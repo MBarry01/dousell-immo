@@ -1,0 +1,43 @@
+{
+  "name": "Doussel Immo",
+  "short_name": "Dousell",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#05080c",
+  "theme_color": "#05080c",
+  "description": "Expérience immobilière mobile-first inspirée des apps natives iOS & Android. Trouvez votre bien à Dakar.",
+  "categories": ["real estate", "business"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Rechercher",
+      "short_name": "Recherche",
+      "description": "Rechercher un bien immobilier",
+      "url": "/recherche",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Favoris",
+      "short_name": "Favoris",
+      "description": "Voir mes biens favoris",
+      "url": "/favoris",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    }
+  ]
+}
+
+
+
+
+
+
+
