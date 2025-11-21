@@ -1,4 +1,4 @@
-# Doussel Immo · Architecture & UX Notes
+# Dousell Immo · Architecture & UX Notes
 
 ## Stack & Conventions
 - **Framework**: Next.js 16 (App Router) en TypeScript.

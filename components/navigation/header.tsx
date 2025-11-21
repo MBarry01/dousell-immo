@@ -48,11 +48,11 @@ export const Header = () => {
         <Link
           href="/"
           className="flex items-center transition-opacity active:opacity-70 hover:opacity-80"
-          aria-label="Doussel Immo - Accueil"
+          aria-label="Dousell Immo - Accueil"
         >
           <Image
             src="/Logo.svg"
-            alt="Doussel Immo"
+            alt="Dousell Immo"
             width={120}
             height={40}
             className="h-8 w-auto"
@@ -79,11 +79,11 @@ export const Header = () => {
           <Link
             href="/"
             className="flex items-center transition-opacity active:opacity-70 hover:opacity-80"
-            aria-label="Doussel Immo - Accueil"
+            aria-label="Dousell Immo - Accueil"
           >
             <Image
               src="/Logo.svg"
-              alt="Doussel Immo"
+              alt="Dousell Immo"
               width={240}
               height={80}
               className="h-11 w-auto transition-transform hover:scale-105 lg:h-14"

@@ -27,7 +27,7 @@ export function ListingApprovedEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Heading style={h1}>Doussel Immo</Heading>
+            <Heading style={h1}>Dousell Immo</Heading>
           </Section>
           <Section style={content}>
             <Heading style={h2}>🎉 Félicitations !</Heading>
@@ -35,7 +35,7 @@ export function ListingApprovedEmail({
               Votre annonce <strong>{propertyTitle}</strong> a été approuvée et est maintenant en ligne.
             </Text>
             <Text style={text}>
-              Elle est désormais visible par tous les visiteurs de Doussel Immo et peut générer des contacts.
+              Elle est désormais visible par tous les visiteurs de Dousell Immo et peut générer des contacts.
             </Text>
             <Section style={buttonContainer}>
               <Link href={propertyUrl} style={button}>
@@ -48,7 +48,7 @@ export function ListingApprovedEmail({
           </Section>
           <Section style={footer}>
             <Text style={footerText}>
-              Doussel Immo - L&apos;immobilier de confiance à Dakar
+              Dousell Immo - L&apos;immobilier de confiance à Dakar
             </Text>
           </Section>
         </Container>

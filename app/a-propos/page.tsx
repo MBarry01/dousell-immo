@@ -48,7 +48,7 @@ export default function AProposPage() {
           Rendre l&apos;immobilier transparent au Sénégal
         </h1>
         <p className="mt-6 text-lg text-white/70 sm:text-xl">
-          Doussel Immo révolutionne l&apos;expérience immobilière en combinant expertise locale et technologie moderne. Nous mettons à votre disposition une plateforme intuitive pour trouver, vendre ou louer votre bien en toute confiance.
+          Dousell Immo révolutionne l&apos;expérience immobilière en combinant expertise locale et technologie moderne. Nous mettons à votre disposition une plateforme intuitive pour trouver, vendre ou louer votre bien en toute confiance.
         </p>
       </motion.section>
 
@@ -68,7 +68,7 @@ export default function AProposPage() {
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white/80 sm:p-8">
           <p className="leading-relaxed">
-            Fondée avec la vision de démocratiser l&apos;accès à l&apos;immobilier au Sénégal, Doussel Immo est née d&apos;un constat simple : trouver un bien de qualité, que ce soit à Dakar, Saly ou en région, ne devrait pas être un parcours du combattant.
+            Fondée avec la vision de démocratiser l&apos;accès à l&apos;immobilier au Sénégal, Dousell Immo est née d&apos;un constat simple : trouver un bien de qualité, que ce soit à Dakar, Saly ou en région, ne devrait pas être un parcours du combattant.
           </p>
           <p className="mt-4 leading-relaxed">
             Notre équipe, composée d&apos;experts locaux et de passionnés de technologie, a développé une plateforme qui allie la chaleur de l&apos;accompagnement humain aux avantages du digital. Chaque bien est vérifié, chaque transaction est sécurisée, et chaque client est accompagné de A à Z.
@@ -156,7 +156,7 @@ export default function AProposPage() {
               </h3>
               <p className="mt-1 text-amber-400">Fondateur & Expert Immobilier</p>
               <p className="mt-4 text-sm leading-relaxed text-white/70">
-                Avec plus de 10 ans d&apos;expérience dans l&apos;immobilier dakarois, Mohamadou a créé Doussel Immo pour rendre l&apos;accès à la propriété plus accessible et transparent. Spécialisé dans les quartiers premium (Almadies, Plateau, Mermoz) et les zones en développement (Diamniadio, Saly), il accompagne chaque client avec expertise et bienveillance.
+                Avec plus de 10 ans d&apos;expérience dans l&apos;immobilier dakarois, Mohamadou a créé Dousell Immo pour rendre l&apos;accès à la propriété plus accessible et transparent. Spécialisé dans les quartiers premium (Almadies, Plateau, Mermoz) et les zones en développement (Diamniadio, Saly), il accompagne chaque client avec expertise et bienveillance.
               </p>
               <div className="mt-4 flex items-center justify-center gap-4 sm:justify-start">
                 <Button

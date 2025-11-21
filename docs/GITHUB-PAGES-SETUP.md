@@ -1,4 +1,4 @@
-# 🚀 Configuration GitHub Pages pour Doussel Immo
+# 🚀 Configuration GitHub Pages pour Dousell Immo
 
 ## ⚠️ Limitation importante
 
@@ -26,7 +26,7 @@ Pour un projet Next.js complet, **Vercel est la meilleure option** :
 - ✅ Gratuit pour les projets open source
 - ✅ Configuration simple (détecte automatiquement Next.js)
 
-👉 [Déployer sur Vercel](https://vercel.com/new)
+👉 [Déployer sur Vercel](https://vercel.co          m/new)
 
 ## 📋 Configuration GitHub Pages (si vous insistez)
 

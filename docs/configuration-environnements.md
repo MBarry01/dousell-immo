@@ -2,7 +2,7 @@
 
 ## 🎯 Objectif
 
-Configurer Doussel Immo pour fonctionner à la fois en **local** (localhost) et en **production** (en ligne).
+Configurer Dousell Immo pour fonctionner à la fois en **local** (localhost) et en **production** (en ligne).
 
 ## 📁 Structure des fichiers d'environnement
 

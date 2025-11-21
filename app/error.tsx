@@ -73,7 +73,7 @@ export default function Error({ error, reset }: ErrorProps) {
       </div>
 
       <div className="mt-12 text-sm text-white/40">
-        <p>Si le problème persiste, contactez-nous à contact@doussel.immo</p>
+        <p>Si le problème persiste, contactez-nous à contact@dousell.immo</p>
       </div>
     </div>
   );

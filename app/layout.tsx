@@ -22,13 +22,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://doussel-immo.app"),
+  metadataBase: new URL("https://dousell-immo.app"),
   title: {
-    default: "Doussel Immo",
-    template: "%s · Doussel Immo",
+    default: "Dousell Immo",
+    template: "%s · Dousell Immo",
   },
   description:
-    "Doussel Immo est une expérience immobilière mobile-first inspirée des apps natives iOS & Android.",
+    "Dousell Immo est une expérience immobilière mobile-first inspirée des apps natives iOS & Android.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icons/icon.svg",

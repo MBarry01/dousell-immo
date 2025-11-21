@@ -4,8 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Conditions Générales d'Utilisation · Doussel Immo",
-  description: "Conditions générales d'utilisation de la plateforme Doussel Immo",
+  title: "Conditions Générales d'Utilisation · Dousell Immo",
+  description: "Conditions générales d'utilisation de la plateforme Dousell Immo",
 };
 
 export default function CGUPage() {
@@ -25,7 +25,7 @@ export default function CGUPage() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">1. Objet</h2>
           <p className="text-white/80">
-            Les présentes Conditions Générales d&apos;Utilisation (ci-après les &quot;CGU&quot;) régissent l&apos;utilisation de la plateforme Doussel Immo (ci-après la &quot;Plateforme&quot;), un service d&apos;intermédiation immobilière en ligne permettant la mise en relation entre propriétaires, vendeurs et acquéreurs de biens immobiliers à Dakar et au Sénégal.
+            Les présentes Conditions Générales d&apos;Utilisation (ci-après les &quot;CGU&quot;) régissent l&apos;utilisation de la plateforme Dousell Immo (ci-après la &quot;Plateforme&quot;), un service d&apos;intermédiation immobilière en ligne permettant la mise en relation entre propriétaires, vendeurs et acquéreurs de biens immobiliers à Dakar et au Sénégal.
           </p>
           <p className="text-white/80">
             L&apos;utilisation de la Plateforme implique l&apos;acceptation pleine et entière des présentes CGU. Si vous n&apos;acceptez pas ces conditions, veuillez ne pas utiliser la Plateforme.
@@ -35,12 +35,12 @@ export default function CGUPage() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">2. Définitions</h2>
           <div className="space-y-2 text-white/80">
-            <p><strong>Plateforme :</strong> Le site web et l&apos;application Doussel Immo accessible à l&apos;adresse doussel-immo.app</p>
+            <p><strong>Plateforme :</strong> Le site web et l&apos;application Dousell Immo accessible à l&apos;adresse dousell-immo.app</p>
             <p><strong>Utilisateur :</strong> Toute personne accédant à la Plateforme</p>
             <p><strong>Propriétaire/Vendeur :</strong> Personne physique ou morale proposant un bien immobilier à la vente ou à la location</p>
             <p><strong>Acheteur/Locataire :</strong> Personne physique ou morale recherchant un bien immobilier</p>
             <p><strong>Annonce :</strong> Publication d&apos;un bien immobilier sur la Plateforme</p>
-            <p><strong>Doussel Immo :</strong> La société éditrice de la Plateforme, agissant en qualité d&apos;intermédiaire</p>
+            <p><strong>Dousell Immo :</strong> La société éditrice de la Plateforme, agissant en qualité d&apos;intermédiaire</p>
           </div>
         </section>
 
@@ -55,7 +55,7 @@ export default function CGUPage() {
           <h2 className="text-2xl font-semibold">4. Description du service</h2>
           <div className="space-y-3 text-white/80">
             <p>
-              Doussel Immo est une plateforme d&apos;intermédiation immobilière qui permet :
+              Dousell Immo est une plateforme d&apos;intermédiation immobilière qui permet :
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>La consultation d&apos;annonces immobilières à Dakar et au Sénégal</li>
@@ -65,7 +65,7 @@ export default function CGUPage() {
               <li>L&apos;estimation gratuite de biens immobiliers</li>
             </ul>
             <p className="mt-4">
-              <strong>Doussel Immo agit uniquement en qualité d&apos;intermédiaire.</strong> La Plateforme ne garantit pas la véracité, l&apos;exactitude ou la complétude des informations fournies par les utilisateurs dans leurs annonces.
+              <strong>Dousell Immo agit uniquement en qualité d&apos;intermédiaire.</strong> La Plateforme ne garantit pas la véracité, l&apos;exactitude ou la complétude des informations fournies par les utilisateurs dans leurs annonces.
             </p>
           </div>
         </section>
@@ -83,7 +83,7 @@ export default function CGUPage() {
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>Fournir des informations exactes et complètes</li>
               <li>Maintenir la sécurité de votre compte</li>
-              <li>Notifier immédiatement Doussel Immo en cas d&apos;utilisation non autorisée de votre compte</li>
+              <li>Notifier immédiatement Dousell Immo en cas d&apos;utilisation non autorisée de votre compte</li>
               <li>Respecter les lois et réglementations en vigueur</li>
               <li>Ne pas utiliser la Plateforme à des fins frauduleuses ou illégales</li>
             </ul>
@@ -98,13 +98,13 @@ export default function CGUPage() {
               Les propriétaires peuvent déposer des annonces sur la Plateforme selon deux modalités :
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li><strong>Mandat Agence (Gratuit) :</strong> Doussel Immo gère la mise en relation et perçoit une commission en cas de transaction réussie</li>
+              <li><strong>Mandat Agence (Gratuit) :</strong> Dousell Immo gère la mise en relation et perçoit une commission en cas de transaction réussie</li>
               <li><strong>Diffusion Simple (Payant) :</strong> Le propriétaire gère lui-même les visites. L&apos;annonce est visible pendant 30 jours après validation et paiement</li>
             </ul>
 
             <h3 className="text-xl font-semibold mt-6">6.2. Modération des annonces</h3>
             <p>
-              Toutes les annonces déposées par les utilisateurs sont soumises à une modération par Doussel Immo. Nous nous réservons le droit de :
+              Toutes les annonces déposées par les utilisateurs sont soumises à une modération par Dousell Immo. Nous nous réservons le droit de :
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>Refuser ou supprimer toute annonce ne respectant pas nos critères de qualité</li>
@@ -129,14 +129,14 @@ export default function CGUPage() {
           <h2 className="text-2xl font-semibold">7. Limitation de responsabilité</h2>
           <div className="space-y-3 text-white/80">
             <p>
-              <strong>Doussel Immo agit en qualité d&apos;intermédiaire technique.</strong> En conséquence :
+              <strong>Dousell Immo agit en qualité d&apos;intermédiaire technique.</strong> En conséquence :
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Doussel Immo ne garantit pas la véracité, l&apos;exactitude ou la complétude des informations contenues dans les annonces</li>
-              <li>Doussel Immo n&apos;est pas responsable des vices cachés, des défauts ou des différences entre l&apos;annonce et le bien réel</li>
-              <li>Doussel Immo n&apos;est pas partie aux transactions immobilières entre les utilisateurs</li>
-              <li>Doussel Immo ne garantit pas la solvabilité des acheteurs ou la capacité des propriétaires à honorer leurs engagements</li>
-              <li>Doussel Immo ne peut être tenu responsable des dommages directs ou indirects résultant de l&apos;utilisation de la Plateforme</li>
+              <li>Dousell Immo ne garantit pas la véracité, l&apos;exactitude ou la complétude des informations contenues dans les annonces</li>
+              <li>Dousell Immo n&apos;est pas responsable des vices cachés, des défauts ou des différences entre l&apos;annonce et le bien réel</li>
+              <li>Dousell Immo n&apos;est pas partie aux transactions immobilières entre les utilisateurs</li>
+              <li>Dousell Immo ne garantit pas la solvabilité des acheteurs ou la capacité des propriétaires à honorer leurs engagements</li>
+              <li>Dousell Immo ne peut être tenu responsable des dommages directs ou indirects résultant de l&apos;utilisation de la Plateforme</li>
             </ul>
             <p className="mt-4">
               Il appartient aux parties (propriétaire et acheteur/locataire) de vérifier toutes les informations avant de conclure une transaction. Nous recommandons fortement de :
@@ -153,10 +153,10 @@ export default function CGUPage() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">8. Propriété intellectuelle</h2>
           <p className="text-white/80">
-            La Plateforme et son contenu (textes, images, logos, design, code source) sont la propriété exclusive de Doussel Immo et sont protégés par les lois sur la propriété intellectuelle. Toute reproduction, même partielle, est interdite sans autorisation préalable.
+            La Plateforme et son contenu (textes, images, logos, design, code source) sont la propriété exclusive de Dousell Immo et sont protégés par les lois sur la propriété intellectuelle. Toute reproduction, même partielle, est interdite sans autorisation préalable.
           </p>
           <p className="text-white/80 mt-4">
-            Les photos et descriptions des biens restent la propriété de leurs auteurs. En déposant une annonce, le propriétaire autorise Doussel Immo à utiliser ces contenus sur la Plateforme.
+            Les photos et descriptions des biens restent la propriété de leurs auteurs. En déposant une annonce, le propriétaire autorise Dousell Immo à utiliser ces contenus sur la Plateforme.
           </p>
         </section>
 
@@ -190,7 +190,7 @@ export default function CGUPage() {
           <h2 className="text-2xl font-semibold">11. Résiliation</h2>
           <div className="space-y-3 text-white/80">
             <p>
-              Doussel Immo se réserve le droit de suspendre ou résilier votre compte à tout moment en cas de :
+              Dousell Immo se réserve le droit de suspendre ou résilier votre compte à tout moment en cas de :
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>Violation des présentes CGU</li>
@@ -214,7 +214,7 @@ export default function CGUPage() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">13. Modifications des CGU</h2>
           <p className="text-white/80">
-            Doussel Immo se réserve le droit de modifier les présentes CGU à tout moment. Les modifications entrent en vigueur dès leur publication sur la Plateforme. Votre utilisation continue de la Plateforme après modification vaut acceptation des nouvelles conditions.
+            Dousell Immo se réserve le droit de modifier les présentes CGU à tout moment. Les modifications entrent en vigueur dès leur publication sur la Plateforme. Votre utilisation continue de la Plateforme après modification vaut acceptation des nouvelles conditions.
           </p>
         </section>
 
@@ -224,7 +224,7 @@ export default function CGUPage() {
             Pour toute question concernant les présentes CGU, vous pouvez nous contacter à :
           </p>
           <div className="mt-4 space-y-2 text-white/80">
-            <p><strong>Email :</strong> <a href="mailto:contact@doussel.immo" className="text-amber-400 hover:text-amber-300 underline">contact@doussel.immo</a></p>
+            <p><strong>Email :</strong> <a href="mailto:contact@dousell.immo" className="text-amber-400 hover:text-amber-300 underline">contact@dousell.immo</a></p>
             <p><strong>Téléphone :</strong> +221 33 860 00 00</p>
             <p><strong>Adresse :</strong> Sacré-Cœur 3, VDN, Dakar, Sénégal</p>
           </div>

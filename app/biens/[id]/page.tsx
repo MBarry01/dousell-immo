@@ -53,7 +53,7 @@ export async function generateMetadata({
     };
   }
 
-  // Formater le titre selon le format demandé : "[Type] à [Quartier] - [Prix] | Doussel Immo"
+  // Formater le titre selon le format demandé : "[Type] à [Quartier] - [Prix] | Dousell Immo"
   const propertyType = property.details.type || "Bien";
   const district = (property.location as { district?: string }).district || 
                    property.location.landmark || 
@@ -62,14 +62,14 @@ export async function generateMetadata({
     maximumFractionDigits: 0,
   }).format(property.price);
   
-  const title = `${propertyType} à ${district} - ${formattedPrice} FCFA | Doussel Immo`;
+  const title = `${propertyType} à ${district} - ${formattedPrice} FCFA | Dousell Immo`;
 
   // Description optimisée pour le SEO
   const description = property.description.length > 160
     ? property.description.substring(0, 157) + "..."
     : property.description;
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://doussel-immo.app";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app";
   const propertyUrl = `${baseUrl}/biens/${property.id}`;
 
   return {
@@ -114,7 +114,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
     getPropertyReviewStats(property.id),
   ]);
   
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://doussel-immo.app";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app";
   const shareUrl = `${baseUrl}/biens/${property.id}`;
 
   return (

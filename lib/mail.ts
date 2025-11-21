@@ -8,7 +8,7 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-const FROM_EMAIL = process.env.FROM_EMAIL || "Doussel Immo <noreply@doussel.immo>";
+const FROM_EMAIL = process.env.FROM_EMAIL || "Dousell Immo <noreply@dousell.immo>";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "barrymohamadou98@gmail.com";
 
 type SendEmailOptions = {

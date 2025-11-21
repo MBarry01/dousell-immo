@@ -24,7 +24,7 @@ export function getSupabaseClient() {
             persistSession: true,
             autoRefreshToken: true,
             detectSessionInUrl: true,
-            storageKey: "doussel-immo-auth",
+            storageKey: "dousell-immo-auth",
           },
         }
       );
@@ -34,7 +34,7 @@ export function getSupabaseClient() {
           persistSession: true,
           autoRefreshToken: true,
           detectSessionInUrl: true,
-          storageKey: "doussel-immo-auth",
+          storageKey: "dousell-immo-auth",
         },
       });
     }

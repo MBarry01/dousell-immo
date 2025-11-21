@@ -798,7 +798,7 @@ export default function DeposerPage() {
                       +221 77 123 45 67
                     </p>
                     <p className="text-sm text-white/60">
-                      (Doussel Immo)
+                      (Dousell Immo)
                     </p>
                   </div>
 

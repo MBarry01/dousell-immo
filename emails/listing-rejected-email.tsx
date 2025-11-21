@@ -29,7 +29,7 @@ export function ListingRejectedEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Heading style={h1}>Doussel Immo</Heading>
+            <Heading style={h1}>Dousell Immo</Heading>
           </Section>
           <Section style={content}>
             <Heading style={h2}>Annonce refusée</Heading>
@@ -50,14 +50,14 @@ export function ListingRejectedEmail({
             </Section>
             <Text style={helpText}>
               Si vous avez des questions, n&apos;hésitez pas à nous contacter à{" "}
-              <Link href="mailto:contact@doussel.immo" style={link}>
-                contact@doussel.immo
+              <Link href="mailto:contact@dousell.immo" style={link}>
+                contact@dousell.immo
               </Link>
             </Text>
           </Section>
           <Section style={footer}>
             <Text style={footerText}>
-              Doussel Immo - L&apos;immobilier de confiance à Dakar
+              Dousell Immo - L&apos;immobilier de confiance à Dakar
             </Text>
           </Section>
         </Container>

@@ -1,5 +1,5 @@
-// Service Worker for Doussel Immo PWA
-const CACHE_NAME = "doussel-immo-v2";
+// Service Worker for Dousell Immo PWA
+const CACHE_NAME = "dousell-immo-v2";
 const STATIC_ASSETS = [
   "/",
   "/manifest.json",
@@ -34,7 +34,7 @@ self.addEventListener("activate", (event) => {
 // Push notification event
 self.addEventListener("push", (event) => {
   const data = event.data?.json() || {};
-  const title = data.title || "Doussel Immo";
+  const title = data.title || "Dousell Immo";
   const options = {
     body: data.body || "Nouvelle notification",
     icon: "/icons/icon.svg",

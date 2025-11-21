@@ -16,7 +16,7 @@
    - Cliquez sur **Create**
 
 2. **Remplissez les informations** :
-   - **App name** : `Doussel Immo`
+   - **App name** : `Dousell Immo`
    - **User support email** : Votre email
    - **Developer contact** : Votre email
    - Cliquez sur **Save and Continue**
@@ -48,7 +48,7 @@ Pour vérifier que les scopes sont bien configurés :
 
 ## 🎯 Scopes nécessaires
 
-Pour Doussel Immo, vous avez besoin de :
+Pour Dousell Immo, vous avez besoin de :
 - **email** : Pour obtenir l'email de l'utilisateur
 - **profile** : Pour obtenir le nom et la photo de profil
 - **openid** : Pour l'authentification OpenID Connect

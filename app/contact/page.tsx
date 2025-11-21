@@ -7,8 +7,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import type { Property } from "@/types/property";
 
 const officeProperty: Property = {
-  id: "office-doussel",
-  title: "Bureau Doussel Immo",
+  id: "office-dousell",
+  title: "Bureau Dousell Immo",
   price: 0,
   transaction: "location",
   location: {
@@ -41,7 +41,7 @@ const officeProperty: Property = {
   description: "",
   disponibilite: "",
   agent: {
-    name: "Équipe Doussel",
+    name: "Équipe Dousell",
     photo:
       "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=400&q=80",
     phone: "+221338600000",
@@ -95,7 +95,7 @@ export default function ContactPage() {
           </h1>
           <p className="text-white/70">
             Pour un partenariat, une estimation multi-biens ou des questions sur
-            notre gestion locative, contactez le siège Doussel Immo.
+            notre gestion locative, contactez le siège Dousell Immo.
           </p>
           <div className="space-y-3 text-sm text-white/80">
             <div>
@@ -108,7 +108,7 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="text-white/40">Email</p>
-              <p>contact@doussel.immo</p>
+              <p>contact@dousell.immo</p>
             </div>
           </div>
         </div>

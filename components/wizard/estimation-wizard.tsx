@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { analyticsEvents } from "@/lib/analytics";
 
-const STORAGE_KEY = "doussel-immo-estimation";
+const STORAGE_KEY = "dousell-immo-estimation";
 
 const wizardSchema = z.object({
   type: z.enum(["appartement", "villa", "terrain", "commercial"]).refine((val) => val !== undefined, {
@@ -448,7 +448,7 @@ export const EstimationWizard = () => {
                     {...register("consent")}
                     className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent"
                   />
-                  J&apos;accepte d&apos;être contacté(e) par Doussel Immo pour
+                  J&apos;accepte d&apos;être contacté(e) par Dousell Immo pour
                   finaliser mon estimation.
                 </label>
                 {errors.consent && (

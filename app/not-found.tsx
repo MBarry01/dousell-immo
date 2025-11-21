@@ -4,7 +4,7 @@ import { Home, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Page introuvable · Doussel Immo",
+  title: "Page introuvable · Dousell Immo",
   description: "La page que vous recherchez n'existe pas ou a été déplacée.",
 };
 

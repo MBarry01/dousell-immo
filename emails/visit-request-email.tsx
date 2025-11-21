@@ -29,7 +29,7 @@ export default function VisitRequestEmail({
   return (
     <Html>
       <Head />
-      <Preview>Nouvelle demande de visite Doussel Immo</Preview>
+      <Preview>Nouvelle demande de visite Dousell Immo</Preview>
       <Body style={styles.body}>
         <Container style={styles.container}>
           <Heading style={styles.title}>Nouvelle demande de visite</Heading>

@@ -37,7 +37,7 @@ export function ListingSubmittedEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Heading style={h1}>Doussel Immo</Heading>
+            <Heading style={h1}>Dousell Immo</Heading>
           </Section>
           <Section style={content}>
             <Heading style={h2}>Nouvelle annonce en attente de validation</Heading>
@@ -62,7 +62,7 @@ export function ListingSubmittedEmail({
           </Section>
           <Section style={footer}>
             <Text style={footerText}>
-              Doussel Immo - L&apos;immobilier de confiance à Dakar
+              Dousell Immo - L&apos;immobilier de confiance à Dakar
             </Text>
           </Section>
         </Container>

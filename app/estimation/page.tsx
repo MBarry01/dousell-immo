@@ -1,7 +1,7 @@
 import { EstimationWizard } from "@/components/wizard/estimation-wizard";
 
 export const metadata = {
-  title: "Estimation · Doussel Immo",
+  title: "Estimation · Dousell Immo",
 };
 
 export default function EstimationPage() {

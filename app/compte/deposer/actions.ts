@@ -148,7 +148,7 @@ export async function submitUserListing(data: SubmitListingData) {
   }
 
   // Envoyer un email à l'admin (même si la notification échoue)
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://doussel-immo.app";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app";
   const adminUrl = `${baseUrl}/admin/moderation`;
   const adminEmail = getAdminEmail();
   

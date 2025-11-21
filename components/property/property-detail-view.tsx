@@ -545,7 +545,7 @@ export const PropertyDetailView = ({
         {/* Agent Profile */}
         <div className="mb-12 border-t border-gray-200 pt-12 dark:border-white/10">
           <h2 className="mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-            Faites connaissance avec Agence Doussel
+            Faites connaissance avec Agence Dousell
           </h2>
           <div className="flex flex-col gap-6 sm:flex-row">
             <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full">

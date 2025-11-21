@@ -72,7 +72,7 @@ export default function RegisterPage() {
           {/* Header */}
           <div className="mb-8 text-center">
             <Link href="/" className="inline-block">
-              <h1 className="text-2xl font-bold text-white">Doussel Immo</h1>
+              <h1 className="text-2xl font-bold text-white">Dousell Immo</h1>
             </Link>
             <h2 className="mt-4 text-2xl font-semibold text-white">
               Créer un compte

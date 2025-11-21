@@ -40,7 +40,7 @@ export async function createVisitRequest(values: VisitRequestFormValues) {
 
   await sendEmail({
     to: getAdminEmail(),
-    subject: "Nouvelle demande de visite · Doussel Immo",
+    subject: "Nouvelle demande de visite · Dousell Immo",
     react: (
       <VisitRequestEmail
         fullName={payload.fullName}

@@ -17,7 +17,7 @@ Vous devez configurer **3 endroits** pour que ça fonctionne en local ET en prod
 1. Allez sur [console.cloud.google.com](https://console.cloud.google.com/)
 2. Cliquez sur le menu déroulant en haut (à côté de "Google Cloud")
 3. Cliquez sur **"New Project"**
-4. Donnez un nom : "Doussel Immo" (ou autre)
+4. Donnez un nom : "Dousell Immo" (ou autre)
 5. Cliquez sur **"Create"**
 
 ### 1.2 Configurer l'écran de consentement OAuth
@@ -27,7 +27,7 @@ Vous devez configurer **3 endroits** pour que ça fonctionne en local ET en prod
 3. Cliquez sur **Create**
 
 **Remplissez le formulaire :**
-- **App name** : `Doussel Immo`
+- **App name** : `Dousell Immo`
 - **User support email** : Votre email
 - **Developer contact information** : Votre email
 - Cliquez sur **Save and Continue**
@@ -51,7 +51,7 @@ Vous devez configurer **3 endroits** pour que ça fonctionne en local ET en prod
 3. Si c'est la première fois, vous devrez d'abord configurer l'écran de consentement (voir étape 1.2)
 
 4. **Application type** : Sélectionnez **Web application**
-5. **Name** : `Doussel Immo`
+5. **Name** : `Dousell Immo`
 
 **Authorized JavaScript origins** :
 - Dans le **premier champ (URI 1)**, entrez :

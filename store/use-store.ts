@@ -32,7 +32,7 @@ export const useFavoritesStore = create<FavoritesState>()(
       },
     }),
     {
-      name: "doussel-immo-favorites",
+      name: "dousell-immo-favorites",
       version: 1,
     }
   )

@@ -67,7 +67,7 @@ export default function PlanifierVisitePage() {
             Confiez-nous votre visite
           </h1>
           <p className="mt-2 text-white/60">
-            Remplissez ce formulaire et un conseiller Doussel vous recontacte
+            Remplissez ce formulaire et un conseiller Dousell vous recontacte
             sous 30 minutes pour organiser la visite idéale.
           </p>
         </div>

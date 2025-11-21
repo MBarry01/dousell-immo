@@ -10,7 +10,7 @@ type SearchPageProps = {
 };
 
 export const metadata = {
-  title: "Recherche · Doussel Immo",
+  title: "Recherche · Dousell Immo",
 };
 
 // Force dynamic to avoid build-time errors if env vars are missing

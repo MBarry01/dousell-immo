@@ -18,7 +18,7 @@ Après le déploiement initial, vous devez configurer les variables d'environnem
 ### 2. Ajouter les Variables dans Vercel
 
 1. Allez sur [vercel.com](https://vercel.com)
-2. Ouvrez votre projet **Doussel Immo**
+2. Ouvrez votre projet **Dousell Immo**
 3. Allez dans **Settings** → **Environment Variables**
 4. Cliquez sur **Add New**
 5. Ajoutez ces 3 variables :

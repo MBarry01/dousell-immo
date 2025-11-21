@@ -4,8 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Mentions Légales · Doussel Immo",
-  description: "Mentions légales et politique de confidentialité de Doussel Immo",
+  title: "Mentions Légales · Dousell Immo",
+  description: "Mentions légales et politique de confidentialité de Dousell Immo",
 };
 
 export default function LegalPage() {
@@ -26,7 +26,7 @@ export default function LegalPage() {
           <h2 className="text-2xl font-semibold">1. Informations légales</h2>
           <div className="space-y-2 text-white/80">
             <p>
-              <strong>Raison sociale :</strong> Doussel Immo
+              <strong>Raison sociale :</strong> Dousell Immo
             </p>
             <p>
               <strong>Siège social :</strong> Sacré-Cœur 3, VDN, Dakar, Sénégal
@@ -35,10 +35,10 @@ export default function LegalPage() {
               <strong>Téléphone :</strong> +221 33 860 00 00
             </p>
             <p>
-              <strong>Email :</strong> contact@doussel.immo
+              <strong>Email :</strong> contact@dousell.immo
             </p>
             <p>
-              <strong>Directeur de publication :</strong> Doussel Immo
+              <strong>Directeur de publication :</strong> Dousell Immo
             </p>
           </div>
         </section>
@@ -54,7 +54,7 @@ export default function LegalPage() {
           <h2 className="text-2xl font-semibold">3. Collecte et traitement des données personnelles</h2>
           <div className="space-y-3 text-white/80">
             <p>
-              Conformément à la réglementation en vigueur au Sénégal et au Règlement Général sur la Protection des Données (RGPD), Doussel Immo s&apos;engage à protéger vos données personnelles.
+              Conformément à la réglementation en vigueur au Sénégal et au Règlement Général sur la Protection des Données (RGPD), Dousell Immo s&apos;engage à protéger vos données personnelles.
             </p>
             <h3 className="text-xl font-semibold mt-6">3.1. Données collectées</h3>
             <p>
@@ -141,7 +141,7 @@ export default function LegalPage() {
               <li><strong>Droit à la limitation :</strong> Limiter le traitement de vos données</li>
             </ul>
             <p className="mt-4">
-              Pour exercer ces droits, contactez-nous à : <a href="mailto:contact@doussel.immo" className="text-amber-400 hover:text-amber-300 underline">contact@doussel.immo</a>
+              Pour exercer ces droits, contactez-nous à : <a href="mailto:contact@dousell.immo" className="text-amber-400 hover:text-amber-300 underline">contact@dousell.immo</a>
             </p>
           </div>
         </section>
@@ -173,7 +173,7 @@ export default function LegalPage() {
             Pour toute question concernant cette politique de confidentialité ou le traitement de vos données personnelles, vous pouvez nous contacter à :
           </p>
           <div className="mt-4 space-y-2 text-white/80">
-            <p><strong>Email :</strong> <a href="mailto:contact@doussel.immo" className="text-amber-400 hover:text-amber-300 underline">contact@doussel.immo</a></p>
+            <p><strong>Email :</strong> <a href="mailto:contact@dousell.immo" className="text-amber-400 hover:text-amber-300 underline">contact@dousell.immo</a></p>
             <p><strong>Téléphone :</strong> +221 33 860 00 00</p>
             <p><strong>Adresse :</strong> Sacré-Cœur 3, VDN, Dakar, Sénégal</p>
           </div>

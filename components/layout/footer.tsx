@@ -36,7 +36,7 @@ export const Footer = () => {
     <footer className="mt-4 border-t border-white/10 bg-[#05080c]/90 pb-16 text-white md:pb-4">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 md:flex-row md:gap-12">
         <div className="flex-1 space-y-3">
-          <p className="text-lg font-semibold">Doussel Immo</p>
+          <p className="text-lg font-semibold">Dousell Immo</p>
           <p className="text-sm text-white/60">
             Immobilier premium et transparent à Dakar.
           </p>
@@ -94,7 +94,7 @@ export const Footer = () => {
         </div>
       </div>
       <div className="border-t border-white/5 px-4 py-4 text-center text-xs text-white/50">
-        © 2025 Doussel Immo — Made with ❤️ in Dakar
+        © 2025 Dousell Immo — Made with ❤️ in Dakar
       </div>
     </footer>
   );

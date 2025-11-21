@@ -11,7 +11,7 @@ Configurer OAuth Google pour fonctionner **uniquement en local** pour l'instant.
 ### 1. Google Cloud Console
 
 **OAuth consent screen** :
-- App name : `Doussel Immo`
+- App name : `Dousell Immo`
 - Scopes : Cochez `email`, `profile`, `openid`
 - Test users : Ajoutez votre email
 
@@ -65,7 +65,7 @@ Allez sur `http://localhost:3000/login` → Cliquez sur "Continuer avec Google"
 
 ## 🚀 Ajouter le domaine plus tard
 
-Quand vous aurez un domaine (ex: `doussel-immo.vercel.app` ou votre domaine custom) :
+Quand vous aurez un domaine (ex: `dousell-immo.vercel.app` ou votre domaine custom) :
 
 1. **Google Cloud Console** → Ajoutez les URLs de production
 2. **Supabase Dashboard** → Ajoutez les URLs de production

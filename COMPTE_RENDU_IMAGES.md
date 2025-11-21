@@ -1,7 +1,7 @@
 # Compte-Rendu : Correction du problème d'affichage des images
 
 ## 📋 Problème initial
-Les images ne s'affichaient plus sur le site Doussel Immo. Le problème était lié au composant `OptimizedImage` qui utilisait une logique de chargement complexe avec skeleton et transitions.
+Les images ne s'affichaient plus sur le site Dousell Immo. Le problème était lié au composant `OptimizedImage` qui utilisait une logique de chargement complexe avec skeleton et transitions.
 
 ## 🔍 Diagnostic
 Le composant `OptimizedImage` avait plusieurs problèmes :

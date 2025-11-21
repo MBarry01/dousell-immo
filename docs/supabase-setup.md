@@ -1,4 +1,4 @@
-# Configuration Supabase pour Doussel Immo
+# Configuration Supabase pour Dousell Immo
 
 ## 📋 Prérequis
 

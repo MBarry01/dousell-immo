@@ -41,7 +41,7 @@ NEXT_PUBLIC_APP_URL=https://votre-domaine.com
 2. Cliquez sur **Create Credentials** → **OAuth client ID**
 3. Si c'est la première fois, configurez l'écran de consentement OAuth :
    - **User Type** : External
-   - **App name** : Doussel Immo
+   - **App name** : Dousell Immo
    - **User support email** : Votre email
    - **Developer contact** : Votre email
    - Cliquez sur **Save and Continue**
@@ -51,7 +51,7 @@ NEXT_PUBLIC_APP_URL=https://votre-domaine.com
 
 4. Créez l'OAuth Client ID :
    - **Application type** : Web application
-   - **Name** : Doussel Immo (Dev + Prod)
+   - **Name** : Dousell Immo (Dev + Prod)
    - **Authorized JavaScript origins** :
      ```
      http://localhost:3000
