@@ -16,20 +16,21 @@ export function useAuth() {
       try {
         const supabase = createClient();
 
-        // Get initial session
-        const { data: { user }, error } = await supabase.auth.getUser();
+        // Get initial session (getSession() est plus silencieux que getUser() pour les utilisateurs non connectés)
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error("Error getting user:", error);
-          if (mounted) {
-            setUser(null);
-            setLoading(false);
-          }
-          return;
-        }
-
         if (mounted) {
-          setUser(user);
+          if (sessionError) {
+            // Log seulement les vraies erreurs (pas les sessions manquantes)
+            const isSessionMissing = sessionError.message?.includes("session") || 
+                                     sessionError.name === "AuthSessionMissingError";
+            if (!isSessionMissing) {
+              console.error("Error getting session:", sessionError);
+            }
+            setUser(null);
+          } else {
+            setUser(session?.user ?? null);
+          }
           setLoading(false);
         }
 
@@ -44,8 +45,16 @@ export function useAuth() {
         });
 
         subscription = authSubscription;
-      } catch (error) {
-        console.error("Error initializing auth:", error);
+      } catch (error: any) {
+        // Ignorer silencieusement les erreurs de session manquante
+        const isSessionMissing = error?.message?.includes("session") || 
+                                 error?.name === "AuthSessionMissingError";
+        
+        if (!isSessionMissing) {
+          // Log seulement les vraies erreurs (problème de configuration, réseau, etc.)
+          console.error("Error initializing auth:", error);
+        }
+        
         if (mounted) {
           setUser(null);
           setLoading(false);
