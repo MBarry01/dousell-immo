@@ -71,10 +71,10 @@ export default async function AdminDashboardPage() {
                 className="border-t border-white/5 bg-transparent"
               >
                 <td className="flex items-center gap-3 px-4 py-4">
-                  {property.images?.[0] && (
+                  {property.image && (
                     <div className="relative h-16 w-16 overflow-hidden rounded-xl">
                       <Image
-                        src={property.images[0]}
+                        src={property.image}
                         alt={property.title}
                         fill
                         sizes="64px"
