@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { Header } from "@/components/navigation/header";
 import { Footer } from "@/components/layout/footer";
+import { ScrollToTop } from "@/components/layout/scroll-to-top";
 
 type AppShellProps = {
   children: ReactNode;
@@ -24,6 +25,7 @@ export const AppShell = ({ children }: AppShellProps) => {
   if (isPropertyDetail) {
     return (
       <div className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white">
+        <ScrollToTop />
         {children}
       </div>
     );
@@ -31,6 +33,7 @@ export const AppShell = ({ children }: AppShellProps) => {
 
   return (
     <div className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white">
+      <ScrollToTop />
       <div className="px-4 md:px-6">
         <Header />
         <main className="mx-auto w-full max-w-6xl pb-16 pt-20 md:pb-4 md:pt-6">
