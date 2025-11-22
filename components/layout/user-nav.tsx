@@ -98,9 +98,10 @@ export function UserNav() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-56 rounded-xl border border-white/10 bg-[#05080c] text-white shadow-xl z-[100]"
+        className="w-56 rounded-xl border border-white/10 bg-[#05080c] text-white shadow-xl z-[100] md:z-[100]"
         align="end"
         sideOffset={8}
+        side="bottom"
       >
         {/* Header avec animation */}
         <motion.div

@@ -46,9 +46,9 @@ export async function updateSession(request: NextRequest) {
 
   let user = null;
   try {
-    const {
+  const {
       data: { user: authUser },
-    } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser();
     user = authUser;
   } catch (error) {
     // If Supabase is not available or credentials are invalid, continue without auth

@@ -1,9 +1,37 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 export default function AuthCodeErrorPage() {
+  const searchParams = useSearchParams();
+  const reason = searchParams.get("reason");
+
+  // Messages d'erreur plus explicites
+  const getErrorMessage = () => {
+    if (reason) {
+      // Décoder l'URL si nécessaire
+      const decodedReason = decodeURIComponent(reason);
+      
+      // Messages d'erreur spécifiques
+      if (decodedReason.includes("redirect_uri_mismatch")) {
+        return "L'URL de redirection ne correspond pas. Vérifiez la configuration dans Supabase et Google Cloud Console.";
+      }
+      if (decodedReason.includes("access_denied")) {
+        return "L'autorisation a été refusée. Veuillez réessayer.";
+      }
+      if (decodedReason.includes("invalid_request")) {
+        return "Requête invalide. Vérifiez la configuration OAuth.";
+      }
+      
+      return decodedReason;
+    }
+    return "Le lien d'authentification est invalide ou a expiré.";
+  };
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="w-full max-w-md space-y-6 text-center">
@@ -14,9 +42,19 @@ export default function AuthCodeErrorPage() {
           <h1 className="text-2xl font-semibold text-white">
             Erreur d&apos;authentification
           </h1>
-          <p className="text-white/70">
-            Le lien d&apos;authentification est invalide ou a expiré.
+          <p className="text-white/70 whitespace-pre-line">
+            {getErrorMessage()}
           </p>
+          {reason && (
+            <details className="mt-4 text-left">
+              <summary className="text-xs text-white/50 cursor-pointer hover:text-white/70">
+                Détails techniques
+              </summary>
+              <pre className="mt-2 p-3 text-xs text-white/60 bg-white/5 rounded-lg overflow-auto max-h-32">
+                {decodeURIComponent(reason)}
+              </pre>
+            </details>
+          )}
         </div>
         <div className="space-y-3">
           <Button asChild className="w-full rounded-xl bg-white text-black">

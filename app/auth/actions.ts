@@ -12,70 +12,126 @@ export async function signup(formData: FormData) {
   const fullName = formData.get("fullName") as string;
   const phone = formData.get("phone") as string;
 
+  // Validation des champs
   if (!email || !password || !fullName || !phone) {
     return {
       error: "Tous les champs sont requis",
     };
   }
 
+  // Validation de l'email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.trim())) {
+    return {
+      error: "Adresse email invalide",
+    };
+  }
+
+  // Validation du mot de passe
+  if (password.length < 6) {
+    return {
+      error: "Le mot de passe doit contenir au moins 6 caractères",
+    };
+  }
+
+  // Validation du téléphone (9 chiffres)
+  const phoneDigits = phone.replace(/\D/g, "");
+  if (phoneDigits.length !== 9) {
+    return {
+      error: "Le numéro de téléphone doit contenir 9 chiffres",
+    };
+  }
+
+  // Validation du nom complet
+  if (fullName.trim().length < 2) {
+    return {
+      error: "Le nom complet doit contenir au moins 2 caractères",
+    };
+  }
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const emailRedirectTo = `${appUrl}/auth/callback?next=/compte`;
+  const emailRedirectTo = `${appUrl}/auth/callback?next=/`;
 
-  const { data, error } = await supabase.auth.signUp({
-    email: email.trim().toLowerCase(),
-    password,
-    options: {
-      data: {
-        full_name: fullName,
-        phone: phone.startsWith("+221") ? phone : `+221${phone}`,
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: {
+        data: {
+          full_name: fullName.trim(),
+          phone: phoneDigits.startsWith("+221") ? phoneDigits : `+221${phoneDigits}`,
+        },
+        emailRedirectTo,
       },
-      emailRedirectTo,
-      // Force l'envoi de l'email même si l'utilisateur existe déjà (pour tester)
-      // En production, retirez cette ligne
-      // skipEmailRedirect: false,
-    },
-  });
+    });
 
-  if (error) {
-    console.error("Signup error:", error);
-    let errorMessage = error.message;
-    
-    // Messages d'erreur plus explicites
-    if (error.message.includes("already registered") || error.message.includes("User already registered")) {
-      errorMessage = "Cet email est déjà enregistré. Essayez de vous connecter ou réinitialisez votre mot de passe.";
-    } else if (error.message.includes("Password")) {
-      errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
-    } else if (error.message.includes("Invalid email")) {
-      errorMessage = "Adresse email invalide";
+    if (error) {
+      console.error("Signup error:", error);
+      let errorMessage = error.message;
+      
+      // Messages d'erreur plus explicites et en français
+      if (error.message.includes("already registered") || 
+          error.message.includes("User already registered") ||
+          error.message.includes("already exists")) {
+        errorMessage = "Cet email est déjà enregistré. Essayez de vous connecter ou réinitialisez votre mot de passe.";
+      } else if (error.message.includes("Password") || error.message.includes("password")) {
+        errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
+      } else if (error.message.includes("Invalid email") || error.message.includes("invalid")) {
+        errorMessage = "Adresse email invalide";
+      } else if (error.message.includes("rate limit") || error.message.includes("too many")) {
+        errorMessage = "Trop de tentatives. Veuillez réessayer dans quelques minutes.";
+      } else {
+        // Message générique pour les autres erreurs
+        errorMessage = "Erreur lors de la création du compte. Veuillez réessayer.";
+      }
+      
+      return {
+        error: errorMessage,
+      };
     }
+
+    // Gestion des différents cas de création de compte
+    if (!data.user) {
+      console.error("No user returned from signup");
+      return {
+        error: "Erreur lors de la création du compte. Veuillez réessayer.",
+      };
+    }
+
+    // Détecter si l'email de confirmation est requis
+    // Si data.session existe, l'utilisateur est automatiquement connecté (auto-confirm activé)
+    // Si data.session est null mais data.user existe, l'email de confirmation est requis
+    const isAutoConfirmed = !!data.session;
+    const emailConfirmationRequired = !isAutoConfirmed && !data.user.email_confirmed_at;
+
+    revalidatePath("/", "layout");
     
+    // Si l'utilisateur est automatiquement confirmé, on peut le rediriger directement
+    if (isAutoConfirmed && data.session) {
+      return {
+        success: true,
+        message: "Compte créé avec succès ! Vous êtes maintenant connecté.",
+        emailSent: false,
+        autoConfirmed: true,
+        session: data.session,
+      };
+    }
+
+    // Si l'email de confirmation est requis
     return {
-      error: errorMessage,
+      success: true,
+      message: emailConfirmationRequired
+        ? "Compte créé ! Un email de vérification a été envoyé à votre adresse. Vérifiez votre boîte de réception (et les spams) pour confirmer votre compte."
+        : "Compte créé avec succès !",
+      emailSent: emailConfirmationRequired,
+      autoConfirmed: false,
+    };
+  } catch (err) {
+    console.error("Unexpected signup error:", err);
+    return {
+      error: "Une erreur inattendue s'est produite. Veuillez réessayer.",
     };
   }
-
-  // Vérifier si l'email a été envoyé
-  // Si data.user est null, cela signifie généralement que la confirmation est requise
-  // Si data.user existe, l'utilisateur a peut-être été confirmé automatiquement
-  if (!data.user) {
-    console.error("No user returned from signup - email might not be sent");
-    return {
-      error: "Erreur lors de la création du compte. Vérifiez votre configuration Supabase.",
-    };
-  }
-
-  // Vérifier si l'email a été envoyé (data.session est null si la confirmation email est requise)
-  const emailSent = !data.session && data.user && !data.user.email_confirmed_at;
-
-  revalidatePath("/", "layout");
-  
-  return {
-    success: true,
-    message: emailSent 
-      ? "Compte créé ! Un email de vérification a été envoyé à votre adresse. Vérifiez votre boîte de réception (et les spams) pour confirmer votre compte."
-      : "Compte créé avec succès !",
-    emailSent,
-  };
 }
 
 export async function login(formData: FormData) {
@@ -111,28 +167,44 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/compte");
+  redirect("/");
 }
 
 export async function signInWithGoogle() {
   const supabase = await createClient();
 
+  // Détection automatique de l'URL (pour Vercel et localhost)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const redirectTo = `${appUrl}/auth/callback?next=/`;
+
+  console.log("🔍 OAuth Google - Configuration:", {
+    appUrl,
+    redirectTo,
+    hasAppUrl: !!process.env.NEXT_PUBLIC_APP_URL,
+  });
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/callback?next=/compte`,
+      redirectTo,
     },
   });
 
   if (error) {
-    console.error("Google OAuth error:", error);
+    console.error("❌ Google OAuth error:", error);
     return {
       error: error.message,
     };
   }
 
   if (data.url) {
+    console.log("✅ OAuth URL générée avec succès:", data.url);
     redirect(data.url);
+  } else {
+    console.error("❌ No OAuth URL returned");
+    return {
+      error: "Impossible de générer l'URL OAuth. Vérifiez la configuration Supabase.",
+    };
   }
 }
 

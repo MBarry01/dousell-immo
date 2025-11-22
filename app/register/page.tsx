@@ -26,6 +26,12 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<{
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    password?: string;
+  }>({});
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove all non-digit characters
@@ -153,6 +159,39 @@ export default function RegisterPage() {
           <form
             action={async (formData: FormData) => {
               setError(null);
+              setValidationErrors({});
+              
+              // Validation côté client
+              const fullName = formData.get("fullName") as string;
+              const email = formData.get("email") as string;
+              const phone = formData.get("phone") as string;
+              const password = formData.get("password") as string;
+              
+              const errors: typeof validationErrors = {};
+              
+              if (!fullName || fullName.trim().length < 2) {
+                errors.fullName = "Le nom complet doit contenir au moins 2 caractères";
+              }
+              
+              if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                errors.email = "Adresse email invalide";
+              }
+              
+              const phoneDigits = phone?.replace(/\D/g, "") || "";
+              if (!phoneDigits || phoneDigits.length !== 9) {
+                errors.phone = "Le numéro de téléphone doit contenir 9 chiffres";
+              }
+              
+              if (!password || password.length < 6) {
+                errors.password = "Le mot de passe doit contenir au moins 6 caractères";
+              }
+              
+              if (Object.keys(errors).length > 0) {
+                setValidationErrors(errors);
+                toast.error("Veuillez corriger les erreurs dans le formulaire");
+                return;
+              }
+              
               startTransition(async () => {
                 const result = await signup(formData);
                 if (result?.error) {
@@ -161,22 +200,39 @@ export default function RegisterPage() {
                     description: result.error,
                   });
                 } else if (result?.success) {
-                  if (result.emailSent) {
+                  // Si l'utilisateur est automatiquement confirmé et connecté
+                  if (result.autoConfirmed) {
+                    toast.success("Compte créé avec succès !", {
+                      description: "Vous êtes maintenant connecté. Bienvenue !",
+                      duration: 3000,
+                    });
+                    // Rediriger vers la home
+                    setTimeout(() => {
+                      router.push("/");
+                      router.refresh();
+                    }, 1500);
+                  } 
+                  // Si l'email de confirmation est requis
+                  else if (result.emailSent) {
                     toast.success("Compte créé !", {
                       description: "Un email de vérification a été envoyé. Vérifiez votre boîte de réception (et les spams) pour confirmer votre compte.",
                       duration: 5000,
                     });
-                    // Ne pas rediriger immédiatement si l'email de confirmation est requis
+                    // Rediriger vers la page de connexion
+                    setTimeout(() => {
+                      router.push("/login?message=Veuillez confirmer votre email pour vous connecter.");
+                    }, 3000);
+                  } 
+                  // Cas par défaut (compte créé mais pas encore confirmé)
+                  else {
+                    toast.success("Compte créé avec succès !", {
+                      description: result.message || "Vous pouvez maintenant vous connecter.",
+                      duration: 3000,
+                    });
+                    // Rediriger vers la page de connexion
                     setTimeout(() => {
                       router.push("/login");
-                    }, 3000);
-                  } else {
-                    toast.success("Compte créé avec succès !", {
-                      description: result.message,
-                    });
-                    setTimeout(() => {
-                      router.push("/compte");
-                    }, 1500);
+                    }, 2000);
                   }
                 }
               });
@@ -204,9 +260,14 @@ export default function RegisterPage() {
                   required
                   minLength={2}
                   maxLength={100}
-                  className="h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500"
+                  className={`h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500 ${
+                    validationErrors.fullName ? "border-red-500/50" : ""
+                  }`}
                 />
               </div>
+              {validationErrors.fullName && (
+                <p className="text-xs text-red-400">{validationErrors.fullName}</p>
+              )}
             </div>
 
             {/* Email */}
@@ -222,9 +283,14 @@ export default function RegisterPage() {
                   type="email"
                   placeholder="oumar@example.com"
                   required
-                  className="h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500"
+                  className={`h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500 ${
+                    validationErrors.email ? "border-red-500/50" : ""
+                  }`}
                 />
               </div>
+              {validationErrors.email && (
+                <p className="text-xs text-red-400">{validationErrors.email}</p>
+              )}
             </div>
 
             {/* Phone */}
@@ -255,6 +321,9 @@ export default function RegisterPage() {
               <p className="text-xs text-white/50">
                 Entrez 9 chiffres (ex: 771234567)
               </p>
+              {validationErrors.phone && (
+                <p className="text-xs text-red-400">{validationErrors.phone}</p>
+              )}
             </div>
 
             {/* Password */}
@@ -293,6 +362,9 @@ export default function RegisterPage() {
               <p className="text-xs text-white/50">
                 Minimum 6 caractères
               </p>
+              {validationErrors.password && (
+                <p className="text-xs text-red-400">{validationErrors.password}</p>
+              )}
             </div>
 
             {/* Submit Button */}

@@ -59,6 +59,8 @@ export const Header = () => {
             priority
           />
         </Link>
+        
+        {/* Actions droite - Connecté */}
         {!loading && user && (
           <div className="flex items-center gap-2">
             <Link
@@ -69,7 +71,27 @@ export const Header = () => {
               <Plus className="h-5 w-5 text-white" />
             </Link>
             <NotificationBell userId={user.id} />
+            {/* Menu utilisateur avec avatar */}
+            <div className="relative" style={{ zIndex: 2 }}>
+              <UserNav />
+            </div>
           </div>
+        )}
+
+        {/* Bouton "Se connecter" si non connecté */}
+        {!loading && !user && (
+          <Button
+            size="sm"
+            className="rounded-xl px-4 text-sm transition-all hover:scale-105 active:scale-95"
+            onClick={() => router.push("/login")}
+          >
+            Se connecter
+          </Button>
+        )}
+
+        {/* Placeholder pendant le chargement */}
+        {loading && (
+          <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
         )}
       </header>
 
