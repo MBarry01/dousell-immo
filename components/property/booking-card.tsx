@@ -22,11 +22,11 @@ type BookingCardProps = {
 };
 
 export const BookingCard = ({ property }: BookingCardProps) => {
-  const whatsappUrl = property.agent.whatsapp
-    ? `https://wa.me/${property.agent.whatsapp}?text=${encodeURIComponent(
-        `Bonjour, je suis intéressé par le bien ${property.title} (${property.id}) à ${property.location.city}.`
-      )}`
-    : undefined;
+  // Priorité : agent.whatsapp > agent.phone > owner.phone > AGENCY_PHONE
+  const whatsappNumber = property.agent.whatsapp || property.agent.phone || property.owner?.phone || AGENCY_PHONE;
+  const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+    `Bonjour, je suis intéressé par le bien ${property.title} (${property.id}) à ${property.location.city}.`
+  )}`;
 
   return (
     <motion.div
@@ -69,36 +69,15 @@ export const BookingCard = ({ property }: BookingCardProps) => {
 
         {/* CTA Principal */}
         <div className="space-y-3">
-          {whatsappUrl ? (
-            <Button
-              asChild
-              className="w-full rounded-xl bg-[#25D366] py-6 text-base font-semibold text-white hover:bg-[#20ba58]"
-            >
-              <a href={whatsappUrl} target="_blank" rel="noreferrer">
-                <MessageCircle className="mr-2 h-5 w-5" />
-                Réserver / Visiter
-              </a>
-            </Button>
-          ) : (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    asChild
-                    className="w-full rounded-xl bg-rose-500 py-6 text-base font-semibold text-white hover:bg-rose-600"
-                  >
-                    <a href={`tel:${property.owner?.phone || AGENCY_PHONE}`}>
-                      <Phone className="mr-2 h-5 w-5" />
-                      Réserver / Visiter
-                    </a>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{property.owner?.phone || AGENCY_PHONE_DISPLAY}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          <Button
+            asChild
+            className="w-full rounded-xl bg-[#25D366] py-6 text-base font-semibold text-white hover:bg-[#20ba58]"
+          >
+            <a href={whatsappUrl} target="_blank" rel="noreferrer">
+              <MessageCircle className="mr-2 h-5 w-5" />
+              Réserver / Visiter
+            </a>
+          </Button>
 
           {/* CTA Secondaire */}
           <Button

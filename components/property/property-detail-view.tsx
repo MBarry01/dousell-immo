@@ -589,7 +589,7 @@ export const PropertyDetailView = ({
                         }}
                       >
                         <a
-                          href={`tel:${property.owner?.phone || AGENCY_PHONE}`}
+                          href={`tel:${property.agent.phone || property.owner?.phone || AGENCY_PHONE}`}
                           className="flex items-center justify-center gap-2"
                         >
                           <Phone className="h-4 w-4" />
@@ -598,7 +598,7 @@ export const PropertyDetailView = ({
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{property.owner?.phone || AGENCY_PHONE_DISPLAY}</p>
+                      <p>{property.agent.phone || property.owner?.phone || AGENCY_PHONE_DISPLAY}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -614,7 +614,9 @@ export const PropertyDetailView = ({
                   }}
                 >
                   <a
-                    href={`https://wa.me/${(property.owner?.phone || AGENCY_PHONE).replace(/[^0-9]/g, "")}`}
+                    href={`https://wa.me/${(property.agent.whatsapp || property.agent.phone || property.owner?.phone || AGENCY_PHONE).replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                      `Bonjour, je suis intéressé par le bien ${property.title} (${property.id}) à ${property.location.city}.`
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2"

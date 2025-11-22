@@ -26,11 +26,11 @@ export const ContactBar = ({ property }: ContactBarProps) => {
     analyticsEvents.contactCall(property.id, property.title);
   }, [property.id, property.title]);
 
-  const whatsappUrl = property.agent.whatsapp
-    ? `https://wa.me/${property.agent.whatsapp}?text=${encodeURIComponent(
-        `Bonjour, je suis intéressé par le bien ${property.title} (${property.id}) à ${property.location.city}.`
-      )}`
-    : undefined;
+  // Priorité : agent.whatsapp > agent.phone > owner.phone > AGENCY_PHONE
+  const whatsappNumber = property.agent.whatsapp || property.agent.phone || property.owner?.phone || AGENCY_PHONE;
+  const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+    `Bonjour, je suis intéressé par le bien ${property.title} (${property.id}) à ${property.location.city}.`
+  )}`;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-white/90 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur-xl dark:bg-black/70">
@@ -44,18 +44,16 @@ export const ContactBar = ({ property }: ContactBarProps) => {
           </p>
         </div>
         <div className="flex flex-1 items-center justify-end gap-2">
-          {whatsappUrl && (
-            <Button
-              className="rounded-2xl border border-[#25D366]/20 bg-[#25D366] text-white hover:bg-[#20ba58]"
-              asChild
-              onClick={handleWhatsApp}
-            >
-              <a href={whatsappUrl} target="_blank" rel="noreferrer">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                WhatsApp
-              </a>
-            </Button>
-          )}
+          <Button
+            className="rounded-2xl border border-[#25D366]/20 bg-[#25D366] text-white hover:bg-[#20ba58]"
+            asChild
+            onClick={handleWhatsApp}
+          >
+            <a href={whatsappUrl} target="_blank" rel="noreferrer">
+              <MessageCircle className="mr-2 h-4 w-4" />
+              WhatsApp
+            </a>
+          </Button>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -65,14 +63,14 @@ export const ContactBar = ({ property }: ContactBarProps) => {
                   asChild
                   onClick={handleCall}
                 >
-                  <a href={`tel:${property.owner?.phone || AGENCY_PHONE}`}>
+                  <a href={`tel:${property.agent.phone || property.owner?.phone || AGENCY_PHONE}`}>
                     <Phone className="mr-2 h-4 w-4" />
                     Appeler
                   </a>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{property.owner?.phone || AGENCY_PHONE_DISPLAY}</p>
+                <p>{property.agent.phone || property.owner?.phone || AGENCY_PHONE_DISPLAY}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

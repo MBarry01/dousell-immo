@@ -8,6 +8,7 @@ import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { SuppressHydrationWarning } from "@/components/providers/suppress-hydration-warning";
 import { CookieConsent } from "@/components/ui/cookie-consent";
 import { ConditionalGoogleAnalytics } from "@/components/analytics/conditional-google-analytics";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import "./globals.css";
 import "react-medium-image-zoom/dist/styles.css";
@@ -84,6 +85,7 @@ export default function RootLayout({
         <Toaster position="top-center" theme="dark" richColors />
         <CookieConsent />
         {gaId && <ConditionalGoogleAnalytics gaId={gaId} />}
+        <SpeedInsights />
       </body>
     </html>
   );
