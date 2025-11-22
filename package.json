@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "prepush": "npm run build",
     "replace-images": "tsx scripts/replace-unsplash-with-pexels.ts",
     "fix-images": "tsx scripts/fix-broken-images.ts",
     "check-homepage-images": "tsx scripts/check-homepage-images.ts"
