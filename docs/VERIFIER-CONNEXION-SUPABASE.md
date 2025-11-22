@@ -104,3 +104,4 @@ Si les problèmes persistent :
 2. Vérifiez les logs dans Supabase Dashboard → **Logs**
 3. Consultez la documentation Supabase : [https://supabase.com/docs](https://supabase.com/docs)
 
+

@@ -101,3 +101,4 @@ Après avoir appliqué la migration :
 - Les compteurs se mettront à jour automatiquement
 - Les données seront synchronisées avec le serveur
 
+

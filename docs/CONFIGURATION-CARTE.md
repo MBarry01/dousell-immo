@@ -201,3 +201,4 @@ Les cartes statiques sont mises en cache par :
    - Le bouton "Ouvrir Maps" fonctionne toujours même sans clé API
    - Il ouvre Google Maps dans un nouvel onglet
 
+

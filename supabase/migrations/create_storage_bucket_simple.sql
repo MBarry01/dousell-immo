@@ -23,3 +23,4 @@ WITH CHECK (
   AND auth.role() = 'authenticated'
 );
 
+

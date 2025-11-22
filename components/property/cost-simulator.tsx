@@ -116,3 +116,4 @@ export const CostSimulator = ({ price, type }: CostSimulatorProps) => {
   );
 };
 
+

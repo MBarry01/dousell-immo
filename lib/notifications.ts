@@ -29,22 +29,72 @@ export async function notifyUser({
   message,
   resourcePath,
 }: NotifyUserParams) {
-  const supabase = await createClient();
+  try {
+    // Utiliser le service role client si disponible pour bypasser RLS
+    const notificationClient = process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? createSupabaseClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY
+        )
+      : await createClient();
 
-  const { error } = await supabase.from("notifications").insert({
-    user_id: userId,
-    type,
-    title,
-    message,
-    resource_path: resourcePath || null,
-  });
+    // Essayer d'abord avec l'insertion directe
+    const { data, error } = await notificationClient
+      .from("notifications")
+      .insert({
+        user_id: userId,
+        type,
+        title,
+        message,
+        resource_path: resourcePath || null,
+      })
+      .select()
+      .single();
 
-  if (error) {
-    console.error("Error creating user notification:", error);
+    if (error) {
+      // Si l'insertion échoue (RLS bloqué), essayer avec la fonction RPC
+      if (error.code === "42501" || error.message?.includes("permission denied") || error.message?.includes("policy")) {
+        console.warn("⚠️ RLS bloque l'insertion directe, tentative avec RPC create_notification");
+        
+        try {
+          const supabase = await createClient();
+          const { data: rpcData, error: rpcError } = await supabase.rpc("create_notification", {
+            p_user_id: userId,
+            p_type: type,
+            p_title: title,
+            p_message: message,
+            p_resource_path: resourcePath || null,
+          });
+
+          if (rpcError) {
+            // Si la fonction RPC n'existe pas, on continue avec l'erreur originale
+            if (rpcError.code === "42883" || rpcError.message?.includes("does not exist")) {
+              console.warn("⚠️ Fonction create_notification n'existe pas. Exécutez docs/create-notification-function.sql");
+              throw error; // Relancer l'erreur originale
+            }
+            console.error("❌ Error creating notification via RPC:", rpcError);
+            throw rpcError;
+          }
+
+          console.log("✅ Notification créée via RPC avec succès:", rpcData);
+          return { success: true, notificationId: rpcData };
+        } catch (rpcErr) {
+          // Si RPC échoue aussi, relancer l'erreur originale
+          throw error;
+        }
+      }
+
+      console.error("❌ Error creating user notification:", error);
+      console.error("Détails:", JSON.stringify(error, null, 2));
+      throw error;
+    }
+
+    console.log("✅ Notification créée avec succès:", data?.id);
+    return { success: true, notificationId: data?.id };
+  } catch (error) {
+    console.error("❌ Erreur inattendue dans notifyUser:", error);
     throw error;
   }
-
-  return { success: true };
 }
 
 /**

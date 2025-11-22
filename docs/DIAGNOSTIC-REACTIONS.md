@@ -164,3 +164,4 @@ SELECT * FROM public.review_reactions LIMIT 10;
    - Fournir les logs d'erreur
    - Fournir la structure de la table
 
+

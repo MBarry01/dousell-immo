@@ -248,3 +248,4 @@ checkHomepageImages()
     process.exit(1);
   });
 
+

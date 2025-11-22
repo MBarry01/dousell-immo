@@ -1,45 +1,43 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { requireAnyRole, type UserRole } from "@/lib/permissions";
 
 /**
- * Authorized admin email
+ * Authorized admin email (fallback pour compatibilité)
  */
 const AUTHORIZED_ADMIN_EMAIL = "barrymohamadou98@gmail.com";
 
 /**
- * Check if the current user is authorized to access admin routes
- * Redirects to /compte if not authorized
+ * Vérifie si un utilisateur a un rôle spécifique
  */
-export async function requireAdmin() {
-  // Skip auth check during build if credentials are missing
-  // This allows the build to complete successfully
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    // Return a dummy user during build to allow build to complete
-    // Runtime checks will handle auth properly
-    return null as any;
-  }
-
+async function hasRole(userId: string, role: UserRole): Promise<boolean> {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("role", role)
+      .single();
 
-    if (!user) {
-      redirect("/login?redirect=/admin/dashboard");
+    if (error || !data) {
+      return false;
     }
-
-    if (user.email?.toLowerCase() !== AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
-      redirect("/compte");
-    }
-
-    return user;
-  } catch (error) {
-    // During build, Supabase might not be available
-    // Return null to allow build to complete
-    console.warn("requireAdmin: Error during auth check (this is OK during build):", error);
-    return null as any;
+    return true;
+  } catch {
+    return false;
   }
+}
+
+/**
+ * Check if the current user is authorized to access admin routes
+ * Redirects to /compte if not authorized
+ * 
+ * @deprecated Utilisez requireAnyRole() à la place pour un système de permissions plus flexible
+ */
+export async function requireAdmin() {
+  // Utiliser requireAnyRole pour la compatibilité
+  return await requireAnyRole(["admin", "superadmin"]);
 }
 
 /**
@@ -56,6 +54,44 @@ export async function isAdmin(): Promise<boolean> {
     return false;
   }
 
-  return user.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase();
+  // Vérifier d'abord via les rôles
+  const isAdminViaRole = await hasRole(user.id, "admin");
+  
+  // Fallback sur l'email pour compatibilité
+  const isAdminViaEmail = user.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase();
+
+  return isAdminViaRole || isAdminViaEmail;
+}
+
+/**
+ * Check if the current user is a moderator
+ */
+export async function isModerator(): Promise<boolean> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return false;
+  }
+
+  return await hasRole(user.id, "moderateur");
+}
+
+/**
+ * Check if the current user has a specific role
+ */
+export async function userHasRole(role: UserRole): Promise<boolean> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return false;
+  }
+
+  return await hasRole(user.id, role);
 }
 

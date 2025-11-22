@@ -158,3 +158,4 @@ CREATE TABLE public.review_reactions (
 3. Vérifier les politiques RLS dans Supabase Dashboard
 4. Vérifier l'authentification de l'utilisateur
 
+

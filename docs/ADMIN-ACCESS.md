@@ -106,3 +106,4 @@ Cette approche garantit que même si une couche est contournée, les autres prot
 - Les redirections préservent l'URL d'origine dans le paramètre `redirect`
 - Les utilisateurs non autorisés voient une redirection silencieuse (pas d'erreur visible)
 
+

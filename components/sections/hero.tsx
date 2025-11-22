@@ -60,7 +60,7 @@ export const HeroSection = () => {
             priority
             className="object-contain object-right-bottom opacity-55"
             sizes="(max-width: 768px) 100vw, 60vw"
-            quality={85}
+            quality={75}
           />
         </div>
       </motion.div>

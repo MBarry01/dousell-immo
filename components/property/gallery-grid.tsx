@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
@@ -27,21 +27,42 @@ export const GalleryGrid = ({
   images,
 }: GalleryGridProps) => {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
-  const [emblaRef] = useEmblaCarousel({
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     dragFree: false,
     align: "start",
+    watchDrag: true,
+    watchResize: true,
   });
+
+  // Suivre l'index sélectionné dans le carousel
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
+    onSelect();
+    emblaApi.on("select", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi]);
+
+  const scrollTo = useCallback(
+    (index: number) => {
+      emblaApi?.scrollTo(index);
+    },
+    [emblaApi]
+  );
 
   // Mobile: Carousel
   const mobileView = (
-    <div className="relative h-[50vh] w-full overflow-hidden rounded-b-[32px] md:hidden">
+    <div className="relative h-[50vh] w-full overflow-hidden rounded-b-[32px] md:hidden touch-pan-y">
       <div className="h-full w-full" ref={emblaRef}>
         <div className="flex h-full">
           {images.map((src, index) => (
             <div
               key={`${propertyId}-${src}-${index}`}
-              className="relative h-[50vh] min-w-full shrink-0 overflow-hidden"
+              className="relative h-[50vh] min-w-full shrink-0 overflow-hidden touch-none"
             >
               <Image
                 src={src}
@@ -51,6 +72,7 @@ export const GalleryGrid = ({
                 className="object-cover"
                 sizes="100vw"
                 quality={75}
+                draggable={false}
               />
             </div>
           ))}
@@ -58,8 +80,24 @@ export const GalleryGrid = ({
       </div>
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
       <div className="absolute right-4 top-4 z-10 rounded-full bg-black/60 px-3 py-1 text-sm text-white backdrop-blur-md">
-        1/{images.length}
+        {selectedIndex + 1}/{images.length}
       </div>
+      {/* Dots indicators */}
+      {images.length > 1 && (
+        <div className="absolute bottom-4 left-0 right-0 z-10 flex items-center justify-center gap-2">
+          {images.map((_, index) => (
+            <button
+              key={`dot-${index}`}
+              type="button"
+              onClick={() => scrollTo(index)}
+              className={`h-2.5 rounded-full transition-all ${
+                selectedIndex === index ? "w-8 bg-white" : "w-2 bg-white/40"
+              }`}
+              aria-label={`Aller à l'image ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 

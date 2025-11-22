@@ -77,3 +77,4 @@ COMMENT ON COLUMN public.review_reactions.user_id IS 'ID de l''utilisateur ayant
 COMMENT ON COLUMN public.review_reactions.reaction_type IS 'Type de réaction: like ou dislike';
 COMMENT ON COLUMN public.review_reactions.created_at IS 'Date de création de la réaction';
 
+

@@ -2,11 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { getProperties } from "@/services/propertyService";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireAnyRole } from "@/lib/permissions";
 import { ModerationBadge } from "../moderation/badge";
 import { ModerationNotification } from "../moderation/notification";
 import { DeleteButton } from "./delete-button";
+import { getAllPropertiesForAdmin } from "./actions";
 
 const statusColors: Record<string, string> = {
   disponible: "bg-emerald-500/20 text-emerald-300",
@@ -19,9 +19,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboardPage() {
   // Ensure user is authorized admin
-  await requireAdmin();
+  await requireAnyRole(["admin", "moderateur", "agent", "superadmin"]);
   
-  const properties = await getProperties();
+  const properties = await getAllPropertiesForAdmin();
 
   return (
     <div className="space-y-6 py-6">
@@ -36,6 +36,12 @@ export default async function AdminDashboardPage() {
           </h1>
         </div>
         <div className="flex gap-3">
+          <Button variant="secondary" className="relative rounded-full" asChild>
+            <Link href="/admin/roles">Rôles</Link>
+          </Button>
+          <Button variant="secondary" className="relative rounded-full" asChild>
+            <Link href="/admin/leads">Leads</Link>
+          </Button>
           <Button variant="secondary" className="relative rounded-full" asChild>
             <Link href="/admin/moderation">
               Modération
@@ -81,7 +87,7 @@ export default async function AdminDashboardPage() {
                       {property.title}
                     </p>
                     <p className="text-xs text-white/50">
-                      {property.location.city}
+                      {property.location?.city || "Non spécifié"}
                     </p>
                   </div>
                 </td>
@@ -92,14 +98,29 @@ export default async function AdminDashboardPage() {
                   FCFA
                 </td>
                 <td className="px-4 py-4">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      statusColors[property.status ?? "disponible"] ??
-                      "bg-white/10 text-white/80"
-                    }`}
-                  >
-                    {property.status ?? "disponible"}
-                  </span>
+                  <div className="flex flex-col gap-2">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        statusColors[property.status ?? "disponible"] ??
+                        "bg-white/10 text-white/80"
+                      }`}
+                    >
+                      {property.status ?? "disponible"}
+                    </span>
+                    {property.validationStatus && property.validationStatus !== "approved" && (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs ${
+                          property.validationStatus === "pending"
+                            ? "bg-amber-500/20 text-amber-300"
+                            : property.validationStatus === "rejected"
+                            ? "bg-red-500/20 text-red-300"
+                            : "bg-white/10 text-white/60"
+                        }`}
+                      >
+                        {property.validationStatus}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-4 py-4 text-sm text-white/70">
                   <div className="flex gap-3">

@@ -18,7 +18,11 @@ export const ListingImageCarousel = ({
   alt,
   className,
 }: ListingImageCarouselProps) => {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: true,
+    watchDrag: true,
+    watchResize: true,
+  });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
@@ -101,12 +105,34 @@ export const ListingImageCarousel = ({
   const hasOverflow = validImagesList.length > dots.length;
 
   return (
-    <div className={cn("group relative h-full w-full overflow-hidden", className)}>
+    <div 
+      className={cn("group relative h-full w-full overflow-hidden touch-pan-y", className)}
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
+      onMouseDown={(e) => {
+        // Empêcher la navigation si on commence un drag
+        const startX = e.clientX;
+        const handleMouseMove = (moveEvent: MouseEvent) => {
+          const diffX = Math.abs(moveEvent.clientX - startX);
+          if (diffX > 5) {
+            // C'est un drag, empêcher la navigation
+            e.stopPropagation();
+          }
+        };
+        const handleMouseUp = () => {
+          document.removeEventListener('mousemove', handleMouseMove as any);
+          document.removeEventListener('mouseup', handleMouseUp);
+        };
+        document.addEventListener('mousemove', handleMouseMove as any);
+        document.addEventListener('mouseup', handleMouseUp);
+      }}
+    >
       <div ref={emblaRef} className="h-full w-full">
         <div className="flex h-full">
           {validImagesList.map((src, index) => (
             <div
-              className="relative h-full min-w-full shrink-0"
+              className="relative h-full min-w-full shrink-0 touch-none"
               key={`${src}-${index}`}
             >
               <div className="relative h-full w-full">
@@ -119,6 +145,7 @@ export const ListingImageCarousel = ({
                   priority={index === 0}
                   onError={() => handleImageError(src)}
                   unoptimized={src.includes("pexels.com") || src.includes("unsplash.com")}
+                  draggable={false}
                 />
               </div>
             </div>

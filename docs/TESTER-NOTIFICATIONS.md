@@ -139,3 +139,4 @@ Pour activer Realtime :
 - Les notifications sont triées par date (plus récentes en premier)
 - Cliquer sur une notification la marque comme lue et redirige vers `resource_path`
 
+

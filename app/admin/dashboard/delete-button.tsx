@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { toast } from "sonner";
+import { deleteProperty } from "./actions";
 
 type DeleteButtonProps = {
   propertyId: string;
@@ -23,17 +24,18 @@ export function DeleteButton({ propertyId }: DeleteButtonProps) {
 
     setIsDeleting(true);
     try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("properties")
-        .delete()
-        .eq("id", propertyId);
-
-      if (error) throw error;
-      router.refresh();
+      const result = await deleteProperty(propertyId);
+      if (result.error) {
+        toast.error("Erreur", { description: result.error });
+      } else {
+        toast.success("Bien supprimé", {
+          description: "Le bien a été supprimé avec succès.",
+        });
+        router.refresh();
+      }
     } catch (error) {
       console.error("Error deleting property:", error);
-      alert("Erreur lors de la suppression");
+      toast.error("Erreur lors de la suppression");
     } finally {
       setIsDeleting(false);
     }
@@ -44,7 +46,7 @@ export function DeleteButton({ propertyId }: DeleteButtonProps) {
       type="button"
       onClick={handleDelete}
       disabled={isDeleting}
-      className="text-red-300 hover:text-red-200 disabled:opacity-50"
+      className="text-red-300 hover:text-red-200 disabled:opacity-50 transition-colors"
     >
       {isDeleting ? "Suppression..." : "Supprimer"}
     </button>

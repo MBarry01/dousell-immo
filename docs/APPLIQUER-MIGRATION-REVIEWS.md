@@ -100,3 +100,4 @@ Si la migration échoue :
 - Les politiques RLS permettent à tous de lire les avis, mais seuls les utilisateurs connectés peuvent créer/modifier/supprimer leurs propres avis
 - Un utilisateur ne peut laisser qu'un seul avis par bien (contrainte unique sur `property_id` + `user_id`)
 
+

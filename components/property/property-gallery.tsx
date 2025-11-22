@@ -21,6 +21,8 @@ export const PropertyGallery = ({
     loop: true,
     dragFree: false,
     align: "start",
+    watchDrag: true,
+    watchResize: true,
   });
 
   useEffect(() => {
@@ -45,14 +47,14 @@ export const PropertyGallery = ({
 
   return (
     <motion.div
-      className="relative h-[50vh] w-full overflow-hidden rounded-b-[32px]"
+      className="relative h-[50vh] w-full overflow-hidden rounded-b-[32px] touch-pan-y"
       layoutId={`property-image-${propertyId}`}
     >
       <div className="h-full w-full" ref={emblaRef}>
         <div className="flex h-full">
           {memoizedImages.map((src, index) => (
             <div
-              className="relative h-[50vh] min-w-full shrink-0 overflow-hidden"
+              className="relative h-[50vh] min-w-full shrink-0 overflow-hidden touch-none"
               key={`${propertyId}-${src}-${index}`}
             >
               <div className="relative h-full w-full">
@@ -64,6 +66,7 @@ export const PropertyGallery = ({
                   className="object-cover"
                   sizes="100vw"
                   quality={75}
+                  draggable={false}
                 />
               </div>
             </div>

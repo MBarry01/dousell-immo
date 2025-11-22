@@ -81,3 +81,4 @@ Après avoir créé la politique, testez l'upload :
 3. Essayez d'uploader une photo
 4. Si ça fonctionne, la politique est correcte ! ✅
 
+

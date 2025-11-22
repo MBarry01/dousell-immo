@@ -65,3 +65,4 @@ Voir `docs/CREER-BUCKET-STORAGE.md` pour les politiques complètes.
 
 Une fois tous ces points cochés, le bucket est opérationnel ! 🎉
 
+

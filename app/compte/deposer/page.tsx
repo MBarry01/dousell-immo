@@ -236,53 +236,67 @@ export default function DeposerPage() {
   };
 
   const onSubmit = async (values: DepositFormValues) => {
-    console.log("🔄 Début de la soumission du formulaire...", { 
+    console.log("🔄 Début de onSubmit...", { 
       step, 
       values: { ...values, images: imageUrls.length }, 
-      imageUrlsCount: imageUrls.length 
+      imageUrlsCount: imageUrls.length,
+      needsPayment 
     });
 
     // Validation : au moins une image est requise
     if (imageUrls.length === 0) {
+      console.error("❌ Aucune image");
       toast.error("Au moins une photo est requise", {
         description: "Veuillez ajouter au moins une photo de votre bien.",
       });
+      setSubmitting(false);
       return;
     }
 
     // Validation : si Diffusion Simple, payment_ref est requis
     if (needsPayment && !values.payment_ref?.trim()) {
+      console.error("❌ Référence de paiement manquante");
       toast.error("Référence de paiement requise", {
         description: "Veuillez entrer votre ID de transaction Wave/OM.",
       });
+      setSubmitting(false);
       return;
     }
 
     // Validation : s'assurer qu'on est à l'étape 3
     if (step !== 3) {
+      console.error("❌ Pas à l'étape 3:", step);
       toast.error("Formulaire incomplet", {
         description: "Veuillez compléter toutes les étapes du formulaire.",
       });
+      setSubmitting(false);
       return;
     }
 
     setSubmitting(true);
     try {
-      console.log("📤 Envoi des données à submitUserListing...");
+      console.log("📤 Envoi des données à submitUserListing...", {
+        title: values.title,
+        type: values.type,
+        price: values.price,
+        imagesCount: imageUrls.length,
+        serviceType: values.service_type,
+      });
       
       const result = await submitUserListing({
         ...values,
         images: imageUrls,
       });
 
-      console.log("📥 Réponse reçue:", result);
+      console.log("📥 Réponse reçue de submitUserListing:", result);
 
-      if (result.error) {
+      if (result?.error) {
         console.error("❌ Erreur lors de la soumission:", result.error);
-        toast.error("Erreur", {
-          description: result.error,
+        toast.error("Erreur lors du dépôt", {
+          description: result.error || "Une erreur est survenue. Veuillez réessayer.",
+          duration: 6000,
         });
-      } else {
+      } else if (result?.success) {
         console.log("✅ Annonce déposée avec succès !");
         toast.success("Annonce déposée avec succès !", {
           description: needsPayment
@@ -293,12 +307,24 @@ export default function DeposerPage() {
         // Petit délai pour voir le toast avant la redirection
         setTimeout(() => {
           router.push("/compte/mes-biens");
+          router.refresh();
         }, 1500);
+      } else {
+        console.error("❌ Réponse inattendue:", result);
+        toast.error("Erreur inattendue", {
+          description: "La réponse du serveur est invalide. Veuillez réessayer.",
+        });
       }
     } catch (error) {
       console.error("❌ Erreur lors du dépôt:", error);
+      const errorMessage = error instanceof Error ? error.message : "Une erreur inattendue est survenue";
+      console.error("❌ Détails de l'erreur:", {
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       toast.error("Erreur lors du dépôt de l'annonce", {
-        description: error instanceof Error ? error.message : "Veuillez réessayer ou contacter le support.",
+        description: errorMessage,
+        duration: 6000,
       });
     } finally {
       setSubmitting(false);
@@ -306,25 +332,55 @@ export default function DeposerPage() {
   };
 
   // Handler pour le bouton submit (évite les problèmes de sérialisation dans Next.js 16)
-  const handleSubmitClick = async () => {
+  const handleSubmitClick = async (e?: React.MouseEvent<HTMLButtonElement>) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    
     try {
+      console.log("🔄 Début de handleSubmitClick...", { step, imageUrlsCount: imageUrls.length });
+      
       // Valider tous les champs du formulaire
       const isValid = await trigger();
+      console.log("✅ Validation du formulaire:", { isValid, errors: Object.keys(errors) });
+      
       if (!isValid) {
-        toast.error("Veuillez corriger les erreurs du formulaire");
+        console.error("❌ Formulaire invalide:", errors);
+        toast.error("Veuillez corriger les erreurs du formulaire", {
+          description: Object.values(errors).map(e => e?.message).filter(Boolean).join(", ") || "Certains champs sont manquants ou invalides",
+        });
+        return;
+      }
+      
+      // Vérifier qu'on est à l'étape 3
+      if (step !== 3) {
+        console.error("❌ Pas à l'étape 3:", step);
+        toast.error("Formulaire incomplet", {
+          description: "Veuillez compléter toutes les étapes du formulaire.",
+        });
+        return;
+      }
+      
+      // Vérifier qu'il y a au moins une image
+      if (imageUrls.length === 0) {
+        console.error("❌ Aucune image");
+        toast.error("Au moins une photo est requise", {
+          description: "Veuillez ajouter au moins une photo de votre bien.",
+        });
         return;
       }
       
       // Récupérer les valeurs validées
       const values = getValues();
+      console.log("📋 Valeurs du formulaire:", { ...values, images: imageUrls.length });
       
       // Appeler onSubmit avec les valeurs
       await onSubmit(values);
     } catch (error) {
-      console.error("Erreur lors de la validation du formulaire:", error);
+      console.error("❌ Erreur lors de la validation du formulaire:", error);
       toast.error("Erreur lors de la validation", {
         description: error instanceof Error ? error.message : "Une erreur est survenue",
       });
+      setSubmitting(false);
     }
   };
 
@@ -412,8 +468,14 @@ export default function DeposerPage() {
         ))}
       </div>
 
-      <div
+      <form
         className="rounded-[32px] border border-white/10 bg-white/5 p-5 sm:p-6"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (step === 3) {
+            handleSubmitClick();
+          }
+        }}
       >
         <AnimatePresence mode="wait">
           {/* Step 1: Le Bien */}
@@ -864,15 +926,45 @@ export default function DeposerPage() {
             <Button
               type="button"
               size="lg"
-              onClick={handleSubmitClick}
-              disabled={submitting}
-              className="h-12 rounded-full bg-white text-black text-base"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSubmitClick(e);
+              }}
+              disabled={submitting || uploading}
+              className="h-12 rounded-full bg-white text-black text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? "Envoi..." : "Confirmer le dépôt"}
+              {submitting ? (
+                <>
+                  <svg
+                    className="mr-2 h-5 w-5 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Envoi en cours...
+                </>
+              ) : (
+                "Confirmer le dépôt"
+              )}
             </Button>
           )}
         </div>
-      </div>
+      </form>
     </div>
   );
 }

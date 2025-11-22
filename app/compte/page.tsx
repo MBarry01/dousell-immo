@@ -31,14 +31,18 @@ import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/utils/supabase/client";
 import { useFavoritesStore } from "@/store/use-store";
 import { FadeIn } from "@/components/ui/motion-wrapper";
+import { useUserRoles } from "@/hooks/use-user-roles";
+import { Badge } from "@/components/ui/badge";
 
 export default function ComptePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { favorites } = useFavoritesStore();
+  const { roles: userRoles, loading: rolesLoading } = useUserRoles(user?.id || null);
 
-  // Check if user is admin
-  const isAdmin = user?.email?.toLowerCase() === "barrymohamadou98@gmail.com".toLowerCase();
+  // Check if user is admin (email fallback) or has any role
+  const isMainAdmin = user?.email?.toLowerCase() === "barrymohamadou98@gmail.com".toLowerCase();
+  const hasRole = userRoles.length > 0 || isMainAdmin;
 
   const handleSignOut = async () => {
     try {
@@ -134,9 +138,37 @@ export default function ComptePage() {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl font-bold text-white">
-                Bonjour, {firstName}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-white">
+                  Bonjour, {firstName}
+                </h1>
+                {!rolesLoading && userRoles.length > 0 && (
+                  <div className="flex gap-1.5">
+                    {userRoles.map((role) => {
+                      const roleLabels: Record<string, string> = {
+                        admin: "Admin",
+                        moderateur: "Modérateur",
+                        agent: "Agent",
+                        superadmin: "Super Admin",
+                      };
+                      const roleColors: Record<string, string> = {
+                        admin: "bg-red-500/20 text-red-300 border-red-500/30",
+                        moderateur: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+                        agent: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+                        superadmin: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+                      };
+                      return (
+                        <Badge
+                          key={role}
+                          className={`text-xs ${roleColors[role] || "bg-white/10 text-white/80"}`}
+                        >
+                          {roleLabels[role] || role}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               <p className="mt-1 text-sm text-zinc-400">
                 {user.email}
               </p>
@@ -282,15 +314,15 @@ export default function ComptePage() {
           </motion.div>
         </div>
 
-        {/* Section Admin (Conditionnelle) */}
-        {isAdmin && (
+        {/* Section Admin (Conditionnelle) - Afficher pour tous les utilisateurs avec un rôle */}
+        {!rolesLoading && hasRole && (
           <FadeIn delay={0.2}>
             <motion.div
               whileHover={{ scale: 1.005 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               className="col-span-full"
             >
-              <Link href="/admin/dashboard">
+              <Link href="/admin">
                 <Card className="cursor-pointer border border-amber-900/30 bg-black transition-all hover:border-amber-900/50">
                   <CardHeader className="p-6">
                     <div className="flex items-center justify-between">
@@ -301,7 +333,17 @@ export default function ComptePage() {
                             Espace Administration
                           </CardTitle>
                           <CardDescription className="mt-1 text-sm text-zinc-500">
-                            Modération, Utilisateurs, Statistiques.
+                            {userRoles.length > 0
+                              ? `Accédez au panel admin avec vos rôles: ${userRoles.map((r) => {
+                                  const labels: Record<string, string> = {
+                                    admin: "Admin",
+                                    moderateur: "Modérateur",
+                                    agent: "Agent",
+                                    superadmin: "Super Admin",
+                                  };
+                                  return labels[r] || r;
+                                }).join(", ")}`
+                              : "Modération, Utilisateurs, Statistiques."}
                           </CardDescription>
                         </div>
                       </div>

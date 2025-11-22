@@ -37,18 +37,15 @@ const notificationColors = {
 
 export function NotificationBell({ userId }: NotificationBellProps) {
   const router = useRouter();
-  const { notifications, unreadCount, loading, error } = useNotifications(userId);
+  const { notifications, unreadCount, loading, error, refetch } = useNotifications(userId);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Debug: Log pour vérifier les notifications
-  if (userId && !loading) {
-    console.log("🔔 NotificationBell - userId:", userId, "unreadCount:", unreadCount, "notifications:", notifications.length);
-  }
 
   const handleNotificationClick = async (notification: Notification) => {
     // Marquer comme lu si ce n'est pas déjà fait
     if (!notification.is_read) {
       await markNotificationAsRead(notification.id);
+      // Le hook useNotifications mettra à jour automatiquement via Realtime
     }
 
     // Fermer le popover
@@ -68,6 +65,11 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       });
     } else {
       toast.success("Toutes les notifications ont été marquées comme lues");
+      // Forcer un refetch car Realtime peut ne pas déclencher un UPDATE pour chaque notification
+      // quand on marque toutes les notifications comme lues en masse
+      setTimeout(() => {
+        refetch();
+      }, 500);
     }
   };
 
@@ -102,10 +104,16 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         <button
           className="relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
           aria-label="Notifications"
+          onClick={() => {
+            // Forcer un refetch quand on ouvre le popover
+            if (!isOpen) {
+              refetch();
+            }
+          }}
         >
           <Bell className="h-5 w-5 text-white" />
           {unreadCount > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+            <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white animate-pulse">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}

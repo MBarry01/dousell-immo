@@ -62,3 +62,4 @@ Si le problème persiste :
 2. Vérifiez la console du navigateur
 3. Vérifiez que les variables d'environnement sont correctes
 
+

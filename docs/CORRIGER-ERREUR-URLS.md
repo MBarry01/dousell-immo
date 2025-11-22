@@ -76,3 +76,4 @@ URI de redirection autorisés:
 
 **Pas d'erreur rouge = Configuration correcte ! ✅**
 
+

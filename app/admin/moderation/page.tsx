@@ -23,6 +23,7 @@ import { RejectDialog } from "./reject-dialog";
 import { PropertyModerationCard } from "./property-card";
 import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useUserRoles } from "@/hooks/use-user-roles";
 
 type PropertyToModerate = {
   id: string;
@@ -44,10 +45,48 @@ type FilterService = "all" | "mandat_confort" | "boost_visibilite";
 export default function ModerationPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { roles: userRoles, loading: loadingRoles } = useUserRoles(user?.id || null);
   const [properties, setProperties] = useState<PropertyToModerate[]>([]);
   const [loading, setLoading] = useState(true);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+
+  // Vérifier que l'utilisateur a le droit d'accéder à la modération
+  const isMainAdmin = user?.email?.toLowerCase() === "barrymohamadou98@gmail.com".toLowerCase();
+  const canModerate = isMainAdmin || userRoles.some((role) => ["admin", "moderateur", "superadmin"].includes(role));
+
+  // Le layout admin vérifie déjà l'accès côté serveur avec requireAnyRole()
+  // On ne fait qu'une vérification côté client pour l'UX (afficher un message si pas de droits)
+  // mais on ne redirige pas car le serveur a déjà autorisé l'accès
+  useEffect(() => {
+    // Attendre que les rôles soient chargés
+    if (authLoading || loadingRoles) {
+      return;
+    }
+
+    if (!user) {
+      return; // Le layout gère déjà la redirection
+    }
+
+    // Vérifier l'accès pour l'UX (affichage conditionnel)
+    const currentCanModerate = isMainAdmin || userRoles.some((role) => ["admin", "moderateur", "superadmin"].includes(role));
+    
+    if (currentCanModerate) {
+      console.log("✅ Modération - Accès autorisé", {
+        email: user.email,
+        roles: userRoles,
+        canModerate: currentCanModerate,
+      });
+    } else {
+      // Si le serveur a autorisé mais que côté client on n'a pas de rôles,
+      // c'est probablement un problème de timing. On attend un peu.
+      console.warn("⚠️ Modération - Rôles non chargés côté client, mais serveur a autorisé", {
+        email: user.email,
+        roles: userRoles,
+        loadingRoles,
+      });
+    }
+  }, [user, authLoading, loadingRoles, userRoles, isMainAdmin]);
   
   // États pour les actions en cours
   const [approvingIds, setApprovingIds] = useState<Set<string>>(new Set());
@@ -83,11 +122,12 @@ export default function ModerationPage() {
   }, [user]);
 
   useEffect(() => {
-    if (user && !authLoading) {
+    // Attendre que l'authentification et les rôles soient chargés avant de charger les propriétés
+    if (user && !authLoading && !loadingRoles && canModerate) {
       loadProperties();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, authLoading]);
+  }, [user, authLoading, loadingRoles, canModerate]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -191,7 +231,10 @@ export default function ModerationPage() {
     return { total, pending, paymentPending };
   }, [properties]);
 
-  if (authLoading || loading) {
+  // Le layout admin vérifie déjà l'accès côté serveur avec requireAnyRole()
+  // On affiche le contenu même si les rôles ne sont pas encore chargés côté client
+  // pour éviter un flash de contenu vide
+  if (authLoading || loadingRoles || loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-white/70">Chargement...</div>
@@ -199,8 +242,24 @@ export default function ModerationPage() {
     );
   }
 
+  // Si l'utilisateur n'est pas connecté, le layout gère déjà la redirection
   if (!user) {
     return null;
+  }
+
+  // Si les rôles sont chargés et que l'utilisateur n'a pas les droits,
+  // on affiche un message (mais normalement le serveur aurait déjà bloqué)
+  if (!loadingRoles && !canModerate) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-white/70">Accès non autorisé</p>
+          <p className="mt-2 text-sm text-white/50">
+            Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -134,7 +134,7 @@ export const Header = () => {
           </nav>
           <div className="flex items-center gap-2.5 lg:gap-3">
             {!loading && user && (
-              <div className="hidden lg:flex items-center gap-2">
+              <>
                 <Link
                   href="/compte/deposer"
                   className="relative flex items-center justify-center rounded-full p-2 transition-all active:scale-95 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
@@ -143,8 +143,10 @@ export const Header = () => {
                 >
                   <Plus className="h-4 w-4 text-white" />
                 </Link>
-                <NotificationBell userId={user.id} />
-              </div>
+                <div className="relative" style={{ zIndex: 1 }}>
+                  <NotificationBell userId={user.id} />
+                </div>
+              </>
             )}
             <div className="relative" style={{ zIndex: 2 }}>
               <UserNav />

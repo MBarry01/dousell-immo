@@ -1,7 +1,7 @@
 "use client";
 
 import type { MouseEvent } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Bookmark, Bed, Bath, Square, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { hapticFeedback } from "@/lib/haptic";
 import { useFavoritesStore } from "@/store/use-store";
 import type { Property } from "@/types/property";
+import Link from "next/link";
 
 type PropertyCardProps = {
   property: Property;
@@ -24,6 +25,7 @@ export const PropertyCard = ({
   className,
   variant = "vertical",
 }: PropertyCardProps) => {
+  const router = useRouter();
   const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
   const favorite = isFavorite(property.id);
 
@@ -39,6 +41,19 @@ export const PropertyCard = ({
       hapticFeedback.success();
       toast.success("Ajouté aux favoris ✨", { description: property.title });
     }
+  };
+
+  const handleCardClick = (event: MouseEvent) => {
+    // Ne pas naviguer si le clic vient du carousel ou d'un bouton
+    const target = event.target as HTMLElement;
+    if (
+      target.closest('[data-carousel]') ||
+      target.closest('button') ||
+      target.closest('a')
+    ) {
+      return;
+    }
+    router.push(`/biens/${property.id}`);
   };
 
   if (variant === "horizontal") {
@@ -57,12 +72,20 @@ export const PropertyCard = ({
           className
         )}
       >
-        <Link
-          href={`/biens/${property.id}`}
-          className="absolute inset-0 z-10"
+      <div 
+        className="absolute inset-0 z-10 cursor-pointer"
+        onClick={handleCardClick}
           aria-label={`Voir ${property.title}`}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            router.push(`/biens/${property.id}`);
+          }
+        }}
         />
-        <div className="relative h-24 w-24 overflow-hidden rounded-2xl">
+      <div className="relative h-24 w-24 overflow-hidden rounded-2xl z-20" data-carousel style={{ pointerEvents: 'auto' }}>
           <ListingImageCarousel
             images={property.images}
             alt={property.title}
@@ -111,12 +134,20 @@ export const PropertyCard = ({
         className
       )}
     >
-      <Link
-        href={`/biens/${property.id}`}
-        className="absolute inset-0 z-10"
+      <div 
+        className="absolute inset-0 z-10 cursor-pointer"
+        onClick={handleCardClick}
         aria-label={`Voir ${property.title}`}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            router.push(`/biens/${property.id}`);
+          }
+        }}
       />
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] z-20" data-carousel style={{ pointerEvents: 'auto' }}>
         <ListingImageCarousel
           images={property.images}
           alt={property.title}
@@ -132,9 +163,10 @@ export const PropertyCard = ({
           type="button"
           aria-label="Enregistrer"
           onClick={toggleFavorite}
-          className={`absolute right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/80 ${
+          className={`absolute right-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/80 ${
             favorite ? "text-amber-300" : ""
           }`}
+          style={{ pointerEvents: 'auto' }}
         >
           <Bookmark className={`h-5 w-5 ${favorite ? "fill-current" : ""}`} />
         </button>

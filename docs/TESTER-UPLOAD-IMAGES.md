@@ -57,3 +57,4 @@ Une fois l'upload testé et fonctionnel :
 - ✅ Les images sont accessibles publiquement
 - ✅ Votre application est complètement connectée à Supabase !
 
+

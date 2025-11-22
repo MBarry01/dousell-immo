@@ -60,6 +60,22 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Empêcher le zoom automatique sur mobile quand on focus les inputs */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* Sur mobile, s'assurer que les inputs ont au moins 16px */
+  @media screen and (max-width: 768px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+
   ::selection {
     background: rgba(242, 201, 76, 0.3);
     color: var(--foreground);

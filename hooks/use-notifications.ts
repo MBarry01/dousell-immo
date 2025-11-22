@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -25,6 +25,7 @@ export function useNotifications(userId: string | null) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const lastRealtimeCheck = useRef<number>(Date.now());
 
   const fetchNotifications = useCallback(async () => {
     if (!userId) {
@@ -69,13 +70,29 @@ export function useNotifications(userId: string | null) {
           setError(null);
           return;
         }
-        console.error("❌ Erreur lors de la récupération des notifications:", fetchError);
+        // Log détaillé pour les erreurs RLS
+        if (fetchError.code === "42501" || fetchError.message?.includes("permission denied") || fetchError.message?.includes("policy")) {
+          console.error("❌ Erreur RLS lors de la récupération des notifications:", {
+            code: fetchError.code,
+            message: fetchError.message,
+            details: fetchError.details,
+            hint: fetchError.hint,
+            userId,
+          });
+        } else {
+          console.error("❌ Erreur lors de la récupération des notifications:", fetchError);
+        }
         throw fetchError;
       }
 
-      console.log("✅ Notifications récupérées:", data?.length || 0, "notifications");
       const unread = data?.filter((n) => !n.is_read).length || 0;
-      console.log("📊 Notifications non lues:", unread);
+      
+      console.log("📬 Notifications récupérées:", {
+        userId,
+        total: data?.length || 0,
+        unread,
+        notifications: data?.map(n => ({ id: n.id, title: n.title, is_read: n.is_read }))
+      });
       
       setNotifications(data || []);
       setUnreadCount(unread);
@@ -115,6 +132,17 @@ export function useNotifications(userId: string | null) {
 
     const setupRealtime = () => {
       try {
+        // Utiliser un debounce pour éviter trop de refetch
+        let refetchTimeout: NodeJS.Timeout | null = null;
+        const debouncedRefetch = () => {
+          if (refetchTimeout) {
+            clearTimeout(refetchTimeout);
+          }
+          refetchTimeout = setTimeout(() => {
+            fetchNotifications();
+          }, 500);
+        };
+
         channel = supabase
           .channel(`notifications:${userId}`)
           .on(
@@ -126,9 +154,12 @@ export function useNotifications(userId: string | null) {
               filter: `user_id=eq.${userId}`,
             },
             (payload) => {
+              console.log("🔔 Nouvelle notification reçue via Realtime:", payload.new);
               // Ajouter la nouvelle notification en haut de la liste
               setNotifications((prev) => [payload.new as Notification, ...prev]);
               setUnreadCount((prev) => prev + 1);
+              // Marquer que Realtime fonctionne
+              lastRealtimeCheck.current = Date.now();
             }
           )
           .on(
@@ -140,25 +171,32 @@ export function useNotifications(userId: string | null) {
               filter: `user_id=eq.${userId}`,
             },
             (payload) => {
-              // Mettre à jour la notification modifiée
-              setNotifications((prev) =>
-                prev.map((n) =>
+              // Mettre à jour la notification modifiée et recalculer le nombre de non lues en une seule opération
+              setNotifications((prev) => {
+                const updated = prev.map((n) =>
                   n.id === payload.new.id ? (payload.new as Notification) : n
-                )
-              );
-              // Recalculer le nombre de non lues
-              setNotifications((current) => {
-                const unread = current.filter((n) => !n.is_read).length;
+                );
+                // Recalculer le nombre de non lues
+                const unread = updated.filter((n) => !n.is_read).length;
                 setUnreadCount(unread);
-                return current;
+                return updated;
               });
+              
+              // Si plusieurs notifications sont mises à jour en même temps (marquer toutes comme lues),
+              // refetch pour s'assurer que tout est à jour
+              debouncedRefetch();
             }
           )
           .subscribe((status) => {
             if (status === "SUBSCRIBED") {
-              console.log("Subscribed to notifications channel");
+              console.log("✅ Abonné avec succès au canal Realtime pour les notifications");
             } else if (status === "CHANNEL_ERROR") {
-              console.warn("Could not subscribe to notifications channel. Realtime may not be enabled.");
+              console.warn("⚠️ Erreur d'abonnement au canal Realtime. Realtime peut ne pas être activé.");
+              console.warn("💡 Exécutez docs/fix-notifications-rls-idempotent.sql pour activer Realtime");
+            } else if (status === "TIMED_OUT") {
+              console.warn("⏱️ Timeout lors de l'abonnement Realtime. Utilisation du polling de fallback.");
+            } else {
+              console.log("📡 Statut Realtime:", status);
             }
           });
       } catch (err) {
@@ -169,10 +207,40 @@ export function useNotifications(userId: string | null) {
 
     setupRealtime();
 
+    // Fallback : Polling si Realtime échoue ou n'est pas disponible
+    // Vérifier périodiquement si Realtime fonctionne, sinon utiliser polling
+    let pollingInterval: NodeJS.Timeout | null = null;
+
+    const startPolling = () => {
+      if (pollingInterval) return; // Déjà en cours
+      
+      console.log("🔄 Démarrage du polling de fallback (toutes les 30 secondes)");
+      pollingInterval = setInterval(() => {
+        // Vérifier si Realtime a fonctionné récemment (dans les 60 dernières secondes)
+        const timeSinceLastRealtime = Date.now() - lastRealtimeCheck.current;
+        if (timeSinceLastRealtime > 60000) {
+          // Realtime ne semble pas fonctionner, utiliser polling
+          console.log("⚠️ Realtime inactif, utilisation du polling");
+          fetchNotifications();
+        }
+      }, 30000); // Polling toutes les 30 secondes
+    };
+
+    // Démarrer le polling après 5 secondes (donner le temps à Realtime de se connecter)
+    const pollingTimeout = setTimeout(() => {
+      startPolling();
+    }, 5000);
+
     // Nettoyer l'abonnement à la déconnexion
     return () => {
       if (channel) {
         supabase.removeChannel(channel);
+      }
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+      if (pollingTimeout) {
+        clearTimeout(pollingTimeout);
       }
     };
   }, [userId, fetchNotifications]);

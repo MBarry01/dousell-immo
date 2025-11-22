@@ -7,11 +7,15 @@ import { sendEmail } from "@/lib/mail";
 import { ListingApprovedEmail } from "@/emails/listing-approved-email";
 import { ListingRejectedEmail } from "@/emails/listing-rejected-email";
 import { notifyUser } from "@/lib/notifications";
+import { requireAnyRole } from "@/lib/permissions";
 
 export async function moderateProperty(
   propertyId: string,
   status: "approved" | "rejected"
 ) {
+  // Vérifier que l'utilisateur a le droit de modérer (admin, moderateur, superadmin)
+  await requireAnyRole(["admin", "moderateur", "superadmin"]);
+  
   const supabase = await createClient();
 
   // Récupérer les infos du bien avant modification
@@ -84,22 +88,10 @@ export async function moderatePropertyWithReason(
   propertyId: string,
   rejectionReason: string
 ) {
+  // Vérifier que l'utilisateur a le droit de modérer (admin, moderateur, superadmin)
+  await requireAnyRole(["admin", "moderateur", "superadmin"]);
+  
   const supabase = await createClient();
-
-  // Vérifier que l'utilisateur est admin
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return { error: "Admin non authentifié." };
-  }
-
-  const authorizedAdminEmail = "barrymohamadou98@gmail.com";
-  if (user.email?.toLowerCase() !== authorizedAdminEmail.toLowerCase()) {
-    return { error: "Accès non autorisé pour la modération." };
-  }
 
   // Récupérer les infos du bien avant modification
   const { data: property } = await supabase

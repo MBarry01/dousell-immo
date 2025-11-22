@@ -82,7 +82,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Admin access restriction: only allow barrymohamadou98@gmail.com
+  // Admin access restriction: check email (fallback) or let pages handle role-based auth
+  // Note: Full role checking is done in server pages via requireAdmin() for performance
   if (request.nextUrl.pathname.startsWith("/admin")) {
     if (!user) {
       // Already handled above, but double check
@@ -92,13 +93,16 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Check if user email is authorized for admin access
+    // Fallback: Check if user email is authorized for admin access
+    // Full role checking is done in server pages for better performance
     const authorizedAdminEmail = "barrymohamadou98@gmail.com";
-    if (user.email?.toLowerCase() !== authorizedAdminEmail.toLowerCase()) {
-      // User is logged in but not authorized for admin
-      const url = request.nextUrl.clone();
-      url.pathname = "/compte";
-      return NextResponse.redirect(url);
+    const isAuthorizedEmail = user.email?.toLowerCase() === authorizedAdminEmail.toLowerCase();
+    
+    // If not authorized by email, let the server page handle role-based auth
+    // This allows role-based access while maintaining email fallback
+    if (!isAuthorizedEmail) {
+      // Let server pages check roles - they will redirect if not authorized
+      // This is more performant than checking roles in middleware on every request
     }
   }
 

@@ -5,6 +5,7 @@ import { User, Home, Heart, LogOut, Calculator, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
+import { useUserRoles } from "@/hooks/use-user-roles";
 
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ import { useAuth } from "@/hooks/use-auth";
 export function UserNav() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { roles: userRoles, loading: loadingRoles } = useUserRoles(user?.id || null);
 
   const handleSignOut = async () => {
     try {
@@ -82,8 +84,19 @@ export function UserNav() {
     .toUpperCase()
     .slice(0, 2) || "U";
 
-  // Vérifier si l'utilisateur est admin
-  const isAdmin = user.email?.toLowerCase() === "barrymohamadou98@gmail.com".toLowerCase();
+  // Vérifier si l'utilisateur a un rôle (admin, moderateur, agent, superadmin)
+  const isMainAdmin = user.email?.toLowerCase() === "barrymohamadou98@gmail.com".toLowerCase();
+  const hasRole = (!loadingRoles && userRoles.length > 0) || isMainAdmin;
+  
+  // Déterminer le label selon le rôle le plus élevé
+  const getAdminLabel = () => {
+    if (userRoles.includes("superadmin")) return "Panel Admin (Super Admin)";
+    if (userRoles.includes("admin")) return "Panel Admin";
+    if (userRoles.includes("moderateur")) return "Panel Admin (Modérateur)";
+    if (userRoles.includes("agent")) return "Panel Admin (Agent)";
+    if (isMainAdmin) return "Panel Admin";
+    return "Panel Admin";
+  };
 
   return (
     <DropdownMenu>
@@ -205,7 +218,7 @@ export function UserNav() {
             </DropdownMenuItem>
           </motion.div>
 
-          {isAdmin && (
+          {hasRole && (
             <motion.div
               variants={{
                 open: { opacity: 1, x: 0 },
@@ -215,10 +228,10 @@ export function UserNav() {
             >
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => router.push("/admin/dashboard")}
+                onClick={() => router.push("/admin")}
               >
                 <Shield className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                Administration
+                {getAdminLabel()}
               </DropdownMenuItem>
             </motion.div>
           )}

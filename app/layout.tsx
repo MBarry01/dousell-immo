@@ -30,13 +30,28 @@ export const metadata: Metadata = {
   description:
     "Dousell Immo est une expérience immobilière mobile-first inspirée des apps natives iOS & Android.",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Dousell Immo",
+  },
   icons: {
     icon: "/icons/icon.svg",
     apple: "/icons/icon.svg",
   },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-title": "Dousell Immo",
+  },
 };
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   themeColor: "#05080c",
 };
 
@@ -48,7 +63,7 @@ export default function RootLayout({
   const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
 
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} bg-[#05080c] antialiased`}
         suppressHydrationWarning
