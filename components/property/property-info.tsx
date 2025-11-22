@@ -181,6 +181,8 @@ export const PropertyInfo = ({ property, similar }: PropertyInfoProps) => {
         <StaticMap
           city={property.location.city}
           coords={property.location.coords}
+          address={property.location.address}
+          landmark={property.location.landmark}
         />
 
         <AgentCard 

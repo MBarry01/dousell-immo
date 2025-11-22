@@ -44,15 +44,16 @@ export const PropertyCard = ({
   };
 
   const handleCardClick = (event: MouseEvent) => {
-    // Ne pas naviguer si le clic vient du carousel ou d'un bouton
+    // Ne pas naviguer si le clic vient du carousel, du bouton favori, ou d'un lien externe
     const target = event.target as HTMLElement;
     if (
       target.closest('[data-carousel]') ||
-      target.closest('button') ||
-      target.closest('a')
+      target.closest('button[aria-label="Enregistrer"]') ||
+      (target.closest('a') && !target.closest('a[href^="/biens/"]'))
     ) {
       return;
     }
+    // Permettre la navigation même si on clique sur le bouton "Découvrir"
     router.push(`/biens/${property.id}`);
   };
 
@@ -95,13 +96,17 @@ export const PropertyCard = ({
             {formatCurrency(property.price)}
           </div>
         </div>
-        <div className="relative z-20 flex flex-1 flex-col gap-1">
-          <p className="flex items-center gap-1 text-[11px] text-white/60">
-            <MapPin className="h-3 w-3" />
-            {property.location.city}
+        <div className="relative z-20 flex flex-1 min-w-0 flex-col gap-1">
+          <p className="flex items-center gap-1 text-[11px] text-white/60 truncate">
+            <MapPin className="h-3 w-3 flex-shrink-0" />
+            <span className="truncate">{property.location.city}</span>
           </p>
-          <h3 className="truncate text-sm font-semibold">{property.title}</h3>
-          <p className="text-[11px] text-white/50">{property.location.landmark}</p>
+          <h3 className="truncate text-sm font-semibold" title={property.title}>
+            {property.title}
+          </h3>
+          <p className="truncate text-[11px] text-white/50" title={property.location.landmark}>
+            {property.location.landmark}
+          </p>
           <div className="flex items-center gap-3 text-[11px] text-white/70">
             <span className="inline-flex items-center gap-1">
               <Bed className="h-3.5 w-3.5" />
@@ -134,19 +139,6 @@ export const PropertyCard = ({
         className
       )}
     >
-      <div 
-        className="absolute inset-0 z-10 cursor-pointer"
-        onClick={handleCardClick}
-        aria-label={`Voir ${property.title}`}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            router.push(`/biens/${property.id}`);
-          }
-        }}
-      />
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] z-20" data-carousel style={{ pointerEvents: 'auto' }}>
         <ListingImageCarousel
           images={property.images}
@@ -163,7 +155,7 @@ export const PropertyCard = ({
           type="button"
           aria-label="Enregistrer"
           onClick={toggleFavorite}
-          className={`absolute right-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/80 ${
+          className={`absolute right-4 top-4 z-40 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/80 ${
             favorite ? "text-amber-300" : ""
           }`}
           style={{ pointerEvents: 'auto' }}
@@ -174,7 +166,7 @@ export const PropertyCard = ({
           {formatCurrency(property.price)}
         </div>
       </div>
-      <div className="relative z-20 space-y-3 px-1 pb-1 pt-4">
+      <div className="relative z-20 space-y-3 px-1 pb-1 pt-4 pointer-events-none">
         <div>
           <p className="flex items-center gap-1 text-xs text-white/60">
             <MapPin className="h-3.5 w-3.5" />
@@ -207,19 +199,33 @@ export const PropertyCard = ({
             DPE {property.specs.dpe}
           </span>
         </div>
-        <div className="pt-2">
+        <div className="pt-2 pointer-events-auto">
           <Button
             variant="secondary"
             className="w-full justify-between rounded-2xl bg-white text-black transition hover:-translate-y-0.5 hover:shadow-lg"
-            asChild
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/biens/${property.id}`);
+            }}
           >
-            <Link href={`/biens/${property.id}`}>
-              Découvrir
-              <span aria-hidden>→</span>
-            </Link>
+            Découvrir
+            <span aria-hidden>→</span>
           </Button>
         </div>
       </div>
+      <div 
+        className="absolute inset-0 z-30 cursor-pointer"
+        onClick={handleCardClick}
+        aria-label={`Voir ${property.title}`}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            router.push(`/biens/${property.id}`);
+          }
+        }}
+      />
     </motion.article>
   );
 };

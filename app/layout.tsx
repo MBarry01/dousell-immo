@@ -10,6 +10,7 @@ import { SuppressHydrationWarning } from "@/components/providers/suppress-hydrat
 
 import "./globals.css";
 import "react-medium-image-zoom/dist/styles.css";
+import "leaflet/dist/leaflet.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

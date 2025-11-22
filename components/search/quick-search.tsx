@@ -14,9 +14,9 @@ export const QuickSearch = () => {
   const router = useRouter();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<PropertyFilters>({});
-  const [location, setLocation] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [minSurface, setMinSurface] = useState("");
+  const [location, setLocation] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [minSurface, setMinSurface] = useState<string>("");
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -98,19 +98,19 @@ export const QuickSearch = () => {
       <form onSubmit={handleSubmit} className="mt-6 grid gap-3 sm:grid-cols-4">
         <Input 
           placeholder="Ville, quartier" 
-          value={location}
+          value={location || ""}
           onChange={(e) => setLocation(e.target.value)}
         />
         <Input 
           placeholder="Budget max (FCFA)" 
           type="number"
-          value={maxPrice}
+          value={maxPrice || ""}
           onChange={(e) => setMaxPrice(e.target.value)}
         />
         <Input 
           placeholder="Surface min (m²)" 
           type="number"
-          value={minSurface}
+          value={minSurface || ""}
           onChange={(e) => setMinSurface(e.target.value)}
         />
         <Button 

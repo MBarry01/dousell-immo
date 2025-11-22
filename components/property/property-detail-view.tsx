@@ -539,6 +539,8 @@ export const PropertyDetailView = ({
           <StaticMap
             coords={property.location.coords}
             city={property.location.city}
+            address={property.location.address}
+            landmark={property.location.landmark}
           />
         </div>
 
@@ -550,18 +552,20 @@ export const PropertyDetailView = ({
           <div className="flex flex-col gap-6 sm:flex-row">
             <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full">
               <Image
-                src="/agent1.png"
-                alt="Mohamadou Barry"
+                src="/agent2.jpg"
+                alt="Amadou Barry"
                 fill
-                className="object-cover"
+                className="object-cover object-[center_top]"
                 sizes="128px"
               />
             </div>
             <div className="flex flex-1 flex-col gap-4">
               <div>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  Amadou Barry
+                </h3>
                 <p className="mb-2 text-gray-700 dark:text-white/80">
-                  Agent immobilier expérimenté spécialisé dans le marché dakarois.
-                  Répond dans l&apos;heure en moyenne.
+                  Co-fondateur et expert terrain, spécialisé dans les visites, l&apos;accompagnement sur le terrain et la connaissance approfondie du marché dakarois. Votre contact privilégié pour toutes vos démarches immobilières.
                 </p>
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-white/60">
                   <Clock className="h-4 w-4" />
@@ -610,7 +614,7 @@ export const PropertyDetailView = ({
                   }}
                 >
                   <a
-                    href="https://wa.me/330751081579"
+                    href={`https://wa.me/${(property.owner?.phone || AGENCY_PHONE).replace(/[^0-9]/g, "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2"

@@ -17,25 +17,39 @@ type AgentCardProps = {
   propertyTitle?: string;
 };
 
-// Informations de l'agent Mohamadou Barry
-const AGENT_INFO = {
+// Informations de l'agent Mohamadou Barry (agent1) - Côté technique
+const AGENT1_INFO = {
   name: "Mohamadou Barry",
   photo: "/agent1.png",
-  description: "Agent immobilier expérimenté spécialisé dans le marché dakarois. Répond dans l'heure en moyenne.",
+  description: "Co-fondateur spécialisé dans l'aspect technique et technologique de l'immobilier. Expert en plateformes digitales et solutions innovantes pour faciliter vos transactions.",
   whatsappNumber: "+330751081579",
+  phoneNumber: "+330751081579",
   responseTime: "Répond dans l'heure",
 };
 
+// Informations de l'agent Amadou Barry (agent2) - Côté terrain
+const AGENT2_INFO = {
+  name: "Amadou Barry",
+  photo: "/agent2.jpg",
+  description: "Co-fondateur et expert terrain, spécialisé dans les visites, l'accompagnement sur le terrain et la connaissance approfondie du marché dakarois. Votre contact privilégié pour toutes vos démarches immobilières.",
+  whatsappNumber: "+221781385281",
+  phoneNumber: "+221781385281",
+  responseTime: "Répond dans l'heure",
+};
+
+// Utiliser agent2 par défaut (public)
+const AGENT_INFO = AGENT2_INFO;
+
 export const AgentCard = ({ agent, property, propertyId, propertyTitle }: AgentCardProps) => {
-  // Utiliser les infos de l'agent ou les infos par défaut
+  // Utiliser les infos de l'agent ou les infos par défaut (agent2)
   const agentName = agent?.name || AGENT_INFO.name;
   const agentPhoto = agent?.photo || AGENT_INFO.photo;
   const agentDescription = AGENT_INFO.description;
   const whatsappLink = `https://wa.me/${AGENT_INFO.whatsappNumber.replace(/[^0-9]/g, "")}`;
   
-  // Numéro de téléphone : propriétaire ou agence (fallback)
-  const phoneNumber = property?.owner?.phone || AGENCY_PHONE;
-  const phoneNumberDisplay = property?.owner?.phone || AGENCY_PHONE_DISPLAY;
+  // Numéro de téléphone : propriétaire, agent par défaut, ou agence (fallback)
+  const phoneNumber = property?.owner?.phone || AGENT_INFO.phoneNumber || AGENCY_PHONE;
+  const phoneNumberDisplay = property?.owner?.phone || AGENT_INFO.phoneNumber || AGENCY_PHONE_DISPLAY;
   const phoneLink = `tel:${phoneNumber}`;
   
   // Handler pour le tracking des appels
@@ -60,12 +74,12 @@ export const AgentCard = ({ agent, property, propertyId, propertyTitle }: AgentC
       className="space-y-4 rounded-3xl border border-gray-100 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/5"
     >
       <div className="flex items-start gap-4">
-        <div className="relative h-20 w-20 shrink-0">
+        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full">
           <Image
             src={agentPhoto}
             alt={agentName}
             fill
-            className="rounded-full object-cover"
+            className="object-cover object-[center_top]"
             quality={85}
             sizes="80px"
           />

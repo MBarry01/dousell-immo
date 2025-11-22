@@ -1,8 +1,20 @@
 "use client";
 
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 
-import { MapView } from "@/components/search/map-view";
+const MapView = dynamic(
+  () => import("@/components/search/map-view").then((mod) => mod.MapView),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[70vh] items-center justify-center rounded-[32px] border border-white/10 bg-white/5 text-white/70">
+        Chargement de la carte…
+      </div>
+    ),
+  }
+);
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { Property } from "@/types/property";
 

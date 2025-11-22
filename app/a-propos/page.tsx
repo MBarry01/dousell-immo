@@ -139,41 +139,85 @@ export default function AProposPage() {
             Des experts passionnés à votre service
           </p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
-          <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-2 border-amber-500/30">
-              <Image
-                src="/agent1.png"
-                alt="Mohamadou Barry"
-                width={96}
-                height={96}
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="flex-1 text-center sm:text-left">
-              <h3 className="text-xl font-semibold text-white">
-                Mohamadou Barry
-              </h3>
-              <p className="mt-1 text-amber-400">Fondateur & Expert Immobilier</p>
-              <p className="mt-4 text-sm leading-relaxed text-white/70">
-                Avec plus de 10 ans d&apos;expérience dans l&apos;immobilier dakarois, Mohamadou a créé Dousell Immo pour rendre l&apos;accès à la propriété plus accessible et transparent. Spécialisé dans les quartiers premium (Almadies, Plateau, Mermoz) et les zones en développement (Diamniadio, Saly), il accompagne chaque client avec expertise et bienveillance.
-              </p>
-              <div className="mt-4 flex items-center justify-center gap-4 sm:justify-start">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="rounded-full"
-                  asChild
-                >
-                  <a
-                    href="https://wa.me/330751081579"
-                    target="_blank"
-                    rel="noopener noreferrer"
+        <div className="grid gap-6 sm:grid-cols-2">
+          {/* Mohamadou Barry - Fondateur */}
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
+            <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-2 border-amber-500/30">
+                <Image
+                  src="/agent1.png"
+                  alt="Mohamadou Barry"
+                  width={96}
+                  height={96}
+                  className="h-full w-full object-cover object-[center_top]"
+                />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <h3 className="text-xl font-semibold text-white">
+                  Mohamadou Barry
+                </h3>
+                <p className="mt-1 text-amber-400">Co-fondateur - Techninicien</p>
+                <p className="mt-4 text-sm leading-relaxed text-white/70">
+                  Spécialisé dans l&apos;aspect technique et technologique de l&apos;immobilier, Mohamadou a créé Dousell Immo pour rendre l&apos;accès à la propriété plus accessible grâce aux solutions digitales innovantes. Expert en plateformes et outils technologiques pour faciliter vos transactions immobilières.
+                </p>
+                <div className="mt-4 flex items-center justify-center gap-4 sm:justify-start">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="rounded-full"
+                    asChild
                   >
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    Contacter
-                  </a>
-                </Button>
+                    <a
+                      href="https://wa.me/330751081579"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Contacter
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Amadou Barry - Cofondateur */}
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
+            <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-2 border-amber-500/30">
+                <Image
+                  src="/agent2.jpg"
+                  alt="Amadou Barry"
+                  width={96}
+                  height={96}
+                  className="h-full w-full object-cover object-[center_top]"
+                />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <h3 className="text-xl font-semibold text-white">
+                  Amadou Barry
+                </h3>
+                <p className="mt-1 text-amber-400">Co-Fondateur - Expert Immobilier</p>
+                <p className="mt-4 text-sm leading-relaxed text-white/70">
+                  Expert terrain et cofondateur de Dousell Immo, Amadou apporte sa connaissance approfondie du marché immobilier dakarois. Spécialisé dans les visites, l&apos;accompagnement sur le terrain et la relation client, il est votre contact privilégié pour toutes vos démarches immobilières concrètes.
+                </p>
+                <div className="mt-4 flex items-center justify-center gap-4 sm:justify-start">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="rounded-full"
+                    asChild
+                  >
+                    <a
+                      href="https://wa.me/221781385281"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Contacter
+                    </a>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
