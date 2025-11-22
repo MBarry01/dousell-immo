@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +26,7 @@ const depositSchema = z
     description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
     price: z.number().min(0, "Le prix doit être positif"),
     category: z.enum(["vente", "location"]),
-    city: z.string().min(1, "La ville est requise"),
+    city: z.string().min(1, "La région est requise"),
     district: z.string().min(1, "Le quartier est requis"),
     address: z.string().min(3, "L'adresse est requise"),
     landmark: z.string().min(3, "Le point de repère est requis"),
@@ -156,6 +156,15 @@ export default function DeposerPage() {
   const type = watch("type");
   const isTerrain = type === "terrain";
   const needsPayment = serviceType === "boost_visibilite";
+
+  // Scroll vers le haut à chaque changement d'étape
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [step]);
 
   if (loading) {
     return (
@@ -417,6 +426,12 @@ export default function DeposerPage() {
       
       if (isValidStep) {
         setStep(step + 1);
+        // Scroll vers le haut de la page après le changement d'étape
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "instant",
+        });
       } else {
         toast.error("Veuillez remplir tous les champs requis", {
           description: "Certains champs sont manquants ou invalides.",
@@ -428,6 +443,12 @@ export default function DeposerPage() {
   const handlePrev = () => {
     if (step > 1) {
       setStep(step - 1);
+      // Scroll vers le haut de la page après le changement d'étape
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "instant",
+      });
     }
   };
 
@@ -494,8 +515,8 @@ export default function DeposerPage() {
                   <label className="text-sm text-white/70">Type de bien</label>
                   <select
                     {...register("type")}
-                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
-                    style={{ colorScheme: "dark" }}
+                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
+                    style={{ colorScheme: "dark", fontSize: "16px" }}
                   >
                     {typesBien.map((t) => (
                       <option key={t.value} value={t.value} className="bg-[#0b0f18] text-white">
@@ -509,8 +530,8 @@ export default function DeposerPage() {
                   <label className="text-sm text-white/70">Catégorie</label>
                   <select
                     {...register("category")}
-                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
-                    style={{ colorScheme: "dark" }}
+                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
+                    style={{ colorScheme: "dark", fontSize: "16px" }}
                   >
                     <option value="vente" className="bg-[#0b0f18] text-white">
                       Vente
@@ -523,7 +544,7 @@ export default function DeposerPage() {
 
                 <div className="sm:col-span-2">
                   <label className="text-sm text-white/70">Titre</label>
-                  <Input {...register("title")} className="mt-2" />
+                  <Input {...register("title")} className="mt-2 text-[16px]" />
                   {errors.title && (
                     <p className="mt-1 text-sm text-amber-300">
                       {errors.title.message}
@@ -536,7 +557,7 @@ export default function DeposerPage() {
                   <Input
                     type="number"
                     {...register("price", { valueAsNumber: true })}
-                    className="mt-2"
+                    className="mt-2 text-[16px]"
                   />
                   {errors.price && (
                     <p className="mt-1 text-sm text-amber-300">
@@ -546,8 +567,8 @@ export default function DeposerPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm text-white/70">Ville</label>
-                  <Input {...register("city")} className="mt-2" />
+                  <label className="text-sm text-white/70">Région</label>
+                  <Input {...register("city")} className="mt-2 text-base" />
                   {errors.city && (
                     <p className="mt-1 text-sm text-amber-300">
                       {errors.city.message}
@@ -556,21 +577,8 @@ export default function DeposerPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm text-white/70">Quartier</label>
-                  <select
-                    {...register("district")}
-                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
-                    style={{ colorScheme: "dark" }}
-                  >
-                    <option value="" className="bg-[#0b0f18] text-white">
-                      Sélectionnez
-                    </option>
-                    {quartiers.map((q) => (
-                      <option key={q} value={q} className="bg-[#0b0f18] text-white">
-                        {q}
-                      </option>
-                    ))}
-                  </select>
+                  <label className="text-sm text-white/70">Quartier (ville)</label>
+                  <Input {...register("district")} className="mt-2 text-base" />
                   {errors.district && (
                     <p className="mt-1 text-sm text-amber-300">
                       {errors.district.message}
@@ -580,7 +588,7 @@ export default function DeposerPage() {
 
                 <div className="sm:col-span-2">
                   <label className="text-sm text-white/70">Adresse</label>
-                  <Input {...register("address")} className="mt-2" />
+                  <Input {...register("address")} className="mt-2 text-[16px]" />
                   {errors.address && (
                     <p className="mt-1 text-sm text-amber-300">
                       {errors.address.message}
@@ -590,7 +598,7 @@ export default function DeposerPage() {
 
                 <div className="sm:col-span-2">
                   <label className="text-sm text-white/70">Point de repère</label>
-                  <Input {...register("landmark")} className="mt-2" />
+                  <Input {...register("landmark")} className="mt-2 text-[16px]" />
                   {errors.landmark && (
                     <p className="mt-1 text-sm text-amber-300">
                       {errors.landmark.message}
@@ -606,7 +614,7 @@ export default function DeposerPage() {
                       <Input
                         type="number"
                         {...register("surfaceTotale", { valueAsNumber: true })}
-                        className="mt-2"
+                        className="mt-2 text-[16px]"
                       />
                       {errors.surfaceTotale && (
                         <p className="mt-1 text-sm text-amber-300">
@@ -618,8 +626,8 @@ export default function DeposerPage() {
                       <label className="text-sm text-white/70">Situation juridique</label>
                       <select
                         {...register("juridique")}
-                        className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
-                        style={{ colorScheme: "dark" }}
+                        className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
+                        style={{ colorScheme: "dark", fontSize: "16px" }}
                       >
                         <option value="" className="bg-[#0b0f18] text-white">
                           Sélectionnez
@@ -648,7 +656,7 @@ export default function DeposerPage() {
                       <Input
                         type="number"
                         {...register("surface", { valueAsNumber: true })}
-                        className="mt-2"
+                        className="mt-2 text-[16px]"
                       />
                       {errors.surface && (
                         <p className="mt-1 text-sm text-amber-300">
@@ -661,7 +669,7 @@ export default function DeposerPage() {
                       <Input
                         type="number"
                         {...register("rooms", { valueAsNumber: true })}
-                        className="mt-2"
+                        className="mt-2 text-[16px]"
                       />
                       {errors.rooms && (
                         <p className="mt-1 text-sm text-amber-300">
@@ -674,7 +682,7 @@ export default function DeposerPage() {
                       <Input
                         type="number"
                         {...register("bedrooms", { valueAsNumber: true })}
-                        className="mt-2"
+                        className="mt-2 text-[16px]"
                       />
                       {errors.bedrooms && (
                         <p className="mt-1 text-sm text-amber-300">
@@ -687,7 +695,7 @@ export default function DeposerPage() {
                       <Input
                         type="number"
                         {...register("bathrooms", { valueAsNumber: true })}
-                        className="mt-2"
+                        className="mt-2 text-[16px]"
                       />
                       {errors.bathrooms && (
                         <p className="mt-1 text-sm text-amber-300">
@@ -871,7 +879,7 @@ export default function DeposerPage() {
                     <Input
                       {...register("payment_ref")}
                       placeholder="Ex: WAVE123456789"
-                      className="mt-2"
+                      className="mt-2 text-[16px]"
                     />
                     {errors.payment_ref && (
                       <p className="mt-1 text-sm text-amber-300">
