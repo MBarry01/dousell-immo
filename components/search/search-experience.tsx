@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Filter, Map, Search as SearchIcon } from "lucide-react";
+import { Filter, Map, Search as SearchIcon, Bell } from "lucide-react";
 
 import { PropertyCard } from "@/components/property/property-card";
 import { FilterDrawer } from "@/components/search/filter-drawer";
+import { CreateAlertDialog } from "@/components/search/create-alert-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/use-auth";
 import type { Property } from "@/types/property";
 import { hasActiveFilters } from "@/lib/search-filters";
 import { useSearchFilters } from "@/hooks/use-search-filters";
@@ -35,12 +38,24 @@ export const SearchExperience = ({
   initialFilters,
   initialResults,
 }: SearchExperienceProps) => {
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
   const { filters, setFilters } = useSearchFilters(initialFilters);
   const [view, setView] = useState<"list" | "map">("list");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
   const [results, setResults] = useState<Property[]>(initialResults);
 
   const activeFilters = hasActiveFilters(filters);
+
+  // Ouvrir le dialog de création d'alerte si ?alert=create est présent
+  useEffect(() => {
+    if (searchParams.get("alert") === "create") {
+      if (user) {
+        setAlertDialogOpen(true);
+      }
+    }
+  }, [searchParams, user]);
 
   const applyFilters = async (nextFilters: PropertyFilters) => {
     setFilters(nextFilters);
@@ -77,6 +92,17 @@ export const SearchExperience = ({
               </span>
             )}
           </Button>
+          {user && (
+            <Button
+              type="button"
+              variant="secondary"
+              className="rounded-2xl border border-white/10 bg-white/10 text-white"
+              onClick={() => setAlertDialogOpen(true)}
+            >
+              <Bell className="mr-2 h-4 w-4" />
+              Créer une alerte
+            </Button>
+          )}
         </div>
         <p className="mt-3 text-sm text-white/60">
           {results.length} bien{results.length > 1 ? "s" : ""} trouvé{results.length > 1 ? "s" : ""}
@@ -137,6 +163,14 @@ export const SearchExperience = ({
         filters={filters}
         onApply={applyFilters}
       />
+
+      {user && (
+        <CreateAlertDialog
+          open={alertDialogOpen}
+          onOpenChange={setAlertDialogOpen}
+          filters={filters}
+        />
+      )}
     </div>
   );
 };

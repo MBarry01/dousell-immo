@@ -36,7 +36,7 @@ export const AppShell = ({ children }: AppShellProps) => {
       <ScrollToTop />
       <div className="px-4 md:px-6">
         <Header />
-        <main className="mx-auto w-full max-w-6xl pb-16 pt-20 md:pb-4 md:pt-6">
+        <main className="mx-auto w-full max-w-6xl pb-16 pt-[calc(env(safe-area-inset-top)+4rem)] md:pb-4 md:pt-6">
           {children}
         </main>
       </div>
