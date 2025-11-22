@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { User, Home, Heart, LogOut, Calculator, Shield } from "lucide-react";
+import { User, Home, Heart, LogOut, Calculator, Shield, Info } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
@@ -197,6 +197,22 @@ export function UserNav() {
             >
               <Heart className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
               Favoris
+            </DropdownMenuItem>
+          </motion.div>
+
+          <motion.div
+            variants={{
+              open: { opacity: 1, x: 0 },
+              closed: { opacity: 0, x: -8 }
+            }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          >
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => router.push("/a-propos")}
+            >
+              <Info className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+              À propos
             </DropdownMenuItem>
           </motion.div>
 
