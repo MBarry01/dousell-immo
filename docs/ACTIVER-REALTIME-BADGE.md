@@ -95,3 +95,6 @@ Après activation de Realtime :
 - Le polling vérifie les nouvelles notifications toutes les 30 secondes
 - Vous pouvez toujours recharger la page pour forcer une mise à jour
 
+
+
+

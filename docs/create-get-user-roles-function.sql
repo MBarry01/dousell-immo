@@ -18,3 +18,6 @@ GRANT EXECUTE ON FUNCTION public.get_user_roles(uuid) TO authenticated;
 -- Test
 SELECT public.get_user_roles('VOTRE_USER_ID_ICI'::uuid);
 
+
+
+

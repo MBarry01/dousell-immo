@@ -132,3 +132,6 @@ Pour tester si les notifications fonctionnent :
 **Problème** : Les notifications sont créées mais le badge ne se met pas à jour
 - **Solution** : Vérifiez que Realtime est activé pour `notifications` (voir Solution 1)
 
+
+
+

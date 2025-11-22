@@ -63,3 +63,6 @@ CREATE POLICY "user_roles_select_own" ON public.user_roles
 - Vérifiez que les politiques RLS sont correctement configurées
 - Vérifiez que l'utilisateur est bien authentifié
 
+
+
+

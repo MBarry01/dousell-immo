@@ -155,3 +155,6 @@ FROM public.user_roles ur
 JOIN auth.users u ON u.id = ur.user_id
 WHERE LOWER(u.email) = 'barrymohamadou98@gmail.com';
 
+
+
+

@@ -83,3 +83,6 @@ JOIN auth.users u ON u.id = ur.user_id
 ORDER BY ur.created_at DESC
 LIMIT 10;
 
+
+
+

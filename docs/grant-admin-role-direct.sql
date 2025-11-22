@@ -25,3 +25,6 @@ JOIN auth.users u ON u.id = ur.user_id
 WHERE LOWER(u.email) = 'barrymohamadou98@gmail.com'
 AND ur.role = 'admin';
 
+
+
+

@@ -14,3 +14,6 @@ AND tablename = 'user_roles';
 
 -- Si la requête ci-dessus retourne une ligne, Realtime est activé ✅
 
+
+
+

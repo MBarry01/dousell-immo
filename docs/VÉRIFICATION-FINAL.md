@@ -58,3 +58,6 @@ Exécutez `docs/create-notification-function.sql` pour créer la fonction RPC `c
 3. Exécutez `docs/create-notification-function.sql` pour le fallback RPC
 4. Vérifiez que les modérateurs ont bien un rôle dans `user_roles`
 
+
+
+

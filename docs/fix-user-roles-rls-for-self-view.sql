@@ -23,3 +23,6 @@ FROM pg_policies
 WHERE tablename = 'user_roles' 
 AND policyname = 'user_roles_select_own';
 
+
+
+

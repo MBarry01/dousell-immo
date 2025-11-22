@@ -82,3 +82,6 @@ Le menu admin (`AdminSidebar`) affiche automatiquement les liens selon les rôle
 
 L'email `barrymohamadou98@gmail.com` a toujours tous les droits, même sans rôle assigné (pour compatibilité).
 
+
+
+

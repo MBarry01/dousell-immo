@@ -88,3 +88,6 @@ $$;
 GRANT EXECUTE ON FUNCTION public.grant_user_role(UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.revoke_user_role(UUID, TEXT) TO authenticated;
 
+
+
+
