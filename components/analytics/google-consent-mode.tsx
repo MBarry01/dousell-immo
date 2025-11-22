@@ -16,16 +16,17 @@ export function GoogleConsentMode() {
     if (typeof window === "undefined") return;
 
     // Initialiser dataLayer si inexistant (doit être fait en premier)
-    if (!window.dataLayer || !Array.isArray(window.dataLayer)) {
-      window.dataLayer = [];
+    const win = window as unknown as { dataLayer?: unknown[] };
+    if (!win.dataLayer || !Array.isArray(win.dataLayer)) {
+      win.dataLayer = [];
     }
 
     // Fonction gtag si inexistante
     function gtag(...args: unknown[]) {
-      if (!window.dataLayer || !Array.isArray(window.dataLayer)) {
-        window.dataLayer = [];
+      if (!win.dataLayer || !Array.isArray(win.dataLayer)) {
+        win.dataLayer = [];
       }
-      window.dataLayer.push(args);
+      win.dataLayer.push(args);
     }
 
     // Définir le consentement par défaut (REFUSÉ) avant le chargement de GA

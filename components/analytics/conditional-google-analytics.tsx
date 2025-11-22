@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import Script from "next/script";
 import { useCookieConsent } from "@/hooks/use-cookie-consent";
 import { GoogleConsentMode } from "./google-consent-mode";
 import { UpdateConsentOnLoad } from "./update-consent-on-load";
@@ -57,14 +57,15 @@ export function ConditionalGoogleAnalytics({
     // Utilise dataLayer.push directement (plus fiable que gtag qui peut ne pas être encore chargé)
     const updateConsent = () => {
       // Vérifier que dataLayer existe
-      if (!window.dataLayer || !Array.isArray(window.dataLayer)) {
+      const dataLayer = (window as unknown as { dataLayer?: unknown[] }).dataLayer;
+      if (!dataLayer || !Array.isArray(dataLayer)) {
         return false;
       }
 
       try {
         // Utiliser dataLayer.push directement (compatible avec gtag.js)
         // Format: dataLayer.push(['consent', 'update', {...}])
-        window.dataLayer.push(["consent", "update", consentParams]);
+        dataLayer.push(["consent", "update", consentParams]);
 
         // Si gtag existe, on peut aussi l'utiliser (double sécurité)
         if (typeof (window as unknown as { gtag?: unknown }).gtag === "function") {
@@ -113,12 +114,27 @@ export function ConditionalGoogleAnalytics({
   // pour que le consentement par défaut soit défini avant gtag.js
   return (
     <>
-      {/* Consent Mode chargé en premier (useEffect s'exécute avant le render de GoogleAnalytics) */}
+      {/* Consent Mode chargé en premier (useEffect s'exécute avant le render du script) */}
       <GoogleConsentMode />
       {/* Mise à jour du consentement au chargement si existant dans localStorage */}
       <UpdateConsentOnLoad />
-      {/* Google Analytics se charge ensuite et respecte le Consent Mode */}
-      <GoogleAnalytics gaId={gaId} />
+      {/* Google Analytics standard injecté dans le head pour détection par Google */}
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+        strategy="afterInteractive"
+      />
+      <Script
+        id="google-analytics-config"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${gaId}');
+          `,
+        }}
+      />
     </>
   );
 }

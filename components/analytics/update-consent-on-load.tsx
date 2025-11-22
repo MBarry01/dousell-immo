@@ -40,13 +40,14 @@ export function UpdateConsentOnLoad() {
 
     // Fonction pour mettre à jour le consentement
     const updateConsent = () => {
-      if (!window.dataLayer || !Array.isArray(window.dataLayer)) {
+      const dataLayer = (window as unknown as { dataLayer?: unknown[] }).dataLayer;
+      if (!dataLayer || !Array.isArray(dataLayer)) {
         return false;
       }
 
       try {
         // Utiliser dataLayer.push directement
-        window.dataLayer.push(["consent", "update", consentParams]);
+        dataLayer.push(["consent", "update", consentParams]);
 
         // Si gtag existe, l'utiliser aussi
         if (typeof (window as unknown as { gtag?: unknown }).gtag === "function") {
