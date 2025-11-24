@@ -9,6 +9,11 @@ import { Footer } from "@/components/layout/footer";
 import { ScrollToTop } from "@/components/layout/scroll-to-top";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
+type BreadcrumbItem = {
+  label: string;
+  href?: string;
+};
+
 type AppShellProps = {
   children: ReactNode;
 };
@@ -62,7 +67,7 @@ export const AppShell = ({ children }: AppShellProps) => {
       return [];
     }
 
-    const items = [{ label: "Accueil", href: "/" }];
+    const items: BreadcrumbItem[] = [{ label: "Accueil", href: "/" }];
     let cumulativePath = "";
 
     segments.forEach((segment, index) => {
