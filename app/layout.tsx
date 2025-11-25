@@ -38,12 +38,29 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Dousell Immo",
+    // Empêche l'effet de brillance sur iOS (si l'icône a un fond opaque)
+    startupImage: [
+      {
+        url: "/icons/icon-512.png",
+        media: "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)",
+      },
+      {
+        url: "/icons/icon-512.png",
+        media: "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)",
+      },
+      {
+        url: "/icons/icon-512.png",
+        media: "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)",
+      },
+    ],
   },
   other: {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
     "apple-mobile-web-app-title": "Dousell Immo",
+    // Empêche le remplissage automatique avec du blanc sur iOS
+    "apple-touch-fullscreen": "yes",
   },
   icons: {
     icon: [
@@ -75,6 +92,7 @@ export default function RootLayout({
 
   return (
     <html lang="fr" suppressHydrationWarning>
+      {/* Next.js ajoute automatiquement le DOCTYPE pour éviter Quirks Mode */}
       <body
         className={`${geistSans.variable} ${geistMono.variable} bg-[#05080c] antialiased`}
         suppressHydrationWarning

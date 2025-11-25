@@ -7,19 +7,36 @@ import {
   type VisitRequestFormValues,
 } from "@/lib/schemas/visit-request";
 import { createClient } from "@/utils/supabase/server";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 // Alias pour compatibilité
-export async function submitLead(values: VisitRequestFormValues) {
-  return createVisitRequest(values);
+export async function submitLead(values: VisitRequestFormValues, turnstileToken?: string) {
+  return createVisitRequest(values, turnstileToken);
 }
 
-export async function createVisitRequest(values: VisitRequestFormValues) {
+export async function createVisitRequest(values: VisitRequestFormValues, turnstileToken?: string) {
   const parsed = visitRequestSchema.safeParse(values);
 
   if (!parsed.success) {
     return {
       success: false,
       error: "Formulaire invalide, merci de vérifier les champs.",
+    };
+  }
+
+  // Vérification Turnstile
+  if (!turnstileToken) {
+    return {
+      success: false,
+      error: "Vérification anti-robot requise. Veuillez réessayer.",
+    };
+  }
+
+  const verification = await verifyTurnstileToken(turnstileToken);
+  if (!verification.success) {
+    return {
+      success: false,
+      error: verification.error || "Vérification anti-robot échouée. Veuillez réessayer.",
     };
   }
 

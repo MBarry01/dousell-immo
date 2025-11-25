@@ -63,7 +63,17 @@ export async function submitUserListing(data: SubmitListingData) {
 
     if (data.service_type === "boost_visibilite") {
       if (data.payment_ref) {
-        validationStatus = "payment_pending";
+        // Vérifier si c'est un token PayDunya valide (format alphanumérique, généralement 40+ caractères)
+        // Les tokens PayDunya sont des chaînes alphanumériques longues, pas des ID manuels courts
+        const isPayDunyaToken = data.payment_ref.length >= 32 && /^[a-zA-Z0-9-]+$/.test(data.payment_ref);
+        
+        if (isPayDunyaToken) {
+          // Token PayDunya valide - marquer comme vérifié (sera confirmé par webhook)
+          validationStatus = "approved";
+        } else {
+          // ID de paiement manuel (Wave/OM) - nécessite vérification manuelle
+          validationStatus = "payment_pending";
+        }
       } else {
         return { error: "La référence de paiement est requise pour cette offre" };
       }
@@ -204,6 +214,7 @@ export async function submitUserListing(data: SubmitListingData) {
     const emailResult = await sendEmail({
       to: adminEmail,
       subject: `Nouvelle annonce en attente : ${data.title}`,
+      user_id: user.id,
       react: ListingSubmittedEmail({
         propertyTitle: data.title,
         propertyPrice: data.price,

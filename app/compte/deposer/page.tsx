@@ -137,6 +137,7 @@ export default function DeposerPage() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [paymentToken, setPaymentToken] = useState<string | null>(null);
 
   const {
     register,
@@ -170,6 +171,35 @@ export default function DeposerPage() {
       behavior: "instant",
     });
   }, [step]);
+
+  // Gérer le retour de PayDunya
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get("payment");
+    const token = params.get("token");
+
+    if (paymentStatus === "success" && token) {
+      setPaymentToken(token);
+      // Stocker le token dans le localStorage pour persister après navigation
+      localStorage.setItem("paydunya_payment_token", token);
+      toast.success("Paiement effectué avec succès !", {
+        description: "Vous pouvez maintenant finaliser votre annonce.",
+      });
+      // Nettoyer l'URL
+      router.replace("/compte/deposer", { scroll: false });
+    } else if (paymentStatus === "canceled") {
+      toast.error("Paiement annulé", {
+        description: "Vous pouvez réessayer le paiement.",
+      });
+      router.replace("/compte/deposer", { scroll: false });
+    } else {
+      // Vérifier si un token est stocké dans le localStorage
+      const storedToken = localStorage.getItem("paydunya_payment_token");
+      if (storedToken) {
+        setPaymentToken(storedToken);
+      }
+    }
+  }, [router]);
 
   if (loading) {
     return (
@@ -267,11 +297,11 @@ export default function DeposerPage() {
       return;
     }
 
-    // Validation : si Diffusion Simple, payment_ref est requis
-    if (needsPayment && !values.payment_ref?.trim()) {
-      console.error("❌ Référence de paiement manquante");
-      toast.error("Référence de paiement requise", {
-        description: "Veuillez entrer votre ID de transaction Wave/OM.",
+    // Validation : si Diffusion Simple, un token de paiement PayDunya est requis
+    if (needsPayment && !paymentToken && !values.payment_ref?.trim()) {
+      console.error("❌ Paiement non effectué");
+      toast.error("Paiement requis", {
+        description: "Veuillez effectuer le paiement avant de finaliser votre annonce.",
       });
       setSubmitting(false);
       return;
@@ -300,6 +330,7 @@ export default function DeposerPage() {
       const result = await submitUserListing({
         ...values,
         images: imageUrls,
+        payment_ref: paymentToken || values.payment_ref, // Utiliser le token PayDunya si disponible
       });
 
       console.log("📥 Réponse reçue de submitUserListing:", result);
@@ -318,6 +349,9 @@ export default function DeposerPage() {
             : "Votre annonce est en attente de validation par notre équipe.",
           duration: 5000,
         });
+        // Nettoyer le token PayDunya du localStorage
+        localStorage.removeItem("paydunya_payment_token");
+        setPaymentToken(null);
         // Petit délai pour voir le toast avant la redirection
         setTimeout(() => {
           router.push("/compte/mes-biens");
@@ -894,36 +928,83 @@ export default function DeposerPage() {
 
               {needsPayment ? (
                 <>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-                    <p className="text-sm text-white/70 mb-4">
-                      Scannez le QR Code ou envoyez 1 500 FCFA à ce numéro Wave/OM
-                    </p>
-                    <div className="mx-auto mb-4 h-48 w-48 rounded-xl bg-white/10 flex items-center justify-center">
-                      <span className="text-white/40">QR Code</span>
-                    </div>
-                    <p className="text-lg font-semibold text-white mb-2">
-                      +221 77 123 45 67
-                    </p>
-                    <p className="text-sm text-white/60">
-                      (Dousell Immo)
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="text-sm text-white/70">
-                      Entrez votre ID de transaction Wave/OM
-                    </label>
-                    <Input
-                      {...register("payment_ref")}
-                      placeholder="Ex: WAVE123456789"
-                      className="mt-2 text-[16px]"
-                    />
-                    {errors.payment_ref && (
-                      <p className="mt-1 text-sm text-amber-300">
-                        {errors.payment_ref.message}
+                  {paymentToken ? (
+                    <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-center">
+                      <Check className="mx-auto h-12 w-12 text-emerald-400" />
+                      <p className="mt-4 text-lg font-semibold text-white">
+                        Paiement effectué avec succès !
                       </p>
-                    )}
-                  </div>
+                      <p className="mt-2 text-sm text-white/70">
+                        Vous pouvez maintenant finaliser votre annonce.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+                      <p className="text-sm text-white/70 mb-4">
+                        Paiement sécurisé via PayDunya
+                      </p>
+                      <p className="text-lg font-semibold text-white mb-2">
+                        1 500 FCFA
+                      </p>
+                      <p className="text-sm text-white/60 mb-4">
+                        Accepte Wave, Orange Money et Free Money
+                      </p>
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            setSubmitting(true);
+                            const values = getValues();
+                            
+                            // Créer la facture PayDunya
+                            const response = await fetch("/api/paydunya/create-invoice", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                amount: 1500,
+                                description: `Diffusion Simple - ${values.title}`,
+                                propertyId: null, // Sera mis à jour après création
+                                returnUrl: `${window.location.origin}/compte/deposer?payment=success`,
+                                cancelUrl: `${window.location.origin}/compte/deposer?payment=canceled`,
+                              }),
+                            });
+
+                          const data = await response.json();
+
+                          if (!response.ok || !data.success) {
+                            throw new Error(data.error || "Erreur lors de la création du paiement");
+                          }
+
+                          // Stocker le token avant la redirection
+                          if (data.token) {
+                            localStorage.setItem("paydunya_payment_token", data.token);
+                          }
+
+                          // Rediriger vers PayDunya
+                          window.location.href = data.checkout_url;
+                          } catch (error) {
+                            console.error("Erreur PayDunya:", error);
+                            toast.error("Erreur lors de la création du paiement", {
+                              description: error instanceof Error ? error.message : "Veuillez réessayer",
+                            });
+                            setSubmitting(false);
+                          }
+                        }}
+                        disabled={submitting}
+                        className="w-full h-12 rounded-xl bg-amber-500 text-black hover:bg-amber-400 disabled:opacity-50"
+                      >
+                        {submitting ? "Redirection..." : "Payer avec PayDunya"}
+                      </Button>
+                    </div>
+                  )}
+                  {!paymentToken && (
+                    <p className="text-xs text-white/50 text-center">
+                      Vous serez redirigé vers PayDunya pour effectuer le paiement. 
+                      Après paiement, vous pourrez finaliser votre annonce.
+                    </p>
+                  )}
                 </>
               ) : (
                 <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-6 text-center">

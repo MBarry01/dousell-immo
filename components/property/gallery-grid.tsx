@@ -70,7 +70,7 @@ export const GalleryGrid = ({
                 fill
                 priority={index === 0}
                 className="object-cover"
-                sizes="100vw"
+                sizes="(max-width: 768px) 100vw, (max-width: 1280px) 90vw, 1200px"
                 quality={75}
                 draggable={false}
               />

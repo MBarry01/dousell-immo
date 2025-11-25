@@ -1,31 +1,42 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   User,
-  Mail,
-  Phone,
   Lock,
   Eye,
   EyeOff,
   ArrowLeft,
+  Mail,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
+import * as RPNInput from "react-phone-number-input";
+import { getCountryCallingCode } from "react-phone-number-input";
+import { parsePhoneNumber } from "libphonenumber-js";
+import flags from "react-phone-number-input/flags";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signup, signInWithGoogle } from "@/app/auth/actions";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { Captcha } from "@/components/ui/captcha";
+import { signup, signInWithGoogle, resendConfirmationEmail } from "@/app/auth/actions";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
-  const [phoneValue, setPhoneValue] = useState("");
+  const [phoneValue, setPhoneValue] = useState<RPNInput.Value | undefined>(undefined);
+  const [selectedCountry, setSelectedCountry] = useState<RPNInput.Country>("SN");
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
     fullName?: string;
     email?: string;
@@ -33,13 +44,31 @@ export default function RegisterPage() {
     password?: string;
   }>({});
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove all non-digit characters
-    const digits = e.target.value.replace(/\D/g, "");
-    // Limit to 9 digits
-    const limited = digits.slice(0, 9);
-    setPhoneValue(limited);
+  // Fonction pour obtenir le drapeau et l'indicatif du pays
+  const getCountryInfo = (country: RPNInput.Country | undefined) => {
+    if (!country) {
+      return { Flag: null, callingCode: "" };
+    }
+    const Flag = flags[country];
+    const callingCode = getCountryCallingCode(country);
+    return { Flag, callingCode };
   };
+
+  const { Flag: SelectedFlag, callingCode } = getCountryInfo(selectedCountry);
+
+  // Synchroniser le pays sélectionné avec la valeur du téléphone
+  useEffect(() => {
+    if (phoneValue && typeof phoneValue === "string") {
+      try {
+        const phoneNumber = parsePhoneNumber(phoneValue);
+        if (phoneNumber && phoneNumber.country) {
+          setSelectedCountry(phoneNumber.country as RPNInput.Country);
+        }
+      } catch (e) {
+        // Ignorer les erreurs de détection de pays (numéro invalide, etc.)
+      }
+    }
+  }, [phoneValue]);
 
   const handleGoogleSignIn = () => {
     startTransition(async () => {
@@ -161,6 +190,13 @@ export default function RegisterPage() {
               setError(null);
               setValidationErrors({});
               
+              if (!captchaToken) {
+                toast.error("Veuillez compléter la vérification anti-robot");
+                return;
+              }
+              
+              formData.append("turnstileToken", captchaToken);
+              
               // Validation côté client
               const fullName = formData.get("fullName") as string;
               const email = formData.get("email") as string;
@@ -177,9 +213,15 @@ export default function RegisterPage() {
                 errors.email = "Adresse email invalide";
               }
               
-              const phoneDigits = phone?.replace(/\D/g, "") || "";
-              if (!phoneDigits || phoneDigits.length !== 9) {
-                errors.phone = "Le numéro de téléphone doit contenir 9 chiffres";
+              // Validation du téléphone (format international)
+              if (!phone || phone.trim().length < 8) {
+                errors.phone = "Numéro de téléphone invalide";
+              } else {
+                // Vérifier que c'est un numéro valide (au moins 8 caractères après l'indicatif)
+                const phoneWithoutSpaces = phone.replace(/\s/g, "");
+                if (phoneWithoutSpaces.length < 8) {
+                  errors.phone = "Numéro de téléphone invalide";
+                }
               }
               
               if (!password || password.length < 6) {
@@ -192,13 +234,31 @@ export default function RegisterPage() {
                 return;
               }
               
+              // La vérification HIBP est maintenant faite côté serveur dans signup()
               startTransition(async () => {
                 const result = await signup(formData);
+                console.log("📋 Résultat signup:", result); // Log pour debugging
                 if (result?.error) {
                   setError(result.error);
-                  toast.error("Erreur lors de l'inscription", {
-                    description: result.error,
-                  });
+                  console.error("🔴 Erreur affichée à l'utilisateur:", result.error);
+                  // Afficher un toast uniquement pour les erreurs critiques (pas de duplication avec la boîte d'erreur)
+                  // Le toast est plus visible et disparaît automatiquement
+                  if (result.error.includes("Trop de tentatives")) {
+                    toast.error("Trop de tentatives", {
+                      description: "Pour votre sécurité, veuillez attendre 5 minutes avant de réessayer.",
+                      duration: 8000,
+                    });
+                  } else if (result.error.includes("déjà enregistré")) {
+                    toast.error("Email déjà utilisé", {
+                      description: result.error,
+                      duration: 6000,
+                    });
+                  } else {
+                    // Pour les autres erreurs, afficher un toast court
+                    toast.error(result.error, {
+                      duration: 5000,
+                    });
+                  }
                 } else if (result?.success) {
                   // Si l'utilisateur est automatiquement confirmé et connecté
                   if (result.autoConfirmed) {
@@ -216,6 +276,8 @@ export default function RegisterPage() {
                   else if (result.emailSent) {
                     // Afficher une alerte claire sans redirection immédiate
                     setError(null);
+                    setEmailSent(true);
+                    setUserEmail(email);
                     toast.success("Compte créé !", {
                       description: "Un lien de confirmation a été envoyé à votre adresse email. Veuillez cliquer dessus pour activer votre compte.",
                       duration: 8000,
@@ -241,6 +303,62 @@ export default function RegisterPage() {
             {error && (
               <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
                 {error}
+              </div>
+            )}
+
+            {/* Message de confirmation email */}
+            {emailSent && userEmail && (
+              <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <Mail className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-blue-300 mb-1">
+                      Email de confirmation envoyé
+                    </h3>
+                    <p className="text-sm text-blue-200/80 mb-3">
+                      Un lien de confirmation a été envoyé à <strong>{userEmail}</strong>. 
+                      Cliquez sur le lien dans l'email pour activer votre compte.
+                    </p>
+                    <p className="text-xs text-blue-200/60 mb-3">
+                      💡 Vérifiez aussi votre dossier spam si vous ne voyez pas l'email.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isResending}
+                      onClick={async () => {
+                        setIsResending(true);
+                        const result = await resendConfirmationEmail(userEmail);
+                        if (result.success) {
+                          toast.success("Email renvoyé !", {
+                            description: "Vérifiez votre boîte de réception.",
+                            duration: 5000,
+                          });
+                        } else {
+                          toast.error("Erreur", {
+                            description: result.error || "Impossible de renvoyer l'email.",
+                            duration: 5000,
+                          });
+                        }
+                        setIsResending(false);
+                      }}
+                      className="w-full sm:w-auto border-blue-500/30 text-blue-300 hover:bg-blue-500/20"
+                    >
+                      {isResending ? (
+                        <>
+                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                          Envoi en cours...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                          Renvoyer l'email
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -297,29 +415,26 @@ export default function RegisterPage() {
               <Label htmlFor="phone" className="text-white/70">
                 Téléphone
               </Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
-                <div className="absolute left-10 top-1/2 flex -translate-y-1/2 items-center gap-1 text-sm text-white/60">
-                  <span>🇸🇳</span>
-                  <span>+221</span>
-                </div>
-                <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  placeholder="77 123 45 67"
-                  value={phoneValue}
-                  onChange={handlePhoneChange}
-                  required
-                  pattern="[0-9]{9}"
-                  minLength={9}
-                  maxLength={9}
-                  className="h-12 rounded-xl border-white/10 bg-white/5 pl-20 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500"
-                />
-              </div>
-              <p className="text-xs text-white/50">
-                Entrez 9 chiffres (ex: 771234567)
-              </p>
+              <PhoneInput
+                id="phone"
+                value={phoneValue}
+                onChange={(value) => {
+                  setPhoneValue(value);
+                }}
+                defaultCountry="SN"
+                international
+                placeholder="Entrez votre numéro"
+                className={`${
+                  validationErrors.phone ? "border-red-500/50" : ""
+                }`}
+                required
+              />
+              {/* Input caché pour envoyer la valeur dans le FormData */}
+              <input
+                type="hidden"
+                name="phone"
+                value={typeof phoneValue === "string" ? phoneValue : ""}
+              />
               {validationErrors.phone && (
                 <p className="text-xs text-red-400">{validationErrors.phone}</p>
               )}
@@ -366,10 +481,25 @@ export default function RegisterPage() {
               )}
             </div>
 
+            <Captcha
+              onVerify={(token) => {
+                setCaptchaToken(token);
+              }}
+              onExpire={() => {
+                setCaptchaToken(null);
+                // Le widget se réinitialise automatiquement
+              }}
+              onError={() => {
+                setCaptchaToken(null);
+              }}
+              theme="auto"
+              className="my-4"
+            />
+
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || !captchaToken}
               className="mt-6 h-12 w-full rounded-xl bg-white text-black hover:bg-gray-100 disabled:opacity-50"
             >
               {isPending ? (

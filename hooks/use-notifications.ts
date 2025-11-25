@@ -53,7 +53,6 @@ export function useNotifications(userId: string | null) {
       }
 
       // Récupérer les notifications (les plus récentes en premier)
-      console.log("🔍 Récupération des notifications pour userId:", userId);
       const { data, error: fetchError } = await supabase
         .from("notifications")
         .select("*")
@@ -98,13 +97,6 @@ export function useNotifications(userId: string | null) {
       }));
 
       const unread = typedNotifications.filter((n) => !n.is_read).length;
-      
-      console.log("📬 Notifications récupérées:", {
-        userId,
-        total: typedNotifications.length,
-        unread,
-        notifications: typedNotifications.map(n => ({ id: n.id, title: n.title, is_read: n.is_read }))
-      });
       
       setNotifications(typedNotifications);
       setUnreadCount(unread);
@@ -166,7 +158,6 @@ export function useNotifications(userId: string | null) {
               filter: `user_id=eq.${userId}`,
             },
             (payload) => {
-              console.log("🔔 Nouvelle notification reçue via Realtime:", payload.new);
               // Typage explicite de la nouvelle notification
               const newNotification: Notification = {
                 id: payload.new.id,
@@ -223,15 +214,13 @@ export function useNotifications(userId: string | null) {
           )
           .subscribe((status) => {
             if (status === "SUBSCRIBED") {
-              console.log("✅ Abonné avec succès au canal Realtime pour les notifications");
+              // Realtime connecté avec succès
             } else if (status === "CHANNEL_ERROR") {
               console.warn("⚠️ Erreur d'abonnement au canal Realtime. Realtime peut ne pas être activé.");
-              console.warn("💡 Exécutez docs/fix-notifications-rls-idempotent.sql pour activer Realtime");
             } else if (status === "TIMED_OUT") {
-              console.warn("⏱️ Timeout lors de l'abonnement Realtime. Utilisation du polling de fallback.");
-            } else {
-              console.log("📡 Statut Realtime:", status);
+              // Timeout silencieux - le polling de fallback prendra le relais
             }
+            // Ne pas logger les autres statuts pour éviter le spam
           });
       } catch (err) {
         console.warn("Error setting up realtime subscription:", err);
@@ -248,13 +237,11 @@ export function useNotifications(userId: string | null) {
     const startPolling = () => {
       if (pollingInterval) return; // Déjà en cours
       
-      console.log("🔄 Démarrage du polling de fallback (toutes les 30 secondes)");
       pollingInterval = setInterval(() => {
         // Vérifier si Realtime a fonctionné récemment (dans les 60 dernières secondes)
         const timeSinceLastRealtime = Date.now() - lastRealtimeCheck.current;
         if (timeSinceLastRealtime > 60000) {
-          // Realtime ne semble pas fonctionner, utiliser polling
-          console.log("⚠️ Realtime inactif, utilisation du polling");
+          // Realtime ne semble pas fonctionner, utiliser polling silencieusement
           fetchNotifications();
         }
       }, 30000); // Polling toutes les 30 secondes

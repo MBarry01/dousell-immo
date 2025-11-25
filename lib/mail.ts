@@ -1,56 +1,34 @@
-import { Resend } from "resend";
+import { sendEmailViaSupabase } from "./mail-supabase";
 
-if (!process.env.RESEND_API_KEY) {
-  console.warn("⚠️ RESEND_API_KEY is not set. Email functionality will be disabled.");
-}
-
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
-
-const FROM_EMAIL = process.env.FROM_EMAIL || "Dousell Immo <noreply@dousell.immo>";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "barrymohamadou98@gmail.com";
 
 type SendEmailOptions = {
   to: string | string[];
   subject: string;
   react: React.ReactElement;
-  from?: string;
+  from?: string; // Conservé pour compatibilité mais non utilisé (géré par Edge Function)
+  fromName?: string;
+  user_id?: string | null;
 };
 
 /**
- * Fonction générique pour envoyer des emails via Resend
+ * Fonction générique pour envoyer des emails via l'Edge Function Supabase
+ * Cette fonction utilise send-email-resend qui gère l'envoi via Resend et le logging
  */
 export async function sendEmail({
   to,
   subject,
   react,
-  from = FROM_EMAIL,
+  fromName = "Dousell Immo",
+  user_id = null,
 }: SendEmailOptions) {
-  if (!resend) {
-    console.warn("📧 Email not sent (Resend not configured):", { to, subject });
-    return { success: false, error: "Resend not configured" };
-  }
-
-  try {
-    const { data, error } = await resend.emails.send({
-      from,
-      to: Array.isArray(to) ? to : [to],
-      subject,
-      react,
-    });
-
-    if (error) {
-      console.error("Error sending email:", error);
-      return { success: false, error };
-    }
-
-    console.log("✅ Email sent successfully:", data);
-    return { success: true, data };
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return { success: false, error };
-  }
+  return sendEmailViaSupabase({
+    to,
+    subject,
+    react,
+    fromName,
+    user_id,
+  });
 }
 
 /**

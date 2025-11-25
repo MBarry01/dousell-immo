@@ -48,7 +48,14 @@ export async function getLeads(): Promise<Lead[]> {
   }
 
   if (error) {
-    console.error("Error fetching leads:", error);
+    console.error("❌ Error fetching leads:", {
+      errorObject: error,
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+      fullError: JSON.stringify(error),
+    });
     return [];
   }
 

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Générateur d'icônes PWA - Dousell Immo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #05080c 0%, #0a0f14 100%);
+      color: #fff;
+      min-height: 100vh;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+    
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .instructions {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #3b82f6;
+    }
+    
+    .instructions h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: #3b82f6;
+    }
+    
+    .instructions ol {
+      margin-left: 1.5rem;
+      line-height: 1.8;
+    }
+    
+    .instructions li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #e0e0e0;
+    }
+    
+    input[type="file"] {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px dashed rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    input[type="file"]:hover {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      margin: 0.5rem 0;
+    }
+    
+    .slider-value {
+      display: inline-block;
+      margin-left: 1rem;
+      font-weight: bold;
+      color: #3b82f6;
+    }
+    
+    .preview-container {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+    
+    .preview-box {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .preview-box h3 {
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: #a0a0a0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    canvas {
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      background: #05080c;
+      display: block;
+    }
+    
+    .canvas-512 {
+      width: 256px;
+      height: 256px;
+    }
+    
+    .canvas-192 {
+      width: 192px;
+      height: 192px;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+    
+    button {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .status {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    .status.success {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .status.error {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .status.info {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Générateur d'icônes PWA</h1>
+    
+    <div class="instructions">
+      <h2>📋 Instructions</h2>
+      <ol>
+        <li>Chargez votre logo (PNG, SVG, JPG) - il sera automatiquement redimensionné</li>
+        <li>Ajustez le padding (marge autour du logo) avec le slider</li>
+        <li>Vérifiez l'aperçu des deux tailles (192x192 et 512x512)</li>
+        <li>Téléchargez les icônes générées</li>
+        <li>Remplacez les fichiers dans <code>public/icons/</code></li>
+      </ol>
+    </div>
+    
+    <div class="input-group">
+      <label for="logoInput">📁 Charger votre logo</label>
+      <input type="file" id="logoInput" accept="image/*">
+    </div>
+    
+    <div class="input-group">
+      <label>
+        📏 Padding (marge autour du logo) : 
+        <span class="slider-value" id="paddingValue">15%</span>
+      </label>
+      <input type="range" id="paddingSlider" min="5" max="30" value="15" step="1">
+    </div>
+    
+    <div class="preview-container">
+      <div class="preview-box">
+        <h3>512x512 (Grande icône)</h3>
+        <canvas id="canvas512" class="canvas-512" width="512" height="512"></canvas>
+      </div>
+      
+      <div class="preview-box">
+        <h3>192x192 (Petite icône)</h3>
+        <canvas id="canvas192" class="canvas-192" width="192" height="192"></canvas>
+      </div>
+    </div>
+    
+    <div class="buttons">
+      <button class="btn-primary" id="download512">⬇️ Télécharger 512x512</button>
+      <button class="btn-primary" id="download192">⬇️ Télécharger 192x192</button>
+      <button class="btn-secondary" id="downloadBoth">📦 Télécharger les deux</button>
+    </div>
+    
+    <div id="status"></div>
+  </div>
+
+  <script>
+    const BACKGROUND_COLOR = '#05080c'; // Noir Dousell
+    
+    const logoInput = document.getElementById('logoInput');
+    const paddingSlider = document.getElementById('paddingSlider');
+    const paddingValue = document.getElementById('paddingValue');
+    const canvas512 = document.getElementById('canvas512');
+    const canvas192 = document.getElementById('canvas192');
+    const download512Btn = document.getElementById('download512');
+    const download192Btn = document.getElementById('download192');
+    const downloadBothBtn = document.getElementById('downloadBoth');
+    const statusDiv = document.getElementById('status');
+    
+    let currentImage = null;
+    
+    // Mise à jour de l'affichage du padding
+    paddingSlider.addEventListener('input', (e) => {
+      const value = e.target.value;
+      paddingValue.textContent = value + '%';
+      if (currentImage) {
+        drawIcons(currentImage);
+      }
+    });
+    
+    // Chargement de l'image
+    logoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          currentImage = img;
+          drawIcons(img);
+          showStatus('✅ Logo chargé avec succès !', 'success');
+        };
+        img.onerror = () => {
+          showStatus('❌ Erreur lors du chargement de l\'image', 'error');
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    // Fonction pour dessiner les icônes
+    function drawIcons(img) {
+      const padding = parseInt(paddingSlider.value) / 100;
+      
+      // Dessiner 512x512
+      drawIcon(canvas512, img, 512, padding);
+      
+      // Dessiner 192x192
+      drawIcon(canvas192, img, 192, padding);
+    }
+    
+    // Fonction pour dessiner une icône
+    function drawIcon(canvas, img, size, padding) {
+      const ctx = canvas.getContext('2d');
+      
+      // Remplir le fond avec la couleur noire
+      ctx.fillStyle = BACKGROUND_COLOR;
+      ctx.fillRect(0, 0, size, size);
+      
+      // Calculer les dimensions du logo avec padding
+      const paddingPixels = size * padding;
+      const logoSize = size - (paddingPixels * 2);
+      const x = paddingPixels;
+      const y = paddingPixels;
+      
+      // Dessiner le logo centré
+      ctx.drawImage(img, x, y, logoSize, logoSize);
+    }
+    
+    // Fonction pour télécharger une icône
+    function downloadIcon(canvas, filename) {
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showStatus(`✅ ${filename} téléchargé !`, 'success');
+      }, 'image/png');
+    }
+    
+    // Événements de téléchargement
+    download512Btn.addEventListener('click', () => {
+      if (!currentImage) {
+        showStatus('⚠️ Veuillez d\'abord charger un logo', 'error');
+        return;
+      }
+      downloadIcon(canvas512, 'icon-512.png');
+    });
+    
+    download192Btn.addEventListener('click', () => {
+      if (!currentImage) {
+        showStatus('⚠️ Veuillez d\'abord charger un logo', 'error');
+        return;
+      }
+      downloadIcon(canvas192, 'icon-192.png');
+    });
+    
+    downloadBothBtn.addEventListener('click', () => {
+      if (!currentImage) {
+        showStatus('⚠️ Veuillez d\'abord charger un logo', 'error');
+        return;
+      }
+      downloadIcon(canvas512, 'icon-512.png');
+      setTimeout(() => {
+        downloadIcon(canvas192, 'icon-192.png');
+      }, 500);
+      showStatus('✅ Les deux icônes sont en cours de téléchargement...', 'info');
+    });
+    
+    // Fonction pour afficher un message de statut
+    function showStatus(message, type) {
+      statusDiv.textContent = message;
+      statusDiv.className = `status ${type}`;
+      setTimeout(() => {
+        statusDiv.textContent = '';
+        statusDiv.className = '';
+      }, 5000);
+    }
+    
+    // Essayer de charger automatiquement le logo depuis /icons/icon-512.png ou /Logo.svg
+    window.addEventListener('load', () => {
+      const tryLoadLogo = (url) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          currentImage = img;
+          drawIcons(img);
+          showStatus('✅ Logo chargé automatiquement depuis ' + url, 'success');
+        };
+        img.onerror = () => {
+          // Essayer le suivant
+          if (url.includes('icon-512')) {
+            tryLoadLogo('/Logo.svg');
+          } else if (url.includes('Logo.svg')) {
+            tryLoadLogo('/Logo.png');
+          }
+        };
+        img.src = url;
+      };
+      
+      // Essayer de charger icon-512.png d'abord
+      tryLoadLogo('/icons/icon-512.png');
+    });
+  </script>
+</body>
+</html>
+

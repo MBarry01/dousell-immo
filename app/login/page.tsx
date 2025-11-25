@@ -8,11 +8,13 @@ import { Mail, Lock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Captcha } from "@/components/ui/captcha";
 import { login, signInWithGoogle } from "@/app/auth/actions";
 
 export default function LoginPage() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const handleGoogleSignIn = () => {
     startTransition(async () => {
@@ -105,13 +107,30 @@ export default function LoginPage() {
           <form
             action={async (formData: FormData) => {
               setError(null);
+              
+              if (!captchaToken) {
+                toast.error("Veuillez compléter la vérification anti-robot");
+                return;
+              }
+              
+              formData.append("turnstileToken", captchaToken);
+              
               startTransition(async () => {
                 const result = await login(formData);
                 if (result?.error) {
                   setError(result.error);
-                  toast.error("Connexion impossible", {
-                    description: result.error,
-                  });
+                  // Afficher un toast pour les erreurs importantes
+                  if (result.error.includes("Trop de tentatives")) {
+                    toast.error("Trop de tentatives", {
+                      description: "Pour votre sécurité, veuillez attendre 5 minutes avant de réessayer.",
+                      duration: 8000,
+                    });
+                  } else {
+                    toast.error("Connexion impossible", {
+                      description: result.error,
+                      duration: 5000,
+                    });
+                  }
                 }
               });
             }}
@@ -157,9 +176,24 @@ export default function LoginPage() {
               </div>
             </div>
 
+            <Captcha
+              onVerify={(token) => {
+                setCaptchaToken(token);
+              }}
+              onExpire={() => {
+                setCaptchaToken(null);
+                // Le widget se réinitialise automatiquement
+              }}
+              onError={() => {
+                setCaptchaToken(null);
+              }}
+              theme="auto"
+              className="my-4"
+            />
+
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || !captchaToken}
               className="mt-6 h-12 w-full rounded-xl bg-white text-black hover:bg-gray-100 disabled:opacity-50"
             >
               {isPending ? "Connexion..." : "Se connecter"}

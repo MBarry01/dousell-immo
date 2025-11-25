@@ -11,6 +11,7 @@ import { createVisitRequest } from "@/app/planifier-visite/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Captcha } from "@/components/ui/captcha";
 import {
   visitRequestSchema,
   type VisitRequestFormValues,
@@ -24,6 +25,7 @@ const availabilityLabels: Record<VisitRequestFormValues["availability"], string>
 
 export default function PlanifierVisitePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const form = useForm<VisitRequestFormValues>({
     resolver: zodResolver(visitRequestSchema),
     defaultValues: {
@@ -37,9 +39,14 @@ export default function PlanifierVisitePage() {
   });
 
   const onSubmit = async (values: VisitRequestFormValues) => {
+    if (!captchaToken) {
+      toast.error("Veuillez compléter la vérification anti-robot");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
-      const result = await createVisitRequest(values);
+      const result = await createVisitRequest(values, captchaToken);
       if (!result.success) {
         toast.error(result.error || "Impossible d'envoyer la demande.");
         return;
@@ -48,6 +55,7 @@ export default function PlanifierVisitePage() {
         description: `${values.fullName}, un conseiller vous rappelle sous 30 min.`,
       });
       form.reset();
+      setCaptchaToken(null);
     } catch (error) {
       console.error(error);
       toast.error("Une erreur est survenue, merci de réessayer.");
@@ -165,11 +173,26 @@ export default function PlanifierVisitePage() {
             )}
           </div>
 
+          <Captcha
+            onVerify={(token) => {
+              setCaptchaToken(token);
+            }}
+            onExpire={() => {
+              setCaptchaToken(null);
+              // Le widget se réinitialise automatiquement
+            }}
+            onError={() => {
+              setCaptchaToken(null);
+            }}
+            theme="auto"
+            className="my-4"
+          />
+
           <Button
             type="submit"
             size="lg"
-            disabled={isSubmitting}
-            className="w-full rounded-full bg-white text-black hover:bg-white/90"
+            disabled={isSubmitting || !captchaToken}
+            className="w-full rounded-full bg-white text-black hover:bg-white/90 disabled:opacity-50"
           >
             {isSubmitting ? "Envoi en cours..." : "Envoyer la demande"}
           </Button>

@@ -25,7 +25,24 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=votre-anon-key
    - ✅ **Confirm email** : Désactivé (pour le développement) ou Activé (pour la production)
    - ✅ **Secure email change** : Activé
 
-### 2. Configurer les Email Templates (Optionnel)
+### 2. Configurer SMTP pour les emails Auth (IMPORTANT)
+
+⚠️ **Nécessaire pour que les emails de confirmation, magic links et reset password fonctionnent.**
+
+1. Allez dans **Project Settings** → **Auth** → **SMTP Settings**
+2. Activez **"Enable Custom SMTP"**
+3. Configurez avec Resend :
+   - **Host**: `smtp.resend.com`
+   - **Port**: `465` (SSL) ou `587` (TLS)
+   - **Username**: `resend`
+   - **Password**: Votre clé API Resend (commence par `re_`)
+   - **Sender email**: `onboarding@resend.dev` (ou votre domaine vérifié)
+   - **Sender name**: `Dousell Immo`
+4. Cliquez sur **Save**
+
+**Alternative pour le développement** : Désactivez "Confirm email" dans **Authentication** → **Providers** → **Email** pour éviter les emails.
+
+### 3. Configurer les Email Templates (Optionnel)
 
 1. Allez dans **Authentication** → **Email Templates**
 2. Personnalisez les templates si nécessaire
@@ -128,4 +145,17 @@ Si vous obtenez une erreur 400 lors de la connexion/inscription :
 - En production, activez "Confirm email" pour la sécurité
 - Les `user_metadata` (full_name, phone) sont stockés automatiquement lors de l'inscription
 - Le client Supabase utilise un singleton pattern pour éviter les instances multiples
+
+## 🔐 Row Level Security (RLS)
+
+### Table `visit_requests`
+
+**Modèle choisi** : INSERT public, lecture admin seulement
+
+- ✅ **Insertion** : Tout le monde (anonyme ou connecté) peut soumettre une demande via `/planifier-visite`
+- ✅ **Lecture** : Seuls les admins, modérateurs et superadmins peuvent voir les demandes dans `/admin/leads`
+- ✅ **Modification/Suppression** : Seuls les admins, modérateurs et superadmins
+- 🛡️ **Protection** : Captcha Turnstile sur le formulaire pour éviter le spam
+
+**Migration** : `supabase/migrations/20250124_visit_requests_rls.sql`
 

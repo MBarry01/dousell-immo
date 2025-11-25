@@ -61,6 +61,7 @@ export async function moderateProperty(
           await sendEmail({
             to: owner.user.email,
             subject: `🎉 Votre annonce "${property.title}" est en ligne !`,
+            user_id: property.owner_id,
             react: ListingApprovedEmail({
               propertyTitle: property.title,
               propertyUrl,
@@ -138,6 +139,7 @@ export async function moderatePropertyWithReason(
         await sendEmail({
           to: owner.user.email,
           subject: `Votre annonce "${property.title}" a été refusée`,
+          user_id: property.owner_id,
           react: ListingRejectedEmail({
             propertyTitle: property.title,
             rejectionReason,

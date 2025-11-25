@@ -102,23 +102,44 @@ export default function ModerationPage() {
     if (!user) return;
 
     setLoading(true);
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("properties")
-      .select("*")
-      .eq("is_agency_listing", false)
-      .in("validation_status", ["pending", "payment_pending"])
-      .order("created_at", { ascending: true });
+    try {
+      const supabase = createClient();
+      
+      console.log("🔍 Fetching properties for moderation...");
+      
+      const { data, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("is_agency_listing", false)
+        .in("validation_status", ["pending", "payment_pending"])
+        .order("created_at", { ascending: true });
 
-    if (error) {
-      console.error("Error loading properties for moderation:", error);
-      toast.error("Erreur lors du chargement des annonces");
+      if (error) {
+        console.error("❌ Error loading properties for moderation:", {
+          errorObject: error,
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          stringified: JSON.stringify(error, null, 2)
+        });
+        toast.error(`Erreur: ${error.message || "Impossible de charger les annonces"}`);
+        setLoading(false);
+        return;
+      }
+
+      console.log("✅ Properties loaded successfully:", data?.length || 0);
+      setProperties((data as PropertyToModerate[]) || []);
       setLoading(false);
-      return;
+    } catch (err) {
+      console.error("❌ Unexpected error loading properties:", {
+        error: err,
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined
+      });
+      toast.error("Erreur inattendue lors du chargement");
+      setLoading(false);
     }
-
-    setProperties((data as PropertyToModerate[]) || []);
-    setLoading(false);
   }, [user]);
 
   useEffect(() => {

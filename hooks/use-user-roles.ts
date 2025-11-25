@@ -46,7 +46,6 @@ export function useUserRoles(userId: string | null) {
       if (!rpcError && rpcData && Array.isArray(rpcData)) {
         // Si la fonction RPC existe et retourne des données (même si vide)
         const userRoles = rpcData as UserRole[];
-        console.log("✅ useUserRoles - Rôles récupérés via RPC:", userId, userRoles);
         setRoles(userRoles);
         setError(null);
         setLoading(false);
@@ -151,7 +150,7 @@ export function useUserRoles(userId: string | null) {
           .subscribe((status) => {
             if (status === "SUBSCRIBED") {
               subscribed = true;
-              console.log("✅ Abonné aux changements de rôles");
+              // Abonnement réussi - pas besoin de logger
             } else if (status === "CHANNEL_ERROR" && !subscribed) {
               // Ne logger l'erreur que si on n'a jamais réussi à s'abonner
               // (évite les faux positifs lors des états transitoires)

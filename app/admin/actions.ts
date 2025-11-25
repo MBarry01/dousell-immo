@@ -140,7 +140,16 @@ export async function getRecentProperties(limit: number = 5) {
       .order("created_at", { ascending: false })
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      console.error("❌ Error in getRecentProperties:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        fullError: JSON.stringify(error, null, 2)
+      });
+      throw error;
+    }
 
     return (
       data?.map((p) => ({
@@ -154,7 +163,14 @@ export async function getRecentProperties(limit: number = 5) {
       })) ?? []
     );
   } catch (error) {
-    console.error("Error fetching recent properties:", error);
+    console.error("❌ Unexpected error in getRecentProperties:", {
+      error,
+      message: error instanceof Error ? error.message : String(error),
+      code: (error as any)?.code,
+      details: (error as any)?.details,
+      hint: (error as any)?.hint,
+      fullError: error ? JSON.stringify(error, null, 2) : null
+    });
     return [];
   }
 }
@@ -233,7 +249,14 @@ export async function getChartData(): Promise<ChartDataPoint[]> {
       .gte("created_at", sixMonthsAgo.toISOString());
 
     if (leadsError) {
-      console.error("Error fetching leads for chart:", leadsError);
+      console.error("❌ Error fetching leads for chart:", {
+        error: leadsError,
+        message: leadsError.message,
+        code: leadsError.code,
+        details: leadsError.details,
+        hint: leadsError.hint,
+        fullError: JSON.stringify(leadsError, null, 2)
+      });
       return getDefaultChartData();
     }
 
@@ -245,7 +268,13 @@ export async function getChartData(): Promise<ChartDataPoint[]> {
       .gte("created_at", sixMonthsAgo.toISOString());
 
     if (propertiesError) {
-      console.error("Error fetching properties for chart:", propertiesError);
+      console.error("Error fetching properties for chart:", {
+        error: propertiesError,
+        message: propertiesError.message,
+        code: propertiesError.code,
+        details: propertiesError.details,
+        hint: propertiesError.hint,
+      });
     }
 
     // Grouper par mois
@@ -286,7 +315,13 @@ export async function getChartData(): Promise<ChartDataPoint[]> {
 
     return chartData;
   } catch (error) {
-    console.error("Error in getChartData:", error);
+    console.error("Error in getChartData:", {
+      error,
+      message: error instanceof Error ? error.message : String(error),
+      code: (error as any)?.code,
+      details: (error as any)?.details,
+      hint: (error as any)?.hint,
+    });
     return getDefaultChartData();
   }
 }

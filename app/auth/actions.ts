@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { verifyTurnstileToken } from "@/lib/turnstile";
+import { checkPasswordHIBPServer } from "@/app/actions/check-hibp";
 
 export async function signup(formData: FormData) {
   const supabase = await createClient();
@@ -11,6 +13,7 @@ export async function signup(formData: FormData) {
   const password = formData.get("password") as string;
   const fullName = formData.get("fullName") as string;
   const phone = formData.get("phone") as string;
+  const turnstileToken = formData.get("turnstileToken") as string;
 
   // Validation des champs
   if (!email || !password || !fullName || !phone) {
@@ -34,11 +37,25 @@ export async function signup(formData: FormData) {
     };
   }
 
-  // Validation du téléphone (9 chiffres)
-  const phoneDigits = phone.replace(/\D/g, "");
-  if (phoneDigits.length !== 9) {
+  // Vérification HIBP (côté serveur, pas de CORS)
+  const hibpResult = await checkPasswordHIBPServer(password);
+  if (!hibpResult.success) {
+    // Soft-fail : log l'erreur mais continue l'inscription
+    console.warn("HIBP check failed:", hibpResult.error);
+    // On continue quand même l'inscription pour ne pas bloquer l'utilisateur
+  } else if (hibpResult.breached) {
+    // Hard-fail : mot de passe compromis, bloquer l'inscription
     return {
-      error: "Le numéro de téléphone doit contenir 9 chiffres",
+      error: hibpResult.error || "Ce mot de passe a été compromis. Choisissez-en un autre plus sécurisé.",
+    };
+  }
+
+  // Validation du téléphone (format international accepté)
+  const phoneDigits = phone.replace(/\D/g, "");
+  // Accepter les numéros internationaux (au moins 8 chiffres, max 15 selon E.164)
+  if (phoneDigits.length < 8 || phoneDigits.length > 15) {
+    return {
+      error: "Numéro de téléphone invalide",
     };
   }
 
@@ -46,6 +63,20 @@ export async function signup(formData: FormData) {
   if (fullName.trim().length < 2) {
     return {
       error: "Le nom complet doit contenir au moins 2 caractères",
+    };
+  }
+
+  // Vérification Turnstile
+  if (!turnstileToken) {
+    return {
+      error: "Vérification anti-robot requise. Veuillez réessayer.",
+    };
+  }
+
+  const verification = await verifyTurnstileToken(turnstileToken);
+  if (!verification.success) {
+    return {
+      error: verification.error || "Vérification anti-robot échouée. Veuillez réessayer.",
     };
   }
 
@@ -66,7 +97,14 @@ export async function signup(formData: FormData) {
     });
 
     if (error) {
-      console.error("Signup error:", error);
+      console.error("❌ Signup error détaillé:", {
+        message: error.message,
+        code: error.code,
+        status: error.status,
+        name: error.name,
+        fullError: JSON.stringify(error, null, 2),
+      });
+      
       let errorMessage = error.message;
       
       // Messages d'erreur plus explicites et en français
@@ -78,11 +116,26 @@ export async function signup(formData: FormData) {
         errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
       } else if (error.message.includes("Invalid email") || error.message.includes("invalid")) {
         errorMessage = "Adresse email invalide";
-      } else if (error.message.includes("rate limit") || error.message.includes("too many")) {
-        errorMessage = "Trop de tentatives. Veuillez réessayer dans quelques minutes.";
+      } else if (
+        error.message.includes("rate limit") || 
+        error.message.includes("too many") ||
+        error.message.includes("rate_limit_exceeded") ||
+        error.code === "429"
+      ) {
+        errorMessage = "Trop de tentatives de connexion. Pour votre sécurité, veuillez attendre 5 minutes avant de réessayer.";
+      } else if (error.message.includes("signup_disabled") || error.message.includes("signup disabled")) {
+        errorMessage = "Les inscriptions sont temporairement désactivées. Veuillez réessayer plus tard.";
+      } else if (error.message.includes("Email rate limit exceeded")) {
+        errorMessage = "Trop d'emails envoyés. Veuillez attendre quelques minutes avant de réessayer.";
+      } else if (error.message.includes("Failed to send")) {
+        errorMessage = "Erreur d'envoi d'email. Veuillez vérifier votre adresse email ou réessayer plus tard.";
       } else {
-        // Message générique pour les autres erreurs
-        errorMessage = "Erreur lors de la création du compte. Veuillez réessayer.";
+        // En développement, afficher le message d'erreur complet pour le debugging
+        if (process.env.NODE_ENV === "development") {
+          errorMessage = `Erreur: ${error.message} (Code: ${error.code || "N/A"})`;
+        } else {
+          errorMessage = "Erreur lors de la création du compte. Veuillez réessayer ou contactez le support.";
+        }
       }
       
       return {
@@ -134,15 +187,60 @@ export async function signup(formData: FormData) {
   }
 }
 
+/**
+ * Renvoyer l'email de confirmation
+ */
+export async function resendConfirmationEmail(email: string) {
+  const supabase = await createClient();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const emailRedirectTo = `${appUrl}/auth/callback?next=/`;
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: email.trim().toLowerCase(),
+    options: {
+      emailRedirectTo,
+    },
+  });
+
+  if (error) {
+    console.error("Resend confirmation email error:", error);
+    return {
+      success: false,
+      error: error.message || "Erreur lors de l'envoi de l'email de confirmation",
+    };
+  }
+
+  return {
+    success: true,
+    message: "Email de confirmation renvoyé ! Vérifiez votre boîte de réception.",
+  };
+}
+
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const turnstileToken = formData.get("turnstileToken") as string;
 
   if (!email || !password) {
     return {
       error: "Email et mot de passe requis",
+    };
+  }
+
+  // Vérification Turnstile
+  if (!turnstileToken) {
+    return {
+      error: "Vérification anti-robot requise. Veuillez réessayer.",
+    };
+  }
+
+  const verification = await verifyTurnstileToken(turnstileToken);
+  if (!verification.success) {
+    return {
+      error: verification.error || "Vérification anti-robot échouée. Veuillez réessayer.",
     };
   }
 
@@ -159,6 +257,13 @@ export async function login(formData: FormData) {
       errorMessage = "Veuillez confirmer votre email avant de vous connecter";
     } else if (error.message.includes("Invalid login credentials")) {
       errorMessage = "Email ou mot de passe incorrect";
+    } else if (
+      error.message.includes("rate limit") || 
+      error.message.includes("too many") ||
+      error.message.includes("rate_limit_exceeded") ||
+      error.code === "429"
+    ) {
+      errorMessage = "Trop de tentatives. Pour votre sécurité, veuillez attendre 5 minutes avant de réessayer.";
     }
 
     return {

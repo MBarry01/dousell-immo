@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import * as RPNInput from "react-phone-number-input";
 
 import {
   Dialog,
@@ -19,7 +20,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 
 export function PhoneMissingDialog() {
   const { user, loading } = useAuth();
-  const [phoneValue, setPhoneValue] = useState<string | undefined>("");
+  const [phoneValue, setPhoneValue] = useState<RPNInput.Value | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -39,7 +40,7 @@ export function PhoneMissingDialog() {
   }, [user, loading]);
 
   const handleSubmit = async () => {
-    // Validation avec react-phone-number-input
+    // Validation
     if (!phoneValue || !isValidPhoneNumber(phoneValue)) {
       toast.error("Veuillez entrer un numéro de téléphone valide");
       return;
@@ -73,7 +74,7 @@ export function PhoneMissingDialog() {
         description: "Votre profil est maintenant complet.",
       });
       setIsOpen(false);
-      setPhoneValue("");
+      setPhoneValue(undefined);
     } catch (err) {
       console.error("Unexpected error:", err);
       toast.error("Une erreur inattendue s'est produite");
@@ -114,10 +115,11 @@ export function PhoneMissingDialog() {
             <PhoneInput
               id="phone-dialog"
               value={phoneValue}
-              onChange={(value) => setPhoneValue(value || "")}
+              onChange={(value) => setPhoneValue(value)}
               defaultCountry="SN"
               international
               disabled={isSubmitting}
+              placeholder="Entrez votre numéro"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && phoneValue && isValidPhoneNumber(phoneValue)) {
                   handleSubmit();

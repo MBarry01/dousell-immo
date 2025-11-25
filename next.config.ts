@@ -42,6 +42,21 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
           },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              // En développement, Next.js nécessite 'unsafe-eval' pour le hot reload
+              // En production, cette directive n'est pas nécessaire
+              `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ""} https://challenges.cloudflare.com https://*.cloudflare.com https://www.googletagmanager.com https://va.vercel-scripts.com`,
+              "style-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+              "img-src 'self' data: https: blob:",
+              "font-src 'self' data:",
+              "connect-src 'self' https://*.supabase.co https://*.supabase.in https://challenges.cloudflare.com https://*.google-analytics.com https://va.vercel-scripts.com wss://*.supabase.co",
+              "frame-src 'self' https://challenges.cloudflare.com",
+              "worker-src 'self' blob:",
+            ].join('; '),
+          },
         ],
       },
     ];
