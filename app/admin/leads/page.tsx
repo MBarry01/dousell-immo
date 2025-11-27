@@ -6,6 +6,7 @@ import { requireAnyRole } from "@/lib/permissions";
 import { getLeads, updateLeadStatus, type Lead, type LeadStatus } from "./actions";
 import { Button } from "@/components/ui/button";
 import { LeadStatusSelect } from "./lead-status-select";
+import { LeadMessageDialog } from "./lead-message-dialog";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -150,10 +151,13 @@ export default async function AdminLeadsPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-4 max-w-md">
-                      <p className="line-clamp-2 text-white/70 text-xs">
-                        {lead.message}
-                      </p>
+                    <td className="px-4 py-4 w-[140px] max-w-[140px]">
+                      <LeadMessageDialog
+                        fullName={lead.full_name}
+                        message={lead.message}
+                        projectType={lead.project_type}
+                        availability={availabilityLabels[lead.availability] || lead.availability}
+                      />
                     </td>
                     <td className="px-4 py-4">
                       <LeadStatusSelect

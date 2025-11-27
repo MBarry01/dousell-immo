@@ -53,5 +53,6 @@ export type Property = {
   };
   service_type?: "mandat_confort" | "boost_visibilite";
   contact_phone?: string;
+  view_count?: number; // Compteur incrémental des vues (optimisé)
 };
 

@@ -19,6 +19,10 @@ CREATE INDEX IF NOT EXISTS idx_property_stats_property_action ON property_stats(
 -- RLS (Row Level Security) : Permettre l'insertion pour tous (anonymes et authentifiés)
 ALTER TABLE property_stats ENABLE ROW LEVEL SECURITY;
 
+-- Nettoyage des politiques existantes pour éviter les conflits
+DROP POLICY IF EXISTS "Allow insert for all" ON property_stats;
+DROP POLICY IF EXISTS "Allow read for admins" ON property_stats;
+
 -- Policy : Permettre l'insertion pour tous
 CREATE POLICY "Allow insert for all" ON property_stats
   FOR INSERT
@@ -33,7 +37,7 @@ CREATE POLICY "Allow read for admins" ON property_stats
     EXISTS (
       SELECT 1 FROM user_roles
       WHERE user_roles.user_id = auth.uid()
-      AND user_roles.role IN ('admin', 'moderator')
+      AND user_roles.role IN ('admin', 'moderator', 'superadmin', 'agent')
     )
   );
 

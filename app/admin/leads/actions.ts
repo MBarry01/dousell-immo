@@ -15,9 +15,8 @@ export interface Lead {
   message: string;
   status: LeadStatus;
   property_id: string | null;
-  source: string | null;
+  // source: string | null; // Colonne inexistante
   created_at: string;
-  updated_at: string;
 }
 
 /**
@@ -28,7 +27,7 @@ export async function getLeads(): Promise<Lead[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from("leads")
+    .from("visit_requests")
     .select("*")
     .order("created_at", { ascending: false }); // Plus récents en premier
 
@@ -73,8 +72,8 @@ export async function updateLeadStatus(
   const supabase = await createClient();
 
   const { error } = await supabase
-    .from("leads")
-    .update({ status, updated_at: new Date().toISOString() })
+    .from("visit_requests")
+    .update({ status })
     .eq("id", leadId);
 
   if (error) {

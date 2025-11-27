@@ -17,6 +17,16 @@ export type RecentActivity = {
   date: Date;
 };
 
+export type RecentProperty = {
+  id: string;
+  title: string;
+  price: number;
+  status: string;
+  image: string | null;
+  createdAt: Date;
+  validationStatus: string;
+};
+
 export type ChartDataPoint = {
   month: string;
   visites: number;
@@ -44,7 +54,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const { count: leadsCount } = await supabase
-      .from("leads")
+      .from("visit_requests")
       .select("*", { count: "exact", head: true })
       .gte("created_at", thirtyDaysAgo.toISOString());
 
@@ -205,7 +215,7 @@ export async function getRecentActivity(limit: number = 5): Promise<RecentActivi
 
     // Récupérer les leads récents
     const { data: recentLeads } = await supabase
-      .from("leads")
+      .from("visit_requests")
       .select("id, full_name, created_at")
       .order("created_at", { ascending: false })
       .limit(2);
@@ -244,7 +254,7 @@ export async function getChartData(): Promise<ChartDataPoint[]> {
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     
     const { data: leads, error: leadsError } = await supabase
-      .from("leads")
+      .from("visit_requests")
       .select("created_at")
       .gte("created_at", sixMonthsAgo.toISOString());
 
@@ -338,5 +348,337 @@ function getDefaultChartData(): ChartDataPoint[] {
     { month: "Mai", visites: 0, leads: 0 },
     { month: "Juin", visites: 0, leads: 0 },
   ];
+}
+
+export type PerformanceStats = {
+  totals: {
+    views: number;
+    clicks: number;
+    whatsappCount: number;
+    phoneCount: number;
+  };
+  chart: {
+    date: string;
+    views: number;
+    clicks: number;
+  }[];
+  topProperties: {
+    id: string;
+    title: string;
+    image: string | null;
+    price: number;
+    views: number;
+    clicks: number;
+  }[];
+};
+
+export type DashboardChartDataPoint = {
+  date: string;
+  views: number;
+  clicks: number;
+};
+
+/**
+ * Récupère les statistiques de performance
+ * @param days - Nombre de jours à récupérer (par défaut 30)
+ */
+export async function getPerformanceStats(days: number = 30): Promise<PerformanceStats | null> {
+  await requireAnyRole();
+  const supabase = await createClient();
+
+  try {
+    // 1. Calculer les vues totales depuis la colonne view_count (optimisé)
+    const { data: properties, error: propertiesError } = await supabase
+      .from("properties")
+      .select("view_count")
+      .eq("validation_status", "approved");
+
+    if (propertiesError) {
+      console.error("Error fetching properties view_count:", propertiesError);
+      return null;
+    }
+
+    const totalViews = properties.reduce((sum, p) => sum + (p.view_count || 0), 0);
+
+    // 2. Récupérer les clics selon la période demandée (historique complet conservé)
+    const clicksPeriodStart = new Date();
+    clicksPeriodStart.setDate(clicksPeriodStart.getDate() - days);
+
+    const { data: stats, error: statsError } = await supabase
+      .from("property_stats")
+      .select("property_id, action_type, created_at")
+      .in("action_type", ["whatsapp_click", "phone_click"])
+      .gte("created_at", clicksPeriodStart.toISOString());
+
+    if (statsError) {
+      console.error("Error fetching performance stats:", statsError);
+      return null;
+    }
+
+    // 3. Calculer les totaux de clics avec détail par type
+    const whatsappCount = stats.filter((s) => s.action_type === "whatsapp_click").length;
+    const phoneCount = stats.filter((s) => s.action_type === "phone_click").length;
+    const totalClicks = stats.length;
+
+    // 4. Récupérer les données réelles du graphique groupées par jour
+    // Récupérer directement depuis property_stats pour avoir les vraies données
+    const periodStart = new Date();
+    periodStart.setDate(periodStart.getDate() - days);
+    periodStart.setHours(0, 0, 0, 0);
+
+    const { data: allStats, error: allStatsError } = await supabase
+      .from("property_stats")
+      .select("action_type, created_at")
+      .gte("created_at", periodStart.toISOString())
+      .order("created_at", { ascending: true });
+
+    if (allStatsError) {
+      console.error("Error fetching all stats for chart:", allStatsError);
+    }
+
+    // Grouper par jour (ou par semaine si days > 30)
+    const isWeekly = days > 30;
+    const groupedStats = new Map<string, { views: number; clicks: number }>();
+
+    // Initialiser tous les jours/semaines de la période
+    if (isWeekly) {
+      const weeks = Math.ceil(days / 7);
+      for (let i = weeks - 1; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - (i * 7));
+        date.setHours(0, 0, 0, 0);
+        // Calculer le début de la semaine (lundi)
+        const dayOfWeek = date.getDay();
+        const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+        date.setDate(diff);
+        const weekKey = date.toISOString().split("T")[0];
+        groupedStats.set(weekKey, { views: 0, clicks: 0 });
+      }
+    } else {
+      for (let i = days - 1; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        date.setHours(0, 0, 0, 0);
+        const dateKey = date.toISOString().split("T")[0];
+        groupedStats.set(dateKey, { views: 0, clicks: 0 });
+      }
+    }
+
+    // Compter les vues et clics
+    if (allStats) {
+      allStats.forEach((stat) => {
+        const statDate = new Date(stat.created_at);
+        statDate.setHours(0, 0, 0, 0);
+        
+        let groupKey: string;
+        if (isWeekly) {
+          // Calculer le début de la semaine
+          const dayOfWeek = statDate.getDay();
+          const diff = statDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+          const weekStart = new Date(statDate);
+          weekStart.setDate(diff);
+          groupKey = weekStart.toISOString().split("T")[0];
+        } else {
+          groupKey = statDate.toISOString().split("T")[0];
+        }
+
+        if (groupedStats.has(groupKey)) {
+          const groupData = groupedStats.get(groupKey)!;
+          if (stat.action_type === "view") {
+            groupData.views += 1;
+          } else if (
+            stat.action_type === "whatsapp_click" ||
+            stat.action_type === "phone_click"
+          ) {
+            groupData.clicks += 1;
+          }
+          groupedStats.set(groupKey, groupData);
+        }
+      });
+    }
+
+    // Convertir en tableau et formater
+    const chartData: { date: string; views: number; clicks: number }[] = Array.from(
+      groupedStats.entries()
+    )
+      .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
+      .map(([dateKey, data]) => {
+        const date = new Date(dateKey + "T00:00:00");
+        let formattedDate: string;
+
+        if (isWeekly) {
+          const weekEnd = new Date(date);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+          formattedDate = `${date.toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "short",
+          })} - ${weekEnd.toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "short",
+          })}`;
+        } else {
+          formattedDate = date.toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "short",
+          });
+        }
+
+        return {
+          date: formattedDate,
+          views: data.views,
+          clicks: data.clicks,
+        };
+      });
+
+    // 5. Top Propriétés (utilise view_count pour les vues, property_stats pour les clics)
+    const propertyClicks = new Map<string, number>();
+
+    // Compter les clics par propriété
+    stats.forEach((s) => {
+      const current = propertyClicks.get(s.property_id) || 0;
+      propertyClicks.set(s.property_id, current + 1);
+    });
+
+    // Récupérer toutes les propriétés approuvées avec leur view_count
+    const { data: allProperties, error: allPropertiesError } = await supabase
+      .from("properties")
+      .select("id, title, images, price, view_count")
+      .eq("validation_status", "approved")
+      .gt("view_count", 0) // Seulement celles qui ont des vues
+      .order("view_count", { ascending: false })
+      .limit(20); // Prendre un peu plus pour filtrer ensuite
+
+    if (allPropertiesError) {
+      console.error("Error fetching properties for top list:", allPropertiesError);
+    }
+
+    // Combiner les vues (depuis view_count) et les clics (depuis property_stats)
+    const combinedStats = (allProperties || []).map((prop) => {
+      const clicks = propertyClicks.get(prop.id) || 0;
+      const views = prop.view_count || 0;
+      return {
+        id: prop.id,
+        views,
+        clicks,
+        total: views + clicks,
+        title: prop.title || "Propriété inconnue",
+        image:
+          Array.isArray(prop.images) && prop.images.length > 0
+            ? prop.images[0]
+            : null,
+        price: prop.price || 0,
+      };
+    });
+
+    // Trier par total (vues + clics) et prendre le top 5
+    const topPropertiesWithDetails = combinedStats
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5);
+
+    return {
+      totals: {
+        views: totalViews,
+        clicks: totalClicks,
+        whatsappCount,
+        phoneCount,
+      },
+      chart: chartData,
+      topProperties: topPropertiesWithDetails,
+    };
+  } catch (error) {
+    console.error("Error in getPerformanceStats:", error);
+    return null;
+  }
+}
+
+/**
+ * Récupère les données réelles du graphique groupées par jour
+ * @param days - Nombre de jours à récupérer (par défaut 30)
+ * @returns Tableau de données groupées par jour avec vues et contacts
+ */
+export async function getDashboardChartData(
+  days: number = 30
+): Promise<DashboardChartDataPoint[]> {
+  await requireAnyRole();
+  const supabase = await createClient();
+
+  try {
+    // Calculer la date de début de la période
+    const periodStart = new Date();
+    periodStart.setDate(periodStart.getDate() - days);
+    periodStart.setHours(0, 0, 0, 0); // Début de la journée
+
+    // Récupérer toutes les entrées de property_stats des 30 derniers jours
+    const { data: stats, error: statsError } = await supabase
+      .from("property_stats")
+      .select("action_type, created_at")
+      .gte("created_at", periodStart.toISOString())
+      .order("created_at", { ascending: true });
+
+    if (statsError) {
+      console.error("Error fetching dashboard chart data:", statsError);
+      return [];
+    }
+
+    // Créer un Map pour grouper par jour
+    // Clé : date au format YYYY-MM-DD, Valeur : { views: number, clicks: number }
+    const dailyStats = new Map<string, { views: number; clicks: number }>();
+
+    // Initialiser tous les jours de la période avec 0
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+      const dateKey = date.toISOString().split("T")[0]; // Format YYYY-MM-DD
+      dailyStats.set(dateKey, { views: 0, clicks: 0 });
+    }
+
+    // Compter les vues et contacts par jour
+    if (stats) {
+      stats.forEach((stat) => {
+        const statDate = new Date(stat.created_at);
+        statDate.setHours(0, 0, 0, 0);
+        const dateKey = statDate.toISOString().split("T")[0];
+
+        // Si la date est dans notre période, incrémenter les compteurs
+        if (dailyStats.has(dateKey)) {
+          const dayData = dailyStats.get(dateKey)!;
+
+          if (stat.action_type === "view") {
+            dayData.views += 1;
+          } else if (
+            stat.action_type === "whatsapp_click" ||
+            stat.action_type === "phone_click"
+          ) {
+            dayData.clicks += 1;
+          }
+
+          dailyStats.set(dateKey, dayData);
+        }
+      });
+    }
+
+    // Convertir le Map en tableau et formater les dates pour Recharts
+    const chartData: DashboardChartDataPoint[] = Array.from(dailyStats.entries())
+      .sort(([dateA], [dateB]) => dateA.localeCompare(dateB)) // Trier par date croissante
+      .map(([dateKey, data]) => {
+        const date = new Date(dateKey + "T00:00:00"); // Ajouter l'heure pour éviter les problèmes de timezone
+        const formattedDate = date.toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "short",
+        });
+
+        return {
+          date: formattedDate,
+          views: data.views,
+          clicks: data.clicks,
+        };
+      });
+
+    return chartData;
+  } catch (error) {
+    console.error("Error in getDashboardChartData:", error);
+    return [];
+  }
 }
 

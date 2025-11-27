@@ -62,6 +62,7 @@ type SupabasePropertyRow = {
   };
   service_type?: "mandat_confort" | "boost_visibilite";
   contact_phone?: string;
+  view_count?: number;
   created_at: string;
   owner?: {
     id: string;
@@ -159,6 +160,7 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
     ) ? proximites as Property["proximites"] : undefined,
     service_type: row.service_type,
     contact_phone: row.contact_phone,
+    view_count: row.view_count,
   };
 };
 
@@ -169,7 +171,7 @@ export const getProperties = async (filters: PropertyFilters = {}) => {
     let query = supabase
       .from("properties")
       .select(
-        "id, title, description, price, category, status, location, specs, details, features, images, agent, created_at, validation_status"
+        "id, title, description, price, category, status, location, specs, details, features, images, agent, created_at, validation_status, view_count"
       );
 
     // Filtrer uniquement les propriétés approuvées et disponibles
@@ -295,24 +297,17 @@ export const getPropertyById = async (id: string) => {
         if (!profileError && profileData) {
           data.owner = profileData;
         } else if (profileError) {
-          // Si la table profiles n'existe pas encore, c'est normal
-          if (profileError.code === "PGRST116" || profileError.message?.includes("does not exist")) {
-            console.warn("getPropertyById: Table profiles n'existe pas encore ou profil non trouvé", {
-              owner_id: data.owner_id,
-              code: profileError.code,
-              message: profileError.message,
-            });
-          } else {
+          // Si la table profiles n'existe pas encore ou le profil n'existe pas, c'est normal
+          // On ne log que les erreurs inattendues (pas les 404 ou "does not exist")
+          if (profileError.code !== "PGRST116" && !profileError.message?.includes("does not exist")) {
+            // Seulement logger les vraies erreurs (permissions, etc.)
             console.warn("getPropertyById: Erreur lors de la récupération du profil", {
               code: profileError.code,
               message: profileError.message,
               owner_id: data.owner_id,
             });
           }
-        } else {
-          console.warn("getPropertyById: Aucun profil trouvé pour owner_id", {
-            owner_id: data.owner_id,
-          });
+          // Sinon, on ignore silencieusement (profil non trouvé ou table inexistante)
         }
       } catch (profileError) {
         console.warn("getPropertyById: Exception lors de la récupération du profil", profileError);
@@ -349,7 +344,7 @@ export const getLatestProperties = async (limit = 6) => {
   try {
     const { data, error } = await supabase
       .from("properties")
-      .select("id, title, description, price, category, status, location, specs, details, features, images, agent, created_at, validation_status")
+      .select("id, title, description, price, category, status, location, specs, details, features, images, agent, created_at, validation_status, view_count")
       .eq("validation_status", "approved")
       .eq("status", "disponible")
       .order("created_at", { ascending: false })
@@ -391,7 +386,7 @@ export const getSimilarProperties = async (
   try {
     const { data, error } = await supabase
       .from("properties")
-      .select("id, title, description, price, category, status, location, specs, details, features, images, agent, created_at, validation_status")
+      .select("id, title, description, price, category, status, location, specs, details, features, images, agent, created_at, validation_status, view_count")
       .eq("validation_status", "approved")
       .eq("status", "disponible")
       .eq("location->>city", city)
@@ -415,6 +410,31 @@ export const deleteProperty = async (id: string) => {
   } catch (error) {
     console.error("deleteProperty error", error);
     return false;
+  }
+};
+
+/**
+ * Incrémente le compteur de vues d'une propriété de manière atomique
+ * Utilise la fonction RPC increment_view_count pour garantir la cohérence
+ * 
+ * @param id - ID de la propriété
+ * @returns Le nouveau total de vues, ou null en cas d'erreur
+ */
+export const incrementView = async (id: string): Promise<number | null> => {
+  try {
+    const { data, error } = await supabase.rpc("increment_view_count", {
+      property_id_param: id,
+    });
+
+    if (error) {
+      console.error("incrementView error:", error);
+      return null;
+    }
+
+    return data as number;
+  } catch (error) {
+    console.error("incrementView unexpected error:", error);
+    return null;
   }
 };
 

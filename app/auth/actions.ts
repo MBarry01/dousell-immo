@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { checkPasswordHIBPServer } from "@/app/actions/check-hibp";
+import { getBaseUrl } from "@/lib/utils";
 
 export async function signup(formData: FormData) {
   const supabase = await createClient();
@@ -80,7 +81,7 @@ export async function signup(formData: FormData) {
     };
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = getBaseUrl();
   const emailRedirectTo = `${appUrl}/auth/callback?next=/`;
 
   try {
@@ -220,7 +221,7 @@ export async function signup(formData: FormData) {
 export async function resendConfirmationEmail(email: string) {
   try {
     const supabase = await createClient();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const appUrl = getBaseUrl();
     const emailRedirectTo = `${appUrl}/auth/callback?next=/`;
 
     const { error } = await supabase.auth.resend({
@@ -314,14 +315,8 @@ export async function signInWithGoogle() {
   const supabase = await createClient();
 
   // Détection automatique de l'URL (pour Vercel et localhost)
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = getBaseUrl();
   const redirectTo = `${appUrl}/auth/callback?next=/`;
-
-  console.log("🔍 OAuth Google - Configuration:", {
-    appUrl,
-    redirectTo,
-    hasAppUrl: !!process.env.NEXT_PUBLIC_APP_URL,
-  });
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -338,7 +333,6 @@ export async function signInWithGoogle() {
   }
 
   if (data.url) {
-    console.log("✅ OAuth URL générée avec succès:", data.url);
     redirect(data.url);
   } else {
     console.error("❌ No OAuth URL returned");
@@ -359,7 +353,7 @@ export async function resetPassword(email: string) {
   const supabase = await createClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/callback?next=/compte/reset-password`,
+    redirectTo: `${getBaseUrl()}/auth/callback?next=/compte/reset-password`,
   });
 
   if (error) {

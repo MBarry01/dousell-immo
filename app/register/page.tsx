@@ -6,12 +6,11 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   User,
+  Mail,
   Lock,
   Eye,
   EyeOff,
   ArrowLeft,
-  Mail,
-  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import * as RPNInput from "react-phone-number-input";
@@ -24,7 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Captcha } from "@/components/ui/captcha";
-import { signup, signInWithGoogle, resendConfirmationEmail } from "@/app/auth/actions";
+import { signup, signInWithGoogle } from "@/app/auth/actions";
+import { checkPasswordHIBP } from "@/lib/hibp";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -34,9 +34,7 @@ export default function RegisterPage() {
   const [selectedCountry, setSelectedCountry] = useState<RPNInput.Country>("SN");
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [emailSent, setEmailSent] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [isResending, setIsResending] = useState(false);
+  const [isCheckingHIBP, setIsCheckingHIBP] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
     fullName?: string;
     email?: string;
@@ -189,30 +187,30 @@ export default function RegisterPage() {
             action={async (formData: FormData) => {
               setError(null);
               setValidationErrors({});
-
+              
               if (!captchaToken) {
                 toast.error("Veuillez compléter la vérification anti-robot");
                 return;
               }
-
+              
               formData.append("turnstileToken", captchaToken);
-
+              
               // Validation côté client
               const fullName = formData.get("fullName") as string;
               const email = formData.get("email") as string;
               const phone = formData.get("phone") as string;
               const password = formData.get("password") as string;
-
+              
               const errors: typeof validationErrors = {};
-
+              
               if (!fullName || fullName.trim().length < 2) {
                 errors.fullName = "Le nom complet doit contenir au moins 2 caractères";
               }
-
+              
               if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 errors.email = "Adresse email invalide";
               }
-
+              
               // Validation du téléphone (format international)
               if (!phone || phone.trim().length < 8) {
                 errors.phone = "Numéro de téléphone invalide";
@@ -223,18 +221,55 @@ export default function RegisterPage() {
                   errors.phone = "Numéro de téléphone invalide";
                 }
               }
-
+              
               if (!password || password.length < 6) {
                 errors.password = "Le mot de passe doit contenir au moins 6 caractères";
               }
-
+              
               if (Object.keys(errors).length > 0) {
                 setValidationErrors(errors);
                 toast.error("Veuillez corriger les erreurs dans le formulaire");
                 return;
               }
-
-              // La vérification HIBP est maintenant faite côté serveur dans signup()
+              
+              // Vérification HIBP avant l'inscription
+              setIsCheckingHIBP(true);
+              try {
+                const hibpResult = await checkPasswordHIBP(password, true);
+                
+                if (!hibpResult.success) {
+                  // Erreur technique (service indisponible, etc.)
+                  toast.error("Vérification de sécurité", {
+                    description: hibpResult.error || "Impossible de vérifier le mot de passe. Veuillez réessayer.",
+                    duration: 6000,
+                  });
+                  setIsCheckingHIBP(false);
+                  return;
+                }
+                
+                if (hibpResult.breached) {
+                  // Mot de passe compromis
+                  setError(hibpResult.error || "Ce mot de passe a été compromis. Choisissez-en un autre.");
+                  toast.error("Mot de passe compromis", {
+                    description: hibpResult.error || "Ce mot de passe a été compromis. Choisissez-en un autre plus sécurisé.",
+                    duration: 8000,
+                  });
+                  setIsCheckingHIBP(false);
+                  return;
+                }
+                
+                // Mot de passe OK, continuer avec l'inscription
+                setIsCheckingHIBP(false);
+              } catch (err) {
+                console.error("HIBP check error:", err);
+                toast.error("Erreur de vérification", {
+                  description: "Impossible de vérifier le mot de passe. Veuillez réessayer.",
+                  duration: 5000,
+                });
+                setIsCheckingHIBP(false);
+                return;
+              }
+              
               startTransition(async () => {
                 const result = await signup(formData);
                 console.log("📋 Résultat signup:", result); // Log pour debugging
@@ -271,19 +306,17 @@ export default function RegisterPage() {
                       router.push("/");
                       router.refresh();
                     }, 1500);
-                  }
+                  } 
                   // Si l'email de confirmation est requis
                   else if (result.emailSent) {
                     // Afficher une alerte claire sans redirection immédiate
                     setError(null);
-                    setEmailSent(true);
-                    setUserEmail(email);
                     toast.success("Compte créé !", {
                       description: "Un lien de confirmation a été envoyé à votre adresse email. Veuillez cliquer dessus pour activer votre compte.",
                       duration: 8000,
                     });
                     // Ne pas rediriger automatiquement, laisser l'utilisateur lire le message
-                  }
+                  } 
                   // Cas par défaut (compte créé mais pas encore confirmé)
                   else {
                     toast.success("Compte créé avec succès !", {
@@ -306,62 +339,6 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* Message de confirmation email */}
-            {emailSent && userEmail && (
-              <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-4 space-y-3">
-                <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-blue-300 mb-1">
-                      Email de confirmation envoyé
-                    </h3>
-                    <p className="text-sm text-blue-200/80 mb-3">
-                      Un lien de confirmation a été envoyé à <strong>{userEmail}</strong>.
-                      Cliquez sur le lien dans l'email pour activer votre compte.
-                    </p>
-                    <p className="text-xs text-blue-200/60 mb-3">
-                      💡 Vérifiez aussi votre dossier spam si vous ne voyez pas l'email.
-                    </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={isResending}
-                      onClick={async () => {
-                        setIsResending(true);
-                        const result = await resendConfirmationEmail(userEmail);
-                        if (result.success) {
-                          toast.success("Email renvoyé !", {
-                            description: "Vérifiez votre boîte de réception.",
-                            duration: 5000,
-                          });
-                        } else {
-                          toast.error("Erreur", {
-                            description: result.error || "Impossible de renvoyer l'email.",
-                            duration: 5000,
-                          });
-                        }
-                        setIsResending(false);
-                      }}
-                      className="w-full sm:w-auto border-blue-500/30 text-blue-300 hover:bg-blue-500/20"
-                    >
-                      {isResending ? (
-                        <>
-                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                          Envoi en cours...
-                        </>
-                      ) : (
-                        <>
-                          <RefreshCw className="mr-2 h-4 w-4" />
-                          Renvoyer l'email
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Full Name */}
             <div className="space-y-2">
               <Label htmlFor="fullName" className="text-white/70">
@@ -377,8 +354,9 @@ export default function RegisterPage() {
                   required
                   minLength={2}
                   maxLength={100}
-                  className={`h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500 ${validationErrors.fullName ? "border-red-500/50" : ""
-                    }`}
+                  className={`h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500 ${
+                    validationErrors.fullName ? "border-red-500/50" : ""
+                  }`}
                 />
               </div>
               {validationErrors.fullName && (
@@ -399,8 +377,9 @@ export default function RegisterPage() {
                   type="email"
                   placeholder="oumar@example.com"
                   required
-                  className={`h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500 ${validationErrors.email ? "border-red-500/50" : ""
-                    }`}
+                  className={`h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500 ${
+                    validationErrors.email ? "border-red-500/50" : ""
+                  }`}
                 />
               </div>
               {validationErrors.email && (
@@ -422,15 +401,16 @@ export default function RegisterPage() {
                 defaultCountry="SN"
                 international
                 placeholder="Entrez votre numéro"
-                className={`${validationErrors.phone ? "border-red-500/50" : ""
-                  }`}
+                className={`${
+                  validationErrors.phone ? "border-red-500/50" : ""
+                }`}
                 required
               />
               {/* Input caché pour envoyer la valeur dans le FormData */}
               <input
                 type="hidden"
                 name="phone"
-                value={typeof phoneValue === "string" ? phoneValue : ""}
+                value={phoneValue || ""}
               />
               {validationErrors.phone && (
                 <p className="text-xs text-red-400">{validationErrors.phone}</p>
@@ -491,10 +471,34 @@ export default function RegisterPage() {
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isPending || !captchaToken}
+              disabled={isPending || !captchaToken || isCheckingHIBP}
               className="mt-6 h-12 w-full rounded-xl bg-white text-black hover:bg-gray-100 disabled:opacity-50"
             >
-              {isPending ? (
+              {isCheckingHIBP ? (
+                <>
+                  <svg
+                    className="mr-2 h-5 w-5 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Vérification du mot de passe...
+                </>
+              ) : isPending ? (
                 <>
                   <svg
                     className="mr-2 h-5 w-5 animate-spin"

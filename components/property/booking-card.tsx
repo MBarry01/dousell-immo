@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { MessageCircle, Phone, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { AGENCY_PHONE, AGENCY_PHONE_DISPLAY } from "@/lib/constants";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { trackPropertyAction } from "@/app/api/property-stats/actions";
+import { useAuth } from "@/hooks/use-auth";
 import {
   Accordion,
   AccordionContent,
@@ -22,10 +25,13 @@ type BookingCardProps = {
 };
 
 export const BookingCard = ({ property }: BookingCardProps) => {
-  // Logique de contact :
-  // - Mandat payant (mandat_confort, boost_visibilite) -> Propriétaire (contact_phone ou owner.phone)
-  // - Mandat gratuit -> Agence (Agent 2)
-  const isPaidService = property.service_type === "mandat_confort" || property.service_type === "boost_visibilite";
+  const router = useRouter();
+  const { user } = useAuth();
+
+  // Logique de contact selon les règles métier :
+  // - Annonce PAYANTE (boost_visibilite) -> Afficher le numéro du propriétaire (contact_phone ou owner.phone)
+  // - Annonce GRATUITE (mandat_confort) -> Afficher le numéro de l'agence
+  const isPaidService = property.service_type === "boost_visibilite";
   const agencyPhone = "+221781385281"; // Agent 2
 
   // Si payant, on cherche d'abord le contact_phone spécifique à l'annonce, sinon le téléphone du profil
@@ -36,6 +42,35 @@ export const BookingCard = ({ property }: BookingCardProps) => {
   const whatsappUrl = `https://wa.me/${targetPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
     `Bonjour, je suis intéressé par le bien ${property.title} (${property.id}) à ${property.location.city}.`
   )}`;
+
+  const handleWhatsAppClick = useCallback(async () => {
+    await trackPropertyAction({
+      propertyId: property.id,
+      actionType: "whatsapp_click",
+      userId: user?.id || null,
+    });
+  }, [property.id, user?.id]);
+
+  /**
+   * Gère le clic sur le bouton "Demander une visite"
+   * Redirige vers la page de planification avec les informations du bien pré-remplies
+   */
+  const handleRequestVisit = () => {
+    // Construire le message pré-rempli avec les informations du bien
+    const propertyInfo = `Je suis intéressé(e) par le bien "${property.title}" (${formatCurrency(property.price)}) situé à ${property.location.address || property.location.city}${property.location.landmark ? `, ${property.location.landmark}` : ""}.`;
+    
+    // Rediriger vers la page de planification avec les paramètres
+    const params = new URLSearchParams({
+      propertyId: property.id,
+      propertyTitle: property.title,
+      propertyPrice: property.price.toString(),
+      propertyLocation: `${property.location.address || property.location.city}${property.location.landmark ? `, ${property.location.landmark}` : ""}`,
+      projectType: property.transaction === "location" ? "location" : "achat",
+      message: propertyInfo,
+    });
+    
+    router.push(`/planifier-visite?${params.toString()}`);
+  };
 
   return (
     <motion.div
@@ -81,6 +116,7 @@ export const BookingCard = ({ property }: BookingCardProps) => {
           <Button
             asChild
             className="w-full rounded-xl bg-[#25D366] py-6 text-base font-semibold text-white hover:bg-[#20ba58]"
+            onClick={handleWhatsAppClick}
           >
             <a href={whatsappUrl} target="_blank" rel="noreferrer">
               <MessageCircle className="mr-2 h-5 w-5" />
@@ -91,6 +127,7 @@ export const BookingCard = ({ property }: BookingCardProps) => {
           {/* CTA Secondaire */}
           <Button
             variant="outline"
+            onClick={handleRequestVisit}
             className="w-full rounded-xl border-2 border-gray-300 py-6 text-base font-semibold text-gray-900 hover:bg-gray-50 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
           >
             <Calendar className="mr-2 h-5 w-5" />

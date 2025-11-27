@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 type TrackActionParams = {
   propertyId: string;
@@ -17,7 +17,8 @@ export async function trackPropertyAction({
   userId,
 }: TrackActionParams) {
   try {
-    const supabase = await createClient();
+    // Utiliser le client admin pour bypasser RLS (les vues peuvent être anonymes)
+    const supabase = createAdminClient();
 
     // Vérifier que la propriété existe
     const { data: property, error: propertyError } = await supabase
@@ -34,9 +35,12 @@ export async function trackPropertyAction({
     // Récupérer l'utilisateur actuel si non fourni
     let currentUserId = userId;
     if (currentUserId === undefined) {
+      // Utiliser un client standard pour récupérer l'utilisateur
+      const { createClient } = await import("@/utils/supabase/server");
+      const userClient = await createClient();
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+      } = await userClient.auth.getUser();
       currentUserId = user?.id || null;
     }
 

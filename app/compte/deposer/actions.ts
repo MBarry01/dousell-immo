@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { notifyAdmin } from "@/lib/notifications";
 import { sendEmail, getAdminEmail } from "@/lib/mail";
 import { ListingSubmittedEmail } from "@/emails/listing-submitted-email";
+import { getBaseUrl } from "@/lib/utils";
 
 type SubmitListingData = {
   type: string;
@@ -24,19 +25,12 @@ type SubmitListingData = {
   bathrooms?: number;
   service_type: "mandat_confort" | "boost_visibilite";
   payment_ref?: string;
+  contact_phone?: string;
   images: string[];
 };
 
 export async function submitUserListing(data: SubmitListingData) {
   try {
-    console.log("📥 submitUserListing appelé avec:", {
-      title: data.title,
-      type: data.type,
-      price: data.price,
-      imagesCount: data.images?.length || 0,
-      serviceType: data.service_type,
-    });
-
     const supabase = await createClient();
 
     // Récupérer l'utilisateur connecté
@@ -64,7 +58,6 @@ export async function submitUserListing(data: SubmitListingData) {
     if (data.service_type === "boost_visibilite") {
       if (data.payment_ref) {
         validationStatus = "payment_pending";
-        console.log("✅ Paiement trouvé, statut défini à payment_pending");
       } else {
         console.error("❌ Pas de référence de paiement pour boost_visibilite");
         return { error: "La référence de paiement est requise pour cette offre" };
@@ -110,6 +103,7 @@ export async function submitUserListing(data: SubmitListingData) {
     validation_status: validationStatus,
     service_type: data.service_type,
     payment_ref: data.payment_ref || null,
+    contact_phone: data.contact_phone || null, // Numéro de contact spécifique à l'annonce
     location: {
       city: data.city,
       district: data.district,
@@ -134,11 +128,6 @@ export async function submitUserListing(data: SubmitListingData) {
       images: data.images,
       views_count: 0,
     };
-
-    console.log("📤 Tentative d'insertion dans Supabase...", {
-      payloadKeys: Object.keys(payload),
-      imagesCount: payload.images?.length || 0,
-    });
 
     const { data: insertedProperty, error } = await supabase
       .from("properties")
@@ -172,16 +161,12 @@ export async function submitUserListing(data: SubmitListingData) {
       return { error: "L'annonce n'a pas pu être enregistrée. Veuillez réessayer." };
     }
 
-    console.log("✅ Propriété insérée avec succès:", { propertyId: insertedProperty.id });
-
     // Créer une notification pour tous les admins et modérateurs
     const serviceLabel =
       data.service_type === "mandat_confort"
         ? "Mandat Agence (Gratuit)"
         : "Diffusion Simple (Payant)";
 
-    console.log("📬 Tentative d'envoi de notification aux modérateurs/admins...");
-    
     // Notifier tous les modérateurs et admins
     const { notifyModeratorsAndAdmins } = await import("@/lib/notifications-helpers");
     const notificationResult = await notifyModeratorsAndAdmins({
@@ -193,16 +178,13 @@ export async function submitUserListing(data: SubmitListingData) {
 
     if (!notificationResult.success) {
       console.error("❌ Erreur lors de la création des notifications:", notificationResult.errors);
-    } else {
-      console.log(`✅ ${notificationResult.notified} notifications créées avec succès`);
     }
 
     // Envoyer un email à l'admin (même si la notification échoue)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app";
+    const baseUrl = getBaseUrl();
     const adminUrl = `${baseUrl}/admin/moderation`;
     const adminEmail = getAdminEmail();
     
-    console.log("📧 Tentative d'envoi d'email à l'admin:", adminEmail);
     const emailResult = await sendEmail({
       to: adminEmail,
       subject: `Nouvelle annonce en attente : ${data.title}`,
@@ -218,14 +200,11 @@ export async function submitUserListing(data: SubmitListingData) {
 
     if (emailResult.error) {
       console.error("❌ Erreur lors de l'envoi de l'email admin:", emailResult.error);
-    } else {
-      console.log("✅ Email admin envoyé avec succès");
     }
 
     revalidatePath("/compte/mes-biens");
     revalidatePath("/admin/moderation");
 
-    console.log("✅ submitUserListing terminé avec succès");
     return { success: true };
   } catch (error) {
     console.error("❌ Erreur inattendue dans submitUserListing:", error);

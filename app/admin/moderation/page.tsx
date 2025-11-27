@@ -72,11 +72,7 @@ export default function ModerationPage() {
     const currentCanModerate = isMainAdmin || userRoles.some((role) => ["admin", "moderateur", "superadmin"].includes(role));
     
     if (currentCanModerate) {
-      console.log("✅ Modération - Accès autorisé", {
-        email: user.email,
-        roles: userRoles,
-        canModerate: currentCanModerate,
-      });
+      // Accès autorisé
     } else {
       // Si le serveur a autorisé mais que côté client on n'a pas de rôles,
       // c'est probablement un problème de timing. On attend un peu.
@@ -104,9 +100,7 @@ export default function ModerationPage() {
     setLoading(true);
     try {
       const supabase = createClient();
-      
-      console.log("🔍 Fetching properties for moderation...");
-      
+            
       const { data, error } = await supabase
         .from("properties")
         .select("*")
@@ -128,8 +122,13 @@ export default function ModerationPage() {
         return;
       }
 
-      console.log("✅ Properties loaded successfully:", data?.length || 0);
-      setProperties((data as PropertyToModerate[]) || []);
+      const propertiesWithLocation = (data || []).map((p) => ({
+        ...p,
+        location: p.location as { city: string; district: string },
+        images: (p.images as string[]) || [],
+      }));
+
+      setProperties(propertiesWithLocation);
       setLoading(false);
     } catch (err) {
       console.error("❌ Unexpected error loading properties:", {

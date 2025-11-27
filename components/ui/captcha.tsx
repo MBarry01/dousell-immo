@@ -26,19 +26,16 @@ export function Captcha({ onVerify, onExpire }: CaptchaProps) {
         onExpire={onExpire}
         theme="auto"
       />
-      {process.env.NODE_ENV === "development" && (
-        <button
-          type="button"
-          id="bypass-captcha-btn"
-          onClick={() => {
-            console.log("🔘 Bypass button clicked");
-            onVerify("dev-token");
-          }}
-          className="text-xs text-amber-400 hover:text-amber-300 underline p-2 border border-amber-400/30 rounded"
-        >
-          [DEV] Bypass Captcha
-        </button>
-      )}
+          {process.env.NODE_ENV === "development" && (
+            <button
+              type="button"
+              id="bypass-captcha-btn"
+              onClick={() => onVerify("dev-token")}
+              className="text-xs text-amber-400 hover:text-amber-300 underline p-2 border border-amber-400/30 rounded"
+            >
+              [DEV] Bypass Captcha
+            </button>
+          )}
     </div>
   );
 }

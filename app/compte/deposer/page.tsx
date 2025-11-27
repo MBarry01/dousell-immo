@@ -135,6 +135,8 @@ function DeposerPageContent() {
   const [paymentToken, setPaymentToken] = useState<string | null>(null);
   const [paymentVerification, setPaymentVerification] = useState<"idle" | "checking" | "success" | "error">("idle");
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+  // État persistant pour éviter le flash du formulaire pendant la soumission
+  const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
 
   const {
     register,
@@ -153,6 +155,14 @@ function DeposerPageContent() {
       service_type: "mandat_confort",
     },
   });
+
+  // Pré-remplir le téléphone avec celui du profil utilisateur (une fois que user est chargé)
+  useEffect(() => {
+    if (user?.user_metadata?.phone && !getValues("contact_phone")) {
+      // Seulement si le champ est vide (pas de données sauvegardées)
+      setValue("contact_phone", user.user_metadata.phone);
+    }
+  }, [user, setValue, getValues]);
 
   const serviceType = watch("service_type");
   const category = watch("category");
@@ -184,7 +194,6 @@ function DeposerPageContent() {
             setValue(key as keyof DepositFormValues, formData[key]);
           }
         });
-        console.log("✅ Données du formulaire restaurées depuis localStorage");
       } catch (error) {
         console.error("Erreur lors de la restauration des données du formulaire:", error);
       }
@@ -196,7 +205,6 @@ function DeposerPageContent() {
         const images = JSON.parse(storedImages);
         if (Array.isArray(images)) {
           setImageUrls(images);
-          console.log("✅ Images restaurées depuis localStorage:", images.length);
         }
       } catch (error) {
         console.error("Erreur lors de la restauration des images:", error);
@@ -207,8 +215,9 @@ function DeposerPageContent() {
     if (storedToken && verified === "true") {
       setPaymentToken(storedToken);
       setPaymentVerification("success");
+      setIsPaymentConfirmed(true); // Marquer comme confirmé dès le chargement
       // Forcer l'étape 3 si on revient avec un paiement validé
-      if (storedStep === "3" || needsPayment) {
+      if (storedStep === "3" || (verified === "true" && storedToken)) {
         setStep(3);
       }
     } else if (storedStep) {
@@ -218,30 +227,35 @@ function DeposerPageContent() {
         setStep(stepNum);
       }
     }
-  }, []);
+  }, [setValue]);
 
-  // Sauvegarder l'étape ET les valeurs du formulaire dans localStorage à chaque changement
+  // Sauvegarder l'étape dans localStorage à chaque changement
   useEffect(() => {
     if (typeof window !== "undefined" && step >= 1 && step <= 3) {
       localStorage.setItem("deposit_form_step", step.toString());
-      
-      // Sauvegarder toutes les valeurs du formulaire
-      const currentValues = getValues();
+    }
+  }, [step]);
+
+  // Sauvegarder les valeurs du formulaire dans localStorage à chaque changement de valeur
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    const subscription = watch((value) => {
       try {
-        localStorage.setItem("deposit_form_data", JSON.stringify(currentValues));
-        console.log("💾 Données du formulaire sauvegardées, step:", step);
+        localStorage.setItem("deposit_form_data", JSON.stringify(value));
       } catch (error) {
         console.error("Erreur lors de la sauvegarde des données du formulaire:", error);
       }
-    }
-  }, [step]);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, setValue]);
 
   // Sauvegarder les images dans localStorage à chaque changement
   useEffect(() => {
     if (typeof window !== "undefined" && imageUrls.length > 0) {
       try {
         localStorage.setItem("deposit_form_images", JSON.stringify(imageUrls));
-        console.log("💾 Images sauvegardées:", imageUrls.length);
       } catch (error) {
         console.error("Erreur lors de la sauvegarde des images:", error);
       }
@@ -286,11 +300,8 @@ function DeposerPageContent() {
 
       const verifyPayment = async () => {
         try {
-          console.log("🔍 Vérification du paiement avec token:", token);
           const res = await fetch(`/api/paydunya/confirm?token=${token}`);
           const data = await res.json();
-          
-          console.log("📥 Réponse de vérification PayDunya:", data);
           
           if (!res.ok || !data?.success) {
             console.error("❌ Erreur de vérification:", data);
@@ -304,12 +315,11 @@ function DeposerPageContent() {
             data.status === "paid" ||
             (data.response?.response_code === "00");
 
-          console.log("✅ Paiement complété?", isPaymentCompleted, "Statut:", data.status);
-
           if (isPaymentCompleted) {
             localStorage.setItem("paydunya_payment_verified", "true");
             setPaymentToken(token);
             setPaymentVerification("success"); // ✅ SUCCÈS MAIS PAS D'AUTO-SUBMIT
+            setIsPaymentConfirmed(true); // Marquer comme confirmé (persiste pendant la soumission)
             setPaymentMessage(null);
             // S'assurer qu'on est bien à l'étape 3
             setStep(3);
@@ -325,6 +335,7 @@ function DeposerPageContent() {
           console.error("❌ Vérification PayDunya échouée:", error);
           setPaymentVerification("error");
           setPaymentToken(null);
+          setIsPaymentConfirmed(false); // Réinitialiser aussi l'état de confirmation
           setPaymentMessage("Le paiement n'a pas été confirmé. Merci de réessayer.");
           localStorage.removeItem("paydunya_payment_token");
           localStorage.removeItem("paydunya_payment_verified");
@@ -344,6 +355,7 @@ function DeposerPageContent() {
       }
       setPaymentToken(null);
       setPaymentVerification("idle");
+      setIsPaymentConfirmed(false); // Réinitialiser aussi l'état de confirmation
       setPaymentMessage("Paiement annulé. Vous pouvez réessayer.");
       toast.error("Paiement annulé", {
         description: "Vous pouvez relancer le paiement quand vous êtes prêt.",
@@ -462,7 +474,7 @@ function DeposerPageContent() {
     // Validation : si Diffusion Simple, un token de paiement PayDunya est requis
     if (
       needsPayment &&
-      (!paymentToken || paymentVerification !== "success") &&
+      (!isPaymentConfirmed && (!paymentToken || paymentVerification !== "success")) &&
       !values.payment_ref?.trim()
     ) {
       console.error("❌ BLOCAGE : Paiement non effectué");
@@ -475,21 +487,11 @@ function DeposerPageContent() {
 
     setSubmitting(true);
     try {
-      console.log("📤 Envoi des données à submitUserListing...", {
-        title: values.title,
-        type: values.type,
-        price: values.price,
-        imagesCount: imageUrls.length,
-        serviceType: values.service_type,
-      });
-      
       const result = await submitUserListing({
         ...values,
         images: imageUrls,
         payment_ref: paymentToken || values.payment_ref,
       });
-
-      console.log("📥 Réponse reçue de submitUserListing:", result);
 
       if (result?.error) {
         console.error("❌ Erreur lors de la soumission:", result.error);
@@ -498,23 +500,25 @@ function DeposerPageContent() {
           duration: 6000,
         });
       } else if (result?.success) {
-        console.log("✅ Annonce déposée avec succès !");
         toast.success("Annonce déposée avec succès !", {
           description: needsPayment
             ? "Votre annonce est en attente de validation après vérification du paiement."
             : "Votre annonce est en attente de validation par notre équipe.",
           duration: 5000,
         });
-        // Nettoyer le token PayDunya, l'étape ET les données du formulaire
-        localStorage.removeItem("paydunya_payment_token");
-        localStorage.removeItem("paydunya_payment_verified");
-        localStorage.removeItem("deposit_form_step");
-        localStorage.removeItem("deposit_form_data");
-        localStorage.removeItem("deposit_form_images");
-        setPaymentToken(null);
-        setPaymentVerification("idle");
         // Petit délai pour voir le toast avant la redirection
+        // NE PAS réinitialiser les états de paiement avant la redirection pour éviter le flash du formulaire
         setTimeout(() => {
+          // Nettoyer le token PayDunya, l'étape ET les données du formulaire AVANT la redirection
+          localStorage.removeItem("paydunya_payment_token");
+          localStorage.removeItem("paydunya_payment_verified");
+          localStorage.removeItem("deposit_form_step");
+          localStorage.removeItem("deposit_form_data");
+          localStorage.removeItem("deposit_form_images");
+          // Réinitialiser les états juste avant la redirection pour éviter le flash
+          setPaymentToken(null);
+          setPaymentVerification("idle");
+          setIsPaymentConfirmed(false); // Réinitialiser aussi l'état de confirmation
           router.push("/compte/mes-biens");
           router.refresh();
         }, 1500);
@@ -542,23 +546,9 @@ function DeposerPageContent() {
     e?.stopPropagation();
     
     try {
-      console.log("🔄 Début de handleSubmitClick...", { step, imageUrlsCount: imageUrls.length });
-      
       // Valider tous les champs du formulaire
       const isValid = await trigger();
       const currentValues = getValues();
-      console.log("✅ Validation du formulaire:", { 
-        isValid, 
-        errorsCount: Object.keys(errors).length,
-        errors: errors,
-        valuesPresent: {
-          title: !!currentValues.title,
-          price: !!currentValues.price,
-          description: !!currentValues.description,
-          city: !!currentValues.city,
-          district: !!currentValues.district
-        }
-      });
       
       if (!isValid) {
         console.error("❌ Formulaire invalide. Erreurs détaillées:", errors);
@@ -596,7 +586,6 @@ function DeposerPageContent() {
       
       // Récupérer les valeurs validées
       const values = getValues();
-      console.log("📋 Valeurs du formulaire:", { ...values, images: imageUrls.length });
       
       // Appeler onSubmit avec les valeurs
       await onSubmit(values);
@@ -1094,8 +1083,8 @@ function DeposerPageContent() {
               {/* LOGIQUE PAIEMENT - FLUX STRICT */}
               {needsPayment ? (
                 <>
-                  {/* On affiche le succès SI le paiement est validé OU si on est en train de soumettre après un succès */}
-                  {(paymentToken && paymentVerification === "success") || (submitting && paymentToken) ? (
+                  {/* On affiche le succès SI le paiement est confirmé (état persistant pour éviter le flash) */}
+                  {(isPaymentConfirmed || (paymentToken && paymentVerification === "success")) ? (
                     // CAS 1 : PAIEMENT RÉUSSI -> CARTE VERTE + BOUTON CONFIRMER
                     <div className="space-y-6">
                       <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-center animate-in fade-in zoom-in duration-500">
@@ -1195,6 +1184,7 @@ function DeposerPageContent() {
                               localStorage.setItem("paydunya_payment_token", data.token);
                               setPaymentToken(null);
                               setPaymentVerification("idle");
+                              setIsPaymentConfirmed(false); // Réinitialiser l'état de confirmation avant redirection
                               setPaymentMessage(null);
                             }
 

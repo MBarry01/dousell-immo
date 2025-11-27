@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -41,6 +41,9 @@ import { analyticsEvents } from "@/lib/analytics";
 import { AGENCY_PHONE, AGENCY_PHONE_DISPLAY } from "@/lib/constants";
 import { useFavoritesStore } from "@/store/use-store";
 import { formatCurrency } from "@/lib/utils";
+import { trackPropertyAction } from "@/app/api/property-stats/actions";
+import { incrementView } from "@/services/propertyService";
+import { useAuth } from "@/hooks/use-auth";
 import type { Property } from "@/types/property";
 import type { Review, ReviewStats } from "@/services/reviewService";
 
@@ -61,7 +64,13 @@ export const PropertyDetailView = ({
 }: PropertyDetailViewProps) => {
   const router = useRouter();
   const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
+  const { user } = useAuth();
   const favorite = isFavorite(property.id);
+
+  // Tracker la vue de la page (compteur incrémental optimisé)
+  useEffect(() => {
+    void incrementView(property.id);
+  }, [property.id]);
 
   const breadcrumbItems = useMemo(() => {
     const transaction = property.transaction ?? "vente";
@@ -284,11 +293,11 @@ export const PropertyDetailView = ({
           {/* Infos Agent (Hôte) */}
           <div className="mb-8 flex items-center gap-4 border-b border-gray-200 pb-6 dark:border-white/10">
             {(() => {
-              // Logique d'affichage :
-              // - Mandat payant (mandat_confort, boost_visibilite) -> Afficher le propriétaire (contact_phone ou owner.phone)
-              // - Mandat gratuit (ou non spécifié) -> Afficher l'agence (Agent 2)
+              // Logique d'affichage selon les règles métier :
+              // - Annonce PAYANTE (boost_visibilite) -> Afficher le propriétaire (contact_phone ou owner.phone)
+              // - Annonce GRATUITE (mandat_confort) -> Afficher l'agence (Agent 2)
 
-              const isPaidService = property.service_type === "mandat_confort" || property.service_type === "boost_visibilite";
+              const isPaidService = property.service_type === "boost_visibilite";
 
               // Données de l'agence (Agent 2 par défaut)
               const agencyName = "Agence Dousell"; // Ou "Amadou Barry" selon préférence
@@ -297,10 +306,15 @@ export const PropertyDetailView = ({
 
               // Si payant, on cherche d'abord le contact_phone spécifique à l'annonce, sinon le téléphone du profil
               const ownerPhone = property.contact_phone || property.owner?.phone;
-              const showOwner = isPaidService && ownerPhone;
+              // Vérifier que property.owner existe ET qu'on a un téléphone pour afficher le propriétaire
+              const showOwner = isPaidService && ownerPhone && property.owner;
 
-              const displayName = showOwner ? property.owner!.full_name : agencyName;
-              const displayPhoto = showOwner ? property.owner!.avatar_url : agencyPhoto;
+              const displayName = showOwner && property.owner?.full_name 
+                ? property.owner.full_name 
+                : agencyName;
+              const displayPhoto = showOwner && property.owner?.avatar_url 
+                ? property.owner.avatar_url 
+                : agencyPhoto;
               const displayPhone = showOwner ? ownerPhone : agencyPhone;
 
               return (

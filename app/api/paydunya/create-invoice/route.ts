@@ -1,5 +1,6 @@
 import { createPayDunyaInvoice, getPayDunyaCheckoutUrl, getPayDunyaConfig } from "@/lib/paydunya";
 import { createClient } from "@/utils/supabase/server";
+import { getBaseUrl } from "@/lib/utils";
 
 export async function POST(request: Request) {
   try {
@@ -29,7 +30,8 @@ export async function POST(request: Request) {
     }
 
     const config = getPayDunyaConfig();
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+    const baseUrl = getBaseUrl();
     const callbackUrl =
       process.env.PAYDUNYA_CALLBACK_URL || `${baseUrl}/api/paydunya/webhook`;
     

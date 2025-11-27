@@ -20,16 +20,20 @@ type ContactBarProps = {
 export const ContactBar = ({ property }: ContactBarProps) => {
   const { user } = useAuth();
 
-  // Logique de contact :
-  // - Mandat payant (mandat_confort, boost_visibilite) -> Propriétaire (contact_phone ou owner.phone)
-  // - Mandat gratuit -> Agence (Agent 2)
-  const isPaidService = property.service_type === "mandat_confort" || property.service_type === "boost_visibilite";
-  const agencyPhone = "+221781385281"; // Agent 2
+  // Logique de contact selon les règles métier :
+  // - Annonce PAYANTE (boost_visibilite) -> Afficher le numéro du propriétaire (contact_phone ou owner.phone)
+  // - Annonce GRATUITE (mandat_confort) -> Afficher le numéro de l'Agence Doussel Immo
+  const AGENCY_PHONE = "+221781385281"; // Numéro de Doussel Immo
+  
+  let displayPhone = AGENCY_PHONE; // Par défaut (Mandat gratuit)
 
-  // Si payant, on cherche d'abord le contact_phone spécifique à l'annonce, sinon le téléphone du profil
-  const ownerPhone = property.contact_phone || property.owner?.phone;
-
-  const targetPhone = (isPaidService && ownerPhone) ? ownerPhone : agencyPhone;
+  if (property.service_type === "boost_visibilite") {
+    // Si payant, on priorise le numéro de l'annonce, sinon celui du profil
+    const ownerPhone = property.contact_phone || property.owner?.phone;
+    displayPhone = ownerPhone || AGENCY_PHONE; // Fallback sur agence si aucun numéro trouvé
+  }
+  
+  const targetPhone = displayPhone;
 
   // Pour WhatsApp : utiliser le même numéro cible
   const whatsappNumber = targetPhone;

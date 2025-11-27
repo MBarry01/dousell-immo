@@ -142,7 +142,6 @@ export function useUserRoles(userId: string | null) {
               filter: `user_id=eq.${userId}`,
             },
             (payload) => {
-              console.log("🔄 Changement de rôle détecté:", payload);
               // Rafraîchir les rôles quand un changement est détecté
               fetchRoles();
             }

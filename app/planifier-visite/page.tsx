@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -23,20 +24,41 @@ const availabilityLabels: Record<VisitRequestFormValues["availability"], string>
   weekend: "Le week-end",
 };
 
-export default function PlanifierVisitePage() {
+function PlanifierVisitePageContent() {
+  const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetKey, setCaptchaResetKey] = useState(0); // Clé pour forcer le reset du widget
+  
+  // Récupérer les paramètres de l'URL pour pré-remplir le formulaire
+  const propertyId = searchParams?.get("propertyId");
+  const propertyTitle = searchParams?.get("propertyTitle");
+  const propertyPrice = searchParams?.get("propertyPrice");
+  const propertyLocation = searchParams?.get("propertyLocation");
+  const projectTypeParam = searchParams?.get("projectType");
+  const messageParam = searchParams?.get("message");
+
   const form = useForm<VisitRequestFormValues>({
     resolver: zodResolver(visitRequestSchema),
     defaultValues: {
       fullName: "",
       phone: "",
-      projectType: "achat",
+      projectType: (projectTypeParam === "location" ? "location" : "achat") as "achat" | "location",
       availability: "semaine-matin",
-      message: "",
+      message: messageParam || "",
     },
     mode: "onTouched",
   });
+
+  // Pré-remplir le formulaire si des paramètres sont présents
+  useEffect(() => {
+    if (messageParam) {
+      form.setValue("message", messageParam);
+    }
+    if (projectTypeParam === "location" || projectTypeParam === "achat") {
+      form.setValue("projectType", projectTypeParam);
+    }
+  }, [messageParam, projectTypeParam, form]);
 
   const onSubmit = async (values: VisitRequestFormValues) => {
     if (!captchaToken) {
@@ -47,20 +69,23 @@ export default function PlanifierVisitePage() {
     try {
       setIsSubmitting(true);
       const result = await createVisitRequest(values, captchaToken);
+      
       if (!result.success) {
         toast.error(result.error || "Impossible d'envoyer la demande.");
         return;
       }
+      
       toast.success("Demande envoyée !", {
         description: `${values.fullName}, un conseiller vous rappelle sous 30 min.`,
       });
       form.reset();
-      setCaptchaToken(null);
     } catch (error) {
-      console.error(error);
+      console.error("Erreur lors de l'envoi:", error);
       toast.error("Une erreur est survenue, merci de réessayer.");
     } finally {
       setIsSubmitting(false);
+      setCaptchaToken(null);
+      setCaptchaResetKey((prev) => prev + 1);
     }
   };
 
@@ -174,6 +199,7 @@ export default function PlanifierVisitePage() {
           </div>
 
           <Captcha
+            key={captchaResetKey} // Force le remontage pour un nouveau challenge
             onVerify={(token) => {
               setCaptchaToken(token);
             }}
@@ -207,6 +233,18 @@ export default function PlanifierVisitePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PlanifierVisitePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+      </div>
+    }>
+      <PlanifierVisitePageContent />
+    </Suspense>
   );
 }
 

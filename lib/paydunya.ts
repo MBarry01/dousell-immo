@@ -141,8 +141,7 @@ export async function createPayDunyaInvoice(
   }
 
   const data = await response.json();
-  console.log("Réponse PayDunya:", data);
-
+  
   if (data.response_code !== "00") {
     throw new Error(
       `Erreur PayDunya: ${data.response_text} - ${data.description}`
@@ -205,7 +204,7 @@ export async function initializePayment(
   const baseUrl = getPayDunyaApiBaseUrl(config.mode);
   const url = `${baseUrl}/checkout-invoice/create`;
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousel-immo.vercel.app";
   const callbackUrl =
     process.env.PAYDUNYA_CALLBACK_URL ||
     process.env.NGROK_CALLBACK_URL ||

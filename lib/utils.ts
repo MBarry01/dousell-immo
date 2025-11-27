@@ -41,3 +41,21 @@ export const dpeColorMap: Record<
   G: "bg-red-700/20 text-red-400",
 };
 
+/**
+ * Récupère l'URL de base de l'application
+ * Gère le cas localhost et production
+ */
+export function getBaseUrl() {
+  if (typeof window !== "undefined") {
+    // Côté client
+    return window.location.origin;
+  }
+  
+  // Côté serveur
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  
+  return "http://localhost:3000";
+}
+
