@@ -361,6 +361,8 @@ export type PerformanceStats = {
     date: string;
     views: number;
     clicks: number;
+    whatsapp: number;
+    phone: number;
   }[];
   topProperties: {
     id: string;
@@ -438,7 +440,10 @@ export async function getPerformanceStats(days: number = 30): Promise<Performanc
 
     // Grouper par jour (ou par semaine si days > 30)
     const isWeekly = days > 30;
-    const groupedStats = new Map<string, { views: number; clicks: number }>();
+    const groupedStats = new Map<
+      string,
+      { views: number; whatsapp: number; phone: number }
+    >();
 
     // Initialiser tous les jours/semaines de la période
     if (isWeekly) {
@@ -452,7 +457,7 @@ export async function getPerformanceStats(days: number = 30): Promise<Performanc
         const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
         date.setDate(diff);
         const weekKey = date.toISOString().split("T")[0];
-        groupedStats.set(weekKey, { views: 0, clicks: 0 });
+        groupedStats.set(weekKey, { views: 0, whatsapp: 0, phone: 0 });
       }
     } else {
       for (let i = days - 1; i >= 0; i--) {
@@ -460,7 +465,7 @@ export async function getPerformanceStats(days: number = 30): Promise<Performanc
         date.setDate(date.getDate() - i);
         date.setHours(0, 0, 0, 0);
         const dateKey = date.toISOString().split("T")[0];
-        groupedStats.set(dateKey, { views: 0, clicks: 0 });
+        groupedStats.set(dateKey, { views: 0, whatsapp: 0, phone: 0 });
       }
     }
 
@@ -486,11 +491,10 @@ export async function getPerformanceStats(days: number = 30): Promise<Performanc
           const groupData = groupedStats.get(groupKey)!;
           if (stat.action_type === "view") {
             groupData.views += 1;
-          } else if (
-            stat.action_type === "whatsapp_click" ||
-            stat.action_type === "phone_click"
-          ) {
-            groupData.clicks += 1;
+          } else if (stat.action_type === "whatsapp_click") {
+            groupData.whatsapp += 1;
+          } else if (stat.action_type === "phone_click") {
+            groupData.phone += 1;
           }
           groupedStats.set(groupKey, groupData);
         }
@@ -498,9 +502,13 @@ export async function getPerformanceStats(days: number = 30): Promise<Performanc
     }
 
     // Convertir en tableau et formater
-    const chartData: { date: string; views: number; clicks: number }[] = Array.from(
-      groupedStats.entries()
-    )
+    const chartData: {
+      date: string;
+      views: number;
+      clicks: number;
+      whatsapp: number;
+      phone: number;
+    }[] = Array.from(groupedStats.entries())
       .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
       .map(([dateKey, data]) => {
         const date = new Date(dateKey + "T00:00:00");
@@ -526,7 +534,9 @@ export async function getPerformanceStats(days: number = 30): Promise<Performanc
         return {
           date: formattedDate,
           views: data.views,
-          clicks: data.clicks,
+          clicks: data.whatsapp + data.phone,
+          whatsapp: data.whatsapp,
+          phone: data.phone,
         };
       });
 

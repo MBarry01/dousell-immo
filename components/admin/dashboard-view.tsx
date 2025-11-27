@@ -119,21 +119,14 @@ export function DashboardView({
   // Préparer les données du graphique selon la métrique active
   const chartDataForMetric = useMemo(() => {
     if (!filteredChartData) return [];
-    
-    if (activeMetric === "views") {
-      return filteredChartData.map((d) => ({
-        date: d.date,
-        views: d.views,
-        clicks: 0, // Masquer les contacts
-      }));
-    } else {
-      return filteredChartData.map((d) => ({
-        date: d.date,
-        views: 0, // Masquer les vues
-        clicks: d.clicks,
-      }));
-    }
-  }, [filteredChartData, activeMetric]);
+
+    return filteredChartData.map((d) => ({
+      date: d.date,
+      views: d.views,
+      whatsapp: d.whatsapp ?? 0,
+      phone: d.phone ?? 0,
+    }));
+  }, [filteredChartData]);
 
   const timeRangeOptions = [
     { value: "7d", label: "7 derniers jours" },
@@ -300,7 +293,7 @@ export function DashboardView({
                     Chargement des données...
                   </div>
                 ) : (
-                  <PerformanceChart data={chartDataForMetric} />
+                  <PerformanceChart data={chartDataForMetric} metric={activeMetric} />
                 )}
               </CardContent>
             </Card>

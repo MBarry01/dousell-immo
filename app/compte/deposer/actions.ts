@@ -2,8 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
-import { notifyAdmin } from "@/lib/notifications";
-import { sendEmail, getAdminEmail } from "@/lib/mail";
+import { sendEmail, getAdminNotificationEmails, getAdminEmail } from "@/lib/mail";
 import { ListingSubmittedEmail } from "@/emails/listing-submitted-email";
 import { getBaseUrl } from "@/lib/utils";
 
@@ -183,10 +182,11 @@ export async function submitUserListing(data: SubmitListingData) {
     // Envoyer un email à l'admin (même si la notification échoue)
     const baseUrl = getBaseUrl();
     const adminUrl = `${baseUrl}/admin/moderation`;
-    const adminEmail = getAdminEmail();
-    
+    const adminEmails = await getAdminNotificationEmails();
+    const adminEmail = getAdminEmail(); // utilisé pour fallback logs/notifications
+   
     const emailResult = await sendEmail({
-      to: adminEmail,
+      to: adminEmails.length > 0 ? adminEmails : adminEmail,
       subject: `Nouvelle annonce en attente : ${data.title}`,
       user_id: user.id,
       react: ListingSubmittedEmail({
