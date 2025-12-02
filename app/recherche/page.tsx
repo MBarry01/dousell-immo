@@ -73,9 +73,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const resolved = await searchParams;
   const filters = recordToFilters(resolved);
   const hasActiveFilters = Object.keys(filters).length > 0;
+  // Sans filtres, afficher toutes les annonces approuvées (pas de limite)
+  // Avec filtres, utiliser getProperties qui respecte les filtres
   const properties = hasActiveFilters
     ? await getProperties(filters)
-    : await getLatestProperties(12);
+    : await getProperties({}); // Pas de limite = toutes les annonces approuvées
 
   return (
     <div className="space-y-6 py-6">

@@ -1,5 +1,5 @@
 // Service Worker for Dousell Immo PWA
-const CACHE_NAME = "dousell-immo-v2";
+const CACHE_NAME = "dousell-immo-v3";
 const STATIC_ASSETS = [
   "/",
   "/manifest.json",
@@ -82,7 +82,9 @@ self.addEventListener("fetch", (event) => {
   // Only handle GET requests
   if (event.request.method !== "GET") return;
 
-  // Skip non-GET requests and external resources
+  const url = new URL(event.request.url);
+
+  // Skip chrome extensions, Next.js static files, and API routes
   if (
     event.request.url.startsWith("chrome-extension://") ||
     event.request.url.includes("_next/static") ||
@@ -91,23 +93,54 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Liste des domaines externes à ne JAMAIS cacher (let browser handle them directly)
+  // Cela évite les violations CSP et réduit la taille du cache
+  const externalDomains = [
+    "images.pexels.com",
+    "images.unsplash.com",
+    "plus.unsplash.com",
+    "googleusercontent.com",    // Couvrira lh3.googleusercontent.com, etc.
+    "googletagmanager.com",     // Google Tag Manager / Analytics
+    "google-analytics.com",     // Google Analytics
+    "basemaps.cartocdn.com",    // Tuiles de carte
+    "openstreetmap.org",        // Tuiles de carte
+    "supabase.co",              // Backend Supabase
+    "supabase.in",              // Backend Supabase
+    "cloudflare.com",           // Cloudflare Turnstile
+    "vercel-scripts.com",       // Scripts Vercel Analytics
+  ];
+
+  // Vérifie si l'URL contient un des domaines externes
+  const isExternalResource = externalDomains.some((domain) => 
+    url.hostname.includes(domain)
+  );
+
+  // Pour les ressources externes, laisser le navigateur gérer directement
+  // Ne PAS intercepter avec le service worker
+  if (isExternalResource) {
+    return; // Le navigateur gère la requête normalement
+  }
+
+  // Pour les ressources internes uniquement : stratégie network-first avec cache fallback
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Clone the response
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
+        // Seulement cacher les réponses réussies
+        if (response.status === 200) {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
         return response;
       })
       .catch(() => {
-        // Network failed, try cache
+        // Échec réseau, essayer le cache
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
           }
-          // If no cache, return offline page for navigation requests
+          // Si pas de cache, retourner la page offline pour les requêtes de navigation
           if (event.request.mode === "navigate") {
             return caches.match("/offline");
           }

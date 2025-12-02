@@ -41,7 +41,27 @@ Après le déploiement initial, vous devez configurer les variables d'environnem
 - **Environment** : Sélectionnez **Production**, **Preview**, et **Development**
 - Cliquez sur **Save**
 
-> **Note** : Pour le développement local, utilisez `.env.local` avec `NEXT_PUBLIC_APP_URL=http://localhost:3000`
+#### Variable 4 : `GMAIL_USER` (⚠️ Pour l'envoi d'emails)
+- **Key** : `GMAIL_USER`
+- **Value** : Votre adresse email Gmail (ex: `mb3186802@gmail.com`)
+- **Environment** : Sélectionnez **Production**, **Preview**, et **Development**
+- Cliquez sur **Save**
+
+#### Variable 5 : `GMAIL_APP_PASSWORD` (⚠️ Pour l'envoi d'emails)
+- **Key** : `GMAIL_APP_PASSWORD`
+- **Value** : Votre mot de passe d'application Gmail (16 caractères, généré sur [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords))
+- **Environment** : Sélectionnez **Production**, **Preview**, et **Development**
+- Cliquez sur **Save**
+
+#### Variable 6 : `ADMIN_EMAIL` (⚠️ Pour les notifications admin)
+- **Key** : `ADMIN_EMAIL`
+- **Value** : L'email de l'administrateur (ex: `barrymohamadou98@gmail.com`)
+- **Environment** : Sélectionnez **Production**, **Preview**, et **Development**
+- Cliquez sur **Save**
+
+> **Note** : Pour le développement local, utilisez `.env.local` avec toutes ces variables
+> 
+> **Important** : `GMAIL_APP_PASSWORD` doit être un **mot de passe d'application** (pas votre mot de passe Gmail normal). Générez-le sur [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) après avoir activé la validation en deux étapes.
 
 ### 3. Redéployer le Projet
 

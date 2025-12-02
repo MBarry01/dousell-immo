@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { AddressInputWithMap } from "@/components/forms/address-input-with-map";
 import { useAuth } from "@/hooks/use-auth";
 import { submitUserListing } from "@/app/compte/deposer/actions";
 import { createClient } from "@/utils/supabase/client";
@@ -93,6 +94,8 @@ const depositSchema = z
     }
   });
 
+import { smartGeocode } from "@/lib/geocoding";
+
 type DepositFormValues = z.infer<typeof depositSchema>;
 
 const quartiers = [
@@ -130,6 +133,9 @@ function DeposerPageContent() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  
+  // Coordonnées sélectionnées manuellement sur la carte
+  const [manualCoordinates, setManualCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   
   // États Paiement - FLUX STRICT
   const [paymentToken, setPaymentToken] = useState<string | null>(null);
@@ -175,20 +181,29 @@ function DeposerPageContent() {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [step]);
 
-  // Restaurer un paiement déjà confirmé (ex: refresh) ET forcer l'étape 3
+  // Restaurer les données du formulaire (formulaire en cours, pas de gestion de paiement ici)
+  // Ce useEffect ne gère PAS le retour après paiement (c'est le rôle du useEffect suivant)
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const storedToken = localStorage.getItem("paydunya_payment_token");
-    const verified = localStorage.getItem("paydunya_payment_verified");
-    const storedStep = localStorage.getItem("deposit_form_step");
+    
+    // Vérifier si on revient d'un paiement (paramètre URL)
+    // Si oui, on laisse le useEffect suivant gérer TOUT (étape + données)
+    const paymentStatus = searchParams?.get("payment");
+    if (paymentStatus === "success" || paymentStatus === "canceled") {
+      // Le useEffect suivant va gérer le retour après paiement
+      // On ne fait rien ici pour éviter les conflits
+      return;
+    }
+    
+    // NOUVEAU FORMULAIRE ou REPRISE : Restaurer les données mais pas l'étape si nouveau formulaire
     const storedFormData = localStorage.getItem("deposit_form_data");
     const storedImages = localStorage.getItem("deposit_form_images");
+    const storedStep = localStorage.getItem("deposit_form_step");
     
-    // Restaurer les valeurs du formulaire sauvegardées
+    // Restaurer les valeurs du formulaire sauvegardées (si on reprend un formulaire en cours)
     if (storedFormData) {
       try {
         const formData = JSON.parse(storedFormData);
-        // Restaurer chaque champ du formulaire
         Object.keys(formData).forEach((key) => {
           if (formData[key] !== undefined && formData[key] !== null) {
             setValue(key as keyof DepositFormValues, formData[key]);
@@ -211,23 +226,27 @@ function DeposerPageContent() {
       }
     }
     
-    // Si on a un paiement vérifié, on doit être à l'étape 3
+    // Si on a un paiement déjà vérifié (refresh de page après paiement confirmé)
+    // On restaure l'état mais on laisse l'étape être gérée par le useEffect suivant
+    const storedToken = localStorage.getItem("paydunya_payment_token");
+    const verified = localStorage.getItem("paydunya_payment_verified");
     if (storedToken && verified === "true") {
       setPaymentToken(storedToken);
       setPaymentVerification("success");
-      setIsPaymentConfirmed(true); // Marquer comme confirmé dès le chargement
-      // Forcer l'étape 3 si on revient avec un paiement validé
-      if (storedStep === "3" || (verified === "true" && storedToken)) {
-        setStep(3);
+      setIsPaymentConfirmed(true);
+      // L'étape sera gérée par le useEffect suivant si payment=success est dans l'URL
+      // Sinon, on restaure l'étape sauvegardée
+      if (!paymentStatus && storedStep) {
+        const stepNum = parseInt(storedStep, 10);
+        if (stepNum >= 1 && stepNum <= 3) {
+          setStep(stepNum);
+        }
       }
-    } else if (storedStep) {
-      // Restaurer l'étape sauvegardée
-      const stepNum = parseInt(storedStep, 10);
-      if (stepNum >= 1 && stepNum <= 3) {
-        setStep(stepNum);
-      }
+    } else if (!paymentStatus) {
+      // NOUVEAU FORMULAIRE : Toujours commencer à l'étape 1
+      setStep(1);
     }
-  }, [setValue]);
+  }, [setValue, searchParams]);
 
   // Sauvegarder l'étape dans localStorage à chaque changement
   useEffect(() => {
@@ -263,6 +282,7 @@ function DeposerPageContent() {
   }, [imageUrls]);
 
   // --- LOGIQUE DE RETOUR PAIEMENT (FLUX STRICT : PAS D'AUTO-SUBMIT) ---
+  // Ce useEffect est le SEUL responsable de gérer le retour après paiement
   useEffect(() => {
     const paymentStatus = searchParams?.get("payment");
     if (!paymentStatus) return;
@@ -280,9 +300,38 @@ function DeposerPageContent() {
         return;
       }
       
-      // FORCER L'ÉTAPE 3 IMMÉDIATEMENT pour éviter de revenir au début
+      // ÉTAPE CRITIQUE : FORCER L'ÉTAPE 3 IMMÉDIATEMENT et restaurer les données
+      // Cela doit être fait AVANT toute autre logique pour éviter les conflits
       setStep(3);
       localStorage.setItem("deposit_form_step", "3");
+      
+      // Restaurer les données du formulaire immédiatement
+      const storedFormData = localStorage.getItem("deposit_form_data");
+      const storedImages = localStorage.getItem("deposit_form_images");
+      
+      if (storedFormData) {
+        try {
+          const formData = JSON.parse(storedFormData);
+          Object.keys(formData).forEach((key) => {
+            if (formData[key] !== undefined && formData[key] !== null) {
+              setValue(key as keyof DepositFormValues, formData[key]);
+            }
+          });
+        } catch (error) {
+          console.error("Erreur lors de la restauration des données:", error);
+        }
+      }
+      
+      if (storedImages) {
+        try {
+          const images = JSON.parse(storedImages);
+          if (Array.isArray(images)) {
+            setImageUrls(images);
+          }
+        } catch (error) {
+          console.error("Erreur lors de la restauration des images:", error);
+        }
+      }
       
       const token = localStorage.getItem("paydunya_payment_token");
       if (!token) {
@@ -318,10 +367,10 @@ function DeposerPageContent() {
           if (isPaymentCompleted) {
             localStorage.setItem("paydunya_payment_verified", "true");
             setPaymentToken(token);
-            setPaymentVerification("success"); // ✅ SUCCÈS MAIS PAS D'AUTO-SUBMIT
-            setIsPaymentConfirmed(true); // Marquer comme confirmé (persiste pendant la soumission)
+            setPaymentVerification("success");
+            setIsPaymentConfirmed(true);
             setPaymentMessage(null);
-            // S'assurer qu'on est bien à l'étape 3
+            // FORCER L'ÉTAPE 3 une dernière fois pour être sûr (après vérification)
             setStep(3);
             localStorage.setItem("deposit_form_step", "3");
             toast.success("Paiement confirmé ✅", {
@@ -335,7 +384,7 @@ function DeposerPageContent() {
           console.error("❌ Vérification PayDunya échouée:", error);
           setPaymentVerification("error");
           setPaymentToken(null);
-          setIsPaymentConfirmed(false); // Réinitialiser aussi l'état de confirmation
+          setIsPaymentConfirmed(false);
           setPaymentMessage("Le paiement n'a pas été confirmé. Merci de réessayer.");
           localStorage.removeItem("paydunya_payment_token");
           localStorage.removeItem("paydunya_payment_verified");
@@ -343,7 +392,12 @@ function DeposerPageContent() {
             description: error instanceof Error ? error.message : undefined,
           });
         } finally {
-          clearPaymentQuery();
+          // Ne pas supprimer le paramètre payment immédiatement
+          // On le garde pour éviter que le premier useEffect ne remette l'étape à 1
+          // On le supprimera après un court délai pour permettre à l'utilisateur de voir le succès
+          setTimeout(() => {
+            clearPaymentQuery();
+          }, 2000);
         }
       };
 
@@ -355,14 +409,17 @@ function DeposerPageContent() {
       }
       setPaymentToken(null);
       setPaymentVerification("idle");
-      setIsPaymentConfirmed(false); // Réinitialiser aussi l'état de confirmation
+      setIsPaymentConfirmed(false);
       setPaymentMessage("Paiement annulé. Vous pouvez réessayer.");
+      // Rester à l'étape 3 pour permettre de réessayer le paiement
+      setStep(3);
+      localStorage.setItem("deposit_form_step", "3");
       toast.error("Paiement annulé", {
         description: "Vous pouvez relancer le paiement quand vous êtes prêt.",
       });
       clearPaymentQuery();
     }
-  }, [pathname, router, searchParams]);
+  }, [pathname, router, searchParams, setValue]);
 
   if (loading) {
     return (
@@ -486,11 +543,47 @@ function DeposerPageContent() {
     }
 
     setSubmitting(true);
+    
+    // GÉOCODAGE INTELLIGENT (Triangulation) - GARANTIT toujours un résultat
+    let coordinates = { lat: 0, lng: 0 };
+    
+    // PRIORITÉ 1: Coordonnées sélectionnées manuellement sur la carte
+    if (manualCoordinates && manualCoordinates.lat !== 0 && manualCoordinates.lng !== 0) {
+      coordinates = manualCoordinates;
+      console.log("✅ Coordonnées utilisées (sélection manuelle sur carte):", coordinates);
+    } else {
+      // PRIORITÉ 2: Géocodage automatique via smartGeocode
+      try {
+        // smartGeocode utilise une stratégie multi-niveaux et garantit toujours un résultat
+        coordinates = await smartGeocode(
+          values.address,
+          values.district,
+          values.city
+        );
+        console.log("✅ Coordonnées trouvées (smartGeocode):", coordinates);
+      } catch (geoError) {
+        console.error("Erreur lors du géocodage:", geoError);
+        // En cas d'erreur inattendue, utiliser les coordonnées par défaut (Dakar)
+        coordinates = { lat: 14.7167, lng: -17.4677 };
+        console.warn("⚠️ Utilisation des coordonnées par défaut (Dakar)");
+      }
+    }
+    
     try {
       const result = await submitUserListing({
         ...values,
         images: imageUrls,
         payment_ref: paymentToken || values.payment_ref,
+        // Ajout des coordonnées géographiques
+        // Note: Il faudra peut-être adapter submitUserListing pour accepter coords séparément
+        // ou l'inclure dans location si la structure le permet
+        location: {
+          address: values.address,
+          city: values.city,
+          district: values.district,
+          landmark: values.landmark,
+          coords: coordinates
+        }
       });
 
       if (result?.error) {
@@ -781,12 +874,16 @@ function DeposerPageContent() {
 
                 <div className="sm:col-span-2">
                   <label className="text-sm text-white/70">Adresse</label>
-                  <Input {...register("address")} className="mt-2 text-[16px]" />
-                  {errors.address && (
-                    <p className="mt-1 text-sm text-amber-300">
-                      {errors.address.message}
-                    </p>
-                  )}
+                  <AddressInputWithMap
+                    register={register("address")}
+                    error={errors.address?.message}
+                    setValue={setValue}
+                    onLocationSelect={(lat, lng) => {
+                      setManualCoordinates({ lat, lng });
+                      console.log("📍 Coordonnées sélectionnées manuellement:", { lat, lng });
+                    }}
+                    className="mt-2"
+                  />
                 </div>
 
                 <div className="sm:col-span-2">

@@ -26,6 +26,16 @@ type SubmitListingData = {
   payment_ref?: string;
   contact_phone?: string;
   images: string[];
+  location?: {
+    city: string;
+    district: string;
+    address: string;
+    landmark: string;
+    coords: {
+      lat: number;
+      lng: number;
+    };
+  };
 };
 
 export async function submitUserListing(data: SubmitListingData) {
@@ -103,7 +113,7 @@ export async function submitUserListing(data: SubmitListingData) {
     service_type: data.service_type,
     payment_ref: data.payment_ref || null,
     contact_phone: data.contact_phone || null, // Numéro de contact spécifique à l'annonce
-    location: {
+    location: data.location || {
       city: data.city,
       district: data.district,
       address: data.address,

@@ -53,18 +53,40 @@ export default function MesBiensPage() {
     if (!user) return;
 
     const supabase = createClient();
-    const { data, error } = await supabase
-      .from("properties")
-      .select("*")
-      .eq("owner_id", user.id)
-      .order("created_at", { ascending: false });
+    // Récupérer TOUTES les annonces de l'utilisateur sans limite
+    // Supabase a une limite par défaut de 1000, mais on peut la contourner avec range()
+    let allProperties: PropertyWithStatus[] = [];
+    let from = 0;
+    const pageSize = 1000; // Taille maximale par requête Supabase
+    
+    while (true) {
+      const { data, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: false })
+        .range(from, from + pageSize - 1);
 
-    if (error) {
-      console.error("Error loading properties:", error);
-      return;
+      if (error) {
+        console.error("Error loading properties:", error);
+        break;
+      }
+
+      if (!data || data.length === 0) {
+        break;
+      }
+
+      allProperties = [...allProperties, ...(data as PropertyWithStatus[])];
+      
+      // Si on a récupéré moins que la taille de page, c'est qu'on a tout récupéré
+      if (data.length < pageSize) {
+        break;
+      }
+      
+      from += pageSize;
     }
 
-    setProperties((data as PropertyWithStatus[]) || []);
+    setProperties(allProperties);
     setLoadingProperties(false);
   };
 

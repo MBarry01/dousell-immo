@@ -33,6 +33,7 @@ import { useFavoritesStore } from "@/store/use-store";
 import { FadeIn } from "@/components/ui/motion-wrapper";
 import { useUserRoles } from "@/hooks/use-user-roles";
 import { Badge } from "@/components/ui/badge";
+import { ROLE_COLORS, ROLE_LABELS } from "@/config/roles";
 
 export default function ComptePage() {
   const { user, loading } = useAuth();
@@ -41,20 +42,21 @@ export default function ComptePage() {
   const { roles: userRoles, loading: rolesLoading } = useUserRoles(user?.id || null);
 
   // Check if user is admin (email fallback) or has any role
-  const isMainAdmin = user?.email?.toLowerCase() === "barrymohamadou98@gmail.com".toLowerCase();
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  const isMainAdmin = adminEmail && user?.email?.toLowerCase() === adminEmail.toLowerCase();
   const hasRole = userRoles.length > 0 || isMainAdmin;
 
   const handleSignOut = async () => {
     try {
       const supabase = createClient();
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         throw error;
       }
-      
+
       toast.success("Déconnexion réussie");
-      
+
       // Redirect to login page
       router.push("/login");
       router.refresh();
@@ -108,12 +110,12 @@ export default function ComptePage() {
   }
 
   // Récupérer le prénom
-  const firstName = 
+  const firstName =
     (user.user_metadata?.full_name as string)?.split(" ")[0] ||
     user.email?.split("@")[0] ||
     "Utilisateur";
 
-  const displayName = 
+  const displayName =
     (user.user_metadata?.full_name as string) ||
     user.email?.split("@")[0] ||
     "Utilisateur";
@@ -145,24 +147,12 @@ export default function ComptePage() {
                 {!rolesLoading && userRoles.length > 0 && (
                   <div className="flex gap-1.5">
                     {userRoles.map((role) => {
-                      const roleLabels: Record<string, string> = {
-                        admin: "Admin",
-                        moderateur: "Modérateur",
-                        agent: "Agent",
-                        superadmin: "Super Admin",
-                      };
-                      const roleColors: Record<string, string> = {
-                        admin: "bg-red-500/20 text-red-300 border-red-500/30",
-                        moderateur: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-                        agent: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-                        superadmin: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-                      };
                       return (
                         <Badge
                           key={role}
-                          className={`text-xs ${roleColors[role] || "bg-white/10 text-white/80"}`}
+                          className={`text-xs ${ROLE_COLORS[role] || "bg-white/10 text-white/80"}`}
                         >
-                          {roleLabels[role] || role}
+                          {ROLE_LABELS[role] || role}
                         </Badge>
                       );
                     })}
@@ -334,15 +324,7 @@ export default function ComptePage() {
                           </CardTitle>
                           <CardDescription className="mt-1 text-sm text-zinc-500">
                             {userRoles.length > 0
-                              ? `Accédez au panel admin avec vos rôles: ${userRoles.map((r) => {
-                                  const labels: Record<string, string> = {
-                                    admin: "Admin",
-                                    moderateur: "Modérateur",
-                                    agent: "Agent",
-                                    superadmin: "Super Admin",
-                                  };
-                                  return labels[r] || r;
-                                }).join(", ")}`
+                              ? `Accédez au panel admin avec vos rôles: ${userRoles.map((r) => ROLE_LABELS[r] || r).join(", ")}`
                               : "Modération, Utilisateurs, Statistiques."}
                           </CardDescription>
                         </div>

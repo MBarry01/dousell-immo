@@ -1,5 +1,7 @@
 "use client";
 
+import "leaflet/dist/leaflet.css";
+
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
@@ -136,13 +138,15 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
 
   // Filtrer les propriétés qui ont des coordonnées valides
   const propertiesWithCoords = useMemo(
-    () =>
-      properties.filter(
+    () => {
+      const valid = properties.filter(
         (p) =>
           p.location?.coords &&
           p.location.coords.lat !== 0 &&
           p.location.coords.lng !== 0
-      ),
+      );
+      return valid;
+    },
     [properties]
   );
 
@@ -246,6 +250,7 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
           zoom={DEFAULT_ZOOM}
           scrollWheelZoom={false} // Désactiver le zoom molette pour ne pas gêner le scroll
           className="h-full w-full rounded-[32px] z-0"
+          style={{ height: "100%", width: "100%", zIndex: 0 }}
           zoomControl={true}
           attributionControl={true}
         >
@@ -276,7 +281,10 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
           <p>Mode économie de données activé sur mobile.</p>
           <Button
             className="rounded-full bg-white px-4 py-2 text-black hover:bg-white/90"
-            onClick={() => setMapEnabled(true)}
+            onClick={() => {
+              console.log("🔄 Activation manuelle de la carte");
+              setMapEnabled(true);
+            }}
           >
             Charger la carte
           </Button>
