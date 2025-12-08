@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Captcha } from "@/components/ui/captcha";
-import { login, signInWithGoogle } from "@/app/auth/actions";
+import { login } from "@/app/auth/actions";
 
 export default function LoginPage() {
   const [isPending, startTransition] = useTransition();
@@ -17,14 +17,8 @@ export default function LoginPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const handleGoogleSignIn = () => {
-    startTransition(async () => {
-      const result = await signInWithGoogle();
-      if (result?.error) {
-        toast.error("Erreur lors de la connexion Google", {
-          description: result.error,
-        });
-      }
-    });
+    // Utiliser une route API pour Google OAuth (meilleure gestion des cookies PKCE)
+    window.location.href = "/auth/google";
   };
 
   return (

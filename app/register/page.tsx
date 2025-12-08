@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Captcha } from "@/components/ui/captcha";
-import { signup, signInWithGoogle } from "@/app/auth/actions";
+import { signup } from "@/app/auth/actions";
 import { checkPasswordHIBP } from "@/lib/hibp";
 
 export default function RegisterPage() {
@@ -69,14 +69,8 @@ export default function RegisterPage() {
   }, [phoneValue]);
 
   const handleGoogleSignIn = () => {
-    startTransition(async () => {
-      const result = await signInWithGoogle();
-      if (result?.error) {
-        toast.error("Erreur lors de la connexion Google", {
-          description: result.error,
-        });
-      }
-    });
+    // Utiliser une route API pour Google OAuth (meilleure gestion des cookies PKCE)
+    window.location.href = "/auth/google";
   };
 
   return (
