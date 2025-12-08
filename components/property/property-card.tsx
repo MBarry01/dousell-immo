@@ -69,24 +69,24 @@ export const PropertyCard = ({
           damping: 17,
         }}
         className={cn(
-          "group relative flex min-w-[280px] items-center gap-4 rounded-[24px] border border-white/10 bg-white/5 p-3 text-white transition-shadow hover:shadow-lg hover:shadow-black/20",
+          "group relative flex min-w-[280px] items-center gap-4 rounded-[24px] border border-white/10 bg-white/5 p-3 text-white transition-shadow hover:shadow-lg hover:shadow-black/20 isolate",
           className
         )}
       >
-      <div 
-        className="absolute inset-0 z-10 cursor-pointer"
-        onClick={handleCardClick}
+        <div
+          className="absolute inset-0 z-10 cursor-pointer"
+          onClick={handleCardClick}
           aria-label={`Voir ${property.title}`}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            router.push(`/biens/${property.id}`);
-          }
-        }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              router.push(`/biens/${property.id}`);
+            }
+          }}
         />
-      <div className="relative h-24 w-24 overflow-hidden rounded-2xl z-20" data-carousel style={{ pointerEvents: 'auto' }}>
+        <div className="relative h-24 w-24 overflow-hidden rounded-2xl z-20" data-carousel style={{ pointerEvents: 'auto' }}>
           <ListingImageCarousel
             images={property.images}
             alt={property.title}
@@ -134,14 +134,14 @@ export const PropertyCard = ({
       }}
       className={cn(
         // Mobile: largeur fixe pour scroll horizontal
-        "group relative flex w-72 flex-none flex-col overflow-hidden rounded-[28px] bg-white/5 p-3 text-white transition-shadow hover:shadow-xl hover:shadow-black/30",
+        "group relative flex w-72 flex-none flex-col overflow-hidden rounded-[28px] bg-white/5 p-3 text-white transition-shadow hover:shadow-xl hover:shadow-black/30 isolate",
         // Desktop: dans une grille, la largeur est gérée par la grille CSS automatiquement
         className
       )}
     >
-      <div 
-        className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] z-40" 
-        data-carousel 
+      <div
+        className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] z-10"
+        data-carousel
         style={{ pointerEvents: 'auto' }}
         onClick={(e) => {
           // Empêcher la propagation du clic vers le div cliquable de la carte
@@ -163,9 +163,8 @@ export const PropertyCard = ({
           type="button"
           aria-label="Enregistrer"
           onClick={toggleFavorite}
-          className={`absolute right-4 top-4 z-40 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/80 ${
-            favorite ? "text-amber-300" : ""
-          }`}
+          className={`absolute right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/80 ${favorite ? "text-amber-300" : ""
+            }`}
           style={{ pointerEvents: 'auto' }}
         >
           <Bookmark className={`h-5 w-5 ${favorite ? "fill-current" : ""}`} />
@@ -222,10 +221,9 @@ export const PropertyCard = ({
         </div>
       </div>
       {/* Zone cliquable uniquement sur la partie inférieure (sous le carousel) */}
-      {/* Le carousel a z-40 donc il est au-dessus et ses flèches (z-50) sont cliquables */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 z-30 cursor-pointer"
-        style={{ 
+      <div
+        className="absolute bottom-0 left-0 right-0 z-5 cursor-pointer"
+        style={{
           top: 'calc(100% * 0.65)', // Après le carousel (aspect 4/3 + padding ≈ 65% de la hauteur)
           pointerEvents: 'auto'
         }}

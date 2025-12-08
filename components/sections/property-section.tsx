@@ -101,7 +101,7 @@ export const PropertySection = ({
         {showLeftButton && (
           <button
             onClick={() => scroll("left")}
-            className="absolute left-0 top-1/2 z-30 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-110 active:scale-95 md:flex"
+            className="absolute left-0 top-1/2 z-50 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-110 active:scale-95 md:flex"
             aria-label="Défiler vers la gauche"
           >
             <ChevronLeft className="h-6 w-6" />
@@ -112,7 +112,7 @@ export const PropertySection = ({
         {showRightButton && (
           <button
             onClick={() => scroll("right")}
-            className="absolute right-0 top-1/2 z-30 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-110 active:scale-95 md:flex"
+            className="absolute right-0 top-1/2 z-50 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-110 active:scale-95 md:flex"
             aria-label="Défiler vers la droite"
           >
             <ChevronRight className="h-6 w-6" />

@@ -160,7 +160,7 @@ export const ListingImageCarousel = ({
             type="button"
             aria-label="Image précédente"
             onClick={scrollPrev}
-            className="hidden sm:flex absolute left-3 top-1/2 z-50 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 hover:bg-black/70 p-2 text-white opacity-0 backdrop-blur transition group-hover:opacity-100 pointer-events-auto"
+            className="hidden sm:flex absolute left-3 top-1/2 z-30 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 hover:bg-black/70 p-2 text-white opacity-0 backdrop-blur transition group-hover:opacity-100 pointer-events-auto"
             style={{ pointerEvents: 'auto' }}
           >
             <ChevronLeft className="h-5 w-5" />
@@ -169,7 +169,7 @@ export const ListingImageCarousel = ({
             type="button"
             aria-label="Image suivante"
             onClick={scrollNext}
-            className="hidden sm:flex absolute right-3 top-1/2 z-50 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 hover:bg-black/70 p-2 text-white opacity-0 backdrop-blur transition group-hover:opacity-100 pointer-events-auto"
+            className="hidden sm:flex absolute right-3 top-1/2 z-30 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 hover:bg-black/70 p-2 text-white opacity-0 backdrop-blur transition group-hover:opacity-100 pointer-events-auto"
             style={{ pointerEvents: 'auto' }}
           >
             <ChevronRight className="h-5 w-5" />
