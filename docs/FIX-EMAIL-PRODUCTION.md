@@ -127,3 +127,6 @@ Si les emails ne fonctionnent toujours pas après configuration :
 - [Variables d'environnement Vercel](./VERCEL-ENV-VARIABLES.md)
 - [Test email](./TEST-SIGNUP-FLOW.md)
 
+
+
+

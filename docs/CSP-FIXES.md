@@ -197,3 +197,6 @@ Banner not shown: beforeinstallpromptevent.preventDefault() called.
 
 **Date de dernière mise à jour :** 28 novembre 2025
 
+
+
+

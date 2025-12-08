@@ -32,26 +32,44 @@ const depositSchema = z
     district: z.string().min(1, "Le quartier est requis"),
     address: z.string().min(3, "L'adresse est requise"),
     landmark: z.string().min(3, "Le point de repère est requis"),
-    
-    surface: z.number().min(10, "La surface doit être d'au moins 10 m²").optional(),
-    surfaceTotale: z.number().min(10, "La surface totale doit être d'au moins 10 m²").optional(),
-    juridique: z.enum(["titre-foncier", "bail", "deliberation", "nicad"]).optional(),
-    rooms: z.number().min(1).optional(),
-    bedrooms: z.number().min(0).optional(),
-    bathrooms: z.number().min(0).optional(),
-    
+
+    surface: z.preprocess(
+      (val) => (typeof val === "number" && isNaN(val) ? undefined : val),
+      z.number().optional()
+    ),
+    surfaceTotale: z.preprocess(
+      (val) => (typeof val === "number" && isNaN(val) ? undefined : val),
+      z.number().optional()
+    ),
+    juridique: z.string().optional().refine(
+      (val) => !val || val === "" || ["titre-foncier", "bail", "deliberation", "nicad"].includes(val),
+      { message: "Situation juridique invalide" }
+    ),
+    rooms: z.preprocess(
+      (val) => (typeof val === "number" && isNaN(val) ? undefined : val),
+      z.number().optional()
+    ),
+    bedrooms: z.preprocess(
+      (val) => (typeof val === "number" && isNaN(val) ? undefined : val),
+      z.number().optional()
+    ),
+    bathrooms: z.preprocess(
+      (val) => (typeof val === "number" && isNaN(val) ? undefined : val),
+      z.number().optional()
+    ),
+
     service_type: z.enum(["mandat_confort", "boost_visibilite"]),
     payment_ref: z.string().optional(),
     contact_phone: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     const isTerrain = data.type === "terrain";
-    
+
     if (isTerrain) {
       if (!data.surfaceTotale || data.surfaceTotale < 10) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "La surface totale est requise pour un terrain",
+          message: "La surface totale est requise (min 10 m²)",
           path: ["surfaceTotale"],
         });
       }
@@ -66,7 +84,7 @@ const depositSchema = z
       if (!data.surface || data.surface < 10) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "La surface habitable est requise",
+          message: "La surface habitable est requise (min 10 m²)",
           path: ["surface"],
         });
       }
@@ -77,6 +95,7 @@ const depositSchema = z
           path: ["rooms"],
         });
       }
+      // Bedrooms et bathrooms peuvent être 0 (studio)
       if (data.bedrooms === undefined || data.bedrooms < 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -94,9 +113,29 @@ const depositSchema = z
     }
   });
 
+
 import { smartGeocode } from "@/lib/geocoding";
 
-type DepositFormValues = z.infer<typeof depositSchema>;
+type DepositFormValues = {
+  type: "villa" | "appartement" | "terrain" | "immeuble";
+  title: string;
+  description: string;
+  price: number;
+  category: "vente" | "location";
+  city: string;
+  district: string;
+  address: string;
+  landmark: string;
+  surface?: number;
+  surfaceTotale?: number;
+  juridique?: string;
+  rooms?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  service_type: "mandat_confort" | "boost_visibilite";
+  payment_ref?: string;
+  contact_phone?: string;
+};
 
 const quartiers = [
   "Almadies",
@@ -128,15 +167,31 @@ function DeposerPageContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
-  
+
   const [step, setStep] = useState(1);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
-  
+  const [services, setServices] = useState<{ code: string; name: string; price: number; description: string }[]>([]);
+
+  // Charger les services depuis la base de données
+  useEffect(() => {
+    const fetchServices = async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase.from("services").select("*");
+      if (error) {
+        console.error("Erreur chargement services:", error);
+        toast.error("Impossible de charger les offres");
+      } else if (data) {
+        setServices(data);
+      }
+    };
+    fetchServices();
+  }, []);
+
   // Coordonnées sélectionnées manuellement sur la carte
   const [manualCoordinates, setManualCoordinates] = useState<{ lat: number; lng: number } | null>(null);
-  
+
   // États Paiement - FLUX STRICT
   const [paymentToken, setPaymentToken] = useState<string | null>(null);
   const [paymentVerification, setPaymentVerification] = useState<"idle" | "checking" | "success" | "error">("idle");
@@ -153,12 +208,25 @@ function DeposerPageContent() {
     control,
     formState: { errors },
   } = useForm<DepositFormValues>({
-    resolver: zodResolver(depositSchema),
+    resolver: zodResolver(depositSchema) as any,
     mode: "onChange",
     defaultValues: {
       type: "appartement",
       category: "vente",
       service_type: "mandat_confort",
+      title: "",
+      description: "",
+      price: 0,
+      city: "",
+      district: "",
+      address: "",
+      landmark: "",
+      surface: undefined,
+      surfaceTotale: undefined,
+      rooms: undefined,
+      bedrooms: undefined,
+      bathrooms: undefined,
+      juridique: "",
     },
   });
 
@@ -185,7 +253,7 @@ function DeposerPageContent() {
   // Ce useEffect ne gère PAS le retour après paiement (c'est le rôle du useEffect suivant)
   useEffect(() => {
     if (typeof window === "undefined") return;
-    
+
     // Vérifier si on revient d'un paiement (paramètre URL)
     // Si oui, on laisse le useEffect suivant gérer TOUT (étape + données)
     const paymentStatus = searchParams?.get("payment");
@@ -194,12 +262,12 @@ function DeposerPageContent() {
       // On ne fait rien ici pour éviter les conflits
       return;
     }
-    
+
     // NOUVEAU FORMULAIRE ou REPRISE : Restaurer les données mais pas l'étape si nouveau formulaire
     const storedFormData = localStorage.getItem("deposit_form_data");
     const storedImages = localStorage.getItem("deposit_form_images");
     const storedStep = localStorage.getItem("deposit_form_step");
-    
+
     // Restaurer les valeurs du formulaire sauvegardées (si on reprend un formulaire en cours)
     if (storedFormData) {
       try {
@@ -213,7 +281,7 @@ function DeposerPageContent() {
         console.error("Erreur lors de la restauration des données du formulaire:", error);
       }
     }
-    
+
     // Restaurer les images
     if (storedImages) {
       try {
@@ -225,7 +293,7 @@ function DeposerPageContent() {
         console.error("Erreur lors de la restauration des images:", error);
       }
     }
-    
+
     // Si on a un paiement déjà vérifié (refresh de page après paiement confirmé)
     // On restaure l'état mais on laisse l'étape être gérée par le useEffect suivant
     const storedToken = localStorage.getItem("paydunya_payment_token");
@@ -258,7 +326,7 @@ function DeposerPageContent() {
   // Sauvegarder les valeurs du formulaire dans localStorage à chaque changement de valeur
   useEffect(() => {
     if (typeof window === "undefined") return;
-    
+
     const subscription = watch((value) => {
       try {
         localStorage.setItem("deposit_form_data", JSON.stringify(value));
@@ -299,16 +367,16 @@ function DeposerPageContent() {
         clearPaymentQuery();
         return;
       }
-      
+
       // ÉTAPE CRITIQUE : FORCER L'ÉTAPE 3 IMMÉDIATEMENT et restaurer les données
       // Cela doit être fait AVANT toute autre logique pour éviter les conflits
       setStep(3);
       localStorage.setItem("deposit_form_step", "3");
-      
+
       // Restaurer les données du formulaire immédiatement
       const storedFormData = localStorage.getItem("deposit_form_data");
       const storedImages = localStorage.getItem("deposit_form_images");
-      
+
       if (storedFormData) {
         try {
           const formData = JSON.parse(storedFormData);
@@ -321,7 +389,7 @@ function DeposerPageContent() {
           console.error("Erreur lors de la restauration des données:", error);
         }
       }
-      
+
       if (storedImages) {
         try {
           const images = JSON.parse(storedImages);
@@ -332,7 +400,7 @@ function DeposerPageContent() {
           console.error("Erreur lors de la restauration des images:", error);
         }
       }
-      
+
       const token = localStorage.getItem("paydunya_payment_token");
       if (!token) {
         setPaymentVerification("error");
@@ -351,16 +419,16 @@ function DeposerPageContent() {
         try {
           const res = await fetch(`/api/paydunya/confirm?token=${token}`);
           const data = await res.json();
-          
+
           if (!res.ok || !data?.success) {
             console.error("❌ Erreur de vérification:", data);
             throw new Error(data?.error || "Vérification impossible");
           }
 
           // Accepter plusieurs statuts de confirmation
-          const isPaymentCompleted = 
-            data.status === "completed" || 
-            data.isCompleted || 
+          const isPaymentCompleted =
+            data.status === "completed" ||
+            data.isCompleted ||
             data.status === "paid" ||
             (data.response?.response_code === "00");
 
@@ -543,10 +611,10 @@ function DeposerPageContent() {
     }
 
     setSubmitting(true);
-    
+
     // GÉOCODAGE INTELLIGENT (Triangulation) - GARANTIT toujours un résultat
     let coordinates = { lat: 0, lng: 0 };
-    
+
     // PRIORITÉ 1: Coordonnées sélectionnées manuellement sur la carte
     if (manualCoordinates && manualCoordinates.lat !== 0 && manualCoordinates.lng !== 0) {
       coordinates = manualCoordinates;
@@ -568,7 +636,7 @@ function DeposerPageContent() {
         console.warn("⚠️ Utilisation des coordonnées par défaut (Dakar)");
       }
     }
-    
+
     try {
       const result = await submitUserListing({
         ...values,
@@ -637,28 +705,28 @@ function DeposerPageContent() {
   const handleSubmitClick = async (e?: React.MouseEvent<HTMLButtonElement>) => {
     e?.preventDefault();
     e?.stopPropagation();
-    
+
     try {
       // Valider tous les champs du formulaire
       const isValid = await trigger();
       const currentValues = getValues();
-      
+
       if (!isValid) {
         console.error("❌ Formulaire invalide. Erreurs détaillées:", errors);
         console.error("❌ Valeurs actuelles:", currentValues);
-        
+
         // Afficher les erreurs spécifiques
         const errorMessages = Object.entries(errors)
           .map(([field, error]) => `${field}: ${error?.message}`)
           .filter(Boolean)
           .join(", ");
-        
+
         toast.error("Veuillez corriger les erreurs du formulaire", {
           description: errorMessages || "Certains champs sont manquants ou invalides. Vérifiez que vous avez bien rempli toutes les étapes du formulaire.",
         });
         return;
       }
-      
+
       // Vérifier qu'on est à l'étape 3
       if (step !== 3) {
         console.error("❌ Pas à l'étape 3:", step);
@@ -667,7 +735,7 @@ function DeposerPageContent() {
         });
         return;
       }
-      
+
       // Vérifier qu'il y a au moins une image
       if (imageUrls.length === 0) {
         console.error("❌ Aucune image");
@@ -676,10 +744,10 @@ function DeposerPageContent() {
         });
         return;
       }
-      
+
       // Récupérer les valeurs validées
       const values = getValues();
-      
+
       // Appeler onSubmit avec les valeurs
       await onSubmit(values);
     } catch (error) {
@@ -695,7 +763,7 @@ function DeposerPageContent() {
     if (step < 3) {
       // Valider les champs de l'étape actuelle avant de passer à la suivante
       let fieldsToValidate: (keyof DepositFormValues)[] = [];
-      
+
       if (step === 1) {
         fieldsToValidate = [
           "type",
@@ -708,7 +776,7 @@ function DeposerPageContent() {
           "address",
           "landmark",
         ];
-        
+
         if (isTerrain) {
           fieldsToValidate.push("surfaceTotale", "juridique");
         } else {
@@ -717,14 +785,14 @@ function DeposerPageContent() {
       } else if (step === 2) {
         fieldsToValidate = ["service_type"];
       }
-      
+
       const isValidStep = await trigger(fieldsToValidate);
-      
+
       if (isValidStep) {
         // Sauvegarder les valeurs actuelles avant de changer d'étape
         const currentValues = getValues();
         localStorage.setItem("deposit_form_data", JSON.stringify(currentValues));
-        
+
         setStep(step + 1);
         window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       } else {
@@ -750,7 +818,7 @@ function DeposerPageContent() {
   return (
     <div className="max-w-lg mx-auto px-5 pt-6 pb-32 text-white">
       <div className="h-16 md:hidden" />
-      
+
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/compte">
@@ -770,9 +838,8 @@ function DeposerPageContent() {
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex-1">
             <div
-              className={`h-2 rounded-full ${
-                s <= step ? "bg-amber-500" : "bg-white/10"
-              }`}
+              className={`h-2 rounded-full ${s <= step ? "bg-amber-500" : "bg-white/10"
+                }`}
             />
           </div>
         ))}
@@ -878,9 +945,20 @@ function DeposerPageContent() {
                     register={register("address")}
                     error={errors.address?.message}
                     setValue={setValue}
+                    currentAddress={watch("address")}
+                    city={watch("city")}
+                    district={watch("district")}
                     onLocationSelect={(lat, lng) => {
                       setManualCoordinates({ lat, lng });
                       console.log("📍 Coordonnées sélectionnées manuellement:", { lat, lng });
+                    }}
+                    onAddressFound={(details) => {
+                      if (details.city) {
+                        setValue("city", details.city, { shouldValidate: true });
+                      }
+                      if (details.district) {
+                        setValue("district", details.district, { shouldValidate: true });
+                      }
                     }}
                     className="mt-2"
                   />
@@ -1024,9 +1102,8 @@ function DeposerPageContent() {
                   />
                   <label
                     htmlFor="photo-upload"
-                    className={`inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm text-white hover:bg-white/10 ${
-                      uploading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm text-white hover:bg-white/10 ${uploading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     {uploading ? "Upload en cours..." : "Choisir des photos"}
                   </label>
@@ -1076,11 +1153,10 @@ function DeposerPageContent() {
                 <button
                   type="button"
                   onClick={() => setValue("service_type", "mandat_confort")}
-                  className={`rounded-2xl border-2 p-6 text-left transition-all ${
-                    serviceType === "mandat_confort"
-                      ? "border-amber-500 bg-amber-500/10"
-                      : "border-white/10 bg-white/5 hover:border-white/20"
-                  }`}
+                  className={`rounded-2xl border-2 p-6 text-left transition-all ${serviceType === "mandat_confort"
+                    ? "border-amber-500 bg-amber-500/10"
+                    : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -1108,11 +1184,10 @@ function DeposerPageContent() {
                 <button
                   type="button"
                   onClick={() => setValue("service_type", "boost_visibilite")}
-                  className={`rounded-2xl border-2 p-6 text-left transition-all ${
-                    serviceType === "boost_visibilite"
-                      ? "border-amber-500 bg-amber-500/10"
-                      : "border-white/10 bg-white/5 hover:border-white/20"
-                  }`}
+                  className={`rounded-2xl border-2 p-6 text-left transition-all ${serviceType === "boost_visibilite"
+                    ? "border-amber-500 bg-amber-500/10"
+                    : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -1127,7 +1202,7 @@ function DeposerPageContent() {
                       </p>
                       <div className="mt-4 flex items-center gap-2">
                         <span className="text-2xl font-bold text-amber-400">
-                          1 500 FCFA
+                          {services.find(s => s.code === "boost_visibilite")?.price.toLocaleString("fr-SN") || "1 500"} FCFA
                         </span>
                       </div>
                     </div>
@@ -1242,7 +1317,7 @@ function DeposerPageContent() {
                         Paiement sécurisé via PayDunya
                       </p>
                       <p className="text-lg font-semibold text-white mb-2">
-                        1 500 FCFA
+                        {services.find(s => s.code === "boost_visibilite")?.price.toLocaleString("fr-SN") || "1 500"} FCFA
                       </p>
                       <p className="text-sm text-white/60 mb-4">
                         Accepte Wave, Orange Money et Free Money
@@ -1253,7 +1328,7 @@ function DeposerPageContent() {
                           try {
                             setSubmitting(true);
                             const values = getValues();
-                            
+
                             // Créer la facture PayDunya
                             const response = await fetch("/api/paydunya/create-invoice", {
                               method: "POST",
@@ -1261,7 +1336,7 @@ function DeposerPageContent() {
                                 "Content-Type": "application/json",
                               },
                               body: JSON.stringify({
-                                amount: 1500,
+                                serviceType: "boost_visibilite", // On envoie le CODE du service, pas le montant
                                 description: `Diffusion Simple - ${values.title}`,
                                 propertyId: null,
                                 returnUrl: `${window.location.origin}/compte/deposer?payment=success`,
@@ -1300,7 +1375,7 @@ function DeposerPageContent() {
                       >
                         {submitting ? "Redirection..." : "Payer avec PayDunya"}
                       </Button>
-                      
+
                       {paymentVerification === "checking" && (
                         <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-center text-sm text-white/70">
                           Vérification du paiement en cours...
@@ -1324,7 +1399,7 @@ function DeposerPageContent() {
                   <p className="mt-2 text-sm text-white/70">
                     Votre annonce sera vérifiée par notre équipe avant publication
                   </p>
-                  
+
                   {/* Bouton pour les annonces gratuites */}
                   <Button
                     type="button"
@@ -1414,7 +1489,7 @@ function DeposerPageContent() {
           ) : null}
         </div>
       </form>
-    </div>
+    </div >
   );
 }
 

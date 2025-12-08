@@ -81,23 +81,41 @@ export async function sendEmail({
 
     // Préparer les attachments avec le bon format pour nodemailer
     const formattedAttachments = attachments?.map((att) => {
+      let content = att.content;
+
+      // Vérifier si le contenu est un Buffer sérialisé (problème fréquent avec Next.js/Server Actions)
+      if (
+        content &&
+        typeof content === "object" &&
+        !Buffer.isBuffer(content) &&
+        (content as any).type === "Buffer" &&
+        Array.isArray((content as any).data)
+      ) {
+        console.log(`⚠️ Détection d'un Buffer sérialisé pour ${att.filename}, conversion en cours...`);
+        content = Buffer.from((content as any).data);
+      }
+
       // Nodemailer accepte directement les Buffers
       // Format attendu: { filename, content (Buffer), contentType }
       const attachment: any = {
         filename: att.filename,
-        content: att.content,
+        content: content,
       };
-      
+
       // Ajouter contentType si spécifié
       if (att.contentType) {
         attachment.contentType = att.contentType;
       }
-      
+
       // Pour les PDFs, s'assurer que le content est bien un Buffer
-      if (att.contentType === "application/pdf" && Buffer.isBuffer(att.content)) {
-        console.log(`📎 Préparation pièce jointe PDF: ${att.filename} (${att.content.length} bytes)`);
+      if (att.contentType === "application/pdf") {
+        if (Buffer.isBuffer(content)) {
+          console.log(`📎 Préparation pièce jointe PDF: ${att.filename} (${content.length} bytes)`);
+        } else {
+          console.warn(`⚠️ Attention: Le contenu de ${att.filename} n'est pas un Buffer (Type: ${typeof content})`);
+        }
       }
-      
+
       return attachment;
     }) || [];
 
@@ -253,13 +271,13 @@ export async function sendInvoiceEmail({
           <p>Nous vous remercions pour votre confiance. Veuillez trouver ci-joint votre facture.</p>
           
           ${invoiceNumber || amount
-            ? `
+      ? `
           <div class="invoice-details">
             ${invoiceNumber ? `<p><strong>Numéro de facture:</strong> ${invoiceNumber}</p>` : ""}
             ${amount ? `<p><strong>Montant:</strong> ${amount.toLocaleString("fr-SN")} FCFA</p>` : ""}
           </div>
           `
-            : ""}
+      : ""}
           
           <p>Cette facture est également disponible en pièce jointe au format PDF.</p>
           

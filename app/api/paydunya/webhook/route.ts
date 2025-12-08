@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   try {
     // Récupérer la signature depuis les headers
     const signature = request.headers.get("PAYDUNYA-SIGNATURE");
-    
+
     if (!signature) {
       console.error("Webhook PayDunya: Signature manquante");
       return Response.json(
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
     // Lire le body brut pour la validation
     const rawBody = await request.text();
-    
+
     // Valider la signature
     if (!validatePayDunyaWebhook(rawBody, signature)) {
       console.error("Webhook PayDunya: Signature invalide");
@@ -43,6 +43,12 @@ export async function POST(request: Request) {
       const propertyId = customData?.property_id;
 
       if (propertyId) {
+        // Extraire les détails du paiement depuis le payload PayDunya
+        const paymentAmount = payload.invoice.total_amount;
+        const serviceName = payload.invoice.items && payload.invoice.items.length > 0
+          ? payload.invoice.items[0].name  // Premier item (ex: "Diffusion Simple - Studio")
+          : payload.invoice.description;   // Fallback sur la description
+
         // Mettre à jour uniquement les informations de paiement, SANS changer le statut de validation
         // Le statut reste "payment_pending" pour que l'admin puisse valider manuellement
         const { error: updateError } = await supabase
@@ -51,13 +57,15 @@ export async function POST(request: Request) {
             // NE PAS changer validation_status - il doit rester "payment_pending" pour validation admin
             payment_ref: payload.invoice.token,
             payment_date: new Date().toISOString(),
+            payment_amount: paymentAmount,
+            service_name: serviceName,
           })
           .eq("id", propertyId);
 
         if (updateError) {
           console.error("Erreur lors de la mise à jour de la propriété:", updateError);
         } else {
-          console.log("✅ Paiement confirmé pour la propriété:", propertyId, "- Statut reste 'payment_pending' pour validation admin");
+          console.log("✅ Paiement confirmé pour la propriété:", propertyId, `- Montant: ${paymentAmount} FCFA - Service: ${serviceName}`);
         }
       } else {
         // Si la propriété n'existe pas encore, le token sera utilisé lors de la création

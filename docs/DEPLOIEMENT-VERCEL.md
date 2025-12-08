@@ -304,3 +304,6 @@ Si vous rencontrez des problèmes :
 2. Consultez les **logs Supabase** (Logs → API)
 3. Vérifiez la **documentation Vercel** : [vercel.com/docs](https://vercel.com/docs)
 
+
+
+

@@ -16,13 +16,13 @@ export async function moderateProperty(
 ) {
   // Vérifier que l'utilisateur a le droit de modérer (admin, moderateur, superadmin)
   await requireAnyRole(["admin", "moderateur", "superadmin"]);
-  
+
   const supabase = await createClient();
 
   // Récupérer les infos du bien avant modification
   const { data: property } = await supabase
     .from("properties")
-    .select("title, owner_id, service_type, price, payment_ref")
+    .select("title, owner_id, service_type, price, payment_ref, payment_amount, service_name, category, location, details")
     .eq("id", propertyId)
     .single();
 
@@ -43,7 +43,7 @@ export async function moderateProperty(
       const { data: owner, error: ownerError } = await adminClient.auth.admin.getUserById(
         property.owner_id
       );
-      
+
       if (!ownerError && owner?.user?.email) {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app";
         const propertyUrl = `${baseUrl}/biens/${propertyId}`;
@@ -57,25 +57,39 @@ export async function moderateProperty(
           if (isPaid) {
             try {
               console.log("💰 Génération de la facture pour l'annonce payante:", property.title);
-              
+
               invoiceNumber = `FAC-${new Date().getFullYear()}-${(property.payment_ref || "REF").slice(-6).toUpperCase()}`;
-              
+
+              const clientName = owner.user.user_metadata?.full_name || owner.user.email || "Client Doussel Immo";
+
+              // Utiliser les vraies données de paiement depuis la base de données
+              const paymentAmount = property.payment_amount;
+              const serviceName = property.service_name || `Boost Visibilité - Annonce : ${property.title}`;
+
               const invoiceData = {
                 invoiceNumber,
                 date: new Date(),
-                clientName: owner.user.user_metadata?.full_name || owner.user.email || "Client Doussel Immo",
-                clientEmail: owner.user.email,
+                clientName: clientName,
+                clientEmail: owner.user.email || "",
                 items: [
                   {
-                    description: `Boost Visibilité - Annonce : ${property.title}`,
-                    amount: 5000, // Montant fixe pour le boost
+                    description: serviceName,
+                    amount: paymentAmount,
                   },
                 ],
-                total: 5000,
+                total: paymentAmount,
               };
 
+              console.log("📄 Données facture:", JSON.stringify(invoiceData, null, 2));
+
               invoiceBuffer = await generateInvoicePdf(invoiceData);
-              console.log("✅ Facture PDF générée avec succès");
+
+              if (invoiceBuffer && Buffer.isBuffer(invoiceBuffer)) {
+                console.log(`✅ Facture PDF générée avec succès (${invoiceBuffer.length} bytes)`);
+              } else {
+                console.error("❌ Le buffer généré n'est pas valide");
+                invoiceBuffer = null;
+              }
             } catch (invoiceError) {
               console.error("❌ Erreur lors de la génération de la facture:", invoiceError);
               // On continue quand même l'envoi de l'email sans la facture
@@ -92,6 +106,15 @@ export async function moderateProperty(
           });
 
           // Envoyer email d'approbation avec facture en pièce jointe si payant
+          console.log("📧 Préparation de l'envoi d'email à:", owner.user.email);
+          console.log("📋 Données pour l'email:", {
+            propertyTitle: property.title,
+            isPaid,
+            hasInvoice: !!invoiceBuffer,
+            hasPropertyType: !!property.details?.type,
+            hasRegion: !!property.location,
+          });
+
           const emailResult = await sendEmail({
             to: owner.user.email,
             subject: `🎉 Votre annonce "${property.title}" est en ligne !`,
@@ -101,15 +124,28 @@ export async function moderateProperty(
               propertyUrl,
               isPaid,
               invoiceNumber,
+              hasInvoice: !!invoiceBuffer,
+              // Détails de l'annonce
+              // Détails de l'annonce
+              propertyType: property.details?.type || "Bien immobilier",
+              transactionType: property.category === "vente" ? "Vente" : "Location",
+              price: property.price,
+              // Localisation
+              region: property.location?.city || property.location?.state || "", // Fallback
+              city: property.location?.district || property.location?.city || "",
+              address: property.location?.address || "",
+              // Paiement
+              paymentAmount: property.payment_amount,
+              serviceName: property.service_name,
             }),
             attachments: invoiceBuffer
               ? [
-                  {
-                    filename: `Facture-${invoiceNumber || "Doussel"}.pdf`,
-                    content: invoiceBuffer,
-                    contentType: "application/pdf",
-                  },
-                ]
+                {
+                  filename: `Facture-${invoiceNumber || "Doussel"}.pdf`,
+                  content: invoiceBuffer,
+                  contentType: "application/pdf",
+                },
+              ]
               : undefined,
           });
 
@@ -151,7 +187,7 @@ export async function moderatePropertyWithReason(
 ) {
   // Vérifier que l'utilisateur a le droit de modérer (admin, moderateur, superadmin)
   await requireAnyRole(["admin", "moderateur", "superadmin"]);
-  
+
   const supabase = await createClient();
 
   // Récupérer les infos du bien avant modification

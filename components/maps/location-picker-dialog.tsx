@@ -36,6 +36,8 @@ interface LocationPickerDialogProps {
   onOpenChange: (open: boolean) => void;
   onLocationSelect: (lat: number, lng: number) => void;
   initialPosition?: { lat: number; lng: number } | null;
+  initialAddress?: string;
+  isLoading?: boolean;
 }
 
 /**
@@ -71,12 +73,13 @@ export function LocationPickerDialog({
   onOpenChange,
   onLocationSelect,
   initialPosition,
+  initialAddress,
+  isLoading = false,
 }: LocationPickerDialogProps) {
   const [mounted, setMounted] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<LatLngExpression>(
     initialPosition ? [initialPosition.lat, initialPosition.lng] : DAKAR_CENTER
   );
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -85,8 +88,35 @@ export function LocationPickerDialog({
   useEffect(() => {
     if (initialPosition) {
       setSelectedPosition([initialPosition.lat, initialPosition.lng]);
+    } else if (open && initialAddress && !initialPosition) {
+      // Si pas de position initiale mais une adresse, on essaie de géocoder
+      const geocodeAddress = async () => {
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+              initialAddress
+            )}&limit=1`,
+            {
+              headers: {
+                "User-Agent": "Doussel-Immo-App/1.0",
+              },
+            }
+          );
+          if (response.ok) {
+            const data = await response.json();
+            if (data && data.length > 0) {
+              const lat = parseFloat(data[0].lat);
+              const lon = parseFloat(data[0].lon);
+              setSelectedPosition([lat, lon]);
+            }
+          }
+        } catch (error) {
+          console.warn("Geocoding failed for initial address:", error);
+        }
+      };
+      geocodeAddress();
     }
-  }, [initialPosition]);
+  }, [initialPosition, initialAddress, open]);
 
   const handleMapClick = useCallback((lat: number, lng: number) => {
     setSelectedPosition([lat, lng]);
@@ -95,8 +125,9 @@ export function LocationPickerDialog({
   const handleConfirm = useCallback(() => {
     const [lat, lng] = selectedPosition as [number, number];
     onLocationSelect(lat, lng);
-    onOpenChange(false);
-  }, [selectedPosition, onLocationSelect, onOpenChange]);
+    // On ne ferme plus le dialog ici, c'est le parent qui le fera après le chargement
+    // onOpenChange(false); 
+  }, [selectedPosition, onLocationSelect]);
 
   if (!mounted) {
     return null;
@@ -142,8 +173,8 @@ export function LocationPickerDialog({
             <MapPin className="h-4 w-4" />
             <span>
               {Array.isArray(selectedPosition) &&
-              typeof selectedPosition[0] === "number" &&
-              typeof selectedPosition[1] === "number"
+                typeof selectedPosition[0] === "number" &&
+                typeof selectedPosition[1] === "number"
                 ? `${selectedPosition[0].toFixed(6)}, ${selectedPosition[1].toFixed(6)}`
                 : "Position non définie"}
             </span>
@@ -163,7 +194,14 @@ export function LocationPickerDialog({
               disabled={isLoading}
               className="bg-amber-500 text-black hover:bg-amber-400"
             >
-              {isLoading ? "Confirmation..." : "Confirmer la position"}
+              {isLoading ? (
+                <>
+                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                  Chargement...
+                </>
+              ) : (
+                "Confirmer la position"
+              )}
             </Button>
           </div>
         </div>

@@ -199,3 +199,6 @@ npx tsx scripts/update-coordinates.ts
 
 **Dernière vérification :** 28 novembre 2025
 
+
+
+

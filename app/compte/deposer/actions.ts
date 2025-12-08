@@ -18,7 +18,7 @@ type SubmitListingData = {
   landmark: string;
   surface?: number;
   surfaceTotale?: number;
-  juridique?: "titre-foncier" | "bail" | "deliberation" | "nicad";
+  juridique?: "titre-foncier" | "bail" | "deliberation" | "nicad" | string;
   rooms?: number;
   bedrooms?: number;
   bathrooms?: number;
@@ -79,19 +79,19 @@ export async function submitUserListing(data: SubmitListingData) {
     // Préparer les specs selon le type
     const specs = isTerrain
       ? {
-          surface: data.surfaceTotale ?? 0,
-          rooms: 0,
-          bedrooms: 0,
-          bathrooms: 0,
-          dpe: "B" as const,
-        }
+        surface: data.surfaceTotale ?? 0,
+        rooms: 0,
+        bedrooms: 0,
+        bathrooms: 0,
+        dpe: "B" as const,
+      }
       : {
-          surface: data.surface ?? 0,
-          rooms: data.rooms ?? 0,
-          bedrooms: data.bedrooms ?? 0,
-          bathrooms: data.bathrooms ?? 0,
-          dpe: "B" as const,
-        };
+        surface: data.surface ?? 0,
+        rooms: data.rooms ?? 0,
+        bedrooms: data.bedrooms ?? 0,
+        bathrooms: data.bathrooms ?? 0,
+        dpe: "B" as const,
+      };
 
     // Mapper le type pour details
     const typeMap: Record<string, "Appartement" | "Maison" | "Studio"> = {
@@ -102,38 +102,38 @@ export async function submitUserListing(data: SubmitListingData) {
     };
 
     const payload = {
-    title: data.title,
-    description: data.description,
-    price: data.price,
-    category: data.category,
-    status: "disponible",
-    owner_id: user.id,
-    is_agency_listing: false,
-    validation_status: validationStatus,
-    service_type: data.service_type,
-    payment_ref: data.payment_ref || null,
-    contact_phone: data.contact_phone || null, // Numéro de contact spécifique à l'annonce
-    location: data.location || {
-      city: data.city,
-      district: data.district,
-      address: data.address,
-      landmark: data.landmark,
-      coords: { lat: 0, lng: 0 },
-    },
+      title: data.title,
+      description: data.description,
+      price: data.price,
+      category: data.category,
+      status: "disponible",
+      owner_id: user.id,
+      is_agency_listing: false,
+      validation_status: validationStatus,
+      service_type: data.service_type,
+      payment_ref: data.payment_ref || null,
+      contact_phone: data.contact_phone || null, // Numéro de contact spécifique à l'annonce
+      location: data.location || {
+        city: data.city,
+        district: data.district,
+        address: data.address,
+        landmark: data.landmark,
+        coords: { lat: 0, lng: 0 },
+      },
       specs,
       features: {},
       details: isTerrain
         ? {
-            type: "Appartement" as const, // Non utilisé pour terrain
-            year: new Date().getFullYear(),
-            heating: "",
-            juridique: data.juridique,
-          }
+          type: "Appartement" as const, // Non utilisé pour terrain
+          year: new Date().getFullYear(),
+          heating: "",
+          juridique: data.juridique,
+        }
         : {
-            type: typeMap[data.type] ?? "Appartement",
-            year: new Date().getFullYear(),
-            heating: "Climatisation",
-          },
+          type: typeMap[data.type] ?? "Appartement",
+          year: new Date().getFullYear(),
+          heating: "Climatisation",
+        },
       images: data.images,
       views_count: 0,
     };
@@ -151,7 +151,7 @@ export async function submitUserListing(data: SubmitListingData) {
         details: error.details,
         hint: error.hint,
       });
-      
+
       // Messages d'erreur plus explicites
       let errorMessage = "Erreur lors de l'enregistrement de l'annonce";
       if (error.message.includes("permission denied") || error.code === "42501") {
@@ -161,7 +161,7 @@ export async function submitUserListing(data: SubmitListingData) {
       } else if (error.message) {
         errorMessage = `Erreur : ${error.message}`;
       }
-      
+
       return { error: errorMessage };
     }
 
@@ -194,7 +194,7 @@ export async function submitUserListing(data: SubmitListingData) {
     const adminUrl = `${baseUrl}/admin/moderation`;
     const adminEmails = await getAdminNotificationEmails();
     const adminEmail = getAdminEmail(); // utilisé pour fallback logs/notifications
-   
+
     const emailResult = await sendEmail({
       to: adminEmails.length > 0 ? adminEmails : adminEmail,
       subject: `Nouvelle annonce en attente : ${data.title}`,

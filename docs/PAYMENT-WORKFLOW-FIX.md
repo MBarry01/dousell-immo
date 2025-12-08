@@ -160,3 +160,6 @@ Si l'utilisateur annule le paiement :
 
 **Date de correction :** 28 novembre 2025
 
+
+
+

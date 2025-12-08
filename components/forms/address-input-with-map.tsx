@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { MapPin } from "lucide-react";
 import type { UseFormRegisterReturn, UseFormSetValue } from "react-hook-form";
@@ -16,12 +16,23 @@ const LocationPickerDialog = dynamic(
   }
 );
 
+interface AddressDetails {
+  city?: string;
+  district?: string;
+  road?: string;
+  postcode?: string;
+}
+
 interface AddressInputWithMapProps {
   register: UseFormRegisterReturn;
   error?: string;
   onLocationSelect?: (lat: number, lng: number) => void;
+  onAddressFound?: (details: AddressDetails) => void;
   setValue?: UseFormSetValue<any>;
   className?: string;
+  currentAddress?: string;
+  city?: string;
+  district?: string;
 }
 
 /**
@@ -32,19 +43,35 @@ export function AddressInputWithMap({
   register,
   error,
   onLocationSelect,
+  onAddressFound,
   setValue,
   className,
+  currentAddress,
+  city,
+  district,
 }: AddressInputWithMapProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<{ lat: number; lng: number } | null>(
     null
   );
+  // Pour suivre si l'adresse actuelle vient de la carte ou d'une saisie manuelle
+  const [lastAddressFromMap, setLastAddressFromMap] = useState<string | null>(null);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+
+  // Si l'adresse change et qu'elle ne correspond pas à la dernière adresse sélectionnée sur la carte,
+  // on réinitialise la position pour forcer un nouveau géocodage à l'ouverture de la carte.
+  useEffect(() => {
+    if (currentAddress && currentAddress !== lastAddressFromMap) {
+      setSelectedPosition(null);
+    }
+  }, [currentAddress, lastAddressFromMap]);
 
   const handleLocationSelect = async (lat: number, lng: number) => {
     if (typeof window === "undefined") return;
-    
+
+    setIsGeocoding(true);
     setSelectedPosition({ lat, lng });
-    
+
     // Optionnel : Reverse geocoding pour remplir l'adresse si vide
     if (onLocationSelect) {
       onLocationSelect(lat, lng);
@@ -64,30 +91,95 @@ export function AddressInputWithMap({
       if (response.ok) {
         const data = await response.json();
         const address = data.address;
-        
-        // Construire une adresse lisible
+        console.log("📍 Adresse complète reçue:", address);
+
+        // Construire une adresse COMPLÈTE avec rue, village, ville, région
         const addressParts: string[] = [];
-        if (address.road) addressParts.push(address.road);
-        if (address.house_number) addressParts.push(address.house_number);
-        if (addressParts.length === 0 && address.suburb) addressParts.push(address.suburb);
-        if (addressParts.length === 0 && address.neighbourhood) addressParts.push(address.neighbourhood);
-        
-        const formattedAddress = addressParts.join(", ");
-        
-        // Mettre à jour le champ input si vide (via react-hook-form)
-        if (setValue && formattedAddress) {
-          const inputElement = document.querySelector(`input[name="${register.name}"]`) as HTMLInputElement;
-          if (inputElement && !inputElement.value.trim()) {
-            setValue(register.name, formattedAddress, { shouldValidate: true });
-          }
+
+        // 1. Partie détaillée : Numéro + Rue OU Lieu-dit/Village
+        const detailedPart: string[] = [];
+        if (address.house_number) detailedPart.push(address.house_number);
+        if (address.road) detailedPart.push(address.road);
+
+        // Si pas de rue, utiliser le lieu-dit le plus spécifique
+        if (detailedPart.length === 0) {
+          if (address.hamlet) detailedPart.push(address.hamlet);
+          else if (address.village) detailedPart.push(address.village);
+          else if (address.suburb) detailedPart.push(address.suburb);
+          else if (address.neighbourhood) detailedPart.push(address.neighbourhood);
+        }
+
+        if (detailedPart.length > 0) {
+          addressParts.push(detailedPart.join(" "));
+        }
+
+        // 2. Ajouter la ville/commune (si différente du lieu-dit déjà ajouté)
+        const cityName = address.city || address.town || address.municipality;
+        if (cityName && !detailedPart.includes(cityName)) {
+          addressParts.push(cityName);
+        }
+
+        // 3. Ajouter la région administrative
+        const regionName = address.state_district || address.region || address.state;
+        if (regionName && regionName !== cityName) {
+          addressParts.push(regionName);
+        }
+
+        // 4. Construire l'adresse complète
+        let formattedAddress = addressParts.join(", ");
+
+        // Fallback ultime si toujours vide
+        if (!formattedAddress && data.display_name) {
+          formattedAddress = data.display_name.split(", Sénégal")[0]; // Enlever juste "Sénégal" à la fin
+        }
+
+        // Mettre à jour le champ input (via react-hook-form)
+        // On met à jour même si c'est vide pour refléter la sélection (ou l'absence de résultat)
+        if (setValue) {
+          setValue(register.name, formattedAddress, { shouldValidate: true });
+          // Marquer cette adresse comme venant de la carte
+          setLastAddressFromMap(formattedAddress);
+        }
+
+        // Extraire les détails pour l'autocomplétion
+        if (onAddressFound) {
+          // Logique pour la Région (Administrative Region)
+          // Pour le Sénégal, on cherche la vraie région administrative (Dakar, Thiès, Diourbel, etc.)
+          // Priorité : state_district (région administrative) > state (peut être une communauté rurale)
+          const city = address.region || address.state || address.province;
+
+          // Logique pour le Quartier (District/Locality)
+          // C'est ici qu'on veut la ville, le village, le quartier, ou la communauté rurale
+          const district =
+            address.town ||           // Ville (ex: Bambey)
+            address.city ||           // Ville principale
+            address.village ||        // Village
+            address.municipality ||   // Municipalité
+            address.hamlet ||         // Hameau
+            address.suburb ||         // Banlieue/Quartier
+            address.neighbourhood ||  // Voisinage
+            address.quarter ||        // Quartier
+            address.state_district;   // Département en dernier recours
+
+          onAddressFound({
+            city,
+            district,
+            road: address.road,
+            postcode: address.postcode
+          });
         }
       }
     } catch (error) {
       console.warn("Reverse geocoding échoué, mais la position est enregistrée:", error);
+    } finally {
+      setIsGeocoding(false);
+      setIsDialogOpen(false);
     }
-
-    setIsDialogOpen(false);
   };
+
+  // Construire l'adresse complète pour le géocodage initial
+  // On combine l'adresse saisie, le quartier et la ville pour plus de précision
+  const fullAddress = [currentAddress, district, city].filter(Boolean).join(", ");
 
   return (
     <>
@@ -115,6 +207,8 @@ export function AddressInputWithMap({
         onOpenChange={setIsDialogOpen}
         onLocationSelect={handleLocationSelect}
         initialPosition={selectedPosition}
+        initialAddress={fullAddress}
+        isLoading={isGeocoding}
       />
     </>
   );

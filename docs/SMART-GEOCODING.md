@@ -216,3 +216,6 @@ export const SENEGAL_COORDINATES: Record<string, { lat: number; lng: number }> =
 **Date de création :** 28 novembre 2025  
 **Version :** 1.0
 
+
+
+
