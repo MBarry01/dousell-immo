@@ -8,6 +8,7 @@ import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { SuppressHydrationWarning } from "@/components/providers/suppress-hydration-warning";
 import { CookieConsent } from "@/components/ui/cookie-consent";
 import { ConditionalGoogleAnalytics } from "@/components/analytics/conditional-google-analytics";
+import { MicrosoftClarity } from "@/components/analytics/microsoft-clarity";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PhoneMissingDialog } from "@/components/auth/phone-missing-dialog";
 
@@ -88,6 +89,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
+  const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID || "ui7isx66wq";
 
   return (
     <html lang="fr" suppressHydrationWarning>
@@ -103,6 +105,7 @@ export default function RootLayout({
         <Toaster position="top-center" theme="dark" richColors />
         <CookieConsent />
         {gaId && <ConditionalGoogleAnalytics gaId={gaId} />}
+        <MicrosoftClarity clarityId={clarityId} />
         <SpeedInsights />
         <PhoneMissingDialog />
       </body>
