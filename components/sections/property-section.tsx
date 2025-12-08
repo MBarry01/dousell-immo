@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { motion } from "framer-motion";
@@ -30,23 +30,21 @@ export const PropertySection = ({
   limit,
   showViewMore = true,
 }: PropertySectionProps) => {
-  if (!properties.length) return null;
-
-  const displayedProperties = limit ? properties.slice(0, limit) : properties;
-  const hasMore = limit && properties.length > limit;
-
   const containerRef = useRef<HTMLDivElement>(null);
   const [showLeftButton, setShowLeftButton] = useState(false);
   const [showRightButton, setShowRightButton] = useState(true);
 
-  const checkScrollButtons = () => {
+  const displayedProperties = limit ? properties.slice(0, limit) : properties;
+  const hasMore = limit && properties.length > limit;
+
+  const checkScrollButtons = useCallback(() => {
     if (!containerRef.current) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
     
     setShowLeftButton(scrollLeft > 0);
     setShowRightButton(scrollLeft < scrollWidth - clientWidth - 10);
-  };
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -60,7 +58,10 @@ export const PropertySection = ({
       container.removeEventListener("scroll", checkScrollButtons);
       window.removeEventListener("resize", checkScrollButtons);
     };
-  }, [displayedProperties]);
+  }, [checkScrollButtons]);
+
+  // Si pas de propriétés, ne rien afficher
+  if (!properties.length) return null;
 
   const scroll = (direction: "left" | "right") => {
     if (!containerRef.current) return;

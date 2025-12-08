@@ -41,6 +41,12 @@
     border-color: var(--border);
   }
 
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
   body {
     font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
       "SF Pro Display", "Segoe UI", sans-serif;

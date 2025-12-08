@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { formatCurrency } from "@/lib/utils";
 import { hapticFeedback } from "@/lib/haptic";
 import { analyticsEvents } from "@/lib/analytics";
-import { AGENCY_PHONE, AGENCY_PHONE_DISPLAY } from "@/lib/constants";
+import { AGENCY_PHONE_DISPLAY } from "@/lib/constants";
 import { trackPropertyAction } from "@/app/api/property-stats/actions";
 import { useAuth } from "@/hooks/use-auth";
 import type { Property } from "@/types/property";

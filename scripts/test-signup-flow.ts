@@ -204,7 +204,20 @@ async function testSignupFlow() {
             !deleteError,
             deleteError ? `Erreur: ${deleteError.message}` : "✅ Compte supprimé"
           );
-        } catch (error) {
+        } catch {
           log("⚠️  Impossible de supprimer le compte de test", "yellow");
         }
       }
+    }
+  } catch (error) {
+    logTest("Inscription Supabase", false, `Erreur: ${error instanceof Error ? error.message : "Unknown"}`);
+  }
+
+  // Résumé
+  logSection("📊 RÉSUMÉ");
+  log("✅ Tous les tests de configuration ont été exécutés.", "green");
+  log("📧 Vérifiez votre boîte email si un compte de test a été créé.", "cyan");
+}
+
+// Exécuter les tests
+testSignupFlow().catch(console.error);

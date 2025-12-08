@@ -64,39 +64,13 @@ const navItems: NavItem[] = [
   },
 ];
 
-export function AdminSidebarClient() {
-  const pathname = usePathname();
-  const { user } = useAuth();
-  const { roles: userRoles, loading } = useUserRoles(user?.id || null);
+type SidebarContentProps = {
+  filteredNavItems: NavItem[];
+  isActive: (href: string) => boolean;
+};
 
-  const isActive = (href: string) => {
-    if (href === "/admin") {
-      return pathname === "/admin" || pathname === "/admin/dashboard";
-    }
-    return pathname?.startsWith(href);
-  };
-
-  // Vérifier si l'utilisateur est l'admin principal (fallback)
-  const isMainAdmin = user?.email?.toLowerCase() === "barrymohamadou98@gmail.com";
-
-  // Filtrer les items selon les rôles de l'utilisateur
-  const filteredNavItems = navItems.filter((item) => {
-    // Si pas de restriction de rôles, afficher toujours
-    if (!item.roles || item.roles.length === 0) return true;
-    
-    // L'admin principal voit toujours tout
-    if (isMainAdmin) return true;
-    
-    // Pendant le chargement, afficher tout pour éviter de cacher le menu
-    if (loading) return true;
-    
-    // Vérifier si l'utilisateur a au moins un des rôles requis
-    const hasAccess = item.roles.some((role: UserRole) => userRoles.includes(role));
-    
-    return hasAccess;
-  });
-
-  const SidebarContent = () => (
+function SidebarContent({ filteredNavItems, isActive }: SidebarContentProps) {
+  return (
     <div className="flex h-full flex-col border-r border-white/10 bg-[#0b0f18]">
       {/* Logo */}
       <div className="flex h-16 items-center border-b border-white/10 px-6">
@@ -132,12 +106,45 @@ export function AdminSidebarClient() {
       </nav>
     </div>
   );
+}
+
+export function AdminSidebarClient() {
+  const pathname = usePathname();
+  const { user } = useAuth();
+  const { roles: userRoles, loading } = useUserRoles(user?.id || null);
+
+  const isActive = (href: string) => {
+    if (href === "/admin") {
+      return pathname === "/admin" || pathname === "/admin/dashboard";
+    }
+    return pathname?.startsWith(href);
+  };
+
+  // Vérifier si l'utilisateur est l'admin principal (fallback)
+  const isMainAdmin = user?.email?.toLowerCase() === "barrymohamadou98@gmail.com";
+
+  // Filtrer les items selon les rôles de l'utilisateur
+  const filteredNavItems = navItems.filter((item) => {
+    // Si pas de restriction de rôles, afficher toujours
+    if (!item.roles || item.roles.length === 0) return true;
+    
+    // L'admin principal voit toujours tout
+    if (isMainAdmin) return true;
+    
+    // Pendant le chargement, afficher tout pour éviter de cacher le menu
+    if (loading) return true;
+    
+    // Vérifier si l'utilisateur a au moins un des rôles requis
+    const hasAccess = item.roles.some((role: UserRole) => userRoles.includes(role));
+    
+    return hasAccess;
+  });
 
   return (
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 shrink-0 md:block">
-        <SidebarContent />
+        <SidebarContent filteredNavItems={filteredNavItems} isActive={isActive} />
       </aside>
 
       {/* Mobile Sidebar */}
@@ -153,7 +160,7 @@ export function AdminSidebarClient() {
           </Button>
         </SheetTrigger>
         <SheetContent className="left-0 top-0 h-full w-64 max-h-full rounded-none border-r border-t-0 p-0 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left">
-          <SidebarContent />
+          <SidebarContent filteredNavItems={filteredNavItems} isActive={isActive} />
         </SheetContent>
       </Sheet>
     </>

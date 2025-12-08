@@ -8,7 +8,6 @@ import {
   CheckCircle,
   AlertTriangle,
   XCircle,
-  Check,
   CheckCheck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";

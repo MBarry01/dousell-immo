@@ -15,13 +15,10 @@ import {
   Car,
   MapPin,
   Star,
-  Clock,
   Home,
   Bed,
   Bath,
   LayoutGrid,
-  MessageCircle,
-  Phone,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -35,15 +32,10 @@ import { ReviewForm } from "@/components/property/review-form";
 import { ReviewItem } from "@/components/property/review-item";
 import { AgentCard } from "@/components/property/agent-card";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { analyticsEvents } from "@/lib/analytics";
-import { AGENCY_PHONE, AGENCY_PHONE_DISPLAY } from "@/lib/constants";
 import { useFavoritesStore } from "@/store/use-store";
 import { formatCurrency } from "@/lib/utils";
-import { trackPropertyAction } from "@/app/api/property-stats/actions";
 import { incrementView } from "@/services/propertyService";
-import { useAuth } from "@/hooks/use-auth";
 import type { Property } from "@/types/property";
 import type { Review, ReviewStats } from "@/services/reviewService";
 
@@ -64,7 +56,6 @@ export const PropertyDetailView = ({
 }: PropertyDetailViewProps) => {
   const router = useRouter();
   const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
-  const { user } = useAuth();
   const favorite = isFavorite(property.id);
 
   // Tracker la vue de la page (compteur incrémental optimisé)
@@ -286,7 +277,7 @@ export const PropertyDetailView = ({
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {property.specs.bathrooms}
               </p>
-              <p className="text-xs text-gray-600 dark:text-white/60">Salles d'eau</p>
+              <p className="text-xs text-gray-600 dark:text-white/60">Salles d&apos;eau</p>
             </div>
           </div>
 

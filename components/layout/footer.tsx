@@ -39,7 +39,7 @@ export const Footer = () => {
         <div className="flex-1 space-y-3">
           <p className="text-lg font-semibold text-white">Dousell Immo</p>
           <p className="text-sm leading-relaxed text-white/70 max-w-md">
-            L'immobilier de confiance à Dakar et au Sénégal. Nous accompagnons particuliers et professionnels dans leurs projets immobiliers avec expertise et transparence.
+            L&apos;immobilier de confiance à Dakar et au Sénégal. Nous accompagnons particuliers et professionnels dans leurs projets immobiliers avec expertise et transparence.
           </p>
         </div>
         <div className="flex flex-1 flex-col gap-4 text-sm text-white/70 sm:flex-row">

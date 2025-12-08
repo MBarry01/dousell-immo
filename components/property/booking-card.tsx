@@ -2,12 +2,10 @@
 
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { MessageCircle, Phone, Calendar } from "lucide-react";
+import { MessageCircle, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
-import { AGENCY_PHONE, AGENCY_PHONE_DISPLAY } from "@/lib/constants";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { trackPropertyAction } from "@/app/api/property-stats/actions";
 import { useAuth } from "@/hooks/use-auth";
 import {
