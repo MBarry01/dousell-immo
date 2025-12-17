@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { SlidersHorizontal } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { SlidersHorizontal, ChevronDown, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import type { PropertyFilters } from "@/services/propertyService";
 export const QuickSearch = () => {
   const router = useRouter();
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [mobileFiltersExpanded, setMobileFiltersExpanded] = useState(false);
   const [filters, setFilters] = useState<PropertyFilters>({});
   const [location, setLocation] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
@@ -71,6 +72,9 @@ export const QuickSearch = () => {
     router.push(`/recherche?${params.toString()}`);
   };
 
+  // Compteur de filtres actifs pour le badge
+  const activeFilterCount = [location, maxPrice, minSurface].filter(Boolean).length;
+
   return (
     <>
       <motion.section
@@ -87,39 +91,113 @@ export const QuickSearch = () => {
             </p>
             <h2 className="text-2xl font-semibold">Trouve ton prochain bien</h2>
           </div>
+          
+          {/* Bouton Filtres - Mobile: toggle accordéon / Desktop: ouvre drawer */}
           <Button
             variant="secondary"
-            className="rounded-2xl border border-white/20 bg-transparent text-white hover:bg-white/10"
+            className="relative rounded-2xl border border-white/20 bg-transparent text-white hover:bg-white/10 sm:hidden"
+            onClick={() => setMobileFiltersExpanded(!mobileFiltersExpanded)}
+          >
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            Filtres
+            {activeFilterCount > 0 && (
+              <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs font-bold text-black">
+                {activeFilterCount}
+              </span>
+            )}
+            <ChevronDown 
+              className={`ml-2 h-4 w-4 transition-transform duration-200 ${
+                mobileFiltersExpanded ? "rotate-180" : ""
+              }`} 
+            />
+          </Button>
+          
+          {/* Bouton desktop - ouvre le drawer complet */}
+          <Button
+            variant="secondary"
+            className="hidden rounded-2xl border border-white/20 bg-transparent text-white hover:bg-white/10 sm:flex"
             onClick={() => setFiltersOpen(true)}
           >
             <SlidersHorizontal className="mr-2 h-4 w-4" /> Filtres avancés
           </Button>
         </div>
-      <form onSubmit={handleSubmit} className="mt-6 grid gap-3 sm:grid-cols-4">
-        <Input 
-          placeholder="Ville, quartier" 
-          value={location || ""}
-          onChange={(e) => setLocation(e.target.value)}
-        />
-        <Input 
-          placeholder="Budget max (FCFA)" 
-          type="number"
-          value={maxPrice || ""}
-          onChange={(e) => setMaxPrice(e.target.value)}
-        />
-        <Input 
-          placeholder="Surface min (m²)" 
-          type="number"
-          value={minSurface || ""}
-          onChange={(e) => setMinSurface(e.target.value)}
-        />
-        <Button 
-          type="submit"
-          className="rounded-2xl bg-white text-black hover:bg-white/90"
-        >
-          Rechercher
-        </Button>
-      </form>
+
+        {/* Mobile: Filtres en accordéon */}
+        <AnimatePresence>
+          {mobileFiltersExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="overflow-hidden sm:hidden"
+            >
+              <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
+                <Input 
+                  placeholder="Ville, quartier" 
+                  value={location || ""}
+                  onChange={(e) => setLocation(e.target.value)}
+                />
+                <Input 
+                  placeholder="Budget max (FCFA)" 
+                  type="number"
+                  value={maxPrice || ""}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                />
+                <Input 
+                  placeholder="Surface min (m²)" 
+                  type="number"
+                  value={minSurface || ""}
+                  onChange={(e) => setMinSurface(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Button 
+                    type="submit"
+                    className="flex-1 rounded-2xl bg-white text-black hover:bg-white/90"
+                  >
+                    <Search className="mr-2 h-4 w-4" />
+                    Rechercher
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="rounded-2xl text-white/60 hover:text-white"
+                    onClick={() => setFiltersOpen(true)}
+                  >
+                    + de filtres
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Desktop: Formulaire toujours visible */}
+        <form onSubmit={handleSubmit} className="mt-6 hidden gap-3 sm:grid sm:grid-cols-4">
+          <Input 
+            placeholder="Ville, quartier" 
+            value={location || ""}
+            onChange={(e) => setLocation(e.target.value)}
+          />
+          <Input 
+            placeholder="Budget max (FCFA)" 
+            type="number"
+            value={maxPrice || ""}
+            onChange={(e) => setMaxPrice(e.target.value)}
+          />
+          <Input 
+            placeholder="Surface min (m²)" 
+            type="number"
+            value={minSurface || ""}
+            onChange={(e) => setMinSurface(e.target.value)}
+          />
+          <Button 
+            type="submit"
+            className="rounded-2xl bg-white text-black hover:bg-white/90"
+          >
+            Rechercher
+          </Button>
+        </form>
       </motion.section>
       
       <FilterDrawer
@@ -131,10 +209,3 @@ export const QuickSearch = () => {
     </>
   );
 };
-
-
-
-
-
-
-
