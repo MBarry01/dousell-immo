@@ -82,9 +82,9 @@ export const QuickSearch = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.5 }}
-        className="mt-6 rounded-[32px] border border-white/10 bg-white/5 p-4 text-white sm:p-6"
+        className="mt-6 rounded-[32px] border border-white/10 bg-white/5 p-4 text-white md:p-6"
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">
               Recherche rapide
@@ -92,10 +92,10 @@ export const QuickSearch = () => {
             <h2 className="text-2xl font-semibold">Trouve ton prochain bien</h2>
           </div>
           
-          {/* Bouton Filtres - Mobile: toggle accordéon / Desktop: ouvre drawer */}
+          {/* Bouton Filtres - Mobile: toggle accordéon */}
           <Button
             variant="secondary"
-            className="relative rounded-2xl border border-white/20 bg-transparent text-white hover:bg-white/10 sm:hidden"
+            className="relative rounded-2xl border border-white/20 bg-transparent text-white hover:bg-white/10 md:hidden"
             onClick={() => setMobileFiltersExpanded(!mobileFiltersExpanded)}
           >
             <SlidersHorizontal className="mr-2 h-4 w-4" />
@@ -115,7 +115,7 @@ export const QuickSearch = () => {
           {/* Bouton desktop - ouvre le drawer complet */}
           <Button
             variant="secondary"
-            className="hidden rounded-2xl border border-white/20 bg-transparent text-white hover:bg-white/10 sm:flex"
+            className="hidden rounded-2xl border border-white/20 bg-transparent text-white hover:bg-white/10 md:flex"
             onClick={() => setFiltersOpen(true)}
           >
             <SlidersHorizontal className="mr-2 h-4 w-4" /> Filtres avancés
@@ -130,7 +130,7 @@ export const QuickSearch = () => {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="overflow-hidden sm:hidden"
+              className="overflow-hidden md:hidden"
             >
               <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
                 <Input 
@@ -173,7 +173,7 @@ export const QuickSearch = () => {
         </AnimatePresence>
 
         {/* Desktop: Formulaire toujours visible */}
-        <form onSubmit={handleSubmit} className="mt-6 hidden gap-3 sm:grid sm:grid-cols-4">
+        <form onSubmit={handleSubmit} className="mt-6 hidden gap-3 md:grid md:grid-cols-4">
           <Input 
             placeholder="Ville, quartier" 
             value={location || ""}

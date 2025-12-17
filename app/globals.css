@@ -121,6 +121,19 @@
   pointer-events: all;
 }
 
+/* ============================================
+   PWA STANDALONE MODE - Safe Areas
+   ============================================ */
+@supports (padding: env(safe-area-inset-bottom)) {
+  /* Mode PWA standalone sur iOS */
+  @media all and (display-mode: standalone) {
+    body {
+      /* Padding pour la barre de navigation en bas */
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+  }
+}
+
 /* Animation fade in pour le contenu après splash */
 @keyframes fadeIn {
   from {
