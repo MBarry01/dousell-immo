@@ -29,3 +29,6 @@ export function MicrosoftClarity({ clarityId }: MicrosoftClarityProps) {
   );
 }
 
+
+
+

@@ -122,3 +122,6 @@ COMMENT ON COLUMN public.profiles.is_verified IS 'Indique si le profil est véri
 
 
 
+
+
+
