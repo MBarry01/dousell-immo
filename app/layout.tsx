@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { SuppressHydrationWarning } from "@/components/providers/suppress-hydration-warning";
+import { SplashProvider } from "@/components/providers/splash-provider";
 import { CookieConsent } from "@/components/ui/cookie-consent";
 import { ConditionalGoogleAnalytics } from "@/components/analytics/conditional-google-analytics";
 import { MicrosoftClarity } from "@/components/analytics/microsoft-clarity";
@@ -100,14 +101,16 @@ export default function RootLayout({
       >
         <SuppressHydrationWarning />
         <ServiceWorkerRegister />
-        <AppShell>{children}</AppShell>
-        <InstallPrompt />
-        <Toaster position="top-center" theme="dark" richColors />
-        <CookieConsent />
+        <SplashProvider>
+          <AppShell>{children}</AppShell>
+          <InstallPrompt />
+          <Toaster position="top-center" theme="dark" richColors />
+          <CookieConsent />
+          <PhoneMissingDialog />
+        </SplashProvider>
         {gaId && <ConditionalGoogleAnalytics gaId={gaId} />}
         <MicrosoftClarity clarityId={clarityId} />
         <SpeedInsights />
-        <PhoneMissingDialog />
       </body>
     </html>
   );
