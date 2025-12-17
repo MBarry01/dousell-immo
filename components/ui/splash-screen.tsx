@@ -61,7 +61,7 @@ export const SplashScreen = ({ onAnimationComplete }: SplashScreenProps) => {
           <motion.path
             d="M128 304L256 192L384 304"
             stroke="white"
-            strokeWidth="32"
+            strokeWidth="20"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
@@ -82,7 +82,7 @@ export const SplashScreen = ({ onAnimationComplete }: SplashScreenProps) => {
           <motion.path
             d="M192 288V384H320V288"
             stroke="white"
-            strokeWidth="32"
+            strokeWidth="20"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
