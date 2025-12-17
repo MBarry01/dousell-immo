@@ -29,41 +29,38 @@ const removeSplashBlocker = () => {
 /**
  * SplashProvider - Gère l'affichage du splash screen au chargement
  * 
- * IMPORTANT: Le contenu n'est PAS rendu tant que le splash est visible
- * pour éviter tout flash de contenu.
+ * Structure stable pour éviter les warnings de key dans Next.js App Router
  */
 export const SplashProvider = ({
   children,
   showEveryVisit = false,
   duration = SPLASH_DURATION,
 }: SplashProviderProps) => {
-  // État initial: on ne sait pas encore si on doit montrer le splash
-  const [splashState, setSplashState] = useState<"loading" | "showing" | "hidden">("loading");
+  const [showSplash, setShowSplash] = useState(true);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     // Vérifier sessionStorage pour éviter de re-montrer le splash
     if (!showEveryVisit) {
       const hasShown = sessionStorage.getItem(SESSION_KEY);
       if (hasShown) {
-        // Supprimer le blocker HTML immédiatement
         removeSplashBlocker();
-        setSplashState("hidden");
+        setShowSplash(false);
+        setIsReady(true);
         return;
       }
     }
 
-    // Supprimer le blocker HTML - React prend le relais avec le vrai splash
+    // Supprimer le blocker HTML - React prend le relais
     removeSplashBlocker();
-    
-    // Afficher le splash React
-    setSplashState("showing");
+    setIsReady(true);
     
     // Bloquer le scroll pendant le splash
     document.body.style.overflow = "hidden";
     
     // Timer pour masquer le splash
     const timer = setTimeout(() => {
-      setSplashState("hidden");
+      setShowSplash(false);
       document.body.style.overflow = "";
       
       // Marquer comme affiché pour cette session
@@ -72,37 +69,40 @@ export const SplashProvider = ({
       }
     }, duration);
 
-    // Cleanup
     return () => {
       clearTimeout(timer);
       document.body.style.overflow = "";
     };
   }, [duration, showEveryVisit]);
 
-  // État initial (avant useEffect) - écran noir (le blocker HTML est déjà visible)
-  if (splashState === "loading") {
-    return <div className="fixed inset-0 z-[9999] bg-black" />;
-  }
-
-  // Splash en cours d'affichage - NE PAS rendre le contenu
-  if (splashState === "showing") {
-    return (
-      <AnimatePresence mode="wait">
-        <SplashScreen key="splash" />
-      </AnimatePresence>
-    );
-  }
-
-  // Splash terminé - afficher le contenu avec fade in
+  // Structure stable - toujours le même wrapper
   return (
-    <div
-      className="animate-fade-in"
-      style={{
-        animation: "fadeIn 0.4s ease-out forwards",
-      }}
-    >
-      {children}
-    </div>
+    <>
+      {/* Splash Screen avec AnimatePresence */}
+      <AnimatePresence mode="wait">
+        {showSplash && isReady && <SplashScreen key="splash-screen" />}
+      </AnimatePresence>
+      
+      {/* Contenu principal - toujours rendu mais caché si splash visible */}
+      <div
+        key="main-content"
+        style={{
+          opacity: showSplash ? 0 : 1,
+          pointerEvents: showSplash ? "none" : "auto",
+          transition: "opacity 0.4s ease-out",
+        }}
+      >
+        {children}
+      </div>
+      
+      {/* Écran noir de fallback avant hydratation */}
+      {!isReady && (
+        <div 
+          key="loading-blocker"
+          className="fixed inset-0 z-[9999] bg-black" 
+        />
+      )}
+    </>
   );
 };
 
