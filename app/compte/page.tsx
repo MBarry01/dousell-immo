@@ -131,26 +131,26 @@ export default function ComptePage() {
     <div className="space-y-8 py-6">
       <FadeIn>
         {/* Header Utilisateur */}
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-14 w-14 border border-zinc-800">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <Avatar className="h-14 w-14 shrink-0 border border-zinc-800">
               <AvatarImage src={user.user_metadata?.avatar_url as string} alt={displayName} />
               <AvatarFallback className="bg-zinc-900 text-zinc-100 text-lg font-semibold border border-zinc-800">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold text-white">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-bold text-white break-words">
                   Bonjour, {firstName}
                 </h1>
                 {!rolesLoading && userRoles.length > 0 && (
-                  <div className="flex gap-1.5">
+                  <div className="flex flex-wrap gap-1.5">
                     {userRoles.map((role) => {
                       return (
                         <Badge
                           key={role}
-                          className={`text-xs ${ROLE_COLORS[role] || "bg-white/10 text-white/80"}`}
+                          className={`text-xs shrink-0 ${ROLE_COLORS[role] || "bg-white/10 text-white/80"}`}
                         >
                           {ROLE_LABELS[role] || role}
                         </Badge>
@@ -159,7 +159,7 @@ export default function ComptePage() {
                   </div>
                 )}
               </div>
-              <p className="mt-1 text-sm text-zinc-400">
+              <p className="mt-1 text-sm text-zinc-400 truncate">
                 {user.email}
               </p>
             </div>
@@ -167,11 +167,11 @@ export default function ComptePage() {
           <Button
             variant="ghost"
             size="sm"
-            className="text-zinc-400 hover:text-white hover:bg-zinc-900"
+            className="shrink-0 text-zinc-400 hover:text-white hover:bg-zinc-900 w-full sm:w-auto"
             onClick={handleSignOut}
           >
-            <LogOut className="mr-2 h-4 w-4" />
-            Déconnexion
+            <LogOut className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Déconnexion</span>
           </Button>
         </div>
 

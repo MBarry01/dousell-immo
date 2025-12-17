@@ -111,7 +111,7 @@ export function UserNav() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-56 rounded-xl border border-white/10 bg-[#05080c] text-white shadow-xl z-[100] md:z-[100]"
+        className="w-56 max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-[#05080c] text-white shadow-xl z-[100] md:z-[100]"
         align="end"
         sideOffset={8}
         side="bottom"
@@ -128,9 +128,9 @@ export function UserNav() {
           }}
         >
           <DropdownMenuLabel>
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-semibold leading-none">{displayName}</p>
-              <p className="text-xs leading-none text-muted-foreground">
+            <div className="flex flex-col space-y-1 min-w-0">
+              <p className="text-sm font-semibold leading-none truncate">{displayName}</p>
+              <p className="text-xs leading-none text-muted-foreground truncate">
                 {user.email}
               </p>
             </div>
@@ -242,13 +242,13 @@ export function UserNav() {
               }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => router.push("/admin")}
-              >
-                <Shield className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                {getAdminLabel()}
-              </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => router.push("/admin")}
+            >
+              <Shield className="mr-2 h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+              <span className="truncate">{getAdminLabel()}</span>
+            </DropdownMenuItem>
             </motion.div>
           )}
 
@@ -265,8 +265,8 @@ export function UserNav() {
               className="cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10"
               onClick={handleSignOut}
             >
-              <LogOut className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-              Déconnexion
+              <LogOut className="mr-2 h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+              <span className="truncate">Déconnexion</span>
             </DropdownMenuItem>
           </motion.div>
         </motion.div>
