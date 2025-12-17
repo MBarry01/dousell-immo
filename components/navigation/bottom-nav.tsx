@@ -15,8 +15,8 @@ export const BottomNav = () => {
   const pathname = usePathname();
 
   return (
-    <nav 
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#05080c] backdrop-blur-xl md:hidden"
+    <nav
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#05080c]/90 backdrop-blur-xl md:hidden"
       style={{
         paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
       }}
@@ -32,11 +32,10 @@ export const BottomNav = () => {
               className="flex flex-1 flex-col items-center gap-0.5 px-1 py-1 min-w-0"
             >
               <span
-                className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
-                  active 
-                    ? "bg-white text-[#05080c] shadow-lg shadow-white/20" 
+                className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${active
+                    ? "bg-white text-[#05080c] shadow-lg shadow-white/20"
                     : "text-white/50"
-                }`}
+                  }`}
               >
                 <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.5 : 2} />
               </span>

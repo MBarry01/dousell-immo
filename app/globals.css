@@ -50,16 +50,12 @@
   body {
     font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
       "SF Pro Display", "Segoe UI", sans-serif;
-    background: radial-gradient(
-        circle at top right,
+    background: radial-gradient(circle at top right,
         rgba(239, 246, 255, 0.08),
-        transparent 45%
-      ),
-      radial-gradient(
-        circle at 20% 20%,
+        transparent 45%),
+      radial-gradient(circle at 20% 20%,
         rgba(255, 214, 150, 0.12),
-        transparent 35%
-      ),
+        transparent 35%),
       var(--background);
     color: var(--foreground);
     min-height: 100dvh;
@@ -75,6 +71,7 @@
 
   /* Sur mobile, s'assurer que les inputs ont au moins 16px */
   @media screen and (max-width: 768px) {
+
     input,
     textarea,
     select {
@@ -105,6 +102,7 @@
   .scrollbar-hide {
     scrollbar-width: none;
   }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -124,21 +122,14 @@
 /* ============================================
    PWA STANDALONE MODE - Safe Areas
    ============================================ */
-@supports (padding: env(safe-area-inset-bottom)) {
-  /* Mode PWA standalone sur iOS */
-  @media all and (display-mode: standalone) {
-    body {
-      /* Padding pour la barre de navigation en bas */
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-  }
-}
+
 
 /* Animation fade in pour le contenu après splash */
 @keyframes fadeIn {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -154,6 +145,7 @@
     opacity: 0;
     transform: scale(0.95) translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -165,6 +157,7 @@
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+
   to {
     opacity: 0;
     transform: scale(0.95) translateY(-4px);

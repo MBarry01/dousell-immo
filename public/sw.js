@@ -1,10 +1,12 @@
 // Service Worker for Dousell Immo PWA
-const CACHE_NAME = "dousell-immo-v5";
+const CACHE_NAME = "dousell-immo-v6";
 const STATIC_ASSETS = [
   "/",
   "/manifest.json",
   "/icons/icon.svg",
-  "/offline",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+  "/offline.html",
 ];
 
 // Allow the app to trigger skipWaiting on update (helps PWA update reliability)
@@ -118,7 +120,7 @@ self.addEventListener("fetch", (event) => {
   ];
 
   // Vérifie si l'URL contient un des domaines externes
-  const isExternalResource = externalDomains.some((domain) => 
+  const isExternalResource = externalDomains.some((domain) =>
     url.hostname.includes(domain)
   );
 
@@ -149,7 +151,7 @@ self.addEventListener("fetch", (event) => {
           }
           // Si pas de cache, retourner la page offline pour les requêtes de navigation
           if (event.request.mode === "navigate") {
-            return caches.match("/offline");
+            return caches.match("/offline.html");
           }
         });
       })
