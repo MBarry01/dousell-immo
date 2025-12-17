@@ -1,5 +1,5 @@
 // Service Worker for Dousell Immo PWA
-const CACHE_NAME = "dousell-immo-v3";
+const CACHE_NAME = "dousell-immo-v4";
 const STATIC_ASSETS = [
   "/",
   "/manifest.json",
