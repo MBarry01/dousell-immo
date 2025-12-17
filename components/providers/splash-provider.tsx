@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { SplashScreen } from "@/components/ui/splash-screen";
 
@@ -16,42 +16,55 @@ interface SplashProviderProps {
 }
 
 /**
+ * Supprime le blocker HTML créé par le script inline
+ */
+const removeSplashBlocker = () => {
+  const blocker = document.getElementById("splash-blocker");
+  if (blocker) {
+    blocker.remove();
+  }
+  document.documentElement.style.overflow = "";
+};
+
+/**
  * SplashProvider - Gère l'affichage du splash screen au chargement
  * 
- * Fonctionnalités :
- * - Affiche le splash au premier chargement (ou à chaque visite si configuré)
- * - Bloque le scroll pendant l'animation
- * - Transition fluide avec AnimatePresence
- * - Stocke en sessionStorage pour ne pas re-afficher lors de la navigation
+ * IMPORTANT: Le contenu n'est PAS rendu tant que le splash est visible
+ * pour éviter tout flash de contenu.
  */
 export const SplashProvider = ({
   children,
   showEveryVisit = false,
   duration = SPLASH_DURATION,
 }: SplashProviderProps) => {
-  const [showSplash, setShowSplash] = useState(true);
-  const [isClient, setIsClient] = useState(false);
+  // État initial: on ne sait pas encore si on doit montrer le splash
+  const [splashState, setSplashState] = useState<"loading" | "showing" | "hidden">("loading");
 
-  // Vérifier si on doit afficher le splash (côté client uniquement)
   useEffect(() => {
-    setIsClient(true);
-    
     // Vérifier sessionStorage pour éviter de re-montrer le splash
     if (!showEveryVisit) {
       const hasShown = sessionStorage.getItem(SESSION_KEY);
       if (hasShown) {
-        setShowSplash(false);
+        // Supprimer le blocker HTML immédiatement
+        removeSplashBlocker();
+        setSplashState("hidden");
         return;
       }
     }
 
+    // Supprimer le blocker HTML - React prend le relais avec le vrai splash
+    removeSplashBlocker();
+    
+    // Afficher le splash React
+    setSplashState("showing");
+    
     // Bloquer le scroll pendant le splash
     document.body.style.overflow = "hidden";
     
     // Timer pour masquer le splash
     const timer = setTimeout(() => {
-      setShowSplash(false);
-      document.body.style.overflow = "unset";
+      setSplashState("hidden");
+      document.body.style.overflow = "";
       
       // Marquer comme affiché pour cette session
       if (!showEveryVisit) {
@@ -62,48 +75,35 @@ export const SplashProvider = ({
     // Cleanup
     return () => {
       clearTimeout(timer);
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = "";
     };
   }, [duration, showEveryVisit]);
 
-  // Callback quand l'animation de sortie est terminée
-  const handleAnimationComplete = useCallback(() => {
-    // Animation de sortie terminée - le splash est complètement parti
-  }, []);
+  // État initial (avant useEffect) - écran noir (le blocker HTML est déjà visible)
+  if (splashState === "loading") {
+    return <div className="fixed inset-0 z-[9999] bg-black" />;
+  }
 
-  // Éviter le flash de contenu avant hydratation
-  if (!isClient) {
+  // Splash en cours d'affichage - NE PAS rendre le contenu
+  if (splashState === "showing") {
     return (
-      <>
-        {/* Placeholder noir pendant l'hydratation SSR */}
-        <div className="fixed inset-0 z-50 bg-black" />
-        {children}
-      </>
+      <AnimatePresence mode="wait">
+        <SplashScreen key="splash" />
+      </AnimatePresence>
     );
   }
 
+  // Splash terminé - afficher le contenu avec fade in
   return (
-    <>
-      <AnimatePresence mode="wait">
-        {showSplash && (
-          <SplashScreen
-            key="splash"
-            onAnimationComplete={handleAnimationComplete}
-          />
-        )}
-      </AnimatePresence>
-      
-      {/* Contenu principal avec fade in subtil */}
-      <div
-        className={`transition-opacity duration-500 ${
-          showSplash ? "opacity-0" : "opacity-100"
-        }`}
-      >
-        {children}
-      </div>
-    </>
+    <div
+      className="animate-fade-in"
+      style={{
+        animation: "fadeIn 0.4s ease-out forwards",
+      }}
+    >
+      {children}
+    </div>
   );
 };
 
 export default SplashProvider;
-

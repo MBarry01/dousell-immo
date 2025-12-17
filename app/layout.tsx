@@ -94,7 +94,28 @@ export default function RootLayout({
 
   return (
     <html lang="fr" suppressHydrationWarning>
-      {/* Next.js ajoute automatiquement le DOCTYPE pour éviter Quirks Mode */}
+      <head>
+        {/* Script inline pour afficher écran noir AVANT React (anti-flash) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                // Ne pas bloquer si déjà vu dans cette session
+                if (sessionStorage.getItem('doussel_splash_shown')) return;
+                
+                // Créer le blocker immédiatement
+                var d = document.createElement('div');
+                d.id = 'splash-blocker';
+                d.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;';
+                document.documentElement.appendChild(d);
+                
+                // Bloquer le scroll
+                document.documentElement.style.overflow = 'hidden';
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} bg-[#05080c] antialiased`}
         suppressHydrationWarning
