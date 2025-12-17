@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Toaster } from "@/components/ui/sonner";
@@ -120,6 +121,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-[#05080c] antialiased`}
         suppressHydrationWarning
       >
+        {/* Top Loader - Barre de progression dorée style YouTube */}
+        <NextTopLoader
+          color="#F2C94C"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #F2C94C, 0 0 5px #F2C94C"
+          zIndex={9999}
+        />
         <SuppressHydrationWarning />
         <ServiceWorkerRegister />
         <SplashProvider>
