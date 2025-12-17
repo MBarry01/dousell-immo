@@ -26,7 +26,7 @@ export const SplashScreen = ({ onAnimationComplete }: SplashScreenProps) => {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black"
+      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black"
       initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

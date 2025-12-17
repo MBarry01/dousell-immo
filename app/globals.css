@@ -116,7 +116,7 @@
 #splash-blocker {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 10000;
   background: #000;
   pointer-events: all;
 }

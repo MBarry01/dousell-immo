@@ -1,11 +1,18 @@
 // Service Worker for Dousell Immo PWA
-const CACHE_NAME = "dousell-immo-v4";
+const CACHE_NAME = "dousell-immo-v5";
 const STATIC_ASSETS = [
   "/",
   "/manifest.json",
   "/icons/icon.svg",
   "/offline",
 ];
+
+// Allow the app to trigger skipWaiting on update (helps PWA update reliability)
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
 
 // Install event - cache static assets
 self.addEventListener("install", (event) => {

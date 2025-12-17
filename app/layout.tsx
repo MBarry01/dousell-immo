@@ -102,12 +102,16 @@ export default function RootLayout({
             __html: `
               (function() {
                 // Ne pas bloquer si déjà vu dans cette session
-                if (sessionStorage.getItem('doussel_splash_shown')) return;
+                try {
+                  if (sessionStorage.getItem('doussel_splash_shown')) return;
+                } catch (e) {
+                  // sessionStorage peut être indisponible (Safari/PWA selon réglages) : on continue sans bloquer le script
+                }
                 
                 // Créer le blocker immédiatement
                 var d = document.createElement('div');
                 d.id = 'splash-blocker';
-                d.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;';
+                d.style.cssText = 'position:fixed;inset:0;z-index:10000;background:#000;';
                 document.documentElement.appendChild(d);
                 
                 // Bloquer le scroll
@@ -123,7 +127,7 @@ export default function RootLayout({
       >
         {/* Top Loader - Barre de progression dorée style YouTube */}
         <NextTopLoader
-          color="#F2C94C"
+          color="#F4C430"
           initialPosition={0.08}
           crawlSpeed={200}
           height={3}
@@ -131,8 +135,8 @@ export default function RootLayout({
           showSpinner={false}
           easing="ease"
           speed={200}
-          shadow="0 0 10px #F2C94C, 0 0 5px #F2C94C"
-          zIndex={9999}
+          shadow="0 0 10px #F4C430, 0 0 5px #F4C430"
+          zIndex={9000}
         />
         <SuppressHydrationWarning />
         <ServiceWorkerRegister />
