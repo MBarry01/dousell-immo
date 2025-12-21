@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Captcha } from "@/components/ui/captcha";
+import { sendGTMEvent } from "@/lib/gtm";
 import {
   visitRequestSchema,
   type VisitRequestFormValues,
@@ -29,7 +30,7 @@ function PlanifierVisitePageContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0); // Clé pour forcer le reset du widget
-  
+
   // Récupérer les paramètres de l'URL pour pré-remplir le formulaire
   const propertyId = searchParams?.get("propertyId");
   const propertyTitle = searchParams?.get("propertyTitle");
@@ -69,15 +70,23 @@ function PlanifierVisitePageContent() {
     try {
       setIsSubmitting(true);
       const result = await createVisitRequest(values, captchaToken);
-      
+
       if (!result.success) {
         toast.error(result.error || "Impossible d'envoyer la demande.");
         return;
       }
-      
+
       toast.success("Demande envoyée !", {
         description: `${values.fullName}, un conseiller vous rappelle sous 30 min.`,
       });
+
+      // GTM Tracking - Generate Lead
+      sendGTMEvent("generate_lead", {
+        source: "formulaire_visite",
+        location: "page_planifier",
+        project_type: values.projectType
+      });
+
       form.reset();
     } catch (error) {
       console.error("Erreur lors de l'envoi:", error);
@@ -225,6 +234,12 @@ function PlanifierVisitePageContent() {
             href="https://wa.me/221770000000"
             target="_blank"
             rel="noreferrer"
+            onClick={() => {
+              sendGTMEvent("contact_click", {
+                method: "whatsapp",
+                value: "page_planifier_bottom"
+              });
+            }}
             className="mt-3 inline-flex items-center justify-center gap-2 text-sm font-medium text-[#25D366] transition hover:text-[#1DA851]"
           >
             <MessageCircle className="h-5 w-5" />

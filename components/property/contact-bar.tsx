@@ -11,6 +11,7 @@ import { analyticsEvents } from "@/lib/analytics";
 import { AGENCY_PHONE_DISPLAY } from "@/lib/constants";
 import { trackPropertyAction } from "@/app/api/property-stats/actions";
 import { useAuth } from "@/hooks/use-auth";
+import { sendGTMEvent } from "@/lib/gtm";
 import type { Property } from "@/types/property";
 
 type ContactBarProps = {
@@ -24,7 +25,7 @@ export const ContactBar = ({ property }: ContactBarProps) => {
   // - Annonce PAYANTE (boost_visibilite) -> Afficher le numéro du propriétaire (contact_phone ou owner.phone)
   // - Annonce GRATUITE (mandat_confort) -> Afficher le numéro de l'Agence Doussel Immo
   const AGENCY_PHONE = "+221781385281"; // Numéro de Doussel Immo
-  
+
   let displayPhone = AGENCY_PHONE; // Par défaut (Mandat gratuit)
 
   if (property.service_type === "boost_visibilite") {
@@ -32,7 +33,7 @@ export const ContactBar = ({ property }: ContactBarProps) => {
     const ownerPhone = property.contact_phone || property.owner?.phone;
     displayPhone = ownerPhone || AGENCY_PHONE; // Fallback sur agence si aucun numéro trouvé
   }
-  
+
   const targetPhone = displayPhone;
 
   // Pour WhatsApp : utiliser le même numéro cible
@@ -45,6 +46,14 @@ export const ContactBar = ({ property }: ContactBarProps) => {
     hapticFeedback.medium();
     analyticsEvents.contactWhatsApp(property.id, property.title);
 
+    // GTM Tracking
+    sendGTMEvent("contact_click", {
+      method: "whatsapp",
+      value: "mobile_bottom_bar",
+      property_id: property.id,
+      property_title: property.title
+    });
+
     // Tracker le clic WhatsApp
     await trackPropertyAction({
       propertyId: property.id,
@@ -56,6 +65,14 @@ export const ContactBar = ({ property }: ContactBarProps) => {
   const handleCall = useCallback(async () => {
     hapticFeedback.medium();
     analyticsEvents.contactCall(property.id, property.title);
+
+    // GTM Tracking
+    sendGTMEvent("contact_click", {
+      method: "phone",
+      value: "mobile_bottom_bar",
+      property_id: property.id,
+      property_title: property.title
+    });
 
     // Tracker le clic téléphone
     await trackPropertyAction({

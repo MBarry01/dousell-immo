@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { trackPropertyAction } from "@/app/api/property-stats/actions";
 import { useAuth } from "@/hooks/use-auth";
+import { sendGTMEvent } from "@/lib/gtm";
 import {
   Accordion,
   AccordionContent,
@@ -42,6 +43,13 @@ export const BookingCard = ({ property }: BookingCardProps) => {
   )}`;
 
   const handleWhatsAppClick = useCallback(async () => {
+    // GTM Tracking
+    sendGTMEvent("contact_click", {
+      method: "whatsapp",
+      value: "desktop_sidebar",
+      property_id: property.id
+    });
+
     await trackPropertyAction({
       propertyId: property.id,
       actionType: "whatsapp_click",
@@ -56,7 +64,7 @@ export const BookingCard = ({ property }: BookingCardProps) => {
   const handleRequestVisit = () => {
     // Construire le message pré-rempli avec les informations du bien
     const propertyInfo = `Je suis intéressé(e) par le bien "${property.title}" (${formatCurrency(property.price)}) situé à ${property.location.address || property.location.city}${property.location.landmark ? `, ${property.location.landmark}` : ""}.`;
-    
+
     // Rediriger vers la page de planification avec les paramètres
     const params = new URLSearchParams({
       propertyId: property.id,
@@ -66,7 +74,7 @@ export const BookingCard = ({ property }: BookingCardProps) => {
       projectType: property.transaction === "location" ? "location" : "achat",
       message: propertyInfo,
     });
-    
+
     router.push(`/planifier-visite?${params.toString()}`);
   };
 
