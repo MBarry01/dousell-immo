@@ -30,14 +30,37 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://dousell-immo.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app"),
   title: {
-    default: "Dousell Immo",
-    template: "%s · Dousell Immo",
+    default: "Dousell Immo | L'immobilier de confiance au Sénégal",
+    template: "%s | Dousell Immo",
   },
   description:
-    "L'immobilier de confiance à Dakar et au Sénégal. Expérience mobile-first inspirée des apps natives iOS & Android.",
+    "Villas, terrains et appartements de luxe à Dakar et sur la Petite Côte. Une expérience immobilière transparente et moderne.",
   manifest: "/manifest.json",
+  openGraph: {
+    type: "website",
+    locale: "fr_SN",
+    url: "https://dousell-immo.app",
+    siteName: "Dousell Immo",
+    title: "Dousell Immo | L'immobilier de confiance au Sénégal",
+    description: "Villas, terrains et appartements de luxe à Dakar et sur la Petite Côte.",
+    images: [
+      {
+        url: "/monument.png", // Image par défaut (Monument de la Renaissance)
+        width: 1200,
+        height: 630,
+        alt: "Dousell Immo - Immobilier Sénégal",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dousell Immo | L'immobilier de confiance au Sénégal",
+    description: "Villas, terrains et appartements de luxe à Dakar et sur la Petite Côte.",
+    images: ["/monument.png"],
+    creator: "@dousell_immo",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
