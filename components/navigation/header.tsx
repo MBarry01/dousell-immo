@@ -39,12 +39,23 @@ export const Header = () => {
       {/* Version Mobile */}
       <header
         className={cn(
-          "fixed top-0 inset-x-0 z-50 flex h-16 items-center justify-between px-4 transition-all duration-300 pt-safe md:hidden",
+          "fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 transition-all duration-300 md:hidden",
           isScrolled
             ? "bg-black/80 backdrop-blur-md border-b border-white/5"
             : "bg-transparent border-transparent"
         )}
+        style={{
+          height: "calc(env(safe-area-inset-top, 0px) + 4rem)",
+          minHeight: "calc(env(safe-area-inset-top, 0px) + 4rem)",
+          paddingTop: "env(safe-area-inset-top, 0px)",
+          willChange: "transform",
+          transform: "translateZ(0)",
+          WebkitTransform: "translateZ(0)",
+          WebkitBackfaceVisibility: "hidden",
+          backfaceVisibility: "hidden",
+        }}
       >
+        <div className="flex h-16 w-full items-center justify-between">
         <Link
           href="/"
           className="flex items-center transition-opacity active:opacity-70 hover:opacity-80"
@@ -93,10 +104,18 @@ export const Header = () => {
         {loading && (
           <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
         )}
+        </div>
       </header>
 
       {/* Version Desktop */}
-      <header className="sticky top-0 z-40 hidden w-full pt-safe md:block">
+      <header 
+        className="sticky top-0 z-40 hidden w-full md:block"
+        style={{
+          paddingTop: "env(safe-area-inset-top, 0px)",
+          willChange: "transform",
+          transform: "translateZ(0)",
+        }}
+      >
         <div className="glass-panel mx-auto flex max-w-6xl items-center justify-between rounded-[32px] border border-white/5 px-6 py-3.5 shadow-lg shadow-black/20 lg:px-8 lg:py-4 relative">
           <Link
             href="/"

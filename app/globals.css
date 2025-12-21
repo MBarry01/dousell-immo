@@ -10,6 +10,10 @@
   --card-foreground: #fafbfd;
   --accent: #f2c94c;
   --accent-foreground: #05080c;
+  /* Couleur primaire - Jaune Or de marque #F4C430 */
+  --primary: 45 91% 57%;
+  --primary-foreground: 0 0% 0%;
+  --ring: 45 91% 57%;
   --border: rgba(255, 255, 255, 0.08);
   --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
@@ -27,6 +31,10 @@
     --card-foreground: #0f172a;
     --accent: #111827;
     --accent-foreground: #f5f5f5;
+    /* Couleur primaire - Jaune Or de marque #F4C430 (identique en mode light) */
+    --primary: 45 91% 57%;
+    --primary-foreground: 0 0% 0%;
+    --ring: 45 91% 57%;
     --border: rgba(15, 23, 42, 0.08);
   }
 }
@@ -34,6 +42,15 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Couleurs primaires - Jaune Or de marque #F4C430 */
+  /* Format HSL pour Tailwind v4 - utilise hsl() automatiquement */
+  --color-primary: 45 91% 57%;
+  --color-primary-foreground: 0 0% 0%;
+  --color-ring: 45 91% 57%;
+  
+  /* Alias pour compatibilité Shadcn UI */
+  --color-brand: #F4C430;
 }
 
 @layer base {
@@ -41,25 +58,30 @@
     border-color: var(--border);
   }
 
-  html,
-  body {
-    margin: 0;
-    padding: 0;
-  }
-
   body {
     font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
       "SF Pro Display", "Segoe UI", sans-serif;
-    background: radial-gradient(circle at top right,
+    background: radial-gradient(
+        circle at top right,
         rgba(239, 246, 255, 0.08),
-        transparent 45%),
-      radial-gradient(circle at 20% 20%,
+        transparent 45%
+      ),
+      radial-gradient(
+        circle at 20% 20%,
         rgba(255, 214, 150, 0.12),
-        transparent 35%),
+        transparent 35%
+      ),
       var(--background);
     color: var(--foreground);
     min-height: 100dvh;
     text-rendering: optimizeLegibility;
+  }
+  
+  /* Lien entre Tailwind v4 et les variables CSS Shadcn UI */
+  :root {
+    --tw-color-primary: hsl(var(--primary));
+    --tw-color-primary-foreground: hsl(var(--primary-foreground));
+    --tw-color-ring: hsl(var(--ring));
   }
 
   /* Empêcher le zoom automatique sur mobile quand on focus les inputs */
@@ -71,7 +93,6 @@
 
   /* Sur mobile, s'assurer que les inputs ont au moins 16px */
   @media screen and (max-width: 768px) {
-
     input,
     textarea,
     select {
@@ -87,11 +108,11 @@
 
 @layer utilities {
   .pt-safe {
-    padding-top: var(--safe-area-top);
+    padding-top: calc(var(--safe-area-top) + 1rem);
   }
 
   .pb-safe {
-    padding-bottom: var(--safe-area-bottom);
+    padding-bottom: calc(var(--safe-area-bottom) + 1rem);
   }
 
   .glass-panel {
@@ -102,41 +123,30 @@
   .scrollbar-hide {
     scrollbar-width: none;
   }
-
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-}
-
-/* ============================================
-   SPLASH SCREEN - Écran noir initial (avant JS)
-   ============================================ */
-#splash-blocker {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: #000;
-  pointer-events: all;
-}
-
-/* ============================================
-   PWA STANDALONE MODE - Safe Areas
-   ============================================ */
-
-
-/* Animation fade in pour le contenu après splash */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+  
+  /* Utilitaires pour la couleur primaire - Jaune Or #F4C430 */
+  .bg-primary {
+    background-color: hsl(var(--primary));
   }
-
-  to {
-    opacity: 1;
+  
+  .bg-primary\/90 {
+    background-color: hsl(var(--primary) / 0.9);
   }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
+  
+  .text-primary-foreground {
+    color: hsl(var(--primary-foreground));
+  }
+  
+  .border-primary {
+    border-color: hsl(var(--primary));
+  }
+  
+  .ring-primary {
+    --tw-ring-color: hsl(var(--ring));
+  }
 }
 
 /* Animations smooth pour les menus */
@@ -145,7 +155,6 @@
     opacity: 0;
     transform: scale(0.95) translateY(-4px);
   }
-
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -157,7 +166,6 @@
     opacity: 1;
     transform: scale(1) translateY(0);
   }
-
   to {
     opacity: 0;
     transform: scale(0.95) translateY(-4px);
@@ -179,22 +187,4 @@
 [data-state="closed"][data-radix-dropdown-menu-content],
 [data-state="closed"][data-radix-popover-content] {
   animation: smooth-fade-out 150ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Styles pour react-phone-number-input - version headless */
-.PhoneInput {
-  display: flex !important;
-  align-items: stretch !important;
-  width: 100% !important;
-  gap: 0 !important;
-}
-
-.PhoneInputCountry {
-  display: none !important;
-}
-
-.PhoneInputInput {
-  flex: 1 !important;
-  width: 100% !important;
-  min-width: 0 !important;
 }

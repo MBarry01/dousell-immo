@@ -108,7 +108,13 @@ export const AppShell = ({ children }: AppShellProps) => {
       <ScrollToTop />
       <div className="px-4 md:px-6">
         <Header />
-        <main className="mx-auto w-full max-w-6xl pt-[calc(env(safe-area-inset-top)+4rem)] md:pb-4 md:pt-6" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)" }}>
+        <main 
+          className="mx-auto w-full max-w-6xl md:pb-4 md:pt-6" 
+          style={{ 
+            paddingTop: "calc(env(safe-area-inset-top, 0px) + 4rem)",
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)" 
+          }}
+        >
           {shouldShowBreadcrumbs && (
             <div className="mb-6">
               <Breadcrumbs items={breadcrumbItems} />
