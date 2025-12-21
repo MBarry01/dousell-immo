@@ -93,6 +93,8 @@ export default function RootLayout({
 }>) {
   const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID || "ui7ik5nepa";
+  // TODO: Configure NEXT_PUBLIC_GTM_ID in your .env.local file
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
   return (
     <html lang="fr" suppressHydrationWarning>
@@ -127,14 +129,16 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {/* Google Tag Manager (noscript) */}
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-WM5MK8PH"
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          />
-        </noscript>
+        {gtmId && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
         {/* End Google Tag Manager (noscript) */}
 
         {/* Top Loader - Barre de progression dorée style YouTube */}
@@ -161,7 +165,7 @@ export default function RootLayout({
         </SplashProvider>
         {gaId && <ConditionalGoogleAnalytics gaId={gaId} />}
         <MicrosoftClarity clarityId={clarityId} />
-        <GoogleTagManager gtmId="GTM-WM5MK8PH" />
+        {gtmId && <GoogleTagManager gtmId={gtmId} />}
         <SpeedInsights />
       </body>
     </html>
