@@ -10,6 +10,7 @@ import { SuppressHydrationWarning } from "@/components/providers/suppress-hydrat
 import { SplashProvider } from "@/components/providers/splash-provider";
 import { CookieConsent } from "@/components/ui/cookie-consent";
 import { ConditionalGoogleAnalytics } from "@/components/analytics/conditional-google-analytics";
+import { GoogleTagManager } from "@next/third-parties/google";
 import { MicrosoftClarity } from "@/components/analytics/microsoft-clarity";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PhoneMissingDialog } from "@/components/auth/phone-missing-dialog";
@@ -125,6 +126,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-[#05080c] antialiased`}
         suppressHydrationWarning
       >
+        {/* Google Tag Manager (noscript) */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-WM5MK8PH"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+        {/* End Google Tag Manager (noscript) */}
+
         {/* Top Loader - Barre de progression dorée style YouTube */}
         <NextTopLoader
           color="#F4C430"
@@ -149,6 +161,7 @@ export default function RootLayout({
         </SplashProvider>
         {gaId && <ConditionalGoogleAnalytics gaId={gaId} />}
         <MicrosoftClarity clarityId={clarityId} />
+        <GoogleTagManager gtmId="GTM-WM5MK8PH" />
         <SpeedInsights />
       </body>
     </html>
