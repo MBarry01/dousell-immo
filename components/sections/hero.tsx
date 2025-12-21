@@ -18,15 +18,15 @@ export const HeroSection = () => {
         - iPhone 14 Pro Max (grand): 428px - min-h-[711px] ≈ 77% viewport
         Breakpoint sm:640px pour tablettes petites
       */}
-      <section 
+      <section
         className="relative md:hidden min-h-[85dvh] overflow-hidden rounded-none md:m-4 md:rounded-3xl"
         suppressHydrationWarning
       >
         {/* Image de fond - pleine immersion */}
         {/* Taille prédéfinie pour mobile/tablette pour un affichage optimal */}
         {/* Dimensions optimisées pour mobile: largeur fixe selon breakpoints */}
-        <div 
-          className="absolute flex flex-wrap justify-start items-start ml-0 mr-0" 
+        <div
+          className="absolute flex flex-wrap justify-start items-start ml-0 mr-0"
           style={{
             top: 0,
             left: 0,
@@ -63,7 +63,7 @@ export const HeroSection = () => {
           - Padding horizontal: px-4 sur petits écrans, px-6 sur écrans ≥640px
           - Padding bottom avec safe area: 46px + safe-area-inset-bottom
         */}
-        <div className="relative z-20 flex min-h-[600px] min-[375px]:min-h-[650px] min-[390px]:min-h-[711px] h-full flex-col justify-end px-4 sm:px-6 pb-[calc(env(safe-area-inset-bottom,0px)+46px)]">
+        <div className="relative z-20 flex min-h-[600px] min-[375px]:min-h-[650px] min-[390px]:min-h-[711px] h-full flex-col justify-end px-4 sm:px-6 pb-[calc(env(safe-area-inset-bottom,0px)+80px)]">
           <div className="space-y-4">
             <FadeIn delay={0.2}>
               <h1 className="text-4xl font-semibold leading-tight text-white">
