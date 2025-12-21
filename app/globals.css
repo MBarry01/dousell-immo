@@ -42,13 +42,13 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  
+
   /* Couleurs primaires - Jaune Or de marque #F4C430 */
   /* Format HSL pour Tailwind v4 - utilise hsl() automatiquement */
   --color-primary: 45 91% 57%;
   --color-primary-foreground: 0 0% 0%;
   --color-ring: 45 91% 57%;
-  
+
   /* Alias pour compatibilité Shadcn UI */
   --color-brand: #F4C430;
 }
@@ -61,22 +61,18 @@
   body {
     font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
       "SF Pro Display", "Segoe UI", sans-serif;
-    background: radial-gradient(
-        circle at top right,
+    background: radial-gradient(circle at top right,
         rgba(239, 246, 255, 0.08),
-        transparent 45%
-      ),
-      radial-gradient(
-        circle at 20% 20%,
+        transparent 45%),
+      radial-gradient(circle at 20% 20%,
         rgba(255, 214, 150, 0.12),
-        transparent 35%
-      ),
+        transparent 35%),
       var(--background);
     color: var(--foreground);
     min-height: 100dvh;
     text-rendering: optimizeLegibility;
   }
-  
+
   /* Lien entre Tailwind v4 et les variables CSS Shadcn UI */
   :root {
     --tw-color-primary: hsl(var(--primary));
@@ -93,6 +89,7 @@
 
   /* Sur mobile, s'assurer que les inputs ont au moins 16px */
   @media screen and (max-width: 768px) {
+
     input,
     textarea,
     select {
@@ -123,27 +120,28 @@
   .scrollbar-hide {
     scrollbar-width: none;
   }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   /* Utilitaires pour la couleur primaire - Jaune Or #F4C430 */
   .bg-primary {
     background-color: hsl(var(--primary));
   }
-  
+
   .bg-primary\/90 {
     background-color: hsl(var(--primary) / 0.9);
   }
-  
+
   .text-primary-foreground {
     color: hsl(var(--primary-foreground));
   }
-  
+
   .border-primary {
     border-color: hsl(var(--primary));
   }
-  
+
   .ring-primary {
     --tw-ring-color: hsl(var(--ring));
   }
@@ -155,6 +153,7 @@
     opacity: 0;
     transform: scale(0.95) translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -166,6 +165,7 @@
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+
   to {
     opacity: 0;
     transform: scale(0.95) translateY(-4px);
@@ -187,4 +187,11 @@
 [data-state="closed"][data-radix-dropdown-menu-content],
 [data-state="closed"][data-radix-popover-content] {
   animation: smooth-fade-out 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* PWA Optimizations */
+@media all and (display-mode: standalone) {
+  .pwa-hero-pb {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 30px) !important;
+  }
 }
