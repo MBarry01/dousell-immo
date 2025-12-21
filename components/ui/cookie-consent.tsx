@@ -16,6 +16,7 @@ export function CookieConsent() {
   return (
     <AnimatePresence>
       <motion.div
+        key="cookie-consent"
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
@@ -48,7 +49,7 @@ export function CookieConsent() {
                 variant="primary"
                 size="default"
                 onClick={grantConsent}
-                className="flex-1 bg-white text-black hover:bg-neutral-200 md:flex-initial"
+                className="flex-1 md:flex-initial"
               >
                 Accepter
               </Button>

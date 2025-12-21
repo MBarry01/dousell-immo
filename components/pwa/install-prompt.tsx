@@ -16,11 +16,11 @@ type Platform = "ios" | "android" | "other";
 
 function detectPlatform(): Platform {
   if (typeof window === "undefined") return "other";
-  
+
   const userAgent = window.navigator.userAgent.toLowerCase();
   const isIOS = /iphone|ipad|ipod/.test(userAgent);
   const isAndroid = /android/.test(userAgent);
-  
+
   if (isIOS) return "ios";
   if (isAndroid) return "android";
   return "other";
@@ -46,7 +46,7 @@ export function InstallPrompt() {
   useEffect(() => {
     // Check if already installed
     setIsInstalled(isStandalone());
-    
+
     // Detect platform
     setPlatform(detectPlatform());
 
@@ -69,8 +69,8 @@ export function InstallPrompt() {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       if (checkDismissed() && !isStandalone()) {
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setIsVisible(true);
+        setDeferredPrompt(e as BeforeInstallPromptEvent);
+        setIsVisible(true);
       }
     };
 
@@ -87,8 +87,8 @@ export function InstallPrompt() {
 
     // For Android/Chrome, listen for beforeinstallprompt
     if (platform !== "ios") {
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-      
+      window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
       // Fallback: Show prompt on mobile Android after delay if no beforeinstallprompt
       const fallbackTimer = setTimeout(() => {
         if (
@@ -104,10 +104,10 @@ export function InstallPrompt() {
         }
       }, 5000);
 
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      return () => {
+        window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
         clearTimeout(fallbackTimer);
-    };
+      };
     }
   }, [platform]);
 
@@ -120,15 +120,15 @@ export function InstallPrompt() {
     // Android/Chrome: Use native prompt if available
     if (deferredPrompt) {
       try {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
 
-    if (outcome === "accepted") {
-      toast.success("Installation en cours...");
-      setIsVisible(false);
-      setDeferredPrompt(null);
-    } else {
-      toast.info("Installation annulée");
+        if (outcome === "accepted") {
+          toast.success("Installation en cours...");
+          setIsVisible(false);
+          setDeferredPrompt(null);
+        } else {
+          toast.info("Installation annulée");
         }
       } catch (error) {
         console.error("Error during install:", error);
@@ -218,7 +218,7 @@ export function InstallPrompt() {
               </div>
             </div>
             <Button
-              className="mt-6 w-full rounded-full bg-white text-black"
+              className="mt-6 w-full rounded-full"
               onClick={handleDismiss}
             >
               J&apos;ai compris
@@ -237,6 +237,7 @@ export function InstallPrompt() {
   return (
     <AnimatePresence>
       <motion.div
+        key="install-prompt-banner"
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
@@ -272,7 +273,7 @@ export function InstallPrompt() {
             </Button>
             <Button
               size="sm"
-              className="flex-1 rounded-full bg-white text-black"
+              className="flex-1 rounded-full"
               onClick={handleInstall}
             >
               {platform === "ios" ? (
@@ -282,8 +283,8 @@ export function InstallPrompt() {
                 </>
               ) : (
                 <>
-              <Download className="mr-2 h-4 w-4" />
-              Installer
+                  <Download className="mr-2 h-4 w-4" />
+                  Installer
                 </>
               )}
             </Button>
