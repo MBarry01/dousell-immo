@@ -91,7 +91,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
-  const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID || "ui7isx66wq";
+  const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID || "ui7ik5nepa";
 
   return (
     <html lang="fr" suppressHydrationWarning>
