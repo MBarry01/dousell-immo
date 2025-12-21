@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle, Copy, Check } from "lucide-react";
+import { Share2, Copy, Check, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -19,9 +19,9 @@ type ShareButtonProps = {
  * Génère un texte accrocheur pour le partage WhatsApp
  */
 function generateWhatsAppText(property: Property, url: string): string {
-  const district = (property.location as { district?: string }).district || 
-                   property.location.landmark || 
-                   property.location.city;
+  const district = (property.location as { district?: string }).district ||
+    property.location.landmark ||
+    property.location.city;
   const formattedPrice = formatCurrency(property.price);
 
   return `🏡 *${property.title}*
@@ -56,10 +56,31 @@ export function ShareButton({
 }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleShare = () => {
+  const handleShare = async () => {
+    // 1. Essayer l'API Native de partage (Mobile Experience)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: property.title,
+          text: `Découvre ce bien à ${property.location.city} : ${property.title}`,
+          url: shareUrl,
+        });
+        toast.success("Partagé avec succès !");
+        return;
+      } catch (error) {
+        // Ignorer l'erreur si l'utilisateur annule le partage (AbortError)
+        if ((error as Error).name !== "AbortError") {
+          console.error("Error sharing:", error);
+        } else {
+          return; // Stop ici si annulé
+        }
+      }
+    }
+
+    // 2. Fallback : WhatsApp (Desktop ou si API non dispo)
     const text = generateWhatsAppText(property, shareUrl);
     const encodedText = encodeURIComponent(text);
-    
+
     // Utiliser le bon protocole selon la plateforme
     const whatsappUrl = isMobile()
       ? `whatsapp://send?text=${encodedText}`
@@ -70,14 +91,14 @@ export function ShareButton({
       window.open(whatsappUrl, "_blank");
       toast.success("Ouverture de WhatsApp...");
     } catch (error) {
-      // Fallback : copier le texte dans le presse-papier
+      // Fallback final : copier le texte
       handleCopy();
     }
   };
 
   const handleCopy = async () => {
     const text = generateWhatsAppText(property, shareUrl);
-    
+
     try {
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(text);
@@ -92,10 +113,10 @@ export function ShareButton({
         document.execCommand("copy");
         document.body.removeChild(textarea);
       }
-      
+
       setCopied(true);
       toast.success("Lien copié ! Partagez-le sur WhatsApp");
-      
+
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error("Error copying to clipboard:", error);
@@ -110,9 +131,9 @@ export function ShareButton({
         size="icon"
         onClick={handleShare}
         className={className}
-        aria-label="Partager sur WhatsApp"
+        aria-label="Partager"
       >
-        <MessageCircle className="h-5 w-5" />
+        <Share2 className="h-5 w-5" />
       </Button>
     );
   }
