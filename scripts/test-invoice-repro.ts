@@ -50,8 +50,9 @@ async function main() {
 
         console.log("✅ Email result:", result);
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("❌ Error:", error);
+        fs.writeFileSync("error.txt", error.stack || String(error));
     }
 }
 

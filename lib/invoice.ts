@@ -1,4 +1,7 @@
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, PDFFont } from "pdf-lib";
+import fontkit from '@pdf-lib/fontkit';
+import fs from 'fs';
+import path from 'path';
 
 interface InvoiceData {
   invoiceNumber: string;
@@ -13,12 +16,18 @@ interface InvoiceData {
 }
 
 // Fonction utilitaire pour nettoyer le texte
+// Emojis are now allowed!
 function sanitizeText(text: string): string {
   if (!text) return "";
   try {
     const str = String(text);
+    // Replace various non-breaking spaces with normal space to support StandardFonts
     let cleaned = str.replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, " ");
-    cleaned = cleaned.replace(/[^\x00-\x7F\u00C0-\u00FF]/g, "");
+
+    // Remove only control characters that might break PDF (0x00-0x1F except tabs/newlines)
+    // keep emojis and other chars
+    cleaned = cleaned.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+
     return cleaned.trim();
   } catch (e) {
     return "";
@@ -28,10 +37,25 @@ function sanitizeText(text: string): string {
 export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
   try {
     const pdfDoc = await PDFDocument.create();
+    pdfDoc.registerFontkit(fontkit);
+
     const page = pdfDoc.addPage([595, 842]); // A4
     const { width, height } = page.getSize();
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+    // Load Emoji Font
+    let emojiFont: PDFFont | undefined;
+    try {
+      // Try public/fonts first, then fallback to node_modules if needed (local dev)
+      const fontsDir = path.join(process.cwd(), 'public', 'fonts');
+      // We will look for NotoEmoji-Regular.ttf or similar
+      const fontPath = path.join(fontsDir, 'NotoEmoji-Regular.woff2');
+      const fontBytes = fs.readFileSync(fontPath);
+      emojiFont = await pdfDoc.embedFont(fontBytes);
+    } catch (e) {
+      console.warn("Could not load Emoji font, falling back to standard fonts:", e);
+    }
 
     const margin = 50;
     let yPosition = height - 80;
@@ -83,7 +107,29 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
 
     yPosition = tableTop - 50;
     data.items.forEach((item) => {
-      page.drawText(sanitizeText(item.description), { x: margin + 10, y: yPosition, size: 10, font: regularFont, color: rgb(0, 0, 0) });
+      // Use fallback font for description to support emojis
+      const description = sanitizeText(item.description);
+      const options: any = { x: margin + 10, y: yPosition, size: 10, font: regularFont, color: rgb(0, 0, 0) };
+
+      if (emojiFont) {
+        options.font = regularFont; // pdf-lib automatic fallback is not that simple, we need to handle it or use a font that supports both?
+        // Actually, pdf-lib doesn't support automatic fallback easily without complex logic.
+        // BUT, if we use the emoji font as the primary font for the description, it might look weird for normal text (monochrome).
+        // However, for this task, the goal is to SHOW emojis.
+        // Let's try to use emojiFont if we detect emojis, or just use `fallback` feature if available? No.
+        // Simplest hack: Use the emoji font for the whole description line if it contains emojis?
+        // Or better: NotoEmoji contains standard chars too?
+
+        // NotoEmoji-Regular is a monochrome font that has standard glyphs too usually.
+        // Let's safe-guard: if descriptions have emojis, use emojiFont.
+        // Regex for emoji:
+        if (/\p{Emoji}/u.test(description)) {
+          options.font = emojiFont;
+        }
+      }
+
+      page.drawText(description, options);
+
       page.drawText(sanitizeText(`${item.amount.toLocaleString("fr-SN")} FCFA`), { x: width - margin - 100, y: yPosition, size: 10, font: regularFont, color: rgb(0, 0, 0) });
       yPosition -= 25;
     });
@@ -106,6 +152,8 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
     throw error;
   }
 }
+
+
 
 
 

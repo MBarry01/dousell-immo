@@ -18,8 +18,10 @@
     "check:signup": "tsx scripts/check-signup-issues.ts"
   },
   "dependencies": {
+    "@fontsource/noto-emoji": "^5.2.10",
     "@hookform/resolvers": "^5.2.2",
     "@next/third-parties": "^16.0.3",
+    "@pdf-lib/fontkit": "^1.1.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",
