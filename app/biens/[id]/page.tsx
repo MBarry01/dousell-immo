@@ -53,16 +53,12 @@ export async function generateMetadata({
     };
   }
 
-  // Formater le titre selon le format demandé : "[Type] à [Quartier] - [Prix] | Dousell Immo"
-  const propertyType = property.details.type || "Bien";
-  const district = (property.location as { district?: string }).district ||
-    property.location.landmark ||
-    property.location.city;
   const formattedPrice = new Intl.NumberFormat("fr-FR", {
     maximumFractionDigits: 0,
   }).format(property.price);
 
-  const title = `${propertyType} à ${district} - ${formattedPrice} FCFA | Dousell Immo`;
+  // Titre: "{Titre du Bien} - {Prix} | Doussel Immo"
+  const title = `${property.title} - ${formattedPrice} FCFA | Dousell Immo`;
 
   // Description optimisée pour le SEO
   const description = property.description.length > 160
