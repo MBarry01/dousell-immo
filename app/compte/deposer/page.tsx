@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { AddressInputWithMap } from "@/components/forms/address-input-with-map";
+import { AdCertificationUpload } from "@/components/dashboard/ad-certification-upload";
 import { useAuth } from "@/hooks/use-auth";
 import { submitUserListing } from "@/app/compte/deposer/actions";
 import { createClient } from "@/utils/supabase/client";
@@ -1251,6 +1252,9 @@ function DeposerPageContent() {
                   </p>
                 )}
               </div>
+
+              {/* CERTIFICATION ANNONCE (NOUVEAU) */}
+              <AdCertificationUpload className="mb-6" />
 
               {/* LOGIQUE PAIEMENT - FLUX STRICT */}
               {needsPayment ? (
