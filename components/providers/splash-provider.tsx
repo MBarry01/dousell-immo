@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Children, Fragment } from "react";
 import { AnimatePresence } from "framer-motion";
 import { SplashScreen } from "@/components/ui/splash-screen";
 
@@ -8,7 +8,7 @@ const SPLASH_DURATION = 2500; // ms - durée totale avant fade out
 const SESSION_KEY = "doussel_splash_shown";
 
 interface SplashProviderProps {
-  children: React.ReactNode;
+  children: React.ReactNode | React.ReactNode[];
   /** Si true, affiche le splash à chaque visite (pas seulement la première) */
   showEveryVisit?: boolean;
   /** Durée personnalisée en ms */
@@ -75,13 +75,15 @@ export const SplashProvider = ({
     };
   }, [duration, showEveryVisit]);
 
-  // Structure stable - toujours le même wrapper
+  // Structure stable - un seul wrapper pour éviter les warnings de key dans Next.js App Router
   return (
     <>
       {/* Splash Screen avec AnimatePresence */}
-      <AnimatePresence mode="wait">
-        {showSplash && isReady && <SplashScreen key="splash-screen" />}
-      </AnimatePresence>
+      {showSplash && isReady && (
+        <AnimatePresence mode="wait">
+          <SplashScreen key="splash-screen" />
+        </AnimatePresence>
+      )}
       
       {/* Contenu principal - toujours rendu mais caché si splash visible */}
       <div
@@ -97,10 +99,7 @@ export const SplashProvider = ({
       
       {/* Écran noir de fallback avant hydratation */}
       {!isReady && (
-        <div 
-          key="loading-blocker"
-          className="fixed inset-0 z-[9999] bg-black" 
-        />
+        <div key="fallback-black" className="fixed inset-0 z-[9999] bg-black" />
       )}
     </>
   );
