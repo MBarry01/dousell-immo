@@ -33,7 +33,7 @@ export const BottomNav = () => {
             >
               <span
                 className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${active
-                  ? "bg-[#F4C430] text-[#05080c] shadow-lg shadow-[#F4C430]/20"
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                   : "text-white/50"
                   }`}
               >
