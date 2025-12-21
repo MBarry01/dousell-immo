@@ -19,7 +19,7 @@ export const HeroSection = () => {
         Breakpoint sm:640px pour tablettes petites
       */}
       <section
-        className="relative md:hidden min-h-[85dvh] overflow-visible rounded-none md:m-4 md:rounded-3xl mb-0 pt-0 pb-0"
+        className="relative md:hidden min-h-[85dvh] overflow-visible rounded-none md:m-4 md:rounded-3xl mb-0 pt-0 pb-[5px]"
         suppressHydrationWarning
       >
         {/* Image de fond - pleine immersion */}
