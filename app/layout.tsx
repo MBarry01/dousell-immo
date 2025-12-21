@@ -82,7 +82,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#F4C430",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -125,8 +125,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-[#05080c] antialiased`}
         suppressHydrationWarning
       >
-        {/* Top Loader - Désactivé temporairement */}
-        {/* <NextTopLoader
+        {/* Top Loader - Barre de progression dorée style YouTube */}
+        <NextTopLoader
           color="#F4C430"
           initialPosition={0.08}
           crawlSpeed={200}
@@ -137,7 +137,7 @@ export default function RootLayout({
           speed={200}
           shadow="0 0 10px #F4C430, 0 0 5px #F4C430"
           zIndex={9000}
-        /> */}
+        />
         <SuppressHydrationWarning />
         <ServiceWorkerRegister />
         <SplashProvider>
