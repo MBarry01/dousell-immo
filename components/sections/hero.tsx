@@ -19,7 +19,7 @@ export const HeroSection = () => {
         Breakpoint sm:640px pour tablettes petites
       */}
       <section
-        className="relative md:hidden min-h-[85dvh] overflow-hidden rounded-none md:m-4 md:rounded-3xl"
+        className="relative md:hidden min-h-[85dvh] overflow-visible rounded-none md:m-4 md:rounded-3xl mb-0 pt-0 pb-0"
         suppressHydrationWarning
       >
         {/* Image de fond - pleine immersion */}
@@ -52,18 +52,21 @@ export const HeroSection = () => {
         {/* Heavy Gradient - garantit la lisibilité du texte */}
         {/* Responsive: w-screen pour couvrir toute la largeur de l'écran, débordant du padding parent */}
         {/* Positionnement absolu avec inset-y-0 et w-screen pour garantir la couverture complète des bords */}
-        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-screen z-10 bg-gradient-to-t from-black via-black/95 via-black/60 to-transparent" />
+        <div 
+          className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-screen z-10 bg-gradient-to-t from-black via-black/95 via-black/60 to-transparent"
+          style={{ height: '630px' }}
+        />
 
         {/* Contenu aligné en bas - au-dessus du gradient */}
         {/* 
           Hauteur responsive:
           - Par défaut (< 375px): min-h-[600px] pour très petits écrans
           - 375px+ (iPhone SE): min-h-[650px] 
-          - 390px+ (iPhone 12/13): min-h-[711px]
+          - 390px+ (iPhone 12/13): min-h-[703px]
           - Padding horizontal: px-4 sur petits écrans, px-6 sur écrans ≥640px
-          - Padding bottom avec safe area: 46px + safe-area-inset-bottom
+          - Padding bottom avec safe area: 101px + safe-area-inset-bottom
         */}
-        <div className="relative z-20 flex min-h-[600px] min-[375px]:min-h-[650px] min-[390px]:min-h-[711px] h-full flex-col justify-end px-4 sm:px-6 pb-[calc(env(safe-area-inset-bottom,0px)+120px)]">
+        <div className="relative z-20 flex min-h-[600px] min-[375px]:min-h-[650px] min-[390px]:min-h-[703px] h-full flex-col justify-end px-4 sm:px-6 pb-[calc(env(safe-area-inset-bottom,0px)+101px)]">
           <div className="space-y-4">
             <FadeIn delay={0.2}>
               <h1 className="text-4xl font-semibold leading-tight text-white">
