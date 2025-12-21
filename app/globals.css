@@ -192,6 +192,6 @@
 /* PWA Optimizations */
 @media all and (display-mode: standalone) {
   .pwa-hero-pb {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 30px) !important;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 35px) !important;
   }
 }
