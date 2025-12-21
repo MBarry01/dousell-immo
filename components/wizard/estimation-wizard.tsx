@@ -219,7 +219,7 @@ export const EstimationWizard = () => {
           {submittedValues?.quartier || values.quartier || "Dakar"}, analyse votre
           dossier.
         </p>
-        <Button className="mt-6 rounded-full bg-white text-black" asChild>
+        <Button className="mt-6 rounded-full" asChild>
           <Link href="/">Retour à l&apos;accueil</Link>
         </Button>
       </div>
@@ -517,7 +517,7 @@ export const EstimationWizard = () => {
         )}
         <Button
           type="button"
-          className="w-full rounded-full bg-white text-black"
+          className="w-full rounded-full"
           disabled={isSubmitting}
           onClick={handleNext}
         >

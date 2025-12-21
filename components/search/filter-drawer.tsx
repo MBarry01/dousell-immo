@@ -179,7 +179,7 @@ export const FilterDrawer = ({
                     <Button
                       type="button"
                       size="icon"
-                      className="h-10 w-10 rounded-full bg-white text-black"
+                      className="h-10 w-10 rounded-full"
                       onClick={() => handleCounterChange(item.key, 1)}
                     >
                       <Plus className="h-4 w-4" />
@@ -234,7 +234,7 @@ export const FilterDrawer = ({
 
         <div className="pointer-events-auto fixed inset-x-0 bottom-0 z-10 border-t border-white/10 bg-[#0b0f18]/95 px-6 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur-lg">
           <Button
-            className="w-full rounded-2xl bg-white text-black"
+            className="w-full rounded-2xl"
             onClick={() => {
               onApply(localFilters);
               onOpenChange(false);

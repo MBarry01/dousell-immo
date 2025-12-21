@@ -77,7 +77,7 @@ const PriceMarker = ({
     if (typeof window === "undefined" || !L) return undefined;
 
     const priceText = formatPrice(property.price);
-    const isActiveClass = isActive ? "scale-110 bg-black text-white z-50" : "bg-white text-black";
+    const isActiveClass = isActive ? "scale-110 bg-black text-white z-50" : "bg-primary text-primary-foreground";
     
     return L.divIcon({
       className: "custom-price-marker",
@@ -109,7 +109,7 @@ const PriceMarker = ({
           if (element) {
             const pill = element.querySelector(".price-pill");
             if (pill && !isActive) {
-              pill.classList.remove("bg-white", "text-black");
+              pill.classList.remove("bg-primary", "text-primary-foreground");
               pill.classList.add("bg-black", "text-white", "scale-105");
             }
           }
@@ -121,7 +121,7 @@ const PriceMarker = ({
             const pill = element.querySelector(".price-pill");
             if (pill && !isActive) {
               pill.classList.remove("bg-black", "text-white", "scale-105");
-              pill.classList.add("bg-white", "text-black");
+              pill.classList.add("bg-primary", "text-primary-foreground");
             }
           }
         },
@@ -280,7 +280,7 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
         <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-white/70">
           <p>Mode économie de données activé sur mobile.</p>
           <Button
-            className="rounded-full bg-white px-4 py-2 text-black hover:bg-white/90"
+            className="rounded-full px-4 py-2 hover:bg-primary/90"
             onClick={() => {
               console.log("🔄 Activation manuelle de la carte");
               setMapEnabled(true);

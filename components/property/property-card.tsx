@@ -155,7 +155,7 @@ export const PropertyCard = ({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-transparent" />
         <div className="absolute left-4 top-4 flex items-center gap-2">
-          <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black">
+          <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
             {property.location.city}
           </span>
         </div>
@@ -169,7 +169,7 @@ export const PropertyCard = ({
         >
           <Bookmark className={`h-5 w-5 ${favorite ? "fill-current" : ""}`} />
         </button>
-        <div className="absolute bottom-4 left-4 rounded-full bg-white/95 px-4 py-1 text-xs font-semibold text-gray-900">
+        <div className="absolute bottom-4 left-4 rounded-full bg-primary px-4 py-1 text-xs font-semibold text-primary-foreground">
           {formatCurrency(property.price)}
         </div>
       </div>
@@ -209,7 +209,7 @@ export const PropertyCard = ({
         <div className="pt-2 pointer-events-auto">
           <Button
             variant="secondary"
-            className="w-full justify-between rounded-2xl bg-white text-black transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="w-full justify-between rounded-2xl transition hover:-translate-y-0.5 hover:shadow-lg"
             onClick={(e) => {
               e.stopPropagation();
               router.push(`/biens/${property.id}`);

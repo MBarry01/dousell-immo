@@ -31,8 +31,8 @@ export const PropertySection = ({
   showViewMore = true,
 }: PropertySectionProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showLeftButton, setShowLeftButton] = useState(false);
-  const [showRightButton, setShowRightButton] = useState(true);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   const displayedProperties = limit ? properties.slice(0, limit) : properties;
   const hasMore = limit && properties.length > limit;
@@ -42,23 +42,33 @@ export const PropertySection = ({
 
     const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
     
-    setShowLeftButton(scrollLeft > 0);
-    setShowRightButton(scrollLeft < scrollWidth - clientWidth - 10);
+    // Marge de sécurité de 10px pour éviter les problèmes de précision
+    const threshold = 10;
+    
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - threshold);
   }, []);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    // Vérification initiale
     checkScrollButtons();
-    container.addEventListener("scroll", checkScrollButtons);
+    
+    // Event listeners
+    container.addEventListener("scroll", checkScrollButtons, { passive: true });
     window.addEventListener("resize", checkScrollButtons);
+    
+    // Vérification après un court délai pour s'assurer que le layout est stable
+    const timeoutId = setTimeout(checkScrollButtons, 100);
 
     return () => {
       container.removeEventListener("scroll", checkScrollButtons);
       window.removeEventListener("resize", checkScrollButtons);
+      clearTimeout(timeoutId);
     };
-  }, [checkScrollButtons]);
+  }, [checkScrollButtons, displayedProperties.length]);
 
   // Si pas de propriétés, ne rien afficher
   if (!properties.length) return null;
@@ -66,7 +76,9 @@ export const PropertySection = ({
   const scroll = (direction: "left" | "right") => {
     if (!containerRef.current) return;
 
-    const scrollAmount = 400; // Largeur de la carte + gap (ajusté pour le nouvel espacement)
+    // Calculer la largeur d'une carte (280px mobile, 320px desktop) + gap (40px mobile, 48px desktop)
+    // On utilise une valeur moyenne de 350px pour un scroll fluide
+    const scrollAmount = 350;
     const scrollDirection = direction === "left" ? -scrollAmount : scrollAmount;
 
     containerRef.current.scrollBy({
@@ -98,10 +110,10 @@ export const PropertySection = ({
       {/* Liste des Biens - Scroll Horizontal (Mobile & Desktop) */}
       <div className="relative group">
         {/* Bouton Navigation Gauche - Desktop Only */}
-        {showLeftButton && (
+        {canScrollLeft && (
           <button
             onClick={() => scroll("left")}
-            className="absolute left-0 top-1/2 z-50 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-110 active:scale-95 md:flex"
+            className="absolute left-0 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg backdrop-blur-sm opacity-0 transition-opacity duration-300 group-hover:opacity-100 hover:bg-primary/90 hover:scale-110 active:scale-95 md:flex"
             aria-label="Défiler vers la gauche"
           >
             <ChevronLeft className="h-6 w-6" />
@@ -109,10 +121,10 @@ export const PropertySection = ({
         )}
 
         {/* Bouton Navigation Droite - Desktop Only */}
-        {showRightButton && (
+        {canScrollRight && (
           <button
             onClick={() => scroll("right")}
-            className="absolute right-0 top-1/2 z-50 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-110 active:scale-95 md:flex"
+            className="absolute right-0 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg backdrop-blur-sm opacity-0 transition-opacity duration-300 group-hover:opacity-100 hover:bg-primary/90 hover:scale-110 active:scale-95 md:flex"
             aria-label="Défiler vers la droite"
           >
             <ChevronRight className="h-6 w-6" />
@@ -143,7 +155,7 @@ export const PropertySection = ({
               >
                 {/* Badge optionnel */}
                 {badge && (
-                  <div className="absolute left-3 top-3 z-20 rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-900 shadow-md">
+                  <div className="absolute left-3 top-3 z-20 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-md">
                     {badge}
                   </div>
                 )}

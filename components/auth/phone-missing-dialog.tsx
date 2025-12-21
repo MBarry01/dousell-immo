@@ -131,7 +131,7 @@ export function PhoneMissingDialog() {
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || !phoneValue || !isValidPhoneNumber(phoneValue)}
-            className="w-full h-12 rounded-xl bg-white text-black hover:bg-gray-100 disabled:opacity-50"
+            className="w-full h-12 rounded-xl disabled:opacity-50"
           >
             {isSubmitting ? (
               <>

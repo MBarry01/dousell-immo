@@ -82,7 +82,7 @@ export const QuickSearch = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.5 }}
-        className="mt-6 rounded-[32px] border border-white/10 bg-white/5 p-4 text-white md:p-6"
+        className="mt-0 mb-0 md:mt-0 md:mb-0 rounded-[32px] border border-white/10 bg-white/5 px-4 py-6 text-white md:px-6 md:py-8 min-h-[152px]"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -101,7 +101,7 @@ export const QuickSearch = () => {
             <SlidersHorizontal className="mr-2 h-4 w-4" />
             Filtres
             {activeFilterCount > 0 && (
-              <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs font-bold text-black">
+              <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                 {activeFilterCount}
               </span>
             )}
@@ -153,7 +153,7 @@ export const QuickSearch = () => {
                 <div className="flex gap-2">
                   <Button 
                     type="submit"
-                    className="flex-1 rounded-2xl bg-white text-black hover:bg-white/90"
+                    className="flex-1 rounded-2xl"
                   >
                     <Search className="mr-2 h-4 w-4" />
                     Rechercher
@@ -193,7 +193,7 @@ export const QuickSearch = () => {
           />
           <Button 
             type="submit"
-            className="rounded-2xl bg-white text-black hover:bg-white/90"
+            className="rounded-2xl"
           >
             Rechercher
           </Button>

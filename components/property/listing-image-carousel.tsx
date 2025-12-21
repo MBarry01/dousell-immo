@@ -19,7 +19,7 @@ export const ListingImageCarousel = ({
   className,
 }: ListingImageCarouselProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
-    loop: true,
+    loop: false,
     watchDrag: true,
     watchResize: true,
   });
@@ -156,24 +156,30 @@ export const ListingImageCarousel = ({
       {/* Arrows (desktop) */}
       {validImagesList.length > 1 && (
         <>
-          <button
-            type="button"
-            aria-label="Image précédente"
-            onClick={scrollPrev}
-            className="hidden sm:flex absolute left-3 top-1/2 z-30 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 hover:bg-black/70 p-2 text-white opacity-0 backdrop-blur transition group-hover:opacity-100 pointer-events-auto"
-            style={{ pointerEvents: 'auto' }}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            aria-label="Image suivante"
-            onClick={scrollNext}
-            className="hidden sm:flex absolute right-3 top-1/2 z-30 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 hover:bg-black/70 p-2 text-white opacity-0 backdrop-blur transition group-hover:opacity-100 pointer-events-auto"
-            style={{ pointerEvents: 'auto' }}
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
+          {/* Bouton Précédent - Caché si première image */}
+          {selectedIndex > 0 && (
+            <button
+              type="button"
+              aria-label="Image précédente"
+              onClick={scrollPrev}
+              className="hidden sm:flex absolute left-3 top-1/2 z-30 h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm border border-white/20 hover:bg-black/50 text-white opacity-0 transition-all duration-200 group-hover:opacity-100 pointer-events-auto"
+              style={{ pointerEvents: 'auto' }}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
+          {/* Bouton Suivant - Caché si dernière image */}
+          {selectedIndex < validImagesList.length - 1 && (
+            <button
+              type="button"
+              aria-label="Image suivante"
+              onClick={scrollNext}
+              className="hidden sm:flex absolute right-3 top-1/2 z-30 h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm border border-white/20 hover:bg-black/50 text-white opacity-0 transition-all duration-200 group-hover:opacity-100 pointer-events-auto"
+              style={{ pointerEvents: 'auto' }}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
         </>
       )}
 

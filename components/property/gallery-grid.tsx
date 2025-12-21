@@ -157,7 +157,7 @@ export const GalleryGrid = ({
               e.stopPropagation();
               setShowAllPhotos(true);
             }}
-            className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black shadow-lg hover:bg-gray-100"
+            className="rounded-xl px-4 py-2 text-sm font-semibold shadow-lg hover:bg-primary/90"
           >
             Afficher toutes les photos
             <ChevronRight className="ml-2 h-4 w-4" />

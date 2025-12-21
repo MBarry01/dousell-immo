@@ -87,7 +87,7 @@ export const SearchExperience = ({
             <Filter className="mr-2 h-4 w-4" />
             Filtres
             {activeFilters && (
-              <span className="ml-2 rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-black">
+              <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
                 ●
               </span>
             )}
@@ -143,7 +143,7 @@ export const SearchExperience = ({
 
       <Button
         type="button"
-        className="fixed bottom-28 right-6 z-30 rounded-full bg-white/90 px-5 py-3 text-black shadow-xl md:bottom-8"
+        className="fixed bottom-28 right-6 z-30 rounded-full px-5 py-3 shadow-xl md:bottom-8"
         onClick={() => setView((prev) => (prev === "list" ? "map" : "list"))}
       >
         {view === "list" ? (
