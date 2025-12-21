@@ -66,7 +66,7 @@ export const HeroSection = () => {
           - Padding horizontal: px-4 sur petits écrans, px-6 sur écrans ≥640px
           - Padding bottom avec safe area: 101px + safe-area-inset-bottom
         */}
-        <div className="relative z-20 flex min-h-[600px] min-[375px]:min-h-[650px] min-[390px]:min-h-[703px] h-full flex-col justify-end px-4 sm:px-6 pb-[calc(env(safe-area-inset-bottom,0px)+101px)] pwa-hero-pb">
+        <div className="relative z-20 flex min-h-[600px] min-[375px]:min-h-[650px] min-[390px]:min-h-[703px] h-full flex-col justify-end px-4 sm:px-6 pb-[calc(env(safe-area-inset-bottom,0px)+106px)] pwa-hero-pb">
           <div className="space-y-4">
             <FadeIn delay={0.2}>
               <h1 className="text-4xl font-semibold leading-tight text-white">
