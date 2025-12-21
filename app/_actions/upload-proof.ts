@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { createClient } from "@/utils/supabase/server";
 
 const uploadSchema = z.object({
     proof: z.instanceof(File, { message: "Le fichier est requis" }),
@@ -11,6 +12,7 @@ export type UploadProofState = {
     message?: string;
     error?: string;
     timestamp?: number;
+    data?: { url: string };
 };
 
 export async function uploadListingProof(formData: FormData): Promise<UploadProofState> {
@@ -29,14 +31,35 @@ export async function uploadListingProof(formData: FormData): Promise<UploadProo
             };
         }
 
-        // SIMULATION (2 secondes)
-        // TODO: Connecter ici le Webhook n8n pour analyse IA (OCR, Vérification nom/titre)
-        // Ex: await fetch('https://n8n.doussel.com/webhook/verify-doc', { method: 'POST', body: formData })
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const validFile = validatedFields.data.proof;
 
+        // Générer un nom de fichier unique et sécurisé
+        const fileExt = validFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        // Organisation par année/mois pour éviter un dossier géant
+        const date = new Date();
+        const filePath = `${date.getFullYear()}/${date.getMonth() + 1}/${fileName}`;
+
+        const supabase = await createClient();
+
+        // Upload dans le bucket "certifications"
+        const { error: uploadError } = await supabase.storage
+            .from('certifications')
+            .upload(filePath, validFile, {
+                cacheControl: '3600',
+                upsert: false
+            });
+
+        if (uploadError) {
+            console.error("Supabase Storage Error:", uploadError);
+            throw new Error("Échec de l'upload vers le cloud");
+        }
+
+        // On retourne le chemin du fichier (filePath) qui sera stocké en base
         return {
             success: true,
-            message: "Document sécurisé et en cours d'analyse.",
+            data: { url: filePath },
+            message: "Document sécurisé et archivé.",
             timestamp: Date.now(),
         };
     } catch (error) {

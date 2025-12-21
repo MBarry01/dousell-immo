@@ -11,7 +11,7 @@ import { uploadListingProof } from "@/app/_actions/upload-proof";
 
 type AdCertificationUploadProps = {
     className?: string;
-    onUploadSuccess?: () => void;
+    onUploadSuccess?: (url: string) => void;
 };
 
 export function AdCertificationUpload({ className, onUploadSuccess }: AdCertificationUploadProps) {
@@ -76,7 +76,9 @@ export function AdCertificationUpload({ className, onUploadSuccess }: AdCertific
                 toast.success("Document reçu !", {
                     description: "Analyse en cours par notre système sécurisé.",
                 });
-                if (onUploadSuccess) onUploadSuccess();
+                if (onUploadSuccess && result.data?.url) {
+                    onUploadSuccess(result.data.url);
+                }
             } else {
                 toast.error("Erreur d'envoi", {
                     description: result.error || "Impossible d'envoyer le document.",

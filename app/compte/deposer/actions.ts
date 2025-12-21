@@ -15,7 +15,7 @@ type SubmitListingData = {
   city: string;
   district: string;
   address: string;
-  landmark: string;
+  landmark?: string;
   surface?: number;
   surfaceTotale?: number;
   juridique?: "titre-foncier" | "bail" | "deliberation" | "nicad" | string;
@@ -30,12 +30,13 @@ type SubmitListingData = {
     city: string;
     district: string;
     address: string;
-    landmark: string;
+    landmark?: string;
     coords: {
       lat: number;
       lng: number;
     };
   };
+  proof_document_url?: string;
 };
 
 export async function submitUserListing(data: SubmitListingData) {
@@ -117,7 +118,7 @@ export async function submitUserListing(data: SubmitListingData) {
         city: data.city,
         district: data.district,
         address: data.address,
-        landmark: data.landmark,
+        landmark: data.landmark || "",
         coords: { lat: 0, lng: 0 },
       },
       specs,
@@ -136,6 +137,8 @@ export async function submitUserListing(data: SubmitListingData) {
         },
       images: data.images,
       views_count: 0,
+      proof_document_url: data.proof_document_url || null,
+      verification_status: data.proof_document_url ? "pending" : "pending", // Si document, on peut mettre un statut spécifique
     };
 
     const { data: insertedProperty, error } = await supabase

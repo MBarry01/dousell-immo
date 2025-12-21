@@ -32,7 +32,7 @@ const depositSchema = z
     city: z.string().min(1, "La région est requise"),
     district: z.string().min(1, "Le quartier est requis"),
     address: z.string().min(3, "L'adresse est requise"),
-    landmark: z.string().min(3, "Le point de repère est requis"),
+    landmark: z.string().optional().or(z.literal("")),
 
     surface: z.preprocess(
       (val) => (typeof val === "number" && isNaN(val) ? undefined : val),
@@ -126,7 +126,7 @@ type DepositFormValues = {
   city: string;
   district: string;
   address: string;
-  landmark: string;
+  landmark?: string;
   surface?: number;
   surfaceTotale?: number;
   juridique?: string;
@@ -174,6 +174,7 @@ function DeposerPageContent() {
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [services, setServices] = useState<{ code: string; name: string; price: number; description: string }[]>([]);
+  const [proofUrl, setProofUrl] = useState<string | null>(null);
 
   // Charger les services depuis la base de données
   useEffect(() => {
@@ -643,6 +644,7 @@ function DeposerPageContent() {
         ...values,
         images: imageUrls,
         payment_ref: paymentToken || values.payment_ref,
+        proof_document_url: proofUrl || undefined, // Ajout du document de preuve
         // Ajout des coordonnées géographiques
         // Note: Il faudra peut-être adapter submitUserListing pour accepter coords séparément
         // ou l'inclure dans location si la structure le permet
@@ -650,7 +652,7 @@ function DeposerPageContent() {
           address: values.address,
           city: values.city,
           district: values.district,
-          landmark: values.landmark,
+          landmark: values.landmark || "",
           coords: coordinates
         }
       });
@@ -966,7 +968,7 @@ function DeposerPageContent() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-sm text-white/70">Point de repère</label>
+                  <label className="text-sm text-white/70">Point de repère <span className="text-white/40">(optionnel)</span></label>
                   <Input {...register("landmark")} className="mt-2 text-[16px]" />
                   {errors.landmark && (
                     <p className="mt-1 text-sm text-amber-300">
@@ -1254,7 +1256,13 @@ function DeposerPageContent() {
               </div>
 
               {/* CERTIFICATION ANNONCE (NOUVEAU) */}
-              <AdCertificationUpload className="mb-6" />
+              <AdCertificationUpload
+                className="mb-6"
+                onUploadSuccess={(url) => {
+                  setProofUrl(url);
+                  console.log("✅ Preuve uploadée:", url);
+                }}
+              />
 
               {/* LOGIQUE PAIEMENT - FLUX STRICT */}
               {needsPayment ? (

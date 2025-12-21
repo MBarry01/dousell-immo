@@ -96,7 +96,7 @@ export async function updateUserProperty(
       city: string;
       district: string;
       address: string;
-      landmark: string;
+      landmark?: string;
       coords: { lat: number; lng: number };
     };
     specs: typeof specs;
@@ -114,7 +114,7 @@ export async function updateUserProperty(
       city: data.city,
       district: data.district,
       address: data.address,
-      landmark: data.landmark,
+      landmark: data.landmark || "",
       coords: { lat: 0, lng: 0 },
     },
     specs,

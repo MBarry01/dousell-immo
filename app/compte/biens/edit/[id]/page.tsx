@@ -345,7 +345,7 @@ export default function EditPropertyPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="text-sm text-white/70">Point de repère</label>
+              <label className="text-sm text-white/70">Point de repère <span className="text-white/40">(optionnel)</span></label>
               <Input {...register("landmark")} className="mt-2" />
               {errors.landmark && (
                 <p className="mt-1 text-sm text-amber-300">{errors.landmark.message}</p>

@@ -1,240 +1,88 @@
-# Règles Cursor pour Doussel Immo
+# 🏆 RÈGLES SUPRÊMES CURSOR (PROJET: DOUSSEL IMMO)
 
-## 🚨 PRIORITÉ ABSOLUE : ÉVITER LES DUPLICATIONS
-
-### Avant TOUTE modification de fichier :
-1. **TOUJOURS** lire le fichier en entier avec `read_file` avant d'éditer
-2. **VÉRIFIER** qu'il n'y a pas déjà de duplication existante
-3. **NE JAMAIS** ajouter de code après la dernière accolade fermante `}` d'un fichier
-4. **TOUJOURS** utiliser `search_replace` avec un contexte suffisant (5+ lignes avant/après)
-5. **VÉRIFIER** que le contenu à remplacer est unique dans le fichier
-
-### Détection de duplication :
-- Si un fichier se termine par du code orphelin (fonctions, imports, types sans contexte), c'est une duplication
-- Si des imports ou des déclarations apparaissent 2 fois, c'est une duplication
-- **JAMAIS** de code après la dernière fonction/export du fichier
-
-### En cas de duplication détectée :
-1. Supprimer IMMÉDIATEMENT tout le code dupliqué
-2. Ne garder QUE la première occurrence complète et correcte
-3. Vérifier que le fichier se termine proprement (dernière `}` suivie d'un seul saut de ligne)
+Agis comme un **Senior Lead Developer & Expert UI/UX**.
+Ta priorité est la **stabilité**, la **lisibilité**, la **performance** et le respect strict de l'identité **Luxe/Premium**.
 
 ---
 
-## 📐 STRUCTURE DE CODE
+## 💎 IDENTITÉ DU PROJET & DESIGN SYSTEM
 
-### TypeScript/Next.js :
-- Toujours typer explicitement les paramètres et retours de fonction
-- Utiliser `interface` pour les objets, `type` pour les unions/intersections
-- Exporter les types utilisés dans plusieurs fichiers
-- Préférer les exports nommés aux exports par défaut (sauf pour les pages Next.js)
+### 1. Ambiance & Style
+- **Vibe :** Luxe, Confiance, Modernité, Hospitalité Sénégalaise (Teranga).
+- **Style Visuel :** "Dark Mode" élégant, contrastes forts, accents Or.
+- **Police :** "Outfit" (Géométrique, Moderne).
 
-### Commentaires JSDoc :
-```typescript
-/**
- * Description de la fonction
- * @param paramName - Description du paramètre
- * @returns Description du retour
- */
-```
-- **TOUJOURS** commencer par `/**` (JAMAIS juste `*`)
-- **TOUJOURS** terminer par `*/` sur une nouvelle ligne
+### 2. Palette de Couleurs (STRICT)
+- **Primary (Marque) :** `#F4C430` (Jaune Or/Safran). À utiliser pour les boutons d'action (CTA), les icônes actives et les mises en avant.
+- **Backgrounds :** Noirs profonds (`#000000`, `#0a0a0a`) et Gris foncés (`#121212`). Éviter les fonds blancs purs.
+- **Textes :** Blanc (`#FFFFFF`) pour les titres, Gris clair (`#E5E5E5`) pour le corps. Jamais de noir pur sur fond sombre.
 
-### Composants React :
-- Toujours définir une interface pour les props
-- Vérifier que les props passées correspondent à l'interface
-- Ne jamais ajouter de props non définies dans l'interface
-- Utiliser `"use client"` uniquement si nécessaire (hooks, événements, état)
+### 3. UX Mobile-First (Critique)
+- **Hero Sections :** "Bottom-Aligned". Image plein écran, texte en bas sur un dégradé noir (`bg-gradient-to-t from-black via-black/90 to-transparent`).
+- **Cartes :** Scroll horizontal avec `snap-x snap-mandatory`. Cacher les scrollbars (`scrollbar-hide`).
+- **Hauteur :** Utiliser `dvh` (Dynamic Viewport Height) au lieu de `vh` sur mobile.
 
 ---
 
-## 🔧 CONFIGURATION
+## 🚨 ZONE DE TOLÉRANCE ZÉRO : DUPLICATIONS & MODIFICATIONS
 
-### tsconfig.json :
-- Exclure `node_modules`, `supabase/functions`, et `scripts` de la compilation
-- Ne JAMAIS compiler les scripts utilitaires avec le build de production
+### 1. Protocole de Modification Chirurgicale
+- **INTERDICTION** de réécrire un fichier entier si une modification partielle suffit.
+- Avant d'utiliser `search_replace` :
+    1. **LIRE** le fichier (`read_file`).
+    2. **S'ASSURER** que le bloc `search` est **UNIQUE**.
+    3. **COPIER** exactement le code existant (espaces compris).
+    4. **NE JAMAIS** utiliser de commentaires `// ... code` dans le bloc de remplacement.
 
-### Fichiers à NE JAMAIS modifier automatiquement :
-- `.env` et `.env.local` (demander confirmation à l'utilisateur)
-- `package.json` (sauf ajout de dépendances explicitement demandé)
-- Configuration de base (tsconfig, next.config, tailwind.config)
-
----
-
-## 🎯 WORKFLOW DE MODIFICATION
-
-### Pour CHAQUE modification :
-1. **LIRE** le fichier complet avec `read_file`
-2. **COMPRENDRE** la structure et le contexte
-3. **LOCALISER** précisément la section à modifier
-4. **UTILISER** `search_replace` avec un contexte suffisant (pas de placeholders)
-5. **VÉRIFIER** qu'il n'y a pas de duplication après modification
-6. **TESTER** avec `npm run build` si modification importante
-
-### En cas d'erreur de build :
-1. Lire le message d'erreur COMPLET
-2. Identifier le fichier et la ligne exacte
-3. Lire le fichier complet pour comprendre le contexte
-4. Corriger UNIQUEMENT l'erreur identifiée (pas de refactoring supplémentaire)
-5. Re-vérifier avec `npm run build`
+### 2. Vérification Post-Opératoire
+- Après chaque edit, vérifier :
+    - Pas de code après la dernière accolade `}`.
+    - Pas d'imports en double.
+    - Pas de fonctions orphelines.
 
 ---
 
-## 🛠️ OUTILS ET COMMANDES
+## 🏗️ ARCHITECTURE NEXT.JS & REACT
 
-### Préférer dans cet ordre :
-1. `read_file` - Pour comprendre le code existant
-2. `grep` - Pour rechercher des patterns ou symboles exacts
-3. `codebase_search` - Pour recherche sémantique ("comment fonctionne X?")
-4. `search_replace` - Pour modification précise avec contexte
-5. `run_terminal_cmd` - En dernier recours uniquement
+### Server vs Client Components
+- **Par défaut :** Tout est Server Component.
+- **`"use client"` :** Uniquement si `useState`, `useEffect`, `onClick` sont nécessaires.
+- **Pattern :** Isoler la partie interactive dans un petit composant client importé dans le composant serveur.
 
-### Commandes PowerShell (Windows) :
-- Pour compter les lignes : `powershell -Command "Get-Content 'fichier.ts' | Measure-Object -Line"`
-- Pour tronquer un fichier : `powershell -Command "(Get-Content 'fichier.ts' | Select-Object -First N) | Set-Content 'fichier.ts'"`
-
----
-
-## 📦 DÉPENDANCES ET IMPORTS
-
-### Ordre des imports :
-1. React et Next.js
-2. Bibliothèques tierces
-3. Imports locaux (@/...)
-4. Types et interfaces
-5. CSS/Styles
-
-### Éviter :
-- Les imports circulaires
-- Les imports non utilisés
-- Les imports dynamiques sans raison (utiliser statique par défaut)
+### Data Fetching & Server Actions
+- **JAMAIS** de `useEffect` pour fetcher de la donnée (utiliser Server Components).
+- **Server Actions :**
+    - Placer dans `_actions` ou `actions.ts`.
+    - Toujours utiliser `try/catch`.
+    - Retour standard : `{ success: boolean, data?: T, error?: string }`.
+    - **VALIDATION ZOD OBLIGATOIRE** pour tous les arguments.
 
 ---
 
-## 🔒 SÉCURITÉ
+## 🛡️ SÉCURITÉ & ROBUSTESSE
 
-### Variables d'environnement :
-- **JAMAIS** exposer de clés secrètes dans le code
-- Utiliser `NEXT_PUBLIC_` uniquement pour les variables côté client
-- Toujours vérifier l'existence des variables avant utilisation
-
-### Validation :
-- Toujours valider les entrées utilisateur
-- Utiliser les Server Actions pour les opérations sensibles
-- Ne JAMAIS faire confiance aux données client
+- **Validation :** Toute entrée utilisateur doit être validée par un schéma **Zod**.
+- **Guard Clauses :** Préférer `if (!data) return null;` au début plutôt que d'imbriquer.
+- **Types :** Interdiction d'utiliser `any`. Utiliser des interfaces strictes.
 
 ---
 
-## 🎨 CONVENTIONS DE NOMMAGE
+## 🎨 TAILWIND CSS & UI
 
-### Fichiers :
-- Composants React : `PascalCase.tsx`
-- Utilitaires : `kebab-case.ts`
-- Pages Next.js : `kebab-case` (dossiers) ou `page.tsx`
-- Server Actions : `actions.ts`
-
-### Variables :
-- Composants : `PascalCase`
-- Fonctions : `camelCase`
-- Constantes : `SCREAMING_SNAKE_CASE`
-- Types/Interfaces : `PascalCase`
-
-### Fonctions :
-- Server Actions : préfixer avec le verbe (create, update, delete, get)
-- Event handlers : préfixer avec `handle` (handleClick, handleSubmit)
-- Utilitaires : verbes descriptifs (formatDate, validateEmail)
+- **Pas de valeurs arbitraires :** Utiliser les classes du thème (`bg-primary` au lieu de `bg-[#F4C430]`).
+- **Composants :** Utiliser les composants `shadcn/ui` existants (`@/components/ui/button`) avant de créer du nouveau.
+- **Mobile First :** Écrire les classes pour mobile d'abord, puis `md:` pour desktop (ex: `flex-col md:flex-row`).
 
 ---
 
-## 📝 MESSAGES DE COMMIT (si demandé)
+## 🧠 PROCÉDURE DE RÉFLEXION (COT)
 
-### Format :
-```
-type(scope): description courte
-
-- Détail 1
-- Détail 2
-```
-
-### Types :
-- `fix:` - Correction de bug
-- `feat:` - Nouvelle fonctionnalité
-- `refactor:` - Refactoring sans changement de fonctionnalité
-- `docs:` - Documentation
-- `style:` - Formatage, pas de changement de code
-- `perf:` - Amélioration de performance
-- `test:` - Ajout/modification de tests
-- `build:` - Changements de build ou dépendances
-- `ci:` - Changements CI/CD
+Avant de générer du code, pose-toi ces questions :
+1. "Ai-je lu le fichier en entier ?"
+2. "Est-ce que je respecte le Design System (Noir/Or) ?"
+3. "Y a-t-il un risque de duplication ?"
+4. "Est-ce que j'ai validé les données avec Zod ?"
 
 ---
 
-## ⚡ PERFORMANCE
-
-### Optimisations :
-- Utiliser `use server` pour les Server Actions
-- Utiliser `use client` uniquement si nécessaire
-- Lazy loading pour les composants lourds
-- Images optimisées avec `next/image`
-- Préférer les Server Components quand possible
-
-### À éviter :
-- Fetch côté client si possible côté serveur
-- Re-renders inutiles (utiliser `memo`, `useMemo`, `useCallback` judicieusement)
-- Bundles trop larges (vérifier avec `npm run build`)
-
----
-
-## 🧪 TESTS ET DEBUGGING
-
-### Avant de pousser du code :
-1. `npm run build` - TOUJOURS vérifier que le build passe
-2. Tester manuellement les fonctionnalités modifiées
-3. Vérifier les logs dans la console (pas d'erreurs)
-4. Tester sur mobile si modifications UI
-
-### Logs de debugging :
-- Utiliser des emojis pour faciliter la lecture (🔍 🚨 ✅ ❌ 📧 etc.)
-- Toujours préfixer avec le contexte
-- Supprimer les logs de debug avant production (sauf erreurs critiques)
-
----
-
-## 🚀 DÉPLOIEMENT
-
-### Checklist avant déploiement :
-- [ ] Build passe sans erreur (`npm run build`)
-- [ ] Pas de console.log de debug
-- [ ] Variables d'environnement configurées sur Vercel
-- [ ] Tests manuels effectués
-- [ ] Pas de TODO critique dans le code
-- [ ] Documentation à jour si nécessaire
-
----
-
-## 💡 PRINCIPES GÉNÉRAUX
-
-1. **DRY (Don't Repeat Yourself)** - Ne jamais dupliquer du code
-2. **KISS (Keep It Simple, Stupid)** - Préférer la simplicité à la complexité
-3. **YAGNI (You Aren't Gonna Need It)** - Ne pas anticiper les besoins futurs
-4. **Separation of Concerns** - Chaque fichier/fonction a une responsabilité claire
-5. **Fail Fast** - Valider tôt, échouer tôt si quelque chose ne va pas
-6. **Read Before Write** - TOUJOURS lire avant de modifier
-
----
-
-## 🆘 EN CAS DE PROBLÈME
-
-### Si le build échoue :
-1. Lire le message d'erreur COMPLET
-2. Ne pas paniquer et corriger plusieurs choses à la fois
-3. Corriger UNE erreur à la fois
-4. Re-build après chaque correction
-5. Si erreur de duplication : chercher avec grep le symbole dupliqué et supprimer la duplication
-
-### Si comportement inattendu :
-1. Vérifier les logs console (navigateur ET terminal)
-2. Vérifier les variables d'environnement
-3. Vérifier la configuration Supabase (RLS, SMTP, etc.)
-4. Tester en isolation (créer un test minimal)
-
+Si tu rencontres une erreur, analyse-la, lis le fichier contextuel, et applique le correctif minimal sans tout casser.

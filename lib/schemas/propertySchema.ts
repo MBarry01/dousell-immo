@@ -14,7 +14,7 @@ export const propertySchema = z
     city: z.string().min(1, "La ville est requise"),
     district: z.string().min(1, "Le quartier est requis"),
     address: z.string().min(3, "L'adresse doit contenir au moins 3 caractères"),
-    landmark: z.string().min(3, "Le point de repère doit contenir au moins 3 caractères"),
+    landmark: z.string().optional().or(z.literal("")),
     
     // Champs conditionnels pour les terrains
     surface: z.number().min(10, "La surface doit être d'au moins 10 m²").optional(),

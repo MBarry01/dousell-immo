@@ -224,3 +224,4 @@ export const SENEGAL_COORDINATES: Record<string, { lat: number; lng: number }> =
 
 
 
+
