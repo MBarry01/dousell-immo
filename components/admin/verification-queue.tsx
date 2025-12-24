@@ -37,16 +37,33 @@ export function VerificationQueue() {
   const [isPending, startTransition] = useTransition();
 
   const loadVerifications = async () => {
+    console.log("🔍 [VerificationQueue] Début chargement des vérifications...");
     setLoading(true);
-    const result = await getPendingVerifications();
-    if (result.success && result.data) {
-      setVerifications(result.data);
-    } else {
+    try {
+      const result = await getPendingVerifications();
+      console.log("🔍 [VerificationQueue] Résultat reçu:", result);
+      console.log("🔍 [VerificationQueue] Success:", result.success);
+      console.log("🔍 [VerificationQueue] Data length:", result.data?.length);
+      console.log("🔍 [VerificationQueue] Error:", result.error);
+
+      if (result.success && result.data) {
+        console.log("✅ [VerificationQueue] Données chargées:", result.data.length, "vérifications");
+        setVerifications(result.data);
+      } else {
+        console.error("❌ [VerificationQueue] Erreur:", result.error);
+        toast.error("Erreur", {
+          description: result.error || "Impossible de charger les demandes.",
+        });
+      }
+    } catch (error) {
+      console.error("❌ [VerificationQueue] Exception:", error);
       toast.error("Erreur", {
-        description: result.error || "Impossible de charger les demandes.",
+        description: "Une erreur inattendue s'est produite.",
       });
+    } finally {
+      setLoading(false);
+      console.log("🔍 [VerificationQueue] Chargement terminé");
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -177,7 +194,7 @@ export function VerificationQueue() {
                   <TableCell>
                     {verification.proofDocumentUrl ? (
                       <a
-                        href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/certifications/${verification.proofDocumentUrl}`}
+                        href={verification.proofDocumentUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 text-primary hover:underline text-sm"
