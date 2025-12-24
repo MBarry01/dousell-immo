@@ -17,12 +17,20 @@ import { uploadVerificationDoc } from "@/app/compte/mes-biens/actions";
 type VerificationUploadFormProps = {
   propertyId: string;
   variant?: "default" | "outline" | "ghost";
+  currentStatus?: string;
+  proofDocumentUrl?: string | null;
 };
 
 export function VerificationUploadForm({
   propertyId,
   variant = "outline",
+  currentStatus,
+  proofDocumentUrl,
 }: VerificationUploadFormProps) {
+  // Si déjà vérifié, ne rien afficher
+  if (currentStatus === 'verified') {
+    return null;
+  }
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
