@@ -30,7 +30,7 @@ export default function FavoritesPage() {
           <p className="mt-2">
             Ajoutez des biens à vos favoris pour les retrouver facilement.
           </p>
-          <Button asChild className="mt-6 rounded-full bg-white text-black">
+          <Button asChild className="mt-6 rounded-full bg-background text-foreground">
             <Link href="/recherche">Explorer les biens</Link>
           </Button>
         </div>

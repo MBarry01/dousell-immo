@@ -253,10 +253,10 @@ export default function NewPropertyPage() {
                   colorScheme: "dark",
                 }}
               >
-                <option value="vente" className="bg-[#0b0f18] text-white">
+                <option value="vente" className="bg-background text-white">
                   Vente
                 </option>
-                <option value="location" className="bg-[#0b0f18] text-white">
+                <option value="location" className="bg-background text-white">
                   Location
                 </option>
               </select>
@@ -274,21 +274,21 @@ export default function NewPropertyPage() {
                   <option
                     key={t.value}
                     value={t.value}
-                    className="bg-[#0b0f18] text-white"
+                    className="bg-background text-white"
                   >
                     {t.label}
                   </option>
                 ))}
               </select>
               {errors.type && (
-                <p className="text-sm text-amber-300">{errors.type.message}</p>
+                <p className="text-sm text-primary">{errors.type.message}</p>
               )}
             </div>
             <div className="sm:col-span-2">
               <label className="text-sm text-white/70">Titre</label>
               <Input {...register("title")} className="mt-2" />
               {errors.title && (
-                <p className="text-sm text-amber-300">{errors.title.message}</p>
+                <p className="text-sm text-primary">{errors.title.message}</p>
               )}
             </div>
             <div className="sm:col-span-2">
@@ -299,7 +299,7 @@ export default function NewPropertyPage() {
                 className="mt-2"
               />
               {errors.price && (
-                <p className="text-sm text-amber-300">{errors.price.message}</p>
+                <p className="text-sm text-primary">{errors.price.message}</p>
               )}
             </div>
           </div>
@@ -307,7 +307,7 @@ export default function NewPropertyPage() {
             <label className="text-sm text-white/70">Description</label>
             <Textarea {...register("description")} className="mt-2" />
             {errors.description && (
-              <p className="text-sm text-amber-300">
+              <p className="text-sm text-primary">
                 {errors.description.message}
               </p>
             )}
@@ -321,7 +321,7 @@ export default function NewPropertyPage() {
               <label className="text-sm text-white/70">Ville</label>
               <Input {...register("city")} className="mt-2" />
               {errors.city && (
-                <p className="text-sm text-amber-300">{errors.city.message}</p>
+                <p className="text-sm text-primary">{errors.city.message}</p>
               )}
             </div>
             <div>
@@ -333,21 +333,21 @@ export default function NewPropertyPage() {
                   colorScheme: "dark",
                 }}
               >
-                  <option value="" className="bg-[#0b0f18] text-white">
+                  <option value="" className="bg-background text-white">
                     Sélectionnez
                   </option>
                   {quartiers.map((q) => (
                     <option
                       key={q}
                       value={q}
-                      className="bg-[#0b0f18] text-white"
+                      className="bg-background text-white"
                     >
                       {q}
                     </option>
                   ))}
               </select>
               {errors.district && (
-                <p className="text-sm text-amber-300">
+                <p className="text-sm text-primary">
                   {errors.district.message}
                 </p>
               )}
@@ -356,7 +356,7 @@ export default function NewPropertyPage() {
               <label className="text-sm text-white/70">Adresse</label>
               <Input {...register("address")} className="mt-2" />
               {errors.address && (
-                <p className="text-sm text-amber-300">
+                <p className="text-sm text-primary">
                   {errors.address.message}
                 </p>
               )}
@@ -365,7 +365,7 @@ export default function NewPropertyPage() {
               <label className="text-sm text-white/70">Point de repère</label>
               <Input {...register("landmark")} className="mt-2" />
               {errors.landmark && (
-                <p className="text-sm text-amber-300">
+                <p className="text-sm text-primary">
                   {errors.landmark.message}
                 </p>
               )}
@@ -386,7 +386,7 @@ export default function NewPropertyPage() {
                   className="mt-2"
                 />
                 {errors.surface && (
-                  <p className="text-sm text-amber-300">
+                  <p className="text-sm text-primary">
                     {errors.surface.message}
                   </p>
                 )}
@@ -399,7 +399,7 @@ export default function NewPropertyPage() {
                   className="mt-2"
                 />
                 {errors.rooms && (
-                  <p className="text-sm text-amber-300">
+                  <p className="text-sm text-primary">
                     {errors.rooms.message}
                   </p>
                 )}
@@ -412,7 +412,7 @@ export default function NewPropertyPage() {
                   className="mt-2"
                 />
                 {errors.bedrooms && (
-                  <p className="text-sm text-amber-300">
+                  <p className="text-sm text-primary">
                     {errors.bedrooms.message}
                   </p>
                 )}
@@ -425,7 +425,7 @@ export default function NewPropertyPage() {
                   className="mt-2"
                 />
                 {errors.bathrooms && (
-                  <p className="text-sm text-amber-300">
+                  <p className="text-sm text-primary">
                     {errors.bathrooms.message}
                   </p>
                 )}
@@ -465,7 +465,7 @@ export default function NewPropertyPage() {
                   className="mt-2"
                 />
                 {errors.surfaceTotale && (
-                  <p className="text-sm text-amber-300">
+                  <p className="text-sm text-primary">
                     {errors.surfaceTotale.message}
                   </p>
                 )}
@@ -479,21 +479,21 @@ export default function NewPropertyPage() {
                     colorScheme: "dark",
                   }}
                 >
-                  <option value="" className="bg-[#0b0f18] text-white">
+                  <option value="" className="bg-background text-white">
                     Sélectionnez
                   </option>
                   {situationsJuridiques.map((sj) => (
                     <option
                       key={sj.value}
                       value={sj.value}
-                      className="bg-[#0b0f18] text-white"
+                      className="bg-background text-white"
                     >
                       {sj.label}
                     </option>
                   ))}
                 </select>
                 {errors.juridique && (
-                  <p className="text-sm text-amber-300">
+                  <p className="text-sm text-primary">
                     {errors.juridique.message}
                   </p>
                 )}
@@ -557,7 +557,7 @@ export default function NewPropertyPage() {
             const values = getValues();
             await onSubmit(values);
           }}
-          className="w-full rounded-full bg-white text-black"
+          className="w-full rounded-full bg-background text-foreground"
           disabled={uploading}
         >
           Publier le bien

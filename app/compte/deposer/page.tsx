@@ -117,26 +117,8 @@ const depositSchema = z
 
 import { smartGeocode } from "@/lib/geocoding";
 
-type DepositFormValues = {
-  type: "villa" | "appartement" | "terrain" | "immeuble";
-  title: string;
-  description: string;
-  price: number;
-  category: "vente" | "location";
-  city: string;
-  district: string;
-  address: string;
-  landmark?: string;
-  surface?: number;
-  surfaceTotale?: number;
-  juridique?: string;
-  rooms?: number;
-  bedrooms?: number;
-  bathrooms?: number;
-  service_type: "mandat_confort" | "boost_visibilite";
-  payment_ref?: string;
-  contact_phone?: string;
-};
+// Dériver le type directement du schéma Zod pour éviter les incohérences
+type DepositFormValues = z.infer<typeof depositSchema>;
 
 const quartiers = [
   "Almadies",
@@ -841,7 +823,7 @@ function DeposerPageContent() {
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex-1">
             <div
-              className={`h-2 rounded-full ${s <= step ? "bg-amber-500" : "bg-white/10"
+              className={`h-2 rounded-full ${s <= step ? "bg-primary" : "bg-white/10"
                 }`}
             />
           </div>
@@ -849,7 +831,7 @@ function DeposerPageContent() {
       </div>
 
       <form
-        className="rounded-[32px] border border-white/10 bg-white/5 p-5 sm:p-6 mt-6"
+        className="rounded-[32px] border border-white/10 bg-card p-5 sm:p-6 mt-6"
         onSubmit={(e) => {
           e.preventDefault();
         }}
@@ -871,11 +853,11 @@ function DeposerPageContent() {
                   <label className="text-sm text-white/70">Type de bien</label>
                   <select
                     {...register("type")}
-                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
                     style={{ colorScheme: "dark", fontSize: "16px" }}
                   >
                     {typesBien.map((t) => (
-                      <option key={t.value} value={t.value} className="bg-[#0b0f18] text-white">
+                      <option key={t.value} value={t.value} className="bg-background text-white">
                         {t.label}
                       </option>
                     ))}
@@ -886,13 +868,13 @@ function DeposerPageContent() {
                   <label className="text-sm text-white/70">Catégorie</label>
                   <select
                     {...register("category")}
-                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
                     style={{ colorScheme: "dark", fontSize: "16px" }}
                   >
-                    <option value="vente" className="bg-[#0b0f18] text-white">
+                    <option value="vente" className="bg-background text-white">
                       Vente
                     </option>
-                    <option value="location" className="bg-[#0b0f18] text-white">
+                    <option value="location" className="bg-background text-white">
                       Location
                     </option>
                   </select>
@@ -997,17 +979,17 @@ function DeposerPageContent() {
                       <label className="text-sm text-white/70">Situation juridique</label>
                       <select
                         {...register("juridique")}
-                        className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
+                        className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
                         style={{ colorScheme: "dark", fontSize: "16px" }}
                       >
-                        <option value="" className="bg-[#0b0f18] text-white">
+                        <option value="" className="bg-background text-white">
                           Sélectionnez
                         </option>
                         {situationsJuridiques.map((sj) => (
                           <option
                             key={sj.value}
                             value={sj.value}
-                            className="bg-[#0b0f18] text-white"
+                            className="bg-background text-white"
                           >
                             {sj.label}
                           </option>
@@ -1157,8 +1139,8 @@ function DeposerPageContent() {
                   type="button"
                   onClick={() => setValue("service_type", "mandat_confort")}
                   className={`rounded-2xl border-2 p-6 text-left transition-all ${serviceType === "mandat_confort"
-                    ? "border-amber-500 bg-amber-500/10"
-                    : "border-white/10 bg-white/5 hover:border-white/20"
+                    ? "border-primary bg-primary/10"
+                    : "border-white/10 bg-card hover:border-white/20"
                     }`}
                 >
                   <div className="flex items-start justify-between">
@@ -1188,8 +1170,8 @@ function DeposerPageContent() {
                   type="button"
                   onClick={() => setValue("service_type", "boost_visibilite")}
                   className={`rounded-2xl border-2 p-6 text-left transition-all ${serviceType === "boost_visibilite"
-                    ? "border-amber-500 bg-amber-500/10"
-                    : "border-white/10 bg-white/5 hover:border-white/20"
+                    ? "border-primary bg-primary/10"
+                    : "border-white/10 bg-card hover:border-white/20"
                     }`}
                 >
                   <div className="flex items-start justify-between">
@@ -1324,7 +1306,7 @@ function DeposerPageContent() {
                     </div>
                   ) : (
                     // CAS 2 : PAS ENCORE PAYÉ -> BOUTON PAYER
-                    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+                    <div className="rounded-2xl border border-white/10 bg-card p-6 text-center">
                       <p className="text-sm text-white/70 mb-4">
                         Paiement sécurisé via PayDunya
                       </p>
@@ -1383,18 +1365,18 @@ function DeposerPageContent() {
                           }
                         }}
                         disabled={submitting}
-                        className="w-full h-12 rounded-xl bg-amber-500 text-black hover:bg-amber-400 disabled:opacity-50"
+                        className="w-full h-12 rounded-xl bg-primary text-black hover:bg-primary/90 disabled:opacity-50"
                       >
                         {submitting ? "Redirection..." : "Payer avec PayDunya"}
                       </Button>
 
                       {paymentVerification === "checking" && (
-                        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-center text-sm text-white/70">
+                        <div className="mt-4 rounded-2xl border border-white/10 bg-card p-4 text-center text-sm text-white/70">
                           Vérification du paiement en cours...
                         </div>
                       )}
                       {paymentMessage && paymentVerification === "error" && (
-                        <div className="mt-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-center text-sm text-amber-200">
+                        <div className="mt-4 rounded-2xl border border-primary/40 bg-primary/10 p-4 text-center text-sm text-primary">
                           {paymentMessage}
                         </div>
                       )}
@@ -1403,8 +1385,8 @@ function DeposerPageContent() {
                 </>
               ) : (
                 // CAS GRATUIT (Mandat)
-                <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-6 text-center">
-                  <Check className="mx-auto h-12 w-12 text-amber-400" />
+                <div className="rounded-2xl border border-primary/20 bg-primary/10 p-6 text-center">
+                  <Check className="mx-auto h-12 w-12 text-primary" />
                   <p className="mt-4 text-lg font-semibold text-white">
                     Offre gratuite sélectionnée
                   </p>
@@ -1420,7 +1402,7 @@ function DeposerPageContent() {
                       handleSubmitClick(e);
                     }}
                     disabled={submitting}
-                    className="mt-6 w-full h-12 rounded-xl bg-white text-black hover:bg-gray-100 disabled:opacity-50"
+                    className="mt-6 w-full h-12 rounded-xl bg-primary text-black hover:bg-primary/90 disabled:opacity-50"
                   >
                     {submitting ? "Envoi..." : "Confirmer le dépôt"}
                   </Button>
@@ -1452,7 +1434,7 @@ function DeposerPageContent() {
               type="button"
               size="lg"
               onClick={handleNext}
-              className="h-12 rounded-full bg-white text-black text-base"
+              className="h-12 rounded-full bg-primary text-black text-base"
             >
               Suivant
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -1468,7 +1450,7 @@ function DeposerPageContent() {
                 handleSubmitClick(e);
               }}
               disabled={submitting || uploading}
-              className="h-12 rounded-full bg-white text-black text-base disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-12 rounded-full bg-primary text-black text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <>

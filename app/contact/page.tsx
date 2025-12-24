@@ -96,7 +96,7 @@ export default function ContactPage() {
         animate="visible"
         variants={fadeUp}
         transition={{ duration: 0.5 }}
-        className="grid gap-8 rounded-[36px] border border-white/10 bg-white/5 p-6 text-white md:grid-cols-2"
+        className="grid gap-8 rounded-[36px] border border-white/10 bg-background/5 p-6 text-white md:grid-cols-2"
       >
         <div className="space-y-4">
           <p className="text-xs uppercase tracking-[0.3em] text-white/40">
@@ -129,7 +129,7 @@ export default function ContactPage() {
         </div>
       </motion.section>
 
-      <section className="rounded-[32px] border border-white/10 bg-white/5 p-6 text-white">
+      <section className="rounded-[32px] border border-white/10 bg-background/5 p-6 text-white">
         <p className="text-xs uppercase tracking-[0.3em] text-white/40">
           FAQ
         </p>

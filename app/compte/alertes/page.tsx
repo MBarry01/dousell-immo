@@ -369,7 +369,7 @@ export default function AlertesPage() {
                 onClick={() => {
                   router.push("/recherche?alert=create");
                 }}
-                className="bg-white text-black hover:bg-white/90"
+                className="bg-background text-foreground hover:bg-background/90"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle alerte
@@ -386,7 +386,7 @@ export default function AlertesPage() {
                 </p>
                 <Button
                   onClick={() => router.push("/recherche?alert=create")}
-                  className="mt-4 bg-white text-black hover:bg-white/90"
+                  className="mt-4 bg-background text-foreground hover:bg-background/90"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Créer ma première alerte

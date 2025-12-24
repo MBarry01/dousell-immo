@@ -27,7 +27,7 @@ export default function LegalHubPage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <Link href="/legal/cgu" className="block h-full">
-          <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors h-full cursor-pointer">
+          <Card className="bg-background/5 border-white/10 hover:bg-background/10 transition-colors h-full cursor-pointer">
             <CardHeader>
               <FileText className="h-8 w-8 text-amber-400 mb-2" />
               <CardTitle className="text-white">Conditions Générales d&apos;Utilisation</CardTitle>
@@ -39,7 +39,7 @@ export default function LegalHubPage() {
         </Link>
 
         <Link href="/legal/privacy" className="block h-full">
-          <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors h-full cursor-pointer">
+          <Card className="bg-background/5 border-white/10 hover:bg-background/10 transition-colors h-full cursor-pointer">
             <CardHeader>
               <Lock className="h-8 w-8 text-emerald-400 mb-2" />
               <CardTitle className="text-white">Politique de Confidentialité</CardTitle>
@@ -57,7 +57,7 @@ export default function LegalHubPage() {
           <h2 className="text-2xl font-semibold m-0">Mentions Légales</h2>
         </div>
         
-        <div className="bg-white/5 rounded-2xl p-6 border border-white/10 space-y-4">
+        <div className="bg-background/5 rounded-2xl p-6 border border-white/10 space-y-4">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <h3 className="text-lg font-medium text-white mb-2">Éditeur</h3>

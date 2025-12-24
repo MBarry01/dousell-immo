@@ -13,7 +13,7 @@ export default async function AdminLayout({
   await requireAnyRole();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#05080c]">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar */}
       <AdminSidebar />
 

@@ -16,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DashboardView } from "@/components/admin/dashboard-view";
+import { VerificationQueue } from "@/components/admin/verification-queue";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,7 @@ export default async function AdminDashboardPage() {
         <h2 className="mb-4 text-lg font-medium text-white/80">Administration</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Link href="/admin/dashboard">
-            <Card className="border-white/10 bg-white/5 transition-all hover:bg-white/10 hover:border-white/20 cursor-pointer h-full">
+            <Card className="border-white/10 bg-background/5 transition-all hover:bg-background/10 hover:border-white/20 cursor-pointer h-full">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-white/70">
                   Biens en ligne
@@ -65,7 +66,7 @@ export default async function AdminDashboardPage() {
           </Link>
 
           <Link href="/admin/moderation">
-            <Card className="border-white/10 bg-white/5 transition-all hover:bg-white/10 hover:border-white/20 cursor-pointer h-full">
+            <Card className="border-white/10 bg-background/5 transition-all hover:bg-background/10 hover:border-white/20 cursor-pointer h-full">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-white/70">
                   En attente
@@ -89,7 +90,7 @@ export default async function AdminDashboardPage() {
           </Link>
 
           <Link href="/admin/leads">
-            <Card className="border-white/10 bg-white/5 transition-all hover:bg-white/10 hover:border-white/20 cursor-pointer h-full">
+            <Card className="border-white/10 bg-background/5 transition-all hover:bg-background/10 hover:border-white/20 cursor-pointer h-full">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-white/70">
                   Leads (30j)
@@ -106,7 +107,7 @@ export default async function AdminDashboardPage() {
           </Link>
 
           <Link href="/admin/users">
-            <Card className="border-white/10 bg-white/5 transition-all hover:bg-white/10 hover:border-white/20 cursor-pointer h-full">
+            <Card className="border-white/10 bg-background/5 transition-all hover:bg-background/10 hover:border-white/20 cursor-pointer h-full">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-white/70">
                   Utilisateurs
@@ -122,6 +123,11 @@ export default async function AdminDashboardPage() {
             </Card>
           </Link>
         </div>
+      </div>
+
+      {/* Section Vérifications en attente */}
+      <div>
+        <VerificationQueue />
       </div>
 
       {/* Section Performance Interactive (Client Component) */}

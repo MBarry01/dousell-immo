@@ -57,7 +57,7 @@ export default async function AdminUsersPage() {
 
       {/* Statistiques */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card className="border-white/10 bg-white/5">
+        <Card className="border-white/10 bg-background/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white/70">
               Total
@@ -69,7 +69,7 @@ export default async function AdminUsersPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-white/5">
+        <Card className="border-white/10 bg-background/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white/70">
               Admins
@@ -81,7 +81,7 @@ export default async function AdminUsersPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-white/5">
+        <Card className="border-white/10 bg-background/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white/70">
               Modérateurs
@@ -93,7 +93,7 @@ export default async function AdminUsersPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-white/5">
+        <Card className="border-white/10 bg-background/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white/70">
               Agents
@@ -105,7 +105,7 @@ export default async function AdminUsersPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-white/5">
+        <Card className="border-white/10 bg-background/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white/70">
               Sans rôle
@@ -119,7 +119,7 @@ export default async function AdminUsersPage() {
       </div>
 
       {/* Tableau des utilisateurs */}
-      <Card className="border-white/10 bg-white/5">
+      <Card className="border-white/10 bg-background/5">
         <CardHeader>
           <CardTitle className="text-white">Liste des utilisateurs</CardTitle>
           <p className="text-sm text-white/60 mt-1">
@@ -130,7 +130,7 @@ export default async function AdminUsersPage() {
           <div className="overflow-hidden rounded-lg border border-white/10">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="bg-white/5 text-xs uppercase tracking-wider text-white/60">
+                <thead className="bg-background/5 text-xs uppercase tracking-wider text-white/60">
                   <tr>
                     <th className="px-4 py-3">Utilisateur</th>
                     <th className="px-4 py-3">Email</th>
@@ -144,11 +144,11 @@ export default async function AdminUsersPage() {
                   {users.map((user) => (
                     <tr
                       key={user.id}
-                      className="transition-colors hover:bg-white/5"
+                      className="transition-colors hover:bg-background/5"
                     >
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-background/10">
                             <Shield className="h-5 w-5 text-white/60" />
                           </div>
                           <div>

@@ -148,7 +148,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-[#05080c] antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-background antialiased`}
         suppressHydrationWarning
       >
         {/* Google Tag Manager (noscript) */}
@@ -166,7 +166,7 @@ export default function RootLayout({
 
         {/* Top Loader - Barre de progression dorée style YouTube */}
         <NextTopLoader
-          color="#F4C430"
+          color="rgb(244, 196, 48)"
           initialPosition={0.08}
           crawlSpeed={200}
           height={3}
@@ -174,7 +174,7 @@ export default function RootLayout({
           showSpinner={false}
           easing="ease"
           speed={200}
-          shadow="0 0 10px #F4C430, 0 0 5px #F4C430"
+          shadow="0 0 10px rgb(244, 196, 48), 0 0 5px rgb(244, 196, 48)"
           zIndex={9000}
         />
         <SuppressHydrationWarning />

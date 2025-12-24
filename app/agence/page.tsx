@@ -64,7 +64,7 @@ export default function AgencePage() {
         animate="visible"
         variants={fadeUp}
         transition={{ duration: 0.6 }}
-        className="rounded-[36px] border border-white/10 bg-gradient-to-br from-[#0d101b] via-[#05080c] to-[#05080c] p-8 text-white shadow-2xl"
+        className="rounded-[36px] border border-white/10 bg-gradient-to-br from-card via-background to-background p-8 text-white shadow-2xl"
       >
         <p className="text-xs uppercase tracking-[0.3em] text-white/50">
           À propos
@@ -87,7 +87,7 @@ export default function AgencePage() {
             whileInView="visible"
             viewport={{ once: true }}
             transition={{ delay: index * 0.1 }}
-            className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center text-white"
+            className="rounded-3xl border border-white/10 bg-background/5 p-6 text-center text-white"
           >
             <p className="text-4xl font-bold">{stat.value}</p>
             <p className="mt-2 text-sm text-white/60">{stat.label}</p>
@@ -113,7 +113,7 @@ export default function AgencePage() {
               whileInView="visible"
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="rounded-3xl border border-white/10 bg-white/5 p-4 text-white"
+              className="rounded-3xl border border-white/10 bg-background/5 p-4 text-white"
             >
               <div className="relative h-48 w-full overflow-hidden rounded-2xl">
                 <Image
@@ -129,7 +129,7 @@ export default function AgencePage() {
               </div>
               <Button
                 variant="secondary"
-                className="mt-4 w-full rounded-full border border-white/10 bg-[#25D366]/10 text-[#25D366]"
+                className="mt-4 w-full rounded-full border border-white/10 bg-emerald-500/10 text-emerald-500"
                 asChild
               >
                 <a
@@ -162,7 +162,7 @@ export default function AgencePage() {
               whileInView="visible"
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="rounded-3xl border border-white/10 bg-white/5 p-5 text-white"
+              className="rounded-3xl border border-white/10 bg-background/5 p-5 text-white"
             >
               <p className="text-lg font-semibold">{valeur.title}</p>
               <p className="mt-2 text-sm text-white/70">{valeur.description}</p>

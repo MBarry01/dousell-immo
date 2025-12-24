@@ -127,7 +127,7 @@ export default function MesBiensPage() {
           </p>
           <h1 className="text-3xl font-semibold">Mes biens</h1>
         </div>
-        <Button className="rounded-full bg-white text-black" asChild>
+        <Button className="rounded-full bg-primary text-black" asChild>
           <Link href="/compte/deposer">
             <Plus className="mr-2 h-4 w-4" />
             Déposer une annonce
@@ -155,7 +155,7 @@ export default function MesBiensPage() {
                 key={property.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-all hover:border-white/20"
+                className="group overflow-hidden rounded-2xl border border-white/10 bg-background/5 transition-all hover:border-white/20"
               >
                 {property.images?.[0] && (
                   <div className="relative h-48 w-full overflow-hidden">
@@ -231,7 +231,7 @@ export default function MesBiensPage() {
 
                   <Button
                     variant="secondary"
-                    className="mt-4 w-full rounded-full"
+                    className="mt-4 w-full rounded-full bg-background/5 border border-white/10"
                     asChild
                   >
                     <Link href={`/biens/${property.id}`}>Voir l&apos;annonce</Link>

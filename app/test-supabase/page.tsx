@@ -220,7 +220,7 @@ export default function TestSupabasePage() {
   const hasErrors = results.some((r) => r.status === "error");
 
   return (
-    <div className="min-h-screen bg-[#0b0f18] p-6 text-white">
+    <div className="min-h-screen bg-background p-6 text-white">
       <div className="mx-auto max-w-4xl space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Test de connexion Supabase</h1>
@@ -291,29 +291,29 @@ export default function TestSupabasePage() {
                   {results.some((r) => r.name === "Storage 'properties'" && r.status === "error") && (
                     <li className="font-semibold text-red-200">
                       📦 <strong>Bucket Storage manquant</strong> : Allez dans Supabase Dashboard → Storage → Créez un bucket nommé "properties" (public). Voir{" "}
-                      <code className="rounded bg-white/10 px-1">docs/CREER-BUCKET-STORAGE.md</code>
+                      <code className="rounded bg-background/10 px-1">docs/CREER-BUCKET-STORAGE.md</code>
                     </li>
                   )}
                   {results.some((r) => r.name === "Variables d'environnement" && r.status === "error") && (
                     <>
                       <li>
-                        Vérifiez que le fichier <code className="rounded bg-white/10 px-1">.env.local</code> existe
+                        Vérifiez que le fichier <code className="rounded bg-background/10 px-1">.env.local</code> existe
                         à la racine du projet
                       </li>
                       <li>
-                        Vérifiez que <code className="rounded bg-white/10 px-1">NEXT_PUBLIC_SUPABASE_URL</code> et{" "}
-                        <code className="rounded bg-white/10 px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> sont
+                        Vérifiez que <code className="rounded bg-background/10 px-1">NEXT_PUBLIC_SUPABASE_URL</code> et{" "}
+                        <code className="rounded bg-background/10 px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> sont
                         définis
                       </li>
                       <li>
                         Redémarrez le serveur de développement après avoir modifié{" "}
-                        <code className="rounded bg-white/10 px-1">.env.local</code>
+                        <code className="rounded bg-background/10 px-1">.env.local</code>
                       </li>
                     </>
                   )}
                   {results.some((r) => r.name.includes("table") && r.status === "error") && (
                     <li>
-                      Vérifiez que la table <code className="rounded bg-white/10 px-1">properties</code> existe dans Supabase (Table Editor)
+                      Vérifiez que la table <code className="rounded bg-background/10 px-1">properties</code> existe dans Supabase (Table Editor)
                     </li>
                   )}
                   <li>

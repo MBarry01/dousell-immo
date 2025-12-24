@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 
 export default function PropertyNotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#05080c] px-6 text-center text-white">
-      <div className="mb-6 rounded-full bg-white/10 p-6">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center text-white">
+      <div className="mb-6 rounded-full bg-background/10 p-6">
         <Home className="h-10 w-10 text-white" />
       </div>
       <h1 className="text-3xl font-semibold">Bien introuvable</h1>

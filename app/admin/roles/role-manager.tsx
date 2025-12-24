@@ -65,7 +65,7 @@ export function RoleManager({ userId, currentRoles }: RoleManagerProps) {
             disabled={isPending}
             className={`rounded-full text-xs ${
               hasRole
-                ? "bg-white text-black hover:bg-white/90"
+                ? "bg-background text-foreground hover:bg-background/90"
                 : "border-white/20 text-white/60 hover:border-white/40 hover:text-white"
             }`}
           >

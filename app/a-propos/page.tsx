@@ -39,7 +39,7 @@ export default function AProposPage() {
         animate="visible"
         variants={fadeUp}
         transition={{ duration: 0.6 }}
-        className="rounded-[36px] border border-white/10 bg-gradient-to-br from-[#0d101b] via-[#05080c] to-[#05080c] p-8 text-white shadow-2xl sm:p-12"
+        className="rounded-[36px] border border-white/10 bg-gradient-to-br from-card via-background to-background p-8 text-white shadow-2xl sm:p-12"
       >
         <p className="text-xs uppercase tracking-[0.3em] text-white/50">
           Notre mission
@@ -66,7 +66,7 @@ export default function AProposPage() {
             Qui sommes-nous ?
           </h2>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white/80 sm:p-8">
+        <div className="rounded-2xl border border-white/10 bg-background/5 p-6 text-white/80 sm:p-8">
           <p className="leading-relaxed">
             Fondée avec la vision de démocratiser l&apos;accès à l&apos;immobilier au Sénégal, Dousell Immo est née d&apos;un constat simple : trouver un bien de qualité, que ce soit à Dakar, Saly ou en région, ne devrait pas être un parcours du combattant.
           </p>
@@ -107,7 +107,7 @@ export default function AProposPage() {
                 whileInView="visible"
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white"
+                className="rounded-2xl border border-white/10 bg-background/5 p-6 text-white"
               >
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20">
                   <Icon className="h-6 w-6 text-amber-400" />
@@ -141,7 +141,7 @@ export default function AProposPage() {
         </div>
         <div className="grid gap-6 sm:grid-cols-2">
           {/* Mohamadou Barry - Fondateur */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
+          <div className="rounded-2xl border border-white/10 bg-background/5 p-6 sm:p-8">
             <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-2 border-amber-500/30">
                 <Image
@@ -182,7 +182,7 @@ export default function AProposPage() {
           </div>
 
           {/* Amadou Barry - Cofondateur */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
+          <div className="rounded-2xl border border-white/10 bg-background/5 p-6 sm:p-8">
             <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-2 border-amber-500/30">
                 <Image
@@ -242,7 +242,7 @@ export default function AProposPage() {
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button
             size="lg"
-            className="h-[50px] rounded-full bg-white px-8 text-black hover:bg-white/90"
+            className="h-[50px] rounded-full bg-primary px-8 text-black hover:bg-primary/90"
             asChild
           >
             <Link href="/planifier-visite">
@@ -253,7 +253,7 @@ export default function AProposPage() {
           <Button
             variant="outline"
             size="lg"
-            className="h-[50px] rounded-full border border-white/20 bg-white/5 px-8 text-white hover:bg-white/10"
+            className="h-[50px] rounded-full border border-white/20 bg-background/5 px-8 text-white hover:bg-background/10"
             asChild
           >
             <Link href="/recherche">

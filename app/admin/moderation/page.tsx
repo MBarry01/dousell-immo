@@ -305,8 +305,8 @@ export default function ModerationPage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-amber-500/20 p-2">
-              <Clock className="h-5 w-5 text-amber-400" />
+            <div className="rounded-full bg-primary/20 p-2">
+              <Clock className="h-5 w-5 text-primary" />
             </div>
             <div>
               <p className="text-xs text-white/60">Total en attente</p>
@@ -366,7 +366,7 @@ export default function ModerationPage() {
                   onClick={() => setFilterStatus(status)}
                   className={`rounded-full text-xs ${
                     filterStatus === status
-                      ? "bg-amber-500 text-black"
+                      ? "bg-primary text-black"
                       : "text-white/70 hover:text-white"
                   }`}
                 >
@@ -393,7 +393,7 @@ export default function ModerationPage() {
                     onClick={() => setFilterService(service)}
                     className={`rounded-full text-xs ${
                       filterService === service
-                        ? "bg-amber-500 text-black"
+                        ? "bg-primary text-black"
                         : "text-white/70 hover:text-white"
                     }`}
                   >
@@ -421,7 +421,7 @@ export default function ModerationPage() {
                     onClick={() => setSortBy(sort)}
                     className={`rounded-full text-xs ${
                       sortBy === sort
-                        ? "bg-amber-500 text-black"
+                        ? "bg-primary text-black"
                         : "text-white/70 hover:text-white"
                     }`}
                   >

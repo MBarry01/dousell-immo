@@ -48,7 +48,7 @@ export default async function AdminDashboardPage() {
               <ModerationBadge />
             </Link>
           </Button>
-          <Button className="rounded-full bg-white text-black" asChild>
+          <Button className="rounded-full bg-background text-foreground" asChild>
             <Link href="/admin/biens/nouveau">Ajouter un bien</Link>
           </Button>
         </div>

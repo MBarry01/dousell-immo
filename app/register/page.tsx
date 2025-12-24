@@ -74,7 +74,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] px-4 py-12">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-background via-background to-black px-4 py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -116,7 +116,7 @@ export default function RegisterPage() {
                 type="submit"
                 variant="secondary"
                 disabled={isPending}
-                className="w-full rounded-xl border border-gray-200 bg-white text-gray-900 hover:bg-gray-50"
+                className="w-full rounded-xl border border-gray-200 bg-background text-foreground hover:bg-gray-50"
               >
                 <svg
                   className="mr-2 h-5 w-5"
@@ -466,7 +466,7 @@ export default function RegisterPage() {
             <Button
               type="submit"
               disabled={isPending || !captchaToken || isCheckingHIBP}
-              className="mt-6 h-12 w-full rounded-xl bg-white text-black hover:bg-gray-100 disabled:opacity-50"
+              className="mt-6 h-12 w-full rounded-xl bg-primary text-black hover:bg-primary/90 disabled:opacity-50"
             >
               {isCheckingHIBP ? (
                 <>

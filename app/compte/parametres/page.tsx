@@ -171,7 +171,7 @@ export default function ParametresPage() {
                     Annuler
                   </Button>
                   <Button
-                    className="flex-1 bg-white text-black hover:bg-zinc-100"
+                    className="flex-1 bg-primary text-black hover:bg-primary/90"
                     onClick={handleResetPassword}
                   >
                     Envoyer

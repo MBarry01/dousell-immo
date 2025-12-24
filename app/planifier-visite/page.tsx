@@ -100,7 +100,7 @@ function PlanifierVisitePageContent() {
 
   return (
     <div className="space-y-10 py-6">
-      <div className="mx-auto w-full max-w-lg rounded-[32px] border border-white/10 bg-white/5 px-6 py-10 shadow-[0_20px_80px_rgba(5,8,12,0.55)] backdrop-blur">
+      <div className="mx-auto w-full max-w-lg rounded-[32px] border border-white/10 bg-background/5 px-6 py-10 shadow-[0_20px_80px_rgba(5,8,12,0.55)] backdrop-blur">
         <div className="mb-10 text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-white/50">
             Conciergerie
@@ -124,7 +124,7 @@ function PlanifierVisitePageContent() {
             <Input
               type="text"
               placeholder="Ex: Amy Ndiaye"
-              className="border-white/10 bg-white/5 text-white placeholder:text-white/40"
+              className="border-white/10 bg-background/5 text-white placeholder:text-white/40"
               {...form.register("fullName")}
             />
             {form.formState.errors.fullName && (
@@ -139,7 +139,7 @@ function PlanifierVisitePageContent() {
               type="tel"
               inputMode="tel"
               placeholder="77 000 00 00"
-              className="border-white/10 bg-white/5 text-white placeholder:text-white/40"
+              className="border-white/10 bg-background/5 text-white placeholder:text-white/40"
               {...form.register("phone")}
             />
             {form.formState.errors.phone && (
@@ -152,13 +152,13 @@ function PlanifierVisitePageContent() {
             <div className="space-y-2">
               <label className="text-sm text-white/70">Type de projet</label>
               <select
-                className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none transition focus:border-white/30"
+                className="h-12 w-full rounded-2xl border border-white/10 bg-background/5 px-4 text-white outline-none transition focus:border-white/30"
                 {...form.register("projectType")}
               >
-                <option value="achat" className="bg-[#05080c] text-white">
+                <option value="achat" className="bg-background text-white">
                   Achat
                 </option>
-                <option value="location" className="bg-[#05080c] text-white">
+                <option value="location" className="bg-background text-white">
                   Location
                 </option>
               </select>
@@ -171,14 +171,14 @@ function PlanifierVisitePageContent() {
             <div className="space-y-2">
               <label className="text-sm text-white/70">Disponibilité</label>
               <select
-                className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none transition focus:border-white/30"
+                className="h-12 w-full rounded-2xl border border-white/10 bg-background/5 px-4 text-white outline-none transition focus:border-white/30"
                 {...form.register("availability")}
               >
                 {Object.entries(availabilityLabels).map(([value, label]) => (
                   <option
                     key={value}
                     value={value}
-                    className="bg-[#05080c] text-white"
+                    className="bg-background text-white"
                   >
                     {label}
                   </option>
@@ -197,7 +197,7 @@ function PlanifierVisitePageContent() {
             </label>
             <Textarea
               placeholder="Je cherche un T3 à Mermoz, budget 800 000 FCFA/mois..."
-              className="min-h-[140px] border-white/10 bg-white/5 text-white placeholder:text-white/40"
+              className="min-h-[140px] border-white/10 bg-background/5 text-white placeholder:text-white/40"
               {...form.register("message")}
             />
             {form.formState.errors.message && (
@@ -222,7 +222,7 @@ function PlanifierVisitePageContent() {
             type="submit"
             size="lg"
             disabled={isSubmitting || !captchaToken}
-            className="w-full rounded-full bg-white text-black hover:bg-white/90 disabled:opacity-50"
+            className="w-full rounded-full bg-primary text-black hover:bg-primary/90 disabled:opacity-50"
           >
             {isSubmitting ? "Envoi en cours..." : "Envoyer la demande"}
           </Button>
@@ -240,7 +240,7 @@ function PlanifierVisitePageContent() {
                 value: "page_planifier_bottom"
               });
             }}
-            className="mt-3 inline-flex items-center justify-center gap-2 text-sm font-medium text-[#25D366] transition hover:text-[#1DA851]"
+            className="mt-3 inline-flex items-center justify-center gap-2 text-sm font-medium text-emerald-500 transition hover:text-emerald-600"
           >
             <MessageCircle className="h-5 w-5" />
             Discuter directement sur WhatsApp

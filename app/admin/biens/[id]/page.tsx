@@ -299,10 +299,10 @@ export default function EditPropertyPage() {
                   colorScheme: "dark",
                 }}
               >
-                <option value="vente" className="bg-[#0b0f18] text-white">
+                <option value="vente" className="bg-background text-white">
                   Vente
                 </option>
-                <option value="location" className="bg-[#0b0f18] text-white">
+                <option value="location" className="bg-background text-white">
                   Location
                 </option>
               </select>
@@ -320,7 +320,7 @@ export default function EditPropertyPage() {
                   <option
                     key={t.value}
                     value={t.value}
-                    className="bg-[#0b0f18] text-white"
+                    className="bg-background text-white"
                   >
                     {t.label}
                   </option>
@@ -383,11 +383,11 @@ export default function EditPropertyPage() {
                   colorScheme: "dark",
                 }}
               >
-                <option value="" className="bg-[#0b0f18] text-white">
+                <option value="" className="bg-background text-white">
                   Sélectionner
                 </option>
                 {quartiers.map((q) => (
-                  <option key={q} value={q} className="bg-[#0b0f18] text-white">
+                  <option key={q} value={q} className="bg-background text-white">
                     {q}
                   </option>
                 ))}
@@ -490,14 +490,14 @@ export default function EditPropertyPage() {
                     colorScheme: "dark",
                   }}
                 >
-                  <option value="" className="bg-[#0b0f18] text-white">
+                  <option value="" className="bg-background text-white">
                     Sélectionner
                   </option>
                   {situationsJuridiques.map((s) => (
                     <option
                       key={s.value}
                       value={s.value}
-                      className="bg-[#0b0f18] text-white"
+                      className="bg-background text-white"
                     >
                       {s.label}
                     </option>
@@ -599,7 +599,7 @@ export default function EditPropertyPage() {
         <Button
           type="button"
           onClick={handleSubmit(onSubmit)}
-          className="w-full rounded-full bg-white text-black"
+          className="w-full rounded-full bg-background text-foreground"
           disabled={uploading}
         >
           Mettre à jour le bien

@@ -169,7 +169,7 @@ export default async function AdminLeadsPage() {
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"
-                          className="rounded-full bg-[#25D366] text-white hover:bg-[#1DA851]"
+                          className="rounded-full bg-emerald-500 text-white hover:bg-emerald-600"
                           asChild
                         >
                           <a

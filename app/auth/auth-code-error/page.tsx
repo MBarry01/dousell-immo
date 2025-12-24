@@ -51,20 +51,20 @@ function AuthCodeErrorContent() {
               <summary className="text-xs text-white/50 cursor-pointer hover:text-white/70">
                 Détails techniques
               </summary>
-              <pre className="mt-2 p-3 text-xs text-white/60 bg-white/5 rounded-lg overflow-auto max-h-32">
+              <pre className="mt-2 p-3 text-xs text-white/60 bg-background/5 rounded-lg overflow-auto max-h-32">
                 {decodeURIComponent(reason)}
               </pre>
             </details>
           )}
         </div>
         <div className="space-y-3">
-          <Button asChild className="w-full rounded-xl bg-white text-black">
+          <Button asChild className="w-full rounded-xl bg-primary text-black">
             <Link href="/login">Retour à la connexion</Link>
           </Button>
           <Button
             variant="secondary"
             asChild
-            className="w-full rounded-xl border border-white/10 bg-white/5 text-white"
+            className="w-full rounded-xl border border-white/10 bg-background/5 text-white"
           >
             <Link href="/">Retour à l&apos;accueil</Link>
           </Button>

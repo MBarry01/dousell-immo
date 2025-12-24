@@ -326,7 +326,7 @@ export default function EditPropertyPage() {
               >
                 <option value="">Sélectionnez</option>
                 {quartiers.map((q) => (
-                  <option key={q} value={q} className="bg-[#0b0f18] text-white">
+                  <option key={q} value={q} className="bg-background text-white">
                     {q}
                   </option>
                 ))}
@@ -432,7 +432,7 @@ export default function EditPropertyPage() {
                   style={{ colorScheme: "dark" }}
                 >
                   {situationsJuridiques.map((sj) => (
-                    <option key={sj.value} value={sj.value} className="bg-[#0b0f18] text-white">
+                    <option key={sj.value} value={sj.value} className="bg-background text-white">
                       {sj.label}
                     </option>
                   ))}
@@ -503,7 +503,7 @@ export default function EditPropertyPage() {
           <Button
             type="submit"
             disabled={submitting}
-            className="rounded-full bg-white text-black hover:bg-white/90"
+            className="rounded-full bg-background text-foreground hover:bg-background/90"
           >
             {submitting ? "Enregistrement..." : "Enregistrer les modifications"}
           </Button>

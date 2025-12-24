@@ -79,7 +79,7 @@ export function RejectDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#0b0f18] border-white/10 text-white sm:max-w-[500px]">
+      <DialogContent className="bg-background border-white/10 text-white sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
             Refuser l&apos;annonce
@@ -105,7 +105,7 @@ export function RejectDialog({
                     value={reason}
                     checked={selectedReason === reason}
                     onChange={(e) => setSelectedReason(e.target.value)}
-                    className="h-4 w-4 text-amber-500 focus:ring-amber-500 focus:ring-offset-0"
+                    className="h-4 w-4 text-primary focus:ring-primary focus:ring-offset-0"
                   />
                   <span className="text-sm text-white/80">{reason}</span>
                 </label>

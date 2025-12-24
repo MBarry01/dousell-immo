@@ -90,7 +90,7 @@ export default function ComptePage() {
 
             <div className="mx-auto max-w-md space-y-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
               <Button
-                className="w-full rounded-xl bg-white text-black hover:bg-zinc-100"
+                className="w-full rounded-xl bg-primary text-black hover:bg-primary/90"
                 onClick={() => router.push("/login")}
               >
                 Se connecter

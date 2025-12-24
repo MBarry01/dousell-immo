@@ -21,8 +21,12 @@ function sanitizeText(text: string): string {
   if (!text) return "";
   try {
     const str = String(text);
-    // Replace various non-breaking spaces with normal space to support StandardFonts
-    let cleaned = str.replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, " ");
+    // Replace ALL Unicode spaces (including non-breaking spaces) with normal space
+    // This includes: \u00A0 (NBSP), \u2000-\u200B (various spaces), \u202F (narrow NBSP), \u205F (medium mathematical space), \u3000 (ideographic space)
+    let cleaned = str.replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000\uFEFF]/g, " ");
+    
+    // Normalize multiple spaces to single space
+    cleaned = cleaned.replace(/\s+/g, " ");
 
     // Remove only control characters that might break PDF (0x00-0x1F except tabs/newlines)
     // keep emojis and other chars
@@ -130,6 +134,7 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
 
       page.drawText(description, options);
 
+      // Nettoyer le montant formaté pour éviter les espaces insécables
       page.drawText(sanitizeText(`${item.amount.toLocaleString("fr-SN")} FCFA`), { x: width - margin - 100, y: yPosition, size: 10, font: regularFont, color: rgb(0, 0, 0) });
       yPosition -= 25;
     });
@@ -139,6 +144,7 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
     page.drawLine({ start: { x: margin, y: yPosition }, end: { x: width - margin, y: yPosition }, thickness: 1, color: rgb(0, 0, 0) });
     yPosition -= 25;
     page.drawText("TOTAL NET A PAYER", { x: width - margin - 250, y: yPosition, size: 12, font: boldFont, color: rgb(0, 0, 0) });
+    // Nettoyer le total formaté pour éviter les espaces insécables
     page.drawText(sanitizeText(`${data.total.toLocaleString("fr-SN")} FCFA`), { x: width - margin - 100, y: yPosition, size: 12, font: boldFont, color: rgb(0, 0, 0) });
 
     // Footer

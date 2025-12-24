@@ -15,7 +15,11 @@
     "resize-screenshot": "node scripts/resize-desktop-screenshot.js",
     "test:email": "tsx scripts/test-email.ts",
     "test:signup": "tsx scripts/test-signup-flow.ts",
-    "check:signup": "tsx scripts/check-signup-issues.ts"
+    "check:signup": "tsx scripts/check-signup-issues.ts",
+    "scan:ui": "tsx scripts/scan-ui.ts",
+    "check:actions": "tsx scripts/check-actions.ts",
+    "quality": "npm run lint && npm run scan:ui && npm run check:actions",
+    "prepare": "husky"
   },
   "dependencies": {
     "@fontsource/noto-emoji": "^5.2.10",
@@ -80,6 +84,9 @@
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
+    "glob": "^13.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",
     "typescript": "^5"
