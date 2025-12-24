@@ -13,9 +13,14 @@ import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/utils/supabase/client";
 import type { Property } from "@/types/property";
 import { PropertyCardActions } from "./property-card-actions";
+import { VerificationUploadForm } from "@/components/dashboard/verification-upload-form";
+import { VerifiedBadge } from "@/components/ui/verified-badge";
+import { ShieldCheck, Timer } from "lucide-react";
 
 type PropertyWithStatus = Property & {
   validation_status: "pending" | "payment_pending" | "approved" | "rejected";
+  validation_rejection_reason?: string | null;
+  verification_status?: "pending" | "verified" | "rejected";
   rejection_reason?: string | null;
   views_count?: number;
 };
@@ -58,7 +63,7 @@ export default function MesBiensPage() {
     let allProperties: PropertyWithStatus[] = [];
     let from = 0;
     const pageSize = 1000; // Taille maximale par requête Supabase
-    
+
     while (true) {
       const { data, error } = await supabase
         .from("properties")
@@ -77,12 +82,12 @@ export default function MesBiensPage() {
       }
 
       allProperties = [...allProperties, ...(data as PropertyWithStatus[])];
-      
+
       // Si on a récupéré moins que la taille de page, c'est qu'on a tout récupéré
       if (data.length < pageSize) {
         break;
       }
-      
+
       from += pageSize;
     }
 
@@ -175,6 +180,23 @@ export default function MesBiensPage() {
                       {property.title}
                     </h3>
                     <div className="flex items-center gap-2">
+                      {/* Status Certification */}
+                      {property.verification_status === "verified" ? (
+                        <VerifiedBadge size="sm" />
+                      ) : property.verification_status === "pending" ? (
+                        <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/50">
+                          <Timer className="h-3 w-3" />
+                          <span>Vérif. en cours</span>
+                        </div>
+                      ) : (
+                        // Afficher le bouton seulement si le bien a un statut de base "approved" ou "payment_pending"
+                        // Pour éviter de certifier des brouillons ou des biens rejetés par la modération principale
+                        (!property.verification_status || property.verification_status === "rejected") &&
+                        (property.validation_status === "approved" || property.validation_status === "pending") && (
+                          <VerificationUploadForm propertyId={property.id} />
+                        )
+                      )}
+
                       <span
                         className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${status.color}`}
                       >
@@ -215,7 +237,7 @@ export default function MesBiensPage() {
 
                   <p className="mb-4 text-sm text-white/60">
                     {property.location.city}
-                    {(property.location as { district?: string }).district && 
+                    {(property.location as { district?: string }).district &&
                       `, ${(property.location as { district?: string }).district}`
                     }
                   </p>

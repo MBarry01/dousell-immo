@@ -1,254 +1,225 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Upload, FileText, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
-
+import { Upload, X, FileText, Loader2, ShieldCheck } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { VerificationStatusBadge } from "./verification-status-badge";
-import { submitListingVerification } from "@/app/_actions/verification";
-import { cn } from "@/lib/utils";
-
-type VerificationStatus = "pending" | "verified" | "rejected" | null;
+import { uploadVerificationDoc } from "@/app/compte/mes-biens/actions";
 
 type VerificationUploadFormProps = {
   propertyId: string;
-  currentStatus: VerificationStatus;
-  proofDocumentUrl?: string | null;
+  variant?: "default" | "outline" | "ghost";
 };
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 Mo
-const ALLOWED_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp"];
 
 export function VerificationUploadForm({
   propertyId,
-  currentStatus,
-  proofDocumentUrl,
+  variant = "outline",
 }: VerificationUploadFormProps) {
-  const [file, setFile] = useState<File | null>(null);
-  const [dragActive, setDragActive] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
-  const handleDrag = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
+    setIsDragOver(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileSelect(e.dataTransfer.files[0]);
+      validateAndSetFile(e.dataTransfer.files[0]);
     }
   };
 
-  const handleFileSelect = (selectedFile: File) => {
-    // Validation du type
-    if (!ALLOWED_TYPES.includes(selectedFile.type)) {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      validateAndSetFile(e.target.files[0]);
+    }
+  };
+
+  const validateAndSetFile = (file: File) => {
+    const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
       toast.error("Format non supporté", {
-        description: "Veuillez uploader un fichier PDF, PNG, JPG ou WEBP.",
+        description: "Veuillez utiliser un fichier PDF, JPG ou PNG."
       });
       return;
     }
 
-    // Validation de la taille
-    if (selectedFile.size > MAX_FILE_SIZE) {
+    if (file.size > 5 * 1024 * 1024) {
       toast.error("Fichier trop volumineux", {
-        description: "La taille maximale est de 5 Mo.",
+        description: "La taille maximale est de 5Mo."
       });
       return;
     }
 
-    setFile(selectedFile);
+    setSelectedFile(file);
   };
 
-  const handleSubmit = () => {
-    if (!file) {
-      toast.error("Aucun fichier sélectionné");
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedFile) return;
 
-    if (currentStatus === "pending") {
-      toast.error("Une demande est déjà en cours de traitement");
-      return;
-    }
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("propertyId", propertyId);
 
-    startTransition(async () => {
-      const result = await submitListingVerification(propertyId, file);
+    try {
+      const result = await uploadVerificationDoc(formData);
 
-      if (result.success) {
-        toast.success("Demande de vérification envoyée", {
-          description: "Votre document sera examiné sous peu.",
-        });
-        setFile(null);
+      if (result.error) {
+        toast.error("Erreur d'envoi", { description: result.error });
       } else {
-        toast.error("Erreur", {
-          description: result.error || "Une erreur est survenue.",
+        toast.success("Document envoyé !", {
+          description: "Votre demande de certification est en cours d'examen."
         });
+        setIsOpen(false);
+        setSelectedFile(null);
       }
-    });
-  };
-
-  const handleRemoveFile = () => {
-    setFile(null);
-  };
-
-  const getFileIcon = () => {
-    if (file?.type === "application/pdf") {
-      return <FileText className="h-8 w-8 text-primary" />;
+    } catch (error) {
+      console.error(error);
+      toast.error("Une erreur inconnue est survenue.");
+    } finally {
+      setIsUploading(false);
     }
-    return <FileText className="h-8 w-8 text-primary" />;
   };
 
   return (
-    <Card className="border-white/10 bg-white/5">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-white">Vérification du bien</CardTitle>
-            <CardDescription className="text-white/60">
-              Uploader un document de preuve de propriété
-            </CardDescription>
-          </div>
-          {currentStatus && (
-            <VerificationStatusBadge status={currentStatus} />
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Affichage du statut */}
-        {currentStatus === "verified" && (
-          <div className="flex items-center gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-emerald-300">
-            <CheckCircle2 className="h-4 w-4" />
-            <span className="text-sm">Votre bien a été vérifié avec succès.</span>
-          </div>
-        )}
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant={variant}
+          size="sm"
+          className="h-8 border-[#F4C430]/50 text-[#F4C430] hover:bg-[#F4C430]/10 hover:text-[#F4C430]"
+        >
+          <ShieldCheck className="mr-2 h-4 w-4" />
+          Certifier ce bien
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md bg-zinc-950 border-white/10 text-white">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-[#F4C430]">
+            <ShieldCheck className="h-5 w-5" />
+            Certification du bien
+          </DialogTitle>
+          <DialogDescription className="text-white/60">
+            Téléchargez votre titre de propriété ou tout document officiel prouvant que vous êtes le propriétaire.
+            Ce document restera confidentiel.
+          </DialogDescription>
+        </DialogHeader>
 
-        {currentStatus === "rejected" && (
-          <div className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-red-300">
-            <AlertCircle className="h-4 w-4" />
-            <span className="text-sm">
-              Votre demande de vérification a été refusée. Vous pouvez soumettre un nouveau document.
-            </span>
-          </div>
-        )}
-
-        {currentStatus === "pending" && (
-          <div className="flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-amber-300">
-            <Upload className="h-4 w-4" />
-            <span className="text-sm">Votre demande est en cours de traitement.</span>
-          </div>
-        )}
-
-        {/* Zone d'upload */}
-        {currentStatus !== "pending" && (
+        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           <div
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
+            className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all p-8
+              ${isDragOver
+                ? "border-[#F4C430] bg-[#F4C430]/5"
+                : "border-white/10 bg-white/5 hover:bg-white/10"
+              }
+              ${selectedFile ? "border-[#F4C430]/50" : ""}
+            `}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={cn(
-              "relative rounded-lg border-2 border-dashed transition-colors",
-              dragActive
-                ? "border-primary bg-primary/10"
-                : "border-white/20 bg-white/5",
-              file && "border-primary bg-primary/10"
-            )}
           >
-            <div className="flex flex-col items-center justify-center p-8 text-center">
-              {file ? (
-                <div className="flex w-full flex-col items-center gap-4">
-                  {getFileIcon()}
-                  <div className="flex flex-col items-center gap-2">
-                    <p className="text-sm font-medium text-white">{file.name}</p>
-                    <p className="text-xs text-white/60">
-                      {(file.size / 1024 / 1024).toFixed(2)} Mo
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleRemoveFile}
-                    className="text-red-400 hover:text-red-300"
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    Retirer
-                  </Button>
+            <input
+              type="file"
+              id="verification-file"
+              accept=".pdf,.jpg,.jpeg,.png,.webp"
+              className="absolute inset-0 cursor-pointer opacity-0"
+              onChange={handleFileChange}
+              disabled={isUploading}
+            />
+
+            {selectedFile ? (
+              <div className="flex flex-col items-center gap-2 text-center">
+                <div className="rounded-full bg-[#F4C430]/10 p-3">
+                  <FileText className="h-8 w-8 text-[#F4C430]" />
                 </div>
-              ) : (
-                <>
-                  <Upload className="h-10 w-10 text-white/40 mb-4" />
-                  <p className="text-sm font-medium text-white mb-1">
-                    Glissez-déposez votre document ici
+                <div>
+                  <p className="font-medium text-white">{selectedFile.name}</p>
+                  <p className="text-xs text-white/50">
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                   </p>
-                  <p className="text-xs text-white/60 mb-4">
-                    ou cliquez pour sélectionner un fichier
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="mt-2 h-8 text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent clicking input again
+                    setSelectedFile(null);
+                  }}
+                >
+                  <X className="mr-2 h-3.5 w-3.5" />
+                  Changer de fichier
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-center">
+                <div className="rounded-full bg-white/5 p-3">
+                  <Upload className="h-6 w-6 text-white/40" />
+                </div>
+                <div>
+                  <p className="font-medium text-white">
+                    Glissez votre document ici
                   </p>
-                  <label htmlFor="proof-upload">
-                    <input
-                      id="proof-upload"
-                      type="file"
-                      accept=".pdf,.png,.jpg,.jpeg,.webp"
-                      className="hidden"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          handleFileSelect(e.target.files[0]);
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      asChild
-                    >
-                      <span>Sélectionner un fichier</span>
-                    </Button>
-                  </label>
-                  <p className="mt-4 text-xs text-white/50">
-                    PDF, PNG, JPG, WEBP (max 5 Mo)
+                  <p className="text-xs text-white/50 mt-1">
+                    ou cliquez pour parcourir
                   </p>
-                </>
-              )}
-            </div>
+                </div>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest mt-2">
+                  PDF, JPG, PNG (Max 5MB)
+                </p>
+              </div>
+            )}
           </div>
-        )}
 
-        {/* Bouton de soumission */}
-        {file && currentStatus !== "pending" && (
-          <Button
-            onClick={handleSubmit}
-            disabled={isPending}
-            className="w-full"
-          >
-            {isPending ? "Envoi en cours..." : "Soumettre la vérification"}
-          </Button>
-        )}
-
-        {/* Lien vers le document existant */}
-        {proofDocumentUrl && currentStatus !== null && (
-          <div className="rounded-lg bg-white/5 border border-white/10 p-3">
-            <p className="text-xs text-white/60 mb-2">Document uploadé :</p>
-            <a
-              href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/certifications/${proofDocumentUrl}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-primary hover:underline flex items-center gap-2"
+          <div className="flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsOpen(false)}
+              disabled={isUploading}
+              className="text-white/60 hover:text-white"
             >
-              <FileText className="h-4 w-4" />
-              Voir le document
-            </a>
+              Annuler
+            </Button>
+            <Button
+              type="submit"
+              disabled={!selectedFile || isUploading}
+              className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90 font-semibold"
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Envoi...
+                </>
+              ) : (
+                "Envoyer pour certification"
+              )}
+            </Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -63,6 +63,11 @@ type SupabasePropertyRow = {
   service_type?: "mandat_confort" | "boost_visibilite";
   contact_phone?: string;
   view_count?: number;
+  verification_status?: Property["verification_status"];
+  proof_document_url?: string;
+  verification_requested_at?: string;
+  featured?: boolean;
+  exclusive?: boolean;
   created_at: string;
   owner?: {
     id: string;
@@ -158,9 +163,13 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
       proximites.ecoles?.length ||
       proximites.commerces?.length
     ) ? proximites as Property["proximites"] : undefined,
-    service_type: row.service_type,
     contact_phone: row.contact_phone,
     view_count: row.view_count,
+    verification_status: row.verification_status,
+    proof_document_url: row.proof_document_url,
+    verification_requested_at: row.verification_requested_at,
+    featured: row.featured,
+    exclusive: row.exclusive,
   };
 };
 
@@ -171,7 +180,7 @@ export const getProperties = async (filters: PropertyFilters = {}) => {
     let query = supabase
       .from("properties")
       .select(
-        "id, title, description, price, category, status, location, specs, details, features, images, agent, created_at, validation_status, view_count"
+        "id, title, description, price, category, status, location, specs, details, features, images, agent, created_at, validation_status, verification_status, view_count"
       );
 
     // Filtrer uniquement les propriétés approuvées et disponibles

@@ -4,6 +4,11 @@ export type Property = {
   price: number;
   transaction: "vente" | "location";
   status?: "disponible" | "sous-offre" | "vendu";
+  verification_status?: "pending" | "verified" | "rejected";
+  proof_document_url?: string;
+  verification_requested_at?: string;
+  featured?: boolean;
+  exclusive?: boolean;
   location: {
     city: string;
     address: string;

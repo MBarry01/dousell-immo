@@ -16,17 +16,17 @@ const L = typeof window !== "undefined" ? require("leaflet") : null;
 
 // Fix pour les icônes Leaflet avec Next.js
 if (typeof window !== "undefined" && L) {
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-    iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-  });
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+        iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+        shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+    });
 }
 
 type MapViewProps = {
-  properties: Property[];
-  showCarousel?: boolean;
+    properties: Property[];
+    showCarousel?: boolean;
 };
 
 // Coordonnées de Dakar par défaut
@@ -35,293 +35,316 @@ const DEFAULT_ZOOM = 11;
 
 // Formatage du prix en format court (ex: "1.5M", "500k")
 const formatPrice = (price: number): string => {
-  if (price >= 1_000_000) {
-    const millions = price / 1_000_000;
-    return `${millions % 1 === 0 ? millions : millions.toFixed(1)}M`;
-  }
-  if (price >= 1_000) {
-    const thousands = price / 1_000;
-    return `${thousands % 1 === 0 ? thousands : thousands.toFixed(1)}k`;
-  }
-  return price.toString();
+    if (price >= 1_000_000) {
+        const millions = price / 1_000_000;
+        return `${millions % 1 === 0 ? millions : millions.toFixed(1)}M`;
+    }
+    if (price >= 1_000) {
+        const thousands = price / 1_000;
+        return `${thousands % 1 === 0 ? thousands : thousands.toFixed(1)}k`;
+    }
+    return price.toString();
 };
 
 // Composant pour centrer la carte automatiquement
 const MapCenter = ({ center, zoom }: { center: LatLngExpression; zoom: number }) => {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(center, zoom);
-  }, [map, center, zoom]);
-  return null;
+    const map = useMap();
+    useEffect(() => {
+        map.setView(center, zoom);
+    }, [map, center, zoom]);
+    return null;
 };
 
 // Composant de marqueur personnalisé avec prix
 const PriceMarker = ({
-  property,
-  isActive,
-  onClick,
-  onRedirect,
+    property,
+    isActive,
+    onClick,
+    onRedirect,
 }: {
-  property: Property;
-  isActive: boolean;
-  onClick: () => void;
-  onRedirect: () => void;
+    property: Property;
+    isActive: boolean;
+    onClick: () => void;
+    onRedirect: () => void;
 }) => {
-  const position: LatLngExpression = [
-    property.location.coords.lat,
-    property.location.coords.lng,
-  ];
+    const position: LatLngExpression = [
+        property.location.coords.lat,
+        property.location.coords.lng,
+    ];
 
-  // Créer une icône HTML personnalisée pour le prix
-  const icon = useMemo(() => {
-    if (typeof window === "undefined" || !L) return undefined;
+    // Créer une icône HTML personnalisée pour le prix
+    const icon = useMemo(() => {
+        if (typeof window === "undefined" || !L) return undefined;
 
-    const priceText = formatPrice(property.price);
-    const isActiveClass = isActive ? "scale-110 bg-black text-white z-50" : "bg-primary text-primary-foreground";
-    
-    return L.divIcon({
-      className: "custom-price-marker",
-      html: `
-        <div class="price-pill ${isActiveClass} inline-flex items-center justify-center rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition-all duration-200 cursor-pointer" style="font-size: 12px; min-width: 50px; white-space: nowrap;">
-          ${priceText}
+        const priceText = formatPrice(property.price);
+        const isVerified = property.verification_status === "verified";
+
+        // Style doré pour les biens vérifiés
+        const verifiedClass = isVerified
+            ? "bg-[#F4C430] text-black border-2 border-white shadow-[0_0_15px_rgba(244,196,48,0.5)]"
+            : "bg-primary text-primary-foreground";
+
+        // Style actif (cliqué)
+        const activeClass = isActive
+            ? "scale-110 bg-white text-black z-50 border-white"
+            : verifiedClass;
+
+        // Z-index supérieur pour les biens vérifiés
+        const zIndex = isActive ? 1000 : (isVerified ? 100 : 1);
+
+        return L.divIcon({
+            className: "custom-price-marker",
+            html: `
+        <div class="price-pill ${activeClass} inline-flex items-center justify-center rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition-all duration-200 cursor-pointer" style="font-size: 12px; min-width: 50px; white-space: nowrap; z-index: ${zIndex};">
+          ${isVerified ? '<span style="margin-right: 4px">🛡️</span>' : ''}${priceText}
         </div>
       `,
-      iconSize: [80, 28],
-      iconAnchor: [40, 14],
-      popupAnchor: [0, -14],
-    }) as DivIcon;
-  }, [property.price, isActive]);
+            iconSize: [isVerified ? 90 : 80, 28],
+            iconAnchor: [isVerified ? 45 : 40, 14],
+            popupAnchor: [0, -14],
+        }) as DivIcon;
+    }, [property.price, property.verification_status, isActive]);
 
-  if (!icon) return null;
+    if (!icon) return null;
 
-  return (
-    <Marker
-      position={position}
-      icon={icon}
-      eventHandlers={{
-        click: (e) => {
-          // Simple clic : faire défiler vers la carte dans le carousel
-          onClick();
-        },
-        mouseover: (e) => {
-          const target = e.target;
-          const element = target?.getElement();
-          if (element) {
-            const pill = element.querySelector(".price-pill");
-            if (pill && !isActive) {
-              pill.classList.remove("bg-primary", "text-primary-foreground");
-              pill.classList.add("bg-black", "text-white", "scale-105");
-            }
-          }
-        },
-        mouseout: (e) => {
-          const target = e.target;
-          const element = target?.getElement();
-          if (element) {
-            const pill = element.querySelector(".price-pill");
-            if (pill && !isActive) {
-              pill.classList.remove("bg-black", "text-white", "scale-105");
-              pill.classList.add("bg-primary", "text-primary-foreground");
-            }
-          }
-        },
-      }}
-    />
-  );
+    return (
+        <Marker
+            position={position}
+            icon={icon}
+            zIndexOffset={property.verification_status === "verified" ? 100 : 0}
+            eventHandlers={{
+                click: (e) => {
+                    // Simple clic : faire défiler vers la carte dans le carousel
+                    onClick();
+                },
+                mouseover: (e) => {
+                    const target = e.target;
+                    const element = target?.getElement();
+                    if (element) {
+                        const pill = element.querySelector(".price-pill");
+                        if (pill && !isActive) {
+                            // Effet hover sans casser le style verified
+                            const currentBg = property.verification_status === "verified" ? "bg-[#F4C430]" : "bg-primary";
+                            const currentText = property.verification_status === "verified" ? "text-black" : "text-primary-foreground";
+
+                            pill.classList.remove(currentBg, currentText);
+                            pill.classList.add("bg-white", "text-black", "scale-105");
+                        }
+                    }
+                },
+                mouseout: (e) => {
+                    const target = e.target;
+                    const element = target?.getElement();
+                    if (element) {
+                        const pill = element.querySelector(".price-pill");
+                        if (pill && !isActive) {
+                            pill.classList.remove("bg-white", "text-black", "scale-105");
+
+                            if (property.verification_status === "verified") {
+                                pill.classList.add("bg-[#F4C430]", "text-black");
+                            } else {
+                                pill.classList.add("bg-primary", "text-primary-foreground");
+                            }
+                        }
+                    }
+                },
+            }}
+        />
+    );
 };
 
 export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
-  const router = useRouter();
-  const [activeId, setActiveId] = useState<string | undefined>(properties[0]?.id);
-  const [mapEnabled, setMapEnabled] = useState(true);
-  const [mounted, setMounted] = useState(false);
+    const router = useRouter();
+    const [activeId, setActiveId] = useState<string | undefined>(properties[0]?.id);
+    const [mapEnabled, setMapEnabled] = useState(true);
+    const [mounted, setMounted] = useState(false);
 
-  // Filtrer les propriétés qui ont des coordonnées valides
-  const propertiesWithCoords = useMemo(
-    () => {
-      const valid = properties.filter(
-        (p) =>
-          p.location?.coords &&
-          p.location.coords.lat !== 0 &&
-          p.location.coords.lng !== 0
-      );
-      return valid;
-    },
-    [properties]
-  );
-
-  // Calculer le centre de la carte (moyenne des coordonnées ou Dakar par défaut)
-  const mapCenter = useMemo<LatLngExpression>(() => {
-    if (propertiesWithCoords.length === 0) return DAKAR_CENTER;
-
-    const center = propertiesWithCoords.reduce(
-      (acc, property) => {
-        acc.lat += property.location.coords.lat;
-        acc.lng += property.location.coords.lng;
-        return acc;
-      },
-      { lat: 0, lng: 0 }
+    // Filtrer les propriétés qui ont des coordonnées valides
+    const propertiesWithCoords = useMemo(
+        () => {
+            const valid = properties.filter(
+                (p) =>
+                    p.location?.coords &&
+                    p.location.coords.lat !== 0 &&
+                    p.location.coords.lng !== 0
+            );
+            return valid;
+        },
+        [properties]
     );
-    center.lat /= propertiesWithCoords.length;
-    center.lng /= propertiesWithCoords.length;
 
-    return [center.lat, center.lng];
-  }, [propertiesWithCoords]);
+    // Calculer le centre de la carte (moyenne des coordonnées ou Dakar par défaut)
+    const mapCenter = useMemo<LatLngExpression>(() => {
+        if (propertiesWithCoords.length === 0) return DAKAR_CENTER;
 
-  // Gestion du montage côté client
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+        const center = propertiesWithCoords.reduce(
+            (acc, property) => {
+                acc.lat += property.location.coords.lat;
+                acc.lng += property.location.coords.lng;
+                return acc;
+            },
+            { lat: 0, lng: 0 }
+        );
+        center.lat /= propertiesWithCoords.length;
+        center.lng /= propertiesWithCoords.length;
 
-  // Gestion de l'activation de la carte selon le contexte
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+        return [center.lat, center.lng];
+    }, [propertiesWithCoords]);
 
-    const enableBasedOnContext = () => {
-      const isMobile = window.matchMedia("(max-width: 768px)").matches;
-      const saveData =
-        typeof navigator !== "undefined"
-          ? (navigator as Navigator & {
-              connection?: { saveData?: boolean };
-            }).connection?.saveData
-          : undefined;
-      // Sur desktop, activer par défaut. Sur mobile, permettre l'activation manuelle
-      setMapEnabled(!isMobile && !saveData);
-    };
+    // Gestion du montage côté client
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
-    enableBasedOnContext();
+    // Gestion de l'activation de la carte selon le contexte
+    useEffect(() => {
+        if (typeof window === "undefined") return;
 
-    const media = window.matchMedia("(max-width: 768px)");
-    const handler = () => enableBasedOnContext();
-    media.addEventListener("change", handler);
-    return () => media.removeEventListener("change", handler);
-  }, []);
+        const enableBasedOnContext = () => {
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            const saveData =
+                typeof navigator !== "undefined"
+                    ? (navigator as Navigator & {
+                        connection?: { saveData?: boolean };
+                    }).connection?.saveData
+                    : undefined;
+            // Sur desktop, activer par défaut. Sur mobile, permettre l'activation manuelle
+            setMapEnabled(!isMobile && !saveData);
+        };
 
-  const handleMarkerClick = useCallback((propertyId: string) => {
-    setActiveId(propertyId);
-    // Scroll vers la carte correspondante dans le carousel
-    setTimeout(() => {
-      const element = document.getElementById(`property-${propertyId}`);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-      }
-    }, 100);
-  }, []);
+        enableBasedOnContext();
 
-  const handleMarkerRedirect = useCallback((propertyId: string) => {
-    // Rediriger vers la page de détail du bien
-    router.push(`/biens/${propertyId}`);
-  }, [router]);
+        const media = window.matchMedia("(max-width: 768px)");
+        const handler = () => enableBasedOnContext();
+        media.addEventListener("change", handler);
+        return () => media.removeEventListener("change", handler);
+    }, []);
 
-  if (!mounted) {
+    const handleMarkerClick = useCallback((propertyId: string) => {
+        setActiveId(propertyId);
+        // Scroll vers la carte correspondante dans le carousel
+        setTimeout(() => {
+            const element = document.getElementById(`property-${propertyId}`);
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+            }
+        }, 100);
+    }, []);
+
+    const handleMarkerRedirect = useCallback((propertyId: string) => {
+        // Rediriger vers la page de détail du bien
+        router.push(`/biens/${propertyId}`);
+    }, [router]);
+
+    if (!mounted) {
+        return (
+            <div className="flex h-[70vh] items-center justify-center rounded-[32px] border border-white/10 bg-white/5 text-white/70">
+                Chargement de la carte…
+            </div>
+        );
+    }
+
+    if (properties.length === 0) {
+        return (
+            <div className="flex h-[70vh] items-center justify-center rounded-[32px] border border-white/10 bg-white/5 text-white/70">
+                Aucun bien ne correspond à ta recherche.
+            </div>
+        );
+    }
+
+    if (propertiesWithCoords.length === 0) {
+        return (
+            <div className="flex h-[70vh] items-center justify-center rounded-[32px] border border-white/10 bg-white/5 text-white/70">
+                <div className="text-center">
+                    <p className="mb-2">Aucune coordonnée disponible pour afficher la carte.</p>
+                    <p className="text-sm text-white/50">
+                        Les biens n&apos;ont pas de localisation géographique.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-      <div className="flex h-[70vh] items-center justify-center rounded-[32px] border border-white/10 bg-white/5 text-white/70">
-        Chargement de la carte…
-      </div>
-    );
-  }
+        <div className="relative h-[70vh] w-full overflow-hidden rounded-[32px] border border-white/10 bg-black/20">
+            {mapEnabled ? (
+                <MapContainer
+                    center={mapCenter}
+                    zoom={DEFAULT_ZOOM}
+                    scrollWheelZoom={false} // Désactiver le zoom molette pour ne pas gêner le scroll
+                    className="h-full w-full rounded-[32px] z-0"
+                    style={{ height: "100%", width: "100%", zIndex: 0 }}
+                    zoomControl={true}
+                    attributionControl={false}
+                >
+                    {/* TileLayer CartoDB Dark Matter */}
+                    <TileLayer
+                        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                        subdomains="abcd"
+                        maxZoom={19}
+                    />
 
-  if (properties.length === 0) {
-    return (
-      <div className="flex h-[70vh] items-center justify-center rounded-[32px] border border-white/10 bg-white/5 text-white/70">
-        Aucun bien ne correspond à ta recherche.
-      </div>
-    );
-  }
+                    {/* Centrer la carte */}
+                    <MapCenter center={mapCenter} zoom={DEFAULT_ZOOM} />
 
-  if (propertiesWithCoords.length === 0) {
-    return (
-      <div className="flex h-[70vh] items-center justify-center rounded-[32px] border border-white/10 bg-white/5 text-white/70">
-        <div className="text-center">
-          <p className="mb-2">Aucune coordonnée disponible pour afficher la carte.</p>
-          <p className="text-sm text-white/50">
-            Les biens n&apos;ont pas de localisation géographique.
-          </p>
-        </div>
-      </div>
-    );
-  }
+                    {/* Marqueurs avec prix */}
+                    {propertiesWithCoords.map((property) => (
+                        <PriceMarker
+                            key={property.id}
+                            property={property}
+                            isActive={property.id === activeId}
+                            onClick={() => handleMarkerClick(property.id)}
+                            onRedirect={() => handleMarkerRedirect(property.id)}
+                        />
+                    ))}
+                </MapContainer>
+            ) : (
+                <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-white/70">
+                    <p>Mode économie de données activé sur mobile.</p>
+                    <Button
+                        className="rounded-full px-4 py-2 hover:bg-primary/90"
+                        onClick={() => {
+                            console.log("🔄 Activation manuelle de la carte");
+                            setMapEnabled(true);
+                        }}
+                    >
+                        Charger la carte
+                    </Button>
+                </div>
+            )}
 
-  return (
-    <div className="relative h-[70vh] w-full overflow-hidden rounded-[32px] border border-white/10 bg-black/20">
-      {mapEnabled ? (
-        <MapContainer
-          center={mapCenter}
-          zoom={DEFAULT_ZOOM}
-          scrollWheelZoom={false} // Désactiver le zoom molette pour ne pas gêner le scroll
-          className="h-full w-full rounded-[32px] z-0"
-          style={{ height: "100%", width: "100%", zIndex: 0 }}
-          zoomControl={true}
-          attributionControl={true}
-        >
-          {/* TileLayer CartoDB Dark Matter */}
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            subdomains="abcd"
-            maxZoom={19}
-          />
+            {/* Carousel des biens en bas */}
+            {showCarousel && (
+                <div className="pointer-events-none absolute inset-x-0 bottom-4 px-4 z-10">
+                    <div className="pointer-events-auto scrollbar-hide flex gap-3 overflow-x-auto pb-2">
+                        {propertiesWithCoords.map((property) => (
+                            <div
+                                key={`mini-${property.id}`}
+                                id={`property-${property.id}`}
+                                onClick={() => {
+                                    // Rediriger vers la page de détail du bien
+                                    handleMarkerRedirect(property.id);
+                                }}
+                                className="min-w-[280px] cursor-pointer"
+                            >
+                                <PropertyCard
+                                    property={property}
+                                    variant="horizontal"
+                                    className={
+                                        property.id === activeId
+                                            ? "bg-[#F4C430]/15 border-[#F4C430] shadow-[0_0_15px_rgba(244,196,48,0.15)] transition-all duration-300"
+                                            : "bg-neutral-900/60 backdrop-blur-md border border-white/10 hover:bg-neutral-900/80 transition-all duration-300"
+                                    }
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
-          {/* Centrer la carte */}
-          <MapCenter center={mapCenter} zoom={DEFAULT_ZOOM} />
-
-          {/* Marqueurs avec prix */}
-          {propertiesWithCoords.map((property) => (
-            <PriceMarker
-              key={property.id}
-              property={property}
-              isActive={property.id === activeId}
-              onClick={() => handleMarkerClick(property.id)}
-              onRedirect={() => handleMarkerRedirect(property.id)}
-            />
-          ))}
-        </MapContainer>
-      ) : (
-        <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-white/70">
-          <p>Mode économie de données activé sur mobile.</p>
-          <Button
-            className="rounded-full px-4 py-2 hover:bg-primary/90"
-            onClick={() => {
-              console.log("🔄 Activation manuelle de la carte");
-              setMapEnabled(true);
-            }}
-          >
-            Charger la carte
-          </Button>
-        </div>
-      )}
-
-      {/* Carousel des biens en bas */}
-      {showCarousel && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-4 px-4 z-10">
-          <div className="pointer-events-auto scrollbar-hide flex gap-3 overflow-x-auto pb-2">
-            {propertiesWithCoords.map((property) => (
-              <div
-                key={`mini-${property.id}`}
-                id={`property-${property.id}`}
-                onClick={() => {
-                  // Rediriger vers la page de détail du bien
-                  handleMarkerRedirect(property.id);
-                }}
-                className="min-w-[280px] cursor-pointer"
-              >
-                <PropertyCard
-                  property={property}
-                  variant="horizontal"
-                  className={
-                    property.id === activeId
-                      ? "border-white/40 bg-white/10"
-                      : "border-transparent opacity-70 hover:opacity-100"
-                  }
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Styles CSS pour la carte Leaflet */}
-      <style jsx global>{`
+            {/* Styles CSS pour la carte Leaflet */}
+            <style jsx global>{`
         .leaflet-container {
           background: #1a1a1a;
         }
@@ -336,6 +359,7 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
         .leaflet-control-zoom {
           border: none;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+          margin-bottom: 200px;
         }
         .leaflet-control-zoom a {
           background-color: rgba(255, 255, 255, 0.1);
@@ -354,6 +378,6 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
           color: rgba(255, 255, 255, 0.8);
         }
       `}</style>
-    </div>
-  );
+        </div>
+    );
 };
