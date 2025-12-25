@@ -14,6 +14,7 @@ import {
   CheckCircle,
   UserCheck,
   Home,
+  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { uploadDocument, getMyDocuments, deleteDocument, getVerificationDocuments, refreshDocumentUrl } from "./actions";
+import { PropertyMapWrapper } from "./components/PropertyMapWrapper";
 
 type Document = {
   id: string;
@@ -572,6 +574,24 @@ export default function MesDocumentsPage() {
                   ))}
                 </div>
               )}
+            </motion.section>
+
+            {/* SECTION CARTE */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="rounded-xl bg-green-500/10 p-2.5 border border-green-500/20">
+                  <MapPin className="h-6 w-6 text-green-400" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-green-400">Localisation de mon patrimoine</h2>
+                  <p className="text-sm text-white/50">Carte interactive de vos biens certifiés</p>
+                </div>
+              </div>
+              <PropertyMapWrapper properties={documents.filter(doc => doc.certification_scope !== 'global')} />
             </motion.section>
 
             {/* SECTION PROPRIÉTÉS */}
