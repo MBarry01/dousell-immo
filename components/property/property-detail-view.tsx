@@ -10,6 +10,7 @@ import {
   BatteryCharging,
   Droplets,
   Shield,
+  BadgeCheck,
   Wifi,
   Wind,
   Car,
@@ -338,9 +339,8 @@ export const PropertyDetailView = ({
                         {displayName}
                       </p>
                       {showOwner && property.owner?.is_identity_verified && (
-                        <div className="flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5" title="Identité vérifiée">
-                          <Shield className="h-3.5 w-3.5 text-blue-500 fill-blue-500/20" />
-                          <span className="text-xs font-semibold text-blue-500">Vérifié</span>
+                        <div className="flex items-center" title="Identité vérifiée">
+                          <BadgeCheck className="h-4 w-4 text-white fill-blue-500" />
                         </div>
                       )}
                     </div>

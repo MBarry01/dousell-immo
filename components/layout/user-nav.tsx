@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
 import { useUserRoles } from "@/hooks/use-user-roles";
+import { useState, useEffect } from "react";
 
 import {
   DropdownMenu,
@@ -27,18 +28,64 @@ export function UserNav() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const { roles: userRoles, loading: loadingRoles } = useUserRoles(user?.id || null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  // Fetch avatar from profiles table and subscribe to realtime updates
+  useEffect(() => {
+    if (!user) return;
+
+    const supabase = createClient();
+
+    // Fetch initial avatar
+    const fetchAvatar = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", user.id)
+        .single();
+
+      if (data?.avatar_url) {
+        setAvatarUrl(data.avatar_url);
+      }
+    };
+
+    fetchAvatar();
+
+    // Subscribe to realtime updates for avatar changes
+    const channel = supabase
+      .channel(`profile-avatar-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.new && typeof payload.new === "object" && "avatar_url" in payload.new) {
+            setAvatarUrl((payload.new as { avatar_url: string | null }).avatar_url);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const handleSignOut = async () => {
     try {
       const supabase = createClient();
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         throw error;
       }
-      
+
       toast.success("Déconnexion réussie");
-      
+
       // Redirect to login page
       router.push("/login");
       router.refresh();
@@ -103,7 +150,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <button className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/20 transition-all hover:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.user_metadata?.avatar_url as string} alt={displayName} />
+            <AvatarImage src={avatarUrl || undefined} alt={displayName} />
             <AvatarFallback className="bg-amber-500/20 text-amber-400 text-xs font-semibold">
               {initials}
             </AvatarFallback>
