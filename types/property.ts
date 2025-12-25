@@ -48,8 +48,8 @@ export type Property = {
     avatar_url?: string;
     role?: "particulier" | "agent" | "admin";
     phone?: string;
-    is_verified?: boolean;
-    created_at?: string;
+    is_identity_verified?: boolean;
+    updated_at?: string;
   };
   proximites?: {
     transports: string[];

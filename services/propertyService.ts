@@ -75,16 +75,16 @@ type SupabasePropertyRow = {
     avatar_url: string;
     role?: "particulier" | "agent" | "admin";
     phone?: string;
-    is_verified?: boolean;
-    created_at?: string;
+    is_identity_verified?: boolean;
+    updated_at?: string;
   } | {
     id: string;
     full_name: string;
     avatar_url: string;
     role?: "particulier" | "agent" | "admin";
     phone?: string;
-    is_verified?: boolean;
-    created_at?: string;
+    is_identity_verified?: boolean;
+    updated_at?: string;
   }[];
   disponibilite?: string;
   proximites?: {
@@ -153,8 +153,8 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
         avatar_url: owner.avatar_url,
         role: owner.role || "particulier",
         phone: owner.phone,
-        is_verified: owner.is_verified || false,
-        created_at: owner.created_at,
+        is_identity_verified: owner.is_identity_verified || false,
+        updated_at: owner.updated_at,
       }
       : undefined,
     disponibilite: row.disponibilite ?? "Immédiate",
@@ -299,7 +299,7 @@ export const getPropertyById = async (id: string) => {
       try {
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("id, full_name, avatar_url, role, phone, is_verified, created_at")
+          .select("id, full_name, avatar_url, role, phone, is_identity_verified, updated_at")
           .eq("id", data.owner_id)
           .single();
 

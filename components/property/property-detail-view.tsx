@@ -285,26 +285,30 @@ export const PropertyDetailView = ({
           <div className="mb-8 flex items-center gap-4 border-b border-gray-200 pb-6 dark:border-white/10">
             {(() => {
               // Logique d'affichage selon les règles métier :
-              // - Annonce PAYANTE (boost_visibilite) -> Afficher le propriétaire (contact_phone ou owner.phone)
-              // - Annonce GRATUITE (mandat_confort) -> Afficher l'agence (Agent 2)
+              // - Si on a les données du propriétaire (owner + téléphone) -> Afficher le propriétaire
+              // - Sinon -> Afficher l'agence par défaut
 
               const isPaidService = property.service_type === "boost_visibilite";
 
               // Données de l'agence (Agent 2 par défaut)
-              const agencyName = "Agence Dousell"; // Ou "Amadou Barry" selon préférence
+              const agencyName = "Agence Dousell";
               const agencyPhoto = "/agent2.png";
               const agencyPhone = "+221781385281";
 
-              // Si payant, on cherche d'abord le contact_phone spécifique à l'annonce, sinon le téléphone du profil
+              // Téléphone : contact_phone spécifique à l'annonce, sinon téléphone du profil
               const ownerPhone = property.contact_phone || property.owner?.phone;
-              // Vérifier que property.owner existe ET qu'on a un téléphone pour afficher le propriétaire
-              const showOwner = isPaidService && ownerPhone && property.owner;
 
-              const displayName = showOwner && property.owner?.full_name 
-                ? property.owner.full_name 
+              // Afficher le propriétaire si on a ses données ET un téléphone
+              // (même si service_type n'est pas défini)
+              const showOwner = property.owner && ownerPhone;
+
+              const displayName = showOwner && property.owner?.full_name
+                ? property.owner.full_name
                 : agencyName;
-              const displayPhoto = showOwner && property.owner?.avatar_url 
-                ? property.owner.avatar_url 
+              // Photo : Si propriétaire -> avatar du propriétaire (ou null pour initiales)
+              //         Sinon -> photo de l'agence
+              const displayPhoto = showOwner
+                ? property.owner?.avatar_url || null  // null déclenche l'affichage des initiales
                 : agencyPhoto;
               const displayPhone = showOwner ? ownerPhone : agencyPhone;
 
@@ -329,9 +333,17 @@ export const PropertyDetailView = ({
                     <p className="text-sm text-gray-600 dark:text-white/60">
                       Proposé par
                     </p>
-                    <p className="font-semibold text-gray-900 dark:text-white">
-                      {displayName}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {displayName}
+                      </p>
+                      {showOwner && property.owner?.is_identity_verified && (
+                        <div className="flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5" title="Identité vérifiée">
+                          <Shield className="h-3.5 w-3.5 text-blue-500 fill-blue-500/20" />
+                          <span className="text-xs font-semibold text-blue-500">Vérifié</span>
+                        </div>
+                      )}
+                    </div>
                     {displayPhone && (
                       <p className="text-sm text-gray-500 dark:text-white/50">
                         {displayPhone}

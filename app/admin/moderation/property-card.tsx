@@ -13,6 +13,8 @@ import {
   CreditCard,
   Loader2,
   ExternalLink,
+  FileText,
+  Shield,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -30,6 +32,7 @@ type PropertyModerationCardProps = {
     payment_ref: string | null;
     owner_id: string;
     created_at?: string;
+    proof_document_url?: string | null;
   };
   onApprove: (id: string) => Promise<void>;
   onReject: (id: string) => void;
@@ -112,11 +115,10 @@ export function PropertyModerationCard({
               </p>
             </div>
             <span
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
-                property.validation_status === "payment_pending"
+              className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${property.validation_status === "payment_pending"
                   ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
                   : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-              }`}
+                }`}
             >
               {property.validation_status === "payment_pending"
                 ? "Paiement en attente"
@@ -163,6 +165,20 @@ export function PropertyModerationCard({
                 Voir l&apos;annonce
               </Link>
             </Button>
+
+            {/* Document preview button */}
+            {property.proof_document_url && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 rounded-full text-xs text-blue-400 hover:bg-blue-500/10"
+                onClick={() => window.open(property.proof_document_url!, '_blank')}
+              >
+                <FileText className="h-3 w-3 mr-1" />
+                <Shield className="h-3 w-3 mr-1" />
+                Voir document
+              </Button>
+            )}
           </div>
         </div>
 

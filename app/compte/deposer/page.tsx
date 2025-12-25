@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { AddressInputWithMap } from "@/components/forms/address-input-with-map";
-import { AdCertificationUpload } from "@/components/dashboard/ad-certification-upload";
+import { DocumentSelector } from "@/components/document/document-selector";
 import { useAuth } from "@/hooks/use-auth";
 import { submitUserListing } from "@/app/compte/deposer/actions";
 import { createClient } from "@/utils/supabase/client";
@@ -157,6 +157,7 @@ function DeposerPageContent() {
   const [uploading, setUploading] = useState(false);
   const [services, setServices] = useState<{ code: string; name: string; price: number; description: string }[]>([]);
   const [proofUrl, setProofUrl] = useState<string | null>(null);
+  const [proofDocumentId, setProofDocumentId] = useState<string | null>(null);
 
   // Charger les services depuis la base de données
   useEffect(() => {
@@ -1237,12 +1238,21 @@ function DeposerPageContent() {
                 )}
               </div>
 
-              {/* CERTIFICATION ANNONCE (NOUVEAU) */}
-              <AdCertificationUpload
+              {/* DOCUMENT JUSTIFICATIF (depuis coffre-fort) */}
+              <DocumentSelector
                 className="mb-6"
-                onUploadSuccess={(url) => {
-                  setProofUrl(url);
-                  console.log("✅ Preuve uploadée:", url);
+                label="Document justificatif (optionnel)"
+                description="Sélectionnez un document depuis votre coffre-fort pour certifier votre annonce"
+                selectedDocumentId={proofDocumentId || undefined}
+                onSelect={(doc) => {
+                  if (doc) {
+                    setProofDocumentId(doc.id);
+                    setProofUrl(doc.url);
+                    console.log("✅ Document sélectionné:", doc);
+                  } else {
+                    setProofDocumentId(null);
+                    setProofUrl(null);
+                  }
                 }}
               />
 

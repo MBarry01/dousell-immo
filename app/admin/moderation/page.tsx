@@ -17,7 +17,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { moderateProperty } from "./actions";
+import { moderateProperty, certifyAdAndDocument } from "./actions";
 import { ModerationNotification } from "@/app/admin/moderation/notification";
 import { RejectDialog } from "./reject-dialog";
 import { PropertyModerationCard } from "./property-card";
@@ -36,6 +36,7 @@ type PropertyToModerate = {
   payment_ref: string | null;
   owner_id: string;
   created_at?: string;
+  proof_document_url?: string | null;
 };
 
 type SortOption = "date_asc" | "date_desc" | "price_asc" | "price_desc";
@@ -70,7 +71,7 @@ export default function ModerationPage() {
 
     // Vérifier l'accès pour l'UX (affichage conditionnel)
     const currentCanModerate = isMainAdmin || userRoles.some((role) => ["admin", "moderateur", "superadmin"].includes(role));
-    
+
     if (currentCanModerate) {
       // Accès autorisé
     } else {
@@ -83,11 +84,11 @@ export default function ModerationPage() {
       });
     }
   }, [user, authLoading, loadingRoles, userRoles, isMainAdmin]);
-  
+
   // États pour les actions en cours
   const [approvingIds, setApprovingIds] = useState<Set<string>>(new Set());
   const [rejectingIds, setRejectingIds] = useState<Set<string>>(new Set());
-  
+
   // États pour filtres et tri
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
@@ -100,7 +101,7 @@ export default function ModerationPage() {
     setLoading(true);
     try {
       const supabase = createClient();
-            
+
       const { data, error } = await supabase
         .from("properties")
         .select("*")
@@ -209,12 +210,22 @@ export default function ModerationPage() {
 
     setApprovingIds((prev) => new Set(prev).add(propertyId));
     try {
-      const result = await moderateProperty(propertyId, "approved");
+      // Find the property to get its document ID
+      const property = properties.find(p => p.id === propertyId);
+      const documentId = property?.proof_document_url || null;
+
+      // Use certifyAdAndDocument if there's a document, otherwise use moderateProperty
+      const result = documentId
+        ? await certifyAdAndDocument(propertyId, documentId)
+        : await moderateProperty(propertyId, "approved");
+
       if (result.error) {
         toast.error("Erreur", { description: result.error });
       } else {
         toast.success("Annonce validée !", {
-          description: "L'annonce est maintenant en ligne.",
+          description: documentId
+            ? "L'annonce et le document ont été certifiés ✅"
+            : "L'annonce est maintenant en ligne.",
         });
         await loadProperties();
       }
@@ -285,7 +296,7 @@ export default function ModerationPage() {
   return (
     <div className="space-y-6 py-6">
       <ModerationNotification />
-      
+
       {/* Header avec statistiques */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -364,17 +375,16 @@ export default function ModerationPage() {
                   variant={filterStatus === status ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setFilterStatus(status)}
-                  className={`rounded-full text-xs ${
-                    filterStatus === status
-                      ? "bg-primary text-black"
-                      : "text-white/70 hover:text-white"
-                  }`}
+                  className={`rounded-full text-xs ${filterStatus === status
+                    ? "bg-primary text-black"
+                    : "text-white/70 hover:text-white"
+                    }`}
                 >
                   {status === "all"
                     ? "Tous"
                     : status === "pending"
-                    ? "En attente"
-                    : "Paiement"}
+                      ? "En attente"
+                      : "Paiement"}
                 </Button>
               ))}
             </div>
@@ -391,17 +401,16 @@ export default function ModerationPage() {
                     variant={filterService === service ? "secondary" : "ghost"}
                     size="sm"
                     onClick={() => setFilterService(service)}
-                    className={`rounded-full text-xs ${
-                      filterService === service
-                        ? "bg-primary text-black"
-                        : "text-white/70 hover:text-white"
-                    }`}
+                    className={`rounded-full text-xs ${filterService === service
+                      ? "bg-primary text-black"
+                      : "text-white/70 hover:text-white"
+                      }`}
                   >
                     {service === "all"
                       ? "Tous"
                       : service === "mandat_confort"
-                      ? "Mandat"
-                      : "Diffusion"}
+                        ? "Mandat"
+                        : "Diffusion"}
                   </Button>
                 )
               )}
@@ -419,11 +428,10 @@ export default function ModerationPage() {
                     variant={sortBy === sort ? "secondary" : "ghost"}
                     size="sm"
                     onClick={() => setSortBy(sort)}
-                    className={`rounded-full text-xs ${
-                      sortBy === sort
-                        ? "bg-primary text-black"
-                        : "text-white/70 hover:text-white"
-                    }`}
+                    className={`rounded-full text-xs ${sortBy === sort
+                      ? "bg-primary text-black"
+                      : "text-white/70 hover:text-white"
+                      }`}
                   >
                     {sort === "date_asc" ? (
                       <SortAsc className="h-3 w-3" />

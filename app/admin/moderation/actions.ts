@@ -255,5 +255,97 @@ export async function moderatePropertyWithReason(
   return { success: true };
 }
 
+/**
+ * Certify ad and associated document from user vault
+ * Handles both global (identity) and specific (property) certification scopes
+ */
+export async function certifyAdAndDocument(
+  propertyId: string,
+  documentId: string | null
+) {
+  // Verify user has moderation rights
+  await requireAnyRole(["admin", "moderateur", "superadmin"]);
 
+  if (!documentId) {
+    // No document attached, just approve the property
+    return await moderateProperty(propertyId, "approved");
+  }
+
+  const supabase = await createClient();
+
+  try {
+    // 1. Get document info to determine certification scope
+    const { data: doc, error: docError } = await supabase
+      .from("user_documents")
+      .select("certification_scope, user_id, file_type")
+      .eq("id", documentId)
+      .single();
+
+    if (docError || !doc) {
+      console.error("❌ Error fetching document:", docError);
+      return { error: "Document introuvable" };
+    }
+
+    // 2. If scope is GLOBAL (Identity documents like CNI/Passport), certify the user's profile
+    if (doc.certification_scope === "global") {
+      console.log("🌍 Global scope detected - Certifying user profile:", doc.user_id);
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ is_identity_verified: true })
+        .eq("id", doc.user_id);
+
+      if (profileError) {
+        console.error("❌ Error certifying profile:", profileError);
+        // Continue anyway, we'll still certify the document
+      } else {
+        console.log("✅ User profile certified");
+      }
+    }
+
+    // 3. Certify the specific ad (property)
+    console.log("📝 Certifying property:", propertyId);
+    const { error: adError } = await supabase
+      .from("properties")
+      .update({
+        validation_status: "approved",
+        verification_status: "verified"
+      })
+      .eq("id", propertyId);
+
+    if (adError) {
+      console.error("❌ Error certifying property:", adError);
+      return { error: "Erreur lors de la certification de l'annonce" };
+    }
+
+    // 4. Mark the document as certified and change source to 'verification'
+    console.log("🔐 Certifying document:", documentId);
+    const { error: certifyError } = await supabase
+      .from("user_documents")
+      .update({
+        is_certified: true,
+        source: "verification"
+      })
+      .eq("id", documentId);
+
+    if (certifyError) {
+      console.error("❌ Error certifying document:", certifyError);
+      return { error: "Erreur lors de la certification du document" };
+    }
+
+    // 5. Call the regular moderation function to handle emails/notifications
+    await moderateProperty(propertyId, "approved");
+
+    console.log("✅ Certification completed successfully");
+
+    revalidatePath("/admin/moderation");
+    revalidatePath("/compte/mes-documents");
+    revalidatePath("/compte/mes-biens");
+
+    return { success: true };
+  } catch (error) {
+    console.error("❌ Unexpected error during certification:", error);
+    return { error: "Erreur technique lors de la certification" };
+  }
+}
 

@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   LogOut,
   ArrowRight,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -280,7 +281,30 @@ export default function ComptePage() {
             </Link>
           </motion.div>
 
-          {/* Card 5: Profil & Sécurité */}
+          {/* Card 5: Mes Documents (Digital Safe) */}
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          >
+            <Link href="/compte/mes-documents">
+              <Card className="h-full cursor-pointer border-zinc-800 bg-zinc-900/50 transition-all hover:bg-zinc-900 hover:border-zinc-700">
+                <CardHeader className="p-6">
+                  <div className="mb-4">
+                    <Lock className="h-6 w-6 text-primary stroke-[1.5]" />
+                  </div>
+                  <CardTitle className="text-lg font-semibold text-white">
+                    Mes Documents
+                  </CardTitle>
+                  <CardDescription className="mt-2 text-sm text-zinc-400">
+                    Coffre-fort numérique ultra-sécurisé (AES-256).
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          </motion.div>
+
+          {/* Card 6: Profil & Sécurité */}
           <motion.div
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
