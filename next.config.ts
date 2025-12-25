@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
   // Headers de sécurité OWASP
   experimental: {
     serverActions: {
-      bodySizeLimit: '5mb',
+      bodySizeLimit: '10mb',
     },
   },
   async headers() {
@@ -57,8 +57,8 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
               "img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com https://images.pexels.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.basemaps.cartocdn.com https://*.openstreetmap.org https://*.tile.openstreetmap.org https://cdnjs.cloudflare.com https://unpkg.com https://a.basemaps.cartocdn.com https://b.basemaps.cartocdn.com https://c.basemaps.cartocdn.com https://d.basemaps.cartocdn.com https://*.google-analytics.com https://*.googletagmanager.com https://c.bing.com https://*.clarity.ms",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co https://*.supabase.in https://challenges.cloudflare.com https://*.google-analytics.com https://www.googletagmanager.com https://va.vercel-scripts.com https://*.basemaps.cartocdn.com https://*.openstreetmap.org https://images.unsplash.com https://images.pexels.com https://*.googleusercontent.com wss://*.supabase.co https://www.clarity.ms https://c.bing.com",
-              "frame-src 'self' https://challenges.cloudflare.com",
+              "connect-src 'self' https://*.supabase.co https://*.supabase.in https://challenges.cloudflare.com https://*.google-analytics.com https://www.googletagmanager.com https://va.vercel-scripts.com https://*.basemaps.cartocdn.com https://*.openstreetmap.org https://images.unsplash.com https://images.pexels.com https://*.googleusercontent.com wss://*.supabase.co https://www.clarity.ms https://*.clarity.ms https://c.bing.com",
+              "frame-src 'self' https://*.supabase.co https://challenges.cloudflare.com",
               "worker-src 'self' blob:",
             ].join('; '),
           },

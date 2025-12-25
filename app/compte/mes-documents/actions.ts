@@ -7,6 +7,7 @@ type DocumentType =
   | "titre_propriete"
   | "bail"
   | "cni"
+  | "passport"
   | "facture"
   | "attestation"
   | "autre";
@@ -43,10 +44,10 @@ export async function uploadDocument(formData: FormData) {
       return { success: false, error: "Fichier ou type manquant" };
     }
 
-    // Valider la taille (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Valider la taille (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
       console.error("❌ [uploadDocument] Fichier trop volumineux:", file.size);
-      return { success: false, error: "Le fichier ne doit pas dépasser 5 MB" };
+      return { success: false, error: "Le fichier ne doit pas dépasser 10 MB" };
     }
 
     // Valider le type de fichier
@@ -88,6 +89,9 @@ export async function uploadDocument(formData: FormData) {
 
     // Enregistrer les métadonnées en base de données
     console.log("💾 [uploadDocument] Insertion dans user_documents...");
+    // Déterminer le scope de certification selon le type de document
+    const certificationScope = (type === 'cni' || type === 'passport') ? 'global' : 'specific';
+
     const insertData = {
       user_id: user.id,
       file_name: file.name,
@@ -96,6 +100,7 @@ export async function uploadDocument(formData: FormData) {
       file_size: file.size,
       mime_type: file.type,
       source: "manual",
+      certification_scope: certificationScope,
     };
     console.log("🔍 [uploadDocument] Data à insérer:", insertData);
 
@@ -184,6 +189,8 @@ export async function getMyDocuments() {
           url: urlData?.signedUrl || "",
           uploaded_at: doc.created_at,
           source: "manual" as const,
+          certification_scope: doc.certification_scope || "specific",
+          is_certified: doc.is_certified || false,
         };
       })
     );
@@ -218,7 +225,22 @@ export async function getVerificationDocuments() {
   }
 
   try {
-    // Récupérer les annonces de l'utilisateur qui sont certifiées et ont un document de preuve
+    // 1. Récupérer les documents d'identité certifiés (global scope)
+    const { data: identityDocs, error: identityError } = await supabase
+      .from("user_documents")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("certification_scope", "global")
+      .eq("is_certified", true)
+      .order("created_at", { ascending: false });
+
+    console.log("🔍 [getVerificationDocuments] Identity docs trouvés:", identityDocs?.length || 0);
+
+    if (identityError) {
+      console.error("❌ [getVerificationDocuments] Identity docs error:", identityError);
+    }
+
+    // 2. Récupérer les annonces de l'utilisateur qui sont certifiées et ont un document de preuve
     const { data: properties, error: propertiesError } = await supabase
       .from("properties")
       .select("id, title, proof_document_url, verification_requested_at")
@@ -233,14 +255,30 @@ export async function getVerificationDocuments() {
       return { success: false, error: "Erreur lors de la récupération" };
     }
 
-    if (!properties || properties.length === 0) {
-      console.log("✅ [getVerificationDocuments] Aucun document de certification");
-      return { success: true, data: [] };
-    }
+    // Générer les URLs signées pour chaque document d'identité certifié
+    const identityDocsWithUrls = await Promise.all(
+      (identityDocs || []).map(async (doc) => {
+        const { data: urlData } = await supabase.storage
+          .from("verification-docs")
+          .createSignedUrl(doc.file_path, 604800); // 7 jours
 
-    // Générer les URLs signées pour chaque document de certification
-    const documentsWithUrls = await Promise.all(
-      properties.map(async (property) => {
+        return {
+          id: doc.id,
+          name: doc.file_name,
+          type: doc.file_type,
+          size: doc.file_size,
+          url: urlData?.signedUrl || "",
+          uploaded_at: doc.created_at,
+          source: "verification" as const,
+          certification_scope: "global", // Documents d'identité
+          is_certified: true,
+        };
+      })
+    );
+
+    // Générer les URLs signées pour chaque document de certification de propriété
+    const propertyDocsWithUrls = await Promise.all(
+      (properties || []).map(async (property) => {
         // Extraire le chemin du fichier depuis l'URL du document
         const documentPath = property.proof_document_url;
 
@@ -281,12 +319,17 @@ export async function getVerificationDocuments() {
           url: finalUrl,
           uploaded_at: property.verification_requested_at || new Date().toISOString(),
           source: "verification" as const,
+          certification_scope: "specific", // Documents de certification de biens
+          is_certified: true, // Déjà certifiés
         };
       })
     );
 
+    // Combiner tous les documents (identité + propriétés)
+    const allDocuments = [...identityDocsWithUrls, ...propertyDocsWithUrls];
+
     // Filtrer les documents null ET ceux avec des URLs vides (fichiers manquants)
-    const validDocuments = documentsWithUrls.filter((doc) => {
+    const validDocuments = allDocuments.filter((doc) => {
       if (doc === null) return false;
       if (!doc.url || doc.url === "") {
         console.warn("⚠️ [getVerificationDocuments] Document ignoré car URL vide:", doc.name);
@@ -297,6 +340,8 @@ export async function getVerificationDocuments() {
     });
 
     console.log("✅ [getVerificationDocuments] Documents valides:", validDocuments.length);
+    console.log("   - Documents d'identité:", identityDocsWithUrls.length);
+    console.log("   - Documents de propriétés:", propertyDocsWithUrls.filter(d => d !== null && d.url).length);
 
     return { success: true, data: validDocuments };
   } catch (error) {

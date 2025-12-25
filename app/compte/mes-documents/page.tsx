@@ -12,6 +12,8 @@ import {
   Eye,
   AlertCircle,
   CheckCircle,
+  UserCheck,
+  Home,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,7 +45,10 @@ type Document = {
   size: number;
   url: string;
   uploaded_at: string;
-  source: "manual" | "verification"; // manuel ou depuis certification
+  source: "manual" | "verification";
+  certification_scope?: "global" | "specific";
+  is_certified?: boolean;
+  rejection_reason?: string;
 };
 
 const documentTypes = [
@@ -82,14 +87,26 @@ export default function MesDocumentsPage() {
       console.log("🔍 [CLIENT] verificationDocs:", verificationDocs);
 
       // Combiner les documents (même si l'un des deux échoue)
+      const manualDocsArray = manualDocs.success ? (manualDocs.data || []) : [];
+      const verificationDocsArray = verificationDocs.success ? (verificationDocs.data || []) : [];
+
+      // Filtrer et combiner les documents valides
       const allDocs = [
-        ...(manualDocs.success ? manualDocs.data || [] : []),
-        ...(verificationDocs.success ? verificationDocs.data || [] : []),
-      ].filter((doc): doc is Document => doc !== null); // Filtrer les valeurs null
+        ...manualDocsArray.filter(doc => doc !== null),
+        ...verificationDocsArray.filter(doc => doc !== null),
+      ] as Document[];
 
       console.log("✅ [CLIENT] Total documents:", allDocs.length);
       console.log("✅ [CLIENT] Documents manuels:", manualDocs.success ? manualDocs.data?.length : 0);
       console.log("✅ [CLIENT] Documents certifiés:", verificationDocs.success ? verificationDocs.data?.length : 0);
+      console.log("📋 [CLIENT] Détails des documents certifiés:",
+        verificationDocsArray.filter(d => d !== null).map(d => ({
+          name: d.name,
+          type: d.type,
+          scope: d.certification_scope,
+          is_certified: d.is_certified
+        }))
+      );
 
       setDocuments(allDocs);
 
@@ -386,7 +403,7 @@ export default function MesDocumentsPage() {
                     className="mt-2 bg-background border-white/10 text-white file:bg-primary file:text-black file:border-0 file:rounded-lg file:px-4 file:py-2 file:font-semibold"
                   />
                   <p className="mt-1 text-xs text-white/50">
-                    PDF, JPG ou PNG • Max 5 MB
+                    PDF, JPG ou PNG • Max 10 MB
                   </p>
                 </div>
 
@@ -435,86 +452,244 @@ export default function MesDocumentsPage() {
             </Card>
           </motion.div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-          >
-            {documents.map((doc, index) => (
-              <motion.div
-                key={doc.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-              >
-                <Card className="group bg-background border-white/10 p-6 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="rounded-xl bg-primary/10 p-3 border border-primary/20">
-                      {getDocumentIcon(doc.type)}
-                    </div>
-                    {doc.source === "verification" && (
-                      <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 text-[10px] font-semibold text-emerald-400">
-                        CERTIFIÉ
-                      </span>
-                    )}
-                  </div>
+          <div className="space-y-12">
+            {/* SECTION IDENTITÉ */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="rounded-xl bg-blue-500/10 p-2.5 border border-blue-500/20">
+                  <UserCheck className="h-6 w-6 text-blue-400" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-blue-400">Mon Identité Officielle</h2>
+                  <p className="text-sm text-white/50">Ces documents permettent de certifier votre profil sur toute la plateforme</p>
+                </div>
+              </div>
 
-                  <h3 className="font-semibold text-white mb-1 line-clamp-1">
-                    {doc.name}
-                  </h3>
-                  <p className="text-xs text-white/50 mb-1">
-                    {documentTypes.find((t) => t.value === doc.type)?.label || doc.type}
-                  </p>
-                  <p className="text-xs text-white/40 mb-4">
-                    {formatFileSize(doc.size)} • {new Date(doc.uploaded_at).toLocaleDateString("fr-FR")}
-                  </p>
-
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="flex-1 bg-white/5 hover:bg-white/10 text-white border-white/10"
-                      onClick={() => {
-                        console.log("👁️ Clic sur Voir - URL:", doc.url);
-                        console.log("👁️ Document:", doc.name);
-                        if (doc.url) {
-                          window.open(doc.url, "_blank", "noopener,noreferrer");
-                        } else {
-                          console.error("❌ Pas d'URL signée disponible");
-                          toast.error("Lien indisponible");
-                        }
-                      }}
-                      disabled={!doc.url}
-                      title="Voir le document"
-                    >
-                      <Eye className="mr-1.5 h-3.5 w-3.5" />
-                      Voir
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="flex-1 bg-white/5 hover:bg-white/10 text-white border-white/10"
-                      onClick={() => handleDownload(doc.url, doc.name, doc.id, doc.source)}
-                    >
-                      <Download className="mr-1.5 h-3.5 w-3.5" />
-                      Télécharger
-                    </Button>
-                    {doc.source === "manual" && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
-                        onClick={() => handleDelete(doc.id)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                  </div>
+              {(() => {
+                const identityDocs = documents.filter(doc => doc.certification_scope === 'global');
+                console.log("🔍 [CLIENT] Documents d'identité filtrés (scope='global'):", identityDocs.length);
+                console.log("📋 [CLIENT] Tous les documents disponibles:", documents.map(d => ({ name: d.name, scope: d.certification_scope })));
+                return identityDocs.length === 0;
+              })() ? (
+                <Card className="bg-background border-white/10 p-8 text-center">
+                  <Shield className="h-12 w-12 mx-auto mb-3 text-white/20" />
+                  <h3 className="text-lg font-semibold text-white mb-1">Aucune pièce d'identité</h3>
+                  <p className="text-sm text-white/50">Ajoutez votre CNI ou passeport pour être vérifié</p>
                 </Card>
-              </motion.div>
-            ))}
-          </motion.div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {documents.filter(doc => doc.certification_scope === 'global').map((doc, index) => (
+                    <motion.div
+                      key={doc.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 * index }}
+                    >
+                      <Card className={`group relative bg-background p-6 transition-all hover:shadow-lg ${doc.is_certified
+                        ? "border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+                        : "border border-white/10 hover:border-blue-500/30 hover:shadow-blue-500/10"
+                        }`}>
+                        {doc.is_certified && (
+                          <div className="absolute -right-2 -top-2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg z-10 flex items-center gap-1">
+                            <Shield className="w-3 h-3" />
+                            Profil Vérifié
+                          </div>
+                        )}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="rounded-xl bg-blue-500/10 p-3 border border-blue-500/20">
+                            {getDocumentIcon(doc.type)}
+                          </div>
+                          {doc.source === "verification" && (
+                            <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2 py-1 text-[10px] font-semibold text-blue-400">
+                              VÉRIFIÉ
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className="font-semibold text-white mb-1 line-clamp-1">
+                          {doc.name}
+                        </h3>
+                        <p className="text-xs text-white/50 mb-1">
+                          {documentTypes.find((t) => t.value === doc.type)?.label || doc.type}
+                        </p>
+                        <p className="text-xs text-white/40 mb-4">
+                          {formatFileSize(doc.size)} • {new Date(doc.uploaded_at).toLocaleDateString("fr-FR")}
+                        </p>
+
+                        {/* Affichage de la raison du rejet/révocation */}
+                        {!doc.is_certified && doc.rejection_reason && (
+                          <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs text-red-400 mb-4">
+                            <p className="font-bold flex items-center gap-1.5 mb-1.5">
+                              <AlertCircle className="w-3.5 h-3.5" /> Motif du refus :
+                            </p>
+                            <p className="italic text-red-300/90">"{doc.rejection_reason}"</p>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="flex-1 bg-white/5 hover:bg-white/10 text-white border-white/10"
+                            onClick={() => {
+                              if (doc.url) {
+                                window.open(doc.url, "_blank", "noopener,noreferrer");
+                              } else {
+                                toast.error("Lien indisponible");
+                              }
+                            }}
+                            disabled={!doc.url}
+                          >
+                            <Eye className="mr-1.5 h-3.5 w-3.5" />
+                            Voir
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="flex-1 bg-white/5 hover:bg-white/10 text-white border-white/10"
+                            onClick={() => handleDownload(doc.url, doc.name, doc.id, doc.source)}
+                          >
+                            <Download className="mr-1.5 h-3.5 w-3.5" />
+                            Télécharger
+                          </Button>
+                          {doc.source === "manual" && (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
+                              onClick={() => handleDelete(doc.id)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                        </div>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.section>
+
+            {/* SECTION PROPRIÉTÉS */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="rounded-xl bg-emerald-500/10 p-2.5 border border-emerald-500/20">
+                  <Home className="h-6 w-6 text-emerald-400" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-emerald-400">Mes Titres de Propriété Certifiés</h2>
+                  <p className="text-sm text-white/50">Ces documents sont utilisés pour certifier vos annonces immobilières spécifiques</p>
+                </div>
+              </div>
+
+              {documents.filter(doc => doc.certification_scope !== 'global').length === 0 ? (
+                <Card className="bg-background border-white/10 p-8 text-center">
+                  <FileText className="h-12 w-12 mx-auto mb-3 text-white/20" />
+                  <h3 className="text-lg font-semibold text-white mb-1">Aucun titre de propriété</h3>
+                  <p className="text-sm text-white/50">Ajoutez vos documents de propriété pour certifier vos annonces</p>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {documents.filter(doc => doc.certification_scope !== 'global').map((doc, index) => (
+                    <motion.div
+                      key={doc.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 * index }}
+                    >
+                      <Card className={`group relative bg-background p-6 transition-all hover:shadow-lg ${doc.is_certified
+                        ? "border-2 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                        : "border border-white/10 hover:border-emerald-500/30 hover:shadow-emerald-500/10"
+                        }`}>
+                        {doc.is_certified && (
+                          <div className="absolute -right-2 -top-2 bg-emerald-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg z-10 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" />
+                            Annonce Certifiée
+                          </div>
+                        )}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="rounded-xl bg-emerald-500/10 p-3 border border-emerald-500/20">
+                            {getDocumentIcon(doc.type)}
+                          </div>
+                          {doc.source === "verification" && (
+                            <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 text-[10px] font-semibold text-emerald-400">
+                              CERTIFIÉ
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className="font-semibold text-white mb-1 line-clamp-1">
+                          {doc.name}
+                        </h3>
+                        <p className="text-xs text-white/50 mb-1">
+                          {documentTypes.find((t) => t.value === doc.type)?.label || doc.type}
+                        </p>
+                        <p className="text-xs text-white/40 mb-4">
+                          {formatFileSize(doc.size)} • {new Date(doc.uploaded_at).toLocaleDateString("fr-FR")}
+                        </p>
+
+                        {/* Affichage de la raison du rejet/révocation */}
+                        {!doc.is_certified && doc.rejection_reason && (
+                          <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs text-red-400 mb-4">
+                            <p className="font-bold flex items-center gap-1.5 mb-1.5">
+                              <AlertCircle className="w-3.5 h-3.5" /> Motif du refus :
+                            </p>
+                            <p className="italic text-red-300/90">"{doc.rejection_reason}"</p>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="flex-1 bg-white/5 hover:bg-white/10 text-white border-white/10"
+                            onClick={() => {
+                              if (doc.url) {
+                                window.open(doc.url, "_blank", "noopener,noreferrer");
+                              } else {
+                                toast.error("Lien indisponible");
+                              }
+                            }}
+                            disabled={!doc.url}
+                          >
+                            <Eye className="mr-1.5 h-3.5 w-3.5" />
+                            Voir
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="flex-1 bg-white/5 hover:bg-white/10 text-white border-white/10"
+                            onClick={() => handleDownload(doc.url, doc.name, doc.id, doc.source)}
+                          >
+                            <Download className="mr-1.5 h-3.5 w-3.5" />
+                            Télécharger
+                          </Button>
+                          {doc.source === "manual" && (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
+                              onClick={() => handleDelete(doc.id)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                        </div>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.section>
+          </div>
         )}
 
         {/* Info Banner */}
