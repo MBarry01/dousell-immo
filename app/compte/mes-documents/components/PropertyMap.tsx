@@ -32,15 +32,17 @@ export function PropertyMap({ properties }: { properties: any[] }) {
   const mapMarkers = properties.filter(p => p.lat && p.lng);
 
   return (
-    <div className={`relative transition-all duration-500 ease-in-out overflow-hidden ${
+    <div className={`relative transition-all duration-500 ease-in-out ${
       isFullscreen
-        ? 'fixed inset-0 z-[9999] bg-black p-4'
-        : 'h-[400px] rounded-2xl border border-gray-800 shadow-2xl'
+        ? 'fixed inset-0 z-[9999] bg-black'
+        : 'h-[400px] rounded-2xl border border-gray-800 shadow-2xl overflow-hidden'
     }`}>
       {/* Bouton Plein Écran Custom */}
       <button
         onClick={() => setIsFullscreen(!isFullscreen)}
-        className="absolute top-6 right-6 z-[1000] p-3 bg-gray-900/90 border border-gray-700 rounded-xl text-white hover:bg-gray-800 hover:scale-105 transition-all shadow-2xl"
+        className={`absolute z-[1000] p-3 bg-gray-900/90 border border-gray-700 rounded-xl text-white hover:bg-gray-800 hover:scale-105 transition-all shadow-2xl ${
+          isFullscreen ? 'top-4 right-4' : 'top-6 right-6'
+        }`}
       >
         {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
       </button>
