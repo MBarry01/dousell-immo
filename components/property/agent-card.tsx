@@ -57,36 +57,36 @@ const getInitials = (name: string): string => {
 export const AgentCard = ({ agent, owner, property, propertyId, propertyTitle }: AgentCardProps) => {
   // Si un propriétaire existe, afficher ses informations
   const isOwner = !!owner && (owner.full_name || owner.phone);
-  
+
   // Informations à afficher
-  const displayName = isOwner 
+  const displayName = isOwner
     ? (owner.full_name || "Propriétaire")
     : (agent?.name || AGENT_INFO.name);
-  
+
   const displayPhoto = isOwner && owner.avatar_url
     ? owner.avatar_url
     : (agent?.photo || AGENT_INFO.photo);
-  
+
   const displayDescription = isOwner
     ? owner.role === "agent"
       ? "Agent immobilier professionnel"
       : "Propriétaire particulier"
     : AGENT_INFO.description;
-  
+
   // Numéro de téléphone : propriétaire, agent par défaut, ou agence (fallback)
   const phoneNumber = owner?.phone || property?.owner?.phone || AGENT_INFO.phoneNumber || AGENCY_PHONE;
   const phoneNumberDisplay = owner?.phone || property?.owner?.phone || AGENT_INFO.phoneNumber || AGENCY_PHONE_DISPLAY;
   const phoneLink = `tel:${phoneNumber}`;
-  
+
   // WhatsApp : utiliser le numéro du propriétaire ou de l'agent
   const whatsappNumber = owner?.phone || property?.owner?.phone || AGENT_INFO.whatsappNumber;
   const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`;
-  
+
   // Date de création du profil
-  const memberSince = owner?.created_at 
-    ? format(new Date(owner.created_at), "MMMM yyyy", { locale: fr })
+  const memberSince = owner?.updated_at
+    ? format(new Date(owner.updated_at), "MMMM yyyy", { locale: fr })
     : null;
-  
+
   // Handler pour le tracking des appels
   const handlePhoneClick = () => {
     if (propertyId && propertyTitle) {
@@ -131,13 +131,13 @@ export const AgentCard = ({ agent, owner, property, propertyId, propertyTitle }:
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                 {displayName}
               </h3>
-              {owner?.is_verified && (
+              {owner?.is_identity_verified && (
                 <BadgeCheck className="h-5 w-5 text-amber-400" />
               )}
             </div>
             {owner && (
               <div className="mt-1 flex items-center gap-2">
-                <Badge 
+                <Badge
                   variant={owner.role === "agent" ? "default" : "secondary"}
                   className="text-xs"
                 >

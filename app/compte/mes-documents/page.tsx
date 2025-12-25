@@ -85,7 +85,7 @@ export default function MesDocumentsPage() {
       const allDocs = [
         ...(manualDocs.success ? manualDocs.data || [] : []),
         ...(verificationDocs.success ? verificationDocs.data || [] : []),
-      ];
+      ].filter((doc): doc is Document => doc !== null); // Filtrer les valeurs null
 
       console.log("✅ [CLIENT] Total documents:", allDocs.length);
       console.log("✅ [CLIENT] Documents manuels:", manualDocs.success ? manualDocs.data?.length : 0);

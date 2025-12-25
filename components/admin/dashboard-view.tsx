@@ -24,7 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PerformanceChart } from "@/components/admin/performance-chart";
 import { TopPropertiesTable } from "@/components/admin/top-properties-table";
 
@@ -69,7 +69,7 @@ export function DashboardView({
       try {
         const days = daysMap[timeRange];
         const response = await fetch(`/api/admin/performance?days=${days}`);
-        
+
         if (!response.ok) {
           console.error("Erreur lors de la récupération des statistiques");
           return;
@@ -104,9 +104,9 @@ export function DashboardView({
   // Filtrer et trier les top propriétés selon la métrique active
   const filteredTopProperties = useMemo(() => {
     if (!perfStats) return [];
-    
+
     const properties = [...perfStats.topProperties];
-    
+
     if (activeMetric === "views") {
       // Trier par vues décroissantes
       return properties.sort((a, b) => b.views - a.views).slice(0, 5);
@@ -150,11 +150,20 @@ export function DashboardView({
             <h2 className="text-lg font-medium text-white/80">Performance</h2>
             <Select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as TimeRange)}
-              options={timeRangeOptions}
+              onValueChange={(value) => setTimeRange(value as TimeRange)}
               disabled={isLoading}
-              className={isLoading ? "opacity-50 cursor-not-allowed" : ""}
-            />
+            >
+              <SelectTrigger className={`w-[180px] ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}>
+                <SelectValue placeholder="Sélectionner une période" />
+              </SelectTrigger>
+              <SelectContent>
+                {timeRangeOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Cartes KPI Cliquables */}
@@ -162,20 +171,18 @@ export function DashboardView({
             {/* Carte Vues */}
             <Card
               onClick={() => setActiveMetric("views")}
-              className={`cursor-pointer transition-all ${
-                activeMetric === "views"
-                  ? "border-blue-500/50 bg-white/10 shadow-lg shadow-blue-500/10"
-                  : "border-white/10 bg-white/5 opacity-70 hover:opacity-100 hover:bg-white/10"
-              }`}
+              className={`cursor-pointer transition-all ${activeMetric === "views"
+                ? "border-blue-500/50 bg-white/10 shadow-lg shadow-blue-500/10"
+                : "border-white/10 bg-white/5 opacity-70 hover:opacity-100 hover:bg-white/10"
+                }`}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-white/70">
                   Vues Totales
                 </CardTitle>
                 <Eye
-                  className={`h-4 w-4 ${
-                    activeMetric === "views" ? "text-blue-400" : "text-white/40"
-                  }`}
+                  className={`h-4 w-4 ${activeMetric === "views" ? "text-blue-400" : "text-white/40"
+                    }`}
                 />
               </CardHeader>
               <CardContent>
@@ -189,11 +196,10 @@ export function DashboardView({
             {/* Carte Contacts */}
             <Card
               onClick={() => setActiveMetric("contacts")}
-              className={`cursor-pointer transition-all ${
-                activeMetric === "contacts"
-                  ? "border-emerald-500/50 bg-white/10 shadow-lg shadow-emerald-500/10"
-                  : "border-white/10 bg-white/5 opacity-70 hover:opacity-100 hover:bg-white/10"
-              }`}
+              className={`cursor-pointer transition-all ${activeMetric === "contacts"
+                ? "border-emerald-500/50 bg-white/10 shadow-lg shadow-emerald-500/10"
+                : "border-white/10 bg-white/5 opacity-70 hover:opacity-100 hover:bg-white/10"
+                }`}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-white/70">
@@ -201,18 +207,16 @@ export function DashboardView({
                 </CardTitle>
                 <div className="flex gap-1">
                   <MessageSquare
-                    className={`h-4 w-4 ${
-                      activeMetric === "contacts"
-                        ? "text-emerald-400"
-                        : "text-white/40"
-                    }`}
+                    className={`h-4 w-4 ${activeMetric === "contacts"
+                      ? "text-emerald-400"
+                      : "text-white/40"
+                      }`}
                   />
                   <Phone
-                    className={`h-4 w-4 ${
-                      activeMetric === "contacts"
-                        ? "text-emerald-400"
-                        : "text-white/40"
-                    }`}
+                    className={`h-4 w-4 ${activeMetric === "contacts"
+                      ? "text-emerald-400"
+                      : "text-white/40"
+                      }`}
                   />
                 </div>
               </CardHeader>
@@ -437,10 +441,9 @@ export function DashboardView({
                         <td className="px-6 py-4">
                           <Badge
                             variant="outline"
-                            className={`${
-                              statusColors[property.status] ||
+                            className={`${statusColors[property.status] ||
                               "border-white/20 text-white/60"
-                            } border-0`}
+                              } border-0`}
                           >
                             {property.status}
                           </Badge>
