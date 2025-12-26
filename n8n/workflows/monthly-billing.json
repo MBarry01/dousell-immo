@@ -1,0 +1,163 @@
+{
+    "name": "Dousell Immo - Facturation Mensuelle Automatique",
+    "description": "Robot qui génère automatiquement les avis d'échéance chaque mois et envoie les notifications WhatsApp",
+    "trigger": {
+        "type": "Cron",
+        "schedule": "0 8 1 * *",
+        "description": "Se déclenche le 1er de chaque mois à 08h00 (heure de Dakar)"
+    },
+    "environment_variables": [
+        "SUPABASE_URL",
+        "SUPABASE_SERVICE_KEY",
+        "TWILIO_ACCOUNT_SID",
+        "TWILIO_AUTH_TOKEN",
+        "TWILIO_WHATSAPP_NUMBER",
+        "PDF_STORAGE_BUCKET"
+    ],
+    "workflow_steps": [
+        {
+            "step": 1,
+            "name": "Récupérer les baux actifs",
+            "node_type": "Supabase",
+            "action": "SELECT",
+            "query": "SELECT * FROM leases WHERE status = 'active'",
+            "output": "active_leases[]"
+        },
+        {
+            "step": 2,
+            "name": "Boucle sur chaque bail",
+            "node_type": "SplitInBatches",
+            "input": "active_leases",
+            "batch_size": 10
+        },
+        {
+            "step": 3,
+            "name": "Calculer les montants du mois",
+            "node_type": "Function",
+            "code": "const currentMonth = new Date().getMonth() + 1; const currentYear = new Date().getFullYear(); return { period_month: currentMonth, period_year: currentYear, amount_due: item.monthly_amount };"
+        },
+        {
+            "step": 4,
+            "name": "Créer l'entrée rental_transaction",
+            "node_type": "Supabase",
+            "action": "INSERT",
+            "table": "rental_transactions",
+            "data": {
+                "lease_id": "{{$node.step3.leaseId}}",
+                "period_month": "{{$node.step3.period_month}}",
+                "period_year": "{{$node.step3.period_year}}",
+                "amount_due": "{{$node.step3.amount_due}}",
+                "status": "pending"
+            },
+            "output": "transaction_id"
+        },
+        {
+            "step": 5,
+            "name": "Générer le PDF Avis d'Échéance",
+            "node_type": "HTTP Request",
+            "method": "POST",
+            "url": "https://api.pdfmonkey.io/api/v1/documents",
+            "headers": {
+                "Authorization": "Bearer {{$env.PDFMONKEY_API_KEY}}"
+            },
+            "body": {
+                "template_id": "avis-echeance-template",
+                "payload": {
+                    "tenant_name": "{{$node.step2.tenant_name}}",
+                    "property_address": "{{$node.step2.property_address}}",
+                    "amount": "{{$node.step3.amount_due}}",
+                    "period": "{{$node.step3.period_month}}/{{$node.step3.period_year}}",
+                    "due_date": "{{$node.step2.billing_day}}/{{$node.step3.period_month}}/{{$node.step3.period_year}}"
+                }
+            },
+            "output": "pdf_url"
+        },
+        {
+            "step": 6,
+            "name": "Uploader le PDF vers Supabase Storage",
+            "node_type": "Supabase",
+            "action": "UPLOAD",
+            "bucket": "rental-documents",
+            "path": "notices/{{$node.step4.transaction_id}}.pdf",
+            "file": "{{$node.step5.pdf_url}}",
+            "output": "storage_url"
+        },
+        {
+            "step": 7,
+            "name": "Mettre à jour notice_url dans la transaction",
+            "node_type": "Supabase",
+            "action": "UPDATE",
+            "table": "rental_transactions",
+            "where": {
+                "id": "{{$node.step4.transaction_id}}"
+            },
+            "data": {
+                "notice_url": "{{$node.step6.storage_url}}"
+            }
+        },
+        {
+            "step": 8,
+            "name": "Envoyer notification WhatsApp",
+            "node_type": "Twilio",
+            "action": "SEND_WHATSAPP",
+            "to": "{{$node.step2.tenant_phone}}",
+            "template": "avis_echeance_notification",
+            "parameters": [
+                "{{$node.step2.tenant_name}}",
+                "{{$node.step3.period_month}}/{{$node.step3.period_year}}",
+                "{{$node.step3.amount_due}} FCFA",
+                "{{$node.step6.storage_url}}"
+            ]
+        },
+        {
+            "step": 9,
+            "name": "Log de succès",
+            "node_type": "Function",
+            "code": "console.log(`✅ Avis envoyé à ${item.tenant_name} pour ${item.amount_due} FCFA`); return { success: true };"
+        }
+    ],
+    "error_handling": {
+        "on_error": "Continue",
+        "notification": {
+            "type": "email",
+            "recipient": "admin@dousell.com",
+            "subject": "❌ Erreur Facturation Mensuelle"
+        }
+    },
+    "related_workflows": [
+        {
+            "name": "generate-lease-pdf",
+            "trigger": "Webhook POST",
+            "description": "Génère le contrat de bail lors de la création d'un nouveau locataire"
+        },
+        {
+            "name": "send-receipt",
+            "trigger": "Webhook POST",
+            "description": "Génère et envoie la quittance lors de la confirmation d'un paiement"
+        },
+        {
+            "name": "new-maintenance-request",
+            "trigger": "Webhook POST",
+            "description": "Notifie le propriétaire d'une nouvelle demande de maintenance"
+        },
+        {
+            "name": "overdue-reminder",
+            "trigger": "Cron (quotidien à 09h00)",
+            "description": "Vérifie les loyers en retard et envoie des rappels"
+        }
+    ],
+    "whatsapp_templates": {
+        "avis_echeance_notification": {
+            "language": "fr",
+            "body": "Bonjour {{1}} 👋\n\nVotre avis d'échéance pour le mois de {{2}} est disponible.\n\n💰 Montant: {{3}}\n📄 Document: {{4}}\n\nMerci de procéder au règlement avant la date d'échéance.\n\n- Dousell Immo"
+        },
+        "quittance_notification": {
+            "language": "fr",
+            "body": "Bonjour {{1}} ✅\n\nVotre paiement de {{2}} pour le mois de {{3}} a bien été reçu.\n\n📄 Quittance: {{4}}\n\nMerci de votre confiance!\n\n- Dousell Immo"
+        },
+        "overdue_reminder": {
+            "language": "fr",
+            "body": "⚠️ Rappel: Bonjour {{1}},\n\nVotre loyer de {{2}} pour le mois de {{3}} n'a pas encore été réglé.\n\nMerci de régulariser votre situation rapidement.\n\n- Dousell Immo"
+        }
+    }
+}

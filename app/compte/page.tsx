@@ -13,6 +13,7 @@ import {
   LogOut,
   ArrowRight,
   Lock,
+  LayoutDashboard,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +36,7 @@ import { FadeIn } from "@/components/ui/motion-wrapper";
 import { useUserRoles } from "@/hooks/use-user-roles";
 import { Badge } from "@/components/ui/badge";
 import { ROLE_COLORS, ROLE_LABELS } from "@/config/roles";
+import { GestionLocativeWidget } from "./components/GestionLocativeWidget";
 
 export default function ComptePage() {
   const { user, loading } = useAuth();
@@ -132,49 +134,57 @@ export default function ComptePage() {
     <div className="space-y-8 py-6">
       <FadeIn>
         {/* Header Utilisateur */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4 min-w-0 flex-1">
-            <Avatar className="h-14 w-14 shrink-0 border border-zinc-800">
-              <AvatarImage src={user.user_metadata?.avatar_url as string} alt={displayName} />
-              <AvatarFallback className="bg-zinc-900 text-zinc-100 text-lg font-semibold border border-zinc-800">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-bold text-white break-words">
-                  Bonjour, {firstName}
-                </h1>
-                {!rolesLoading && userRoles.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {userRoles.map((role) => {
-                      return (
-                        <Badge
-                          key={role}
-                          className={`text-xs shrink-0 ${ROLE_COLORS[role] || "bg-white/10 text-white/80"}`}
-                        >
-                          {ROLE_LABELS[role] || role}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-              <p className="mt-1 text-sm text-zinc-400 truncate">
-                {user.email}
-              </p>
+        <div className="mb-8 flex items-start gap-4">
+          <Avatar className="h-14 w-14 shrink-0 border border-zinc-800">
+            <AvatarImage src={user.user_metadata?.avatar_url as string} alt={displayName} />
+            <AvatarFallback className="bg-zinc-900 text-zinc-100 text-lg font-semibold border border-zinc-800">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="min-w-0 flex-1">
+            {/* Ligne du nom + bouton déconnexion */}
+            <div className="flex items-center justify-between gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-white break-words">
+                Bonjour, {firstName}
+              </h1>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0 text-zinc-400 hover:text-white hover:bg-zinc-900 h-8 w-8"
+                onClick={handleSignOut}
+                title="Déconnexion"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
+
+            {/* Badges des rôles */}
+            {!rolesLoading && userRoles.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {userRoles.map((role) => {
+                  return (
+                    <Badge
+                      key={role}
+                      className={`text-xs shrink-0 ${ROLE_COLORS[role] || "bg-white/10 text-white/80"}`}
+                    >
+                      {ROLE_LABELS[role] || role}
+                    </Badge>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Email */}
+            <p className="mt-1 text-sm text-zinc-400 truncate">
+              {user.email}
+            </p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="shrink-0 text-zinc-400 hover:text-white hover:bg-zinc-900 w-full sm:w-auto flex items-center gap-2"
-            onClick={handleSignOut}
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Déconnexion</span>
-          </Button>
         </div>
+
+
+        {/* Widget Gestion Locative Premium */}
+        <GestionLocativeWidget />
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
