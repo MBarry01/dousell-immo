@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { BatteryCharging, Droplets, Minus, Plus } from "lucide-react";
+import { BatteryCharging, Droplets, Minus, Plus, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -62,7 +62,7 @@ export const FilterDrawer = ({
   };
 
   const toggleFeature = (
-    key: "hasBackupGenerator" | "hasWaterTank",
+    key: "hasBackupGenerator" | "hasWaterTank" | "isVerified",
     value: boolean
   ) => {
     setLocalFilters((prev) => ({
@@ -227,6 +227,29 @@ export const FilterDrawer = ({
               >
                 <Droplets className="mr-2 h-4 w-4" />
                 Réservoir / Surpresseur
+              </Button>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+              Certification
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant={localFilters.isVerified ? "secondary" : "ghost"}
+                className={`rounded-full border ${
+                  localFilters.isVerified
+                    ? "border-[#F4C430] bg-[#F4C430]/20 text-white"
+                    : "border-white/10 text-white/70"
+                }`}
+                onClick={() =>
+                  toggleFeature("isVerified", !localFilters.isVerified)
+                }
+              >
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                Biens certifiés uniquement
               </Button>
             </div>
           </section>

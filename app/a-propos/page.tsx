@@ -99,8 +99,8 @@ export default function AProposPage() {
           {/* Image */}
           <div className="order-1 relative h-[300px] overflow-hidden rounded-2xl border border-white/10 md:order-2 md:h-auto">
             <Image
-              src="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Équipe travaillant ensemble"
+              src="https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Professionnels africains travaillant ensemble"
               fill
               className="object-cover"
             />
@@ -151,11 +151,13 @@ export default function AProposPage() {
                   transition={{ delay: index * 0.1 }}
                   className="rounded-2xl border border-white/10 bg-background/40 p-6 text-white backdrop-blur-sm"
                 >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20">
-                    <Icon className="h-6 w-6 text-amber-400" />
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
+                      <Icon className="h-6 w-6 text-amber-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold">{valeur.title}</h3>
                   </div>
-                  <h3 className="text-xl font-semibold">{valeur.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/70">
+                  <p className="mt-4 text-sm leading-relaxed text-white/70">
                     {valeur.description}
                   </p>
                 </motion.div>

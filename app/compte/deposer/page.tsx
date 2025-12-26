@@ -27,7 +27,14 @@ const depositSchema = z
     type: z.enum(["villa", "appartement", "terrain", "immeuble"]),
     title: z.string().min(3, "Le titre doit contenir au moins 3 caractères"),
     description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
-    price: z.number().min(0, "Le prix doit être positif"),
+    price: z.preprocess(
+      (val) => {
+        if (val === "" || val === null || val === undefined) return undefined;
+        const num = Number(val);
+        return isNaN(num) ? undefined : num;
+      },
+      z.number().min(1, "Le prix doit être supérieur à 0")
+    ),
     category: z.enum(["vente", "location"]),
     city: z.string().min(1, "La région est requise"),
     district: z.string().min(1, "Le quartier est requis"),
@@ -158,6 +165,11 @@ function DeposerPageContent() {
   const [services, setServices] = useState<{ code: string; name: string; price: number; description: string }[]>([]);
   const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [proofDocumentId, setProofDocumentId] = useState<string | null>(null);
+  const [formSaving, setFormSaving] = useState(false);
+
+  // États accordéon intelligent
+  const [activeSection, setActiveSection] = useState<string>("essentials");
+  const [completedSections, setCompletedSections] = useState<string[]>([]);
 
   // Charger les services depuis la base de données
   useEffect(() => {
@@ -201,7 +213,7 @@ function DeposerPageContent() {
       service_type: "mandat_confort",
       title: "",
       description: "",
-      price: 0,
+      price: "" as any,
       city: "",
       district: "",
       address: "",
@@ -228,6 +240,78 @@ function DeposerPageContent() {
   const type = watch("type");
   const isTerrain = type === "terrain";
   const needsPayment = serviceType === "boost_visibilite";
+
+  // Fonctions de validation par section
+  const isEssentialsValid = () => {
+    const data = getValues();
+    return !!(data.type && data.category && data.title && data.title.length >= 3 && data.price && data.price > 0);
+  };
+
+  const isLocationValid = () => {
+    const data = getValues();
+    return !!(data.city && data.city.length >= 1 && data.district && data.district.length >= 1 && data.address && data.address.length >= 3);
+  };
+
+  const isCharacteristicsValid = () => {
+    const data = getValues();
+    if (data.type === "terrain") {
+      return !!(data.surfaceTotale && data.surfaceTotale >= 10 && data.juridique);
+    } else {
+      return !!(data.surface && data.surface >= 10 && data.rooms && data.rooms >= 1 && data.bedrooms !== undefined && data.bedrooms >= 0 && data.bathrooms !== undefined && data.bathrooms >= 0);
+    }
+  };
+
+  const isDescriptionValid = () => {
+    const data = getValues();
+    return !!(data.description && data.description.length >= 10 && imageUrls.length > 0);
+  };
+
+  // Logique d'auto-expansion intelligente avec debounce
+  useEffect(() => {
+    // Ne pas exécuter pendant la soumission pour éviter les flash backs
+    if (step !== 1 || submitting) return;
+
+    const data = getValues();
+
+    // Marquer les sections comme complétées
+    if (isEssentialsValid() && !completedSections.includes("essentials")) {
+      setCompletedSections((prev) => [...prev, "essentials"]);
+    }
+    if (isLocationValid() && !completedSections.includes("location")) {
+      setCompletedSections((prev) => [...prev, "location"]);
+    }
+    if (isCharacteristicsValid() && !completedSections.includes("characteristics")) {
+      setCompletedSections((prev) => [...prev, "characteristics"]);
+    }
+    if (isDescriptionValid() && !completedSections.includes("description")) {
+      setCompletedSections((prev) => [...prev, "description"]);
+    }
+
+    // Auto-expansion avec délai de 1.5s pour laisser l'utilisateur finir de taper
+    const autoExpandTimer = setTimeout(() => {
+      if (isEssentialsValid() && activeSection === "essentials" && !completedSections.includes("essentials")) {
+        setActiveSection("location");
+        const element = document.getElementById("section-location");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      } else if (isLocationValid() && activeSection === "location" && !completedSections.includes("location")) {
+        setActiveSection("characteristics");
+        const element = document.getElementById("section-characteristics");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      } else if (isCharacteristicsValid() && activeSection === "characteristics" && !completedSections.includes("characteristics")) {
+        setActiveSection("description");
+        const element = document.getElementById("section-description");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    }, 1500); // 1.5 secondes de délai
+
+    return () => clearTimeout(autoExpandTimer);
+  }, [watch("type"), watch("category"), watch("title"), watch("price"), watch("city"), watch("district"), watch("address"), watch("surface"), watch("surfaceTotale"), watch("juridique"), watch("rooms"), watch("bedrooms"), watch("bathrooms"), watch("description"), imageUrls, activeSection, step, completedSections, submitting]);
 
   // Scroll vers le haut à chaque changement d'étape
   useEffect(() => {
@@ -303,25 +387,31 @@ function DeposerPageContent() {
 
   // Sauvegarder l'étape dans localStorage à chaque changement
   useEffect(() => {
-    if (typeof window !== "undefined" && step >= 1 && step <= 3) {
+    // Ne pas sauvegarder pendant la soumission pour éviter les conflits
+    if (typeof window !== "undefined" && step >= 1 && step <= 3 && !submitting) {
       localStorage.setItem("deposit_form_step", step.toString());
     }
-  }, [step]);
+  }, [step, submitting]);
 
   // Sauvegarder les valeurs du formulaire dans localStorage à chaque changement de valeur
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    // Ne pas auto-sauvegarder pendant la soumission
+    if (typeof window === "undefined" || submitting) return;
 
     const subscription = watch((value) => {
       try {
+        setFormSaving(true);
         localStorage.setItem("deposit_form_data", JSON.stringify(value));
+        // Masquer l'indicateur après 800ms
+        setTimeout(() => setFormSaving(false), 800);
       } catch (error) {
         console.error("Erreur lors de la sauvegarde des données du formulaire:", error);
+        setFormSaving(false);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [watch, setValue]);
+  }, [watch, setValue, submitting]);
 
   // Sauvegarder les images dans localStorage à chaque changement
   useEffect(() => {
@@ -662,10 +752,12 @@ function DeposerPageContent() {
           localStorage.removeItem("deposit_form_step");
           localStorage.removeItem("deposit_form_data");
           localStorage.removeItem("deposit_form_images");
-          // Réinitialiser les états juste avant la redirection pour éviter le flash
-          setPaymentToken(null);
-          setPaymentVerification("idle");
-          setIsPaymentConfirmed(false); // Réinitialiser aussi l'état de confirmation
+
+          // IMPORTANT: Ne PAS réinitialiser les états React avant la redirection
+          // pour éviter un re-render qui causerait un flash back vers les étapes précédentes
+          // Le nettoyage des états React sera automatique lors du unmount du composant
+
+          // Redirection immédiate sans modification des états React
           router.push("/compte/mes-biens");
           router.refresh();
         }, 1500);
@@ -819,16 +911,33 @@ function DeposerPageContent() {
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="flex items-center gap-2">
-        {[1, 2, 3].map((s) => (
-          <div key={s} className="flex-1">
-            <div
-              className={`h-2 rounded-full ${s <= step ? "bg-primary" : "bg-white/10"
-                }`}
-            />
+      {/* Progress Bar - Enhanced */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-white">Étape {step} sur 3</span>
+            <span className="text-xs text-white/50">
+              {step === 1 ? "Informations du bien" : step === 2 ? "Choix de l'offre" : "Finalisation"}
+            </span>
           </div>
-        ))}
+          <span className="text-sm font-semibold text-primary">{Math.round((step / 3) * 100)}%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className="flex-1">
+              <div className="relative h-2 rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    s <= step ? "bg-primary" : "bg-transparent"
+                  }`}
+                  style={{
+                    width: s < step ? "100%" : s === step ? "50%" : "0%"
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <form
@@ -838,27 +947,70 @@ function DeposerPageContent() {
         }}
       >
         <AnimatePresence mode="wait">
-          {/* Step 1: Le Bien */}
+          {/* Step 1: Informations du bien */}
           {step === 1 && (
             <motion.div
               key="step1"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="space-y-6"
+              className="space-y-8"
             >
-              <h2 className="text-xl font-semibold">1. Informations du bien</h2>
+              <div>
+                <h2 className="text-xl font-semibold mb-1">1. Informations du bien</h2>
+                <p className="text-sm text-white/50">Complétez les informations essentielles de votre bien</p>
+              </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              {/* Section: Informations Essentielles */}
+              <div id="section-essentials" className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setActiveSection(activeSection === "essentials" ? "" : "essentials")}
+                  className="w-full p-5 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+                >
+                  <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    Informations Essentielles
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {completedSections.includes("essentials") && (
+                      <Check className="h-5 w-5 text-emerald-400" />
+                    )}
+                    <motion.div
+                      animate={{ rotate: activeSection === "essentials" ? 180 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <svg className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </motion.div>
+                  </div>
+                </button>
+                <AnimatePresence>
+                  {activeSection === "essentials" && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                    >
+                      <div className="px-5 pb-5 space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="text-sm text-white/70">Type de bien</label>
                   <select
                     {...register("type")}
-                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
-                    style={{ colorScheme: "dark", fontSize: "16px" }}
+                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 appearance-none bg-no-repeat bg-right pr-10"
+                    style={{
+                      colorScheme: "dark",
+                      fontSize: "16px",
+                      backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
+                      backgroundPosition: "right 0.75rem center",
+                      backgroundSize: "1.5em 1.5em"
+                    }}
                   >
                     {typesBien.map((t) => (
-                      <option key={t.value} value={t.value} className="bg-background text-white">
+                      <option key={t.value} value={t.value} className="bg-[#121212] text-white py-2">
                         {t.label}
                       </option>
                     ))}
@@ -869,13 +1021,19 @@ function DeposerPageContent() {
                   <label className="text-sm text-white/70">Catégorie</label>
                   <select
                     {...register("category")}
-                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
-                    style={{ colorScheme: "dark", fontSize: "16px" }}
+                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 appearance-none bg-no-repeat bg-right pr-10"
+                    style={{
+                      colorScheme: "dark",
+                      fontSize: "16px",
+                      backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
+                      backgroundPosition: "right 0.75rem center",
+                      backgroundSize: "1.5em 1.5em"
+                    }}
                   >
-                    <option value="vente" className="bg-background text-white">
+                    <option value="vente" className="bg-[#121212] text-white py-2">
                       Vente
                     </option>
-                    <option value="location" className="bg-background text-white">
+                    <option value="location" className="bg-[#121212] text-white py-2">
                       Location
                     </option>
                   </select>
@@ -883,7 +1041,12 @@ function DeposerPageContent() {
 
                 <div className="sm:col-span-2">
                   <label className="text-sm text-white/70">Titre</label>
-                  <Input {...register("title")} className="mt-2 text-[16px]" />
+                  <div className="relative">
+                    <Input {...register("title")} className="mt-2 text-[16px] pr-10" />
+                    {!errors.title && watch("title") && watch("title").length >= 3 && (
+                      <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-400" />
+                    )}
+                  </div>
                   {errors.title && (
                     <p className="mt-1 text-sm text-amber-300">
                       {errors.title.message}
@@ -893,18 +1056,65 @@ function DeposerPageContent() {
 
                 <div className="sm:col-span-2">
                   <label className="text-sm text-white/70">{priceLabel}</label>
-                  <Input
-                    type="number"
-                    {...register("price", { valueAsNumber: true })}
-                    className="mt-2 text-[16px]"
-                  />
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      {...register("price")}
+                      className="mt-2 text-[16px] pr-10"
+                      placeholder={category === "location" ? "Ex: 250000" : "Ex: 45000000"}
+                    />
+                    {!errors.price && watch("price") && Number(watch("price")) > 0 && (
+                      <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-400" />
+                    )}
+                  </div>
                   {errors.price && (
                     <p className="mt-1 text-sm text-amber-300">
                       {errors.price.message}
                     </p>
                   )}
                 </div>
+              </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
+            {/* Section: Localisation */}
+            <div id="section-location" className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setActiveSection(activeSection === "location" ? "" : "location")}
+                className="w-full p-5 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+              >
+                <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  Localisation
+                </h3>
+                <div className="flex items-center gap-2">
+                  {completedSections.includes("location") && (
+                    <Check className="h-5 w-5 text-emerald-400" />
+                  )}
+                  <motion.div
+                    animate={{ rotate: activeSection === "location" ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <svg className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </motion.div>
+                </div>
+              </button>
+              <AnimatePresence>
+                {activeSection === "location" && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                  >
+                    <div className="px-5 pb-5 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="text-sm text-white/70">Région</label>
                   <Input {...register("city")} className="mt-2 text-base" />
@@ -951,15 +1161,59 @@ function DeposerPageContent() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-sm text-white/70">Point de repère <span className="text-white/40">(optionnel)</span></label>
-                  <Input {...register("landmark")} className="mt-2 text-[16px]" />
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-white/70">Point de repère <span className="text-white/40">(optionnel)</span></label>
+                    <InfoTooltip content="Ex: Près de la station Total, à côté de l'école primaire Liberté, face à la mosquée..." />
+                  </div>
+                  <Input {...register("landmark")} className="mt-2 text-[16px]" placeholder="Ex: Près de la station Total..." />
                   {errors.landmark && (
                     <p className="mt-1 text-sm text-amber-300">
                       {errors.landmark.message}
                     </p>
                   )}
                 </div>
+              </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
+            {/* Section: Caractéristiques (conditionnelle selon le type) */}
+            <div id="section-characteristics" className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setActiveSection(activeSection === "characteristics" ? "" : "characteristics")}
+                className="w-full p-5 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+              >
+                <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  Caractéristiques
+                </h3>
+                <div className="flex items-center gap-2">
+                  {completedSections.includes("characteristics") && (
+                    <Check className="h-5 w-5 text-emerald-400" />
+                  )}
+                  <motion.div
+                    animate={{ rotate: activeSection === "characteristics" ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <svg className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </motion.div>
+                </div>
+              </button>
+              <AnimatePresence>
+                {activeSection === "characteristics" && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                  >
+                    <div className="px-5 pb-5 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {/* Champs conditionnels selon le type */}
                 {isTerrain ? (
                   <>
@@ -980,17 +1234,23 @@ function DeposerPageContent() {
                       <label className="text-sm text-white/70">Situation juridique</label>
                       <select
                         {...register("juridique")}
-                        className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
-                        style={{ colorScheme: "dark", fontSize: "16px" }}
+                        className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 appearance-none bg-no-repeat bg-right pr-10"
+                        style={{
+                          colorScheme: "dark",
+                          fontSize: "16px",
+                          backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
+                          backgroundPosition: "right 0.75rem center",
+                          backgroundSize: "1.5em 1.5em"
+                        }}
                       >
-                        <option value="" className="bg-background text-white">
+                        <option value="" className="bg-[#121212] text-white py-2">
                           Sélectionnez
                         </option>
                         {situationsJuridiques.map((sj) => (
                           <option
                             key={sj.value}
                             value={sj.value}
-                            className="bg-background text-white"
+                            className="bg-[#121212] text-white py-2"
                           >
                             {sj.label}
                           </option>
@@ -1060,12 +1320,53 @@ function DeposerPageContent() {
                   </>
                 )}
               </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Section: Description & Photos */}
+            <div id="section-description" className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setActiveSection(activeSection === "description" ? "" : "description")}
+                className="w-full p-5 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+              >
+                <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  Description & Photos
+                </h3>
+                <div className="flex items-center gap-2">
+                  {completedSections.includes("description") && (
+                    <Check className="h-5 w-5 text-emerald-400" />
+                  )}
+                  <motion.div
+                    animate={{ rotate: activeSection === "description" ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <svg className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </motion.div>
+                </div>
+              </button>
+              <AnimatePresence>
+                {activeSection === "description" && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                  >
+                    <div className="px-5 pb-5 space-y-4">
 
               <div>
                 <label className="text-sm text-white/70">Description</label>
                 <Textarea
                   {...register("description")}
                   className="mt-2 min-h-[120px]"
+                  placeholder="Décrivez votre bien en détail..."
                 />
                 {errors.description && (
                   <p className="mt-1 text-sm text-amber-300">
@@ -1121,6 +1422,11 @@ function DeposerPageContent() {
                   )}
                 </div>
               </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             </motion.div>
           )}
 
@@ -1493,6 +1799,23 @@ function DeposerPageContent() {
           ) : null}
         </div>
       </form>
+
+      {/* Auto-save Indicator */}
+      <AnimatePresence>
+        {formSaving && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
+          >
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm text-white shadow-lg">
+              <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="font-medium">Sauvegarde automatique...</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div >
   );
 }

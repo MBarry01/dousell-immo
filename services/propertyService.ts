@@ -13,6 +13,7 @@ export type PropertyFilters = {
   bedrooms?: number;
   hasBackupGenerator?: boolean;
   hasWaterTank?: boolean;
+  isVerified?: boolean; // Filtrer par biens certifiés/vérifiés
   type?: Property["details"]["type"];
   types?: Property["details"]["type"][]; // Support pour sélection multiple
   limit?: number;
@@ -226,6 +227,9 @@ export const getProperties = async (filters: PropertyFilters = {}) => {
     }
     if (filters.hasWaterTank) {
       query = query.eq("features->>hasWaterTank", "true");
+    }
+    if (filters.isVerified) {
+      query = query.eq("verification_status", "verified");
     }
     // Support pour un seul type ou plusieurs types (OR)
     if (filters.types && filters.types.length > 0) {

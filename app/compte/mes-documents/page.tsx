@@ -3,19 +3,20 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  Lock,
-  Shield,
+  LockKey,
+  ShieldCheck,
   FileText,
-  Download,
-  Trash2,
-  Upload,
+  DownloadSimple,
+  Trash,
+  UploadSimple,
   Eye,
-  AlertCircle,
+  WarningCircle,
   CheckCircle,
   UserCheck,
-  Home,
+  House,
+  Fingerprint,
   MapPin,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { uploadDocument, getMyDocuments, deleteDocument, getVerificationDocuments, refreshDocumentUrl } from "./actions";
-import { PropertyMapWrapper } from "./components/PropertyMapWrapper";
 
 type Document = {
   id: string;
@@ -308,8 +308,11 @@ export default function MesDocumentsPage() {
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
-  const getDocumentIcon = (type: string) => {
-    return <FileText className="h-8 w-8 text-primary" />;
+  const getDocumentIcon = (type: string, isIdentity: boolean = false) => {
+    if (isIdentity) {
+      return <Fingerprint weight="light" className="h-7 w-7 text-blue-400" />;
+    }
+    return <FileText weight="light" className="h-7 w-7 text-emerald-400" />;
   };
 
   return (
@@ -323,7 +326,7 @@ export default function MesDocumentsPage() {
         >
           <div className="flex items-center gap-3 mb-4">
             <div className="rounded-2xl bg-primary/10 p-3 border border-primary/20">
-              <Lock className="h-8 w-8 text-primary" />
+              <LockKey weight="light" className="h-8 w-8 text-primary" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">Mes Documents</h1>
@@ -334,15 +337,15 @@ export default function MesDocumentsPage() {
           {/* Security Badges */}
           <div className="flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-400">
-              <Shield className="h-3.5 w-3.5" />
+              <ShieldCheck weight="light" className="h-3.5 w-3.5" />
               Chiffré AES-256
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-semibold text-primary">
-              <Lock className="h-3.5 w-3.5" />
+              <LockKey weight="light" className="h-3.5 w-3.5" />
               Confidentiel
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-400">
-              <CheckCircle className="h-3.5 w-3.5" />
+              <CheckCircle weight="light" className="h-3.5 w-3.5" />
               Accès Privé
             </span>
           </div>
@@ -358,7 +361,7 @@ export default function MesDocumentsPage() {
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-primary text-black hover:bg-primary/90 font-semibold">
-                <Upload className="mr-2 h-4 w-4" />
+                <UploadSimple weight="light" className="mr-2 h-4 w-4" />
                 Ajouter un document
               </Button>
             </DialogTrigger>
@@ -437,7 +440,7 @@ export default function MesDocumentsPage() {
             transition={{ delay: 0.2 }}
           >
             <Card className="bg-background border-white/10 p-12 text-center">
-              <Lock className="h-16 w-16 mx-auto mb-4 text-white/20" />
+              <LockKey weight="light" className="h-16 w-16 mx-auto mb-4 text-white/20" />
               <h3 className="text-xl font-semibold text-white mb-2">
                 Votre coffre-fort est vide
               </h3>
@@ -448,7 +451,7 @@ export default function MesDocumentsPage() {
                 onClick={() => setDialogOpen(true)}
                 className="bg-primary text-black hover:bg-primary/90 font-semibold"
               >
-                <Upload className="mr-2 h-4 w-4" />
+                <UploadSimple weight="light" className="mr-2 h-4 w-4" />
                 Ajouter mon premier document
               </Button>
             </Card>
@@ -463,7 +466,7 @@ export default function MesDocumentsPage() {
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="rounded-xl bg-blue-500/10 p-2.5 border border-blue-500/20">
-                  <UserCheck className="h-6 w-6 text-blue-400" />
+                  <UserCheck weight="light" className="h-6 w-6 text-blue-400" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-blue-400">Mon Identité Officielle</h2>
@@ -478,7 +481,7 @@ export default function MesDocumentsPage() {
                 return identityDocs.length === 0;
               })() ? (
                 <Card className="bg-background border-white/10 p-8 text-center">
-                  <Shield className="h-12 w-12 mx-auto mb-3 text-white/20" />
+                  <ShieldCheck weight="light" className="h-12 w-12 mx-auto mb-3 text-white/20" />
                   <h3 className="text-lg font-semibold text-white mb-1">Aucune pièce d'identité</h3>
                   <p className="text-sm text-white/50">Ajoutez votre CNI ou passeport pour être vérifié</p>
                 </Card>
@@ -491,52 +494,47 @@ export default function MesDocumentsPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 * index }}
                     >
-                      <Card className={`group relative bg-background p-6 transition-all hover:shadow-lg ${doc.is_certified
-                        ? "border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]"
-                        : "border border-white/10 hover:border-blue-500/30 hover:shadow-blue-500/10"
+                      <Card className={`group relative bg-gray-900/40 p-5 transition-all rounded-[22px] hover:shadow-2xl ${doc.is_certified
+                        ? "border-2 border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                        : "border border-gray-800/60 hover:border-blue-500/30 hover:shadow-blue-500/5"
                         }`}>
                         {doc.is_certified && (
-                          <div className="absolute -right-2 -top-2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg z-10 flex items-center gap-1">
-                            <Shield className="w-3 h-3" />
+                          <div className="absolute -right-2 -top-2 bg-blue-500/90 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg z-10 flex items-center gap-1.5">
+                            <ShieldCheck weight="fill" size={14} />
                             Profil Vérifié
                           </div>
                         )}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="rounded-xl bg-blue-500/10 p-3 border border-blue-500/20">
-                            {getDocumentIcon(doc.type)}
+                        <div className="flex items-start justify-between mb-6">
+                          <div className="rounded-2xl bg-blue-500/10 p-3">
+                            {getDocumentIcon(doc.type, true)}
                           </div>
                           {doc.source === "verification" && (
-                            <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2 py-1 text-[10px] font-semibold text-blue-400">
+                            <span className="rounded-full bg-blue-500/5 border border-blue-500/20 px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase text-blue-400">
                               VÉRIFIÉ
                             </span>
                           )}
                         </div>
 
-                        <h3 className="font-semibold text-white mb-1 line-clamp-1">
-                          {doc.name}
-                        </h3>
-                        <p className="text-xs text-white/50 mb-1">
-                          {documentTypes.find((t) => t.value === doc.type)?.label || doc.type}
-                        </p>
-                        <p className="text-xs text-white/40 mb-4">
-                          {formatFileSize(doc.size)} • {new Date(doc.uploaded_at).toLocaleDateString("fr-FR")}
-                        </p>
+                        <div className="space-y-1">
+                          <h3 className="text-sm font-semibold text-gray-100 truncate">{doc.name}</h3>
+                          <p className="text-[11px] text-gray-500 flex items-center gap-1">
+                            Vérification d'identité
+                          </p>
+                        </div>
 
                         {/* Affichage de la raison du rejet/révocation */}
                         {!doc.is_certified && doc.rejection_reason && (
-                          <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs text-red-400 mb-4">
+                          <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400 mb-4">
                             <p className="font-bold flex items-center gap-1.5 mb-1.5">
-                              <AlertCircle className="w-3.5 h-3.5" /> Motif du refus :
+                              <WarningCircle weight="light" className="w-3.5 h-3.5" /> Motif du refus :
                             </p>
                             <p className="italic text-red-300/90">"{doc.rejection_reason}"</p>
                           </div>
                         )}
 
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="flex-1 bg-white/5 hover:bg-white/10 text-white border-white/10"
+                        <div className="flex gap-2 mt-6">
+                          <button
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-800/50 hover:bg-gray-700/50 rounded-xl text-xs font-medium transition-colors border border-gray-700/50 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={() => {
                               if (doc.url) {
                                 window.open(doc.url, "_blank", "noopener,noreferrer");
@@ -546,27 +544,21 @@ export default function MesDocumentsPage() {
                             }}
                             disabled={!doc.url}
                           >
-                            <Eye className="mr-1.5 h-3.5 w-3.5" />
-                            Voir
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="flex-1 bg-white/5 hover:bg-white/10 text-white border-white/10"
+                            <Eye weight="light" size={16} /> Voir
+                          </button>
+                          <button
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-800/50 hover:bg-gray-700/50 rounded-xl text-xs font-medium transition-colors border border-gray-700/50 text-white"
                             onClick={() => handleDownload(doc.url, doc.name, doc.id, doc.source)}
                           >
-                            <Download className="mr-1.5 h-3.5 w-3.5" />
-                            Télécharger
-                          </Button>
+                            <DownloadSimple weight="light" size={16} /> Télécharger
+                          </button>
                           {doc.source === "manual" && (
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
+                            <button
+                              className="p-2.5 bg-gray-800/50 hover:bg-red-500/20 text-red-400 rounded-xl border border-gray-700/50 hover:border-red-500/30 transition-colors"
                               onClick={() => handleDelete(doc.id)}
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
+                              <Trash weight="light" size={16} />
+                            </button>
                           )}
                         </div>
                       </Card>
@@ -574,24 +566,6 @@ export default function MesDocumentsPage() {
                   ))}
                 </div>
               )}
-            </motion.section>
-
-            {/* SECTION CARTE */}
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="rounded-xl bg-green-500/10 p-2.5 border border-green-500/20">
-                  <MapPin className="h-6 w-6 text-green-400" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-green-400">Localisation de mon patrimoine</h2>
-                  <p className="text-sm text-white/50">Carte interactive de vos biens certifiés</p>
-                </div>
-              </div>
-              <PropertyMapWrapper properties={documents.filter(doc => doc.certification_scope !== 'global')} />
             </motion.section>
 
             {/* SECTION PROPRIÉTÉS */}
@@ -602,7 +576,7 @@ export default function MesDocumentsPage() {
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="rounded-xl bg-emerald-500/10 p-2.5 border border-emerald-500/20">
-                  <Home className="h-6 w-6 text-emerald-400" />
+                  <House weight="light" className="h-6 w-6 text-emerald-400" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-emerald-400">Mes Titres de Propriété Certifiés</h2>
@@ -612,7 +586,7 @@ export default function MesDocumentsPage() {
 
               {documents.filter(doc => doc.certification_scope !== 'global').length === 0 ? (
                 <Card className="bg-background border-white/10 p-8 text-center">
-                  <FileText className="h-12 w-12 mx-auto mb-3 text-white/20" />
+                  <FileText weight="light" className="h-12 w-12 mx-auto mb-3 text-white/20" />
                   <h3 className="text-lg font-semibold text-white mb-1">Aucun titre de propriété</h3>
                   <p className="text-sm text-white/50">Ajoutez vos documents de propriété pour certifier vos annonces</p>
                 </Card>
@@ -625,52 +599,47 @@ export default function MesDocumentsPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 * index }}
                     >
-                      <Card className={`group relative bg-background p-6 transition-all hover:shadow-lg ${doc.is_certified
-                        ? "border-2 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-                        : "border border-white/10 hover:border-emerald-500/30 hover:shadow-emerald-500/10"
+                      <Card className={`group relative bg-gray-900/40 p-5 transition-all rounded-[22px] hover:shadow-2xl ${doc.is_certified
+                        ? "border-2 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+                        : "border border-gray-800/60 hover:border-emerald-500/30 hover:shadow-emerald-500/5"
                         }`}>
                         {doc.is_certified && (
-                          <div className="absolute -right-2 -top-2 bg-emerald-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg z-10 flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3" />
+                          <div className="absolute -right-2 -top-2 bg-emerald-500/90 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg z-10 flex items-center gap-1.5">
+                            <CheckCircle weight="fill" size={14} />
                             Annonce Certifiée
                           </div>
                         )}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="rounded-xl bg-emerald-500/10 p-3 border border-emerald-500/20">
-                            {getDocumentIcon(doc.type)}
+                        <div className="flex items-start justify-between mb-6">
+                          <div className="rounded-2xl bg-emerald-500/10 p-3">
+                            {getDocumentIcon(doc.type, false)}
                           </div>
                           {doc.source === "verification" && (
-                            <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 text-[10px] font-semibold text-emerald-400">
+                            <span className="rounded-full bg-emerald-500/5 border border-emerald-500/20 px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase text-emerald-400">
                               CERTIFIÉ
                             </span>
                           )}
                         </div>
 
-                        <h3 className="font-semibold text-white mb-1 line-clamp-1">
-                          {doc.name}
-                        </h3>
-                        <p className="text-xs text-white/50 mb-1">
-                          {documentTypes.find((t) => t.value === doc.type)?.label || doc.type}
-                        </p>
-                        <p className="text-xs text-white/40 mb-4">
-                          {formatFileSize(doc.size)} • {new Date(doc.uploaded_at).toLocaleDateString("fr-FR")}
-                        </p>
+                        <div className="space-y-1">
+                          <h3 className="text-sm font-semibold text-gray-100 truncate">{doc.name}</h3>
+                          <p className="text-[11px] text-gray-500 flex items-center gap-1">
+                            Preuve de propriété
+                          </p>
+                        </div>
 
                         {/* Affichage de la raison du rejet/révocation */}
                         {!doc.is_certified && doc.rejection_reason && (
-                          <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs text-red-400 mb-4">
+                          <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400 mb-4">
                             <p className="font-bold flex items-center gap-1.5 mb-1.5">
-                              <AlertCircle className="w-3.5 h-3.5" /> Motif du refus :
+                              <WarningCircle weight="light" className="w-3.5 h-3.5" /> Motif du refus :
                             </p>
                             <p className="italic text-red-300/90">"{doc.rejection_reason}"</p>
                           </div>
                         )}
 
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="flex-1 bg-white/5 hover:bg-white/10 text-white border-white/10"
+                        <div className="flex gap-2 mt-6">
+                          <button
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-800/50 hover:bg-gray-700/50 rounded-xl text-xs font-medium transition-colors border border-gray-700/50 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={() => {
                               if (doc.url) {
                                 window.open(doc.url, "_blank", "noopener,noreferrer");
@@ -680,27 +649,21 @@ export default function MesDocumentsPage() {
                             }}
                             disabled={!doc.url}
                           >
-                            <Eye className="mr-1.5 h-3.5 w-3.5" />
-                            Voir
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="flex-1 bg-white/5 hover:bg-white/10 text-white border-white/10"
+                            <Eye weight="light" size={16} /> Voir
+                          </button>
+                          <button
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-800/50 hover:bg-gray-700/50 rounded-xl text-xs font-medium transition-colors border border-gray-700/50 text-white"
                             onClick={() => handleDownload(doc.url, doc.name, doc.id, doc.source)}
                           >
-                            <Download className="mr-1.5 h-3.5 w-3.5" />
-                            Télécharger
-                          </Button>
+                            <DownloadSimple weight="light" size={16} /> Télécharger
+                          </button>
                           {doc.source === "manual" && (
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
+                            <button
+                              className="p-2.5 bg-gray-800/50 hover:bg-red-500/20 text-red-400 rounded-xl border border-gray-700/50 hover:border-red-500/30 transition-colors"
                               onClick={() => handleDelete(doc.id)}
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
+                              <Trash weight="light" size={16} />
+                            </button>
                           )}
                         </div>
                       </Card>
@@ -722,7 +685,7 @@ export default function MesDocumentsPage() {
           <Card className="bg-blue-500/5 border-blue-500/20 p-6">
             <div className="flex gap-4">
               <div className="rounded-xl bg-blue-500/10 p-3 border border-blue-500/20 h-fit">
-                <AlertCircle className="h-5 w-5 text-blue-400" />
+                <WarningCircle weight="light" className="h-5 w-5 text-blue-400" />
               </div>
               <div>
                 <h3 className="font-semibold text-white mb-2">

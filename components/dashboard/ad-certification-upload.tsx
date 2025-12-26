@@ -95,7 +95,7 @@ export function AdCertificationUpload({ className, onUploadSuccess }: AdCertific
     return (
         <div className={cn("rounded-xl border border-white/10 bg-zinc-900 overflow-hidden", className)}>
             {/* Header */}
-            <div className="bg-white/5 px-4 py-3 border-b border-white/10 flex items-start gap-3">
+            <div className="bg-white/5 px-4 py-3 border-b border-white/10 flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-full shrink-0">
                     <ShieldCheck className="h-5 w-5 text-primary" />
                 </div>

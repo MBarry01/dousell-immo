@@ -13,7 +13,10 @@
       "Bash(npx supabase:*)",
       "Bash(npm run diagnose:safe:*)",
       "Bash(npm run apply:storage-policies:*)",
-      "Bash(npm run verify:storage-policies:*)"
+      "Bash(npm run verify:storage-policies:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git add:*)",
+      "Bash(find:*)"
     ]
   }
 }

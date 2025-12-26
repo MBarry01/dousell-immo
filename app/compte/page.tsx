@@ -168,10 +168,10 @@ export default function ComptePage() {
           <Button
             variant="ghost"
             size="sm"
-            className="shrink-0 text-zinc-400 hover:text-white hover:bg-zinc-900 w-full sm:w-auto"
+            className="shrink-0 text-zinc-400 hover:text-white hover:bg-zinc-900 w-full sm:w-auto flex items-center gap-2"
             onClick={handleSignOut}
           >
-            <LogOut className="h-4 w-4 sm:mr-2" />
+            <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline">Déconnexion</span>
           </Button>
         </div>
@@ -187,20 +187,20 @@ export default function ComptePage() {
             <Link href="/favoris">
               <Card className="h-full cursor-pointer border-zinc-800 bg-zinc-900/50 transition-all hover:bg-zinc-900 hover:border-zinc-700">
                 <CardHeader className="p-6">
-                  <div className="mb-4">
-                    <Heart className="h-6 w-6 text-zinc-100 stroke-[1.5]" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-semibold text-white">
-                      Mes Favoris
-                    </CardTitle>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <Heart className="h-6 w-6 shrink-0 text-zinc-100 stroke-[1.5]" />
+                      <CardTitle className="text-lg font-semibold text-white">
+                        Mes Favoris
+                      </CardTitle>
+                    </div>
                     {favorites.length > 0 && (
                       <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-zinc-800 px-2 text-xs font-medium text-zinc-300">
                         {favorites.length > 9 ? "9+" : favorites.length}
                       </span>
                     )}
                   </div>
-                  <CardDescription className="mt-2 text-sm text-zinc-400">
+                  <CardDescription className="text-sm text-zinc-400">
                     Retrouvez vos biens sauvegardés.
                   </CardDescription>
                 </CardHeader>
@@ -217,13 +217,13 @@ export default function ComptePage() {
             <Link href="/compte/mes-biens">
               <Card className="h-full cursor-pointer border-zinc-800 bg-zinc-900/50 transition-all hover:bg-zinc-900 hover:border-zinc-700">
                 <CardHeader className="p-6">
-                  <div className="mb-4">
-                    <Building2 className="h-6 w-6 text-zinc-100 stroke-[1.5]" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <Building2 className="h-6 w-6 shrink-0 text-zinc-100 stroke-[1.5]" />
+                    <CardTitle className="text-lg font-semibold text-white">
+                      Gérer mes biens
+                    </CardTitle>
                   </div>
-                  <CardTitle className="text-lg font-semibold text-white">
-                    Gérer mes biens
-                  </CardTitle>
-                  <CardDescription className="mt-2 text-sm text-zinc-400">
+                  <CardDescription className="text-sm text-zinc-400">
                     Suivez vos annonces en ligne et leurs stats.
                   </CardDescription>
                   <div className="mt-4 flex items-center text-sm text-zinc-300">
@@ -244,13 +244,13 @@ export default function ComptePage() {
             <Link href="/compte/deposer">
               <Card className="h-full cursor-pointer border-zinc-800 bg-zinc-900/50 transition-all hover:bg-zinc-900 hover:border-zinc-700">
                 <CardHeader className="p-6">
-                  <div className="mb-4">
-                    <Plus className="h-6 w-6 text-zinc-100 stroke-[1.5]" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <Plus className="h-6 w-6 shrink-0 text-zinc-100 stroke-[1.5]" />
+                    <CardTitle className="text-lg font-semibold text-white">
+                      Louer ou Vendre
+                    </CardTitle>
                   </div>
-                  <CardTitle className="text-lg font-semibold text-white">
-                    Louer ou Vendre
-                  </CardTitle>
-                  <CardDescription className="mt-2 text-sm text-zinc-400">
+                  <CardDescription className="text-sm text-zinc-400">
                     Créez une nouvelle annonce en 2 minutes.
                   </CardDescription>
                 </CardHeader>
@@ -267,13 +267,13 @@ export default function ComptePage() {
             <Link href="/compte/alertes">
               <Card className="h-full cursor-pointer border-zinc-800 bg-zinc-900/50 transition-all hover:bg-zinc-900 hover:border-zinc-700">
                 <CardHeader className="p-6">
-                  <div className="mb-4">
-                    <Bell className="h-6 w-6 text-zinc-100 stroke-[1.5]" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <Bell className="h-6 w-6 shrink-0 text-zinc-100 stroke-[1.5]" />
+                    <CardTitle className="text-lg font-semibold text-white">
+                      Mes Alertes
+                    </CardTitle>
                   </div>
-                  <CardTitle className="text-lg font-semibold text-white">
-                    Mes Alertes
-                  </CardTitle>
-                  <CardDescription className="mt-2 text-sm text-zinc-400">
+                  <CardDescription className="text-sm text-zinc-400">
                     Soyez notifié des nouveaux biens.
                   </CardDescription>
                 </CardHeader>
@@ -290,13 +290,13 @@ export default function ComptePage() {
             <Link href="/compte/mes-documents">
               <Card className="h-full cursor-pointer border-zinc-800 bg-zinc-900/50 transition-all hover:bg-zinc-900 hover:border-zinc-700">
                 <CardHeader className="p-6">
-                  <div className="mb-4">
-                    <Lock className="h-6 w-6 text-primary stroke-[1.5]" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <Lock className="h-6 w-6 shrink-0 text-primary stroke-[1.5]" />
+                    <CardTitle className="text-lg font-semibold text-white">
+                      Mes Documents
+                    </CardTitle>
                   </div>
-                  <CardTitle className="text-lg font-semibold text-white">
-                    Mes Documents
-                  </CardTitle>
-                  <CardDescription className="mt-2 text-sm text-zinc-400">
+                  <CardDescription className="text-sm text-zinc-400">
                     Coffre-fort numérique ultra-sécurisé (AES-256).
                   </CardDescription>
                 </CardHeader>
@@ -313,13 +313,13 @@ export default function ComptePage() {
             <Link href="/compte/parametres">
               <Card className="h-full cursor-pointer border-zinc-800 bg-zinc-900/50 transition-all hover:bg-zinc-900 hover:border-zinc-700">
                 <CardHeader className="p-6">
-                  <div className="mb-4">
-                    <User className="h-6 w-6 text-zinc-100 stroke-[1.5]" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <User className="h-6 w-6 shrink-0 text-zinc-100 stroke-[1.5]" />
+                    <CardTitle className="text-lg font-semibold text-white">
+                      Profil & Sécurité
+                    </CardTitle>
                   </div>
-                  <CardTitle className="text-lg font-semibold text-white">
-                    Profil & Sécurité
-                  </CardTitle>
-                  <CardDescription className="mt-2 text-sm text-zinc-400">
+                  <CardDescription className="text-sm text-zinc-400">
                     Modifier mes infos personnelles.
                   </CardDescription>
                 </CardHeader>
@@ -339,10 +339,10 @@ export default function ComptePage() {
               <Link href="/admin">
                 <Card className="cursor-pointer border border-amber-900/30 bg-black transition-all hover:border-amber-900/50">
                   <CardHeader className="p-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center gap-4">
-                        <ShieldCheck className="h-6 w-6 text-zinc-100 stroke-[1.5]" />
-                        <div>
+                        <ShieldCheck className="h-6 w-6 shrink-0 text-zinc-100 stroke-[1.5]" />
+                        <div className="min-w-0">
                           <CardTitle className="text-lg font-semibold text-white">
                             Espace Administration
                           </CardTitle>
@@ -356,7 +356,7 @@ export default function ComptePage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-zinc-800 bg-transparent text-white hover:bg-zinc-900 hover:border-zinc-700"
+                        className="shrink-0 border-zinc-800 bg-transparent text-white hover:bg-zinc-900 hover:border-zinc-700 w-full sm:w-auto"
                       >
                         Accéder
                         <ArrowRight className="ml-2 h-4 w-4" />

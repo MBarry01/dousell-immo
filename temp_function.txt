@@ -1,0 +1,67 @@
+
+
+/**
+ * Get list of users with verified identity for management
+ */
+export async function getVerifiedIdentities() {
+    try {
+        const supabase = await createClient();
+
+        // Check permissions
+        await requireAnyRole(["admin", "superadmin"]);
+
+        // Fetch verified users
+        const { data: profiles, error: profilesError } = await supabase
+            .from("profiles")
+            .select("id, full_name, phone, email, is_identity_verified, created_at, updated_at")
+            .eq("is_identity_verified", true)
+            .order("updated_at", { ascending: false });
+
+        if (profilesError) {
+            console.error("❌ Error fetching verified identities:", profilesError);
+            return {
+                success: false,
+                error: profilesError.message,
+                data: []
+            };
+        }
+
+        if (!profiles || profiles.length === 0) {
+            return {
+                success: true,
+                data: []
+            };
+        }
+
+        // Get property counts for each user
+        const userIds = profiles.map(p => p.id);
+        const { data: propertyCounts } = await supabase
+            .from("properties")
+            .select("owner_id")
+            .in("owner_id", userIds);
+
+        // Count properties per user
+        const countsMap = new Map<string, number>();
+        propertyCounts?.forEach(p => {
+            countsMap.set(p.owner_id, (countsMap.get(p.owner_id) || 0) + 1);
+        });
+
+        // Combine data
+        const verifiedUsers = profiles.map(profile => ({
+            ...profile,
+            properties_count: countsMap.get(profile.id) || 0
+        }));
+
+        return {
+            success: true,
+            data: verifiedUsers
+        };
+    } catch (error) {
+        console.error("❌ getVerifiedIdentities error:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Une erreur est survenue",
+            data: []
+        };
+    }
+}

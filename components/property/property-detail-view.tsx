@@ -361,7 +361,7 @@ export const PropertyDetailView = ({
               {highlights.map((highlight, index) => {
                 const Icon = highlight.icon;
                 return (
-                  <div key={index} className="flex items-start gap-3">
+                  <div key={index} className="flex items-center gap-3">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10">
                       <Icon className="h-6 w-6 text-gray-700 dark:text-white" />
                     </div>

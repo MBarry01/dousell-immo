@@ -30,7 +30,8 @@ export const HeroSection = () => {
           style={{
             top: 0,
             left: 0,
-            width: '381px',
+            width: '100%',
+            maxWidth: '100vw',
             height: '404px'
           }}
           suppressHydrationWarning

@@ -247,11 +247,16 @@ export default function EditPropertyPage() {
               <label className="text-sm text-white/70">Catégorie</label>
               <select
                 {...register("category")}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white"
-                style={{ colorScheme: "dark" }}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white appearance-none bg-no-repeat bg-right pr-10"
+                style={{
+                  colorScheme: "dark",
+                  backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
+                  backgroundPosition: "right 0.75rem center",
+                  backgroundSize: "1.5em 1.5em"
+                }}
               >
-                <option value="vente">Vente</option>
-                <option value="location">Location</option>
+                <option value="vente" className="bg-[#121212] text-white py-2">Vente</option>
+                <option value="location" className="bg-[#121212] text-white py-2">Location</option>
               </select>
             </div>
 
@@ -259,13 +264,18 @@ export default function EditPropertyPage() {
               <label className="text-sm text-white/70">Type de bien</label>
               <select
                 {...register("type")}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white"
-                style={{ colorScheme: "dark" }}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white appearance-none bg-no-repeat bg-right pr-10"
+                style={{
+                  colorScheme: "dark",
+                  backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
+                  backgroundPosition: "right 0.75rem center",
+                  backgroundSize: "1.5em 1.5em"
+                }}
               >
-                <option value="appartement">Appartement</option>
-                <option value="villa">Villa</option>
-                <option value="terrain">Terrain</option>
-                <option value="immeuble">Immeuble / Commercial</option>
+                <option value="appartement" className="bg-[#121212] text-white py-2">Appartement</option>
+                <option value="villa" className="bg-[#121212] text-white py-2">Villa</option>
+                <option value="terrain" className="bg-[#121212] text-white py-2">Terrain</option>
+                <option value="immeuble" className="bg-[#121212] text-white py-2">Immeuble / Commercial</option>
               </select>
             </div>
 
@@ -321,12 +331,17 @@ export default function EditPropertyPage() {
               <label className="text-sm text-white/70">Quartier</label>
               <select
                 {...register("district")}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white"
-                style={{ colorScheme: "dark" }}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white appearance-none bg-no-repeat bg-right pr-10"
+                style={{
+                  colorScheme: "dark",
+                  backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
+                  backgroundPosition: "right 0.75rem center",
+                  backgroundSize: "1.5em 1.5em"
+                }}
               >
-                <option value="">Sélectionnez</option>
+                <option value="" className="bg-[#121212] text-white py-2">Sélectionnez</option>
                 {quartiers.map((q) => (
-                  <option key={q} value={q} className="bg-background text-white">
+                  <option key={q} value={q} className="bg-[#121212] text-white py-2">
                     {q}
                   </option>
                 ))}
@@ -428,11 +443,16 @@ export default function EditPropertyPage() {
                 <label className="text-sm text-white/70">Situation Juridique</label>
                 <select
                   {...register("juridique")}
-                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white"
-                  style={{ colorScheme: "dark" }}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white appearance-none bg-no-repeat bg-right pr-10"
+                  style={{
+                    colorScheme: "dark",
+                    backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
+                    backgroundPosition: "right 0.75rem center",
+                    backgroundSize: "1.5em 1.5em"
+                  }}
                 >
                   {situationsJuridiques.map((sj) => (
-                    <option key={sj.value} value={sj.value} className="bg-background text-white">
+                    <option key={sj.value} value={sj.value} className="bg-[#121212] text-white py-2">
                       {sj.label}
                     </option>
                   ))}
