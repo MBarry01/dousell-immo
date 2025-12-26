@@ -13,9 +13,13 @@ export const metadata = {
   title: "Recherche · Dousell Immo",
 };
 
-// Force dynamic to avoid build-time errors if env vars are missing
-// Page dynamique car les filtres changent constamment
-export const dynamic = "force-dynamic";
+// Utiliser ISR pour optimiser les performances
+// Revalidation toutes les 10 minutes (600s)
+export const revalidate = 600;
+
+// Rendre la page dynamique seulement si nécessaire
+export const dynamic = "auto";
+export const dynamicParams = true;
 
 const recordToFilters = (
   params: Record<string, string | string[] | undefined>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Filter, Map, Search as SearchIcon, Bell } from "lucide-react";
@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
+import { useDebounce } from "@/hooks/use-debounce";
 import type { Property } from "@/types/property";
 import { hasActiveFilters } from "@/lib/search-filters";
 import { useSearchFilters } from "@/hooks/use-search-filters";
@@ -45,6 +46,11 @@ export const SearchExperience = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [alertDialogOpen, setAlertDialogOpen] = useState(false);
   const [results, setResults] = useState<Property[]>(initialResults);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(filters.q ?? "");
+
+  // Debounce de la recherche textuelle (500ms)
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const activeFilters = hasActiveFilters(filters);
 
@@ -57,23 +63,41 @@ export const SearchExperience = ({
     }
   }, [searchParams, user]);
 
-  const applyFilters = async (nextFilters: PropertyFilters) => {
+  // Effet pour appliquer la recherche debouncée
+  useEffect(() => {
+    if (debouncedSearchQuery !== filters.q) {
+      const searchFilters = async () => {
+        setIsSearching(true);
+        const nextFilters = { ...filters, q: debouncedSearchQuery || undefined };
+        setFilters(nextFilters);
+        const data = await getProperties(nextFilters);
+        setResults(data);
+        setIsSearching(false);
+      };
+      searchFilters();
+    }
+  }, [debouncedSearchQuery]); // Exclure filters et setFilters des dépendances pour éviter les boucles
+
+  const applyFilters = useCallback(async (nextFilters: PropertyFilters) => {
+    setIsSearching(true);
     setFilters(nextFilters);
     const data = await getProperties(nextFilters);
     setResults(data);
-  };
+    setIsSearching(false);
+  }, [setFilters]);
+
+  // Mémoiser le nombre de résultats
+  const resultCount = useMemo(() => results.length, [results.length]);
 
   return (
     <div className="relative space-y-6 pb-32">
-      <div className="md:sticky md:top-24 z-30 rounded-[28px] border border-white/5 bg-black/40 p-4 backdrop-blur-xl">
+      <div className="rounded-[28px] border border-white/5 bg-black/40 p-4 backdrop-blur-xl">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex flex-1 items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2">
-            <SearchIcon className="h-5 w-5 text-white/50" />
+            <SearchIcon className={`h-5 w-5 ${isSearching ? "text-primary animate-pulse" : "text-white/50"}`} />
             <Input
-              value={filters.q ?? ""}
-              onChange={(event) =>
-                setFilters({ q: event.target.value || undefined })
-              }
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Ville ou code postal"
               className="border-none bg-transparent p-0 text-white placeholder:text-white/50 focus-visible:ring-0"
             />
@@ -105,7 +129,11 @@ export const SearchExperience = ({
           )}
         </div>
         <p className="mt-3 text-sm text-white/60">
-          {results.length} bien{results.length > 1 ? "s" : ""} trouvé{results.length > 1 ? "s" : ""}
+          {isSearching ? (
+            <span className="animate-pulse">Recherche en cours...</span>
+          ) : (
+            <>{resultCount} bien{resultCount > 1 ? "s" : ""} trouvé{resultCount > 1 ? "s" : ""}</>
+          )}
         </p>
       </div>
 

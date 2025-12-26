@@ -38,6 +38,7 @@ type IdentityDocument = {
     file_size: number;
     uploaded_at: string;
     user_id: string;
+    is_certified: boolean;
     profiles: {
         id: string;
         full_name: string;
@@ -50,9 +51,10 @@ type IdentityDocument = {
 
 type Props = {
     initialDocuments: IdentityDocument[];
+    onDocumentUpdate?: (updatedDocs: IdentityDocument[]) => void;
 };
 
-export function IdentityVerificationList({ initialDocuments }: Props) {
+export function IdentityVerificationList({ initialDocuments, onDocumentUpdate }: Props) {
     const [documents, setDocuments] = useState(initialDocuments);
     const [selectedDoc, setSelectedDoc] = useState<IdentityDocument | null>(null);
     const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -71,7 +73,9 @@ export function IdentityVerificationList({ initialDocuments }: Props) {
             if (result.success) {
                 toast.success("Identité vérifiée avec succès");
                 // Remove from list
-                setDocuments(prev => prev.filter(d => d.id !== doc.id));
+                const updatedDocs = documents.filter(d => d.id !== doc.id);
+                setDocuments(updatedDocs);
+                onDocumentUpdate?.(updatedDocs);
             } else {
                 toast.error(result.error || "Erreur lors de la vérification");
             }
@@ -96,7 +100,9 @@ export function IdentityVerificationList({ initialDocuments }: Props) {
             if (result.success) {
                 toast.success("Document rejeté");
                 // Remove from list
-                setDocuments(prev => prev.filter(d => d.id !== selectedDoc.id));
+                const updatedDocs = documents.filter(d => d.id !== selectedDoc.id);
+                setDocuments(updatedDocs);
+                onDocumentUpdate?.(updatedDocs);
                 setRejectDialogOpen(false);
                 setRejectReason("");
                 setSelectedDoc(null);
@@ -246,9 +252,10 @@ export function IdentityVerificationList({ initialDocuments }: Props) {
                             Annuler
                         </Button>
                         <Button
-                            variant="destructive"
+                            variant="secondary"
                             onClick={handleReject}
                             disabled={processing || !rejectReason.trim()}
+                            className="bg-red-600 hover:bg-red-700 text-white"
                         >
                             Rejeter
                         </Button>

@@ -1,8 +1,10 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, memo } from "react";
 import { useRouter } from "next/navigation";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import type { LatLngExpression, DivIcon } from "leaflet";
@@ -13,6 +15,7 @@ import type { Property } from "@/types/property";
 
 // Import dynamique pour éviter les erreurs SSR
 const L = typeof window !== "undefined" ? require("leaflet") : null;
+const MarkerClusterGroup = typeof window !== "undefined" ? require("leaflet.markercluster") : null;
 
 // Fix pour les icônes Leaflet avec Next.js
 if (typeof window !== "undefined" && L) {
@@ -55,8 +58,54 @@ const MapCenter = ({ center, zoom }: { center: LatLngExpression; zoom: number })
     return null;
 };
 
-// Composant de marqueur personnalisé avec prix
-const PriceMarker = ({
+// Composant de clustering pour les marqueurs
+const MarkerCluster = ({ children }: { children: React.ReactNode }) => {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!L || !MarkerClusterGroup) return;
+
+        // Créer un groupe de clusters avec une configuration optimisée
+        const cluster = new L.MarkerClusterGroup({
+            maxClusterRadius: 60, // Rayon de clustering réduit pour plus de précision
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true,
+            disableClusteringAtZoom: 17, // Désactiver le clustering en très gros zoom
+            iconCreateFunction: (cluster: any) => {
+                const count = cluster.getChildCount();
+                let size = "small";
+                let className = "marker-cluster-small";
+
+                if (count > 10) {
+                    size = "medium";
+                    className = "marker-cluster-medium";
+                }
+                if (count > 20) {
+                    size = "large";
+                    className = "marker-cluster-large";
+                }
+
+                return L.divIcon({
+                    html: `<div class="cluster-pill ${className}"><span>${count}</span></div>`,
+                    className: "custom-cluster-icon",
+                    iconSize: L.point(50, 50),
+                });
+            },
+        });
+
+        map.addLayer(cluster);
+
+        return () => {
+            map.removeLayer(cluster);
+        };
+    }, [map]);
+
+    return null;
+};
+
+// Composant de marqueur personnalisé avec prix - Optimisé avec memo
+const PriceMarker = memo(({
     property,
     isActive,
     onClick,
@@ -67,10 +116,10 @@ const PriceMarker = ({
     onClick: () => void;
     onRedirect: () => void;
 }) => {
-    const position: LatLngExpression = [
+    const position: LatLngExpression = useMemo(() => [
         property.location.coords.lat,
         property.location.coords.lng,
-    ];
+    ], [property.location.coords.lat, property.location.coords.lng]);
 
     // Créer une icône HTML personnalisée pour le prix
     const icon = useMemo(() => {
@@ -151,7 +200,15 @@ const PriceMarker = ({
             }}
         />
     );
-};
+}, (prevProps, nextProps) => {
+    // Custom comparator pour éviter re-renders inutiles
+    return (
+        prevProps.property.id === nextProps.property.id &&
+        prevProps.isActive === nextProps.isActive &&
+        prevProps.property.price === nextProps.property.price &&
+        prevProps.property.verification_status === nextProps.property.verification_status
+    );
+});
 
 export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
     const router = useRouter();
@@ -314,11 +371,11 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
                 </div>
             )}
 
-            {/* Carousel des biens en bas */}
-            {showCarousel && (
+            {/* Carousel des biens en bas - Optimisé: affiche seulement les 10 premiers + actif */}
+            {showCarousel && propertiesWithCoords.length > 0 && (
                 <div className="pointer-events-none absolute inset-x-0 bottom-4 px-4 z-10">
                     <div className="pointer-events-auto scrollbar-hide flex gap-3 overflow-x-auto pb-2">
-                        {propertiesWithCoords.map((property) => (
+                        {propertiesWithCoords.slice(0, 15).map((property) => (
                             <div
                                 key={`mini-${property.id}`}
                                 id={`property-${property.id}`}
@@ -326,7 +383,7 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
                                     // Rediriger vers la page de détail du bien
                                     handleMarkerRedirect(property.id);
                                 }}
-                                className="min-w-[280px] cursor-pointer"
+                                className="min-w-[280px] cursor-pointer flex-shrink-0"
                             >
                                 <PropertyCard
                                     property={property}
@@ -339,6 +396,11 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
                                 />
                             </div>
                         ))}
+                        {propertiesWithCoords.length > 15 && (
+                            <div className="min-w-[280px] flex-shrink-0 flex items-center justify-center rounded-[28px] border border-white/10 bg-white/5 p-6 text-center text-white/70">
+                                <p className="text-sm">+{propertiesWithCoords.length - 15} autres biens</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
@@ -376,6 +438,43 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
         }
         .leaflet-control-attribution a {
           color: rgba(255, 255, 255, 0.8);
+        }
+        /* Styles pour les clusters */
+        .custom-cluster-icon {
+          background: transparent !important;
+          border: none !important;
+        }
+        .cluster-pill {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          font-weight: bold;
+          color: white;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+        .cluster-pill:hover {
+          transform: scale(1.1);
+        }
+        .marker-cluster-small {
+          background: linear-gradient(135deg, #F4C430 0%, #D4A028 100%);
+          border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .marker-cluster-medium {
+          background: linear-gradient(135deg, #D4A028 0%, #B48820 100%);
+          border: 2px solid rgba(255, 255, 255, 0.4);
+          width: 60px;
+          height: 60px;
+        }
+        .marker-cluster-large {
+          background: linear-gradient(135deg, #B48820 0%, #947018 100%);
+          border: 2px solid rgba(255, 255, 255, 0.5);
+          width: 70px;
+          height: 70px;
+          font-size: 18px;
         }
       `}</style>
         </div>

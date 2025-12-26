@@ -15,6 +15,7 @@ import {
     ExternalLink,
     FileText,
     BadgeCheck,
+    Home,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -269,9 +270,10 @@ export function PropertyVerificationList({ initialProperties }: Props) {
                             Annuler
                         </Button>
                         <Button
-                            variant="destructive"
+                            variant="secondary"
                             onClick={handleReject}
                             disabled={processing || !rejectReason.trim()}
+                            className="bg-red-600 hover:bg-red-700 text-white"
                         >
                             Rejeter
                         </Button>
