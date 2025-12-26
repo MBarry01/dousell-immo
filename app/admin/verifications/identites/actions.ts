@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { requireAnyRole } from "@/lib/permissions";
+import { notifyUser } from "@/lib/notifications";
 
 /**
  * DEBUG: Get ALL identity documents to see what's in the database
@@ -81,7 +82,21 @@ export async function approveIdentity(userId: string, docId: string) {
             console.error("⚠️ Error auto-certifying properties:", propertiesError);
         }
 
-        // 3. Revalidate cache - Force aggressive cache invalidation
+        // 3. Créer une notification pour l'utilisateur
+        try {
+            await notifyUser({
+                userId,
+                type: "success",
+                title: "Identité vérifiée",
+                message: `Votre pièce d'identité a été vérifiée avec succès. ${updatedProperties && updatedProperties.length > 0 ? `${updatedProperties.length} bien(s) ont été automatiquement certifié(s).` : ""}`,
+                resourcePath: "/compte/profil"
+            });
+        } catch (notifError) {
+            console.error("⚠️ Erreur lors de la création de la notification:", notifError);
+            // Ne pas bloquer l'opération si la notification échoue
+        }
+
+        // 4. Revalidate cache - Force aggressive cache invalidation
         revalidatePath("/admin/verifications/identites", "page");
         revalidatePath("/admin/verifications", "layout");
         revalidatePath("/compte/mes-documents", "page");
@@ -127,6 +142,19 @@ export async function rejectIdentity(userId: string, docId: string, reason: stri
                 success: false,
                 error: `Erreur lors du rejet du document: ${docError.message}`
             };
+        }
+
+        // Créer une notification pour l'utilisateur
+        try {
+            await notifyUser({
+                userId,
+                type: "warning",
+                title: "Document rejeté",
+                message: `Votre pièce d'identité a été rejetée. Motif : ${reason}. Veuillez soumettre un nouveau document conforme.`,
+                resourcePath: "/compte/mes-documents"
+            });
+        } catch (notifError) {
+            console.error("⚠️ Erreur lors de la création de la notification:", notifError);
         }
 
         revalidatePath("/admin/verifications/identites");
@@ -203,7 +231,20 @@ export async function revokeIdentityVerification(userId: string, reason: string)
                 updatedProperties?.map(p => p.title).join(", "));
         }
 
-        // 4. Revalidate paths
+        // 4. Créer une notification pour l'utilisateur
+        try {
+            await notifyUser({
+                userId,
+                type: "error",
+                title: "Vérification d'identité révoquée",
+                message: `Votre vérification d'identité a été révoquée. Motif : ${reason}. ${updatedProperties && updatedProperties.length > 0 ? `${updatedProperties.length} bien(s) ont été décertifié(s).` : ""} Veuillez soumettre un nouveau document conforme.`,
+                resourcePath: "/compte/mes-documents"
+            });
+        } catch (notifError) {
+            console.error("⚠️ Erreur lors de la création de la notification:", notifError);
+        }
+
+        // 5. Revalidate paths
         revalidatePath("/admin/verifications/identites");
         revalidatePath("/compte/mes-documents");
         revalidatePath("/compte/profil");
