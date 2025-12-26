@@ -39,17 +39,31 @@ export default function AProposPage() {
         animate="visible"
         variants={fadeUp}
         transition={{ duration: 0.6 }}
-        className="rounded-[36px] border border-white/10 bg-gradient-to-br from-card via-background to-background p-8 text-white shadow-2xl sm:p-12"
+        className="relative overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-card via-background to-background p-8 text-white shadow-2xl sm:p-12"
       >
-        <p className="text-xs uppercase tracking-[0.3em] text-white/50">
-          Notre mission
-        </p>
-        <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
-          Rendre l&apos;immobilier transparent au Sénégal
-        </h1>
-        <p className="mt-6 text-lg text-white/70 sm:text-xl">
-          Dousell Immo révolutionne l&apos;expérience immobilière en combinant expertise locale et technologie moderne. Nous mettons à votre disposition une plateforme intuitive pour trouver, vendre ou louer votre bien en toute confiance.
-        </p>
+        {/* Image de fond pour desktop */}
+        <div className="absolute inset-0 hidden md:block">
+          <Image
+            src="https://images.pexels.com/photos/1732414/pexels-photo-1732414.jpeg?auto=compress&cs=tinysrgb&w=1920"
+            alt="Skyline de Dakar"
+            fill
+            className="object-cover opacity-10"
+            priority
+          />
+        </div>
+
+        {/* Contenu */}
+        <div className="relative z-10">
+          <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+            Notre mission
+          </p>
+          <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
+            Rendre l&apos;immobilier transparent au Sénégal
+          </h1>
+          <p className="mt-6 text-lg text-white/70 sm:text-xl">
+            Dousell Immo révolutionne l&apos;expérience immobilière en combinant expertise locale et technologie moderne. Nous mettons à votre disposition une plateforme intuitive pour trouver, vendre ou louer votre bien en toute confiance.
+          </p>
+        </div>
       </motion.section>
 
       {/* Qui sommes-nous */}
@@ -66,16 +80,31 @@ export default function AProposPage() {
             Qui sommes-nous ?
           </h2>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-background/5 p-6 text-white/80 sm:p-8">
-          <p className="leading-relaxed">
-            Fondée avec la vision de démocratiser l&apos;accès à l&apos;immobilier au Sénégal, Dousell Immo est née d&apos;un constat simple : trouver un bien de qualité, que ce soit à Dakar, Saly ou en région, ne devrait pas être un parcours du combattant.
-          </p>
-          <p className="mt-4 leading-relaxed">
-            Notre équipe, composée d&apos;experts locaux et de passionnés de technologie, a développé une plateforme qui allie la chaleur de l&apos;accompagnement humain aux avantages du digital. Chaque bien est vérifié, chaque transaction est sécurisée, et chaque client est accompagné de A à Z.
-          </p>
-          <p className="mt-4 leading-relaxed">
-            Que vous cherchiez une villa aux Almadies, un appartement à Mermoz, un terrain à Diamniadio ou une location à Saly, nous sommes là pour vous guider vers la meilleure décision.
-          </p>
+
+        {/* Grille avec image et texte */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Texte */}
+          <div className="order-2 rounded-2xl border border-white/10 bg-background/5 p-6 text-white/80 sm:p-8 md:order-1">
+            <p className="leading-relaxed">
+              Fondée avec la vision de démocratiser l&apos;accès à l&apos;immobilier au Sénégal, Dousell Immo est née d&apos;un constat simple : trouver un bien de qualité, que ce soit à Dakar, Saly ou en région, ne devrait pas être un parcours du combattant.
+            </p>
+            <p className="mt-4 leading-relaxed">
+              Notre équipe, composée d&apos;experts locaux et de passionnés de technologie, a développé une plateforme qui allie la chaleur de l&apos;accompagnement humain aux avantages du digital. Chaque bien est vérifié, chaque transaction est sécurisée, et chaque client est accompagné de A à Z.
+            </p>
+            <p className="mt-4 leading-relaxed">
+              Que vous cherchiez une villa aux Almadies, un appartement à Mermoz, un terrain à Diamniadio ou une location à Saly, nous sommes là pour vous guider vers la meilleure décision.
+            </p>
+          </div>
+
+          {/* Image */}
+          <div className="order-1 relative h-[300px] overflow-hidden rounded-2xl border border-white/10 md:order-2 md:h-auto">
+            <Image
+              src="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Équipe travaillant ensemble"
+              fill
+              className="object-cover"
+            />
+          </div>
         </div>
       </motion.section>
 
@@ -86,39 +115,53 @@ export default function AProposPage() {
         whileInView="visible"
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="space-y-6"
+        className="relative overflow-hidden rounded-[36px] border border-white/10 p-8 sm:p-12"
       >
-        <div>
-          <h2 className="text-2xl font-semibold text-white sm:text-3xl">
-            Nos Valeurs
-          </h2>
-          <p className="mt-2 text-white/60">
-            Les principes qui guident chaque décision et chaque interaction
-          </p>
+        {/* Image de fond avec overlay */}
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1920"
+            alt="Architecture moderne"
+            fill
+            className="object-cover opacity-5"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/90 to-background" />
         </div>
-        <div className="grid gap-6 sm:grid-cols-3">
-          {valeurs.map((valeur, index) => {
-            const Icon = valeur.icon;
-            return (
-              <motion.div
-                key={valeur.title}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="rounded-2xl border border-white/10 bg-background/5 p-6 text-white"
-              >
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20">
-                  <Icon className="h-6 w-6 text-amber-400" />
-                </div>
-                <h3 className="text-xl font-semibold">{valeur.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/70">
-                  {valeur.description}
-                </p>
-              </motion.div>
-            );
-          })}
+
+        {/* Contenu */}
+        <div className="relative z-10 space-y-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-white sm:text-3xl">
+              Nos Valeurs
+            </h2>
+            <p className="mt-2 text-white/60">
+              Les principes qui guident chaque décision et chaque interaction
+            </p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {valeurs.map((valeur, index) => {
+              const Icon = valeur.icon;
+              return (
+                <motion.div
+                  key={valeur.title}
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="rounded-2xl border border-white/10 bg-background/40 p-6 text-white backdrop-blur-sm"
+                >
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20">
+                    <Icon className="h-6 w-6 text-amber-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold">{valeur.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/70">
+                    {valeur.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </motion.section>
 
@@ -231,35 +274,49 @@ export default function AProposPage() {
         whileInView="visible"
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.5 }}
-        className="rounded-[36px] border border-white/10 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-8 text-center text-white sm:p-12"
+        className="relative overflow-hidden rounded-[36px] border border-white/10 p-8 text-center text-white sm:p-12"
       >
-        <h2 className="text-3xl font-semibold sm:text-4xl">
-          Prêt à concrétiser votre projet ?
-        </h2>
-        <p className="mt-4 text-lg text-white/70">
-          Planifiez une visite ou contactez-nous pour discuter de vos besoins immobiliers
-        </p>
-        <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button
-            size="lg"
-            className="h-[50px] rounded-full bg-primary px-8 text-black hover:bg-primary/90"
-            asChild
-          >
-            <Link href="/planifier-visite">
-              Planifier une visite
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="h-[50px] rounded-full border border-white/20 bg-background/5 px-8 text-white hover:bg-background/10"
-            asChild
-          >
-            <Link href="/recherche">
-              Découvrir les biens
-            </Link>
-          </Button>
+        {/* Image de fond avec overlay doré */}
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.pexels.com/photos/1546168/pexels-photo-1546168.jpeg?auto=compress&cs=tinysrgb&w=1920"
+            alt="Villa de luxe"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-900/80 via-black/70 to-black/90" />
+        </div>
+
+        {/* Contenu */}
+        <div className="relative z-10">
+          <h2 className="text-3xl font-semibold sm:text-4xl">
+            Prêt à concrétiser votre projet ?
+          </h2>
+          <p className="mt-4 text-lg text-white/90">
+            Planifiez une visite ou contactez-nous pour discuter de vos besoins immobiliers
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Button
+              size="lg"
+              className="h-[50px] rounded-full bg-primary px-8 text-black hover:bg-primary/90"
+              asChild
+            >
+              <Link href="/planifier-visite">
+                Planifier une visite
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-[50px] rounded-full border-2 border-white/30 bg-white/10 px-8 text-white backdrop-blur-sm hover:bg-white/20"
+              asChild
+            >
+              <Link href="/recherche">
+                Découvrir les biens
+              </Link>
+            </Button>
+          </div>
         </div>
       </motion.section>
     </div>
