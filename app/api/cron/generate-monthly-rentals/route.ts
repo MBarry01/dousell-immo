@@ -5,6 +5,8 @@
  * Crée une nouvelle ligne dans rental_transactions pour chaque bail actif
  *
  * Configuration Vercel Cron dans vercel.json
+ *
+ * Paramètre optionnel: ?date=YYYY-MM-DD pour simuler une date future
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -53,19 +55,49 @@ export async function GET(request: Request) {
         return NextResponse.json({
             success: true,
             message: 'Aucun bail actif',
-            created: 0
+            processed: 0,
+            created: 0,
+            skipped: 0
         });
     }
 
-    // 3. Date du mois en cours
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1; // 1-12
-    const currentYear = now.getFullYear();
+    // 3. Date cible : Par défaut = maintenant, ou depuis le paramètre ?date=YYYY-MM-DD
+    const { searchParams } = new URL(request.url);
+    const dateParam = searchParams.get('date');
+
+    let targetDate: Date;
+    if (dateParam) {
+        // Simulation : utiliser la date fournie
+        targetDate = new Date(dateParam);
+        if (isNaN(targetDate.getTime())) {
+            return NextResponse.json({
+                success: false,
+                error: 'Format de date invalide. Utilisez YYYY-MM-DD (ex: 2026-01-15)'
+            }, { status: 400 });
+        }
+        console.log(`🧪 MODE SIMULATION - Date cible: ${dateParam}`);
+    } else {
+        // Production : date actuelle
+        targetDate = new Date();
+    }
+
+    const currentMonth = targetDate.getMonth() + 1; // 1-12
+    const currentYear = targetDate.getFullYear();
+
+    // Calculer period_start (1er du mois) et period_end (dernier jour du mois)
+    const periodStart = new Date(currentYear, currentMonth - 1, 1);
+    const periodEnd = new Date(currentYear, currentMonth, 0);
+
+    // Formater les dates au format ISO (YYYY-MM-DD) pour Postgres
+    const periodStartISO = periodStart.toISOString().split('T')[0];
+    const periodEndISO = periodEnd.toISOString().split('T')[0];
 
     console.log(`📅 Génération pour ${currentMonth}/${currentYear}`);
+    console.log(`📆 Période: ${periodStartISO} → ${periodEndISO}`);
 
     // 4. Pour chaque bail actif, vérifier si l'échéance existe déjà
     const transactionsToCreate = [];
+    let skippedCount = 0;
 
     for (const lease of activeLeases) {
         // Vérifier si une transaction existe déjà pour ce mois
@@ -79,16 +111,20 @@ export async function GET(request: Request) {
 
         if (existingTrans) {
             console.log(`⏭️  Échéance déjà existante pour ${lease.tenant_name}`);
+            skippedCount++;
             continue;
         }
 
-        // Créer la nouvelle échéance
+        // Créer la nouvelle échéance avec les nouveaux champs
         transactionsToCreate.push({
             lease_id: lease.id,
             period_month: currentMonth,
             period_year: currentYear,
+            period_start: periodStartISO,
+            period_end: periodEndISO,
             amount_due: lease.monthly_amount,
-            status: 'pending'
+            status: 'pending',
+            tenant_id: null // NULL car pas de table tenants séparée pour l'instant
         });
     }
 
@@ -112,14 +148,21 @@ export async function GET(request: Request) {
         return NextResponse.json({
             success: true,
             message: `${insertedTrans.length} échéances générées`,
+            processed: activeLeases.length,
             created: insertedTrans.length,
-            period: `${currentMonth}/${currentYear}`
+            skipped: skippedCount,
+            period: `${currentMonth}/${currentYear}`,
+            period_start: periodStartISO,
+            period_end: periodEndISO
         });
     }
 
     return NextResponse.json({
         success: true,
         message: 'Toutes les échéances existent déjà',
-        created: 0
+        processed: activeLeases.length,
+        created: 0,
+        skipped: activeLeases.length,
+        period: `${currentMonth}/${currentYear}`
     });
 }
