@@ -16,9 +16,9 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
         <>
             <Button
                 onClick={() => setIsModalOpen(true)}
-                className="bg-white text-black hover:bg-gray-200 rounded-xl h-12 px-6 font-bold transition-all transform hover:scale-105"
+                className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90 rounded-lg h-9 px-4 font-medium text-sm transition-all"
             >
-                <Plus className="w-5 h-5 mr-2" /> Nouveau Locataire
+                <Plus className="w-4 h-4 mr-1.5" /> Nouveau
             </Button>
 
             <AddTenantModal

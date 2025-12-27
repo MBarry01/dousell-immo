@@ -86,6 +86,15 @@ export default async function GestionLocativePage({
     // ========================================
     const stats = await getRentalStats();
 
+    // Calculs additionnels pour les nouvelles stats
+    const totalLeases = filteredLeases?.length || 0;
+    const paidCount = transactions?.filter(t =>
+        t.status === 'paid' &&
+        t.period_month === new Date().getMonth() + 1 &&
+        t.period_year === new Date().getFullYear()
+    ).length || 0;
+    const pendingCount = totalLeases - paidCount;
+
     // Transformer les demandes de maintenance pour MaintenanceHub
     // Note: category n'existe pas encore dans la table
     const formattedRequests = (maintenanceRequests || []).map(req => {
@@ -105,75 +114,95 @@ export default async function GestionLocativePage({
     });
 
     return (
-        <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-10 print:hidden">
-            {/* En-tête Dynamique */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20">
-                        <LayoutDashboard className="text-white w-6 h-6" />
+        <div className="min-h-screen bg-slate-950 print:hidden">
+            {/* Header Enterprise - Ligne unique */}
+            <div className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-10">
+                <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-xl font-semibold text-white tracking-tight">Gestion Locative</h1>
+                            <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg">
+                                <Link
+                                    href="/compte/gestion-locative"
+                                    className={`px-3 py-1 text-xs font-medium rounded transition-all ${
+                                        !isViewingTerminated
+                                            ? 'bg-green-500/10 text-green-400'
+                                            : 'text-slate-400 hover:text-white'
+                                    }`}
+                                >
+                                    Actifs
+                                </Link>
+                                <Link
+                                    href="/compte/gestion-locative?view=terminated"
+                                    className={`px-3 py-1 text-xs font-medium rounded transition-all ${
+                                        isViewingTerminated
+                                            ? 'bg-orange-500/10 text-orange-400'
+                                            : 'text-slate-400 hover:text-white'
+                                    }`}
+                                >
+                                    Résiliés
+                                </Link>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href="/compte/gestion-locative/config"
+                                className="p-2 hover:bg-slate-900 rounded-lg transition-colors"
+                                title="Configuration"
+                            >
+                                <Settings className="w-4 h-4 text-slate-400" />
+                            </Link>
+                            {!isViewingTerminated && <AddTenantButton ownerId={user.id} />}
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Gestion Locative</h1>
-                        <p className="text-gray-400 text-sm italic">Votre assistant immobilier Premium</p>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    {/* Toggle Actifs / Résiliés */}
-                    <div className="flex items-center gap-2 p-1 bg-gray-900/40 border border-gray-800 rounded-xl">
-                        <Link
-                            href="/compte/gestion-locative"
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                                !isViewingTerminated
-                                    ? 'bg-green-600 text-white shadow-lg shadow-green-600/20'
-                                    : 'text-gray-400 hover:text-white'
-                            }`}
-                        >
-                            Actifs
-                        </Link>
-                        <Link
-                            href="/compte/gestion-locative?view=terminated"
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                                isViewingTerminated
-                                    ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
-                                    : 'text-gray-400 hover:text-white'
-                            }`}
-                        >
-                            Résiliés
-                        </Link>
-                    </div>
-
-                    <Link
-                        href="/compte/gestion-locative/config"
-                        className="p-3 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
-                        title="Configuration"
-                    >
-                        <Settings className="w-5 h-5 text-gray-400" />
-                    </Link>
-                    {!isViewingTerminated && <AddTenantButton ownerId={user.id} />}
                 </div>
             </div>
 
-            {/* Statistiques Financières - Données réelles */}
-            <RentalStats stats={stats} />
-
-            {/* Section Principale : Grille 2 colonnes */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Liste des locataires avec sélecteur de mois - 2 colonnes */}
-                <div className="lg:col-span-2">
-                    <GestionLocativeClient
-                        leases={filteredLeases || []}
-                        transactions={transactions || []}
-                        profile={profile}
-                        userEmail={user.email}
-                        isViewingTerminated={isViewingTerminated}
-                    />
+            {/* Bande de statistiques simplifiée */}
+            <div className="border-b border-slate-800 bg-slate-900/30">
+                <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div>
+                            <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Total Baux</div>
+                            <div className="text-2xl font-semibold text-white">{totalLeases}</div>
+                        </div>
+                        <div>
+                            <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Payés</div>
+                            <div className="text-2xl font-semibold text-green-400">{paidCount}</div>
+                        </div>
+                        <div>
+                            <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">En attente</div>
+                            <div className="text-2xl font-semibold text-yellow-400">{pendingCount}</div>
+                        </div>
+                        <div>
+                            <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Encaissé</div>
+                            <div className="text-2xl font-semibold text-white font-mono">
+                                {stats.collected} <span className="text-sm text-slate-500">FCFA</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                {/* Hub Maintenance sur 1 colonne */}
-                <div className="lg:col-span-1">
-                    <div className="bg-gray-900/20 border border-gray-800 rounded-[2rem] p-4">
-                        <MaintenanceHub requests={formattedRequests} />
+            {/* Contenu principal */}
+            <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Table des locataires - 2/3 */}
+                    <div className="lg:col-span-2">
+                        <GestionLocativeClient
+                            leases={filteredLeases || []}
+                            transactions={transactions || []}
+                            profile={profile}
+                            userEmail={user.email}
+                            isViewingTerminated={isViewingTerminated}
+                        />
+                    </div>
+
+                    {/* Hub Maintenance - 1/3 */}
+                    <div className="lg:col-span-1">
+                        <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
+                            <MaintenanceHub requests={formattedRequests} />
+                        </div>
                     </div>
                 </div>
             </div>

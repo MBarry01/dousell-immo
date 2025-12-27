@@ -42,32 +42,29 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange }: Mo
     };
 
     return (
-        <div className="flex items-center justify-between gap-4 p-4 bg-gray-900/40 border border-gray-800 rounded-2xl">
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg">
             {/* Bouton Mois précédent */}
             <Button
                 variant="ghost"
                 size="sm"
                 onClick={handlePrevious}
-                className="rounded-xl hover:bg-gray-800"
+                className="h-8 w-8 p-0 hover:bg-slate-800"
                 title="Mois précédent"
             >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-4 h-4 text-slate-400" />
             </Button>
 
             {/* Affichage du mois et année */}
-            <div className="flex-1 text-center">
-                <div className="flex items-center justify-center gap-2">
-                    <Calendar className="w-5 h-5 text-[#F4C430]" />
-                    <h3 className="text-lg font-bold text-white">
-                        {MONTHS_FR[selectedMonth - 1]} {selectedYear}
-                    </h3>
-                </div>
+            <div className="flex items-center gap-2 px-2">
+                <span className="text-sm font-medium text-white whitespace-nowrap">
+                    {MONTHS_FR[selectedMonth - 1]} {selectedYear}
+                </span>
                 {!isCurrentMonth() && (
                     <button
                         onClick={handleToday}
-                        className="text-xs text-gray-500 hover:text-[#F4C430] transition-colors mt-1"
+                        className="text-xs text-slate-500 hover:text-[#F4C430] transition-colors"
                     >
-                        Revenir au mois actuel
+                        Aujourd'hui
                     </button>
                 )}
             </div>
@@ -77,10 +74,10 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange }: Mo
                 variant="ghost"
                 size="sm"
                 onClick={handleNext}
-                className="rounded-xl hover:bg-gray-800"
+                className="h-8 w-8 p-0 hover:bg-slate-800"
                 title="Mois suivant"
             >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4 text-slate-400" />
             </Button>
         </div>
     );

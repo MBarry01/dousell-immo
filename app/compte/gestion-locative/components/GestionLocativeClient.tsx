@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { TenantList } from './TenantList';
+import { TenantTable } from './TenantTable';
 import { MonthSelector } from './MonthSelector';
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 interface Tenant {
     id: string;
@@ -46,6 +48,7 @@ export function GestionLocativeClient({
     const today = new Date();
     const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1); // 1-12
     const [selectedYear, setSelectedYear] = useState(today.getFullYear());
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleMonthChange = (month: number, year: number) => {
         setSelectedMonth(month);
@@ -103,71 +106,63 @@ export function GestionLocativeClient({
     };
 
     return (
-        <div className="space-y-6">
-            {/* Sélecteur de mois */}
-            <MonthSelector
-                selectedMonth={selectedMonth}
-                selectedYear={selectedYear}
-                onMonthChange={handleMonthChange}
+        <div className="space-y-4">
+            {/* Barre de contrôles */}
+            <div className="flex flex-col md:flex-row gap-3">
+                {/* Recherche */}
+                <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                        type="text"
+                        placeholder="Rechercher un locataire, bien, email..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 bg-slate-900 border-slate-800 text-white placeholder:text-slate-500 focus:border-slate-700 h-10"
+                    />
+                </div>
+
+                {/* Sélecteur de mois */}
+                <div className="md:w-auto">
+                    <MonthSelector
+                        selectedMonth={selectedMonth}
+                        selectedYear={selectedYear}
+                        onMonthChange={handleMonthChange}
+                    />
+                </div>
+            </div>
+
+            {/* Mini statistiques du mois en ligne */}
+            <div className="flex items-center gap-6 px-4 py-2 bg-slate-900/50 border-y border-slate-800 text-sm">
+                <div>
+                    <span className="text-slate-400">Total:</span>
+                    <span className="ml-2 font-semibold text-white">{monthStats.total}</span>
+                </div>
+                <div>
+                    <span className="text-slate-400">Payés:</span>
+                    <span className="ml-2 font-semibold text-green-400">{monthStats.paid}</span>
+                </div>
+                <div>
+                    <span className="text-slate-400">En attente:</span>
+                    <span className="ml-2 font-semibold text-yellow-400">{monthStats.pending}</span>
+                </div>
+                <div>
+                    <span className="text-slate-400">Retard:</span>
+                    <span className="ml-2 font-semibold text-red-400">{monthStats.overdue}</span>
+                </div>
+                <div className="ml-auto hidden md:block">
+                    <span className="text-slate-400">Total période:</span>
+                    <span className="ml-2 font-mono font-semibold text-white">{monthStats.totalAmount.toLocaleString('fr-FR')} FCFA</span>
+                </div>
+            </div>
+
+            {/* Table Enterprise */}
+            <TenantTable
+                tenants={formattedTenants}
+                profile={profile}
+                userEmail={userEmail}
+                isViewingTerminated={isViewingTerminated}
+                searchQuery={searchQuery}
             />
-
-            {/* Statistiques du mois */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-gray-900/40 border border-gray-800 rounded-2xl">
-                    <div className="text-xs text-gray-500 uppercase tracking-wider">Total Baux</div>
-                    <div className="text-2xl font-bold text-white mt-1">{monthStats.total}</div>
-                </div>
-                <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-2xl">
-                    <div className="text-xs text-green-400 uppercase tracking-wider">Payés</div>
-                    <div className="text-2xl font-bold text-green-400 mt-1">{monthStats.paid}</div>
-                </div>
-                <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl">
-                    <div className="text-xs text-yellow-400 uppercase tracking-wider">En attente</div>
-                    <div className="text-2xl font-bold text-yellow-400 mt-1">{monthStats.pending}</div>
-                </div>
-                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl">
-                    <div className="text-xs text-red-400 uppercase tracking-wider">En retard</div>
-                    <div className="text-2xl font-bold text-red-400 mt-1">{monthStats.overdue}</div>
-                </div>
-            </div>
-
-            {/* Montant total */}
-            <div className="p-6 bg-gradient-to-br from-[#F4C430]/20 to-transparent border border-[#F4C430]/30 rounded-2xl">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <div className="text-sm text-gray-400">Montant total du mois</div>
-                        <div className="text-3xl font-bold text-white mt-1">
-                            {monthStats.totalAmount.toLocaleString('fr-FR')} <span className="text-xl text-gray-500">FCFA</span>
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <div className="text-sm text-green-400">Encaissé</div>
-                        <div className="text-2xl font-bold text-green-400 mt-1">
-                            {monthStats.paidAmount.toLocaleString('fr-FR')} <span className="text-base text-gray-500">FCFA</span>
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                            {monthStats.total > 0 ? Math.round((monthStats.paid / monthStats.total) * 100) : 0}% collecté
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Liste des locataires filtrée par mois */}
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold">Paiements - {selectedMonth}/{selectedYear}</h2>
-                <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">
-                    {formattedTenants.length} locataire{formattedTenants.length > 1 ? 's' : ''}
-                </span>
-            </div>
-
-            <div className="bg-gray-900/20 border border-gray-800 rounded-[2rem] p-2 overflow-hidden">
-                <TenantList
-                    tenants={formattedTenants}
-                    profile={profile}
-                    userEmail={userEmail}
-                    isViewingTerminated={isViewingTerminated}
-                />
-            </div>
         </div>
     );
 }
