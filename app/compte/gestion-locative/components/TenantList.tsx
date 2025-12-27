@@ -2,6 +2,7 @@
 
 import { ReceiptModal } from './ReceiptModal';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { User, Phone, Calendar, Edit2, X, Check, Mail, MapPin, Loader2, CheckCircle, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ const statusLabels = {
 };
 
 export function TenantList({ tenants = [], profile, userEmail }: TenantListProps) {
+    const router = useRouter();
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editData, setEditData] = useState<Partial<Tenant>>({});
     const [saving, setSaving] = useState(false);
@@ -96,6 +98,7 @@ export function TenantList({ tenants = [], profile, userEmail }: TenantListProps
             toast.success('Locataire mis à jour!');
             setEditingId(null);
             setEditData({});
+            router.refresh(); // Rafraîchir pour afficher les nouvelles données
         } else {
             toast.error(result.error || 'Erreur lors de la mise à jour');
         }
@@ -193,6 +196,10 @@ export function TenantList({ tenants = [], profile, userEmail }: TenantListProps
                 duration: 5000,
             });
         }
+
+        // IMPORTANT: Rafraîchir la page pour afficher le nouveau statut "paid"
+        // Cela recharge les données depuis le serveur et met à jour TOUS les locataires
+        router.refresh();
     };
 
     // --- LOGIQUE QUITTANCE ---
