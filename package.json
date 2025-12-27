@@ -17,6 +17,7 @@
     "test:signup": "tsx scripts/test-signup-flow.ts",
     "test:n8n": "tsx scripts/test-n8n-webhook.ts",
     "test:cron-rentals": "tsx scripts/test-cron-monthly-rentals.ts",
+    "simulate:cron": "tsx scripts/simulate-cron-workflow.ts",
     "check:signup": "tsx scripts/check-signup-issues.ts",
     "scan:ui": "tsx scripts/scan-ui.ts",
     "check:actions": "tsx scripts/check-actions.ts",
