@@ -23,6 +23,8 @@ interface Transaction {
     period_month: number;
     period_year: number;
     status: string;
+    period_start?: string | null;
+    period_end?: string | null;
 }
 
 interface GestionLocativeClientProps {
@@ -30,13 +32,15 @@ interface GestionLocativeClientProps {
     transactions: Transaction[];
     profile: any;
     userEmail?: string;
+    isViewingTerminated?: boolean;
 }
 
 export function GestionLocativeClient({
     leases,
     transactions,
     profile,
-    userEmail
+    userEmail,
+    isViewingTerminated = false
 }: GestionLocativeClientProps) {
     // État pour le mois/année sélectionné
     const today = new Date();
@@ -62,7 +66,7 @@ export function GestionLocativeClient({
         const isCurrentMonth = selectedMonth === today.getMonth() + 1 && selectedYear === today.getFullYear();
 
         // Calcul du statut dynamique
-        let displayStatus: 'paid' | 'pending' | 'overdue' = selectedTransaction?.status || 'pending';
+        let displayStatus: 'paid' | 'pending' | 'overdue' = (selectedTransaction?.status as 'paid' | 'pending' | 'overdue') || 'pending';
 
         // Si c'est le mois actuel, impayé et date passée => Overdue
         if (isCurrentMonth && displayStatus === 'pending' && lease.billing_day && currentDay > lease.billing_day) {
@@ -79,7 +83,12 @@ export function GestionLocativeClient({
             status: displayStatus,
             dueDate: lease.billing_day,
             startDate: lease.start_date,
-            last_transaction_id: selectedTransaction?.id
+            last_transaction_id: selectedTransaction?.id,
+            // DONNÉES DE PÉRIODE (depuis la transaction ou calculées depuis selectedMonth/selectedYear)
+            period_month: selectedMonth,
+            period_year: selectedYear,
+            period_start: selectedTransaction?.period_start || null,
+            period_end: selectedTransaction?.period_end || null
         };
     });
 
@@ -156,6 +165,7 @@ export function GestionLocativeClient({
                     tenants={formattedTenants}
                     profile={profile}
                     userEmail={userEmail}
+                    isViewingTerminated={isViewingTerminated}
                 />
             </div>
         </div>

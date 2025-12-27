@@ -3,10 +3,10 @@
 import { ReceiptModal } from './ReceiptModal';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Phone, Calendar, Edit2, X, Check, Mail, MapPin, Loader2, CheckCircle, Eye } from 'lucide-react';
+import { User, Phone, Calendar, Edit2, X, Check, Mail, MapPin, Loader2, CheckCircle, Eye, Trash2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { updateLease, confirmPayment } from '../actions';
+import { updateLease, confirmPayment, terminateLease, reactivateLease } from '../actions';
 import { toast } from 'sonner';
 
 interface Tenant {
@@ -20,12 +20,18 @@ interface Tenant {
     dueDate?: number;
     startDate?: string;
     last_transaction_id?: string;
+    // DONNÉES DE PÉRIODE (depuis la DB, pas calculées!)
+    period_month?: number;
+    period_year?: number;
+    period_start?: string | null;
+    period_end?: string | null;
 }
 
 interface TenantListProps {
     tenants?: Tenant[];
     profile?: any;
     userEmail?: string;
+    isViewingTerminated?: boolean;
 }
 
 const statusColors = {
@@ -40,7 +46,7 @@ const statusLabels = {
     overdue: 'Retard'
 };
 
-export function TenantList({ tenants = [], profile, userEmail }: TenantListProps) {
+export function TenantList({ tenants = [], profile, userEmail, isViewingTerminated = false }: TenantListProps) {
     const router = useRouter();
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editData, setEditData] = useState<Partial<Tenant>>({});
@@ -104,6 +110,48 @@ export function TenantList({ tenants = [], profile, userEmail }: TenantListProps
         }
     };
 
+    const handleTerminateLease = async (leaseId: string, tenantName: string) => {
+        // Confirmation avant résiliation
+        const confirmed = window.confirm(
+            `⚠️ Voulez-vous vraiment résilier le bail de ${tenantName} ?\n\n` +
+            `Le locataire n'apparaîtra plus dans la liste active, mais l'historique des paiements sera conservé.`
+        );
+
+        if (!confirmed) return;
+
+        setSaving(true);
+        const result = await terminateLease(leaseId);
+        setSaving(false);
+
+        if (result.success) {
+            toast.success(result.message || 'Bail résilié avec succès');
+            router.refresh(); // Rafraîchir pour mettre à jour la liste
+        } else {
+            toast.error(result.error || 'Erreur lors de la résiliation');
+        }
+    };
+
+    const handleReactivateLease = async (leaseId: string, tenantName: string) => {
+        // Confirmation avant réactivation
+        const confirmed = window.confirm(
+            `✅ Voulez-vous réactiver le bail de ${tenantName} ?\n\n` +
+            `Le locataire réapparaîtra dans la liste active et le Cron générera automatiquement les prochaines échéances.`
+        );
+
+        if (!confirmed) return;
+
+        setSaving(true);
+        const result = await reactivateLease(leaseId);
+        setSaving(false);
+
+        if (result.success) {
+            toast.success(result.message || 'Bail réactivé avec succès');
+            router.refresh(); // Rafraîchir pour mettre à jour la liste
+        } else {
+            toast.error(result.error || 'Erreur lors de la réactivation');
+        }
+    };
+
     const handleConfirmPayment = async (leaseId: string, transactionId?: string) => {
         // Trouver le locataire pour les données de la quittance
         const tenant = tenants.find(t => t.id === leaseId);
@@ -152,16 +200,29 @@ export function TenantList({ tenants = [], profile, userEmail }: TenantListProps
             const landlordName = profile?.company_name || profile?.full_name || "Propriétaire";
             const landlordAddress = profile?.company_address || "Adresse non renseignée";
 
-            const today = new Date();
+            // 🚨 CRITIQUE: Utiliser les données de la transaction (DB), PAS new Date()
+            const periodMonth = tenant.period_month?.toString().padStart(2, '0') || '01';
+            const periodYear = tenant.period_year || new Date().getFullYear();
+
+            // Calculer les dates de début/fin si non présentes (fallback)
+            const periodStartDate = tenant.period_start
+                ? new Date(tenant.period_start)
+                : new Date(periodYear, parseInt(periodMonth) - 1, 1);
+
+            const periodEndDate = tenant.period_end
+                ? new Date(tenant.period_end)
+                : new Date(periodYear, parseInt(periodMonth), 0);
+
             const receiptData = {
                 tenantName: tenant.name,
                 tenantEmail: tenant.email,
                 tenantPhone: tenant.phone || '',
                 tenantAddress: tenant.property,
                 amount: Number(tenant.rentAmount) || 0,
-                periodMonth: `${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`,
-                periodStart: `01/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`,
-                periodEnd: `30/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`,
+                // DONNÉES DYNAMIQUES depuis la DB (transaction)
+                periodMonth: `${periodMonth}/${periodYear}`,
+                periodStart: periodStartDate.toLocaleDateString('fr-FR'),
+                periodEnd: periodEndDate.toLocaleDateString('fr-FR'),
                 receiptNumber: `QUITT-${Date.now().toString().slice(-6)}`,
                 ownerName: landlordName,
                 ownerAddress: landlordAddress,
@@ -224,7 +285,10 @@ export function TenantList({ tenants = [], profile, userEmail }: TenantListProps
             });
         }
 
-        const today = new Date();
+        // 🚨 CRITIQUE: Utiliser les données de la transaction (DB), PAS new Date()
+        const periodMonth = tenant.period_month?.toString().padStart(2, '0') || '01';
+        const periodYear = tenant.period_year || new Date().getFullYear();
+
         setCurrentReceipt({
             tenant: {
                 tenant_name: tenant.name,
@@ -235,8 +299,9 @@ export function TenantList({ tenants = [], profile, userEmail }: TenantListProps
             profile: safeProfile,
             userEmail: userEmail, // Email du compte pour fallback
             amount: tenant.rentAmount,
-            month: (today.getMonth() + 1).toString().padStart(2, '0'),
-            year: today.getFullYear(),
+            // DONNÉES DYNAMIQUES depuis la DB (transaction)
+            month: periodMonth,
+            year: periodYear,
             property_address: tenant.property
         });
         setIsReceiptOpen(true);
@@ -332,13 +397,36 @@ export function TenantList({ tenants = [], profile, userEmail }: TenantListProps
                                     className={`bg-gray-800/50 border-gray-700 h-10 ${!editData.property || editData.property === 'Adresse non renseignée' ? 'border-orange-500/50' : ''}`}
                                 />
 
-                                <Button
-                                    onClick={handleSaveEdit}
-                                    disabled={saving || !editData.email}
-                                    className="w-full bg-green-600 hover:bg-green-700 h-10"
-                                >
-                                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4 mr-2" /> Enregistrer</>}
-                                </Button>
+                                <div className="flex gap-2">
+                                    <Button
+                                        onClick={handleSaveEdit}
+                                        disabled={saving || !editData.email}
+                                        className="flex-1 bg-green-600 hover:bg-green-700 h-10"
+                                    >
+                                        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4 mr-2" /> Enregistrer</>}
+                                    </Button>
+                                    {isViewingTerminated ? (
+                                        <Button
+                                            onClick={() => handleReactivateLease(tenant.id, tenant.name)}
+                                            disabled={saving}
+                                            variant="outline"
+                                            className="border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300 h-10 px-4"
+                                            title="Réactiver le bail"
+                                        >
+                                            <RotateCcw className="w-4 h-4" />
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            onClick={() => handleTerminateLease(tenant.id, tenant.name)}
+                                            disabled={saving}
+                                            variant="outline"
+                                            className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300 h-10 px-4"
+                                            title="Résilier le bail (conserve l'historique)"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         ) : (
                             // ===== MODE AFFICHAGE =====

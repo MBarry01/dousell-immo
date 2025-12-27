@@ -303,6 +303,106 @@ export async function updateLease(leaseId: string, data: {
 }
 
 /**
+ * Résilier un bail (Suppression logique - conserve l'historique)
+ * Change le statut à 'terminated' et enregistre la date de fin
+ */
+export async function terminateLease(leaseId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { success: false, error: "Non autorisé" };
+    }
+
+    // Vérifier que le bail appartient à l'utilisateur
+    const { data: lease } = await supabase
+        .from('leases')
+        .select('owner_id, tenant_name')
+        .eq('id', leaseId)
+        .single();
+
+    if (!lease) {
+        return { success: false, error: "Bail introuvable" };
+    }
+
+    if (lease.owner_id !== user.id) {
+        return { success: false, error: "Action non autorisée" };
+    }
+
+    // Marquer le bail comme résilié
+    const { error } = await supabase
+        .from('leases')
+        .update({
+            status: 'terminated'
+            // Note: end_date sera ajouté plus tard via migration
+        })
+        .eq('id', leaseId);
+
+    if (error) {
+        console.error("Erreur résiliation bail:", error.message);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/compte/gestion-locative');
+    return {
+        success: true,
+        message: `Le bail de ${lease.tenant_name} a été résilié. L'historique reste accessible.`
+    };
+}
+
+/**
+ * Réactiver un bail résilié
+ * Change le statut de 'terminated' à 'active'
+ */
+export async function reactivateLease(leaseId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { success: false, error: "Non autorisé" };
+    }
+
+    // Vérifier que le bail appartient à l'utilisateur
+    const { data: lease } = await supabase
+        .from('leases')
+        .select('owner_id, tenant_name, status')
+        .eq('id', leaseId)
+        .single();
+
+    if (!lease) {
+        return { success: false, error: "Bail introuvable" };
+    }
+
+    if (lease.owner_id !== user.id) {
+        return { success: false, error: "Action non autorisée" };
+    }
+
+    if (lease.status !== 'terminated') {
+        return { success: false, error: "Ce bail n'est pas résilié" };
+    }
+
+    // Réactiver le bail
+    const { error } = await supabase
+        .from('leases')
+        .update({
+            status: 'active'
+            // Note: end_date sera supprimé plus tard via migration
+        })
+        .eq('id', leaseId);
+
+    if (error) {
+        console.error("Erreur réactivation bail:", error.message);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/compte/gestion-locative');
+    return {
+        success: true,
+        message: `Le bail de ${lease.tenant_name} a été réactivé.`
+    };
+}
+
+/**
  * Signaler une demande de maintenance
  * Peut être signalé par le propriétaire (avec sélection du bail) ou le locataire
  */

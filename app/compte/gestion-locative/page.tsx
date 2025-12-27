@@ -8,13 +8,24 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
-export default async function GestionLocativePage() {
+export default async function GestionLocativePage({
+    searchParams,
+}: {
+    searchParams?: Promise<{ view?: string }>;
+}) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         redirect('/auth');
     }
+
+    // Unwrap searchParams (Next.js 15+)
+    const params = await searchParams;
+
+    // Déterminer le statut à afficher (actifs ou résiliés)
+    const viewMode = params?.view === 'terminated' ? 'terminated' : 'active';
+    const isViewingTerminated = viewMode === 'terminated';
 
     // ========================================
     // RÉCUPÉRATION DES VRAIES DONNÉES SUPABASE
@@ -33,8 +44,14 @@ export default async function GestionLocativePage() {
         .from('leases')
         .select('id, tenant_name, tenant_phone, tenant_email, property_address, monthly_amount, billing_day, start_date, status, created_at')
         .eq('owner_id', user.id)
-        .eq('status', 'active')
+        // TEMPORAIRE: Afficher TOUS les baux pour diagnostic
+        // .eq('status', viewMode) // Dynamique: 'active' ou 'terminated'
         .order('created_at', { ascending: false });
+
+    // Filtrer côté client selon le statut
+    const filteredLeases = isViewingTerminated
+        ? (leases || []).filter(l => l.status === 'terminated')
+        : (leases || []).filter(l => !l.status || l.status === 'active' || l.status === 'pending');
 
     if (leasesError) {
         console.error("Erreur récupération baux:", leasesError.message);
@@ -43,8 +60,8 @@ export default async function GestionLocativePage() {
     // 2. Récupérer TOUTES les transactions de loyer (pour tous les mois)
     const { data: transactions, error: transError } = await supabase
         .from('rental_transactions')
-        .select('id, lease_id, period_month, period_year, status, amount_due, paid_at')
-        .in('lease_id', (leases || []).map(l => l.id))
+        .select('id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end')
+        .in('lease_id', (filteredLeases || []).map(l => l.id))
         .order('period_year', { ascending: false })
         .order('period_month', { ascending: false });
 
@@ -102,6 +119,30 @@ export default async function GestionLocativePage() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {/* Toggle Actifs / Résiliés */}
+                    <div className="flex items-center gap-2 p-1 bg-gray-900/40 border border-gray-800 rounded-xl">
+                        <Link
+                            href="/compte/gestion-locative"
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                                !isViewingTerminated
+                                    ? 'bg-green-600 text-white shadow-lg shadow-green-600/20'
+                                    : 'text-gray-400 hover:text-white'
+                            }`}
+                        >
+                            Actifs
+                        </Link>
+                        <Link
+                            href="/compte/gestion-locative?view=terminated"
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                                isViewingTerminated
+                                    ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
+                                    : 'text-gray-400 hover:text-white'
+                            }`}
+                        >
+                            Résiliés
+                        </Link>
+                    </div>
+
                     <Link
                         href="/compte/gestion-locative/config"
                         className="p-3 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
@@ -109,7 +150,7 @@ export default async function GestionLocativePage() {
                     >
                         <Settings className="w-5 h-5 text-gray-400" />
                     </Link>
-                    <AddTenantButton ownerId={user.id} />
+                    {!isViewingTerminated && <AddTenantButton ownerId={user.id} />}
                 </div>
             </div>
 
@@ -121,10 +162,11 @@ export default async function GestionLocativePage() {
                 {/* Liste des locataires avec sélecteur de mois - 2 colonnes */}
                 <div className="lg:col-span-2">
                     <GestionLocativeClient
-                        leases={leases || []}
+                        leases={filteredLeases || []}
                         transactions={transactions || []}
                         profile={profile}
                         userEmail={user.email}
+                        isViewingTerminated={isViewingTerminated}
                     />
                 </div>
 
