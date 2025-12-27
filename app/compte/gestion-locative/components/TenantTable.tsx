@@ -282,16 +282,16 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
             </div>
 
             {/* DESKTOP: Table */}
-            <div className="hidden md:block bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-                <table className="w-full">
+            <div className="hidden md:block bg-slate-900 border border-slate-800 rounded-lg overflow-x-auto">
+                <table className="w-full min-w-[900px]">
                     <thead className="bg-slate-900/50 border-b border-slate-800">
                         <tr>
-                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Locataire</th>
-                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Bien</th>
-                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Période</th>
-                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Statut</th>
-                            <th className="text-right py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Montant</th>
-                            <th className="text-right py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Actions</th>
+                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[250px]">Locataire</th>
+                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[200px]">Bien</th>
+                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[100px]">Période</th>
+                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[120px]">Statut</th>
+                            <th className="text-right py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[140px]">Montant</th>
+                            <th className="text-right py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[90px]">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800">
@@ -304,7 +304,7 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
                             return (
                                 <tr key={tenant.id} className="hover:bg-slate-800/50 transition-colors">
                                     {/* Locataire */}
-                                    <td className="py-3 px-4">
+                                    <td className="py-3 px-4 w-[250px]">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold shrink-0">
                                                 {getInitials(tenant.name)}
@@ -317,17 +317,17 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
                                     </td>
 
                                     {/* Bien */}
-                                    <td className="py-3 px-4">
-                                        <div className="text-sm text-slate-300 truncate max-w-[200px]">{tenant.property}</div>
+                                    <td className="py-3 px-4 w-[200px]">
+                                        <div className="text-sm text-slate-300 truncate">{tenant.property}</div>
                                     </td>
 
                                     {/* Période */}
-                                    <td className="py-3 px-4">
-                                        <div className="text-sm text-slate-300">{periodLabel}</div>
+                                    <td className="py-3 px-4 w-[100px]">
+                                        <div className="text-sm text-slate-300 whitespace-nowrap">{periodLabel}</div>
                                     </td>
 
                                     {/* Statut */}
-                                    <td className="py-3 px-4">
+                                    <td className="py-3 px-4 w-[120px]">
                                         <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium ${statusConfig[tenant.status].bg} ${statusConfig[tenant.status].text}`}>
                                             <div className={`w-1.5 h-1.5 rounded-full ${statusConfig[tenant.status].dot}`} />
                                             {statusConfig[tenant.status].label}
@@ -335,13 +335,13 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
                                     </td>
 
                                     {/* Montant */}
-                                    <td className="py-3 px-4 text-right">
-                                        <div className="font-mono font-semibold text-white text-sm">{formatAmount(tenant.rentAmount)}</div>
+                                    <td className="py-3 px-4 text-right w-[140px]">
+                                        <div className="font-mono font-semibold text-white text-sm whitespace-nowrap">{formatAmount(tenant.rentAmount)}</div>
                                         <div className="text-xs text-slate-500">FCFA</div>
                                     </td>
 
                                     {/* Actions */}
-                                    <td className="py-3 px-4 text-right">
+                                    <td className="py-3 px-4 text-right w-[90px]">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-800">
