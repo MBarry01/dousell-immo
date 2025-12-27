@@ -3,7 +3,7 @@
 import { ReceiptModal } from './ReceiptModal';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, Loader2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,

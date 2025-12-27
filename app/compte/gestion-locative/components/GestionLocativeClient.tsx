@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { TenantTable } from './TenantTable';
 import { MonthSelector } from './MonthSelector';
-import { Search } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface Tenant {
     id: string;
@@ -53,6 +54,63 @@ export function GestionLocativeClient({
     const handleMonthChange = (month: number, year: number) => {
         setSelectedMonth(month);
         setSelectedYear(year);
+    };
+
+    // Helper function to format CSV data
+    const formatCSVValue = (value: string | number | null | undefined): string => {
+        if (value === null || value === undefined) return '';
+        const stringValue = String(value);
+        // Escape double quotes and wrap in quotes if contains comma, newline, or quote
+        if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+    };
+
+    // Export to CSV function
+    const handleExportCSV = () => {
+        const headers = ['Locataire', 'Email', 'Téléphone', 'Bien', 'Période', 'Statut', 'Montant (FCFA)'];
+
+        const csvRows = formattedTenants.map(tenant => {
+            const periodStr = tenant.period_month && tenant.period_year
+                ? `${tenant.period_month.toString().padStart(2, '0')}/${tenant.period_year}`
+                : '';
+
+            const statusLabels = {
+                paid: 'Payé',
+                pending: 'En attente',
+                overdue: 'Retard'
+            };
+
+            return [
+                formatCSVValue(tenant.name),
+                formatCSVValue(tenant.email),
+                formatCSVValue(tenant.phone),
+                formatCSVValue(tenant.property),
+                formatCSVValue(periodStr),
+                formatCSVValue(statusLabels[tenant.status]),
+                formatCSVValue(tenant.rentAmount)
+            ].join(',');
+        });
+
+        const csvContent = [headers.join(','), ...csvRows].join('\n');
+
+        // Create blob and download
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        // Filename with month/year
+        const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                            'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+        const filename = `loyers-${monthNames[selectedMonth - 1]}-${selectedYear}.csv`;
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     // Filtrer et formater les locataires pour le mois sélectionné
@@ -120,6 +178,17 @@ export function GestionLocativeClient({
                         className="pl-10 bg-slate-900 border-slate-800 text-white placeholder:text-slate-500 focus:border-slate-700 h-10"
                     />
                 </div>
+
+                {/* Bouton Export CSV */}
+                <Button
+                    onClick={handleExportCSV}
+                    variant="outline"
+                    className="bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white h-10 px-4"
+                    disabled={formattedTenants.length === 0}
+                >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV
+                </Button>
 
                 {/* Sélecteur de mois */}
                 <div className="md:w-auto">
