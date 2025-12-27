@@ -1,6 +1,6 @@
 import { RentalStats } from "./components/RentalStats";
 import { getRentalStats } from "./actions";
-import { TenantList } from "./components/TenantList";
+import { GestionLocativeClient } from "./components/GestionLocativeClient";
 import { AddTenantButton } from "./components/AddTenantButton";
 import { MaintenanceHub } from "./components/MaintenanceHub";
 import { LayoutDashboard, Settings } from "lucide-react";
@@ -40,11 +40,13 @@ export default async function GestionLocativePage() {
         console.error("Erreur récupération baux:", leasesError.message);
     }
 
-    // 2. Récupérer les transactions de loyer pour calculer les stats
+    // 2. Récupérer TOUTES les transactions de loyer (pour tous les mois)
     const { data: transactions, error: transError } = await supabase
         .from('rental_transactions')
-        .select('*, leases!inner(owner_id)')
-        .eq('leases.owner_id', user.id);
+        .select('id, lease_id, period_month, period_year, status, amount_due, paid_at')
+        .in('lease_id', (leases || []).map(l => l.id))
+        .order('period_year', { ascending: false })
+        .order('period_month', { ascending: false });
 
     if (transError) {
         console.error("Erreur récupération transactions:", transError.message);
@@ -66,48 +68,6 @@ export default async function GestionLocativePage() {
     // CALCUL DES STATISTIQUES (MODE RÉEL)
     // ========================================
     const stats = await getRentalStats();
-
-    // ========================================
-    // FORMATAGE DES DONNÉES POUR LES COMPOSANTS
-    // ========================================
-
-    // Transformer les baux pour TenantList
-    const formattedTenants = (leases || []).map(lease => {
-        // Trouver la dernière transaction pour ce bail
-        const leaseTransactions = transactions?.filter(t => t.lease_id === lease.id) || [];
-        // On suppose que la plus récente est la première car on filtrera par mois plus tard idéalement
-        // Pour l'instant on prend celle qui correspond au mois en cours si elle existe
-        const currentMonth = new Date().getMonth() + 1;
-        const currentYear = new Date().getFullYear();
-        const latestTransaction = leaseTransactions.find(t =>
-            t.period_month === currentMonth && t.period_year === currentYear
-        ) || leaseTransactions[0]; // Fallback
-
-        const today = new Date();
-        const currentDay = today.getDate();
-
-        // Calcul du statut dynamique
-        let displayStatus: 'paid' | 'pending' | 'overdue' = latestTransaction?.status || 'pending';
-
-        // Si impayé et date passée => Overdue
-        // On s'assure que ce n'est pas déjà payé
-        if (displayStatus === 'pending' && lease.billing_day && currentDay > lease.billing_day) {
-            displayStatus = 'overdue';
-        }
-
-        return {
-            id: lease.id,
-            name: lease.tenant_name,
-            property: lease.property_address || 'Adresse non renseignée',
-            phone: lease.tenant_phone,
-            email: lease.tenant_email,
-            rentAmount: lease.monthly_amount,
-            status: displayStatus,
-            dueDate: lease.billing_day,
-            startDate: lease.start_date,
-            last_transaction_id: latestTransaction?.id // ID requis pour validation paiement
-        };
-    });
 
     // Transformer les demandes de maintenance pour MaintenanceHub
     // Note: category n'existe pas encore dans la table
@@ -158,17 +118,14 @@ export default async function GestionLocativePage() {
 
             {/* Section Principale : Grille 2 colonnes */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Liste des locataires sur 2 colonnes */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold">Mes Locataires & Paiements</h2>
-                        <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">
-                            {leases?.length || 0} bail{(leases?.length || 0) > 1 ? 's' : ''} actif{(leases?.length || 0) > 1 ? 's' : ''}
-                        </span>
-                    </div>
-                    <div className="bg-gray-900/20 border border-gray-800 rounded-[2rem] p-2 overflow-hidden">
-                        <TenantList tenants={formattedTenants} profile={profile} userEmail={user.email} />
-                    </div>
+                {/* Liste des locataires avec sélecteur de mois - 2 colonnes */}
+                <div className="lg:col-span-2">
+                    <GestionLocativeClient
+                        leases={leases || []}
+                        transactions={transactions || []}
+                        profile={profile}
+                        userEmail={user.email}
+                    />
                 </div>
 
                 {/* Hub Maintenance sur 1 colonne */}
