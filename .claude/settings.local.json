@@ -21,7 +21,11 @@
       "Bash(npx tsc:*)",
       "Bash(ls:*)",
       "Bash(npx kill-port 3000)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(git push)",
+      "Bash(npm run test:cron-rentals:*)",
+      "Bash(npm run reset:december-rentals:*)",
+      "Bash(npm run clean:test-data:*)"
     ]
   }
 }
