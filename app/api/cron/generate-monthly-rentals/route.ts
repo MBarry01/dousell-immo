@@ -7,7 +7,7 @@
  * Configuration Vercel Cron dans vercel.json
  */
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -22,7 +22,17 @@ export async function GET(request: Request) {
 
     console.log('🚀 CRON JOB DÉMARRÉ - Génération des échéances mensuelles');
 
-    const supabase = await createClient();
+    // Utiliser le Service Role Key pour bypasser RLS (pas de session utilisateur dans un Cron)
+    const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        }
+    );
 
     // 2. Récupérer tous les baux actifs
     const { data: activeLeases, error: leasesError } = await supabase
