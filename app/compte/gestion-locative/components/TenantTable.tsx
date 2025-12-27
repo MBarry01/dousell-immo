@@ -3,7 +3,7 @@
 import { ReceiptModal } from './ReceiptModal';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Download } from 'lucide-react';
+import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -12,7 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { updateLease, confirmPayment, terminateLease, reactivateLease } from '../actions';
+import { confirmPayment, terminateLease, reactivateLease } from '../actions';
 import { toast } from 'sonner';
 
 interface Tenant {
@@ -38,18 +38,21 @@ interface TenantTableProps {
     userEmail?: string;
     isViewingTerminated?: boolean;
     searchQuery?: string;
+    onEdit?: (tenant: Tenant) => void;
+    onDelete?: (transactionId: string) => void;
+    onDeleteLease?: (leaseId: string) => void;
 }
 
 const statusConfig = {
-    paid: { label: 'Payé', bg: 'bg-green-500/10', text: 'text-green-500', dot: 'bg-green-500' },
-    pending: { label: 'En attente', bg: 'bg-yellow-500/10', text: 'text-yellow-500', dot: 'bg-yellow-500' },
-    overdue: { label: 'Retard', bg: 'bg-red-500/10', text: 'text-red-500', dot: 'bg-red-500' }
+    paid: { label: 'Payé', bg: 'bg-green-500/10', text: 'text-green-400', dot: 'bg-green-500' },
+    pending: { label: 'Attente', bg: 'bg-yellow-500/10', text: 'text-yellow-400', dot: 'bg-yellow-500' },
+    overdue: { label: 'Retard', bg: 'bg-red-500/10', text: 'text-red-400', dot: 'bg-red-500' }
 };
 
 type SortField = 'name' | 'property' | 'rentAmount' | 'status' | 'period';
 type SortOrder = 'asc' | 'desc';
 
-export function TenantTable({ tenants = [], profile, userEmail, isViewingTerminated = false, searchQuery = '' }: TenantTableProps) {
+export function TenantTable({ tenants = [], profile, userEmail, isViewingTerminated = false, searchQuery = '', onEdit, onDelete, onDeleteLease }: TenantTableProps) {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [isReceiptOpen, setIsReceiptOpen] = useState(false);
@@ -65,29 +68,24 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
         return amount.toLocaleString('fr-FR');
     };
 
-    // Fonction de tri
     const handleSort = (field: SortField) => {
         if (sortField === field) {
-            // Si on clique sur la même colonne, inverser l'ordre
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {
-            // Nouvelle colonne, ordre ASC par défaut
             setSortField(field);
             setSortOrder('asc');
         }
     };
 
-    // Icône de tri
     const SortIcon = ({ field }: { field: SortField }) => {
         if (sortField !== field) {
-            return <ArrowUpDown className="w-3 h-3 text-slate-500" />;
+            return <ArrowUpDown className="w-3 h-3 text-slate-600" />;
         }
         return sortOrder === 'asc'
-            ? <ArrowUp className="w-3 h-3 text-[#F4C430]" />
-            : <ArrowDown className="w-3 h-3 text-[#F4C430]" />;
+            ? <ArrowUp className="w-3 h-3 text-slate-400" />
+            : <ArrowDown className="w-3 h-3 text-slate-400" />;
     };
 
-    // Filtrer et trier
     const filteredTenants = tenants
         .filter(tenant =>
             tenant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -112,7 +110,6 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
                     compareB = b.rentAmount;
                     break;
                 case 'status':
-                    // Ordre: paid < pending < overdue
                     const statusOrder = { paid: 0, pending: 1, overdue: 2 };
                     compareA = statusOrder[a.status];
                     compareB = statusOrder[b.status];
@@ -145,7 +142,7 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
         }
 
         const shouldSendReceipt = window.confirm(
-            `Le loyer est marqué comme payé. Souhaitez-vous envoyer immédiatement la quittance par email à ${tenant.name} ?`
+            `Le loyer est marqué comme payé. Envoyer la quittance par email à ${tenant.name} ?`
         );
 
         if (shouldSendReceipt) {
@@ -270,6 +267,8 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
         }
     };
 
+    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
     return (
         <>
             <ReceiptModal
@@ -278,204 +277,154 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
                 data={currentReceipt}
             />
 
-            {/* MOBILE: Cards */}
-            <div className="md:hidden space-y-2">
-                {filteredTenants.map((tenant) => (
-                    <div
-                        key={tenant.id}
-                        className="bg-slate-900 border border-slate-800 rounded-lg p-3"
-                    >
-                        <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold shrink-0">
-                                    {getInitials(tenant.name)}
-                                </div>
-                                <div className="min-w-0">
-                                    <div className="font-medium text-white text-sm truncate">{tenant.name}</div>
-                                    <div className="text-xs text-slate-400 truncate">{tenant.email}</div>
-                                </div>
-                            </div>
-                            <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs ${statusConfig[tenant.status].bg} ${statusConfig[tenant.status].text}`}>
-                                <div className={`w-1.5 h-1.5 rounded-full ${statusConfig[tenant.status].dot}`} />
-                                {statusConfig[tenant.status].label}
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-800">
-                            <div className="font-mono font-semibold text-white">{formatAmount(tenant.rentAmount)} FCFA</div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                        <MoreHorizontal className="h-4 w-4 text-slate-400" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48 bg-slate-900 border-slate-800">
-                                    {tenant.status === 'paid' && (
-                                        <DropdownMenuItem onClick={() => handleViewReceipt(tenant)} className="text-slate-300">
-                                            <Eye className="mr-2 h-4 w-4" />
-                                            Voir quittance
-                                        </DropdownMenuItem>
-                                    )}
-                                    {(tenant.status === 'pending' || tenant.status === 'overdue') && (
-                                        <DropdownMenuItem onClick={() => handleConfirmPayment(tenant.id, tenant.last_transaction_id)} className="text-slate-300">
-                                            <CheckCircle className="mr-2 h-4 w-4" />
-                                            Marquer payé
-                                        </DropdownMenuItem>
-                                    )}
-                                    <DropdownMenuItem className="text-slate-300">
-                                        <Edit2 className="mr-2 h-4 w-4" />
-                                        Modifier
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator className="bg-slate-800" />
-                                    {isViewingTerminated ? (
-                                        <DropdownMenuItem onClick={() => handleReactivateLease(tenant.id, tenant.name)} className="text-green-400">
-                                            <RotateCcw className="mr-2 h-4 w-4" />
-                                            Réactiver
-                                        </DropdownMenuItem>
-                                    ) : (
-                                        <DropdownMenuItem onClick={() => handleTerminateLease(tenant.id, tenant.name)} className="text-red-400">
-                                            <Trash2 className="mr-2 h-4 w-4" />
-                                            Résilier
-                                        </DropdownMenuItem>
-                                    )}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* DESKTOP: Table */}
-            <div className="hidden md:block bg-slate-900 border border-slate-800 rounded-lg overflow-x-auto">
-                <table className="w-full min-w-[900px]">
-                    <thead className="bg-slate-900/50 border-b border-slate-800">
+            {/* Table Dark Enterprise - Responsive */}
+            <div className="bg-black border border-slate-800 rounded-lg overflow-x-auto">
+                <table className="w-full text-left text-sm min-w-[650px]">
+                    <thead className="border-b border-slate-800">
                         <tr>
-                            <th className="text-left py-3 px-4 w-[250px]">
+                            {/* Locataire - Always visible */}
+                            <th className="py-3 px-4">
                                 <button
                                     onClick={() => handleSort('name')}
-                                    className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider hover:text-white transition-colors"
+                                    className="flex items-center gap-1.5 text-xs font-medium text-slate-500 uppercase tracking-wider hover:text-slate-300 transition-colors"
                                 >
                                     Locataire
                                     <SortIcon field="name" />
                                 </button>
                             </th>
-                            <th className="text-left py-3 px-4 w-[200px]">
+
+                            {/* Bien - Hidden on mobile */}
+                            <th className="py-3 px-4 hidden lg:table-cell">
                                 <button
                                     onClick={() => handleSort('property')}
-                                    className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider hover:text-white transition-colors"
+                                    className="flex items-center gap-1.5 text-xs font-medium text-slate-500 uppercase tracking-wider hover:text-slate-300 transition-colors"
                                 >
                                     Bien
                                     <SortIcon field="property" />
                                 </button>
                             </th>
-                            <th className="text-left py-3 px-4 w-[100px]">
+
+                            {/* Période - Hidden on mobile */}
+                            <th className="py-3 px-4 hidden md:table-cell">
                                 <button
                                     onClick={() => handleSort('period')}
-                                    className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider hover:text-white transition-colors"
+                                    className="flex items-center gap-1.5 text-xs font-medium text-slate-500 uppercase tracking-wider hover:text-slate-300 transition-colors"
                                 >
                                     Période
                                     <SortIcon field="period" />
                                 </button>
                             </th>
-                            <th className="text-left py-3 px-4 w-[120px]">
+
+                            {/* Statut - Always visible */}
+                            <th className="py-3 px-4">
                                 <button
                                     onClick={() => handleSort('status')}
-                                    className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider hover:text-white transition-colors"
+                                    className="flex items-center gap-1.5 text-xs font-medium text-slate-500 uppercase tracking-wider hover:text-slate-300 transition-colors"
                                 >
                                     Statut
                                     <SortIcon field="status" />
                                 </button>
                             </th>
-                            <th className="text-right py-3 px-4 w-[140px]">
+
+                            {/* Montant - Always visible */}
+                            <th className="py-3 px-4 text-right">
                                 <button
                                     onClick={() => handleSort('rentAmount')}
-                                    className="flex items-center gap-2 ml-auto text-xs font-medium text-slate-400 uppercase tracking-wider hover:text-white transition-colors"
+                                    className="flex items-center gap-1.5 ml-auto text-xs font-medium text-slate-500 uppercase tracking-wider hover:text-slate-300 transition-colors"
                                 >
                                     Montant
                                     <SortIcon field="rentAmount" />
                                 </button>
                             </th>
-                            <th className="text-right py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[90px]">Actions</th>
+
+                            {/* Actions */}
+                            <th className="py-3 px-4 text-right w-12">
+                                <span className="sr-only">Actions</span>
+                            </th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800">
+                    <tbody className="divide-y divide-slate-800/50">
                         {filteredTenants.map((tenant) => {
-                            const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
                             const periodLabel = tenant.period_month && tenant.period_year
                                 ? `${monthNames[tenant.period_month - 1]} ${tenant.period_year}`
                                 : '-';
 
                             return (
-                                <tr key={tenant.id} className="hover:bg-slate-800/50 transition-colors">
+                                <tr key={tenant.id} className="hover:bg-slate-900/50 transition-colors">
                                     {/* Locataire */}
-                                    <td className="py-3 px-4 w-[250px]">
+                                    <td className="py-3 px-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold shrink-0">
+                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-xs font-medium shrink-0">
                                                 {getInitials(tenant.name)}
                                             </div>
                                             <div className="min-w-0">
                                                 <div className="font-medium text-white text-sm truncate">{tenant.name}</div>
-                                                <div className="text-xs text-slate-400 truncate">{tenant.email || 'Email manquant'}</div>
+                                                <div className="text-xs text-slate-500 truncate">{tenant.email || 'Email manquant'}</div>
                                             </div>
                                         </div>
                                     </td>
 
-                                    {/* Bien */}
-                                    <td className="py-3 px-4 w-[200px]">
-                                        <div className="text-sm text-slate-300 truncate">{tenant.property}</div>
+                                    {/* Bien - Hidden on mobile */}
+                                    <td className="py-3 px-4 hidden lg:table-cell">
+                                        <div className="text-sm text-slate-400 truncate max-w-[200px]">{tenant.property}</div>
                                     </td>
 
-                                    {/* Période */}
-                                    <td className="py-3 px-4 w-[100px]">
-                                        <div className="text-sm text-slate-300 whitespace-nowrap">{periodLabel}</div>
+                                    {/* Période - Hidden on mobile */}
+                                    <td className="py-3 px-4 hidden md:table-cell">
+                                        <div className="text-sm text-slate-400">{periodLabel}</div>
                                     </td>
 
                                     {/* Statut */}
-                                    <td className="py-3 px-4 w-[120px]">
-                                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium ${statusConfig[tenant.status].bg} ${statusConfig[tenant.status].text}`}>
+                                    <td className="py-3 px-4">
+                                        <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium ${statusConfig[tenant.status].bg} ${statusConfig[tenant.status].text}`}>
                                             <div className={`w-1.5 h-1.5 rounded-full ${statusConfig[tenant.status].dot}`} />
                                             {statusConfig[tenant.status].label}
                                         </div>
                                     </td>
 
                                     {/* Montant */}
-                                    <td className="py-3 px-4 text-right w-[140px]">
-                                        <div className="font-mono font-semibold text-white text-sm whitespace-nowrap">{formatAmount(tenant.rentAmount)}</div>
-                                        <div className="text-xs text-slate-500">FCFA</div>
+                                    <td className="py-3 px-4 text-right">
+                                        <div className="font-mono font-medium text-white text-sm">{formatAmount(tenant.rentAmount)}</div>
+                                        <div className="text-xs text-slate-600">FCFA</div>
                                     </td>
 
                                     {/* Actions */}
-                                    <td className="py-3 px-4 text-right w-[90px]">
+                                    <td className="py-3 px-4 text-right">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-800">
-                                                    <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                                                    <MoreHorizontal className="h-4 w-4 text-slate-500" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-48 bg-slate-900 border-slate-800">
+                                            <DropdownMenuContent align="end" className="w-44 bg-slate-900 border-slate-800">
                                                 {tenant.status === 'paid' && (
-                                                    <DropdownMenuItem onClick={() => handleViewReceipt(tenant)} className="text-slate-300 hover:bg-slate-800">
+                                                    <DropdownMenuItem onClick={() => handleViewReceipt(tenant)} className="text-slate-300 hover:bg-slate-800 focus:bg-slate-800">
                                                         <Eye className="mr-2 h-4 w-4" />
                                                         Voir quittance
                                                     </DropdownMenuItem>
                                                 )}
                                                 {(tenant.status === 'pending' || tenant.status === 'overdue') && (
-                                                    <DropdownMenuItem onClick={() => handleConfirmPayment(tenant.id, tenant.last_transaction_id)} className="text-slate-300 hover:bg-slate-800">
+                                                    <DropdownMenuItem onClick={() => handleConfirmPayment(tenant.id, tenant.last_transaction_id)} className="text-slate-300 hover:bg-slate-800 focus:bg-slate-800">
                                                         <CheckCircle className="mr-2 h-4 w-4" />
                                                         Marquer payé
                                                     </DropdownMenuItem>
                                                 )}
-                                                <DropdownMenuItem className="text-slate-300 hover:bg-slate-800">
+                                                <DropdownMenuItem
+                                                    onClick={() => onEdit?.(tenant)}
+                                                    className="text-slate-300 hover:bg-slate-800 focus:bg-slate-800"
+                                                >
                                                     <Edit2 className="mr-2 h-4 w-4" />
                                                     Modifier
                                                 </DropdownMenuItem>
+
                                                 <DropdownMenuSeparator className="bg-slate-800" />
                                                 {isViewingTerminated ? (
-                                                    <DropdownMenuItem onClick={() => handleReactivateLease(tenant.id, tenant.name)} className="text-green-400 hover:bg-slate-800">
+                                                    <DropdownMenuItem onClick={() => handleReactivateLease(tenant.id, tenant.name)} className="text-green-400 hover:bg-slate-800 focus:bg-slate-800">
                                                         <RotateCcw className="mr-2 h-4 w-4" />
                                                         Réactiver
                                                     </DropdownMenuItem>
                                                 ) : (
-                                                    <DropdownMenuItem onClick={() => handleTerminateLease(tenant.id, tenant.name)} className="text-red-400 hover:bg-slate-800">
+                                                    <DropdownMenuItem onClick={() => handleTerminateLease(tenant.id, tenant.name)} className="text-orange-400 hover:bg-slate-800 focus:bg-slate-800">
                                                         <Trash2 className="mr-2 h-4 w-4" />
                                                         Résilier
                                                     </DropdownMenuItem>
@@ -490,11 +439,12 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
                 </table>
 
                 {filteredTenants.length === 0 && (
-                    <div className="text-center py-12 text-slate-400 text-sm">
-                        Aucun locataire trouvé
+                    <div className="text-center py-16 px-4">
+                        <div className="text-slate-500 text-sm">Aucune échéance pour cette période</div>
+                        <div className="text-slate-600 text-xs mt-1">Les loyers sont générés automatiquement chaque mois</div>
                     </div>
                 )}
-            </div>
+            </div >
         </>
     );
 }

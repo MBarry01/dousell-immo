@@ -7,6 +7,7 @@ interface MonthSelectorProps {
     selectedMonth: number; // 1-12
     selectedYear: number;
     onMonthChange: (month: number, year: number) => void;
+    minDate?: string;
 }
 
 const MONTHS_FR = [
@@ -14,7 +15,7 @@ const MONTHS_FR = [
     'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
 ];
 
-export function MonthSelector({ selectedMonth, selectedYear, onMonthChange }: MonthSelectorProps) {
+export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minDate }: MonthSelectorProps) {
     const handlePrevious = () => {
         if (selectedMonth === 1) {
             onMonthChange(12, selectedYear - 1);
@@ -41,6 +42,18 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange }: Mo
         return selectedMonth === today.getMonth() + 1 && selectedYear === today.getFullYear();
     };
 
+    const isPastLimit = () => {
+        if (!minDate) return false;
+        const limit = new Date(minDate);
+        // On compare l'année et le mois.
+        // Si l'année affichée est < année limite, c'est bloqué.
+        if (selectedYear < limit.getFullYear()) return true;
+        // Si même année, on regarde le mois.
+        if (selectedYear === limit.getFullYear() && selectedMonth <= limit.getMonth() + 1) return true;
+
+        return false;
+    };
+
     return (
         <div className="flex items-center gap-2 px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg">
             {/* Bouton Mois précédent */}
@@ -48,7 +61,8 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange }: Mo
                 variant="ghost"
                 size="sm"
                 onClick={handlePrevious}
-                className="h-8 w-8 p-0 hover:bg-slate-800"
+                disabled={isPastLimit()}
+                className={`h-8 w-8 p-0 hover:bg-slate-800 ${isPastLimit() ? 'opacity-30 cursor-not-allowed' : ''}`}
                 title="Mois précédent"
             >
                 <ChevronLeft className="w-4 h-4 text-slate-400" />
@@ -74,7 +88,8 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange }: Mo
                 variant="ghost"
                 size="sm"
                 onClick={handleNext}
-                className="h-8 w-8 p-0 hover:bg-slate-800"
+                disabled={isCurrentMonth()}
+                className={`h-8 w-8 p-0 hover:bg-slate-800 ${isCurrentMonth() ? 'opacity-30 cursor-not-allowed' : ''}`}
                 title="Mois suivant"
             >
                 <ChevronRight className="w-4 h-4 text-slate-400" />

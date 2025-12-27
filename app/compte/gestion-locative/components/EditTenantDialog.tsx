@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from 'react';
-import { Plus, Loader2 } from "lucide-react";
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,86 +8,86 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
+    DialogDescription,
 } from "@/components/ui/dialog";
-import { createNewLease } from "../actions";
+import { updateLease } from "../actions";
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
-interface AddTenantButtonProps {
-    ownerId: string;
+interface EditTenantDialogProps {
+    isOpen: boolean;
+    onClose: () => void;
+    tenant: any; // Using any for flexibility, but ideally should be the Tenant interface
 }
 
-export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
-    const [open, setOpen] = useState(false);
+export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogProps) {
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+
+    if (!tenant) return null;
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
         const formData = new FormData(e.currentTarget);
-        const data = {
-            owner_id: ownerId,
-            tenant_name: formData.get('tenant_name') as string,
-            tenant_phone: formData.get('tenant_phone') as string,
-            tenant_email: formData.get('tenant_email') as string,
-            property_address: formData.get('property_address') as string,
-            monthly_amount: Number(formData.get('monthly_amount')),
-            billing_day: Number(formData.get('billing_day')) || 5,
-            start_date: formData.get('start_date') as string,
-            status: 'active' as const,
-        };
 
-        const result = await createNewLease(data);
+        // Only include fields that have values
+        const data: any = {};
+
+        const tenantName = formData.get('tenant_name') as string;
+        if (tenantName) data.tenant_name = tenantName;
+
+        const tenantPhone = formData.get('tenant_phone') as string;
+        if (tenantPhone) data.tenant_phone = tenantPhone;
+
+        const tenantEmail = formData.get('tenant_email') as string;
+        if (tenantEmail) data.tenant_email = tenantEmail;
+
+        const propertyAddress = formData.get('property_address') as string;
+        if (propertyAddress) data.property_address = propertyAddress;
+
+        const monthlyAmount = formData.get('monthly_amount');
+        if (monthlyAmount) data.monthly_amount = Number(monthlyAmount);
+
+        const billingDay = formData.get('billing_day');
+        if (billingDay) data.billing_day = Number(billingDay);
+
+        // Start date might be needed if user wants to correct it
+        const startDate = formData.get('start_date') as string;
+        if (startDate) data.start_date = startDate;
+
+        const result = await updateLease(tenant.id, data);
         setLoading(false);
 
         if (result.success) {
-            toast.success('Locataire ajouté avec succès');
-            setOpen(false);
+            toast.success('Bail modifié avec succès');
+            onClose();
             router.refresh();
         } else {
-            const errorMsg = result.error || 'Erreur lors de la création';
-            setError(errorMsg);
-            toast.error(errorMsg);
+            toast.error(result.error || 'Erreur lors de la modification');
         }
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90 rounded-lg h-9 px-4 font-medium text-sm transition-all">
-                    <Plus className="w-4 h-4 mr-1.5" /> Nouveau
-                </Button>
-            </DialogTrigger>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[550px] bg-slate-900 border-slate-800 text-white">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold text-white">Nouveau Locataire</DialogTitle>
+                    <DialogTitle className="text-xl font-semibold text-white">Modifier le bail</DialogTitle>
+                    <DialogDescription className="text-slate-400">
+                        Modifications pour {tenant.name}
+                    </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                    {/* Zone d'erreur critique */}
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 flex items-start gap-3">
-                            <span className="text-red-500 mt-0.5">⚠️</span>
-                            <div className="space-y-1">
-                                <h4 className="text-sm font-semibold text-red-500">Erreur Bloquante</h4>
-                                <p className="text-sm text-red-200/90">{error}</p>
-                            </div>
-                        </div>
-                    )}
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300">
-                                Nom complet <span className="text-red-400">*</span>
+                                Nom complet
                             </label>
                             <Input
                                 name="tenant_name"
+                                defaultValue={tenant.name}
                                 placeholder="ex: Mamadou Diop"
-                                required
                                 className="bg-slate-800 border-slate-700 text-white"
                             />
                         </div>
@@ -96,6 +95,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                             <label className="text-sm font-medium text-slate-300">Téléphone</label>
                             <Input
                                 name="tenant_phone"
+                                defaultValue={tenant.phone}
                                 placeholder="ex: +221 77..."
                                 className="bg-slate-800 border-slate-700 text-white"
                             />
@@ -104,14 +104,13 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-300">
-                            Email <span className="text-red-400">*</span>
-                            <span className="text-xs text-slate-500 ml-2">(pour l&apos;envoi des quittances)</span>
+                            Email
                         </label>
                         <Input
                             name="tenant_email"
                             type="email"
+                            defaultValue={tenant.email}
                             placeholder="ex: locataire@email.com"
-                            required
                             className="bg-slate-800 border-slate-700 text-white"
                         />
                     </div>
@@ -120,6 +119,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                         <label className="text-sm font-medium text-slate-300">Adresse du bien</label>
                         <Input
                             name="property_address"
+                            defaultValue={tenant.property}
                             placeholder="ex: Appartement F3, Almadies, Dakar"
                             className="bg-slate-800 border-slate-700 text-white"
                         />
@@ -128,35 +128,33 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300">
-                                Loyer (FCFA) <span className="text-red-400">*</span>
+                                Loyer (FCFA)
                             </label>
                             <Input
                                 name="monthly_amount"
                                 type="number"
+                                defaultValue={tenant.rentAmount}
                                 placeholder="500000"
-                                required
                                 className="bg-slate-800 border-slate-700 text-white font-mono"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">Jour de paiement</label>
+                            <label className="text-sm font-medium text-slate-300">Jour paiement</label>
                             <Input
                                 name="billing_day"
                                 type="number"
                                 min="1"
                                 max="31"
-                                defaultValue="5"
+                                defaultValue={tenant.dueDate || 5}
                                 className="bg-slate-800 border-slate-700 text-white"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">
-                                Début bail <span className="text-red-400">*</span>
-                            </label>
+                            <label className="text-sm font-medium text-slate-300">Début bail</label>
                             <Input
                                 name="start_date"
                                 type="date"
-                                required
+                                defaultValue={tenant.startDate}
                                 className="
             bg-slate-800 
             border-slate-700 
@@ -166,34 +164,35 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
             px-3 
             block 
             [color-scheme:dark] 
+            [&::-webkit-calendar-picker-indicator]:ml-auto 
             [&::-webkit-calendar-picker-indicator]:cursor-pointer 
             [&::-webkit-calendar-picker-indicator]:opacity-60 
-            [&::-webkit-calendar-picker-indicator]:hover:opacity-100
-            [&::-webkit-calendar-picker-indicator]:ml-auto
+            hover:[&::-webkit-calendar-picker-indicator]:opacity-100
             [&::-webkit-calendar-picker-indicator]:p-1
         "
                             />
                         </div>
                     </div>
 
-                    <div className="pt-4">
+                    <div className="pt-4 flex justify-end gap-3">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={onClose}
+                            className="hover:bg-slate-800 text-slate-300"
+                        >
+                            Annuler
+                        </Button>
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-[#F4C430] text-black hover:bg-[#F4C430]/90 h-11 text-base font-semibold rounded-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90"
                         >
-                            {loading ? (
-                                <div className="flex items-center gap-2">
-                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                    <span>Création en cours...</span>
-                                </div>
-                            ) : (
-                                "Confirmer & Créer le Bail"
-                            )}
+                            {loading ? "Enregistrement..." : "Enregistrer"}
                         </Button>
                     </div>
                 </form>
             </DialogContent>
-        </Dialog >
+        </Dialog>
     );
 }

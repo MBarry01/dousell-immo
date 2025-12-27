@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { validateTenantCreation } from '@/lib/finance';
 
 /**
  * Calcule les statistiques financières en temps réel
@@ -122,6 +123,19 @@ export async function createNewLease(formData: Record<string, unknown>) {
         ...formData,
         owner_id: user.id  // Toujours forcer l'ID du propriétaire connecté
     };
+
+    // 1. Vérification STRICTE d'unicité via FinanceGuard (Pilier 2)
+    const emailToCheck = (finalData as any).tenant_email as string | undefined;
+    if (emailToCheck) {
+        const validation = await validateTenantCreation(emailToCheck, supabase, user.id);
+
+        if (!validation.valid) {
+            return {
+                success: false,
+                error: validation.error || "Erreur de validation"
+            };
+        }
+    }
 
     const { data: lease, error } = await supabase
         .from('leases')
@@ -632,6 +646,79 @@ export async function sendReceiptToN8N(data: any) {
             error: error instanceof Error ? error.message : "Impossible de joindre le webhook"
         };
     }
+}
+
+/**
+ * Supprime une transaction (pour nettoyer les doublons générés par erreur)
+ */
+export async function deleteTransaction(transactionId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { success: false, error: "Non autorisé" };
+    }
+
+    // Sécurité: Vérifier que la transaction appartient bien à un bail de l'utilisateur
+    // On fait un join car rental_transactions n'a pas owner_id directement
+    const { data: transaction } = await supabase
+        .from('rental_transactions')
+        .select('lease_id, leases!inner(owner_id)')
+        .eq('id', transactionId)
+        .single();
+
+    // Cast sécurisé ou accès flexible car Join Supabase peut être un objet ou tableau selon la version
+    const leaseData = transaction?.leases as any;
+
+    if (!transaction || !leaseData || leaseData.owner_id !== user.id) {
+        return { success: false, error: "Transaction introuvable ou non autorisée" };
+    }
+
+    const { error } = await supabase
+        .from('rental_transactions')
+        .delete()
+        .eq('id', transactionId);
+
+    if (error) {
+        console.error("Erreur suppression transaction:", error.message);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/compte/gestion-locative');
+    return { success: true };
+}
+
+/**
+ * Supprime DÉFINITIVEMENT un bail (Fonction de nettoyage)
+ */
+export async function deleteLease(leaseId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "Non autorisé" };
+
+    const { data: lease } = await supabase
+        .from('leases')
+        .select('owner_id')
+        .eq('id', leaseId)
+        .single();
+
+    if (!lease || lease.owner_id !== user.id) {
+        return { success: false, error: "Bail introuvable ou non autorisé" };
+    }
+
+    const { error } = await supabase
+        .from('leases')
+        .delete()
+        .eq('id', leaseId);
+
+    if (error) {
+        console.error("Erreur suppression bail:", error.message);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/compte/gestion-locative');
+    return { success: true };
 }
 
 

@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { getDashboardStats } from "./actions";
 import {
   Heart,
   Building2,
@@ -43,6 +45,17 @@ export default function ComptePage() {
   const router = useRouter();
   const { favorites } = useFavoritesStore();
   const { roles: userRoles, loading: rolesLoading } = useUserRoles(user?.id || null);
+  const [stats, setStats] = useState({ activeLeases: 0, pendingPayments: 0, maintenanceRequests: 0 });
+
+  useEffect(() => {
+    async function loadStats() {
+      if (user?.id) {
+        const data = await getDashboardStats();
+        setStats(data);
+      }
+    }
+    loadStats();
+  }, [user?.id]);
 
   // Check if user is admin (email fallback) or has any role
   const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -184,7 +197,7 @@ export default function ComptePage() {
 
 
         {/* Widget Gestion Locative Premium */}
-        <GestionLocativeWidget />
+        <GestionLocativeWidget {...stats} />
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

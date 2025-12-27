@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { User, Home, Heart, LogOut, Calculator, Shield, Info } from "lucide-react";
+import { User, Home, Heart, LogOut, Calculator, Shield, Info, Menu } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
 import { useUserRoles } from "@/hooks/use-user-roles";
-import { useState, useEffect } from "react";
+// React hooks removed as unused
 
 import {
   DropdownMenu,
@@ -16,11 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+// Avatar imports removed as we switched to Menu icon
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -28,52 +24,7 @@ export function UserNav() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const { roles: userRoles, loading: loadingRoles } = useUserRoles(user?.id || null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  // Fetch avatar from profiles table and subscribe to realtime updates
-  useEffect(() => {
-    if (!user) return;
-
-    const supabase = createClient();
-
-    // Fetch initial avatar
-    const fetchAvatar = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("avatar_url")
-        .eq("id", user.id)
-        .single();
-
-      if (data?.avatar_url) {
-        setAvatarUrl(data.avatar_url);
-      }
-    };
-
-    fetchAvatar();
-
-    // Subscribe to realtime updates for avatar changes
-    const channel = supabase
-      .channel(`profile-avatar-${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "profiles",
-          filter: `id=eq.${user.id}`,
-        },
-        (payload) => {
-          if (payload.new && typeof payload.new === "object" && "avatar_url" in payload.new) {
-            setAvatarUrl((payload.new as { avatar_url: string | null }).avatar_url);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
+  // Avatar fetching logic removed as we use Menu icon now
 
   const handleSignOut = async () => {
     try {
@@ -119,22 +70,17 @@ export function UserNav() {
   if (!user) return null;
 
   // Récupérer le nom d'affichage
-  const displayName = 
+  const displayName =
     (user.user_metadata?.full_name as string) ||
     user.email?.split("@")[0] ||
     "Utilisateur";
-  
-  const initials = displayName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2) || "U";
+
+  // initials calculation removed as unused
 
   // Vérifier si l'utilisateur a un rôle (admin, moderateur, agent, superadmin)
   const isMainAdmin = user.email?.toLowerCase() === "barrymohamadou98@gmail.com".toLowerCase();
   const hasRole = (!loadingRoles && userRoles.length > 0) || isMainAdmin;
-  
+
   // Déterminer le label selon le rôle le plus élevé
   const getAdminLabel = () => {
     if (userRoles.includes("superadmin")) return "Panel Admin (Super Admin)";
@@ -148,13 +94,8 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/20 transition-all hover:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={avatarUrl || undefined} alt={displayName} />
-            <AvatarFallback className="bg-amber-500/20 text-amber-400 text-xs font-semibold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+        <button className="flex items-center justify-center p-1 transition-opacity hover:opacity-70 focus:outline-none">
+          <Menu className="h-6 w-6 text-white" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -167,11 +108,11 @@ export function UserNav() {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ 
+          transition={{
             type: "spring",
             stiffness: 400,
             damping: 30,
-            delay: 0.05 
+            delay: 0.05
           }}
         >
           <DropdownMenuLabel>
@@ -289,13 +230,13 @@ export function UserNav() {
               }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={() => router.push("/admin")}
-            >
-              <Shield className="mr-2 h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
-              <span className="truncate">{getAdminLabel()}</span>
-            </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => router.push("/admin")}
+              >
+                <Shield className="mr-2 h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+                <span className="truncate">{getAdminLabel()}</span>
+              </DropdownMenuItem>
             </motion.div>
           )}
 

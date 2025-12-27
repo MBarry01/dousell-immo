@@ -57,13 +57,32 @@ export default async function GestionLocativePage({
         console.error("Erreur récupération baux:", leasesError.message);
     }
 
+    // 1.5 Récupérer la date du tout premier bail (pour bloquer la navigation avant l'activité)
+    const { data: earliestLease } = await supabase
+        .from('leases')
+        .select('start_date')
+        .eq('owner_id', user.id)
+        .order('start_date', { ascending: true })
+        .limit(1)
+        .single();
+
+    const minDateStr = earliestLease?.start_date || new Date().toISOString();
+
     // 2. Récupérer TOUTES les transactions de loyer (pour tous les mois)
-    const { data: transactions, error: transError } = await supabase
+    const { data: rawTransactions, error: transError } = await supabase
         .from('rental_transactions')
         .select('id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end')
         .in('lease_id', (filteredLeases || []).map(l => l.id))
         .order('period_year', { ascending: false })
         .order('period_month', { ascending: false });
+
+    // Polyfill pour amount_paid (car la colonne n'existe pas encore en base)
+    // Cela permet au Finance Guard de fonctionner (Règle : Encaissé = amount_paid)
+    // En attendant la migration DB, on assume que Payé = Totalité.
+    const transactions = (rawTransactions || []).map(t => ({
+        ...t,
+        amount_paid: (t.status?.toLowerCase() === 'paid') ? t.amount_due : 0
+    }));
 
     if (transError) {
         console.error("Erreur récupération transactions:", transError.message);
@@ -115,21 +134,19 @@ export default async function GestionLocativePage({
                             <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg">
                                 <Link
                                     href="/compte/gestion-locative"
-                                    className={`px-3 py-1 text-xs font-medium rounded transition-all ${
-                                        !isViewingTerminated
-                                            ? 'bg-green-500/10 text-green-400'
-                                            : 'text-slate-400 hover:text-white'
-                                    }`}
+                                    className={`px-3 py-1 text-xs font-medium rounded transition-all ${!isViewingTerminated
+                                        ? 'bg-green-500/10 text-green-400'
+                                        : 'text-slate-400 hover:text-white'
+                                        }`}
                                 >
                                     Actifs
                                 </Link>
                                 <Link
                                     href="/compte/gestion-locative?view=terminated"
-                                    className={`px-3 py-1 text-xs font-medium rounded transition-all ${
-                                        isViewingTerminated
-                                            ? 'bg-orange-500/10 text-orange-400'
-                                            : 'text-slate-400 hover:text-white'
-                                    }`}
+                                    className={`px-3 py-1 text-xs font-medium rounded transition-all ${isViewingTerminated
+                                        ? 'bg-orange-500/10 text-orange-400'
+                                        : 'text-slate-400 hover:text-white'
+                                        }`}
                                 >
                                     Résiliés
                                 </Link>
@@ -161,6 +178,7 @@ export default async function GestionLocativePage({
                             profile={profile}
                             userEmail={user.email}
                             isViewingTerminated={isViewingTerminated}
+                            minDate={minDateStr}
                         />
                     </div>
 

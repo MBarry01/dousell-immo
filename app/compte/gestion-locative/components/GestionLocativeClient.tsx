@@ -1,11 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { TenantTable } from './TenantTable';
 import { MonthSelector } from './MonthSelector';
+import { EditTenantDialog } from './EditTenantDialog';
 import { Search, Download } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { deleteTransaction, deleteLease } from '../actions';
+
+import { calculateFinancials, LeaseInput, TransactionInput } from '@/lib/finance';
 
 interface Tenant {
     id: string;
@@ -18,6 +22,10 @@ interface Tenant {
     dueDate?: number;
     startDate?: string;
     last_transaction_id?: string;
+    period_month?: number;
+    period_year?: number;
+    period_start?: string | null;
+    period_end?: string | null;
 }
 
 interface Transaction {
@@ -26,6 +34,9 @@ interface Transaction {
     period_month: number;
     period_year: number;
     status: string;
+    amount_due?: number;
+    amount_paid?: number | null;
+    paid_at?: string | null;
     period_start?: string | null;
     period_end?: string | null;
 }
@@ -49,6 +60,7 @@ interface GestionLocativeClientProps {
     profile: any;
     userEmail?: string;
     isViewingTerminated?: boolean;
+    minDate?: string;
 }
 
 export function GestionLocativeClient({
@@ -56,24 +68,135 @@ export function GestionLocativeClient({
     transactions,
     profile,
     userEmail,
-    isViewingTerminated = false
+    isViewingTerminated = false,
+    minDate
 }: GestionLocativeClientProps) {
-    // État pour le mois/année sélectionné
+    // État pour le mois/année sélectionné - Initialisé à aujourd'hui
     const today = new Date();
     const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1); // 1-12
     const [selectedYear, setSelectedYear] = useState(today.getFullYear());
     const [searchQuery, setSearchQuery] = useState('');
+    const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
 
     const handleMonthChange = (month: number, year: number) => {
         setSelectedMonth(month);
         setSelectedYear(year);
     };
 
+    // ========================================
+    // FILTRAGE STRICT PAR PÉRIODE
+    // ========================================
+    const currentTransactions = useMemo(() => {
+        return transactions.filter(t =>
+            t.period_month === selectedMonth &&
+            t.period_year === selectedYear
+        );
+    }, [transactions, selectedMonth, selectedYear]);
+
+    // ========================================
+    // KPI CALCULATIONS (Source Unique de Vérité : lib/finance.ts)
+    // ========================================
+    const kpiStats = useMemo(() => {
+        // Préparer les données pour le Finance Guard
+        const targetDate = new Date(selectedYear, selectedMonth - 1, 1);
+
+        const safeLeases: LeaseInput[] = leases.map(l => ({
+            id: l.id,
+            monthly_amount: l.monthly_amount,
+            status: l.status || 'active',
+            start_date: l.start_date || null,
+            billing_day: l.billing_day || 5
+        }));
+
+        const safeTransactions: TransactionInput[] = currentTransactions.map(t => ({
+            id: t.id,
+            lease_id: t.lease_id,
+            amount_due: t.amount_due || 0,
+            amount_paid: t.amount_paid,
+            status: t.status
+        }));
+
+        const kpis = calculateFinancials(safeLeases, safeTransactions, targetDate);
+
+        return {
+            totalExpected: kpis.totalExpected,
+            totalCollected: kpis.totalCollected,
+            totalPending: kpis.totalExpected - kpis.totalCollected, // Reste = Attendu - Encaissé
+            paidCount: kpis.paidCount,
+            pendingCount: kpis.pendingCount,
+            overdueCount: kpis.overdueCount,
+            collectedPercent: kpis.collectionRate,
+            transactionCount: currentTransactions.length // Juste pour info debug si besoin
+        };
+    }, [leases, currentTransactions, selectedMonth, selectedYear]);
+
+    // ========================================
+    // FORMATER LES LOCATAIRES POUR LE TABLEAU
+    // ========================================
+    const formattedTenants: Tenant[] = useMemo(() => {
+        const result: Tenant[] = [];
+
+        (leases || []).forEach(lease => {
+            // Trouver TOUTES les transactions pour CE mois sélectionné
+            const leaseTransactions = currentTransactions.filter(t => t.lease_id === lease.id);
+
+            // Calcul du jour actuel (pour déterminer si overdue)
+            const currentDay = today.getDate();
+            const isCurrentMonth = selectedMonth === today.getMonth() + 1 && selectedYear === today.getFullYear();
+
+            // Si aucune transaction : Créer une ligne virtuelle "Pending" (cas normal début de mois)
+            if (leaseTransactions.length === 0) {
+                let displayStatus: 'pending' | 'overdue' = 'pending';
+                if (isCurrentMonth && lease.billing_day && currentDay > lease.billing_day) {
+                    displayStatus = 'overdue';
+                }
+
+                result.push({
+                    id: lease.id,
+                    name: lease.tenant_name,
+                    property: lease.property_address || 'Adresse non renseignée',
+                    phone: lease.tenant_phone,
+                    email: lease.tenant_email,
+                    rentAmount: lease.monthly_amount,
+                    status: displayStatus,
+                    dueDate: lease.billing_day,
+                    startDate: lease.start_date,
+                    last_transaction_id: undefined, // Pas de transaction réelle
+                    period_month: selectedMonth,
+                    period_year: selectedYear,
+                    period_start: null,
+                    period_end: null
+                });
+            } else {
+                // Si transactions existent : Créer une ligne POUR CHAQUE transaction (mode "Révéler les doublons")
+                leaseTransactions.forEach(trans => {
+                    result.push({
+                        id: lease.id,
+                        name: lease.tenant_name,
+                        property: lease.property_address || 'Adresse non renseignée',
+                        phone: lease.tenant_phone,
+                        email: lease.tenant_email,
+                        rentAmount: trans.amount_due || lease.monthly_amount,
+                        status: trans.status as 'paid' | 'pending' | 'overdue',
+                        dueDate: lease.billing_day,
+                        startDate: lease.start_date,
+                        last_transaction_id: trans.id, // ID unique de la transaction
+                        period_month: selectedMonth,
+                        period_year: selectedYear,
+                        period_start: trans.period_start || null,
+                        period_end: trans.period_end || null
+                    });
+                });
+            }
+        });
+
+        return result;
+    }, [leases, currentTransactions, selectedMonth, selectedYear, today]);
+
     // Helper function to format CSV data
     const formatCSVValue = (value: string | number | null | undefined): string => {
         if (value === null || value === undefined) return '';
         const stringValue = String(value);
-        // Escape double quotes and wrap in quotes if contains comma, newline, or quote
         if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
             return `"${stringValue.replace(/"/g, '""')}"`;
         }
@@ -85,8 +208,8 @@ export function GestionLocativeClient({
         const headers = ['Locataire', 'Email', 'Téléphone', 'Bien', 'Période', 'Statut', 'Montant (FCFA)'];
 
         const csvRows = formattedTenants.map(tenant => {
-            const periodStr = tenant.period_month && tenant.period_year
-                ? `${tenant.period_month.toString().padStart(2, '0')}/${tenant.period_year}`
+            const periodStr = selectedMonth && selectedYear
+                ? `${selectedMonth.toString().padStart(2, '0')}/${selectedYear}`
                 : '';
 
             const statusLabels = {
@@ -108,14 +231,12 @@ export function GestionLocativeClient({
 
         const csvContent = [headers.join(','), ...csvRows].join('\n');
 
-        // Create blob and download
         const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
 
-        // Filename with month/year
         const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-                            'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+            'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
         const filename = `loyers-${monthNames[selectedMonth - 1]}-${selectedYear}.csv`;
 
         link.setAttribute('href', url);
@@ -126,116 +247,78 @@ export function GestionLocativeClient({
         document.body.removeChild(link);
     };
 
-    // Filtrer et formater les locataires pour le mois sélectionné
-    const formattedTenants: Tenant[] = (leases || []).map(lease => {
-        // Trouver la transaction pour CE mois sélectionné
-        const leaseTransactions = transactions?.filter(t => t.lease_id === lease.id) || [];
-        const selectedTransaction = leaseTransactions.find(t =>
-            t.period_month === selectedMonth && t.period_year === selectedYear
-        );
-
-        // Calcul du jour actuel (pour déterminer si overdue)
-        const today = new Date();
-        const currentDay = today.getDate();
-        const isCurrentMonth = selectedMonth === today.getMonth() + 1 && selectedYear === today.getFullYear();
-
-        // Calcul du statut dynamique
-        let displayStatus: 'paid' | 'pending' | 'overdue' = (selectedTransaction?.status as 'paid' | 'pending' | 'overdue') || 'pending';
-
-        // Si c'est le mois actuel, impayé et date passée => Overdue
-        if (isCurrentMonth && displayStatus === 'pending' && lease.billing_day && currentDay > lease.billing_day) {
-            displayStatus = 'overdue';
-        }
-
-        return {
-            id: lease.id,
-            name: lease.tenant_name,
-            property: lease.property_address || 'Adresse non renseignée',
-            phone: lease.tenant_phone,
-            email: lease.tenant_email,
-            rentAmount: lease.monthly_amount,
-            status: displayStatus,
-            dueDate: lease.billing_day,
-            startDate: lease.start_date,
-            last_transaction_id: selectedTransaction?.id,
-            // DONNÉES DE PÉRIODE (depuis la transaction ou calculées depuis selectedMonth/selectedYear)
-            period_month: selectedMonth,
-            period_year: selectedYear,
-            period_start: selectedTransaction?.period_start || null,
-            period_end: selectedTransaction?.period_end || null
-        };
-    });
-
-    // Statistiques GLOBALES (tous les baux actifs pour le mois sélectionné)
-    const globalStats = {
-        totalLeases: leases.length,
-        totalBauxActifs: leases.filter(l => !l.status || l.status === 'active').length,
-        paidCount: transactions?.filter(t =>
-            t.status === 'paid' &&
-            t.period_month === selectedMonth &&
-            t.period_year === selectedYear
-        ).length || 0,
-        encaisse: transactions
-            ?.filter(t =>
-                t.status === 'paid' &&
-                t.period_month === selectedMonth &&
-                t.period_year === selectedYear
-            )
-            .reduce((sum, t) => sum + (t.amount_due || 0), 0) || 0
-    };
-
-    const globalPendingCount = globalStats.totalBauxActifs - globalStats.paidCount;
-
-    // Statistiques pour le mois sélectionné (tableau filtré)
-    const monthStats = {
-        total: formattedTenants.length,
-        paid: formattedTenants.filter(t => t.status === 'paid').length,
-        pending: formattedTenants.filter(t => t.status === 'pending').length,
-        overdue: formattedTenants.filter(t => t.status === 'overdue').length,
-        totalAmount: formattedTenants.reduce((sum, t) => sum + t.rentAmount, 0),
-        paidAmount: formattedTenants.filter(t => t.status === 'paid').reduce((sum, t) => sum + t.rentAmount, 0),
+    // Format montant avec espaces
+    const formatAmount = (amount: number) => {
+        return amount.toLocaleString('fr-FR');
     };
 
     return (
         <div className="space-y-0">
-            {/* KPI Bar Globale - Style Enterprise Dense */}
-            <div className="border-b border-slate-800 bg-slate-900/30 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4">
-                <div className="flex items-center justify-between gap-6 text-sm font-mono">
-                    <div className="flex items-center gap-6">
-                        <div>
-                            <span className="text-slate-500">Total Baux:</span>
-                            <span className="ml-2 font-semibold text-white">{globalStats.totalBauxActifs}</span>
+            {/* ========================================
+                KPI STRIP - Bandeau Dense Dark Enterprise
+                ======================================== */}
+            <div className="border-b border-slate-800 bg-black -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4">
+                <div className="flex items-center justify-between gap-4 text-sm">
+                    <div className="flex items-center gap-4 md:gap-6 font-mono">
+                        {/* Total Attendu */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-slate-500 text-xs uppercase tracking-wider hidden md:inline">Total</span>
+                            <span className="font-semibold text-white">{formatAmount(kpiStats.totalExpected)}</span>
                         </div>
-                        <div className="hidden md:block text-slate-700">|</div>
-                        <div>
-                            <span className="text-slate-500">Payés:</span>
-                            <span className="ml-2 font-semibold text-green-400">{globalStats.paidCount}</span>
+
+                        <div className="text-slate-700">|</div>
+
+                        {/* Encaissé */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-slate-500 text-xs uppercase tracking-wider hidden md:inline">Encaissé</span>
+                            <span className="font-semibold text-green-400">{formatAmount(kpiStats.totalCollected)}</span>
+                            <span className="text-slate-500 text-xs">({kpiStats.collectedPercent}%)</span>
                         </div>
-                        <div className="hidden md:block text-slate-700">|</div>
-                        <div>
-                            <span className="text-slate-500">En attente:</span>
-                            <span className="ml-2 font-semibold text-yellow-400">{globalPendingCount}</span>
+
+                        <div className="text-slate-700 hidden md:block">|</div>
+
+                        {/* Reste */}
+                        <div className="flex items-center gap-2 hidden md:flex">
+                            <span className="text-slate-500 text-xs uppercase tracking-wider">Reste</span>
+                            <span className={`font-semibold ${kpiStats.totalPending > 0 ? 'text-yellow-400' : 'text-green-400'}`}>
+                                {formatAmount(kpiStats.totalPending)}
+                            </span>
                         </div>
                     </div>
-                    <div className="hidden md:block">
-                        <span className="text-slate-500">Encaissé:</span>
-                        <span className="ml-2 font-semibold text-white">{globalStats.encaisse.toLocaleString('fr-FR')}</span>
-                        <span className="ml-1 text-slate-500 text-xs">FCFA</span>
+
+                    {/* Compteurs */}
+                    <div className="flex items-center gap-3 text-xs">
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-green-500/10 rounded">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                            <span className="text-green-400 font-medium">{kpiStats.paidCount}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-yellow-500/10 rounded">
+                            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
+                            <span className="text-yellow-400 font-medium">{kpiStats.pendingCount}</span>
+                        </div>
+                        {kpiStats.overdueCount > 0 && (
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-red-500/10 rounded">
+                                <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+                                <span className="text-red-400 font-medium">{kpiStats.overdueCount}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Barre de contrôles */}
-            <div className="flex flex-col md:flex-row gap-3">
+            {/* ========================================
+                BARRE DE CONTRÔLES
+                ======================================== */}
+            <div className="flex flex-col md:flex-row gap-3 mb-4">
                 {/* Recherche */}
-                <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
+                <div className="flex-1 flex items-center gap-2 bg-black border border-slate-800 rounded-md px-3 h-9 focus-within:border-slate-700">
+                    <Search className="h-4 w-4 text-slate-500 shrink-0" />
+                    <input
                         type="text"
-                        placeholder="Rechercher un locataire, bien, email..."
+                        placeholder="Rechercher..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 bg-slate-900 border-slate-800 text-white placeholder:text-slate-500 focus:border-slate-700 h-10"
+                        className="flex-1 bg-transparent text-white placeholder:text-slate-600 text-sm outline-none"
                     />
                 </div>
 
@@ -243,11 +326,12 @@ export function GestionLocativeClient({
                 <Button
                     onClick={handleExportCSV}
                     variant="outline"
-                    className="bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white h-10 px-4"
+                    size="sm"
+                    className="bg-black border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-white h-9 px-3"
                     disabled={formattedTenants.length === 0}
                 >
                     <Download className="w-4 h-4 mr-2" />
-                    Export CSV
+                    CSV
                 </Button>
 
                 {/* Sélecteur de mois */}
@@ -256,42 +340,33 @@ export function GestionLocativeClient({
                         selectedMonth={selectedMonth}
                         selectedYear={selectedYear}
                         onMonthChange={handleMonthChange}
+                        minDate={minDate}
                     />
                 </div>
             </div>
 
-            {/* Mini statistiques du mois en ligne (Tableau filtré) */}
-            <div className="flex items-center gap-6 px-4 py-2 bg-slate-900/50 border-y border-slate-800 text-sm mt-4">
-                <div>
-                    <span className="text-slate-400">Affichés:</span>
-                    <span className="ml-2 font-semibold text-white">{monthStats.total}</span>
-                </div>
-                <div>
-                    <span className="text-slate-400">Payés:</span>
-                    <span className="ml-2 font-semibold text-green-400">{monthStats.paid}</span>
-                </div>
-                <div>
-                    <span className="text-slate-400">En attente:</span>
-                    <span className="ml-2 font-semibold text-yellow-400">{monthStats.pending}</span>
-                </div>
-                <div>
-                    <span className="text-slate-400">Retard:</span>
-                    <span className="ml-2 font-semibold text-red-400">{monthStats.overdue}</span>
-                </div>
-                <div className="ml-auto hidden md:block">
-                    <span className="text-slate-400">Total période:</span>
-                    <span className="ml-2 font-mono font-semibold text-white">{monthStats.totalAmount.toLocaleString('fr-FR')} FCFA</span>
-                </div>
-            </div>
-
-            {/* Table Enterprise */}
+            {/* ========================================
+                TABLE ENTERPRISE
+                ======================================== */}
             <TenantTable
                 tenants={formattedTenants}
                 profile={profile}
                 userEmail={userEmail}
                 isViewingTerminated={isViewingTerminated}
                 searchQuery={searchQuery}
+                onEdit={(tenant) => setEditingTenant(tenant)}
+                onDelete={deleteTransaction}
+                onDeleteLease={deleteLease}
             />
+
+            {/* Modale d'édition */}
+            {editingTenant && (
+                <EditTenantDialog
+                    isOpen={!!editingTenant}
+                    onClose={() => setEditingTenant(null)}
+                    tenant={editingTenant}
+                />
+            )}
         </div>
     );
 }

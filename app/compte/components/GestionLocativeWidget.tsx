@@ -1,99 +1,116 @@
-'use client';
-
-import { LayoutDashboard, ArrowRight, Wallet, Bell, FileText, Clock, Wrench } from 'lucide-react';
+import { ArrowRight, Building2, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 interface GestionLocativeWidgetProps {
     activeLeases?: number;
     pendingPayments?: number;
     maintenanceRequests?: number;
+    financials?: {
+        total: number;
+        collected: number;
+        percent: number;
+    };
 }
 
 export function GestionLocativeWidget({
     activeLeases = 3,
     pendingPayments = 2,
-    maintenanceRequests = 1
+    maintenanceRequests = 1,
+    financials = { total: 0, collected: 0, percent: 0 }
 }: GestionLocativeWidgetProps) {
-    const stats = {
-        baux: activeLeases,
-        attente: pendingPayments,
-        pannes: maintenanceRequests
-    };
+    // Format current month (e.g., "Décembre")
+    const currentMonthName = new Date().toLocaleString('fr-FR', { month: 'long' });
+    const monthLabel = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1);
 
     return (
-        <Link href="/compte/gestion-locative" className="block group mb-8">
-            {/* Dégradé bleu nuit profond - plus élégant et moins agressif */}
-            <div className="relative overflow-hidden p-6 rounded-[2.5rem] bg-gradient-to-br from-gray-900 via-blue-950 to-slate-900 text-white shadow-xl shadow-blue-900/20 transition-all duration-300 hover:scale-[1.01] active:scale-95 border border-blue-800/30">
+        <div className="group relative overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 transition-all duration-300 mb-8">
 
-                {/* Cercles de décoration subtils */}
-                <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors" />
-                <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-colors" />
+            {/* 1. HEADER : Titre + Badge Premium */}
+            <div className="flex items-center justify-between p-4 border-b border-slate-800/50">
+                <div className="space-y-0.5">
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                        Gestion Locative
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                        Automatisez vos revenus fonciers.
+                    </p>
+                </div>
 
-                <div className="relative z-10">
-                    {/* Header du Widget */}
-                    <div className="flex justify-between items-start mb-6">
-                        <div className="p-3 bg-blue-950/50 rounded-2xl backdrop-blur-md border border-blue-800/50">
-                            <LayoutDashboard className="w-6 h-6 text-blue-200" />
-                        </div>
-                        <div className="flex flex-col items-end">
-                            {/* Badge Premium légèrement moins saturé */}
-                            <span className="text-[10px] font-black bg-yellow-500/90 text-blue-950 px-3 py-1 rounded-full uppercase tracking-tighter mb-1 shadow-sm">
-                                Premium
-                            </span>
-                            <div className="flex items-center gap-1 text-[10px] text-blue-300/80">
-                                <span className="w-1.5 h-1.5 bg-green-500/80 rounded-full animate-pulse"></span>
-                                Système Actif
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Titre et description */}
-                    <div className="space-y-1 mb-6">
-                        <h3 className="text-2xl font-extrabold tracking-tight text-white">Gestion Locative</h3>
-                        <p className="text-blue-200/70 text-sm font-medium">Automatisez vos revenus fonciers & quittances.</p>
-                    </div>
-
-                    {/* Cartes de stats - tons plus sombres */}
-                    <div className="grid grid-cols-3 gap-3 mb-6">
-                        <div className="bg-black/20 border border-blue-800/30 rounded-2xl p-3 backdrop-blur-sm">
-                            <div className="flex items-center gap-1 text-blue-300 text-xs mb-1">
-                                <FileText className="w-3 h-3" /> Baux
-                            </div>
-                            <div className="text-xl font-bold">{stats.baux}</div>
-                        </div>
-                        <div className="bg-black/20 border border-blue-800/30 rounded-2xl p-3 backdrop-blur-sm">
-                            <div className="flex items-center gap-1 text-yellow-300/80 text-xs mb-1">
-                                <Clock className="w-3 h-3" /> En attente
-                            </div>
-                            <div className="text-xl font-bold">{stats.attente}</div>
-                        </div>
-                        <div className="bg-black/20 border border-blue-800/30 rounded-2xl p-3 backdrop-blur-sm">
-                            <div className="flex items-center gap-1 text-orange-300/80 text-xs mb-1">
-                                <Wrench className="w-3 h-3" /> Pannes
-                            </div>
-                            <div className="text-xl font-bold">{stats.pannes}</div>
-                        </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="pt-4 border-t border-blue-800/30 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="flex -space-x-2">
-                                <div className="w-7 h-7 rounded-full bg-blue-900 border-2 border-blue-950 flex items-center justify-center text-blue-200">
-                                    <Wallet className="w-3 h-3" />
-                                </div>
-                                <div className="w-7 h-7 rounded-full bg-indigo-900 border-2 border-blue-950 flex items-center justify-center text-blue-200">
-                                    <Bell className="w-3 h-3" />
-                                </div>
-                            </div>
-                            <span className="text-xs text-blue-300/80 font-semibold tracking-wide">Tableau de bord intelligent</span>
-                        </div>
-                        <div className="p-2 bg-blue-950 text-blue-200 rounded-full group-hover:bg-blue-900 group-hover:text-white transition-all group-hover:translate-x-1">
-                            <ArrowRight className="w-4 h-4" />
-                        </div>
-                    </div>
+                {/* Badge Premium Style "Linear" */}
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20">
+                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                    <span className="text-[10px] font-medium text-yellow-500 uppercase tracking-wider">Premium</span>
                 </div>
             </div>
-        </Link>
+
+            {/* 2. BODY : Les Métriques (Grid) */}
+            <div className="grid grid-cols-3 divide-x divide-slate-800/50">
+
+                {/* KPI 1 : Baux Actifs */}
+                <Link href="/compte/gestion-locative" className="p-2 flex flex-col items-center justify-center text-center gap-2 hover:bg-slate-800/30 transition-colors cursor-pointer">
+                    <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                        <Building2 className="w-4 h-4" />
+                    </div>
+                    <div>
+                        <span className="text-xl font-mono font-bold text-white">{activeLeases}</span>
+                        <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide mt-1">Baux Actifs</p>
+                    </div>
+                </Link>
+
+                {/* KPI 2 : En Attente (Dynamic Color) */}
+                <Link href="/compte/gestion-locative" className="p-2 flex flex-col items-center justify-center text-center gap-2 hover:bg-slate-800/30 transition-colors cursor-pointer">
+                    <div className={`p-2 rounded-lg ${pendingPayments > 0 ? 'bg-orange-500/10 text-orange-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                        {pendingPayments > 0 ? <Clock className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                    </div>
+                    <div>
+                        <span className={`text-xl font-mono font-bold ${pendingPayments > 0 ? 'text-white' : 'text-emerald-400'}`}>
+                            {pendingPayments}
+                        </span>
+                        <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide mt-1">
+                            {pendingPayments === 0 ? 'Retard' : 'En attente'}
+                        </p>
+                    </div>
+                </Link>
+
+                {/* KPI 3 : Pannes (Rouge) */}
+                <Link href="/compte/gestion-locative" className="p-2 flex flex-col items-center justify-center text-center gap-2 hover:bg-slate-800/30 transition-colors cursor-pointer">
+                    <div className="p-2 rounded-lg bg-red-500/10 text-red-400">
+                        <AlertCircle className="w-4 h-4" />
+                    </div>
+                    <div>
+                        <span className="text-xl font-mono font-bold text-white">{maintenanceRequests}</span>
+                        <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide mt-1">Pannes</p>
+                    </div>
+                </Link>
+
+            </div>
+
+            {/* 3. FOOTER : Section Financière (Remplacement du simple lien) */}
+            <Link href="/compte/gestion-locative" className="block border-t border-slate-800 bg-slate-900/30 p-4 hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="text-slate-400 text-xs">Revenus de {monthLabel}</span>
+                    <span className="text-white font-mono font-medium text-xs">
+                        {financials.percent}% <span className="text-slate-500 text-[10px]">encaissé</span>
+                    </span>
+                </div>
+
+                {/* Barre de progression */}
+                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-emerald-500 transition-all duration-500 ease-out"
+                        style={{ width: `${financials.percent}%` }}
+                    />
+                </div>
+
+                <div className="flex justify-between mt-2 text-[10px] font-mono">
+                    <div className="text-emerald-400 font-medium">
+                        + {financials.collected.toLocaleString()} FCFA
+                    </div>
+                    <div className="text-slate-500">
+                        Obj: {financials.total.toLocaleString()} FCFA
+                    </div>
+                </div>
+            </Link>
+        </div>
     );
 }
