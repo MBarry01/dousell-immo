@@ -7,7 +7,13 @@ import { useEffect, useState, useRef } from "react";
  * @returns La position Y actuelle du scroll
  */
 export function useScrollPosition() {
-  const [scrollY, setScrollY] = useState(0);
+  const [scrollY, setScrollY] = useState(() => {
+    // Initialisation paresseuse pour éviter setState dans useEffect
+    if (typeof window !== 'undefined') {
+      return window.scrollY;
+    }
+    return 0;
+  });
   const ticking = useRef(false);
 
   useEffect(() => {
@@ -21,9 +27,6 @@ export function useScrollPosition() {
         ticking.current = true;
       }
     };
-
-    // Initialiser avec la position actuelle
-    setScrollY(window.scrollY);
 
     // Écouter les événements de scroll avec passive pour optimiser
     window.addEventListener("scroll", handleScroll, { passive: true });

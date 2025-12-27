@@ -39,7 +39,7 @@ export const Header = () => {
       {/* Version Mobile */}
       <header
         className={cn(
-          "fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 transition-all duration-300 md:hidden",
+          "fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 transition-all duration-300 md:hidden print:hidden",
           isScrolled
             ? "bg-black/80 backdrop-blur-md border-b border-white/5"
             : "bg-transparent border-transparent"
@@ -108,8 +108,8 @@ export const Header = () => {
       </header>
 
       {/* Version Desktop */}
-      <header 
-        className="sticky top-0 z-40 hidden w-full md:block"
+      <header
+        className="sticky top-0 z-40 hidden w-full md:block print:hidden"
         style={{
           paddingTop: "env(safe-area-inset-top, 0px)",
           willChange: "transform",

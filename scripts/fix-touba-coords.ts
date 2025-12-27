@@ -54,8 +54,8 @@ async function fixTouba() {
 
     // Utiliser smartGeocode pour obtenir les bonnes coordonnées
     // Si la ville est "Kafrine" mais l'adresse est "Touba", on doit corriger
-    let geocodeAddress = address;
-    let geocodeDistrict = district;
+    const geocodeAddress = address;
+    const geocodeDistrict = district;
     let geocodeCity = city;
 
     // Si l'adresse est "Touba" mais la ville est "Kafrine", on corrige la ville

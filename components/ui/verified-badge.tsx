@@ -1,18 +1,10 @@
 "use client";
 
-import { BadgeCheck, ShieldCheck } from "lucide-react";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { BadgeCheck } from "lucide-react";
 
 export const VerifiedBadge = ({
     className = "",
     size = "md",
-    showTooltip = true,
-    variant = "pill" // "pill" | "icon"
 }: {
     className?: string;
     size?: "sm" | "md" | "lg";
@@ -26,20 +18,15 @@ export const VerifiedBadge = ({
     };
 
     // Badge simplifié : icône uniquement
-    const BadgeContent = () => {
-        return (
-            <div className={`relative inline-flex items-center justify-center ${className}`}>
-                {/* Icône style "Sceau" : remplie or, trait noir */}
-                <BadgeCheck
-                    className={`${sizeClasses[size]} fill-[#F4C430] text-black`}
-                    strokeWidth={2}
-                />
-            </div>
-        );
-    };
-
-    // Tooltip/Hover commenté pour le moment
-    return <BadgeContent />;
+    return (
+        <div className={`relative inline-flex items-center justify-center ${className}`}>
+            {/* Icône style "Sceau" : remplie or, trait noir */}
+            <BadgeCheck
+                className={`${sizeClasses[size]} fill-[#F4C430] text-black`}
+                strokeWidth={2}
+            />
+        </div>
+    );
 
     /* 
     // Version avec tooltip (désactivée temporairement)

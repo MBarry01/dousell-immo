@@ -58,7 +58,7 @@ export function VerificationEmail({
             <Hr style={hr} />
 
             <Text style={footer}>
-              Ce lien est valide pendant 24 heures. Si vous n'avez pas créé de
+              Ce lien est valide pendant 24 heures. Si vous n&apos;avez pas créé de
               compte sur Doussel Immo, vous pouvez ignorer cet email.
             </Text>
 

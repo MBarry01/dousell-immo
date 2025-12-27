@@ -106,25 +106,25 @@ export const AppShell = ({ children }: AppShellProps) => {
   return (
     <div className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white">
       <ScrollToTop />
-      <div className="px-4 md:px-6">
+      <div className="px-4 md:px-6 print:hidden">
         <Header />
-        <main 
-          className="mx-auto w-full max-w-6xl md:pb-4 md:pt-6" 
-          style={{ 
-            paddingTop: "calc(env(safe-area-inset-top, 0px) + 4rem)",
-            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)" 
-          }}
-        >
-          {shouldShowBreadcrumbs && (
-            <div className="mb-6">
-              <Breadcrumbs items={breadcrumbItems} />
-            </div>
-          )}
-          {children}
-        </main>
       </div>
+      <main
+        className="mx-auto w-full max-w-6xl md:pb-4 md:pt-6 print:p-0 print:max-w-none"
+        style={{
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 4rem)",
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)"
+        }}
+      >
+        {shouldShowBreadcrumbs && (
+          <div className="mb-6 print:hidden">
+            <Breadcrumbs items={breadcrumbItems} />
+          </div>
+        )}
+        {children}
+      </main>
       {!shouldHideFooter && (
-        <div className="px-4 md:px-0">
+        <div className="px-4 md:px-0 print:hidden">
           <Footer />
         </div>
       )}

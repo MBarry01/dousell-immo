@@ -78,11 +78,11 @@ export function ListingApprovedEmail({
           <Section style={content}>
             <Heading style={h2} className="heading">Félicitations ! 🎉</Heading>
             <Text style={paragraph} className="text">
-              Votre annonce <strong>"{propertyTitle}"</strong> a été validée par notre équipe. Elle est désormais visible par des milliers de visiteurs potentiels.
+              Votre annonce <strong>&quot;{propertyTitle}&quot;</strong> a été validée par notre équipe. Elle est désormais visible par des milliers de visiteurs potentiels.
             </Text>
 
             <Section style={card} className="card">
-              <Heading style={cardTitle} className="heading">Détails de l'annonce</Heading>
+              <Heading style={cardTitle} className="heading">Détails de l&apos;annonce</Heading>
 
               <div style={grid}>
                 <div style={column}>
@@ -146,7 +146,7 @@ export function ListingApprovedEmail({
           </Section>
 
           <Section style={footer}>
-            <Text style={footerContact}>Besoin d'aide ? Contactez nos agents :</Text>
+            <Text style={footerContact}>Besoin d&apos;aide ? Contactez nos agents :</Text>
             <Text style={footerPhone}>🇫🇷 +33 07 51 08 15 79</Text>
             <Text style={footerPhone}>🇸🇳 +221 77 138 52 81</Text>
             <Text style={footerLinks}>

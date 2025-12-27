@@ -34,7 +34,7 @@ const socials = [
 
 export const Footer = () => {
   return (
-    <footer className="mt-4 border-t border-white/10 bg-[#05080c]/90 pb-16 text-white md:pb-4">
+    <footer className="mt-4 border-t border-white/10 bg-[#05080c]/90 pb-16 text-white md:pb-4 print:hidden">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 md:flex-row md:gap-12">
         <div className="flex-1 space-y-3">
           <p className="text-lg font-semibold text-white">Dousell Immo</p>

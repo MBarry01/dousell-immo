@@ -16,7 +16,7 @@ export const BottomNav = () => {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#05080c]/90 backdrop-blur-xl md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#05080c]/90 backdrop-blur-xl md:hidden print:hidden"
       style={{
         paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
       }}

@@ -56,10 +56,10 @@ export const SearchExperience = ({
 
   // Ouvrir le dialog de création d'alerte si ?alert=create est présent
   useEffect(() => {
-    if (searchParams.get("alert") === "create") {
-      if (user) {
-        setAlertDialogOpen(true);
-      }
+    const shouldOpenAlert = searchParams.get("alert") === "create" && !!user;
+    if (shouldOpenAlert) {
+      // Utiliser setTimeout pour éviter setState synchrone dans useEffect
+      setTimeout(() => setAlertDialogOpen(true), 0);
     }
   }, [searchParams, user]);
 

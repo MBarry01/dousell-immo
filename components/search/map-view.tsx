@@ -214,7 +214,7 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
     const router = useRouter();
     const [activeId, setActiveId] = useState<string | undefined>(properties[0]?.id);
     const [mapEnabled, setMapEnabled] = useState(true);
-    const [mounted, setMounted] = useState(false);
+    const [mounted, setMounted] = useState(true); // Déjà monté si ce composant client s'exécute
 
     // Filtrer les propriétés qui ont des coordonnées valides
     const propertiesWithCoords = useMemo(
@@ -247,11 +247,6 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
 
         return [center.lat, center.lng];
     }, [propertiesWithCoords]);
-
-    // Gestion du montage côté client
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     // Gestion de l'activation de la carte selon le contexte
     useEffect(() => {

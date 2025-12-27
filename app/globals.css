@@ -195,3 +195,18 @@
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 43px) !important;
   }
 }
+
+/* Print Optimizations - Quittance de loyer */
+@media print {
+  /* Optimisation des images pour l'impression */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Éviter les coupures de page dans les sections importantes */
+  table,
+  .signature-block {
+    page-break-inside: avoid !important;
+  }
+}

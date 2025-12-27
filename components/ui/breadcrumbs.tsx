@@ -22,7 +22,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
     <nav
       aria-label="Fil d'Ariane"
       className={cn(
-        "flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground",
+        "flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground print:hidden",
         className
       )}
     >

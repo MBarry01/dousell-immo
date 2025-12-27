@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Turnstile from "react-turnstile";
 
 interface CaptchaProps {
@@ -9,12 +9,8 @@ interface CaptchaProps {
 }
 
 export function Captcha({ onVerify, onExpire }: CaptchaProps) {
-  const [mounted, setMounted] = useState(false);
+  const [mounted] = useState(true); // Déjà monté si ce composant client s'exécute
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!mounted || !siteKey) return null;
 
