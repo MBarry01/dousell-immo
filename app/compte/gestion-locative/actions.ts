@@ -4,10 +4,79 @@ import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 /**
+ * Calcule les statistiques financières en temps réel
+ */
+export async function getRentalStats() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { collected: "0", pending: "0", overdue: "0" };
+
+    const today = new Date();
+    const currentDay = today.getDate();
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+
+    // 1. Récupérer tous les baux actifs (revenus attendus)
+    const { data: activeLeases } = await supabase
+        .from('leases')
+        .select('id, monthly_amount, billing_day')
+        .eq('owner_id', user.id)
+        .eq('status', 'active');
+
+    // 2. Récupérer les transactions de ce mois
+    const { data: paidTrans } = await supabase
+        .from('rental_transactions')
+        .select('lease_id, amount_due, status')
+        .eq('period_month', currentMonth)
+        .eq('period_year', currentYear)
+        // On filtre sur les leases du user via le join implicite ou une requête séparée.
+        // Ici on suppose que rental_transactions est fiable, mais pour sécu on peut join.
+        // Cependant pour perf on va filtrer en JS avec la liste des activeLeases
+        .in('lease_id', (activeLeases || []).map(l => l.id));
+
+    let collected = 0;
+    let pending = 0;
+    let overdue = 0;
+
+    const paidLeaseIds = new Set();
+
+    // Traiter les paiements existants
+    paidTrans?.forEach(t => {
+        if (t.status === 'paid') {
+            collected += Number(t.amount_due);
+            paidLeaseIds.add(t.lease_id);
+        }
+    });
+
+    // 3. Pour chaque bail actif, vérifier le statut
+    activeLeases?.forEach(lease => {
+        // Si le bail a déjà été payé (transaction 'paid' trouvée), on ne compte plus en pending/overdue
+        if (paidLeaseIds.has(lease.id)) return;
+
+        const amount = Number(lease.monthly_amount);
+
+        // Si pas payé, c'est soit pending, soit overdue selon la date
+        if (currentDay > (lease.billing_day || 5)) {
+            overdue += amount;
+        } else {
+            pending += amount;
+        }
+    });
+
+    return {
+        collected: collected.toLocaleString('fr-FR'),
+        pending: pending.toLocaleString('fr-FR'),
+        overdue: overdue.toLocaleString('fr-FR')
+    };
+}
+
+
+/**
  * Fonction utilitaire pour envoyer les données à n8n
  * Les webhooks n8n doivent être configurés pour recevoir ces événements
  */
-async function triggerN8N(webhookPath: string, payload: any) {
+async function triggerN8N(webhookPath: string, payload: Record<string, unknown>) {
     const N8N_URL = process.env.N8N_WEBHOOK_URL; // URL de l'instance n8n
     if (!N8N_URL) {
         console.warn('N8N_WEBHOOK_URL non configuré - webhook ignoré');
@@ -37,7 +106,7 @@ async function triggerN8N(webhookPath: string, payload: any) {
  * Enregistre un nouveau locataire et son bail
  * Déclenche la génération automatique du contrat PDF via n8n
  */
-export async function createNewLease(formData: any) {
+export async function createNewLease(formData: Record<string, unknown>) {
     const supabase = await createClient();
 
     // Récupérer l'utilisateur courant
@@ -87,17 +156,57 @@ export async function createNewLease(formData: any) {
  * Marque un loyer comme payé
  * Déclenche l'envoi automatique de la quittance par EMAIL via n8n
  */
-export async function confirmPayment(transactionId: string) {
+/**
+ * Marque un loyer comme payé
+ * Déclenche l'envoi automatique de la quittance par EMAIL via n8n
+ * Si pas d'ID de transaction, en crée une pour le mois courant
+ */
+export async function confirmPayment(leaseId: string, transactionId?: string) {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    // Mise à jour avec récupération des données du bail pour l'email
+    if (!user) return { success: false, error: "Non autorisé" };
+
+    let targetId = transactionId;
+
+    // 1. Si pas de transactionID, on en crée une pour le mois actuel
+    if (!targetId) {
+        // Récupérer le montant du bail
+        const { data: lease } = await supabase
+            .from('leases')
+            .select('monthly_amount')
+            .eq('id', leaseId)
+            .single();
+
+        if (!lease) return { success: false, error: "Bail introuvable" };
+
+        const { data: newTrans, error: insertError } = await supabase
+            .from('rental_transactions')
+            .insert([{
+                lease_id: leaseId,
+                period_month: new Date().getMonth() + 1,
+                period_year: new Date().getFullYear(),
+                amount_due: lease.monthly_amount,
+                status: 'pending'
+            }])
+            .select()
+            .single();
+
+        if (insertError) {
+            console.error("Erreur création transaction:", insertError.message);
+            return { success: false, error: insertError.message };
+        }
+        targetId = newTrans.id;
+    }
+
+    // 2. Mise à jour de la transaction en 'paid' avec récupération des données pour email
     const { data: trans, error } = await supabase
         .from('rental_transactions')
         .update({
             status: 'paid',
             paid_at: new Date().toISOString()
         })
-        .eq('id', transactionId)
+        .eq('id', targetId)
         .select('*, leases(tenant_name, tenant_email, monthly_amount, owner_id)')
         .single();
 
@@ -106,29 +215,37 @@ export async function confirmPayment(transactionId: string) {
         return { success: false, error: error.message };
     }
 
-    // DÉCLENCHEUR N8N : Envoi de la quittance par EMAIL (Gmail)
-    if (trans && trans.leases && trans.leases.tenant_email) {
-        await triggerN8N('send-receipt-email', {
+    // 3. Appel n8n en "Fire and Forget" avec l'email du propriétaire en CC
+    const N8N_URL = process.env.N8N_WEBHOOK_URL;
+    let emailSent = false;
+
+    if (N8N_URL && trans && trans.leases && trans.leases.tenant_email) {
+        // On n'attend pas la réponse (pas de await) pour ne pas bloquer l'UI
+        triggerN8N('send-receipt-email', {
             transactionId: trans.id,
             leaseId: trans.lease_id,
-            // Destinataire EMAIL (priorité Gmail)
             tenantEmail: trans.leases.tenant_email,
             tenantName: trans.leases.tenant_name,
-            // Détails paiement
+            ownerEmail: user.email, // Email du propriétaire pour le CC
+            shouldSendCC: true, // Flag pour indiquer d'envoyer une copie au proprio
             amount: trans.amount_due,
             currency: 'FCFA',
             periodMonth: trans.period_month,
             periodYear: trans.period_year,
             paidAt: trans.paid_at,
-            // Pour le template
             monthLabel: new Date(trans.period_year, trans.period_month - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-        });
-    } else {
-        console.warn("Quittance non envoyée: email locataire manquant pour transaction", transactionId);
+        }).catch(err => console.error("Erreur background n8n:", err));
+        emailSent = true;
     }
 
     revalidatePath('/compte/gestion-locative');
-    return { success: true };
+
+    // Message personnalisé selon si n8n est configuré ou non
+    const message = emailSent
+        ? "Paiement validé ! n8n va envoyer la quittance par email au locataire (et vous en copie) d'ici quelques instants."
+        : "Paiement validé ! Vous pouvez générer la quittance manuellement via le bouton 'Voir quittance'.";
+
+    return { success: true, message };
 }
 
 /**
@@ -141,6 +258,7 @@ export async function updateLease(leaseId: string, data: {
     property_address?: string;
     monthly_amount?: number;
     billing_day?: number;
+    start_date?: string;
 }) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -161,13 +279,14 @@ export async function updateLease(leaseId: string, data: {
     }
 
     // Ne mettre à jour que les colonnes qui existent
-    // property_address et updated_at seront ajoutés plus tard via migration
-    const updateData: Record<string, any> = {};
-    if (data.tenant_name) updateData.tenant_name = data.tenant_name;
+    const updateData: Record<string, string | number | undefined> = {};
+    if (data.tenant_name !== undefined) updateData.tenant_name = data.tenant_name;
     if (data.tenant_phone !== undefined) updateData.tenant_phone = data.tenant_phone;
-    if (data.tenant_email) updateData.tenant_email = data.tenant_email;
-    if (data.monthly_amount) updateData.monthly_amount = data.monthly_amount;
-    if (data.billing_day) updateData.billing_day = data.billing_day;
+    if (data.tenant_email !== undefined) updateData.tenant_email = data.tenant_email;
+    if (data.property_address !== undefined) updateData.property_address = data.property_address;
+    if (data.monthly_amount !== undefined) updateData.monthly_amount = data.monthly_amount;
+    if (data.billing_day !== undefined) updateData.billing_day = data.billing_day;
+    if (data.start_date !== undefined) updateData.start_date = data.start_date;
 
     const { error } = await supabase
         .from('leases')
@@ -300,6 +419,119 @@ export async function getActiveLeases() {
     }
 
     return { success: true, data: leases || [] };
+}
+
+/**
+ * Envoie les données de quittance à Pipedream
+ * Formate correctement le payload pour le webhook Pipedream
+ */
+export async function sendReceiptToN8N(data: any) {
+    // 1. On récupère l'URL Pipedream définie dans .env.local
+    const WEBHOOK_URL = process.env.NEXT_PUBLIC_WEBHOOK_URL;
+
+    if (!WEBHOOK_URL) {
+        console.error("URL Pipedream manquante !");
+        return { success: false, error: "Configuration webhook manquante" };
+    }
+
+    // 2. On prépare le paquet de données (L'enveloppe)
+    // On mappe vos données Supabase vers les noms attendus par Pipedream
+
+    // Debug: Voir ce qu'on reçoit vraiment
+    console.log("=".repeat(80));
+    console.log("📦 DONNÉES BRUTES REÇUES AVANT ENVOI:");
+    console.log("📧 Email du tenant:", data.tenant?.email);
+    console.log("📞 Téléphone du tenant:", data.tenant?.phone);
+    console.log("👤 Objet tenant complet:", JSON.stringify(data.tenant, null, 2));
+    console.log("=".repeat(80));
+
+    const payload = {
+        // Infos Locataire
+        tenantName: data.tenant?.tenant_name || data.tenant?.name || '',
+        tenantEmail: data.tenant?.email || data.tenant?.tenant_email || '',
+        tenantPhone: data.tenant?.phone || data.tenant?.tenant_phone || '',
+        tenantAddress: data.tenant?.address || data.property_address || '',
+
+        // Infos Paiement
+        amount: Number(data.amount) || 0,
+        periodMonth: data.periodMonth || `${data.month || new Date().getMonth() + 1}/2025`,
+        periodStart: data.periodStart || `01/${data.month || new Date().getMonth() + 1}/2025`,
+        periodEnd: data.periodEnd || `30/${data.month || new Date().getMonth() + 1}/2025`,
+        receiptNumber: data.receiptNumber || `QUITT-${Date.now().toString().slice(-6)}`,
+
+        // Infos Propriétaire (Baraka Immo)
+        ownerName: data.profile?.company_name || data.profile?.full_name || 'Propriétaire',
+        ownerEmail: data.profile?.email || '',
+        ownerLogo: data.profile?.logo_url || null,
+        ownerSignature: data.profile?.signature_url || null,
+        ownerAddress: data.profile?.company_address || '',
+        ownerNinea: data.profile?.ninea || '',
+
+        // Infos Propriété
+        propertyAddress: data.property_address || data.tenant?.address || '',
+
+        // Image de la quittance (si générée côté client)
+        receiptImage: data.receiptImage || null
+    };
+
+    console.log("📤 Envoi à Pipedream :", JSON.stringify(payload, null, 2)); // Pour vérifier dans vos logs serveur
+
+    try {
+        // 3. On expédie le tout à Pipedream
+        const response = await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload) // Pipedream : envoyer directement le payload, pas enveloppé
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Erreur Pipedream:', response.status, response.statusText);
+            console.error('Réponse brute:', errorText.substring(0, 500)); // Log les 500 premiers caractères
+            return {
+                success: false,
+                error: `Erreur webhook (${response.status}): ${response.statusText}`
+            };
+        }
+
+        // Essayer de parser la réponse comme JSON
+        const responseText = await response.text();
+        let result;
+
+        try {
+            result = JSON.parse(responseText);
+            console.log("✅ Réponse Pipedream:", result);
+            return { success: true, data: result };
+        } catch (parseError) {
+            // Si ce n'est pas du JSON, c'est probablement du HTML d'erreur
+            console.warn("⚠️ Réponse non-JSON reçue:", responseText.substring(0, 200));
+
+            // On considère quand même que c'est un succès si status 200
+            if (response.status === 200) {
+                console.log("✅ Requête envoyée avec succès (pas de JSON retourné)");
+                return {
+                    success: true,
+                    data: {
+                        message: "Envoyé à Pipedream (pas de réponse JSON)",
+                        rawResponse: responseText.substring(0, 200)
+                    }
+                };
+            }
+
+            return {
+                success: false,
+                error: "Réponse invalide de Pipedream (pas du JSON)"
+            };
+        }
+    } catch (error) {
+        console.error("❌ Echec envoi Pipedream:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Impossible de joindre le webhook"
+        };
+    }
 }
 
 

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Upload, PenTool, Building2, Save, Check, Phone, Mail, MapPin, Loader2, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { updatePremiumBranding } from './actions';
+import { updateBranding } from './actions';
 import { toast } from 'sonner';
 
 interface BrandingData {
@@ -98,7 +98,15 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
     const handleSave = async () => {
         setSaving(true);
 
-        const result = await updatePremiumBranding(formData);
+        const formDataObj = new FormData();
+        if (formData.company_name) formDataObj.append('company_name', formData.company_name);
+        if (formData.company_address) formDataObj.append('company_address', formData.company_address);
+        if (formData.company_phone) formDataObj.append('company_phone', formData.company_phone);
+        if (formData.company_email) formDataObj.append('company_email', formData.company_email);
+        if (formData.company_ninea) formDataObj.append('company_ninea', formData.company_ninea);
+
+        // Appel à la nouvelle server action (Step 3)
+        const result = await updateBranding(formDataObj); // utilisation de updateBranding importé depuis ./actions (ou config/actions)
 
         setSaving(false);
         if (result.success) {
@@ -132,8 +140,8 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                     </div>
                     <label className="block">
                         <div className={`h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${logoPreview
-                                ? 'border-blue-500/50 bg-blue-500/5'
-                                : 'border-gray-700 bg-gray-900/20 hover:border-blue-500/50'
+                            ? 'border-blue-500/50 bg-blue-500/5'
+                            : 'border-gray-700 bg-gray-900/20 hover:border-blue-500/50'
                             } ${uploadingLogo ? 'opacity-50 pointer-events-none' : ''}`}>
                             {logoPreview ? (
                                 <img src={logoPreview} alt="Logo" className="max-h-32 object-contain" />
@@ -186,8 +194,8 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                     </div>
                     <label className="block">
                         <div className={`h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${signaturePreview
-                                ? 'border-purple-500/50 bg-purple-500/5'
-                                : 'border-gray-700 bg-gray-900/20 hover:border-purple-500/50'
+                            ? 'border-purple-500/50 bg-purple-500/5'
+                            : 'border-gray-700 bg-gray-900/20 hover:border-purple-500/50'
                             } ${uploadingSignature ? 'opacity-50 pointer-events-none' : ''}`}>
                             {signaturePreview ? (
                                 <img src={signaturePreview} alt="Signature" className="max-h-32 object-contain" />

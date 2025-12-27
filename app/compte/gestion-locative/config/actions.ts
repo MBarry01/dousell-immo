@@ -3,6 +3,35 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
+export async function updateBranding(formData: FormData) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "Non autorisé" };
+
+    const updates = {
+        company_name: formData.get('company_name'),
+        company_address: formData.get('company_address'),
+        company_phone: formData.get('company_phone'),
+        company_email: formData.get('company_email'),
+        company_ninea: formData.get('company_ninea'),
+        updated_at: new Date().toISOString()
+    };
+
+    const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
+    if (!error) {
+        // IMPORTANT: Revalider TOUTES les pages qui utilisent le profil
+        revalidatePath('/compte/gestion-locative/config');
+        revalidatePath('/compte/gestion-locative');
+    }
+
+    return { success: !error, error: error?.message };
+}
+
 /**
  * Met à jour les paramètres de branding Premium de l'utilisateur
  */

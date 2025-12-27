@@ -209,45 +209,25 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
             {/* Liste des demandes */}
             <div className="space-y-2">
                 {requests.length > 0 ? requests.map((req) => (
-                    <div key={req.id} className="p-3 bg-gray-900/40 border border-gray-800 rounded-xl space-y-2">
-                        {/* Ligne 1: Description + Status */}
-                        <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{req.description}</p>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                    {req.category && (
-                                        <span className="text-[10px] text-gray-500">{req.category}</span>
-                                    )}
-                                    {req.created_at && (
-                                        <span className="text-[10px] text-gray-600">• {formatDate(req.created_at)}</span>
-                                    )}
-                                </div>
-                            </div>
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-medium border shrink-0 flex items-center gap-1 ${getStatusStyle(req.status)}`}>
-                                {getStatusIcon(req.status)}
-                                {getStatusLabel(req.status)}
-                            </span>
+                    <div key={req.id} className="flex items-center justify-between p-3 bg-gray-900/40 border border-gray-800 rounded-2xl">
+                        <div>
+                            <p className="text-sm font-bold">{req.description}</p>
+                            <span className="text-[10px] text-gray-500 uppercase">{req.status}</span>
                         </div>
 
-                        {/* Ligne 2: Devis si applicable */}
-                        {req.status === 'quote_received' && req.quote_amount && (
-                            <div className="flex items-center justify-between pt-2 border-t border-gray-800">
-                                <span className="text-sm font-bold text-orange-400">
-                                    {req.quote_amount.toLocaleString()} FCFA
-                                </span>
-                                <Button
-                                    size="sm"
-                                    className="h-7 text-xs bg-green-600 hover:bg-green-700"
-                                    onClick={() => handleApproveQuote(req.id)}
-                                    disabled={approvingId === req.id}
-                                >
-                                    {approvingId === req.id ? (
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                    ) : (
-                                        'Approuver'
-                                    )}
-                                </Button>
-                            </div>
+                        {/* Le bouton n'apparaît que si un devis a été reçu */}
+                        {req.status === 'quote_received' ? (
+                            <Button
+                                onClick={() => handleApproveQuote(req.id)}
+                                disabled={approvingId === req.id}
+                                className="bg-orange-600 hover:bg-orange-700 text-[10px] h-7 px-3 font-bold"
+                            >
+                                {approvingId === req.id ? <Loader2 className="w-3 h-3 animate-spin" /> : `Approuver ${req.quote_amount} FCFA`}
+                            </Button>
+                        ) : (
+                            <span className="text-[10px] italic text-gray-600 text-right">
+                                {req.status === 'approved' ? 'Devis approuvé' : 'En attente de devis...'}
+                            </span>
                         )}
                     </div>
                 )) : (

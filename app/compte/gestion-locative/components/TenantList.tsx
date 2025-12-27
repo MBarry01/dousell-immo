@@ -1,10 +1,11 @@
 'use client';
 
+import { ReceiptModal } from './ReceiptModal';
 import { useState } from 'react';
-import { User, Phone, Calendar, Edit2, X, Check, Mail, MapPin, Loader2 } from 'lucide-react';
+import { User, Phone, Calendar, Edit2, X, Check, Mail, MapPin, Loader2, CheckCircle, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { updateLease } from '../actions';
+import { updateLease, confirmPayment } from '../actions';
 import { toast } from 'sonner';
 
 interface Tenant {
@@ -16,10 +17,14 @@ interface Tenant {
     rentAmount: number;
     status: 'paid' | 'pending' | 'overdue';
     dueDate?: number;
+    startDate?: string;
+    last_transaction_id?: string;
 }
 
 interface TenantListProps {
     tenants?: Tenant[];
+    profile?: any;
+    userEmail?: string;
 }
 
 const statusColors = {
@@ -34,10 +39,14 @@ const statusLabels = {
     overdue: 'Retard'
 };
 
-export function TenantList({ tenants = [] }: TenantListProps) {
+export function TenantList({ tenants = [], profile, userEmail }: TenantListProps) {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editData, setEditData] = useState<Partial<Tenant>>({});
     const [saving, setSaving] = useState(false);
+
+    // État pour la modale de quittance
+    const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+    const [currentReceipt, setCurrentReceipt] = useState<any>(null);
 
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -54,7 +63,9 @@ export function TenantList({ tenants = [] }: TenantListProps) {
             phone: tenant.phone || '',
             email: tenant.email || '',
             property: tenant.property,
-            rentAmount: tenant.rentAmount
+            rentAmount: tenant.rentAmount,
+            dueDate: tenant.dueDate,
+            startDate: tenant.startDate
         });
     };
 
@@ -75,7 +86,9 @@ export function TenantList({ tenants = [] }: TenantListProps) {
             tenant_phone: editData.phone,
             tenant_email: editData.email,
             property_address: editData.property,
-            monthly_amount: editData.rentAmount
+            monthly_amount: editData.rentAmount,
+            billing_day: editData.dueDate,
+            start_date: editData.startDate
         });
         setSaving(false);
 
@@ -88,15 +101,156 @@ export function TenantList({ tenants = [] }: TenantListProps) {
         }
     };
 
+    const handleConfirmPayment = async (leaseId: string, transactionId?: string) => {
+        // Trouver le locataire pour les données de la quittance
+        const tenant = tenants.find(t => t.id === leaseId);
+
+        if (!tenant) {
+            toast.error('Locataire introuvable');
+            return;
+        }
+
+        // Étape 1: Marquer comme payé dans la DB
+        const result = await confirmPayment(leaseId, transactionId);
+
+        if (!result.success) {
+            toast.error(result.error || 'Erreur inconnue', {
+                description: "Vous pouvez toujours générer la quittance manuellement via le bouton 'Voir quittance'.",
+                duration: 7000,
+            });
+            return;
+        }
+
+        // Étape 2: Demander si on envoie la quittance
+        const shouldSendReceipt = window.confirm(
+            `Le loyer est marqué comme payé. Souhaitez-vous envoyer immédiatement la quittance par email à ${tenant.name} ?`
+        );
+
+        if (shouldSendReceipt) {
+            // Vérifier si l'email existe
+            if (!tenant.email) {
+                toast.error('Email manquant pour ce locataire', {
+                    description: "Modifiez le locataire pour ajouter son email.",
+                    duration: 5000,
+                });
+                return;
+            }
+
+            // Vérifier si l'adresse du bien est renseignée
+            if (!tenant.property || tenant.property === 'Adresse non renseignée') {
+                toast.error('Adresse du bien manquante', {
+                    description: "Veuillez modifier le locataire et ajouter l'adresse du bien avant d'envoyer la quittance.",
+                    duration: 6000,
+                });
+                return;
+            }
+
+            // Préparer les données pour la quittance
+            const landlordName = profile?.company_name || profile?.full_name || "Propriétaire";
+            const landlordAddress = profile?.company_address || "Adresse non renseignée";
+
+            const today = new Date();
+            const receiptData = {
+                tenantName: tenant.name,
+                tenantEmail: tenant.email,
+                tenantPhone: tenant.phone || '',
+                tenantAddress: tenant.property,
+                amount: Number(tenant.rentAmount) || 0,
+                periodMonth: `${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`,
+                periodStart: `01/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`,
+                periodEnd: `30/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`,
+                receiptNumber: `QUITT-${Date.now().toString().slice(-6)}`,
+                ownerName: landlordName,
+                ownerAddress: landlordAddress,
+                ownerNinea: profile?.company_ninea || undefined,
+                ownerLogo: profile?.logo_url || undefined,
+                ownerSignature: profile?.signature_url || undefined,
+                ownerEmail: profile?.company_email || undefined, // Email de config (priorité)
+                ownerAccountEmail: userEmail || undefined, // Email du compte (fallback)
+                propertyAddress: tenant.property,
+            };
+
+            // Envoyer la quittance
+            toast.promise(
+                fetch('/api/send-receipt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(receiptData),
+                }).then(async (res) => {
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || 'Erreur lors de l\'envoi');
+                    return data;
+                }),
+                {
+                    loading: 'Envoi de la quittance par email...',
+                    success: 'Quittance envoyée avec succès !',
+                    error: (err) => `Erreur: ${err.message}`,
+                }
+            );
+        } else {
+            // Juste confirmer le paiement sans envoi
+            toast.success(result.message || "Paiement enregistré avec succès !", {
+                duration: 5000,
+            });
+        }
+    };
+
+    // --- LOGIQUE QUITTANCE ---
+    const handleViewReceipt = (tenant: Tenant) => {
+        // Extraction sécurisée des infos avec fallback intelligent
+        const landlordName = profile?.company_name || profile?.full_name || "Propriétaire (non configuré)";
+        const landlordAddress = profile?.company_address || "Adresse (non configurée)";
+
+        const safeProfile = {
+            company_name: landlordName,
+            company_address: landlordAddress,
+            company_email: profile?.company_email || undefined,
+            company_ninea: profile?.company_ninea || undefined,
+            logo_url: profile?.logo_url || undefined,
+            signature_url: profile?.signature_url || undefined
+        };
+
+        // Avertissement si le profil n'est pas complet
+        if (!profile?.company_name && !profile?.full_name) {
+            toast.warning("Info: Configurez votre profil pour personnaliser la quittance.", {
+                duration: 5000,
+            });
+        }
+
+        const today = new Date();
+        setCurrentReceipt({
+            tenant: {
+                tenant_name: tenant.name,
+                email: tenant.email,
+                phone: tenant.phone,
+                address: tenant.property
+            },
+            profile: safeProfile,
+            userEmail: userEmail, // Email du compte pour fallback
+            amount: tenant.rentAmount,
+            month: (today.getMonth() + 1).toString().padStart(2, '0'),
+            year: today.getFullYear(),
+            property_address: tenant.property
+        });
+        setIsReceiptOpen(true);
+    };
+
     return (
         <div className="space-y-3">
+            {/* Modale Quittance */}
+            <ReceiptModal
+                isOpen={isReceiptOpen}
+                onClose={() => setIsReceiptOpen(false)}
+                data={currentReceipt}
+            />
             {tenants.length > 0 ? (
-                tenants.map((tenant) => (
+                <div className="max-h-[600px] overflow-y-auto pr-2 space-y-3 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-900 [&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-600">
+                {tenants.map((tenant) => (
                     <div
                         key={tenant.id}
                         className={`p-4 rounded-2xl border transition-all ${editingId === tenant.id
-                                ? 'bg-blue-500/5 border-blue-500/30'
-                                : 'bg-gray-900/40 border-gray-800 hover:border-gray-700'
+                            ? 'bg-blue-500/5 border-blue-500/30'
+                            : 'bg-gray-900/40 border-gray-800 hover:border-gray-700'
                             }`}
                     >
                         {editingId === tenant.id ? (
@@ -143,13 +297,32 @@ export function TenantList({ tenants = [] }: TenantListProps) {
                                         onChange={(e) => setEditData({ ...editData, rentAmount: Number(e.target.value) })}
                                         className="bg-gray-800/50 border-gray-700 h-10"
                                     />
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-gray-500 whitespace-nowrap">Jour fact.</span>
+                                        <Input
+                                            type="number"
+                                            min={1}
+                                            max={31}
+                                            placeholder="Ex: 5"
+                                            value={editData.dueDate || ''}
+                                            onChange={(e) => setEditData({ ...editData, dueDate: Number(e.target.value) })}
+                                            className="bg-gray-800/50 border-gray-700 h-10 w-20"
+                                        />
+                                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">Début bail</span>
+                                        <Input
+                                            type="date"
+                                            value={editData.startDate || ''}
+                                            onChange={(e) => setEditData({ ...editData, startDate: e.target.value })}
+                                            className="bg-gray-800/50 border-gray-700 h-10"
+                                        />
+                                    </div>
                                 </div>
 
                                 <Input
-                                    placeholder="Adresse du bien"
+                                    placeholder="Adresse du bien loué *"
                                     value={editData.property || ''}
                                     onChange={(e) => setEditData({ ...editData, property: e.target.value })}
-                                    className="bg-gray-800/50 border-gray-700 h-10"
+                                    className={`bg-gray-800/50 border-gray-700 h-10 ${!editData.property || editData.property === 'Adresse non renseignée' ? 'border-orange-500/50' : ''}`}
                                 />
 
                                 <Button
@@ -197,28 +370,64 @@ export function TenantList({ tenants = [] }: TenantListProps) {
                                     </div>
                                 </div>
 
-                                {/* Ligne 3: Warning email + Bouton modifier */}
+                                {/* Ligne 3: Warning email/adresse + Actions */}
                                 <div className="flex items-center justify-between pl-[52px]">
-                                    {!tenant.email ? (
-                                        <span className="text-xs text-red-400 flex items-center gap-1">
-                                            <Mail className="w-3 h-3" /> Email manquant
-                                        </span>
-                                    ) : (
-                                        <span className="text-xs text-gray-600 truncate">{tenant.email}</span>
-                                    )}
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 h-7 px-2 text-xs"
-                                        onClick={() => handleEdit(tenant)}
-                                    >
-                                        <Edit2 className="w-3 h-3 mr-1" /> Modifier
-                                    </Button>
+                                    <div className="flex flex-col gap-1">
+                                        {!tenant.email ? (
+                                            <span className="text-xs text-red-400 flex items-center gap-1">
+                                                <Mail className="w-3 h-3" /> Email manquant
+                                            </span>
+                                        ) : (
+                                            <span className="text-xs text-gray-600 truncate">{tenant.email}</span>
+                                        )}
+                                        {(!tenant.property || tenant.property === 'Adresse non renseignée') && (
+                                            <span className="text-xs text-orange-400 flex items-center gap-1">
+                                                <MapPin className="w-3 h-3" /> Adresse manquante
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="flex items-center gap-2 mt-4">
+                                        {/* Bouton "Marquer payé" pour pending ET overdue */}
+                                        {(tenant.status === 'pending' || tenant.status === 'overdue') && (
+                                            <Button
+                                                size="sm"
+                                                onClick={() => handleConfirmPayment(tenant.id, tenant.last_transaction_id)}
+                                                className={`${
+                                                    tenant.status === 'overdue'
+                                                        ? 'bg-orange-600 hover:bg-orange-700 shadow-orange-500/20'
+                                                        : 'bg-green-600 hover:bg-green-700 shadow-green-500/20'
+                                                } text-white font-bold rounded-xl h-9 shadow-lg transition-all active:scale-95`}
+                                            >
+                                                <CheckCircle className="w-4 h-4 mr-2" />
+                                                {tenant.status === 'overdue' ? 'Paiement reçu' : 'Marquer payé'}
+                                            </Button>
+                                        )}
+                                        {/* Bouton "Voir quittance" uniquement pour paid */}
+                                        {tenant.status === 'paid' && (
+                                            <button
+                                                onClick={() => handleViewReceipt(tenant)}
+                                                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors text-xs font-medium border border-blue-500/20"
+                                            >
+                                                <Eye className="w-3 h-3" /> Voir quittance
+                                            </button>
+                                        )}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="rounded-xl border-gray-700 text-gray-400 hover:text-white hover:bg-gray-800"
+                                            onClick={() => handleEdit(tenant)}
+                                        >
+                                            Modifier
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         )}
                     </div>
                 ))
+                }
+                </div>
             ) : (
                 <div className="p-12 text-center border-2 border-dashed border-gray-800 rounded-2xl">
                     <User className="w-10 h-10 text-gray-700 mx-auto mb-3" />

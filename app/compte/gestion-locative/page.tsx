@@ -1,4 +1,5 @@
 import { RentalStats } from "./components/RentalStats";
+import { getRentalStats } from "./actions";
 import { TenantList } from "./components/TenantList";
 import { AddTenantButton } from "./components/AddTenantButton";
 import { MaintenanceHub } from "./components/MaintenanceHub";
@@ -19,10 +20,18 @@ export default async function GestionLocativePage() {
     // RÉCUPÉRATION DES VRAIES DONNÉES SUPABASE
     // ========================================
 
+    // 0. Récupérer le profil pour les infos de quittance (Branding)
+    // IMPORTANT: On récupère TOUS les champs nécessaires pour le fallback intelligent
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_name, company_address, company_email, company_ninea, signature_url, logo_url, full_name')
+        .eq('id', user.id)
+        .maybeSingle();
+
     // 1. Récupérer tous les baux du propriétaire (colonnes explicites)
     const { data: leases, error: leasesError } = await supabase
         .from('leases')
-        .select('id, tenant_name, tenant_phone, tenant_email, monthly_amount, billing_day, status, created_at')
+        .select('id, tenant_name, tenant_phone, tenant_email, property_address, monthly_amount, billing_day, start_date, status, created_at')
         .eq('owner_id', user.id)
         .eq('status', 'active')
         .order('created_at', { ascending: false });
@@ -42,32 +51,21 @@ export default async function GestionLocativePage() {
     }
 
     // 3. Récupérer les demandes de maintenance (colonnes de base seulement)
-    const { data: maintenanceRequests, error: maintenanceError } = await supabase
+    const { data: maintenanceData, error: maintenanceError } = await supabase
         .from('maintenance_requests')
         .select('id, description, status, quote_amount, created_at, lease_id')
         .order('created_at', { ascending: false });
+
+    const maintenanceRequests = maintenanceData || [];
 
     if (maintenanceError) {
         console.error("Erreur récupération maintenance:", maintenanceError.message);
     }
 
     // ========================================
-    // CALCUL DES STATISTIQUES
+    // CALCUL DES STATISTIQUES (MODE RÉEL)
     // ========================================
-
-    const paidTransactions = transactions?.filter(t => t.status === 'paid') || [];
-    const pendingTransactions = transactions?.filter(t => t.status === 'pending') || [];
-    const overdueTransactions = transactions?.filter(t => t.status === 'overdue') || [];
-
-    const totalCollected = paidTransactions.reduce((acc, t) => acc + Number(t.amount_due || 0), 0);
-    const totalPending = pendingTransactions.reduce((acc, t) => acc + Number(t.amount_due || 0), 0);
-    const overdueCount = overdueTransactions.length;
-
-    const stats = {
-        collected: totalCollected.toLocaleString('fr-FR'),
-        pending: totalPending.toLocaleString('fr-FR'),
-        overdue: overdueCount.toString()
-    };
+    const stats = await getRentalStats();
 
     // ========================================
     // FORMATAGE DES DONNÉES POUR LES COMPOSANTS
@@ -77,17 +75,37 @@ export default async function GestionLocativePage() {
     const formattedTenants = (leases || []).map(lease => {
         // Trouver la dernière transaction pour ce bail
         const leaseTransactions = transactions?.filter(t => t.lease_id === lease.id) || [];
-        const latestTransaction = leaseTransactions[0];
+        // On suppose que la plus récente est la première car on filtrera par mois plus tard idéalement
+        // Pour l'instant on prend celle qui correspond au mois en cours si elle existe
+        const currentMonth = new Date().getMonth() + 1;
+        const currentYear = new Date().getFullYear();
+        const latestTransaction = leaseTransactions.find(t =>
+            t.period_month === currentMonth && t.period_year === currentYear
+        ) || leaseTransactions[0]; // Fallback
+
+        const today = new Date();
+        const currentDay = today.getDate();
+
+        // Calcul du statut dynamique
+        let displayStatus: 'paid' | 'pending' | 'overdue' = latestTransaction?.status || 'pending';
+
+        // Si impayé et date passée => Overdue
+        // On s'assure que ce n'est pas déjà payé
+        if (displayStatus === 'pending' && lease.billing_day && currentDay > lease.billing_day) {
+            displayStatus = 'overdue';
+        }
 
         return {
             id: lease.id,
             name: lease.tenant_name,
-            property: 'Adresse non renseignée', // TODO: Ajouter property_address à la table leases
+            property: lease.property_address || 'Adresse non renseignée',
             phone: lease.tenant_phone,
             email: lease.tenant_email,
             rentAmount: lease.monthly_amount,
-            status: latestTransaction?.status || 'pending',
-            dueDate: lease.billing_day
+            status: displayStatus,
+            dueDate: lease.billing_day,
+            startDate: lease.start_date,
+            last_transaction_id: latestTransaction?.id // ID requis pour validation paiement
         };
     });
 
@@ -110,7 +128,7 @@ export default async function GestionLocativePage() {
     });
 
     return (
-        <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-10">
+        <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-10 print:hidden">
             {/* En-tête Dynamique */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -149,7 +167,7 @@ export default async function GestionLocativePage() {
                         </span>
                     </div>
                     <div className="bg-gray-900/20 border border-gray-800 rounded-[2rem] p-2 overflow-hidden">
-                        <TenantList tenants={formattedTenants} />
+                        <TenantList tenants={formattedTenants} profile={profile} userEmail={user.email} />
                     </div>
                 </div>
 
