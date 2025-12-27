@@ -30,8 +30,21 @@ interface Transaction {
     period_end?: string | null;
 }
 
+interface Lease {
+    id: string;
+    tenant_name: string;
+    tenant_phone?: string;
+    tenant_email?: string;
+    property_address?: string;
+    monthly_amount: number;
+    billing_day?: number;
+    start_date?: string;
+    status?: 'active' | 'terminated' | 'pending';
+    created_at?: string;
+}
+
 interface GestionLocativeClientProps {
-    leases: any[];
+    leases: Lease[];
     transactions: Transaction[];
     profile: any;
     userEmail?: string;
@@ -153,7 +166,27 @@ export function GestionLocativeClient({
         };
     });
 
-    // Statistiques pour le mois sélectionné
+    // Statistiques GLOBALES (tous les baux actifs pour le mois sélectionné)
+    const globalStats = {
+        totalLeases: leases.length,
+        totalBauxActifs: leases.filter(l => !l.status || l.status === 'active').length,
+        paidCount: transactions?.filter(t =>
+            t.status === 'paid' &&
+            t.period_month === selectedMonth &&
+            t.period_year === selectedYear
+        ).length || 0,
+        encaisse: transactions
+            ?.filter(t =>
+                t.status === 'paid' &&
+                t.period_month === selectedMonth &&
+                t.period_year === selectedYear
+            )
+            .reduce((sum, t) => sum + (t.amount_due || 0), 0) || 0
+    };
+
+    const globalPendingCount = globalStats.totalBauxActifs - globalStats.paidCount;
+
+    // Statistiques pour le mois sélectionné (tableau filtré)
     const monthStats = {
         total: formattedTenants.length,
         paid: formattedTenants.filter(t => t.status === 'paid').length,
@@ -164,7 +197,34 @@ export function GestionLocativeClient({
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-0">
+            {/* KPI Bar Globale - Style Enterprise Dense */}
+            <div className="border-b border-slate-800 bg-slate-900/30 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4">
+                <div className="flex items-center justify-between gap-6 text-sm font-mono">
+                    <div className="flex items-center gap-6">
+                        <div>
+                            <span className="text-slate-500">Total Baux:</span>
+                            <span className="ml-2 font-semibold text-white">{globalStats.totalBauxActifs}</span>
+                        </div>
+                        <div className="hidden md:block text-slate-700">|</div>
+                        <div>
+                            <span className="text-slate-500">Payés:</span>
+                            <span className="ml-2 font-semibold text-green-400">{globalStats.paidCount}</span>
+                        </div>
+                        <div className="hidden md:block text-slate-700">|</div>
+                        <div>
+                            <span className="text-slate-500">En attente:</span>
+                            <span className="ml-2 font-semibold text-yellow-400">{globalPendingCount}</span>
+                        </div>
+                    </div>
+                    <div className="hidden md:block">
+                        <span className="text-slate-500">Encaissé:</span>
+                        <span className="ml-2 font-semibold text-white">{globalStats.encaisse.toLocaleString('fr-FR')}</span>
+                        <span className="ml-1 text-slate-500 text-xs">FCFA</span>
+                    </div>
+                </div>
+            </div>
+
             {/* Barre de contrôles */}
             <div className="flex flex-col md:flex-row gap-3">
                 {/* Recherche */}
@@ -200,10 +260,10 @@ export function GestionLocativeClient({
                 </div>
             </div>
 
-            {/* Mini statistiques du mois en ligne */}
-            <div className="flex items-center gap-6 px-4 py-2 bg-slate-900/50 border-y border-slate-800 text-sm">
+            {/* Mini statistiques du mois en ligne (Tableau filtré) */}
+            <div className="flex items-center gap-6 px-4 py-2 bg-slate-900/50 border-y border-slate-800 text-sm mt-4">
                 <div>
-                    <span className="text-slate-400">Total:</span>
+                    <span className="text-slate-400">Affichés:</span>
                     <span className="ml-2 font-semibold text-white">{monthStats.total}</span>
                 </div>
                 <div>

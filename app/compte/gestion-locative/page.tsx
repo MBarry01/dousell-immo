@@ -86,15 +86,6 @@ export default async function GestionLocativePage({
     // ========================================
     const stats = await getRentalStats();
 
-    // Calculs additionnels pour les nouvelles stats
-    const totalLeases = filteredLeases?.length || 0;
-    const paidCount = transactions?.filter(t =>
-        t.status === 'paid' &&
-        t.period_month === new Date().getMonth() + 1 &&
-        t.period_year === new Date().getFullYear()
-    ).length || 0;
-    const pendingCount = totalLeases - paidCount;
-
     // Transformer les demandes de maintenance pour MaintenanceHub
     // Note: category n'existe pas encore dans la table
     const formattedRequests = (maintenanceRequests || []).map(req => {
@@ -158,31 +149,6 @@ export default async function GestionLocativePage({
                 </div>
             </div>
 
-            {/* Bande de statistiques simplifiée */}
-            <div className="border-b border-slate-800 bg-slate-900/30">
-                <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <div>
-                            <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Total Baux</div>
-                            <div className="text-2xl font-semibold text-white">{totalLeases}</div>
-                        </div>
-                        <div>
-                            <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Payés</div>
-                            <div className="text-2xl font-semibold text-green-400">{paidCount}</div>
-                        </div>
-                        <div>
-                            <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">En attente</div>
-                            <div className="text-2xl font-semibold text-yellow-400">{pendingCount}</div>
-                        </div>
-                        <div>
-                            <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Encaissé</div>
-                            <div className="text-2xl font-semibold text-white font-mono">
-                                {stats.collected} <span className="text-sm text-slate-500">FCFA</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             {/* Contenu principal */}
             <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
