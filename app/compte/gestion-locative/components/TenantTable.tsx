@@ -3,7 +3,7 @@
 import { ReceiptModal } from './ReceiptModal';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, Loader2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -46,11 +46,16 @@ const statusConfig = {
     overdue: { label: 'Retard', bg: 'bg-red-500/10', text: 'text-red-500', dot: 'bg-red-500' }
 };
 
+type SortField = 'name' | 'property' | 'rentAmount' | 'status' | 'period';
+type SortOrder = 'asc' | 'desc';
+
 export function TenantTable({ tenants = [], profile, userEmail, isViewingTerminated = false, searchQuery = '' }: TenantTableProps) {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [isReceiptOpen, setIsReceiptOpen] = useState(false);
     const [currentReceipt, setCurrentReceipt] = useState<any>(null);
+    const [sortField, setSortField] = useState<SortField>('name');
+    const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -60,12 +65,70 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
         return amount.toLocaleString('fr-FR');
     };
 
-    // Filtrer par recherche
-    const filteredTenants = tenants.filter(tenant =>
-        tenant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tenant.property.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tenant.email?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Fonction de tri
+    const handleSort = (field: SortField) => {
+        if (sortField === field) {
+            // Si on clique sur la même colonne, inverser l'ordre
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            // Nouvelle colonne, ordre ASC par défaut
+            setSortField(field);
+            setSortOrder('asc');
+        }
+    };
+
+    // Icône de tri
+    const SortIcon = ({ field }: { field: SortField }) => {
+        if (sortField !== field) {
+            return <ArrowUpDown className="w-3 h-3 text-slate-500" />;
+        }
+        return sortOrder === 'asc'
+            ? <ArrowUp className="w-3 h-3 text-[#F4C430]" />
+            : <ArrowDown className="w-3 h-3 text-[#F4C430]" />;
+    };
+
+    // Filtrer et trier
+    const filteredTenants = tenants
+        .filter(tenant =>
+            tenant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            tenant.property.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            tenant.email?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort((a, b) => {
+            let compareA: any;
+            let compareB: any;
+
+            switch (sortField) {
+                case 'name':
+                    compareA = a.name.toLowerCase();
+                    compareB = b.name.toLowerCase();
+                    break;
+                case 'property':
+                    compareA = a.property.toLowerCase();
+                    compareB = b.property.toLowerCase();
+                    break;
+                case 'rentAmount':
+                    compareA = a.rentAmount;
+                    compareB = b.rentAmount;
+                    break;
+                case 'status':
+                    // Ordre: paid < pending < overdue
+                    const statusOrder = { paid: 0, pending: 1, overdue: 2 };
+                    compareA = statusOrder[a.status];
+                    compareB = statusOrder[b.status];
+                    break;
+                case 'period':
+                    compareA = `${a.period_year}-${String(a.period_month).padStart(2, '0')}`;
+                    compareB = `${b.period_year}-${String(b.period_month).padStart(2, '0')}`;
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (compareA < compareB) return sortOrder === 'asc' ? -1 : 1;
+            if (compareA > compareB) return sortOrder === 'asc' ? 1 : -1;
+            return 0;
+        });
 
     const handleConfirmPayment = async (leaseId: string, transactionId?: string) => {
         const tenant = tenants.find(t => t.id === leaseId);
@@ -286,11 +349,51 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
                 <table className="w-full min-w-[900px]">
                     <thead className="bg-slate-900/50 border-b border-slate-800">
                         <tr>
-                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[250px]">Locataire</th>
-                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[200px]">Bien</th>
-                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[100px]">Période</th>
-                            <th className="text-left py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[120px]">Statut</th>
-                            <th className="text-right py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[140px]">Montant</th>
+                            <th className="text-left py-3 px-4 w-[250px]">
+                                <button
+                                    onClick={() => handleSort('name')}
+                                    className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider hover:text-white transition-colors"
+                                >
+                                    Locataire
+                                    <SortIcon field="name" />
+                                </button>
+                            </th>
+                            <th className="text-left py-3 px-4 w-[200px]">
+                                <button
+                                    onClick={() => handleSort('property')}
+                                    className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider hover:text-white transition-colors"
+                                >
+                                    Bien
+                                    <SortIcon field="property" />
+                                </button>
+                            </th>
+                            <th className="text-left py-3 px-4 w-[100px]">
+                                <button
+                                    onClick={() => handleSort('period')}
+                                    className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider hover:text-white transition-colors"
+                                >
+                                    Période
+                                    <SortIcon field="period" />
+                                </button>
+                            </th>
+                            <th className="text-left py-3 px-4 w-[120px]">
+                                <button
+                                    onClick={() => handleSort('status')}
+                                    className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider hover:text-white transition-colors"
+                                >
+                                    Statut
+                                    <SortIcon field="status" />
+                                </button>
+                            </th>
+                            <th className="text-right py-3 px-4 w-[140px]">
+                                <button
+                                    onClick={() => handleSort('rentAmount')}
+                                    className="flex items-center gap-2 ml-auto text-xs font-medium text-slate-400 uppercase tracking-wider hover:text-white transition-colors"
+                                >
+                                    Montant
+                                    <SortIcon field="rentAmount" />
+                                </button>
+                            </th>
                             <th className="text-right py-3 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider w-[90px]">Actions</th>
                         </tr>
                     </thead>
