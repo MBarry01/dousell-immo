@@ -1,4 +1,5 @@
 import { internalProcessReminders } from "@/lib/reminders-service";
+import { checkLeaseExpirations } from "@/lib/lease-expiration-service";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { NextResponse } from "next/server";
 
@@ -19,11 +20,24 @@ export async function GET(request: Request) {
     }
 
     try {
-        console.log('[CRON] Starting reminders processing...');
+        console.log('[CRON] Starting daily tasks (reminders + lease expirations)...');
         const supabaseAdmin = createAdminClient();
-        const result = await internalProcessReminders(supabaseAdmin);
-        console.log('[CRON] Reminders processing completed:', result);
-        return NextResponse.json(result);
+
+        // 1. Process reminders
+        console.log('[CRON] Processing reminders...');
+        const remindersResult = await internalProcessReminders(supabaseAdmin);
+        console.log('[CRON] Reminders completed:', remindersResult);
+
+        // 2. Check lease expirations
+        console.log('[CRON] Checking lease expirations...');
+        const expirationsResult = await checkLeaseExpirations(supabaseAdmin);
+        console.log('[CRON] Lease expirations completed:', expirationsResult);
+
+        return NextResponse.json({
+            reminders: remindersResult,
+            expirations: expirationsResult,
+            success: true
+        });
     } catch (error) {
         console.error("[CRON] Job Failed:", error);
         return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
