@@ -135,6 +135,15 @@
     display: none;
   }
 
+  /* Mobile-first: Empêcher le débordement horizontal */
+  @media screen and (max-width: 768px) {
+    body {
+      overflow-x: hidden;
+      width: 100vw;
+      position: relative;
+    }
+  }
+
   /* Utilitaires pour la couleur primaire - Jaune Or #F4C430 */
   .bg-primary {
     background-color: hsl(var(--primary));

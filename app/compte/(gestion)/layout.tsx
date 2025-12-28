@@ -38,7 +38,7 @@ export default function GestionLayout({
         <div className="min-h-screen bg-slate-950">
             {/* Menu de navigation horizontal - Style Vercel */}
             <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-50">
-                <div className="max-w-[1600px] mx-auto px-4 md:px-6">
+                <div className="w-full mx-auto px-4 md:px-6">
                     <div className="flex items-center gap-1 h-14">
                         {/* Logo / Retour */}
                         <Link
@@ -61,16 +61,13 @@ export default function GestionLayout({
                             Gestion Locative
                         </NavLink>
 
-                        <Link
+                        <NavLink
                             href="/compte/legal"
-                            className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${pathname === '/compte/legal'
-                                    ? 'bg-green-500/10 text-green-400'
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
-                                }`}
+                            icon={Scale}
+                            isActive={pathname === '/compte/legal'}
                         >
-                            <span className="hidden sm:inline">Assistant Juridique</span>
-                            <span className="sm:hidden">Juridique</span>
-                        </Link>
+                            Juridique
+                        </NavLink>
 
                         {/* Spacer */}
                         <div className="flex-1" />

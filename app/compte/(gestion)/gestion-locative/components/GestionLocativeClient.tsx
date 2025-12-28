@@ -313,7 +313,7 @@ export function GestionLocativeClient({
             {/* ========================================
                 KPI STRIP - Bandeau Dense Dark Enterprise
                 ======================================== */}
-            <div className="border-b border-slate-800 bg-black -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 overflow-x-auto">
+            <div className="border-b border-slate-800 bg-black py-3 mb-4 overflow-x-auto">
                 <div className="flex items-center justify-between gap-4 text-sm min-w-max">
                     <div className="flex items-center gap-4 md:gap-6 font-mono">
                         {/* Total Attendu */}
@@ -365,7 +365,7 @@ export function GestionLocativeClient({
             {/* ========================================
                 BARRE DE CONTRÔLES
                 ======================================== */}
-            <div className="flex flex-col gap-3 mb-4 px-4 md:px-0">
+            <div className="flex flex-col gap-3 mb-4">
                 {/* Ligne 1: Recherche + Relances */}
                 <div className="flex flex-row gap-2 items-center">
                     {/* Recherche */}
@@ -411,7 +411,7 @@ export function GestionLocativeClient({
             {/* ========================================
                 TABLE ENTERPRISE
                 ======================================== */}
-            <div className="px-4 md:px-0">
+            <div>
                 <TenantTable
                     tenants={formattedTenants}
                     profile={profile}
