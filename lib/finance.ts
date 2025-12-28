@@ -1,13 +1,43 @@
+/**
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║                        FINANCE GUARD - KPI ENGINE                         ║
+ * ║                       Moteur de calcul financier                          ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
+ *
+ * RESPONSABILITÉS :
+ * 1. Calcul des KPIs financiers (Attendu, Encaissé, Taux de recouvrement)
+ * 2. Comptage des statuts (Payé, En attente, En retard)
+ * 3. Validation des données (doublon email, cohérence)
+ *
+ * RÈGLES MÉTIER :
+ * - Source de vérité pour "Attendu" : Table LEASES (baux actifs)
+ * - Source de vérité pour "Encaissé" : Table RENTAL_TRANSACTIONS (amount_paid)
+ * - Statut "En retard" : Déterminé par billing_day (synchronisé avec UI)
+ *
+ * SYNCHRONISATION UI ↔ BACKEND ↔ KPIs :
+ * ✓ UI affiche "Retard" si currentDay > billing_day
+ * ✓ KPIs comptent "overdue" si currentDay > billing_day
+ * ✓ Relances envoyées si daysOverdue >= 5
+ *
+ * COMPATIBILITÉ :
+ * - Gère l'absence de la colonne amount_paid (fallback sur amount_due)
+ * - Supporte les paiements partiels (amount_paid < amount_due)
+ * - Gère les lignes virtuelles (baux sans transaction)
+ *
+ * @version 2.0 - Synchronisé avec UI et système de relances
+ * @date 2025-12-28
+ */
+
 import { isSameMonth, isWithinInterval, startOfMonth, endOfMonth, parseISO, isAfter } from 'date-fns';
 
 export interface FinancialKPIs {
-    totalExpected: number;  // Basé sur les baux actifs
-    totalCollected: number; // Basé sur les versements réels (amount_paid)
-    collectionRate: number; // Taux de recouvrement (Collected / Expected)
-    occupancyRate: number;  // Taux d'occupation financier (Placeholder)
-    pendingCount: number;   // Nombre de loyers en attente
-    overdueCount: number;   // Nombre de loyers en retard
-    paidCount: number;      // Nombre de loyers payés
+    totalExpected: number;  // Basé sur les baux actifs (monthly_amount)
+    totalCollected: number; // Basé sur les versements réels (amount_paid ou amount_due si paid)
+    collectionRate: number; // Taux de recouvrement en % (Collected / Expected * 100)
+    occupancyRate: number;  // Taux d'occupation financier (Placeholder pour future implémentation)
+    pendingCount: number;   // Nombre de loyers en attente (status != 'paid' && !overdue)
+    overdueCount: number;   // Nombre de loyers en retard (status != 'paid' && currentDay > billing_day)
+    paidCount: number;      // Nombre de loyers payés (status === 'paid')
 }
 
 // Interfaces minimales pour découplage
@@ -68,21 +98,36 @@ export function calculateFinancials(
 
             if (leaseTransaction) {
                 // Règle 2 : On prend ce qui a été RÉELLEMENT payé
-                // On additionne amount_paid s'il existe, sinon 0.
-                const paidAmount = Number(leaseTransaction.amount_paid) || 0;
+                // Priorité 1: amount_paid (si la colonne existe)
+                // Priorité 2: amount_due si status='paid' (fallback pour compatibilité)
+                // Priorité 3: 0 (non payé)
+                let paidAmount = 0;
+                if (leaseTransaction.status === 'paid') {
+                    // Si marqué comme payé, utiliser amount_paid (ou amount_due en fallback)
+                    paidAmount = Number(leaseTransaction.amount_paid) || Number(leaseTransaction.amount_due) || 0;
+                } else {
+                    // Si non payé (pending/overdue), amount_paid pourrait être un acompte partiel
+                    paidAmount = Number(leaseTransaction.amount_paid) || 0;
+                }
                 totalCollected += paidAmount;
 
-                // Comptage des statuts basé sur la transaction
+                // Comptage des statuts - SYNCHRONISÉ AVEC L'UI
+                // L'UI vérifie le billing_day pour déterminer si c'est en retard
                 if (leaseTransaction.status === 'paid') {
                     paidCount++;
-                } else if (leaseTransaction.status === 'overdue') {
-                    overdueCount++;
                 } else {
-                    pendingCount++;
+                    // Pour les transactions non payées (pending, overdue, etc.)
+                    // On vérifie si le billing_day est dépassé dans le mois courant
+                    const billingDay = lease.billing_day || 5;
+                    if (isTargetMonthCurrent && currentDay > billingDay) {
+                        overdueCount++;
+                    } else {
+                        pendingCount++;
+                    }
                 }
             } else {
                 // 3. Pas de transaction = "En attente" virtuelle (ou retard)
-                // "Revenus Fantômes" gérés ici : on ajoute au totalExpected (déjà fait plus haut), 
+                // "Revenus Fantômes" gérés ici : on ajoute au totalExpected (déjà fait plus haut),
                 // et on considère comme non payé (collected += 0).
 
                 // Déterminer si c'est "Pending" ou "Overdue" (Retard)
@@ -111,6 +156,32 @@ export function calculateFinancials(
         overdueCount,
         paidCount
     };
+}
+
+/**
+ * Calcule le statut d'affichage d'une transaction (synchronisé avec l'UI)
+ *
+ * @param transactionStatus - Statut en base de données
+ * @param billingDay - Jour de facturation (défaut: 5)
+ * @param isCurrentMonth - Si on regarde le mois en cours
+ * @returns 'paid' | 'pending' | 'overdue'
+ */
+export function calculateDisplayStatus(
+    transactionStatus: string,
+    billingDay: number = 5,
+    isCurrentMonth: boolean = true
+): 'paid' | 'pending' | 'overdue' {
+    if (transactionStatus === 'paid') {
+        return 'paid';
+    }
+
+    // Pour les transactions non payées, vérifier si en retard
+    const currentDay = new Date().getDate();
+    if (isCurrentMonth && currentDay > billingDay) {
+        return 'overdue';
+    }
+
+    return 'pending';
 }
 
 /**

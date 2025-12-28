@@ -169,24 +169,22 @@ export default async function GestionLocativePage({
 
             {/* Contenu principal */}
             <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Table des locataires - 2/3 */}
-                    <div className="lg:col-span-2">
-                        <GestionLocativeClient
-                            leases={filteredLeases || []}
-                            transactions={transactions || []}
-                            profile={profile}
-                            userEmail={user.email}
-                            isViewingTerminated={isViewingTerminated}
-                            minDate={minDateStr}
-                        />
-                    </div>
+                {/* Table des locataires - Pleine largeur */}
+                <div className="mb-6">
+                    <GestionLocativeClient
+                        leases={filteredLeases || []}
+                        transactions={transactions || []}
+                        profile={profile}
+                        userEmail={user.email}
+                        isViewingTerminated={isViewingTerminated}
+                        minDate={minDateStr}
+                    />
+                </div>
 
-                    {/* Hub Maintenance - 1/3 */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-                            <MaintenanceHub requests={formattedRequests} />
-                        </div>
+                {/* Hub Maintenance - En dessous, aligné */}
+                <div className="max-w-sm">
+                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
+                        <MaintenanceHub requests={formattedRequests} />
                     </div>
                 </div>
             </div>

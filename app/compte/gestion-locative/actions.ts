@@ -221,7 +221,7 @@ export async function confirmPayment(leaseId: string, transactionId?: string) {
             paid_at: new Date().toISOString()
         })
         .eq('id', targetId)
-        .select('*, leases(tenant_name, tenant_email, monthly_amount, owner_id)')
+        .select('*, leases(tenant_name, tenant_email, monthly_amount, owner_id, property_address)')
         .single();
 
     if (error) {
@@ -229,35 +229,77 @@ export async function confirmPayment(leaseId: string, transactionId?: string) {
         return { success: false, error: error.message };
     }
 
-    // 3. Appel n8n en "Fire and Forget" avec l'email du propriétaire en CC
-    const N8N_URL = process.env.N8N_WEBHOOK_URL;
+    // 4. Récupérer le profil du propriétaire pour les infos de l'agence
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_name, company_address, company_email, company_ninea, signature_url, logo_url, full_name')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    // 5. Envoi automatique de la quittance par email (Gmail direct)
     let emailSent = false;
 
-    if (N8N_URL && trans && trans.leases && trans.leases.tenant_email) {
-        // On n'attend pas la réponse (pas de await) pour ne pas bloquer l'UI
-        triggerN8N('send-receipt-email', {
-            transactionId: trans.id,
-            leaseId: trans.lease_id,
-            tenantEmail: trans.leases.tenant_email,
-            tenantName: trans.leases.tenant_name,
-            ownerEmail: user.email, // Email du propriétaire pour le CC
-            shouldSendCC: true, // Flag pour indiquer d'envoyer une copie au proprio
-            amount: trans.amount_due,
-            currency: 'FCFA',
-            periodMonth: trans.period_month,
-            periodYear: trans.period_year,
-            paidAt: trans.paid_at,
-            monthLabel: new Date(trans.period_year, trans.period_month - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-        }).catch(err => console.error("Erreur background n8n:", err));
-        emailSent = true;
+    if (trans && trans.leases && trans.leases.tenant_email) {
+        try {
+            // Préparer les données pour la quittance
+            const receiptData = {
+                // Locataire
+                tenantName: trans.leases.tenant_name || 'Locataire',
+                tenantEmail: trans.leases.tenant_email,
+                tenantAddress: trans.leases.property_address || '',
+
+                // Montants
+                amount: trans.amount_due || 0,
+
+                // Période
+                periodMonth: new Date(trans.period_year, trans.period_month - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
+                periodStart: `01/${String(trans.period_month).padStart(2, '0')}/${trans.period_year}`,
+                periodEnd: `${new Date(trans.period_year, trans.period_month, 0).getDate()}/${String(trans.period_month).padStart(2, '0')}/${trans.period_year}`,
+
+                // Référence
+                receiptNumber: `QUITT-${Date.now().toString().slice(-8)}`,
+
+                // Propriétaire / Agence
+                ownerName: profile?.company_name || profile?.full_name || 'Propriétaire',
+                ownerAddress: profile?.company_address || '',
+                ownerNinea: profile?.company_ninea || '',
+                ownerLogo: profile?.logo_url || undefined,
+                ownerSignature: profile?.signature_url || undefined,
+                ownerEmail: profile?.company_email || undefined, // Email de l'agence (priorité)
+                ownerAccountEmail: user.email, // Email du compte (fallback)
+
+                // Propriété
+                propertyAddress: trans.leases.property_address || 'Adresse non renseignée',
+            };
+
+            // Appel à l'API /api/send-receipt (pas d'await pour ne pas bloquer)
+            fetch('/api/send-receipt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(receiptData),
+            })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        console.log('✅ Quittance envoyée:', result.messageId);
+                    } else {
+                        console.error('❌ Erreur envoi quittance:', result.error);
+                    }
+                })
+                .catch(err => console.error('❌ Erreur appel API quittance:', err));
+
+            emailSent = true;
+        } catch (err) {
+            console.error('❌ Erreur préparation quittance:', err);
+        }
     }
 
     revalidatePath('/compte/gestion-locative');
 
-    // Message personnalisé selon si n8n est configuré ou non
+    // Message personnalisé selon si l'email a été déclenché
     const message = emailSent
-        ? "Paiement validé ! n8n va envoyer la quittance par email au locataire (et vous en copie) d'ici quelques instants."
-        : "Paiement validé ! Vous pouvez générer la quittance manuellement via le bouton 'Voir quittance'.";
+        ? `Paiement validé ! La quittance sera envoyée par email au locataire (${trans.leases?.tenant_email}) avec copie au propriétaire.`
+        : "Paiement validé ! Vous pouvez générer la quittance manuellement.";
 
     return { success: true, message };
 }

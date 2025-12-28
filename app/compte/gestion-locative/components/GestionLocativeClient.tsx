@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { TenantTable } from './TenantTable';
 import { MonthSelector } from './MonthSelector';
 import { EditTenantDialog } from './EditTenantDialog';
+import { SendRemindersButton } from './SendRemindersButton';
 import { Search, Download } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -170,6 +171,21 @@ export function GestionLocativeClient({
             } else {
                 // Si transactions existent : Créer une ligne POUR CHAQUE transaction (mode "Révéler les doublons")
                 leaseTransactions.forEach(trans => {
+                    // Calculer le statut d'affichage en fonction du billing_day (SYNCHRONISÉ AVEC finance.ts)
+                    let displayStatus: 'paid' | 'pending' | 'overdue';
+
+                    if (trans.status === 'paid') {
+                        displayStatus = 'paid';
+                    } else {
+                        // Pour les transactions non payées, vérifier si le billing_day est dépassé
+                        const billingDay = lease.billing_day || 5;
+                        if (isCurrentMonth && currentDay > billingDay) {
+                            displayStatus = 'overdue';
+                        } else {
+                            displayStatus = 'pending';
+                        }
+                    }
+
                     result.push({
                         id: lease.id,
                         name: lease.tenant_name,
@@ -177,7 +193,7 @@ export function GestionLocativeClient({
                         phone: lease.tenant_phone,
                         email: lease.tenant_email,
                         rentAmount: trans.amount_due || lease.monthly_amount,
-                        status: trans.status as 'paid' | 'pending' | 'overdue',
+                        status: displayStatus,
                         dueDate: lease.billing_day,
                         startDate: lease.start_date,
                         last_transaction_id: trans.id, // ID unique de la transaction
@@ -334,8 +350,11 @@ export function GestionLocativeClient({
                     CSV
                 </Button>
 
-                {/* Sélecteur de mois */}
-                <div className="md:w-auto">
+                {/* Bouton Relances J+5 */}
+                <SendRemindersButton />
+
+                {/* Sélecteur de mois - Centré sur mobile */}
+                <div className="w-fit mx-auto md:mx-0 md:w-auto">
                     <MonthSelector
                         selectedMonth={selectedMonth}
                         selectedYear={selectedYear}
