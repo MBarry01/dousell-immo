@@ -5,18 +5,27 @@ import { NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
-    // Optional: Verify specific header for security (e.g. CRON_SECRET)
-    // const authHeader = request.headers.get('authorization');
-    // if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    //   return new NextResponse('Unauthorized', { status: 401 });
-    // }
+    // Vérification de sécurité : Vercel Cron envoie un header spécial
+    const authHeader = request.headers.get('authorization');
+
+    // En production, vérifier le header Authorization de Vercel Cron
+    // Vercel envoie automatiquement un Bearer token pour les crons
+    if (process.env.NODE_ENV === 'production') {
+        const cronSecret = process.env.CRON_SECRET;
+        if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+            console.error('Unauthorized cron access attempt');
+            return new NextResponse('Unauthorized', { status: 401 });
+        }
+    }
 
     try {
+        console.log('[CRON] Starting reminders processing...');
         const supabaseAdmin = createAdminClient();
         const result = await internalProcessReminders(supabaseAdmin);
+        console.log('[CRON] Reminders processing completed:', result);
         return NextResponse.json(result);
     } catch (error: any) {
-        console.error("Cron Job Failed:", error);
+        console.error("[CRON] Job Failed:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

@@ -344,9 +344,17 @@ export function GestionLocativeClient({
                     <SendRemindersButton />
                 </div>
 
-                {/* Ligne 2: CSV + Sélecteur de mois */}
-                <div className="flex flex-row gap-2 items-center justify-center md:justify-start">
-                    {/* Bouton Export CSV */}
+                {/* Ligne 2: Sélecteur de mois (gauche) + CSV (droite) */}
+                <div className="flex flex-row gap-2 items-center justify-between">
+                    {/* Sélecteur de mois - Aligné à gauche */}
+                    <MonthSelector
+                        selectedMonth={selectedMonth}
+                        selectedYear={selectedYear}
+                        onMonthChange={handleMonthChange}
+                        minDate={minDate}
+                    />
+
+                    {/* Bouton Export CSV - Aligné à droite */}
                     <Button
                         onClick={handleExportCSV}
                         variant="outline"
@@ -357,13 +365,6 @@ export function GestionLocativeClient({
                         <Download className="w-4 h-4 mr-2" />
                         CSV
                     </Button>
-
-                    <MonthSelector
-                        selectedMonth={selectedMonth}
-                        selectedYear={selectedYear}
-                        onMonthChange={handleMonthChange}
-                        minDate={minDate}
-                    />
                 </div>
             </div>
 

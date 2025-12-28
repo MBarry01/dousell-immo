@@ -203,6 +203,63 @@ Calcule le statut d'affichage synchronisé.
 ### `validateTenantCreation(email, supabaseClient, ownerId)`
 Vérifie qu'un email n'est pas déjà utilisé.
 
+## 🆕 Création Automatique de Transactions (MAJ: 2025-12-28)
+
+### Comportement lors de l'ajout d'un nouveau locataire
+
+**IMPORTANT**: Depuis le 28 décembre 2025, quand un nouveau locataire est ajouté via le dashboard (`AddTenantButton`), le système **crée automatiquement** une transaction pour le mois en cours.
+
+#### Avant (❌ Ancien comportement)
+```typescript
+createNewLease() → Crée uniquement le bail (leases)
+                 → ❌ Pas de transaction créée
+                 → Le cron ne voit pas le nouveau locataire
+```
+
+#### Après (✅ Nouveau comportement)
+```typescript
+createNewLease() → Crée le bail (leases)
+                 → ✅ Crée automatiquement la transaction du mois actuel
+                 → Le cron peut traiter ce locataire dès le lendemain
+```
+
+#### Code (app/compte/gestion-locative/actions.ts:151-172)
+```typescript
+// Après création du bail
+const today = new Date();
+const currentMonth = today.getMonth() + 1;     // ✅ DYNAMIQUE
+const currentYear = today.getFullYear();       // ✅ DYNAMIQUE
+
+await supabase.from('rental_transactions').insert([{
+    lease_id: lease.id,
+    period_month: currentMonth,                 // Ex: 12 pour Décembre
+    period_year: currentYear,                   // Ex: 2025
+    amount_due: lease.monthly_amount,
+    status: 'pending',
+    period_start: new Date(currentYear, currentMonth - 1, 1).toISOString().split('T')[0],
+    period_end: new Date(currentYear, currentMonth, 0).toISOString().split('T')[0],
+    reminder_sent: false                        // Prêt pour relances !
+}]);
+```
+
+#### Exemples
+
+| Date d'ajout       | Transaction créée                                    |
+|--------------------|------------------------------------------------------|
+| 15 Décembre 2025   | `period_month: 12, period_year: 2025, period_start: 2025-12-01, period_end: 2025-12-31` |
+| 3 Janvier 2026     | `period_month: 1, period_year: 2026, period_start: 2026-01-01, period_end: 2026-01-31`  |
+| 20 Juillet 2027    | `period_month: 7, period_year: 2027, period_start: 2027-07-01, period_end: 2027-07-31`  |
+
+#### Impact sur les Relances
+
+Si un locataire est ajouté avec `billing_day = 5` le **28 décembre 2025** :
+- Transaction créée : `period_month: 12, period_year: 2025`
+- Date d'échéance calculée : **5 décembre 2025**
+- Jours de retard : **23 jours** (28 - 5)
+- **✅ Relance envoyée automatiquement** le lendemain matin (29 décembre à 9h GMT)
+
+---
+
 ## Migration Requise
 
 ### Ajouter `amount_paid`

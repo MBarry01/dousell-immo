@@ -19,12 +19,19 @@
  * ✓ KPIs comptent "overdue" si currentDay > billing_day
  * ✓ Relances envoyées si daysOverdue >= 5
  *
+ * CRÉATION AUTOMATIQUE DE TRANSACTIONS (MAJ: 2025-12-28) :
+ * ✓ Lors de l'ajout d'un nouveau locataire via createNewLease()
+ * ✓ Transaction créée automatiquement pour le mois EN COURS (dynamique)
+ * ✓ Champs: period_month (actuel), period_year (actuel), reminder_sent: false
+ * ✓ Exemple: Locataire ajouté le 28/12/2025 → Transaction Décembre 2025 créée
+ * ✓ Impact: Cron peut traiter ce locataire dès le lendemain
+ *
  * COMPATIBILITÉ :
  * - Gère l'absence de la colonne amount_paid (fallback sur amount_due)
  * - Supporte les paiements partiels (amount_paid < amount_due)
  * - Gère les lignes virtuelles (baux sans transaction)
  *
- * @version 2.0 - Synchronisé avec UI et système de relances
+ * @version 2.1 - Création auto transactions + Documentation
  * @date 2025-12-28
  */
 

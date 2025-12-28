@@ -148,6 +148,29 @@ export async function createNewLease(formData: Record<string, unknown>) {
         return { success: false, error: error.message };
     }
 
+    // 2. Créer automatiquement la transaction pour le mois en cours
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+
+    const { error: transError } = await supabase
+        .from('rental_transactions')
+        .insert([{
+            lease_id: lease.id,
+            period_month: currentMonth,
+            period_year: currentYear,
+            amount_due: lease.monthly_amount,
+            status: 'pending',
+            period_start: new Date(currentYear, currentMonth - 1, 1).toISOString().split('T')[0],
+            period_end: new Date(currentYear, currentMonth, 0).toISOString().split('T')[0],
+            reminder_sent: false
+        }]);
+
+    if (transError) {
+        console.error("Erreur création transaction:", transError.message);
+        // On ne bloque pas la création du bail, mais on log l'erreur
+    }
+
     // DÉCLENCHEUR N8N : Génération du contrat de bail PDF (email)
     await triggerN8N('generate-lease-pdf', {
         leaseId: lease.id,
