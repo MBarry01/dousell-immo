@@ -88,10 +88,10 @@ export default async function GestionLocativePage({
         console.error("Erreur récupération transactions:", transError.message);
     }
 
-    // 3. Récupérer les demandes de maintenance (colonnes de base seulement)
+    // 3. Récupérer les demandes de maintenance (avec infos artisan)
     const { data: maintenanceData, error: maintenanceError } = await supabase
         .from('maintenance_requests')
-        .select('id, description, status, quote_amount, created_at, lease_id')
+        .select('id, description, status, created_at, lease_id, artisan_name, artisan_phone, artisan_rating, artisan_address, quoted_price, intervention_date, owner_approved')
         .order('created_at', { ascending: false });
 
     const maintenanceRequests = maintenanceData || [];
