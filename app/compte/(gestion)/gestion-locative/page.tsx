@@ -118,8 +118,16 @@ export default async function GestionLocativePage({
             description: cleanDescription,
             category: category,
             status: req.status,
-            quote_amount: req.quote_amount,
-            created_at: req.created_at
+            created_at: req.created_at,
+            // Infos artisan (Make.com)
+            artisan_name: req.artisan_name,
+            artisan_phone: req.artisan_phone,
+            artisan_rating: req.artisan_rating,
+            artisan_address: req.artisan_address,
+            // Infos devis
+            quoted_price: req.quoted_price,
+            intervention_date: req.intervention_date,
+            owner_approved: req.owner_approved
         };
     });
 
