@@ -96,7 +96,7 @@ export const AppShell = ({ children }: AppShellProps) => {
 
   if (isPropertyDetail) {
     return (
-      <div className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white">
+      <div className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
         <ScrollToTop />
         {children}
       </div>
@@ -104,7 +104,7 @@ export const AppShell = ({ children }: AppShellProps) => {
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white">
+    <div className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
       <ScrollToTop />
       <div className="px-4 md:px-6 print:hidden">
         <Header />

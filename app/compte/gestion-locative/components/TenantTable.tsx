@@ -278,7 +278,7 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
             />
 
             {/* Table Dark Enterprise - Responsive */}
-            <div className="bg-black border border-slate-800 rounded-lg overflow-x-auto">
+            <div className="bg-black border border-slate-800 rounded-lg overflow-x-auto max-w-full">
                 <table className="w-full text-left text-sm min-w-[650px]">
                     <thead className="border-b border-slate-800">
                         <tr>

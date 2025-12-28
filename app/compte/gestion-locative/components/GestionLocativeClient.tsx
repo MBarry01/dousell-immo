@@ -269,12 +269,12 @@ export function GestionLocativeClient({
     };
 
     return (
-        <div className="space-y-0">
+        <div className="space-y-0 overflow-x-hidden">
             {/* ========================================
                 KPI STRIP - Bandeau Dense Dark Enterprise
                 ======================================== */}
-            <div className="border-b border-slate-800 bg-black -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4">
-                <div className="flex items-center justify-between gap-4 text-sm">
+            <div className="border-b border-slate-800 bg-black md:-mx-6 px-4 md:px-6 py-3 mb-4 max-w-[100vw] overflow-x-auto scrollbar-hide">
+                <div className="flex items-center justify-between gap-4 text-sm min-w-max">
                     <div className="flex items-center gap-4 md:gap-6 font-mono">
                         {/* Total Attendu */}
                         <div className="flex items-center gap-2">
@@ -325,36 +325,39 @@ export function GestionLocativeClient({
             {/* ========================================
                 BARRE DE CONTRÔLES
                 ======================================== */}
-            <div className="flex flex-col md:flex-row gap-3 mb-4">
-                {/* Recherche */}
-                <div className="flex-1 flex items-center gap-2 bg-black border border-slate-800 rounded-md px-3 h-9 focus-within:border-slate-700">
-                    <Search className="h-4 w-4 text-slate-500 shrink-0" />
-                    <input
-                        type="text"
-                        placeholder="Rechercher..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-1 bg-transparent text-white placeholder:text-slate-600 text-sm outline-none"
-                    />
+            <div className="flex flex-col gap-3 mb-4 px-4 md:px-0">
+                {/* Ligne 1: Recherche + Relances */}
+                <div className="flex flex-row gap-2 items-center">
+                    {/* Recherche */}
+                    <div className="flex-1 flex items-center gap-2 bg-black border border-slate-800 rounded-md px-3 h-9 focus-within:border-slate-700 min-w-0">
+                        <Search className="h-4 w-4 text-slate-500 shrink-0" />
+                        <input
+                            type="text"
+                            placeholder="Rechercher..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="flex-1 bg-transparent text-white placeholder:text-slate-600 text-sm outline-none min-w-0"
+                        />
+                    </div>
+
+                    {/* Bouton Relances J+5 */}
+                    <SendRemindersButton />
                 </div>
 
-                {/* Bouton Export CSV */}
-                <Button
-                    onClick={handleExportCSV}
-                    variant="outline"
-                    size="sm"
-                    className="bg-black border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-white h-9 px-3"
-                    disabled={formattedTenants.length === 0}
-                >
-                    <Download className="w-4 h-4 mr-2" />
-                    CSV
-                </Button>
+                {/* Ligne 2: CSV + Sélecteur de mois */}
+                <div className="flex flex-row gap-2 items-center justify-center md:justify-start">
+                    {/* Bouton Export CSV */}
+                    <Button
+                        onClick={handleExportCSV}
+                        variant="outline"
+                        size="sm"
+                        className="bg-black border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-white h-9 px-3 shrink-0"
+                        disabled={formattedTenants.length === 0}
+                    >
+                        <Download className="w-4 h-4 mr-2" />
+                        CSV
+                    </Button>
 
-                {/* Bouton Relances J+5 */}
-                <SendRemindersButton />
-
-                {/* Sélecteur de mois - Centré sur mobile */}
-                <div className="w-fit mx-auto md:mx-0 md:w-auto">
                     <MonthSelector
                         selectedMonth={selectedMonth}
                         selectedYear={selectedYear}
@@ -367,16 +370,18 @@ export function GestionLocativeClient({
             {/* ========================================
                 TABLE ENTERPRISE
                 ======================================== */}
-            <TenantTable
-                tenants={formattedTenants}
-                profile={profile}
-                userEmail={userEmail}
-                isViewingTerminated={isViewingTerminated}
-                searchQuery={searchQuery}
-                onEdit={(tenant) => setEditingTenant(tenant)}
-                onDelete={deleteTransaction}
-                onDeleteLease={deleteLease}
-            />
+            <div className="px-4 md:px-0">
+                <TenantTable
+                    tenants={formattedTenants}
+                    profile={profile}
+                    userEmail={userEmail}
+                    isViewingTerminated={isViewingTerminated}
+                    searchQuery={searchQuery}
+                    onEdit={(tenant) => setEditingTenant(tenant)}
+                    onDelete={deleteTransaction}
+                    onDeleteLease={deleteLease}
+                />
+            </div>
 
             {/* Modale d'édition */}
             {editingTenant && (
