@@ -285,7 +285,7 @@ export async function getPendingPropertyDocuments() {
                     profiles: profilesMap.get(property.owner_id) || {
                         id: property.owner_id,
                         full_name: "Propriétaire inconnu",
-                        phone: null
+                        phone: undefined
                     },
                     document: {
                         id: docData.id,
