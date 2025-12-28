@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { validateTenantCreation } from '@/lib/finance';
+import { sendEmail } from '@/lib/mail';
 
 /**
  * Calcule les statistiques financières en temps réel
@@ -670,22 +671,82 @@ export async function approveQuoteByOwner(requestId: string) {
         artisanPhone: request.artisan_phone
     });
 
-    // Notification au locataire par email
+    // Notification au locataire par email (Nodemailer)
     if (tenantEmail && request.artisan_name) {
         const datePrevue = request.intervention_date
             ? new Date(request.intervention_date).toLocaleDateString('fr-FR')
             : 'à confirmer';
 
-        await triggerN8N('tenant-intervention-approved', {
-            tenantEmail,
-            tenantName: tenantName || 'Locataire',
-            description: request.description,
-            artisanName: request.artisan_name,
-            artisanPhone: request.artisan_phone,
-            artisanAddress: request.artisan_address || 'Non spécifiée',
-            interventionDate: datePrevue,
-            quoteAmount: request.quoted_price
-        });
+        try {
+            await sendEmail({
+                to: tenantEmail,
+                subject: `✅ Intervention validée : ${request.description}`,
+                html: `
+                    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9fafb; padding: 20px;">
+                        <div style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white; padding: 30px 20px; border-radius: 10px 10px 0 0; text-align: center;">
+                            <h1 style="margin: 0; font-size: 24px;">✅ Intervention Validée</h1>
+                        </div>
+
+                        <div style="background-color: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                            <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+                                Bonjour <strong>${tenantName || 'Locataire'}</strong>,
+                            </p>
+
+                            <p style="font-size: 14px; color: #6b7280; line-height: 1.6;">
+                                Bonne nouvelle ! La demande d'intervention pour <strong style="color: #16a34a;">${request.description}</strong> a été validée par le propriétaire.
+                            </p>
+
+                            <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                                <p style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #15803d; font-weight: bold;">
+                                    👷‍♂️ Artisan Assigné
+                                </p>
+                                <h2 style="margin: 10px 0; font-size: 20px; color: #111827;">${request.artisan_name}</h2>
+
+                                <div style="margin-top: 15px;">
+                                    <p style="margin: 5px 0; font-size: 14px; color: #374151;">
+                                        <strong>📞 Téléphone :</strong>
+                                        <a href="tel:${request.artisan_phone}" style="color: #16a34a; text-decoration: none; font-weight: 600;">${request.artisan_phone}</a>
+                                    </p>
+                                    ${request.artisan_address ? `
+                                    <p style="margin: 5px 0; font-size: 14px; color: #374151;">
+                                        <strong>📍 Adresse :</strong> ${request.artisan_address}
+                                    </p>` : ''}
+                                    <p style="margin: 5px 0; font-size: 14px; color: #374151;">
+                                        <strong>📅 Date prévue :</strong> ${datePrevue}
+                                    </p>
+                                    ${request.quoted_price ? `
+                                    <p style="margin: 5px 0; font-size: 14px; color: #374151;">
+                                        <strong>💰 Montant :</strong> ${request.quoted_price.toLocaleString('fr-FR')} FCFA
+                                    </p>` : ''}
+                                </div>
+                            </div>
+
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                                <p style="margin: 0; font-size: 13px; color: #92400e;">
+                                    <strong>ℹ️ Que faire maintenant ?</strong><br/>
+                                    L'artisan a été notifié et devrait vous contacter sous peu. Si vous ne recevez pas d'appel dans les 24h, n'hésitez pas à le contacter directement au numéro ci-dessus.
+                                </p>
+                            </div>
+
+                            <p style="font-size: 14px; color: #6b7280; margin-top: 30px; line-height: 1.6;">
+                                Cordialement,<br/>
+                                <strong style="color: #111827;">L'équipe de Gestion</strong>
+                            </p>
+
+                            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;" />
+
+                            <p style="font-size: 11px; color: #9ca3af; text-align: center; margin: 0;">
+                                Cet email a été envoyé automatiquement. Pour toute question, contactez votre propriétaire.
+                            </p>
+                        </div>
+                    </div>
+                `
+            });
+            console.log(`✅ Email envoyé à ${tenantEmail} pour intervention ${request.description}`);
+        } catch (emailError) {
+            console.error("❌ Erreur envoi email locataire:", emailError);
+            // On ne bloque pas le workflow si l'email échoue
+        }
     }
 
     revalidatePath('/compte/gestion-locative');
