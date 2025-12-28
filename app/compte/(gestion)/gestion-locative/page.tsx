@@ -124,10 +124,10 @@ export default async function GestionLocativePage({
     });
 
     return (
-        <div className="min-h-screen bg-slate-950 print:hidden overflow-x-hidden">
+        <div className="min-h-screen bg-slate-950 print:hidden">
             {/* Sub-header avec filtres Actifs/Résiliés */}
             <div className="border-b border-slate-800 bg-slate-900/50">
-                <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3">
+                <div className="w-full mx-auto px-4 md:px-6 py-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg">
                             <Link
@@ -157,7 +157,7 @@ export default async function GestionLocativePage({
             </div>
 
             {/* Contenu principal */}
-            <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6 overflow-x-hidden">
+            <div className="w-full mx-auto px-4 md:px-6 py-6">
                 {/* Table des locataires - Pleine largeur */}
                 <div className="mb-6">
                     <GestionLocativeClient

@@ -6,7 +6,6 @@ import { MonthSelector } from './MonthSelector';
 import { EditTenantDialog } from './EditTenantDialog';
 import { SendRemindersButton } from './SendRemindersButton';
 import { Search, Download } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { deleteTransaction, deleteLease } from '../actions';
 
@@ -85,7 +84,7 @@ export function GestionLocativeClient({
     minDate
 }: GestionLocativeClientProps) {
     // État pour le mois/année sélectionné - Initialisé à aujourd'hui
-    const today = new Date();
+    const today = useMemo(() => new Date(), []);
     const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1); // 1-12
     const [selectedYear, setSelectedYear] = useState(today.getFullYear());
     const [searchQuery, setSearchQuery] = useState('');
@@ -310,11 +309,11 @@ export function GestionLocativeClient({
     };
 
     return (
-        <div className="space-y-0 overflow-x-hidden">
+        <div className="space-y-0 w-full">
             {/* ========================================
                 KPI STRIP - Bandeau Dense Dark Enterprise
                 ======================================== */}
-            <div className="border-b border-slate-800 bg-black md:-mx-6 px-4 md:px-6 py-3 mb-4 max-w-[100vw] overflow-x-auto scrollbar-hide">
+            <div className="border-b border-slate-800 bg-black -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 overflow-x-auto">
                 <div className="flex items-center justify-between gap-4 text-sm min-w-max">
                     <div className="flex items-center gap-4 md:gap-6 font-mono">
                         {/* Total Attendu */}
