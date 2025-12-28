@@ -28,7 +28,9 @@
       "Bash(npm run clean:test-data:*)",
       "Bash(curl:*)",
       "Bash(rm:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(git status:*)",
+      "Bash(git rm:*)"
     ]
   }
 }

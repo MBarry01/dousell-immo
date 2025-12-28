@@ -2,8 +2,6 @@ import { RentalStats } from "./components/RentalStats";
 import { getRentalStats } from "./actions";
 import { GestionLocativeClient } from "./components/GestionLocativeClient";
 import { AddTenantButton } from "./components/AddTenantButton";
-import { MaintenanceHub } from "./components/MaintenanceHub";
-import { LegalAlertsWidget } from "./components/LegalAlertsWidget";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -88,48 +86,10 @@ export default async function GestionLocativePage({
         console.error("Erreur récupération transactions:", transError.message);
     }
 
-    // 3. Récupérer les demandes de maintenance (avec infos artisan)
-    const { data: maintenanceData, error: maintenanceError } = await supabase
-        .from('maintenance_requests')
-        .select('id, description, status, created_at, lease_id, artisan_name, artisan_phone, artisan_rating, artisan_address, quoted_price, intervention_date, owner_approved')
-        .order('created_at', { ascending: false });
-
-    const maintenanceRequests = maintenanceData || [];
-
-    if (maintenanceError) {
-        console.error("Erreur récupération maintenance:", maintenanceError.message);
-    }
-
     // ========================================
     // CALCUL DES STATISTIQUES (MODE RÉEL)
     // ========================================
     const stats = await getRentalStats();
-
-    // Transformer les demandes de maintenance pour MaintenanceHub
-    // Note: category n'existe pas encore dans la table
-    const formattedRequests = (maintenanceRequests || []).map(req => {
-        // Extraire la catégorie de la description si elle existe (format: "description [Catégorie]")
-        const categoryMatch = req.description?.match(/\[([^\]]+)\]$/);
-        const category = categoryMatch ? categoryMatch[1] : undefined;
-        const cleanDescription = category ? req.description.replace(` [${category}]`, '') : req.description;
-
-        return {
-            id: req.id,
-            description: cleanDescription,
-            category: category,
-            status: req.status,
-            created_at: req.created_at,
-            // Infos artisan (Make.com)
-            artisan_name: req.artisan_name,
-            artisan_phone: req.artisan_phone,
-            artisan_rating: req.artisan_rating,
-            artisan_address: req.artisan_address,
-            // Infos devis
-            quoted_price: req.quoted_price,
-            intervention_date: req.intervention_date,
-            owner_approved: req.owner_approved
-        };
-    });
 
     return (
         <div className="min-h-screen bg-slate-950 print:hidden">
@@ -167,27 +127,14 @@ export default async function GestionLocativePage({
             {/* Contenu principal */}
             <div className="w-full mx-auto px-4 md:px-6 py-6">
                 {/* Table des locataires - Pleine largeur */}
-                <div className="mb-6">
-                    <GestionLocativeClient
-                        leases={filteredLeases || []}
-                        transactions={transactions || []}
-                        profile={profile}
-                        userEmail={user.email}
-                        isViewingTerminated={isViewingTerminated}
-                        minDate={minDateStr}
-                    />
-                </div>
-
-                {/* Widgets Latéraux - En dessous */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {/* Alertes Juridiques */}
-                    <LegalAlertsWidget />
-
-                    {/* Hub Maintenance */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-                        <MaintenanceHub requests={formattedRequests} />
-                    </div>
-                </div>
+                <GestionLocativeClient
+                    leases={filteredLeases || []}
+                    transactions={transactions || []}
+                    profile={profile}
+                    userEmail={user.email}
+                    isViewingTerminated={isViewingTerminated}
+                    minDate={minDateStr}
+                />
             </div>
         </div>
     );

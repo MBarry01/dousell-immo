@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Scale, Settings, Building2 } from "lucide-react";
+import { LayoutDashboard, Scale, Settings, Building2, Wrench } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
@@ -59,6 +59,14 @@ export default function GestionLayout({
                             isActive={pathname?.startsWith('/compte/gestion-locative')}
                         >
                             Gestion Locative
+                        </NavLink>
+
+                        <NavLink
+                            href="/compte/interventions"
+                            icon={Wrench}
+                            isActive={pathname?.startsWith('/compte/interventions')}
+                        >
+                            Interventions
                         </NavLink>
 
                         <NavLink
