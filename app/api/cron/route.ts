@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
         // 2. Check lease expirations
         console.log('[CRON] Checking lease expirations...');
-        const expirationsResult = await checkLeaseExpirations(supabaseAdmin);
+        const expirationsResult = await checkLeaseExpirations();
         console.log('[CRON] Lease expirations completed:', expirationsResult);
 
         return NextResponse.json({
