@@ -2,6 +2,8 @@ import { RentalStats } from "./components/RentalStats";
 import { getRentalStats } from "./actions";
 import { GestionLocativeClient } from "./components/GestionLocativeClient";
 import { AddTenantButton } from "./components/AddTenantButton";
+import { MaintenanceHub } from "./components/MaintenanceHub";
+import { LegalAlertsWidget } from "./components/LegalAlertsWidget";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -86,10 +88,45 @@ export default async function GestionLocativePage({
         console.error("Erreur récupération transactions:", transError.message);
     }
 
+    // 3. Récupérer les demandes de maintenance (avec infos artisan) - Aperçu seulement
+    const { data: maintenanceData, error: maintenanceError } = await supabase
+        .from('maintenance_requests')
+        .select('id, description, status, created_at, lease_id, artisan_name, artisan_phone, artisan_rating, artisan_address, quoted_price, intervention_date, owner_approved')
+        .order('created_at', { ascending: false })
+        .limit(5); // Limiter à 5 pour l'aperçu
+
+    const maintenanceRequests = maintenanceData || [];
+
+    if (maintenanceError) {
+        console.error("Erreur récupération maintenance:", maintenanceError.message);
+    }
+
     // ========================================
     // CALCUL DES STATISTIQUES (MODE RÉEL)
     // ========================================
     const stats = await getRentalStats();
+
+    // Transformer les demandes de maintenance pour MaintenanceHub
+    const formattedRequests = (maintenanceRequests || []).map(req => {
+        const categoryMatch = req.description?.match(/\[([^\]]+)\]$/);
+        const category = categoryMatch ? categoryMatch[1] : undefined;
+        const cleanDescription = category ? req.description.replace(` [${category}]`, '') : req.description;
+
+        return {
+            id: req.id,
+            description: cleanDescription,
+            category: category,
+            status: req.status,
+            created_at: req.created_at,
+            artisan_name: req.artisan_name,
+            artisan_phone: req.artisan_phone,
+            artisan_rating: req.artisan_rating,
+            artisan_address: req.artisan_address,
+            quoted_price: req.quoted_price,
+            intervention_date: req.intervention_date,
+            owner_approved: req.owner_approved
+        };
+    });
 
     return (
         <div className="min-h-screen bg-slate-950 print:hidden">
@@ -127,14 +164,47 @@ export default async function GestionLocativePage({
             {/* Contenu principal */}
             <div className="w-full mx-auto px-4 md:px-6 py-6">
                 {/* Table des locataires - Pleine largeur */}
-                <GestionLocativeClient
-                    leases={filteredLeases || []}
-                    transactions={transactions || []}
-                    profile={profile}
-                    userEmail={user.email}
-                    isViewingTerminated={isViewingTerminated}
-                    minDate={minDateStr}
-                />
+                <div className="mb-6">
+                    <GestionLocativeClient
+                        leases={filteredLeases || []}
+                        transactions={transactions || []}
+                        profile={profile}
+                        userEmail={user.email}
+                        isViewingTerminated={isViewingTerminated}
+                        minDate={minDateStr}
+                    />
+                </div>
+
+                {/* Widgets Dashboard - Vue d'ensemble */}
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+                    {/* Interventions - Aperçu */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-sm font-semibold text-white">Interventions Récentes</h3>
+                            <Link
+                                href="/compte/interventions"
+                                className="text-xs text-slate-400 hover:text-white transition-colors"
+                            >
+                                Voir tout →
+                            </Link>
+                        </div>
+                        <MaintenanceHub requests={formattedRequests} />
+                    </div>
+
+                    {/* Alertes Juridiques */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-sm font-semibold text-white">Alertes Juridiques</h3>
+                            <Link
+                                href="/compte/legal"
+                                className="text-xs text-slate-400 hover:text-white transition-colors"
+                            >
+                                Voir tout →
+                            </Link>
+                        </div>
+                        <LegalAlertsWidget />
+                    </div>
+                </div>
             </div>
         </div>
     );
