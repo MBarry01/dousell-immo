@@ -197,7 +197,7 @@ export function calculateDisplayStatus(
  */
 export async function validateTenantCreation(
     email: string,
-    supabaseClient: any,
+    supabaseClient: { from: (table: string) => { select: (columns: string) => { eq: (column: string, value: string) => { neq: (column: string, value: string) => Promise<{ data: unknown; error: unknown }> } } } },
     ownerId: string
 ): Promise<{ valid: boolean; error?: string }> {
     if (!email) return { valid: true }; // Pas d'email, pas de conflit

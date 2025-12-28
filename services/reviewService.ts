@@ -81,7 +81,7 @@ export async function getPropertyReviews(
     const reviewIds = reviews.map((r) => r.id);
 
     // Récupérer toutes les réactions (si la table existe)
-    let reactions: any[] = [];
+    let reactions: ReviewReaction[] = [];
     const { data: reactionsData, error: reactionsError } = await supabase
       .from("review_reactions")
       .select("*")

@@ -32,8 +32,8 @@ export default async function PropertyVerificationPage() {
                     <div className="text-sm text-white/70">
                         <p className="font-semibold text-white mb-1">Certification Spécifique</p>
                         <p>
-                            En approuvant un document de propriété, vous certifiez l'annonce spécifique associée.
-                            Le bien affichera un badge "Certifié" pour renforcer la confiance des acheteurs.
+                            En approuvant un document de propriété, vous certifiez l&apos;annonce spécifique associée.
+                            Le bien affichera un badge &quot;Certifié&quot; pour renforcer la confiance des acheteurs.
                         </p>
                     </div>
                 </div>
@@ -42,7 +42,7 @@ export default async function PropertyVerificationPage() {
             {/* Documents List */}
             <Suspense fallback={<LoadingSkeleton />}>
                 {result.success ? (
-                    <PropertyVerificationList initialProperties={result.data as any} />
+                    <PropertyVerificationList initialProperties={result.data} />
                 ) : (
                     <Card className="border-red-500/20 bg-red-500/5 p-6 text-center">
                         <p className="text-red-400">Erreur: {result.error}</p>

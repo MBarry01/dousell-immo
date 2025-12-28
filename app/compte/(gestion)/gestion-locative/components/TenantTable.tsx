@@ -32,9 +32,19 @@ interface Tenant {
     period_end?: string | null;
 }
 
+interface ProfileData {
+    company_name?: string | null;
+    full_name?: string | null;
+    company_address?: string | null;
+    company_email?: string | null;
+    company_ninea?: string | null;
+    signature_url?: string | null;
+    logo_url?: string | null;
+}
+
 interface TenantTableProps {
     tenants?: Tenant[];
-    profile?: any;
+    profile?: ProfileData | null;
     userEmail?: string;
     isViewingTerminated?: boolean;
     searchQuery?: string;
@@ -52,11 +62,25 @@ const statusConfig = {
 type SortField = 'name' | 'property' | 'rentAmount' | 'status' | 'period';
 type SortOrder = 'asc' | 'desc';
 
+interface ReceiptData {
+    tenant: {
+        tenant_name?: string;
+        name?: string;
+        email?: string;
+        phone?: string;
+    };
+    property_address?: string;
+    amount?: number;
+    period?: string;
+    month?: string;
+    profile?: ProfileData | null;
+}
+
 export function TenantTable({ tenants = [], profile, userEmail, isViewingTerminated = false, searchQuery = '', onEdit, onDelete, onDeleteLease }: TenantTableProps) {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [isReceiptOpen, setIsReceiptOpen] = useState(false);
-    const [currentReceipt, setCurrentReceipt] = useState<any>(null);
+    const [currentReceipt, setCurrentReceipt] = useState<ReceiptData | null>(null);
     const [sortField, setSortField] = useState<SortField>('name');
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
@@ -93,8 +117,8 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
             tenant.email?.toLowerCase().includes(searchQuery.toLowerCase())
         )
         .sort((a, b) => {
-            let compareA: any;
-            let compareB: any;
+            let compareA: string | number;
+            let compareB: string | number;
 
             switch (sortField) {
                 case 'name':

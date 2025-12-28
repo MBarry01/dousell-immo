@@ -39,6 +39,7 @@ import { useUserRoles } from "@/hooks/use-user-roles";
 import { Badge } from "@/components/ui/badge";
 import { ROLE_COLORS, ROLE_LABELS } from "@/config/roles";
 import { GestionLocativeWidget } from "./components/GestionLocativeWidget";
+import { LegalAssistantWidget } from "./components/LegalAssistantWidget";
 
 export default function ComptePage() {
   const { user, loading } = useAuth();
@@ -196,8 +197,11 @@ export default function ComptePage() {
         </div>
 
 
-        {/* Widget Gestion Locative Premium */}
-        <GestionLocativeWidget {...stats} />
+        {/* Widgets Premium */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <GestionLocativeWidget {...stats} />
+          <LegalAssistantWidget />
+        </div>
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

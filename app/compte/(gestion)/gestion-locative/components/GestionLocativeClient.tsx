@@ -22,6 +22,7 @@ interface Tenant {
     status: 'paid' | 'pending' | 'overdue';
     dueDate?: number;
     startDate?: string;
+    endDate?: string;
     last_transaction_id?: string;
     period_month?: number;
     period_year?: number;
@@ -51,14 +52,20 @@ interface Lease {
     monthly_amount: number;
     billing_day?: number;
     start_date?: string;
+    end_date?: string;
     status?: 'active' | 'terminated' | 'pending';
     created_at?: string;
+}
+
+interface Profile {
+    id: string;
+    [key: string]: unknown;
 }
 
 interface GestionLocativeClientProps {
     leases: Lease[];
     transactions: Transaction[];
-    profile: any;
+    profile: Profile;
     userEmail?: string;
     isViewingTerminated?: boolean;
     minDate?: string;
@@ -189,6 +196,7 @@ export function GestionLocativeClient({
                     status: displayStatus,
                     dueDate: lease.billing_day,
                     startDate: lease.start_date,
+                    endDate: lease.end_date,
                     last_transaction_id: undefined, // Pas de transaction réelle
                     period_month: selectedMonth,
                     period_year: selectedYear,
@@ -223,6 +231,7 @@ export function GestionLocativeClient({
                         status: displayStatus,
                         dueDate: lease.billing_day,
                         startDate: lease.start_date,
+                        endDate: lease.end_date,
                         last_transaction_id: trans.id, // ID unique de la transaction
                         period_month: selectedMonth,
                         period_year: selectedYear,

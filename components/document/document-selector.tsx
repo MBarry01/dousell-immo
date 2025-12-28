@@ -141,7 +141,7 @@ export function DocumentSelector({
                 // Recharger la liste
                 await loadDocuments();
                 // Auto-sélectionner le nouveau document
-                const newDoc = result.data as any;
+                const newDoc = result.data as { id?: string };
                 if (newDoc.id) {
                     handleSelectDocument(newDoc.id);
                 }

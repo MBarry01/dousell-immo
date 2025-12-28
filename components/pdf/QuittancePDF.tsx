@@ -241,7 +241,7 @@ export const createQuittanceDocument = (data: QuittanceData) => {
             <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 5 }}>
               {data.receiptNumber}
             </Text>
-            <Text style={styles.companyInfo}>Date d'émission</Text>
+            <Text style={styles.companyInfo}>Date d&apos;émission</Text>
             <Text style={{ fontSize: 10, fontWeight: 'bold' }}>{today}</Text>
           </View>
         </View>
@@ -356,7 +356,7 @@ const QuittancePDFOld: React.FC<{ data: QuittanceData }> = ({ data }) => {
             <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 5 }}>
               {data.receiptNumber}
             </Text>
-            <Text style={styles.companyInfo}>Date d'émission</Text>
+            <Text style={styles.companyInfo}>Date d&apos;émission</Text>
             <Text style={{ fontSize: 10, fontWeight: 'bold' }}>{today}</Text>
           </View>
         </View>

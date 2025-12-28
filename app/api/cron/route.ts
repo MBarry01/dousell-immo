@@ -24,8 +24,8 @@ export async function GET(request: Request) {
         const result = await internalProcessReminders(supabaseAdmin);
         console.log('[CRON] Reminders processing completed:', result);
         return NextResponse.json(result);
-    } catch (error: any) {
+    } catch (error) {
         console.error("[CRON] Job Failed:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
     }
 }

@@ -101,7 +101,7 @@ function NavLink({
     children,
 }: {
     href: string;
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
     isActive?: boolean;
     children: React.ReactNode;
 }) {

@@ -190,7 +190,7 @@ function VerifiedDocumentsView({ documents }: { documents: IdentityDocument[] })
                     Aucun document vérifié
                 </h3>
                 <p className="text-white/60">
-                    Les documents d'identité vérifiés apparaîtront ici
+                    Les documents d&apos;identité vérifiés apparaîtront ici
                 </p>
             </Card>
         );
@@ -302,7 +302,7 @@ function VerifiedDocumentsView({ documents }: { documents: IdentityDocument[] })
                             Document vérifié - {selectedDoc?.profiles.full_name}
                         </DialogTitle>
                         <DialogDescription className="text-white/60">
-                            {selectedDoc?.file_type === 'cni' ? 'Carte Nationale d\'Identité' : 'Passeport'}
+                            {selectedDoc?.file_type === 'cni' ? 'Carte Nationale d&apos;Identité' : 'Passeport'}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -333,7 +333,7 @@ function VerifiedDocumentsView({ documents }: { documents: IdentityDocument[] })
                     <DialogHeader>
                         <DialogTitle className="text-white flex items-center gap-2">
                             <AlertTriangle className="h-5 w-5 text-red-400" />
-                            Révoquer la vérification d'identité
+                            Révoquer la vérification d&apos;identité
                         </DialogTitle>
                         <DialogDescription className="text-white/60">
                             ⚠️ Action critique pour {selectedDoc?.profiles.full_name}
@@ -346,9 +346,9 @@ function VerifiedDocumentsView({ documents }: { documents: IdentityDocument[] })
                                 Cette action va :
                             </p>
                             <ul className="text-xs text-red-300 space-y-1 list-disc list-inside">
-                                <li>Retirer le badge "Vérifié" du profil</li>
-                                <li>Décertifier tous les documents d'identité</li>
-                                <li>Décertifier toutes les annonces de l'utilisateur</li>
+                                <li>Retirer le badge &quot;Vérifié&quot; du profil</li>
+                                <li>Décertifier tous les documents d&apos;identité</li>
+                                <li>Décertifier toutes les annonces de l&apos;utilisateur</li>
                             </ul>
                         </div>
 

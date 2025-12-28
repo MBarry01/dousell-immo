@@ -26,7 +26,9 @@
       "Bash(npm run test:cron-rentals:*)",
       "Bash(npm run reset:december-rentals:*)",
       "Bash(npm run clean:test-data:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(rm:*)",
+      "Bash(done)"
     ]
   }
 }

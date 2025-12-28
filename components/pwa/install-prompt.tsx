@@ -28,9 +28,10 @@ function detectPlatform(): Platform {
 
 function isStandalone(): boolean {
   if (typeof window === "undefined") return false;
+  const nav = window.navigator as { standalone?: boolean };
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
-    (window.navigator as any).standalone === true ||
+    nav.standalone === true ||
     document.referrer.includes("android-app://")
   );
 }

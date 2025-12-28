@@ -99,7 +99,7 @@ export async function getUsersWithRoles(): Promise<UserWithRole[]> {
     // Si la fonction SQL fonctionne et retourne des données, les utiliser
     if (!rpcError && rpcData && Array.isArray(rpcData)) {
       // Mapper les résultats de la fonction SQL (même si le tableau est vide)
-      const mappedData = rpcData.map((row: any) => ({
+      const mappedData = rpcData.map((row: { id: string; email?: string; full_name?: string; phone?: string; roles?: UserRole[]; created_at?: string }) => ({
         id: row.id,
         email: row.email || "",
         full_name: row.full_name || null,
@@ -165,9 +165,9 @@ export async function getUsersWithRoles(): Promise<UserWithRole[]> {
     const rolesByUserId = new Map<string, UserRole[]>();
     const userCreatedAt = new Map<string, string>();
     
-    userRoles.forEach((ur: any) => {
+    userRoles.forEach((ur: { user_id?: string; role: string; created_at?: string }) => {
       if (!ur.user_id) return; // Ignorer les entrées invalides
-      
+
       if (!rolesByUserId.has(ur.user_id)) {
         rolesByUserId.set(ur.user_id, []);
       }
@@ -185,7 +185,7 @@ export async function getUsersWithRoles(): Promise<UserWithRole[]> {
     }
 
     // Essayer de récupérer depuis une table users publique si elle existe
-    let usersData: any[] = [];
+    let usersData: { id: string; email?: string; full_name?: string; phone?: string; created_at?: string }[] = [];
     const { data: usersTableData, error: usersError } = await supabase
       .from("users")
       .select("id, email, full_name, phone, created_at")
@@ -241,21 +241,21 @@ export async function getUsersWithRoles(): Promise<UserWithRole[]> {
       } else if (allUsers && allUsers.length > 0) {
         console.log(`Found ${allUsers.length} users in users table`);
         // Récupérer les rôles pour ces utilisateurs
-        const allUserIds = allUsers.map((u: any) => u.id);
+        const allUserIds = allUsers.map((u: { id: string }) => u.id);
         const { data: allUserRoles } = await supabase
           .from("user_roles")
           .select("user_id, role")
           .in("user_id", allUserIds);
 
         const rolesMap = new Map<string, UserRole[]>();
-        (allUserRoles || []).forEach((ur: any) => {
+        (allUserRoles || []).forEach((ur: { user_id: string; role: string }) => {
           if (!rolesMap.has(ur.user_id)) {
             rolesMap.set(ur.user_id, []);
           }
           rolesMap.get(ur.user_id)!.push(ur.role as UserRole);
         });
 
-        return allUsers.map((user: any) => ({
+        return allUsers.map((user: { id: string; email?: string; full_name?: string; phone?: string; created_at?: string }) => ({
           id: user.id,
           email: user.email || "",
           full_name: user.full_name || null,

@@ -106,7 +106,7 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
   // Gérer le cas où owner est un tableau (join) ou un objet
   const ownerData = Array.isArray(row.owner)
     ? row.owner[0]
-    : (row.owner || (row as any).profiles);
+    : (row.owner || (row as Record<string, unknown>).profiles);
   const owner = ownerData ?? {};
 
   return {

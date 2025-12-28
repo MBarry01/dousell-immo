@@ -98,7 +98,8 @@ export function CreateAlertDialog({
   const formatFilters = () => {
     const parts: string[] = [];
     // Utiliser 'q' pour la recherche textuelle (location)
-    const searchQuery = (filters as any).q || filters.location;
+    const filtersWithQ = filters as { q?: string; location?: string; category?: string; city?: string; type?: string; minPrice?: number; maxPrice?: number; rooms?: number; bedrooms?: number; hasBackupGenerator?: boolean; hasWaterTank?: boolean };
+    const searchQuery = filtersWithQ.q || filters.location;
     if (searchQuery && searchQuery.trim()) {
       parts.push(searchQuery.trim());
     }
@@ -139,8 +140,9 @@ export function CreateAlertDialog({
 
   const hasActiveFilters = (() => {
     // Vérifier si au moins un filtre a une valeur significative
+    const filtersWithQ = filters as { q?: string; location?: string; category?: string; city?: string; type?: string; minPrice?: number; maxPrice?: number };
     return !!(
-      ((filters as any).q && (filters as any).q.trim()) ||
+      (filtersWithQ.q && filtersWithQ.q.trim()) ||
       filters.location ||
       filters.category ||
       filters.city ||

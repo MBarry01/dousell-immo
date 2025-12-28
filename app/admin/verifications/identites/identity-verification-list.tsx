@@ -130,7 +130,7 @@ export function IdentityVerificationList({ initialDocuments, onDocumentUpdate }:
                     Aucun document en attente
                 </h3>
                 <p className="text-white/60">
-                    Tous les documents d'identité ont été traités
+                    Tous les documents d&apos;identité ont été traités
                 </p>
             </Card>
         );

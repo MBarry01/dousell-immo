@@ -34,11 +34,11 @@ export async function grantRoleViaFunction(
     revalidatePath("/admin/roles");
     revalidatePath("/admin/users");
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in grantRoleViaFunction:", error);
     return {
       success: false,
-      error: `Erreur: ${error.message || "Erreur inconnue"}`,
+      error: `Erreur: ${error instanceof Error ? error.message : "Erreur inconnue"}`,
     };
   }
 }

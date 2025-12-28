@@ -104,7 +104,7 @@ export function AdCertificationUpload({ className, onUploadSuccess }: AdCertific
                         Certifiez votre annonce (Recommandé)
                     </h3>
                     <p className="text-xs text-zinc-400 mt-1">
-                        Les annonces vérifiées obtiennent le badge "Confiance" et 3x plus de contacts.
+                        Les annonces vérifiées obtiennent le badge &quot;Confiance&quot; et 3x plus de contacts.
                     </p>
                 </div>
             </div>
@@ -123,7 +123,7 @@ export function AdCertificationUpload({ className, onUploadSuccess }: AdCertific
                             </div>
                             <h4 className="text-white font-medium">Document sécurisé</h4>
                             <p className="text-sm text-zinc-400 mt-1 max-w-[200px]">
-                                Votre justificatif est en cours d'analyse. Vous serez notifié sous 24h.
+                                Votre justificatif est en cours d&apos;analyse. Vous serez notifié sous 24h.
                             </p>
                         </motion.div>
                     ) : (

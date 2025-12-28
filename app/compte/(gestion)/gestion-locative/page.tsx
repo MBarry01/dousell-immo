@@ -3,7 +3,7 @@ import { getRentalStats } from "./actions";
 import { GestionLocativeClient } from "./components/GestionLocativeClient";
 import { AddTenantButton } from "./components/AddTenantButton";
 import { MaintenanceHub } from "./components/MaintenanceHub";
-import { LayoutDashboard, Settings } from "lucide-react";
+import { LegalAlertsWidget } from "./components/LegalAlertsWidget";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -42,7 +42,7 @@ export default async function GestionLocativePage({
     // 1. Récupérer tous les baux du propriétaire (colonnes explicites)
     const { data: leases, error: leasesError } = await supabase
         .from('leases')
-        .select('id, tenant_name, tenant_phone, tenant_email, property_address, monthly_amount, billing_day, start_date, status, created_at')
+        .select('id, tenant_name, tenant_phone, tenant_email, property_address, monthly_amount, billing_day, start_date, end_date, status, created_at')
         .eq('owner_id', user.id)
         // TEMPORAIRE: Afficher TOUS les baux pour diagnostic
         // .eq('status', viewMode) // Dynamique: 'active' ou 'terminated'
@@ -125,47 +125,36 @@ export default async function GestionLocativePage({
 
     return (
         <div className="min-h-screen bg-slate-950 print:hidden overflow-x-hidden">
-            {/* Header Enterprise - Ligne unique */}
-            <div className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-10 overflow-x-hidden">
-                <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-4">
+            {/* Sub-header avec filtres Actifs/Résiliés */}
+            <div className="border-b border-slate-800 bg-slate-900/50">
+                <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-xl font-semibold text-white tracking-tight">Gestion Locative</h1>
-                            <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg">
-                                <Link
-                                    href="/compte/gestion-locative"
-                                    className={`px-3 py-1 text-xs font-medium rounded transition-all ${!isViewingTerminated
-                                        ? 'bg-green-500/10 text-green-400'
-                                        : 'text-slate-400 hover:text-white'
-                                        }`}
-                                >
-                                    Actifs
-                                </Link>
-                                <Link
-                                    href="/compte/gestion-locative?view=terminated"
-                                    className={`px-3 py-1 text-xs font-medium rounded transition-all ${isViewingTerminated
-                                        ? 'bg-orange-500/10 text-orange-400'
-                                        : 'text-slate-400 hover:text-white'
-                                        }`}
-                                >
-                                    Résiliés
-                                </Link>
-                            </div>
+                        <div className="flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg">
+                            <Link
+                                href="/compte/gestion-locative"
+                                className={`px-3 py-1 text-xs font-medium rounded transition-all ${!isViewingTerminated
+                                    ? 'bg-green-500/10 text-green-400'
+                                    : 'text-slate-400 hover:text-white'
+                                    }`}
+                            >
+                                Actifs
+                            </Link>
+                            <Link
+                                href="/compte/gestion-locative?view=terminated"
+                                className={`px-3 py-1 text-xs font-medium rounded transition-all ${isViewingTerminated
+                                    ? 'bg-orange-500/10 text-orange-400'
+                                    : 'text-slate-400 hover:text-white'
+                                    }`}
+                            >
+                                Résiliés
+                            </Link>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Link
-                                href="/compte/gestion-locative/config"
-                                className="p-2 hover:bg-slate-900 rounded-lg transition-colors"
-                                title="Configuration"
-                            >
-                                <Settings className="w-4 h-4 text-slate-400" />
-                            </Link>
                             {!isViewingTerminated && <AddTenantButton ownerId={user.id} />}
                         </div>
                     </div>
                 </div>
             </div>
-
 
             {/* Contenu principal */}
             <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6 overflow-x-hidden">
@@ -181,8 +170,12 @@ export default async function GestionLocativePage({
                     />
                 </div>
 
-                {/* Hub Maintenance - En dessous, aligné */}
-                <div className="max-w-sm">
+                {/* Widgets Latéraux - En dessous */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {/* Alertes Juridiques */}
+                    <LegalAlertsWidget />
+
+                    {/* Hub Maintenance */}
                     <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
                         <MaintenanceHub requests={formattedRequests} />
                     </div>

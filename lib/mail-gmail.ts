@@ -84,20 +84,25 @@ export async function sendEmail({
       let content = att.content;
 
       // Vérifier si le contenu est un Buffer sérialisé (problème fréquent avec Next.js/Server Actions)
+      interface SerializedBuffer {
+        type: string;
+        data: number[];
+      }
+
       if (
         content &&
         typeof content === "object" &&
         !Buffer.isBuffer(content) &&
-        (content as any).type === "Buffer" &&
-        Array.isArray((content as any).data)
+        (content as SerializedBuffer).type === "Buffer" &&
+        Array.isArray((content as SerializedBuffer).data)
       ) {
         console.log(`⚠️ Détection d'un Buffer sérialisé pour ${att.filename}, conversion en cours...`);
-        content = Buffer.from((content as any).data);
+        content = Buffer.from((content as SerializedBuffer).data);
       }
 
       // Nodemailer accepte directement les Buffers
       // Format attendu: { filename, content (Buffer), contentType }
-      const attachment: any = {
+      const attachment: { filename: string; content: Buffer | string; contentType?: string } = {
         filename: att.filename,
         content: content,
       };

@@ -216,7 +216,7 @@ export function VerifiedIdentitiesList({ initialUsers }: Props) {
                     <DialogHeader>
                         <DialogTitle className="text-white flex items-center gap-2">
                             <AlertTriangle className="h-5 w-5 text-red-400" />
-                            Révoquer la vérification d'identité
+                            Révoquer la vérification d&apos;identité
                         </DialogTitle>
                         <DialogDescription className="text-white/60">
                             ⚠️ Action critique pour {selectedUser?.full_name}
@@ -229,8 +229,8 @@ export function VerifiedIdentitiesList({ initialUsers }: Props) {
                                 Cette action va :
                             </p>
                             <ul className="text-xs text-red-300 space-y-1 list-disc list-inside">
-                                <li>Retirer le badge "Vérifié" du profil</li>
-                                <li>Décertifier tous les documents d'identité</li>
+                                <li>Retirer le badge &quot;Vérifié&quot; du profil</li>
+                                <li>Décertifier tous les documents d&apos;identité</li>
                                 <li>Décertifier toutes les annonces ({selectedUser?.properties_count || 0})</li>
                             </ul>
                         </div>

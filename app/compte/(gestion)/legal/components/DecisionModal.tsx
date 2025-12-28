@@ -183,7 +183,7 @@ export function DecisionModal({ alert }: DecisionModalProps) {
 
                         <div className="space-y-2">
                             <Label htmlFor="terminationReason">Motif du congé (Obligatoire)</Label>
-                            <Select value={terminationReason} onValueChange={(v: any) => setTerminationReason(v)}>
+                            <Select value={terminationReason} onValueChange={(v: 'reprise' | 'vente' | 'legitime') => setTerminationReason(v)}>
                                 <SelectTrigger className="bg-black border-slate-700">
                                     <SelectValue />
                                 </SelectTrigger>
@@ -219,7 +219,7 @@ export function DecisionModal({ alert }: DecisionModalProps) {
                                 <li>✅ Un préavis PDF sera généré</li>
                                 <li>✅ Le préavis sera envoyé par email au locataire</li>
                                 <li>✅ Vous recevrez une copie (CC)</li>
-                                <li>✅ Le bail sera marqué "en cours de résiliation"</li>
+                                <li>✅ Le bail sera marqué &quot;en cours de résiliation&quot;</li>
                             </ul>
                         </div>
 

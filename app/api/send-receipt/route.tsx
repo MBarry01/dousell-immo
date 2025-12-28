@@ -118,13 +118,13 @@ export async function POST(request: NextRequest) {
       receiptNumber: data.receiptNumber,
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ Erreur lors de l\'envoi:', error);
 
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Erreur lors de l\'envoi de l\'email',
+        error: error instanceof Error ? error.message : 'Erreur lors de l\'envoi de l\'email',
       },
       { status: 500 }
     );

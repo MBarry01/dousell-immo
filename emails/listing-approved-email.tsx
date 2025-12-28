@@ -72,7 +72,7 @@ export function ListingApprovedEmail({
           {/* Header avec Logo (Simulé par texte stylisé si image pas dispo, ou image externe) */}
           <Section style={header}>
             <Heading style={brandName}>Dousell Immo</Heading>
-            <Text style={brandSubtitle}>L'immobilier de confiance</Text>
+            <Text style={brandSubtitle}>L&apos;immobilier de confiance</Text>
           </Section>
 
           <Section style={content}>

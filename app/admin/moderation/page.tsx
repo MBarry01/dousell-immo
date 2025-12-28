@@ -286,7 +286,7 @@ export default function ModerationPage() {
         <div className="text-center">
           <p className="text-lg text-white/70">Accès non autorisé</p>
           <p className="mt-2 text-sm text-white/50">
-            Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+            Vous n&apos;avez pas les permissions nécessaires pour accéder à cette page.
           </p>
         </div>
       </div>

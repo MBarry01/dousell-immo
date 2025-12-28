@@ -28,7 +28,7 @@ interface AddressInputWithMapProps {
   error?: string;
   onLocationSelect?: (lat: number, lng: number) => void;
   onAddressFound?: (details: AddressDetails) => void;
-  setValue?: UseFormSetValue<any>;
+  setValue?: UseFormSetValue<Record<string, unknown>>;
   className?: string;
   currentAddress?: string;
   city?: string;

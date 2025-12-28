@@ -14,10 +14,22 @@ import { updateLease } from "../actions";
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
+interface Tenant {
+    id: string;
+    name: string;
+    phone?: string;
+    email?: string;
+    property: string;
+    rentAmount: number;
+    dueDate?: number;
+    startDate?: string;
+    endDate?: string;
+}
+
 interface EditTenantDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    tenant: any; // Using any for flexibility, but ideally should be the Tenant interface
+    tenant: Tenant;
 }
 
 export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogProps) {
@@ -32,7 +44,7 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
         const formData = new FormData(e.currentTarget);
 
         // Only include fields that have values
-        const data: any = {};
+        const data: Record<string, string | number> = {};
 
         const tenantName = formData.get('tenant_name') as string;
         if (tenantName) data.tenant_name = tenantName;
@@ -55,6 +67,10 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
         // Start date might be needed if user wants to correct it
         const startDate = formData.get('start_date') as string;
         if (startDate) data.start_date = startDate;
+
+        // End date for legal alerts (J-180 and J-90)
+        const endDate = formData.get('end_date') as string;
+        if (endDate) data.end_date = endDate;
 
         const result = await updateLease(tenant.id, data);
         setLoading(false);
@@ -150,28 +166,31 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">Début bail</label>
+                            <label className="text-sm font-medium text-slate-300">
+                                Début bail <span className="text-red-400">*</span>
+                            </label>
                             <Input
                                 name="start_date"
                                 type="date"
+                                required
                                 defaultValue={tenant.startDate}
-                                className="
-            bg-slate-800 
-            border-slate-700 
-            text-white 
-            h-10 
-            w-full 
-            px-3 
-            block 
-            [color-scheme:dark] 
-            [&::-webkit-calendar-picker-indicator]:ml-auto 
-            [&::-webkit-calendar-picker-indicator]:cursor-pointer 
-            [&::-webkit-calendar-picker-indicator]:opacity-60 
-            hover:[&::-webkit-calendar-picker-indicator]:opacity-100
-            [&::-webkit-calendar-picker-indicator]:p-1
-        "
+                                className="bg-slate-800 border-slate-700 text-white h-10 w-full px-3 block [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:p-1"
                             />
                         </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">
+                            Fin bail <span className="text-red-400">*</span>
+                            <span className="text-xs text-slate-500 ml-2">(pour les alertes juridiques J-180 et J-90)</span>
+                        </label>
+                        <Input
+                            name="end_date"
+                            type="date"
+                            required
+                            defaultValue={tenant.endDate}
+                            className="bg-slate-800 border-slate-700 text-white h-10 w-full px-3 block [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:p-1"
+                        />
                     </div>
 
                     <div className="pt-4 flex justify-end gap-3">

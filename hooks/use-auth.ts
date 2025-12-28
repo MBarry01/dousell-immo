@@ -45,10 +45,10 @@ export function useAuth() {
         });
 
         subscription = authSubscription;
-      } catch (error: any) {
+      } catch (error) {
         // Ignorer silencieusement les erreurs de session manquante
-        const isSessionMissing = error?.message?.includes("session") || 
-                                 error?.name === "AuthSessionMissingError";
+        const isSessionMissing = (error as Error)?.message?.includes("session") ||
+                                 (error as { name?: string })?.name === "AuthSessionMissingError";
         
         if (!isSessionMissing) {
           // Log seulement les vraies erreurs (problème de configuration, réseau, etc.)

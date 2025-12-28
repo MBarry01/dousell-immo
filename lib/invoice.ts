@@ -113,7 +113,7 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
     data.items.forEach((item) => {
       // Use fallback font for description to support emojis
       const description = sanitizeText(item.description);
-      const options: any = { x: margin + 10, y: yPosition, size: 10, font: regularFont, color: rgb(0, 0, 0) };
+      const options: { x: number; y: number; size: number; font: PDFFont; color: ReturnType<typeof rgb> } = { x: margin + 10, y: yPosition, size: 10, font: regularFont, color: rgb(0, 0, 0) };
 
       if (emojiFont) {
         options.font = regularFont; // pdf-lib automatic fallback is not that simple, we need to handle it or use a font that supports both?

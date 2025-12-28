@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         </p>
         <ul className="list-disc pl-5 space-y-2">
           <li>Gérer votre compte et vos annonces</li>
-          <li>Vous mettre en relation avec d'autres utilisateurs</li>
+          <li>Vous mettre en relation avec d&apos;autres utilisateurs</li>
           <li>Améliorer nos services</li>
           <li>Vous envoyer des notifications importantes</li>
         </ul>
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
       <section className="space-y-4 mb-8">
         <h2 className="text-xl font-semibold text-white">4. Vos droits</h2>
         <p>
-          Conformément à la législation en vigueur, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Contactez-nous pour exercer ces droits.
+          Conformément à la législation en vigueur, vous disposez d&apos;un droit d&apos;accès, de rectification et de suppression de vos données. Contactez-nous pour exercer ces droits.
         </p>
       </section>
 

@@ -125,7 +125,7 @@ export async function createNewLease(formData: Record<string, unknown>) {
     };
 
     // 1. Vérification STRICTE d'unicité via FinanceGuard (Pilier 2)
-    const emailToCheck = (finalData as any).tenant_email as string | undefined;
+    const emailToCheck = (finalData as Record<string, unknown>).tenant_email as string | undefined;
     if (emailToCheck) {
         const validation = await validateTenantCreation(emailToCheck, supabase, user.id);
 
@@ -517,14 +517,61 @@ export async function createMaintenanceRequest(data: {
         targetLeaseId = firstLease.id;
     }
 
-    // Insert avec seulement les colonnes qui existent
-    // TODO: Ajouter 'category' après migration de la table
+    // 1. Récupérer les infos du bail pour le contexte (Adresse pour Google Maps)
+    const { data: leaseContext } = await supabase
+        .from('leases')
+        .select('property_address, tenant_name, tenant_phone, tenant_email')
+        .eq('id', targetLeaseId)
+        .single();
+
+    let artisanInfo = "";
+    let status = 'open';
+
+    // 2. APPEL DU WEBHOOK MAKE (Recherche Artisan)
+    // On utilise une variable d'env pour l'URL, sinon fallback sur une valeur par défaut ou erreur
+    const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL;
+
+    if (MAKE_WEBHOOK_URL) {
+        try {
+            // On attend la réponse pour afficher le résultat immédiatement
+            const response = await fetch(MAKE_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    category: data.category || "General",
+                    location: leaseContext?.property_address || "Dakar, Sénégal",
+                    issue: data.description,
+                    tenantName: leaseContext?.tenant_name,
+                    tenantPhone: leaseContext?.tenant_phone,
+                    tenantEmail: leaseContext?.tenant_email,
+                    webhookType: 'find_artisan' // Tag pour router dans Make si besoin
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+
+                // Si Make renvoie un artisan
+                if (result.artisan_name) {
+                    artisanInfo = `\n\n[Artisan Trouvé]\nNom: ${result.artisan_name}\nTél: ${result.artisan_phone}\nNote: ${result.rating}/5\nAdresse: ${result.address}`;
+                    status = 'quote_received'; // On considère qu'on a une "offre" ou un contact
+                }
+            }
+        } catch (e) {
+            console.error("Erreur Webhook Make:", e);
+            // On continue sans bloquer, le statut restera 'open'
+        }
+    }
+
+    // 3. Enregistrer la demande en base
+    const fullDescription = data.description + (data.category ? ` [${data.category}]` : '') + artisanInfo;
+
     const { data: request, error } = await supabase
         .from('maintenance_requests')
         .insert([{
             lease_id: targetLeaseId,
-            description: data.description + (data.category ? ` [${data.category}]` : ''),
-            status: 'open'
+            description: fullDescription,
+            status: status
         }])
         .select('id, description, status, created_at')
         .single();
@@ -534,16 +581,15 @@ export async function createMaintenanceRequest(data: {
         return { success: false, error: error.message };
     }
 
-    // DÉCLENCHEUR N8N : Notification de nouvelle panne
-    if (request) {
-        await triggerN8N('new-maintenance-request', {
-            requestId: request.id,
-            description: request.description
-        });
-    }
-
     revalidatePath('/compte/gestion-locative');
-    return { success: true, id: request.id };
+
+    // On renvoie le succès avec potentiellement l'info artisan pour l'UI
+    return {
+        success: true,
+        id: request.id,
+        artisanFound: status === 'quote_received',
+        message: status === 'quote_received' ? "Artisan trouvé et demande enregistrée !" : "Demande enregistrée."
+    };
 }
 
 /**
@@ -606,7 +652,7 @@ export async function getActiveLeases() {
  * Envoie les données de quittance à Pipedream
  * Formate correctement le payload pour le webhook Pipedream
  */
-export async function sendReceiptToN8N(data: any) {
+export async function sendReceiptToN8N(data: Record<string, unknown>) {
     // 1. On récupère l'URL Pipedream définie dans .env.local
     const WEBHOOK_URL = process.env.NEXT_PUBLIC_WEBHOOK_URL;
 
@@ -735,7 +781,7 @@ export async function deleteTransaction(transactionId: string) {
         .single();
 
     // Cast sécurisé ou accès flexible car Join Supabase peut être un objet ou tableau selon la version
-    const leaseData = transaction?.leases as any;
+    const leaseData = transaction?.leases as { owner_id: string } | undefined;
 
     if (!transaction || !leaseData || leaseData.owner_id !== user.id) {
         return { success: false, error: "Transaction introuvable ou non autorisée" };

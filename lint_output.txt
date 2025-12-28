@@ -1,0 +1,692 @@
+
+> dousell-immo@0.1.0 lint
+> eslint
+
+
+C:\Users\Barry\Downloads\Doussel_immo\app\_actions\verification.ts
+  8:7  warning  'verificationSchema' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\actions.ts
+  298:13  warning  'monthKey' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\biens\[id]\page.tsx
+  58:5  warning  'setValue' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\biens\nouveau\page.tsx
+  74:5  warning  'handleSubmit' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\leads\page.tsx
+   6:20  warning  'updateLeadStatus' is defined but never used       @typescript-eslint/no-unused-vars
+   6:43  warning  'Lead' is defined but never used                   @typescript-eslint/no-unused-vars
+  14:7   warning  'statusLabels' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  20:7   warning  'statusColors' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\moderation\page.tsx
+   7:10  warning  'motion' is defined but never used                    @typescript-eslint/no-unused-vars
+  90:24  warning  'setRejectingIds' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\moderation\property-card.tsx
+  233:26  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\moderation\reject-dialog.tsx
+  4:10  warning  'X' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\roles\actions.ts
+  14:3  warning  'supabase' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\roles\grant-role-action.ts
+  21:13  warning  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\roles\page.tsx
+  2:18  warning  'UserPlus' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\verifications\biens\actions.ts
+  218:40  warning  'profilesError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\verifications\biens\property-verification-list.tsx
+  13:5   warning  'Phone' is defined but never used  @typescript-eslint/no-unused-vars
+  24:10  warning  'Badge' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\verifications\identites\actions.ts
+  312:40  warning  'profilesError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\verifications\identites\identity-verification-list.tsx
+    4:8   warning  'Image' is defined but never used                                @typescript-eslint/no-unused-vars
+  133:41  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\verifications\identites\identity-verification-tabs.tsx
+  193:36  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  336:55  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\verifications\identites\page.tsx
+  23:81  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\admin\verifications\identites\verified-list.tsx
+    3:20  warning  'useEffect' is defined but never used                            @typescript-eslint/no-unused-vars
+   12:5   warning  'Shield' is defined but never used                               @typescript-eslint/no-unused-vars
+  219:55  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  232:54  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  232:62  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  233:69  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\api\branding\upload\route.ts
+  41:23  warning  'uploadData' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\api\send-notice\route.tsx
+  61:11  warning  'title' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\api\test-reminders\route.ts
+  40:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\app\auth\actions.ts
+  114:16  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\actions.ts
+  734:18  warning  'parseError' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\components\EditTenantDialog.tsx
+  3:20  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\components\GestionLocativeClient.tsx
+   9:10  warning  'Input' is defined but never used                                                                                                                                                       @typescript-eslint/no-unused-vars
+  83:11  warning  The 'today' object construction makes the dependencies of useMemo Hook (at line 246) change on every render. To fix this, wrap the initialization of 'today' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\components\MaintenanceHub.tsx
+   61:11  warning  'getStatusStyle' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   71:11  warning  'getStatusLabel' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   81:11  warning  'getStatusIcon' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  121:11  warning  'formatDate' is assigned a value but never used      @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\components\MonthSelector.tsx
+   3:37  warning  'Calendar' is defined but never used                             @typescript-eslint/no-unused-vars
+  81:32  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\components\ReceiptModal.tsx
+  49:39  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\components\RentalStats.tsx
+  12:11  warning  'cards' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\components\TenantList.tsx
+  256:41  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\components\TenantList.tsx:256:41
+  254 |                 periodStart: periodStartDate.toLocaleDateString('fr-FR'),
+  255 |                 periodEnd: periodEndDate.toLocaleDateString('fr-FR'),
+> 256 |                 receiptNumber: `QUITT-${Date.now().toString().slice(-6)}`,
+      |                                         ^^^^^^^^^^ Cannot call impure function
+  257 |                 ownerName: landlordName,
+  258 |                 ownerAddress: landlordAddress,
+  259 |                 ownerNinea: profile?.company_ninea || undefined,  react-hooks/purity
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\components\TenantTable.tsx
+   79:120  warning  'onDelete' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   79:130  warning  'onDeleteLease' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   81:12   warning  'saving' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  196:41   error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\components\TenantTable.tsx:196:41
+  194 |                 periodStart: periodStartDate.toLocaleDateString('fr-FR'),
+  195 |                 periodEnd: periodEndDate.toLocaleDateString('fr-FR'),
+> 196 |                 receiptNumber: `QUITT-${Date.now().toString().slice(-6)}`,
+      |                                         ^^^^^^^^^^ Cannot call impure function
+  197 |                 ownerName: profile?.company_name || profile?.full_name || "Propriétaire",
+  198 |                 ownerAddress: profile?.company_address || "Adresse non renseignée",
+  199 |                 ownerNinea: profile?.company_ninea || undefined,  react-hooks/purity
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\config\actions.ts
+   91:19  warning  'uploadData' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  133:19  warning  'uploadData' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\config\config-form.tsx
+   42:9   warning  Expected an assignment or function call and instead saw an expression                                                                                                                                                                                                                    @typescript-eslint/no-unused-expressions
+   70:13  warning  Expected an assignment or function call and instead saw an expression                                                                                                                                                                                                                    @typescript-eslint/no-unused-expressions
+  147:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  201:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  312:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  335:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\gestion-locative\page.tsx
+    1:10  warning  'RentalStats' is defined but never used     @typescript-eslint/no-unused-vars
+  106:11  warning  'stats' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\layout.tsx
+  5:27  warning  'Scale' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\(gestion)\legal\page.tsx
+   1:48   warning  'Gavel' is defined but never used                                @typescript-eslint/no-unused-vars
+   1:75   warning  'Scale' is defined but never used                                @typescript-eslint/no-unused-vars
+   1:92   warning  'Shield' is defined but never used                               @typescript-eslint/no-unused-vars
+  81:111  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\alertes\page.tsx
+    6:18  warning  'AnimatePresence' is defined but never used                                                                                            @typescript-eslint/no-unused-vars
+   13:3   warning  'X' is defined but never used                                                                                                          @typescript-eslint/no-unused-vars
+   14:3   warning  'MapPin' is defined but never used                                                                                                     @typescript-eslint/no-unused-vars
+   15:3   warning  'DollarSign' is defined but never used                                                                                                 @typescript-eslint/no-unused-vars
+   16:3   warning  'Home' is defined but never used                                                                                                       @typescript-eslint/no-unused-vars
+   19:3   warning  'Check' is defined but never used                                                                                                      @typescript-eslint/no-unused-vars
+   73:10  warning  'showCreateAlert' is assigned a value but never used                                                                                   @typescript-eslint/no-unused-vars
+   73:27  warning  'setShowCreateAlert' is assigned a value but never used                                                                                @typescript-eslint/no-unused-vars
+   91:6   warning  React Hook useEffect has missing dependencies: 'loadAlerts' and 'loadPreferences'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  116:14  warning  'error' is defined but never used                                                                                                      @typescript-eslint/no-unused-vars
+  141:14  warning  'error' is defined but never used                                                                                                      @typescript-eslint/no-unused-vars
+  482:32  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                        react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\biens\[id]\page.tsx
+  75:6  warning  React Hook useEffect has a missing dependency: 'loadProperty'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\components\GestionLocativeWidget.tsx
+  1:10  warning  'ArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\deposer\page.tsx
+  130:7    warning  'quartiers' is assigned a value but never used                                                                                                                                                              @typescript-eslint/no-unused-vars
+  208:45   error    Unexpected any. Specify a different type                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  216:20   error    Unexpected any. Specify a different type                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  274:11   warning  'data' is assigned a value but never used                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  314:6    warning  React Hook useEffect has missing dependencies: 'getValues', 'isCharacteristicsValid', 'isDescriptionValid', 'isEssentialsValid', and 'isLocationValid'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  314:7    warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:22   warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:41   warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:57   warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:73   warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:88   warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:107  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:125  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:143  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:167  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:187  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:203  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:222  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+  314:242  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                    react-hooks/exhaustive-deps
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\mes-biens\page.tsx
+  18:10  warning  'ShieldCheck' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\mes-documents\page.tsx
+   18:3   warning  'MapPin' is defined but never used                               @typescript-eslint/no-unused-vars
+  153:14  warning  'error' is defined but never used                                @typescript-eslint/no-unused-vars
+  300:14  warning  'error' is defined but never used                                @typescript-eslint/no-unused-vars
+  305:9   warning  'formatFileSize' is assigned a value but never used              @typescript-eslint/no-unused-vars
+  485:87  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  521:43  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  531:67  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  531:90  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  636:67  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  636:90  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\page.tsx
+  18:3  warning  'LayoutDashboard' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\compte\parametres\page.tsx
+  5:10  warning  'motion' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\error.tsx
+  30:23  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\legal\cgu\page.tsx
+   4:80   error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+   9:120  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  23:97   error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  30:135  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\legal\page.tsx
+  4:56  warning  'CardContent' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\legal\privacy\page.tsx
+  20:45  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  36:68  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  36:79  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\not-found.tsx
+  14:36  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\app\planifier-visite\actions.tsx
+  48:11  warning  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\planifier-visite\page.tsx
+  35:9  warning  'propertyId' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  36:9  warning  'propertyTitle' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  37:9  warning  'propertyPrice' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  38:9  warning  'propertyLocation' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\recherche\page.tsx
+  3:3  warning  'getLatestProperties' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\register\page.tsx
+  55:17  warning  'SelectedFlag' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  55:31  warning  'callingCode' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  63:11  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Barry\Downloads\Doussel_immo\app\register\page.tsx:63:11
+  61 |         const phoneNumber = parsePhoneNumber(phoneValue);
+  62 |         if (phoneNumber && phoneNumber.country) {
+> 63 |           setSelectedCountry(phoneNumber.country as RPNInput.Country);
+     |           ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  64 |         }
+  65 |       } catch (e) {
+  66 |         // Ignorer les erreurs de détection de pays (numéro invalide, etc.)  react-hooks/set-state-in-effect
+  65:16  warning  'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\app\test-supabase\page.tsx
+  293:133  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  293:144  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\check-env.js
+  1:20  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:21  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\Barry\Downloads\Doussel_immo\check_schema.ts
+  8:13  warning  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\components\admin\admin-topbar.tsx
+  19:13  warning  'currentPath' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\components\admin\dashboard-view.tsx
+  48:3  warning  'stats' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\components\admin\verification-queue.tsx
+   7:8   warning  'Link' is defined but never used                     @typescript-eslint/no-unused-vars
+  27:10  warning  'VerificationStatusBadge' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\components\dashboard\ad-certification-upload.tsx
+  126:66  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\components\dashboard\verification-upload-form.tsx
+  28:3   warning  'proofDocumentUrl' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+  34:31  error    React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+  35:43  error    React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+  36:41  error    React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+  37:39  error    React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+
+C:\Users\Barry\Downloads\Doussel_immo\components\document\document-selector.tsx
+   78:8   warning  React Hook useEffect has a missing dependency: 'loadDocuments'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  144:47  error    Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\components\layout\notification-bell.tsx
+  49:48  warning  'error' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\components\maps\location-picker-dialog.tsx
+  18:43  error  A `require()` style import is forbidden                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-require-imports
+  22:39  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-explicit-any
+  85:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Barry\Downloads\Doussel_immo\components\maps\location-picker-dialog.tsx:85:5
+  83 |
+  84 |   useEffect(() => {
+> 85 |     setMounted(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  86 |   }, []);
+  87 |
+  88 |   useEffect(() => {                                                                                                                                                                                                                                                react-hooks/set-state-in-effect
+  90:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Barry\Downloads\Doussel_immo\components\maps\location-picker-dialog.tsx:90:7
+  88 |   useEffect(() => {
+  89 |     if (initialPosition) {
+> 90 |       setSelectedPosition([initialPosition.lat, initialPosition.lng]);
+     |       ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  91 |     } else if (open && initialAddress && !initialPosition) {
+  92 |       // Si pas de position initiale mais une adresse, on essaie de géocoder
+  93 |       const geocodeAddress = async () => {  react-hooks/set-state-in-effect
+
+C:\Users\Barry\Downloads\Doussel_immo\components\pdf\PreavisPDF.tsx
+  231:15  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+  257:62  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                              react/no-unescaped-entities
+  281:50  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                              react/no-unescaped-entities
+  306:25  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                              react/no-unescaped-entities
+  306:53  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                              react/no-unescaped-entities
+  315:15  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+C:\Users\Barry\Downloads\Doussel_immo\components\pdf\QuittancePDF.tsx
+  231:15  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+  244:52  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                              react/no-unescaped-entities
+  315:13  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+  336:7   warning  'QuittancePDFOld' is assigned a value but never used                                                         @typescript-eslint/no-unused-vars
+  346:15  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+  359:52  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                              react/no-unescaped-entities
+  430:13  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+C:\Users\Barry\Downloads\Doussel_immo\components\pdf\QuittancePDF_v2.tsx
+  201:15  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+  216:52  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                              react/no-unescaped-entities
+  293:13  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+C:\Users\Barry\Downloads\Doussel_immo\components\property\agent-card.tsx
+   5:39  warning  'User' is defined but never used                  @typescript-eslint/no-unused-vars
+  25:7   warning  'AGENT1_INFO' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\components\property\property-card.tsx
+  16:8  warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\components\property\property-detail-view.tsx
+  292:21  warning  'isPaidService' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\components\property\review-item.tsx
+  17:31  warning  'propertyId' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\components\property\share-button.tsx
+  93:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\components\property\static-map.tsx
+   4:10  warning  'ExternalLink' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  36:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Barry\Downloads\Doussel_immo\components\property\static-map.tsx:36:7
+  34 |   useEffect(() => {
+  35 |     if (!hasValidCoords) {
+> 36 |       setMapUrl(null);
+     |       ^^^^^^^^^ Avoid calling setState() directly within an effect
+  37 |       return;
+  38 |     }
+  39 |  react-hooks/set-state-in-effect
+
+C:\Users\Barry\Downloads\Doussel_immo\components\providers\splash-provider.tsx
+   3:31  warning  'Children' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  48:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Barry\Downloads\Doussel_immo\components\providers\splash-provider.tsx:48:9
+  46 |       if (hasShown) {
+  47 |         removeSplashBlocker();
+> 48 |         setShowSplash(false);
+     |         ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  49 |         setIsReady(true);
+  50 |         return;
+  51 |       }  react-hooks/set-state-in-effect
+
+C:\Users\Barry\Downloads\Doussel_immo\components\pwa\install-prompt.tsx
+   49:5  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Barry\Downloads\Doussel_immo\components\pwa\install-prompt.tsx:49:5
+  47 |   useEffect(() => {
+  48 |     // Check if already installed
+> 49 |     setIsInstalled(isStandalone());
+     |     ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  50 |
+  51 |     // Detect platform
+  52 |     setPlatform(detectPlatform());  react-hooks/set-state-in-effect
+  113:6  warning  React Hook useEffect has a missing dependency: 'deferredPrompt'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+
+C:\Users\Barry\Downloads\Doussel_immo\components\search\create-alert-dialog.tsx
+    5:16  warning  'X' is defined but never used             @typescript-eslint/no-unused-vars
+  101:37  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  143:20  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  143:42  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\components\search\map-view.tsx
+   17:43  error    A `require()` style import is forbidden             @typescript-eslint/no-require-imports
+   18:60  error    A `require()` style import is forbidden             @typescript-eslint/no-require-imports
+   62:7   warning  'MarkerCluster' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   62:26  warning  'children' is defined but never used                @typescript-eslint/no-unused-vars
+   85:21  warning  'size' is assigned a value but never used           @typescript-eslint/no-unused-vars
+  108:21  error    Component definition is missing display name        react/display-name
+  112:5   warning  'onRedirect' is defined but never used              @typescript-eslint/no-unused-vars
+  165:25  warning  'e' is defined but never used                       @typescript-eslint/no-unused-vars
+  217:21  warning  'setMounted' is assigned a value but never used     @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\components\search\search-experience.tsx
+  79:6  warning  React Hook useEffect has missing dependencies: 'filters' and 'setFilters'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\Barry\Downloads\Doussel_immo\components\ui\command.tsx
+  26:11  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Users\Barry\Downloads\Doussel_immo\components\ui\empty-state.tsx
+  2:24  warning  'AlertCircle' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\emails\listing-approved-email.tsx
+  75:42  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Barry\Downloads\Doussel_immo\emails\verification-email.tsx
+  10:3  warning  'Img' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\hooks\use-user-roles.ts
+  144:14  warning  'payload' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\lib\admin-auth.ts
+  2:10  warning  'redirect' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\lib\finance.ts
+   38:23  warning  'isWithinInterval' is defined but never used  @typescript-eslint/no-unused-vars
+   38:41  warning  'startOfMonth' is defined but never used      @typescript-eslint/no-unused-vars
+   38:55  warning  'endOfMonth' is defined but never used        @typescript-eslint/no-unused-vars
+   38:67  warning  'parseISO' is defined but never used          @typescript-eslint/no-unused-vars
+   38:77  warning  'isAfter' is defined but never used           @typescript-eslint/no-unused-vars
+  200:21  error    Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\lib\gtm.ts
+  1:6  warning  'GTMEvent' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\lib\invoice.ts
+  36:12  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\lib\mail.ts
+  35:3  warning  'fromName' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  36:3  warning  'user_id' is assigned a value but never used   @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\lib\notifications-helpers.ts
+  7:10  warning  'getUserRoles' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\lib\notifications.ts
+  81:18  warning  'rpcErr' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\lib\paydunya.ts
+  276:20  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\Barry\Downloads\Doussel_immo\lib\permissions.ts
+  192:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\lib\reminders-service.ts
+  186:9  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\add-amount-paid-column.ts
+  18:17  warning  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\add-end-date-column.ts
+  41:27  warning  'columns' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  99:21  error    Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\apply-migration-end-date.ts
+  70:19  warning  'updated' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  93:19  error    Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\apply-rental-migration.ts
+  25:7  warning  'supabase' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\apply-storage-policies.ts
+  24:16  warning  'applySQLMigration' is defined but never used  @typescript-eslint/no-unused-vars
+  28:11  warning  'data' is assigned a value but never used      @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\check-all-months.ts
+  48:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\check-homepage-images.ts
+   32:61  warning  'type' is defined but never used          @typescript-eslint/no-unused-vars
+   72:12  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+   90:45  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   99:12  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  137:9   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  144:9   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\check-manifest.js
+    8:12  error    A `require()` style import is forbidden         @typescript-eslint/no-require-imports
+    9:14  error    A `require()` style import is forbidden         @typescript-eslint/no-require-imports
+  175:12  error    A `require()` style import is forbidden         @typescript-eslint/no-require-imports
+  176:14  error    A `require()` style import is forbidden         @typescript-eslint/no-require-imports
+  179:7   warning  'iconsPath' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\check-reminders-logic.ts
+  39:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\check-signup-issues.ts
+  212:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\check-status-logic.ts
+  2:10  warning  'differenceInDays' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\check-touba.ts
+  44:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\count-properties.ts
+  18:11  warning  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\create-test-late-payment.ts
+  34:5  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\debug-kidira.js
+  1:26  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:16  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  3:14  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\debug-relations.ts
+  69:17  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\debug-reminders-issue.ts
+  135:40  warning  'serviceError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\diagnose-digital-safe.ts
+  29:17  warning  'tableData' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  98:17  warning  'verifications' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\diagnose-reminders.ts
+  36:9  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\download-font.js
+  1:15  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  3:14  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\fetch-pexels-images.ts
+  36:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  39:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\fix-broken-images.ts
+   39:61  warning  'type' is defined but never used                  @typescript-eslint/no-unused-vars
+   98:12  warning  'error' is defined but never used                 @typescript-eslint/no-unused-vars
+  119:45  error    Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+  175:11  warning  'imageChecks' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  203:28  error    Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\fix-touba-coords.ts
+  43:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\generate-pwa-icons.js
+  11:12  error    A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  12:14  error    A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  29:15  error    A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  30:14  warning  'error' is defined but never used        @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\link-audit.js
+  1:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:14  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\refactor-invoice.ts
+  41:15  warning  'newBlock' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\replace-unsplash-with-pexels.ts
+   46:61  warning  'type' is defined but never used          @typescript-eslint/no-unused-vars
+   87:45  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  156:28  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\reset-reminder-flags.ts
+  41:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  69:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\resize-desktop-screenshot.js
+  12:12  error    A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  13:14  error    A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  30:15  error    A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  31:14  warning  'error' is defined but never used        @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\run-migration.ts
+  80:19  warning  'profiles' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  91:19  warning  'leases' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\scan-ui.ts
+  2:8  warning  'path' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\setup-storage-policies.ts
+  20:7  warning  'supabase' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\test-db-connection.ts
+  66:18  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+  90:20  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\test-email-invoice.ts
+  4:13  warning  'fs' is defined but never used    @typescript-eslint/no-unused-vars
+  5:13  warning  'path' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\test-invoice-repro.ts
+  53:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\test-lease-expirations.ts
+  29:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\test-notifications.ts
+   9:10  warning  'readFileSync' is defined but never used            @typescript-eslint/no-unused-vars
+  40:17  warning  'healthCheck' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  51:17  warning  'notifications' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\test-signup-flow.ts
+  135:19  warning  'healthCheck' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\test-supabase-connection.js
+   6:1   error    A `require()` style import is forbidden        @typescript-eslint/no-require-imports
+   8:26  error    A `require()` style import is forbidden        @typescript-eslint/no-require-imports
+  56:19  warning  'authData' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\update-coordinates.ts
+  88:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\verify-current-state.ts
+  96:40  warning  'sqError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Barry\Downloads\Doussel_immo\scripts\verify-storage-policies.ts
+  42:9   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  61:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Barry\Downloads\Doussel_immo\update_invoice_logo.js
+  1:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:14  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+✖ 301 problems (115 errors, 186 warnings)
+

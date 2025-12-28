@@ -6,7 +6,7 @@ import { sendEmail } from "@/lib/mail";
 export interface ReminderResult {
     count: number;
     message: string;
-    errors?: any[];
+    errors?: Error[];
 }
 
 /**

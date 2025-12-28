@@ -26,24 +26,26 @@ export async function GET(request: Request) {
     console.log("🔍 Réponse PayDunya complète:", JSON.stringify(invoice, null, 2));
     
     // Essayer plusieurs chemins pour trouver le statut
+    const invoiceData = invoice as Record<string, unknown>;
     const status =
-      (invoice as any)?.status ||
-      (invoice as any)?.invoice_status ||
-      (invoice as any)?.invoice?.status ||
-      (invoice as any)?.state ||
-      (invoice as any)?.response_code === "00" ? "completed" : null;
+      invoiceData?.status ||
+      invoiceData?.invoice_status ||
+      (invoiceData?.invoice as Record<string, unknown>)?.status ||
+      invoiceData?.state ||
+      (invoiceData?.response_code === "00" ? "completed" : null);
 
     console.log("📊 Statut extrait:", status);
-    console.log("📊 Response code:", (invoice as any)?.response_code);
-    console.log("📊 Response text:", (invoice as any)?.response_text);
+    console.log("📊 Response code:", invoiceData?.response_code);
+    console.log("📊 Response text:", invoiceData?.response_text);
 
     // Vérifier si le paiement est complété selon plusieurs critères
-    const isCompleted = 
+    const responseText = typeof invoiceData?.response_text === 'string' ? invoiceData.response_text : '';
+    const isCompleted =
       status === "completed" ||
       status === "paid" ||
-      (invoice as any)?.response_code === "00" ||
-      (invoice as any)?.response_text?.toLowerCase().includes("success") ||
-      (invoice as any)?.response_text?.toLowerCase().includes("completed");
+      invoiceData?.response_code === "00" ||
+      responseText.toLowerCase().includes("success") ||
+      responseText.toLowerCase().includes("completed");
 
     return Response.json({
       success: true,

@@ -271,11 +271,11 @@ export async function generateNotice(formData: FormData) {
             tenant: lease.tenant_name,
             noticeNumber
         };
-    } catch (error: any) {
+    } catch (error) {
         console.error("Erreur lors de la génération du préavis:", error);
         return {
             success: false,
-            error: error.message || "Erreur lors de la génération du préavis"
+            error: error instanceof Error ? error.message : "Erreur lors de la génération du préavis"
         };
     }
 }
@@ -354,7 +354,7 @@ export async function renewLease(formData: FormData) {
             : addMonths(currentEndDate, 12);
 
         // Mettre à jour le bail
-        const updateData: any = {
+        const updateData: { end_date: string; monthly_amount?: number } = {
             end_date: calculatedNewEndDate.toISOString().split('T')[0],
         };
 
@@ -472,11 +472,11 @@ export async function renewLease(formData: FormData) {
             message: `Bail renouvelé jusqu'au ${calculatedNewEndDate.toLocaleDateString('fr-FR')}${lease.tenant_email ? ' et locataire notifié par email' : ''}`,
             newEndDate: calculatedNewEndDate.toISOString().split('T')[0],
         };
-    } catch (error: any) {
+    } catch (error) {
         console.error("Erreur lors du renouvellement:", error);
         return {
             success: false,
-            error: error.message || "Erreur lors du renouvellement du bail"
+            error: error instanceof Error ? error.message : "Erreur lors du renouvellement du bail"
         };
     }
 }
@@ -610,11 +610,11 @@ export async function terminateLease(formData: FormData) {
             noticeType,
             noticeNumber,
         };
-    } catch (error: any) {
+    } catch (error) {
         console.error("Erreur lors de la résiliation:", error);
         return {
             success: false,
-            error: error.message || "Erreur lors de la résiliation du bail"
+            error: error instanceof Error ? error.message : "Erreur lors de la résiliation du bail"
         };
     }
 }

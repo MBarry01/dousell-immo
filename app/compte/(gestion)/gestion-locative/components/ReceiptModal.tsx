@@ -8,10 +8,39 @@ import { toast } from 'sonner';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { createQuittanceDocument } from '@/components/pdf/QuittancePDF_v2';
 
+interface ReceiptData {
+    tenant?: {
+        tenant_name?: string;
+        name?: string;
+        email?: string;
+        phone?: string;
+        address?: string;
+    };
+    property_address?: string;
+    amount?: number;
+    period?: string;
+    month?: string | number;
+    periodStart?: string;
+    periodEnd?: string;
+    receiptNumber?: string;
+    profile?: {
+        company_name?: string | null;
+        full_name?: string | null;
+        company_address?: string | null;
+        company_email?: string | null;
+        email?: string;
+        logo_url?: string | null;
+        signature_url?: string | null;
+        ninea?: string | null;
+        company_ninea?: string | null;
+    };
+    receiptImage?: string | null;
+}
+
 interface ReceiptModalProps {
     isOpen: boolean;
     onClose: () => void;
-    data: any;
+    data: ReceiptData | null;
 }
 
 export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {

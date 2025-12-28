@@ -35,7 +35,7 @@ export default function VerificationsIndexPage() {
                                     Identités (Profils)
                                 </h2>
                                 <p className="text-sm text-white/60 mb-3">
-                                    Validation des documents d'identité (CNI, Passeport) pour certification globale des profils utilisateurs
+                                    Validation des documents d&apos;identité (CNI, Passeport) pour certification globale des profils utilisateurs
                                 </p>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs font-medium text-blue-400">Certification Globale</span>
@@ -79,8 +79,8 @@ export default function VerificationsIndexPage() {
                     <div className="text-sm text-white/70">
                         <p className="font-semibold text-white mb-2">Processus de vérification</p>
                         <ul className="space-y-1">
-                            <li>• <strong>Identités :</strong> Certifie le profil utilisateur globalement (badge "Vérifié" sur toutes ses annonces)</li>
-                            <li>• <strong>Biens :</strong> Certifie une annonce spécifique (badge "Certifié" sur l'annonce concernée)</li>
+                            <li>• <strong>Identités :</strong> Certifie le profil utilisateur globalement (badge &quot;Vérifié&quot; sur toutes ses annonces)</li>
+                            <li>• <strong>Biens :</strong> Certifie une annonce spécifique (badge &quot;Certifié&quot; sur l&apos;annonce concernée)</li>
                         </ul>
                     </div>
                 </div>

@@ -121,10 +121,10 @@ export const ListingImageCarousel = ({
           }
         };
         const handleMouseUp = () => {
-          document.removeEventListener('mousemove', handleMouseMove as any);
+          document.removeEventListener('mousemove', handleMouseMove);
           document.removeEventListener('mouseup', handleMouseUp);
         };
-        document.addEventListener('mousemove', handleMouseMove as any);
+        document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
       }}
     >

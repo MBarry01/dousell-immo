@@ -37,7 +37,19 @@ export async function GET() {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        const debug: any[] = [];
+        const debug: Array<{
+            id: string;
+            tenant: string;
+            email?: string;
+            period: string;
+            billing_day: number;
+            due_date: string;
+            days_overdue: number;
+            status: string;
+            reminder_sent: boolean | null;
+            should_send: boolean;
+            reasons: string[];
+        }> = [];
 
         for (const tx of transactions || []) {
             const lease = Array.isArray(tx.leases) ? tx.leases[0] : tx.leases;
@@ -77,8 +89,8 @@ export async function GET() {
             eligible_for_reminder: debug.filter(t => t.should_send).length
         });
 
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
     }
 }

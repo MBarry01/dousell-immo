@@ -27,9 +27,19 @@ interface Tenant {
     period_end?: string | null;
 }
 
+interface ProfileData {
+    company_name?: string | null;
+    full_name?: string | null;
+    company_address?: string | null;
+    company_email?: string | null;
+    company_ninea?: string | null;
+    signature_url?: string | null;
+    logo_url?: string | null;
+}
+
 interface TenantListProps {
     tenants?: Tenant[];
-    profile?: any;
+    profile?: ProfileData | null;
     userEmail?: string;
     isViewingTerminated?: boolean;
 }
@@ -54,7 +64,27 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
 
     // État pour la modale de quittance
     const [isReceiptOpen, setIsReceiptOpen] = useState(false);
-    const [currentReceipt, setCurrentReceipt] = useState<any>(null);
+    const [currentReceipt, setCurrentReceipt] = useState<{
+        tenant: {
+            tenant_name: string;
+            email?: string;
+            phone?: string;
+            address: string;
+        };
+        profile: {
+            company_name: string;
+            company_address: string;
+            company_email?: string;
+            company_ninea?: string;
+            logo_url?: string;
+            signature_url?: string;
+        };
+        userEmail?: string;
+        amount: number;
+        month: string;
+        year: number;
+        property_address: string;
+    } | null>(null);
 
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -114,7 +144,7 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
         // Confirmation avant résiliation
         const confirmed = window.confirm(
             `⚠️ Voulez-vous vraiment résilier le bail de ${tenantName} ?\n\n` +
-            `Le locataire n'apparaîtra plus dans la liste active, mais l'historique des paiements sera conservé.`
+            `Le locataire n&apos;apparaîtra plus dans la liste active, mais l&apos;historique des paiements sera conservé.`
         );
 
         if (!confirmed) return;
@@ -166,7 +196,7 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
 
         if (!result.success) {
             toast.error(result.error || 'Erreur inconnue', {
-                description: "Vous pouvez toujours générer la quittance manuellement via le bouton 'Voir quittance'.",
+                description: "Vous pouvez toujours générer la quittance manuellement via le bouton &quot;Voir quittance&quot;.",
                 duration: 7000,
             });
             return;
@@ -190,7 +220,7 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
             // Vérifier si l'adresse du bien est renseignée
             if (!tenant.property || tenant.property === 'Adresse non renseignée') {
                 toast.error('Adresse du bien manquante', {
-                    description: "Veuillez modifier le locataire et ajouter l'adresse du bien avant d'envoyer la quittance.",
+                    description: "Veuillez modifier le locataire et ajouter l&apos;adresse du bien avant d&apos;envoyer la quittance.",
                     duration: 6000,
                 });
                 return;
@@ -242,7 +272,7 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
                     body: JSON.stringify(receiptData),
                 }).then(async (res) => {
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || 'Erreur lors de l\'envoi');
+                    if (!res.ok) throw new Error(data.error || 'Erreur lors de l&apos;envoi');
                     return data;
                 }),
                 {

@@ -2,6 +2,12 @@
  * Analytics utilities for tracking user interactions
  */
 
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
+
 export interface ContactEvent {
   property_id: string;
   property_title: string;
@@ -22,8 +28,8 @@ export const analyticsEvents = {
     };
 
     // Google Analytics 4 (gtag)
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", "contact_click", {
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", "contact_click", {
         event_category: "Contact",
         event_label: "Phone Call",
         property_id: propertyId,
@@ -55,8 +61,8 @@ export const analyticsEvents = {
     };
 
     // Google Analytics 4 (gtag)
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", "contact_click", {
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", "contact_click", {
         event_category: "Contact",
         event_label: "WhatsApp",
         property_id: propertyId,
@@ -82,8 +88,8 @@ export const analyticsEvents = {
     };
 
     // Google Analytics 4 (gtag)
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", "contact_click", {
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", "contact_click", {
         event_category: "Contact",
         event_label: "Email",
         property_id: propertyId,
@@ -102,8 +108,8 @@ export const analyticsEvents = {
    */
   estimateStart: () => {
     // Google Analytics 4 (gtag)
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", "estimation_start", {
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", "estimation_start", {
         event_category: "Estimation",
         event_label: "Wizard Started",
       });
@@ -118,8 +124,8 @@ export const analyticsEvents = {
    */
   estimateComplete: (type: string, quartier: string) => {
     // Google Analytics 4 (gtag)
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", "estimation_complete", {
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", "estimation_complete", {
         event_category: "Estimation",
         event_label: "Wizard Completed",
         property_type: type,

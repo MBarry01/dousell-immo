@@ -213,7 +213,7 @@ export const createQuittanceDocument = (data: QuittanceData) => {
             <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 3 }}>
               {data.receiptNumber}
             </Text>
-            <Text style={styles.companyInfo}>Date d'émission</Text>
+            <Text style={styles.companyInfo}>Date d&apos;émission</Text>
             <Text style={{ fontSize: 9, fontWeight: 'bold' }}>{today}</Text>
           </View>
         </View>

@@ -20,7 +20,7 @@ export default async function IdentityVerificationPage() {
                     <UserCheck className="h-8 w-8 text-blue-500" />
                 </div>
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Vérification d'Identités</h1>
+                    <h1 className="text-3xl font-bold text-white">Vérification d&apos;Identités</h1>
                     <p className="text-white/60">Validation des CNI et Passeports pour certification globale des profils</p>
                 </div>
             </div>
@@ -32,8 +32,8 @@ export default async function IdentityVerificationPage() {
                     <div className="text-sm text-white/70">
                         <p className="font-semibold text-white mb-1">Certification Globale</p>
                         <p>
-                            En approuvant un document d'identité, vous certifiez l'identité de l'utilisateur sur l'ensemble de
-                            la plateforme. Son profil affichera un badge "Vérifié" visible sur toutes ses annonces.
+                            En approuvant un document d&apos;identité, vous certifiez l&apos;identité de l&apos;utilisateur sur l&apos;ensemble de
+                            la plateforme. Son profil affichera un badge &quot;Vérifié&quot; visible sur toutes ses annonces.
                         </p>
                     </div>
                 </div>

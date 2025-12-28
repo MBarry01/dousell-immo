@@ -37,7 +37,7 @@ type PropertyWithDocument = {
     id: string;
     title: string;
     price: number;
-    location: any;
+    location: { city?: string; [key: string]: unknown };
     images: string[];
     verification_status: string | null;
     created_at: string;
@@ -251,7 +251,7 @@ export function PropertyVerificationList({ initialProperties }: Props) {
                     <DialogHeader>
                         <DialogTitle className="text-white">Rejeter le document</DialogTitle>
                         <DialogDescription className="text-white/60">
-                            Veuillez indiquer la raison du rejet pour "{selectedProperty?.title}"
+                            Veuillez indiquer la raison du rejet pour &quot;{selectedProperty?.title}&quot;
                         </DialogDescription>
                     </DialogHeader>
                     <Textarea

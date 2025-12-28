@@ -90,13 +90,13 @@ export async function getDashboardStats(): Promise<DashboardStats> {
           const allUserIds = new Set<string>();
           
           if (propertyUsers) {
-            propertyUsers.forEach((p: any) => {
+            propertyUsers.forEach((p: { user_id?: string }) => {
               if (p.user_id) allUserIds.add(p.user_id);
             });
           }
-          
+
           if (roleUsers) {
-            roleUsers.forEach((r: any) => {
+            roleUsers.forEach((r: { user_id?: string }) => {
               if (r.user_id) allUserIds.add(r.user_id);
             });
           }
@@ -113,7 +113,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
           .select("user_id");
         
         if (userRoles) {
-          const uniqueUserIds = new Set(userRoles.map((ur: any) => ur.user_id));
+          const uniqueUserIds = new Set(userRoles.map((ur: { user_id: string }) => ur.user_id));
           usersCount = uniqueUserIds.size;
         }
       } catch (fallbackError) {
@@ -176,9 +176,9 @@ export async function getRecentProperties(limit: number = 5) {
     console.error("❌ Unexpected error in getRecentProperties:", {
       error,
       message: error instanceof Error ? error.message : String(error),
-      code: (error as any)?.code,
-      details: (error as any)?.details,
-      hint: (error as any)?.hint,
+      code: (error as { code?: string })?.code,
+      details: (error as { details?: string })?.details,
+      hint: (error as { hint?: string })?.hint,
       fullError: error ? JSON.stringify(error, null, 2) : null
     });
     return [];
@@ -328,9 +328,9 @@ export async function getChartData(): Promise<ChartDataPoint[]> {
     console.error("Error in getChartData:", {
       error,
       message: error instanceof Error ? error.message : String(error),
-      code: (error as any)?.code,
-      details: (error as any)?.details,
-      hint: (error as any)?.hint,
+      code: (error as { code?: string })?.code,
+      details: (error as { details?: string })?.details,
+      hint: (error as { hint?: string })?.hint,
     });
     return getDefaultChartData();
   }

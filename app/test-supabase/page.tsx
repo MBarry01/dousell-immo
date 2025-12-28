@@ -62,11 +62,11 @@ export default function TestSupabasePage() {
           status: "success",
           message: "✅ Client créé avec succès",
         };
-      } catch (error: any) {
+      } catch (error) {
         testResults[1] = {
           name: "Création du client Supabase",
           status: "error",
-          message: `❌ Erreur: ${error.message}`,
+          message: `❌ Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
         };
         setResults([...testResults]);
         setLoading(false);
@@ -98,11 +98,11 @@ export default function TestSupabasePage() {
             message: `✅ Table accessible (${data?.length || 0} résultat(s))`,
           };
         }
-      } catch (error: any) {
+      } catch (error) {
         testResults[2] = {
           name: "Connexion à la table 'properties'",
           status: "error",
-          message: `❌ Erreur: ${error.message}`,
+          message: `❌ Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
         };
       }
       setResults([...testResults]);
@@ -133,11 +133,11 @@ export default function TestSupabasePage() {
               : "✅ Service opérationnel (Aucune session)",
           };
         }
-      } catch (error: any) {
+      } catch (error) {
         testResults[3] = {
           name: "Service d'authentification",
           status: "error",
-          message: `❌ Erreur: ${error.message}`,
+          message: `❌ Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
         };
       }
       setResults([...testResults]);
@@ -201,11 +201,11 @@ export default function TestSupabasePage() {
             message: `✅ Bucket 'properties' accessible (${testFiles?.length || 0} fichier(s))`,
           };
         }
-      } catch (error: any) {
+      } catch (error) {
         testResults[4] = {
           name: "Storage 'properties'",
           status: "error",
-          message: `❌ Erreur: ${error.message}`,
+          message: `❌ Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
         };
       }
       setResults([...testResults]);
@@ -290,7 +290,7 @@ export default function TestSupabasePage() {
                 <ul className="list-disc space-y-2 pl-5 text-sm text-white/80">
                   {results.some((r) => r.name === "Storage 'properties'" && r.status === "error") && (
                     <li className="font-semibold text-red-200">
-                      📦 <strong>Bucket Storage manquant</strong> : Allez dans Supabase Dashboard → Storage → Créez un bucket nommé "properties" (public). Voir{" "}
+                      📦 <strong>Bucket Storage manquant</strong> : Allez dans Supabase Dashboard → Storage → Créez un bucket nommé &quot;properties&quot; (public). Voir{" "}
                       <code className="rounded bg-background/10 px-1">docs/CREER-BUCKET-STORAGE.md</code>
                     </li>
                   )}
