@@ -3,13 +3,15 @@ type GTMEvent = {
     [key: string]: unknown;
 };
 
-interface WindowWithDataLayer extends Window {
-    dataLayer?: unknown[];
+declare global {
+    interface Window {
+        dataLayer?: Record<string, unknown>[];
+    }
 }
 
 export const sendGTMEvent = (eventName: string, data?: object) => {
-    if (typeof window !== 'undefined' && (window as WindowWithDataLayer).dataLayer) {
-        (window as WindowWithDataLayer).dataLayer?.push({
+    if (typeof window !== 'undefined' && window.dataLayer) {
+        window.dataLayer.push({
             event: eventName,
             ...data,
         });

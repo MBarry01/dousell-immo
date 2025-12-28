@@ -107,7 +107,7 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
   const ownerData = Array.isArray(row.owner)
     ? row.owner[0]
     : (row.owner || (row as Record<string, unknown>).profiles);
-  const owner = ownerData ?? {};
+  const owner = (ownerData ?? {}) as Record<string, unknown>;
 
   return {
     id: row.id,
@@ -149,13 +149,13 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
     },
     owner: owner && (owner.phone || owner.full_name || owner.id)
       ? {
-        id: owner.id,
-        full_name: owner.full_name,
-        avatar_url: owner.avatar_url,
-        role: owner.role || "particulier",
-        phone: owner.phone,
-        is_identity_verified: owner.is_identity_verified || false,
-        updated_at: owner.updated_at,
+        id: owner.id as string,
+        full_name: owner.full_name as string,
+        avatar_url: owner.avatar_url as string,
+        role: (owner.role as "particulier" | "agent" | "admin") || "particulier",
+        phone: owner.phone as string,
+        is_identity_verified: (owner.is_identity_verified as boolean) || false,
+        updated_at: owner.updated_at as string,
       }
       : undefined,
     disponibilite: row.disponibilite ?? "Immédiate",

@@ -63,17 +63,34 @@ type SortField = 'name' | 'property' | 'rentAmount' | 'status' | 'period';
 type SortOrder = 'asc' | 'desc';
 
 interface ReceiptData {
-    tenant: {
+    tenant?: {
         tenant_name?: string;
         name?: string;
         email?: string;
         phone?: string;
+        address?: string;
     };
     property_address?: string;
     amount?: number;
     period?: string;
-    month?: string;
-    profile?: ProfileData | null;
+    month?: string | number;
+    year?: number;
+    periodStart?: string;
+    periodEnd?: string;
+    receiptNumber?: string;
+    userEmail?: string;
+    profile?: {
+        company_name?: string | null;
+        full_name?: string | null;
+        company_address?: string | null;
+        company_email?: string | null;
+        email?: string;
+        logo_url?: string | null;
+        signature_url?: string | null;
+        ninea?: string | null;
+        company_ninea?: string | null;
+    };
+    receiptImage?: string | null;
 }
 
 export function TenantTable({ tenants = [], profile, userEmail, isViewingTerminated = false, searchQuery = '', onEdit, onDelete, onDeleteLease }: TenantTableProps) {

@@ -20,9 +20,11 @@ interface ReceiptData {
     amount?: number;
     period?: string;
     month?: string | number;
+    year?: number;
     periodStart?: string;
     periodEnd?: string;
     receiptNumber?: string;
+    userEmail?: string;
     profile?: {
         company_name?: string | null;
         full_name?: string | null;
@@ -189,7 +191,22 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="p-4 md:p-8 max-h-[85vh] md:max-h-[90vh] overflow-y-auto bg-gray-100 flex justify-center print:max-h-none print:overflow-visible print:p-0 print:bg-white">
-                    <ReceiptPreview {...data} />
+                    <ReceiptPreview
+                        tenant={{
+                            tenant_name: data.tenant?.tenant_name || data.tenant?.name || 'Locataire',
+                            address: data.property_address || data.tenant?.address || ''
+                        }}
+                        profile={{
+                            company_name: data.profile?.company_name || data.profile?.full_name || 'Propriétaire',
+                            company_address: data.profile?.company_address || '',
+                            company_ninea: data.profile?.company_ninea || data.profile?.ninea || undefined,
+                            logo_url: data.profile?.logo_url || undefined,
+                            signature_url: data.profile?.signature_url || undefined
+                        }}
+                        amount={data.amount || 0}
+                        month={data.month || new Date().getMonth() + 1}
+                        year={data.year || new Date().getFullYear()}
+                    />
                 </div>
             </div>
         </div>

@@ -781,6 +781,7 @@ export async function sendReceiptToN8N(data: Record<string, unknown>) {
     console.log("=".repeat(80));
     console.log("📦 DONNÉES BRUTES REÇUES AVANT ENVOI:");
     const tenant = data.tenant as Record<string, unknown> | undefined;
+    const profile = data.profile as Record<string, unknown> | undefined;
     console.log("📧 Email du tenant:", tenant?.email);
     console.log("📞 Téléphone du tenant:", tenant?.phone);
     console.log("👤 Objet tenant complet:", JSON.stringify(tenant, null, 2));
@@ -788,10 +789,10 @@ export async function sendReceiptToN8N(data: Record<string, unknown>) {
 
     const payload = {
         // Infos Locataire
-        tenantName: data.tenant?.tenant_name || data.tenant?.name || '',
-        tenantEmail: data.tenant?.email || data.tenant?.tenant_email || '',
-        tenantPhone: data.tenant?.phone || data.tenant?.tenant_phone || '',
-        tenantAddress: data.tenant?.address || data.property_address || '',
+        tenantName: tenant?.tenant_name || tenant?.name || '',
+        tenantEmail: tenant?.email || tenant?.tenant_email || '',
+        tenantPhone: tenant?.phone || tenant?.tenant_phone || '',
+        tenantAddress: tenant?.address || (data.property_address as string) || '',
 
         // Infos Paiement
         amount: Number(data.amount) || 0,
@@ -801,15 +802,15 @@ export async function sendReceiptToN8N(data: Record<string, unknown>) {
         receiptNumber: data.receiptNumber || `QUITT-${Date.now().toString().slice(-6)}`,
 
         // Infos Propriétaire (Baraka Immo)
-        ownerName: data.profile?.company_name || data.profile?.full_name || 'Propriétaire',
-        ownerEmail: data.profile?.email || '',
-        ownerLogo: data.profile?.logo_url || null,
-        ownerSignature: data.profile?.signature_url || null,
-        ownerAddress: data.profile?.company_address || '',
-        ownerNinea: data.profile?.ninea || '',
+        ownerName: profile?.company_name || profile?.full_name || 'Propriétaire',
+        ownerEmail: profile?.email || '',
+        ownerLogo: profile?.logo_url || null,
+        ownerSignature: profile?.signature_url || null,
+        ownerAddress: profile?.company_address || '',
+        ownerNinea: profile?.ninea || '',
 
         // Infos Propriété
-        propertyAddress: data.property_address || data.tenant?.address || '',
+        propertyAddress: (data.property_address as string) || tenant?.address || '',
 
         // Image de la quittance (si générée côté client)
         receiptImage: data.receiptImage || null

@@ -57,7 +57,7 @@ export async function internalProcessReminders(supabase: SupabaseClient): Promis
     }
 
     let emailsSent = 0;
-    const errors = [];
+    const errors: Error[] = [];
 
     for (const tx of transactions) {
         console.log(`Checking transaction ${tx.id}: Status=${tx.status}, Period=${tx.period_month}/${tx.period_year}`);
@@ -114,13 +114,13 @@ export async function internalProcessReminders(supabase: SupabaseClient): Promis
 
                     if (updateError) {
                         console.error(`Failed to update tx ${tx.id}`, updateError);
-                        errors.push(updateError);
+                        errors.push(updateError instanceof Error ? updateError : new Error(JSON.stringify(updateError)));
                     } else {
                         emailsSent++;
                     }
                 } catch (err) {
                     console.error(`Failed to send email to ${leaseData.tenant_email}`, err);
-                    errors.push(err);
+                    errors.push(err instanceof Error ? err : new Error(String(err)));
                 }
             }
         }

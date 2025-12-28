@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 /**
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║                        FINANCE GUARD - KPI ENGINE                         ║
@@ -197,8 +199,7 @@ export function calculateDisplayStatus(
  */
 export async function validateTenantCreation(
     email: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    supabaseClient: any,
+    supabaseClient: SupabaseClient,
     ownerId: string
 ): Promise<{ valid: boolean; error?: string }> {
     if (!email) return { valid: true }; // Pas d'email, pas de conflit

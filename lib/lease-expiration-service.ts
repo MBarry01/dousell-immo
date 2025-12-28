@@ -88,7 +88,7 @@ export async function checkLeaseExpirations(): Promise<LeaseExpirationResult> {
         alertsSent += result;
       } catch (err) {
         console.error(`❌ Erreur traitement bail ${lease.id}:`, err);
-        errors.push(err);
+        errors.push(err instanceof Error ? err : new Error(String(err)));
       }
     }
 
@@ -103,7 +103,7 @@ export async function checkLeaseExpirations(): Promise<LeaseExpirationResult> {
     return {
       count: 0,
       message: "Erreur inattendue lors du traitement.",
-      errors: [err]
+      errors: [err instanceof Error ? err : new Error(String(err))]
     };
   }
 }

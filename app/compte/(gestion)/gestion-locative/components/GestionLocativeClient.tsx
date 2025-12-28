@@ -58,14 +58,19 @@ interface Lease {
 }
 
 interface Profile {
-    id: string;
-    [key: string]: unknown;
+    company_name?: string | null;
+    full_name?: string | null;
+    company_address?: string | null;
+    company_email?: string | null;
+    company_ninea?: string | null;
+    signature_url?: string | null;
+    logo_url?: string | null;
 }
 
 interface GestionLocativeClientProps {
     leases: Lease[];
     transactions: Transaction[];
-    profile: Profile;
+    profile: Profile | null;
     userEmail?: string;
     isViewingTerminated?: boolean;
     minDate?: string;
