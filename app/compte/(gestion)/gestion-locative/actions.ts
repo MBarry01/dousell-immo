@@ -524,16 +524,20 @@ export async function createMaintenanceRequest(data: {
         .eq('id', targetLeaseId)
         .single();
 
-    let artisanInfo = "";
+    // Variables pour stocker les infos artisan
+    let artisanData: {
+        name?: string;
+        phone?: string;
+        rating?: number;
+        address?: string;
+    } = {};
     let status = 'open';
 
     // 2. APPEL DU WEBHOOK MAKE (Recherche Artisan)
-    // On utilise une variable d'env pour l'URL, sinon fallback sur une valeur par défaut ou erreur
     const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL;
 
     if (MAKE_WEBHOOK_URL) {
         try {
-            // On attend la réponse pour afficher le résultat immédiatement
             const response = await fetch(MAKE_WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -544,36 +548,41 @@ export async function createMaintenanceRequest(data: {
                     tenantName: leaseContext?.tenant_name,
                     tenantPhone: leaseContext?.tenant_phone,
                     tenantEmail: leaseContext?.tenant_email,
-                    webhookType: 'find_artisan' // Tag pour router dans Make si besoin
+                    webhookType: 'find_artisan'
                 })
             });
 
             if (response.ok) {
                 const result = await response.json();
-
-                // Si Make renvoie un artisan
                 if (result.artisan_name) {
-                    artisanInfo = `\n\n[Artisan Trouvé]\nNom: ${result.artisan_name}\nTél: ${result.artisan_phone}\nNote: ${result.rating}/5\nAdresse: ${result.address}`;
-                    status = 'quote_received'; // On considère qu'on a une "offre" ou un contact
+                    artisanData = {
+                        name: result.artisan_name,
+                        phone: result.artisan_phone,
+                        rating: parseFloat(result.rating) || undefined,
+                        address: result.address
+                    };
+                    status = 'artisan_found'; // Nouveau statut clair
                 }
             }
         } catch (e) {
             console.error("Erreur Webhook Make:", e);
-            // On continue sans bloquer, le statut restera 'open'
         }
     }
 
-    // 3. Enregistrer la demande en base
-    const fullDescription = data.description + (data.category ? ` [${data.category}]` : '') + artisanInfo;
-
+    // 3. Enregistrer la demande en base avec colonnes dédiées
     const { data: request, error } = await supabase
         .from('maintenance_requests')
         .insert([{
             lease_id: targetLeaseId,
-            description: fullDescription,
-            status: status
+            description: data.description,
+            status: status,
+            // Colonnes dédiées pour l'artisan (après migration)
+            artisan_name: artisanData.name || null,
+            artisan_phone: artisanData.phone || null,
+            artisan_rating: artisanData.rating || null,
+            artisan_address: artisanData.address || null
         }])
-        .select('id, description, status, created_at')
+        .select('id, description, status, created_at, artisan_name, artisan_phone')
         .single();
 
     if (error) {
@@ -583,27 +592,64 @@ export async function createMaintenanceRequest(data: {
 
     revalidatePath('/compte/gestion-locative');
 
-    // On renvoie le succès avec potentiellement l'info artisan pour l'UI
     return {
         success: true,
         id: request.id,
-        artisanFound: status === 'quote_received',
-        message: status === 'quote_received' ? "Artisan trouvé et demande enregistrée !" : "Demande enregistrée."
+        artisanFound: status === 'artisan_found',
+        artisan: artisanData.name ? artisanData : null,
+        message: status === 'artisan_found' ? "Artisan trouvé !" : "Demande enregistrée."
     };
 }
 
 /**
- * Approuver un devis de maintenance
- * Déclenche la notification à l'artisan via n8n
+ * Saisir le devis réel après contact avec l'artisan
+ * Passe le statut à 'awaiting_approval' pour validation propriétaire
  */
-export async function approveMaintenanceQuote(requestId: string) {
+export async function submitQuote(requestId: string, data: {
+    quoted_price: number;
+    intervention_date: string;
+}) {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "Non autorisé" };
+
+    const { error } = await supabase
+        .from('maintenance_requests')
+        .update({
+            quoted_price: data.quoted_price,
+            intervention_date: data.intervention_date,
+            status: 'awaiting_approval' // En attente de validation propriétaire
+        })
+        .eq('id', requestId);
+
+    if (error) {
+        console.error("Erreur saisie devis:", error.message);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/compte/gestion-locative');
+    return { success: true, message: "Devis enregistré, en attente de validation." };
+}
+
+/**
+ * Le propriétaire approuve le devis
+ * Passe le statut à 'approved' et lance les travaux
+ */
+export async function approveQuoteByOwner(requestId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "Non autorisé" };
 
     const { data: request, error } = await supabase
         .from('maintenance_requests')
-        .update({ status: 'approved' })
+        .update({
+            status: 'approved',
+            owner_approved: true
+        })
         .eq('id', requestId)
-        .select('*, leases(tenant_name)')
+        .select('*, leases(tenant_name, owner_id)')
         .single();
 
     if (error) {
@@ -611,17 +657,84 @@ export async function approveMaintenanceQuote(requestId: string) {
         return { success: false, error: error.message };
     }
 
-    // DÉCLENCHEUR N8N : Notification approbation devis
-    if (request) {
-        await triggerN8N('maintenance-quote-approved', {
-            requestId: request.id,
-            description: request.description,
-            quoteAmount: request.quote_amount
-        });
+    // Optionnel: Déclencher notification à l'artisan via webhook
+    await triggerN8N('maintenance-quote-approved', {
+        requestId: request.id,
+        description: request.description,
+        quoteAmount: request.quoted_price,
+        artisanPhone: request.artisan_phone
+    });
+
+    revalidatePath('/compte/gestion-locative');
+    return { success: true, message: "Devis approuvé ! Les travaux peuvent commencer." };
+}
+
+/**
+ * Terminer l'intervention et créer la dépense comptable
+ * Crée automatiquement une ligne dans la table 'expenses'
+ */
+export async function completeIntervention(requestId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "Non autorisé" };
+
+    // 1. Récupérer les détails de l'intervention
+    const { data: request, error: fetchError } = await supabase
+        .from('maintenance_requests')
+        .select('*, leases(owner_id, property_id)')
+        .eq('id', requestId)
+        .single();
+
+    if (fetchError || !request) {
+        return { success: false, error: "Intervention introuvable" };
+    }
+
+    // Vérifier que le devis a été approuvé
+    if (!request.owner_approved) {
+        return { success: false, error: "Le devis doit être approuvé avant de terminer." };
+    }
+
+    // 2. Mettre à jour le statut de l'intervention
+    const { error: updateError } = await supabase
+        .from('maintenance_requests')
+        .update({
+            status: 'completed',
+            completed_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
+
+    if (updateError) {
+        return { success: false, error: updateError.message };
+    }
+
+    // 3. Créer la dépense comptable
+    const leaseData = request.leases as { owner_id: string; property_id?: string } | null;
+
+    if (leaseData && request.quoted_price) {
+        const { error: expenseError } = await supabase
+            .from('expenses')
+            .insert([{
+                owner_id: leaseData.owner_id,
+                property_id: leaseData.property_id || null,
+                maintenance_request_id: requestId,
+                description: `Intervention: ${request.description} (${request.artisan_name || 'Artisan'})`,
+                amount: request.quoted_price,
+                category: 'maintenance',
+                expense_date: new Date().toISOString().split('T')[0]
+            }]);
+
+        if (expenseError) {
+            console.error("Erreur création dépense:", expenseError.message);
+            // On ne bloque pas la clôture, mais on log l'erreur
+        }
     }
 
     revalidatePath('/compte/gestion-locative');
-    return { success: true };
+    return {
+        success: true,
+        message: `Intervention terminée ! Dépense de ${request.quoted_price?.toLocaleString('fr-FR')} FCFA enregistrée.`
+    };
 }
 
 /**
@@ -667,9 +780,10 @@ export async function sendReceiptToN8N(data: Record<string, unknown>) {
     // Debug: Voir ce qu'on reçoit vraiment
     console.log("=".repeat(80));
     console.log("📦 DONNÉES BRUTES REÇUES AVANT ENVOI:");
-    console.log("📧 Email du tenant:", data.tenant?.email);
-    console.log("📞 Téléphone du tenant:", data.tenant?.phone);
-    console.log("👤 Objet tenant complet:", JSON.stringify(data.tenant, null, 2));
+    const tenant = data.tenant as Record<string, unknown> | undefined;
+    console.log("📧 Email du tenant:", tenant?.email);
+    console.log("📞 Téléphone du tenant:", tenant?.phone);
+    console.log("👤 Objet tenant complet:", JSON.stringify(tenant, null, 2));
     console.log("=".repeat(80));
 
     const payload = {
