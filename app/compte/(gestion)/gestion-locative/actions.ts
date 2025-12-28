@@ -649,7 +649,7 @@ export async function approveQuoteByOwner(requestId: string) {
             owner_approved: true
         })
         .eq('id', requestId)
-        .select('*, leases(tenant_name, owner_id)')
+        .select('*, leases(tenant_name, tenant_email, owner_id)')
         .single();
 
     if (error) {
@@ -657,7 +657,12 @@ export async function approveQuoteByOwner(requestId: string) {
         return { success: false, error: error.message };
     }
 
-    // Optionnel: Déclencher notification à l'artisan via webhook
+    // Récupérer les informations complètes du bail pour l'email
+    const lease = Array.isArray(request.leases) ? request.leases[0] : request.leases;
+    const tenantEmail = lease?.tenant_email;
+    const tenantName = lease?.tenant_name;
+
+    // Notification à l'artisan via webhook
     await triggerN8N('maintenance-quote-approved', {
         requestId: request.id,
         description: request.description,
@@ -665,8 +670,26 @@ export async function approveQuoteByOwner(requestId: string) {
         artisanPhone: request.artisan_phone
     });
 
+    // Notification au locataire par email
+    if (tenantEmail && request.artisan_name) {
+        const datePrevue = request.intervention_date
+            ? new Date(request.intervention_date).toLocaleDateString('fr-FR')
+            : 'à confirmer';
+
+        await triggerN8N('tenant-intervention-approved', {
+            tenantEmail,
+            tenantName: tenantName || 'Locataire',
+            description: request.description,
+            artisanName: request.artisan_name,
+            artisanPhone: request.artisan_phone,
+            artisanAddress: request.artisan_address || 'Non spécifiée',
+            interventionDate: datePrevue,
+            quoteAmount: request.quoted_price
+        });
+    }
+
     revalidatePath('/compte/gestion-locative');
-    return { success: true, message: "Devis approuvé ! Les travaux peuvent commencer." };
+    return { success: true, message: "Devis approuvé ! Le locataire et l'artisan ont été notifiés." };
 }
 
 /**
