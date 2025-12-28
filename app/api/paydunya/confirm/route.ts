@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     console.log("🔍 Réponse PayDunya complète:", JSON.stringify(invoice, null, 2));
     
     // Essayer plusieurs chemins pour trouver le statut
-    const invoiceData = invoice as Record<string, unknown>;
+    const invoiceData = invoice as unknown as Record<string, unknown>;
     const status =
       invoiceData?.status ||
       invoiceData?.invoice_status ||
