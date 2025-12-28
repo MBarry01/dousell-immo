@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { TenantTable } from './TenantTable';
 import { MonthSelector } from './MonthSelector';
 import { EditTenantDialog } from './EditTenantDialog';
@@ -83,6 +83,33 @@ export function GestionLocativeClient({
         setSelectedMonth(month);
         setSelectedYear(year);
     };
+
+    // ========================================
+    // AUTO-UPDATE MONTH DETECTION (Passage automatique au nouveau mois)
+    // ========================================
+    useEffect(() => {
+        // Vérifier toutes les minutes si on a changé de mois
+        const checkMonthChange = () => {
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1;
+            const currentYear = now.getFullYear();
+
+            // Si le mois ou l'année a changé, mettre à jour automatiquement
+            if (currentMonth !== selectedMonth || currentYear !== selectedYear) {
+                console.log(`[AUTO-UPDATE] Changement détecté: ${selectedMonth}/${selectedYear} → ${currentMonth}/${currentYear}`);
+                setSelectedMonth(currentMonth);
+                setSelectedYear(currentYear);
+            }
+        };
+
+        // Vérifier immédiatement au montage
+        checkMonthChange();
+
+        // Puis vérifier toutes les 60 secondes
+        const interval = setInterval(checkMonthChange, 60000);
+
+        return () => clearInterval(interval);
+    }, [selectedMonth, selectedYear]);
 
     // ========================================
     // FILTRAGE STRICT PAR PÉRIODE

@@ -124,9 +124,9 @@ export default async function GestionLocativePage({
     });
 
     return (
-        <div className="min-h-screen bg-slate-950 print:hidden overflow-x-hidden w-full max-w-[100vw]">
+        <div className="min-h-screen bg-slate-950 print:hidden overflow-x-hidden">
             {/* Header Enterprise - Ligne unique */}
-            <div className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-10">
+            <div className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-10 overflow-x-hidden">
                 <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -168,7 +168,7 @@ export default async function GestionLocativePage({
 
 
             {/* Contenu principal */}
-            <div className="max-w-[1600px] mx-auto md:px-6 py-6">
+            <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6 overflow-x-hidden">
                 {/* Table des locataires - Pleine largeur */}
                 <div className="mb-6">
                     <GestionLocativeClient
@@ -182,7 +182,7 @@ export default async function GestionLocativePage({
                 </div>
 
                 {/* Hub Maintenance - En dessous, aligné */}
-                <div className="max-w-sm px-4 md:px-0">
+                <div className="max-w-sm">
                     <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
                         <MaintenanceHub requests={formattedRequests} />
                     </div>

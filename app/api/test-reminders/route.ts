@@ -59,7 +59,7 @@ export async function GET() {
                 status: tx.status,
                 reminder_sent: tx.reminder_sent,
                 should_send: daysOverdue >= 5 && !tx.reminder_sent && !!lease.tenant_email,
-                reasons: []
+                reasons: [] as string[]
             };
 
             if (daysOverdue < 5) info.reasons.push('Pas encore J+5');
