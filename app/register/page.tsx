@@ -23,37 +23,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Captcha } from "@/components/ui/captcha";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { signup } from "@/app/auth/actions";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [phoneValue, setPhoneValue] = useState<RPNInput.Value | undefined>(undefined);
   const [selectedCountry, setSelectedCountry] = useState<RPNInput.Country>("SN");
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showEmailConfirmModal, setShowEmailConfirmModal] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState<string>("");
-  const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [isCheckingVerification, setIsCheckingVerification] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<{
     fullName?: string;
     email?: string;
     phone?: string;
     password?: string;
-    confirmPassword?: string;
   }>({});
 
   // Fonction pour obtenir le drapeau et l'indicatif du pays
@@ -81,36 +65,6 @@ export default function RegisterPage() {
       }
     }
   }, [phoneValue]);
-
-  // Polling pour vérifier si l'email a été confirmé
-  useEffect(() => {
-    if (!showEmailConfirmModal || !registeredUserId || isEmailVerified) {
-      return;
-    }
-
-    const checkVerification = async () => {
-      try {
-        setIsCheckingVerification(true);
-        const response = await fetch(`/api/auth/check-verification?userId=${registeredUserId}`);
-        const data = await response.json();
-
-        if (data.verified) {
-          setIsEmailVerified(true);
-          setIsCheckingVerification(false);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la vérification:", error);
-      } finally {
-        setIsCheckingVerification(false);
-      }
-    };
-
-    // Vérifier immédiatement et ensuite toutes les 3 secondes
-    checkVerification();
-    const interval = setInterval(checkVerification, 3000);
-
-    return () => clearInterval(interval);
-  }, [showEmailConfirmModal, registeredUserId, isEmailVerified]);
 
   const handleGoogleSignIn = () => {
     // Utiliser une route API pour Google OAuth (meilleure gestion des cookies PKCE)
@@ -224,7 +178,6 @@ export default function RegisterPage() {
           <form
             action={async (formData: FormData) => {
               setError(null);
-              setSuccessMessage(null);
               setValidationErrors({});
 
               if (!captchaToken) {
@@ -239,7 +192,6 @@ export default function RegisterPage() {
               const email = formData.get("email") as string;
               const phone = formData.get("phone") as string;
               const password = formData.get("password") as string;
-              const confirmPassword = formData.get("confirmPassword") as string;
 
               const errors: typeof validationErrors = {};
 
@@ -251,26 +203,19 @@ export default function RegisterPage() {
                 errors.email = "Adresse email invalide";
               }
 
-              // Validation du téléphone (format international E.164)
+              // Validation du téléphone (format international)
               if (!phone || phone.trim().length < 8) {
                 errors.phone = "Numéro de téléphone invalide";
               } else {
-                // Extraire uniquement les chiffres (sans espaces ni symboles)
-                const phoneDigitsOnly = phone.replace(/\D/g, "");
-                // Accepter les numéros internationaux (8 à 15 chiffres selon E.164)
-                if (phoneDigitsOnly.length < 8 || phoneDigitsOnly.length > 15) {
-                  errors.phone = "Numéro de téléphone invalide (8 à 15 chiffres requis)";
+                // Vérifier que c'est un numéro valide (au moins 8 caractères après l'indicatif)
+                const phoneWithoutSpaces = phone.replace(/\s/g, "");
+                if (phoneWithoutSpaces.length < 8) {
+                  errors.phone = "Numéro de téléphone invalide";
                 }
               }
 
               if (!password || password.length < 6) {
                 errors.password = "Le mot de passe doit contenir au moins 6 caractères";
-              }
-
-              if (!confirmPassword) {
-                errors.confirmPassword = "Veuillez confirmer votre mot de passe";
-              } else if (password !== confirmPassword) {
-                errors.confirmPassword = "Les mots de passe ne correspondent pas";
               }
 
               if (Object.keys(errors).length > 0) {
@@ -279,7 +224,9 @@ export default function RegisterPage() {
                 return;
               }
 
-              // La vérification HIBP est effectuée côté serveur pour éviter les problèmes CORS
+              // La vérification HIBP se fait maintenant côté serveur dans la Server Action signup()
+              // Cela évite les problèmes CORS et améliore la sécurité
+
               startTransition(async () => {
                 const result = await signup(formData);
                 console.log("📋 Résultat signup:", result); // Log pour debugging
@@ -319,13 +266,14 @@ export default function RegisterPage() {
                   }
                   // Si l'email de confirmation est requis
                   else if (result.emailSent) {
-                    // Afficher le modal de confirmation d'email
-                    setError(null);
-                    setSuccessMessage(null);
-                    setRegisteredEmail(formData.get("email") as string);
-                    setRegisteredUserId(result.userId || null);
-                    setIsEmailVerified(false);
-                    setShowEmailConfirmModal(true);
+                    toast.success("Compte créé !", {
+                      description: "Un lien de confirmation a été envoyé à votre adresse email.",
+                      duration: 3000,
+                    });
+                    // Rediriger vers la page de vérification email
+                    setTimeout(() => {
+                      router.push(`/auth/check-email?email=${encodeURIComponent(email)}`);
+                    }, 1500);
                   }
                   // Cas par défaut (compte créé mais pas encore confirmé)
                   else {
@@ -346,12 +294,6 @@ export default function RegisterPage() {
             {error && (
               <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
                 {error}
-              </div>
-            )}
-
-            {successMessage && (
-              <div className="rounded-xl bg-green-500/10 border border-green-500/20 p-3 text-sm text-green-400">
-                {successMessage}
               </div>
             )}
 
@@ -444,8 +386,7 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className={`h-12 rounded-xl border-white/10 bg-white/5 pl-10 pr-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500 ${validationErrors.password ? "border-red-500/50" : ""
-                    }`}
+                  className="h-12 rounded-xl border-white/10 bg-white/5 pl-10 pr-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500"
                 />
                 <button
                   type="button"
@@ -472,217 +413,64 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* Confirm Password */}
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-white/70">
-                Confirmer le mot de passe
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                  className="h-12 rounded-xl border-white/10 bg-white/5 pl-10 pr-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
-                  aria-label={
-                    showConfirmPassword
-                      ? "Masquer le mot de passe"
-                      : "Afficher le mot de passe"
-                  }
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-              {validationErrors.confirmPassword && (
-                <p className="text-xs text-red-400">{validationErrors.confirmPassword}</p>
+            <Captcha
+              onVerify={(token) => {
+                setCaptchaToken(token);
+              }}
+              onExpire={() => {
+                setCaptchaToken(null);
+                // Le widget se réinitialise automatiquement
+              }}
+            />
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              disabled={isPending || !captchaToken}
+              className="mt-6 h-12 w-full rounded-xl bg-primary text-black hover:bg-primary/90 disabled:opacity-50"
+            >
+              {isPending ? (
+                <>
+                  <svg
+                    className="mr-2 h-5 w-5 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Inscription en cours...
+                </>
+              ) : (
+                "S'inscrire"
               )}
-            </div>
-            {validationErrors.confirmPassword && (
-              <p className="text-xs text-red-400">{validationErrors.confirmPassword}</p>
-            )}
+            </Button>
+          </form>
+
+          {/* Footer Link */}
+          <p className="mt-6 text-center text-sm text-white/70">
+            Déjà un compte ?{" "}
+            <Link
+              href="/login"
+              className="font-semibold text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+            >
+              Se connecter
+            </Link>
+          </p>
         </div>
-
-        <Captcha
-          onVerify={(token) => {
-            setCaptchaToken(token);
-          }}
-          onExpire={() => {
-            setCaptchaToken(null);
-            // Le widget se réinitialise automatiquement
-          }}
-        />
-
-        {/* Submit Button */}
-        <Button
-          type="submit"
-          disabled={isPending || !captchaToken}
-          className="mt-6 h-12 w-full rounded-xl bg-primary text-black hover:bg-primary/90 disabled:opacity-50"
-        >
-          {isPending ? (
-            <>
-              <svg
-                className="mr-2 h-5 w-5 animate-spin"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Inscription en cours...
-            </>
-          ) : (
-            "S'inscrire"
-          )}
-        </Button>
-      </form>
-
-      {/* Footer Link */}
-      <p className="mt-6 text-center text-sm text-white/70">
-        Déjà un compte ?{" "}
-        <Link
-          href="/login"
-          className="font-semibold text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
-        >
-          Se connecter
-        </Link>
-      </p>
+      </motion.div>
     </div>
-      </motion.div >
-
-    {/* Modal de confirmation d'email */ }
-    < Dialog open = { showEmailConfirmModal } onOpenChange = {(open) => {
-    // Empêcher la fermeture si non vérifié
-    if (!open && !isEmailVerified) return;
-    setShowEmailConfirmModal(open);
-  }
-}>
-  <DialogContent className="sm:max-w-md border-white/20 bg-gradient-to-b from-gray-900 to-black [&>button]:hidden">
-    <DialogHeader className="text-center space-y-4">
-      {/* Icône qui change selon le statut */}
-      <div className={`mx-auto flex h-20 w-20 items-center justify-center rounded-full ${isEmailVerified
-        ? "bg-green-500/20"
-        : "bg-amber-500/20"
-        }`}>
-        {isEmailVerified ? (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", duration: 0.5 }}
-          >
-            <svg className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </motion.div>
-        ) : (
-          <Mail className="h-10 w-10 text-amber-500" />
-        )}
-      </div>
-
-      <DialogTitle className="text-xl text-white">
-        {isEmailVerified
-          ? "✅ Email vérifié !"
-          : "📧 Vérifiez votre email"}
-      </DialogTitle>
-
-      <DialogDescription className="text-base text-white/70 text-center">
-        {isEmailVerified ? (
-          <span className="text-green-400 font-medium">
-            Votre compte a été activé avec succès ! Cliquez sur le bouton ci-dessous pour accéder à votre espace.
-          </span>
-        ) : (
-          <span>
-            Un email de confirmation a été envoyé à{" "}
-            <span className="font-semibold text-amber-400">{registeredEmail}</span>.
-            Veuillez cliquer sur le lien dans l'email pour activer votre compte.
-          </span>
-        )}
-      </DialogDescription>
-
-      {/* Animation d'attente - en dehors de DialogDescription */}
-      {!isEmailVerified && (
-        <div className="flex flex-col items-center gap-3 py-4">
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1">
-              <motion.div
-                className="h-3 w-3 rounded-full bg-amber-500"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-              />
-              <motion.div
-                className="h-3 w-3 rounded-full bg-amber-500"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
-              />
-              <motion.div
-                className="h-3 w-3 rounded-full bg-amber-500"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
-              />
-            </div>
-            <span className="text-sm text-white/50">
-              En attente de confirmation...
-            </span>
-          </div>
-          <span className="text-sm text-white/50">
-            💡 Pensez à vérifier vos spams si vous ne trouvez pas l'email.
-          </span>
-        </div>
-      )}
-    </DialogHeader>
-
-    <DialogFooter className="mt-6">
-      <Button
-        onClick={async () => {
-          if (isEmailVerified) {
-            setShowEmailConfirmModal(false);
-            // Rafraîchir la session et rediriger vers la homepage
-            router.push("/");
-            router.refresh();
-          }
-        }}
-        disabled={!isEmailVerified}
-        className={`w-full h-12 rounded-xl transition-all duration-300 ${isEmailVerified
-          ? "bg-green-500 text-white hover:bg-green-600"
-          : "bg-gray-600 text-gray-400 cursor-not-allowed"
-          }`}
-      >
-        {isEmailVerified ? (
-          <>
-            🚀 Accéder à mon espace
-          </>
-        ) : (
-          <>
-            ⏳ En attente de vérification...
-          </>
-        )}
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-      </Dialog >
-    </div >
   );
 }

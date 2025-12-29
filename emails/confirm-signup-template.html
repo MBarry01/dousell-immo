@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmez votre inscription - Dousell Immo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #0a0a0a;
+      color: #ffffff;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #121212;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #F4C430 0%, #D4A028 100%);
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+      color: #000000;
+    }
+    .content {
+      padding: 40px 24px;
+    }
+    .content h2 {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 0 16px 0;
+      color: #ffffff;
+    }
+    .content p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 0 0 16px 0;
+      color: #d1d5db;
+    }
+    .button-container {
+      text-align: center;
+      margin: 32px 0;
+    }
+    .button {
+      display: inline-block;
+      padding: 16px 32px;
+      background: linear-gradient(135deg, #F4C430 0%, #D4A028 100%);
+      color: #000000 !important;
+      text-decoration: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(244, 196, 48, 0.3);
+      transition: transform 0.2s;
+    }
+    .button:hover {
+      transform: scale(1.05);
+    }
+    .info-box {
+      background-color: #1a1a1a;
+      border-left: 4px solid #F4C430;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 24px 0;
+    }
+    .info-box p {
+      margin: 0;
+      font-size: 14px;
+      color: #9ca3af;
+    }
+    .footer {
+      padding: 24px;
+      text-align: center;
+      background-color: #0a0a0a;
+      border-top: 1px solid #2a2a2a;
+    }
+    .footer p {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #6b7280;
+    }
+    .footer a {
+      color: #F4C430;
+      text-decoration: none;
+    }
+    .logo {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">Dousell Immo</div>
+      <p style="margin: 8px 0 0 0; color: #000000; font-size: 16px;">L'immobilier de confiance au Sénégal</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <h2>Bienvenue sur Dousell Immo ! 🎉</h2>
+
+      <p>Merci de vous être inscrit sur notre plateforme. Vous êtes à un clic d'accéder aux meilleures offres immobilières de Dakar et de la Petite Côte.</p>
+
+      <p>Pour activer votre compte et commencer à explorer nos biens, cliquez sur le bouton ci-dessous :</p>
+
+      <!-- Button -->
+      <div class="button-container">
+        <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email&next=/" class="button">
+          ✓ Confirmer mon inscription
+        </a>
+      </div>
+
+      <!-- Info Box -->
+      <div class="info-box">
+        <p><strong>⏱️ Ce lien est valable pendant 24 heures.</strong></p>
+        <p>Après ce délai, vous devrez demander un nouveau lien de confirmation.</p>
+      </div>
+
+      <p>Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :</p>
+      <p style="word-break: break-all; color: #F4C430; font-size: 14px;">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email&next=/</p>
+
+      <p style="margin-top: 32px;">Une fois votre compte activé, vous pourrez :</p>
+      <ul style="color: #d1d5db; line-height: 1.8;">
+        <li>Publier vos annonces immobilières</li>
+        <li>Contacter des vendeurs et propriétaires</li>
+        <li>Enregistrer vos biens favoris</li>
+        <li>Recevoir des alertes personnalisées</li>
+      </ul>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Vous n'avez pas demandé ce lien ? Ignorez simplement cet email.</p>
+      <p style="margin-top: 16px;">
+        <a href="https://dousell-immo.com">Visitez notre site</a> •
+        <a href="https://dousell-immo.com/contact">Contactez-nous</a> •
+        <a href="https://dousell-immo.com/legal/privacy">Politique de confidentialité</a>
+      </p>
+      <p style="margin-top: 16px; color: #4b5563;">
+        © 2025 Dousell Immo. Tous droits réservés.<br>
+        Dakar, Sénégal
+      </p>
+    </div>
+  </div>
+</body>
+</html>
