@@ -24,22 +24,22 @@ import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Captcha } from "@/components/ui/captcha";
 import { signup } from "@/app/auth/actions";
-import { checkPasswordHIBP } from "@/lib/hibp";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [phoneValue, setPhoneValue] = useState<RPNInput.Value | undefined>(undefined);
   const [selectedCountry, setSelectedCountry] = useState<RPNInput.Country>("SN");
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [isCheckingHIBP, setIsCheckingHIBP] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
     fullName?: string;
     email?: string;
     phone?: string;
     password?: string;
+    confirmPassword?: string;
   }>({});
 
   // Fonction pour obtenir le drapeau et l'indicatif du pays
@@ -181,30 +181,31 @@ export default function RegisterPage() {
             action={async (formData: FormData) => {
               setError(null);
               setValidationErrors({});
-              
+
               if (!captchaToken) {
                 toast.error("Veuillez compléter la vérification anti-robot");
                 return;
               }
-              
+
               formData.append("turnstileToken", captchaToken);
-              
+
               // Validation côté client
               const fullName = formData.get("fullName") as string;
               const email = formData.get("email") as string;
               const phone = formData.get("phone") as string;
               const password = formData.get("password") as string;
-              
+              const confirmPassword = formData.get("confirmPassword") as string;
+
               const errors: typeof validationErrors = {};
-              
+
               if (!fullName || fullName.trim().length < 2) {
                 errors.fullName = "Le nom complet doit contenir au moins 2 caractères";
               }
-              
+
               if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 errors.email = "Adresse email invalide";
               }
-              
+
               // Validation du téléphone (format international)
               if (!phone || phone.trim().length < 8) {
                 errors.phone = "Numéro de téléphone invalide";
@@ -215,55 +216,24 @@ export default function RegisterPage() {
                   errors.phone = "Numéro de téléphone invalide";
                 }
               }
-              
+
               if (!password || password.length < 6) {
                 errors.password = "Le mot de passe doit contenir au moins 6 caractères";
               }
-              
+
+              if (password !== confirmPassword) {
+                errors.confirmPassword = "Les mots de passe ne correspondent pas";
+              }
+
               if (Object.keys(errors).length > 0) {
                 setValidationErrors(errors);
                 toast.error("Veuillez corriger les erreurs dans le formulaire");
                 return;
               }
-              
-              // Vérification HIBP avant l'inscription
-              setIsCheckingHIBP(true);
-              try {
-                const hibpResult = await checkPasswordHIBP(password, true);
-                
-                if (!hibpResult.success) {
-                  // Erreur technique (service indisponible, etc.)
-                  toast.error("Vérification de sécurité", {
-                    description: hibpResult.error || "Impossible de vérifier le mot de passe. Veuillez réessayer.",
-                    duration: 6000,
-                  });
-                  setIsCheckingHIBP(false);
-                  return;
-                }
-                
-                if (hibpResult.breached) {
-                  // Mot de passe compromis
-                  setError(hibpResult.error || "Ce mot de passe a été compromis. Choisissez-en un autre.");
-                  toast.error("Mot de passe compromis", {
-                    description: hibpResult.error || "Ce mot de passe a été compromis. Choisissez-en un autre plus sécurisé.",
-                    duration: 8000,
-                  });
-                  setIsCheckingHIBP(false);
-                  return;
-                }
-                
-                // Mot de passe OK, continuer avec l'inscription
-                setIsCheckingHIBP(false);
-              } catch (err) {
-                console.error("HIBP check error:", err);
-                toast.error("Erreur de vérification", {
-                  description: "Impossible de vérifier le mot de passe. Veuillez réessayer.",
-                  duration: 5000,
-                });
-                setIsCheckingHIBP(false);
-                return;
-              }
-              
+
+              // La vérification HIBP se fait maintenant côté serveur dans la Server Action signup()
+              // Cela évite les problèmes CORS et améliore la sécurité
+
               startTransition(async () => {
                 const result = await signup(formData);
                 console.log("📋 Résultat signup:", result); // Log pour debugging
@@ -300,17 +270,18 @@ export default function RegisterPage() {
                       router.push("/");
                       router.refresh();
                     }, 1500);
-                  } 
+                  }
                   // Si l'email de confirmation est requis
                   else if (result.emailSent) {
-                    // Afficher une alerte claire sans redirection immédiate
-                    setError(null);
                     toast.success("Compte créé !", {
-                      description: "Un lien de confirmation a été envoyé à votre adresse email. Veuillez cliquer dessus pour activer votre compte.",
-                      duration: 8000,
+                      description: "Un lien de confirmation a été envoyé à votre adresse email.",
+                      duration: 3000,
                     });
-                    // Ne pas rediriger automatiquement, laisser l'utilisateur lire le message
-                  } 
+                    // Rediriger vers la page de vérification email
+                    setTimeout(() => {
+                      router.push(`/auth/check-email?email=${encodeURIComponent(email)}`);
+                    }, 1500);
+                  }
                   // Cas par défaut (compte créé mais pas encore confirmé)
                   else {
                     toast.success("Compte créé avec succès !", {
@@ -348,9 +319,8 @@ export default function RegisterPage() {
                   required
                   minLength={2}
                   maxLength={100}
-                  className={`h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500 ${
-                    validationErrors.fullName ? "border-red-500/50" : ""
-                  }`}
+                  className={`h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500 ${validationErrors.fullName ? "border-red-500/50" : ""
+                    }`}
                 />
               </div>
               {validationErrors.fullName && (
@@ -371,9 +341,8 @@ export default function RegisterPage() {
                   type="email"
                   placeholder="oumar@example.com"
                   required
-                  className={`h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500 ${
-                    validationErrors.email ? "border-red-500/50" : ""
-                  }`}
+                  className={`h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500 ${validationErrors.email ? "border-red-500/50" : ""
+                    }`}
                 />
               </div>
               {validationErrors.email && (
@@ -395,9 +364,8 @@ export default function RegisterPage() {
                 defaultCountry="SN"
                 international
                 placeholder="Entrez votre numéro"
-                className={`${
-                  validationErrors.phone ? "border-red-500/50" : ""
-                }`}
+                className={`${validationErrors.phone ? "border-red-500/50" : ""
+                  }`}
                 required
               />
               {/* Input caché pour envoyer la valeur dans le FormData */}
@@ -452,6 +420,44 @@ export default function RegisterPage() {
               )}
             </div>
 
+            {/* Confirm Password */}
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-white/70">
+                Confirmer le mot de passe
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                  className="h-12 rounded-xl border-white/10 bg-white/5 pl-10 pr-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                  aria-label={
+                    showConfirmPassword
+                      ? "Masquer le mot de passe"
+                      : "Afficher le mot de passe"
+                  }
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+              {validationErrors.confirmPassword && (
+                <p className="text-xs text-red-400">{validationErrors.confirmPassword}</p>
+              )}
+            </div>
+
             <Captcha
               onVerify={(token) => {
                 setCaptchaToken(token);
@@ -465,34 +471,10 @@ export default function RegisterPage() {
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isPending || !captchaToken || isCheckingHIBP}
+              disabled={isPending || !captchaToken}
               className="mt-6 h-12 w-full rounded-xl bg-primary text-black hover:bg-primary/90 disabled:opacity-50"
             >
-              {isCheckingHIBP ? (
-                <>
-                  <svg
-                    className="mr-2 h-5 w-5 animate-spin"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Vérification du mot de passe...
-                </>
-              ) : isPending ? (
+              {isPending ? (
                 <>
                   <svg
                     className="mr-2 h-5 w-5 animate-spin"
