@@ -38,6 +38,7 @@ export const Header = () => {
     <>
       {/* Version Mobile */}
       <header
+        suppressHydrationWarning
         className={cn(
           "fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 transition-all duration-300 md:hidden print:hidden",
           isScrolled

@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { HeroSection } from "@/components/sections/hero";
 import { PropertySection } from "@/components/sections/property-section";
 import { QuickSearch } from "@/components/search/quick-search";
 import { getHomePageSections } from "@/services/homeService";
+import { VerificationSuccessToast } from "@/components/auth/verification-success-toast";
 
 // Cache la page d'accueil pendant 1 heure (3600 secondes)
 // Cela améliore les performances et réduit la charge sur Supabase
@@ -18,9 +20,14 @@ export default async function Home() {
 
   return (
     <div className="space-y-6">
+      {/* Toast de succès après vérification d'email */}
+      <Suspense fallback={null}>
+        <VerificationSuccessToast />
+      </Suspense>
+
       {/* Hero Section */}
       <HeroSection />
-      
+
       {/* Quick Search */}
       <QuickSearch />
 
