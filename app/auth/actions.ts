@@ -82,16 +82,29 @@ export async function signup(formData: FormData) {
   }
 
   const appUrl = getBaseUrl();
-  const emailRedirectTo = `${appUrl}/auth/callback?next=/`;
+  // Utiliser /auth/confirm au lieu de /auth/callback pour éviter les erreurs PKCE
+  const emailRedirectTo = `${appUrl}/auth/confirm?next=/`;
 
   try {
+    // Normaliser le numéro de téléphone
+    // Si le numéro commence par +, c'est déjà au format international
+    // Sinon, on ajoute +221 (Sénégal par défaut)
+    let normalizedPhone = phone.trim();
+    if (!normalizedPhone.startsWith('+')) {
+      normalizedPhone = `+221${phoneDigits}`;
+    }
+
+    // IMPORTANT: Pour utiliser Nodemailer au lieu de l'email Supabase :
+    // 1. Allez dans Dashboard Supabase → Authentication → Providers → Email
+    // 2. Décochez "Confirm email" pour désactiver l'auto-confirmation
+    // 3. L'email sera envoyé via Nodemailer (voir plus bas)
     const { data, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
       options: {
         data: {
           full_name: fullName.trim(),
-          phone: phoneDigits.startsWith("+221") ? phoneDigits : `+221${phoneDigits}`,
+          phone: normalizedPhone,
         },
         emailRedirectTo,
       },
@@ -114,20 +127,62 @@ export async function signup(formData: FormData) {
       } catch (e) {
         console.error("🚨 Impossible de sérialiser l'erreur en JSON");
       }
-      
+
       let errorMessage = error.message;
-      
+
       // Messages d'erreur plus explicites et en français
-      if (error.message.includes("already registered") || 
-          error.message.includes("User already registered") ||
-          error.message.includes("already exists")) {
-        errorMessage = "Cet email est déjà enregistré. Essayez de vous connecter ou réinitialisez votre mot de passe.";
+      if (error.message.includes("already registered") ||
+        error.message.includes("User already registered") ||
+        error.message.includes("already exists")) {
+        // Vérifier si l'utilisateur existe via un provider OAuth (Google, Apple, etc.)
+        try {
+          const { createClient } = await import("@supabase/supabase-js");
+          const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+              auth: {
+                autoRefreshToken: false,
+                persistSession: false,
+              },
+            }
+          );
+
+          // Utiliser listUsers avec pagination limitée (max 1000 users)
+          const { data: usersData } = await supabaseAdmin.auth.admin.listUsers({
+            page: 1,
+            perPage: 1000,
+          });
+
+          const existingUser = usersData?.users?.find(
+            u => u.email?.toLowerCase() === email.trim().toLowerCase()
+          );
+
+          if (existingUser?.app_metadata) {
+            const providers = existingUser.app_metadata.providers as string[] | undefined;
+            const provider = existingUser.app_metadata.provider as string | undefined;
+
+            if (providers?.includes("google") || provider === "google") {
+              errorMessage = "Cet email est déjà associé à un compte Google. Veuillez vous connecter avec Google ou réinitialisez votre mot de passe pour ajouter une connexion par email.";
+            } else if (providers?.includes("apple") || provider === "apple") {
+              errorMessage = "Cet email est déjà associé à un compte Apple. Veuillez vous connecter avec Apple ou réinitialisez votre mot de passe pour ajouter une connexion par email.";
+            } else {
+              errorMessage = "Cet email est déjà enregistré. Essayez de vous connecter ou réinitialisez votre mot de passe.";
+            }
+          } else {
+            errorMessage = "Cet email est déjà enregistré. Essayez de vous connecter ou réinitialisez votre mot de passe.";
+          }
+        } catch (adminError) {
+          console.error("Erreur lors de la vérification du provider:", adminError);
+          // Fallback au message générique si la vérification échoue
+          errorMessage = "Cet email est déjà enregistré. Essayez de vous connecter ou réinitialisez votre mot de passe.";
+        }
       } else if (error.message.includes("Password") || error.message.includes("password")) {
         errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
       } else if (error.message.includes("Invalid email") || error.message.includes("invalid")) {
         errorMessage = "Adresse email invalide";
       } else if (
-        error.message.includes("rate limit") || 
+        error.message.includes("rate limit") ||
         error.message.includes("too many") ||
         error.message.includes("rate_limit_exceeded") ||
         error.code === "429"
@@ -152,7 +207,7 @@ export async function signup(formData: FormData) {
           errorMessage = "Erreur lors de la création du compte. Veuillez réessayer ou contactez le support.";
         }
       }
-      
+
       return {
         error: errorMessage,
       };
@@ -172,11 +227,8 @@ export async function signup(formData: FormData) {
     const isAutoConfirmed = !!data.session;
     const emailConfirmationRequired = !isAutoConfirmed && !data.user.email_confirmed_at;
 
-    // Supabase envoie automatiquement l'email via SMTP configuré dans le dashboard
-    // Pas besoin de logique personnalisée
-
     revalidatePath("/", "layout");
-    
+
     // Si l'utilisateur est automatiquement confirmé, on peut le rediriger directement
     if (isAutoConfirmed && data.session) {
       return {
@@ -189,12 +241,26 @@ export async function signup(formData: FormData) {
     }
 
     // Si l'email de confirmation est requis
+    // Supabase envoie automatiquement un email avec un lien magique
+    // Quand l'utilisateur clique, il sera automatiquement connecté (comme Firebase)
+    if (emailConfirmationRequired && data.user) {
+      console.log("📧 Email de confirmation envoyé automatiquement par Supabase");
+      console.log("🔗 L'utilisateur sera connecté automatiquement après avoir cliqué sur le lien");
+
+      return {
+        success: true,
+        message: "Compte créé ! Un email de vérification a été envoyé à votre adresse. Cliquez sur le lien dans l'email pour activer votre compte et vous connecter automatiquement.",
+        emailSent: true,
+        autoConfirmed: false,
+        userId: data.user.id,
+      };
+    }
+
+    // Cas par défaut
     return {
       success: true,
-      message: emailConfirmationRequired
-        ? "Compte créé ! Un email de vérification a été envoyé à votre adresse. Vérifiez votre boîte de réception (et les spams) pour confirmer votre compte."
-        : "Compte créé avec succès !",
-      emailSent: emailConfirmationRequired,
+      message: "Compte créé avec succès !",
+      emailSent: false,
       autoConfirmed: false,
     };
   } catch (err) {
@@ -288,13 +354,13 @@ export async function login(formData: FormData) {
   if (error) {
     console.error("Login error:", error);
     let errorMessage = "Email ou mot de passe incorrect";
-    
+
     if (error.message.includes("Email not confirmed")) {
       errorMessage = "Veuillez confirmer votre email avant de vous connecter";
     } else if (error.message.includes("Invalid login credentials")) {
       errorMessage = "Email ou mot de passe incorrect";
     } else if (
-      error.message.includes("rate limit") || 
+      error.message.includes("rate limit") ||
       error.message.includes("too many") ||
       error.message.includes("rate_limit_exceeded") ||
       error.code === "429"

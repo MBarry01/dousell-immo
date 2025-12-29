@@ -53,7 +53,18 @@ export async function GET(request: Request) {
 
     if (data.session) {
       console.log("✅ Session créée avec succès");
-      // Rediriger vers la page demandée
+      console.log("👤 Utilisateur connecté:", data.user?.email);
+
+      // Si c'est une vérification d'email (type=signup), rediriger vers la home avec un message de succès
+      const isEmailVerification = searchParams.get("type") === "signup" ||
+                                   searchParams.get("type") === "email";
+
+      if (isEmailVerification) {
+        console.log("✅ Email vérifié - redirection vers la home");
+        return NextResponse.redirect(`${origin}/?verified=true`);
+      }
+
+      // Sinon, rediriger vers la page demandée
       return NextResponse.redirect(`${origin}${next}`);
     }
 
