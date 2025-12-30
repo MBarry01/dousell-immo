@@ -38,6 +38,7 @@ export default function RegisterPage() {
     email?: string;
     phone?: string;
     password?: string;
+    confirmPassword?: string;
   }>({});
 
   // Fonction pour obtenir le drapeau et l'indicatif du pays
@@ -142,7 +143,7 @@ export default function RegisterPage() {
                 {isPending ? "Connexion..." : "Continuer avec Google"}
               </Button>
             </form>
-            <Button
+            {/* <Button
               type="button"
               variant="secondary"
               className="w-full rounded-xl border border-white/20 bg-black text-white hover:bg-gray-900"
@@ -161,7 +162,7 @@ export default function RegisterPage() {
                 <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
               </svg>
               Continuer avec Apple
-            </Button>
+            </Button> */}
           </div>
 
           {/* Separator */}
@@ -192,6 +193,7 @@ export default function RegisterPage() {
               const email = formData.get("email") as string;
               const phone = formData.get("phone") as string;
               const password = formData.get("password") as string;
+              const confirmPassword = formData.get("confirmPassword") as string;
 
               const errors: typeof validationErrors = {};
 
@@ -216,6 +218,10 @@ export default function RegisterPage() {
 
               if (!password || password.length < 6) {
                 errors.password = "Le mot de passe doit contenir au moins 6 caractères";
+              }
+
+              if (password !== confirmPassword) {
+                errors.confirmPassword = "Les mots de passe ne correspondent pas";
               }
 
               if (Object.keys(errors).length > 0) {
@@ -410,6 +416,28 @@ export default function RegisterPage() {
               </p>
               {validationErrors.password && (
                 <p className="text-xs text-red-400">{validationErrors.password}</p>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-white/70">
+                Confirmer le mot de passe
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                  className="h-12 rounded-xl border-white/10 bg-white/5 pl-10 pr-10 text-white placeholder:text-white/40 focus:border-amber-500 focus:ring-amber-500"
+                />
+              </div>
+              {validationErrors.confirmPassword && (
+                <p className="text-xs text-red-400">{validationErrors.confirmPassword}</p>
               )}
             </div>
 

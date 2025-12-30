@@ -46,10 +46,11 @@ export async function updateSession(request: NextRequest) {
 
   let user = null;
   try {
-  const {
+    const {
       data: { user: authUser },
-  } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser();
     user = authUser;
+
   } catch (error) {
     // If Supabase is not available or credentials are invalid, continue without auth
     // This allows the app to work even if Supabase is not configured yet
@@ -97,7 +98,7 @@ export async function updateSession(request: NextRequest) {
     // Full role checking is done in server pages for better performance
     const authorizedAdminEmail = "barrymohamadou98@gmail.com";
     const isAuthorizedEmail = user.email?.toLowerCase() === authorizedAdminEmail.toLowerCase();
-    
+
     // If not authorized by email, let the server page handle role-based auth
     // This allows role-based access while maintaining email fallback
     if (!isAuthorizedEmail) {

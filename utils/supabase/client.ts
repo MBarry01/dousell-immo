@@ -20,14 +20,6 @@ export function createClient() {
   const isLocalhost = typeof window !== 'undefined' &&
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-  return createBrowserClient(supabaseUrl, supabaseAnonKey, {
-    cookieOptions: {
-      name: 'sb-auth-token',
-      // Omettre le domaine en localhost pour que les cookies fonctionnent correctement
-      domain: !isLocalhost && typeof window !== 'undefined' ? window.location.hostname : undefined,
-      path: '/',
-      sameSite: 'lax',
-    },
-  });
+  return createBrowserClient(supabaseUrl, supabaseAnonKey);
 }
 

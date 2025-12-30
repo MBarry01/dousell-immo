@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     if (token_hash && type) {
       console.log("📝 Utilisation de verifyOtp avec token_hash");
       const { error } = await supabase.auth.verifyOtp({
-        token_hash,
+        token_hash: token_hash as string,
         type: type as any,
       });
 
@@ -58,8 +58,19 @@ export async function GET(request: Request) {
         );
       }
 
-      console.log("✅ Email vérifié avec succès via token_hash");
-      return NextResponse.redirect(`${origin}/?verified=true`);
+      // Important: Rafraîchir la session pour s'assurer que les cookies sont bien définis
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        console.error("❌ Session non établie après vérification:", sessionError);
+        return NextResponse.redirect(
+          `${origin}/auth/auth-code-error?reason=Echec de creation de session`
+        );
+      }
+
+      console.log("✅ Email vérifié avec succès via token_hash - Session active:", session.user.email);
+      // Redirection vers l'accueil
+      return NextResponse.redirect(`${origin}/`);
     }
 
     // Si aucun token valide

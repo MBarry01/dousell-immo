@@ -9,39 +9,65 @@ import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
-import { checkEmailVerificationStatus } from './actions'
+
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 
 function CheckEmailContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const email = searchParams.get('email') || ''
   const [isResending, setIsResending] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false)
 
-  useEffect(() => {
-    if (!email) return
+  // Fonction pour gérer la soumission du code
+  const handleVerify = async (token: string) => {
+    // Supabase envoie parfois 6 ou 8 chiffres selon la config
+    if (token.length < 6) return
 
-    const checkStatus = async () => {
-      try {
-        const isVerified = await checkEmailVerificationStatus(email)
-        if (isVerified) {
+    setIsVerifying(true)
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'signup'
+      })
+
+      console.log('🔐 verifyOtp result:', { data, error })
+
+      if (!error && data.session) {
+        // Confirmer que la session est bien établie
+        const { data: sessionData } = await supabase.auth.getSession()
+        console.log('🔑 Session confirmée:', sessionData?.session?.user?.email)
+
+        if (sessionData?.session) {
           toast.success("Email vérifié avec succès !", {
-            description: "Vous pouvez maintenant vous connecter.",
+            description: "Redirection vers votre compte...",
           })
-          router.push('/login')
+
+          // Attendre un peu pour que les cookies soient bien persistés
+          await new Promise(resolve => setTimeout(resolve, 500))
+
+          // Forcer un rechargement complet
+          window.location.href = '/'
+        } else {
+          console.error('❌ Session non trouvée après verifyOtp')
+          toast.error("Erreur de session", {
+            description: "La session n'a pas pu être créée. Veuillez réessayer."
+          })
         }
-      } catch (error) {
-        console.error("Erreur vérification auto:", error)
+      } else {
+        toast.error("Code invalide", {
+          description: error?.message || "Le code saisi est incorrect ou expiré"
+        })
       }
+    } catch (error) {
+      console.error('❌ Erreur verifyOtp:', error)
+      toast.error("Une erreur s'est produite lors de la vérification")
+    } finally {
+      setIsVerifying(false)
     }
-
-    // Premier check immédiat
-    checkStatus()
-
-    // Puis toutes les 3 secondes
-    const interval = setInterval(checkStatus, 3000)
-
-    return () => clearInterval(interval)
-  }, [email, router])
+  }
 
   const handleResendEmail = async () => {
     setIsResending(true)
@@ -57,8 +83,8 @@ function CheckEmailContent() {
           description: "Impossible de renvoyer l'email. Veuillez réessayer dans quelques minutes.",
         })
       } else {
-        toast.success("Email renvoyé !", {
-          description: "Vérifiez votre boîte de réception.",
+        toast.success("Code renvoyé !", {
+          description: "Vérifiez votre boîte de réception pour le nouveau code.",
         })
       }
     } catch (err) {
@@ -84,22 +110,72 @@ function CheckEmailContent() {
           </h1>
 
           {/* Description */}
-          <div className="mb-6 space-y-3 text-white/70">
+          <div className="mb-8 space-y-3 text-white/70">
             <p>
-              Un email de confirmation a été envoyé à :
+              Un code de confirmation a été envoyé à :
             </p>
             <p className="font-semibold text-primary">
               {email}
             </p>
             <p>
-              Cliquez sur le lien dans l&apos;email pour activer votre compte et vous connecter automatiquement.
+              Saisissez le code reçu (6 ou 8 chiffres) ci-dessous.
             </p>
           </div>
+
+          {/* Standard Input for OTP */}
+          <div className="mb-6">
+            <input
+              type="text"
+              name="otp"
+              id="otp"
+              className="flex h-12 w-full rounded-xl border border-white/10 bg-white/5 text-center text-2xl tracking-[1em] text-white placeholder:text-white/20 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              placeholder="123456"
+              maxLength={8}
+              autoComplete="one-time-code"
+              disabled={isVerifying}
+              onChange={(e) => {
+                // Auto-verify if 6 or 8 digits could be nice, but explicit button is safer for user experience with variable length
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const val = (e.target as HTMLInputElement).value
+                  if (val.length >= 6) handleVerify(val)
+                }
+              }}
+            />
+          </div>
+
+          {isVerifying && (
+            <p className="mb-6 text-sm text-primary animate-pulse">Vérification du code...</p>
+          )}
+
+          {/* Validate Button */}
+          <Button
+            className="mb-4 w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+            onClick={() => {
+              const input = document.getElementById('otp') as HTMLInputElement
+              if (input && input.value.length >= 6) {
+                handleVerify(input.value)
+              } else {
+                toast.error("Code trop court (minimum 6 chiffres)")
+              }
+            }}
+            disabled={isVerifying}
+          >
+            {isVerifying ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                Vérification...
+              </>
+            ) : (
+              "Valider"
+            )}
+          </Button>
 
           {/* Info Box */}
           <div className="mb-6 rounded-xl bg-primary/10 p-4 text-left">
             <p className="text-sm text-white/70">
-              <strong className="text-white">💡 Astuce :</strong> Vérifiez aussi votre dossier spam si vous ne voyez pas l&apos;email dans votre boîte de réception.
+              <strong className="text-white">💡 Astuce :</strong> Vérifiez aussi votre dossier spam si vous ne voyez pas l&apos;email.
             </p>
           </div>
 
@@ -110,7 +186,7 @@ function CheckEmailContent() {
               variant="outline"
               className="w-full rounded-xl border-white/20 text-white hover:bg-white/10"
               onClick={handleResendEmail}
-              disabled={isResending}
+              disabled={isResending || isVerifying}
             >
               {isResending ? (
                 <>
@@ -120,7 +196,7 @@ function CheckEmailContent() {
               ) : (
                 <>
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  Renvoyer l&apos;email
+                  Renvoyer le code
                 </>
               )}
             </Button>

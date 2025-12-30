@@ -92,38 +92,7 @@ export default function ComptePage() {
   }
 
   if (!user) {
-    return (
-      <div className="space-y-8 py-6">
-        <FadeIn>
-          <div className="space-y-6">
-            <div className="text-center">
-              <h1 className="text-3xl font-semibold text-white">
-                Espace client
-              </h1>
-              <p className="mt-2 text-zinc-400">
-                Connectez-vous pour accéder à votre compte
-              </p>
-            </div>
-
-            <div className="mx-auto max-w-md space-y-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-              <Button
-                className="w-full rounded-xl bg-primary text-black hover:bg-primary/90"
-                onClick={() => router.push("/login")}
-              >
-                Se connecter
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full rounded-xl border-zinc-800 bg-transparent text-white hover:bg-zinc-900 hover:border-zinc-700"
-                onClick={() => router.push("/register")}
-              >
-                Créer un compte
-              </Button>
-            </div>
-          </div>
-        </FadeIn>
-      </div>
-    );
+    return null; // Let middleware handle redirect
   }
 
   // Récupérer le prénom
