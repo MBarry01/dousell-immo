@@ -70,3 +70,7 @@ logs/
 dist/
 build/
 out/
+
+# Test artifacts
+test-contract-output.*
+y.sql*
