@@ -65,7 +65,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                     <Plus className="w-4 h-4 mr-1.5" /> Nouveau
                 </Button>
             </DialogTrigger>
-            <DialogContent className="z-[100] fixed top-[4%] left-[50%] translate-x-[-50%] translate-y-0 sm:top-[50%] sm:translate-y-[-50%] w-[96%] sm:w-full max-w-lg max-h-[92vh] overflow-y-auto bg-slate-900 border-slate-800 text-white p-4 sm:p-6">
+            <DialogContent className="z-[100] fixed top-[4%] left-[50%] translate-x-[-50%] translate-y-0 sm:top-[50%] sm:translate-y-[-50%] w-[95vw] sm:w-full max-w-lg max-h-[92vh] overflow-y-auto overflow-x-hidden bg-slate-900 border-slate-800 text-white p-4 sm:p-6 outline-none">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold text-white">Nouveau Locataire</DialogTitle>
                     <DialogDescription className="text-slate-400">
@@ -95,6 +95,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                                 placeholder="ex: Mamadou Diop"
                                 required
                                 className="bg-slate-800 border-slate-700 text-white"
+                                whileFocus={{ scale: 1 }}
                             />
                         </div>
                         <div className="space-y-2">
@@ -103,6 +104,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                                 name="tenant_phone"
                                 placeholder="ex: +221 77..."
                                 className="bg-slate-800 border-slate-700 text-white"
+                                whileFocus={{ scale: 1 }}
                             />
                         </div>
                     </div>
@@ -118,6 +120,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                             placeholder="ex: locataire@email.com"
                             required
                             className="bg-slate-800 border-slate-700 text-white"
+                            whileFocus={{ scale: 1 }}
                         />
                     </div>
 
@@ -127,6 +130,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                             name="property_address"
                             placeholder="ex: Appartement F3, Almadies, Dakar"
                             className="bg-slate-800 border-slate-700 text-white"
+                            whileFocus={{ scale: 1 }}
                         />
                     </div>
 
@@ -141,6 +145,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                                 placeholder="500000"
                                 required
                                 className="bg-slate-800 border-slate-700 text-white font-mono"
+                                whileFocus={{ scale: 1 }}
                             />
                         </div>
                         <div className="space-y-2">
@@ -152,6 +157,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                                 max="31"
                                 defaultValue="5"
                                 className="bg-slate-800 border-slate-700 text-white"
+                                whileFocus={{ scale: 1 }}
                             />
                         </div>
                         <div className="space-y-2">
@@ -163,6 +169,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                                 type="date"
                                 required
                                 className="bg-slate-800 border-slate-700 text-white h-10 w-full px-3 block [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:p-1"
+                                whileFocus={{ scale: 1 }}
                             />
                         </div>
                     </div>
@@ -177,6 +184,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                             type="date"
                             required
                             className="bg-slate-800 border-slate-700 text-white h-10 w-full px-3 block [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:p-1"
+                            whileFocus={{ scale: 1 }}
                         />
                     </div>
 

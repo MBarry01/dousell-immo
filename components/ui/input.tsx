@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 export type InputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
   "onDrag" | "onDragStart" | "onDragEnd"
->;
+> & { whileFocus?: any };
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type = "text", ...props }, ref) => {
