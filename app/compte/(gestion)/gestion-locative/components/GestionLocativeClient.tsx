@@ -313,8 +313,8 @@ export function GestionLocativeClient({
             {/* ========================================
                 KPI STRIP - Bandeau Dense Dark Enterprise
                 ======================================== */}
-            <div className="border-b border-slate-800 bg-black py-3 mb-4 overflow-x-auto">
-                <div className="flex items-center justify-between gap-4 text-sm min-w-max">
+            <div className="border-b border-slate-800 bg-black py-3 mb-4 overflow-x-auto max-w-[100vw] w-full">
+                <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
                     <div className="flex items-center gap-4 md:gap-6 font-mono">
                         {/* Total Attendu */}
                         <div className="flex items-center gap-2">
@@ -367,7 +367,7 @@ export function GestionLocativeClient({
                 ======================================== */}
             <div className="flex flex-col gap-3 mb-4">
                 {/* Ligne 1: Recherche + Relances */}
-                <div className="flex flex-row gap-2 items-center">
+                <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
                     {/* Recherche */}
                     <div className="flex-1 flex items-center gap-2 bg-black border border-slate-800 rounded-md px-3 h-9 focus-within:border-slate-700 min-w-0">
                         <Search className="h-4 w-4 text-slate-500 shrink-0" />
@@ -385,7 +385,7 @@ export function GestionLocativeClient({
                 </div>
 
                 {/* Ligne 2: Sélecteur de mois (gauche) + CSV (droite) */}
-                <div className="flex flex-row gap-2 items-center justify-between">
+                <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
                     {/* Sélecteur de mois - Aligné à gauche */}
                     <MonthSelector
                         selectedMonth={selectedMonth}

@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, Heart, User } from "lucide-react";
+import { Home, Search, User, Building2 } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Accueil", icon: Home },
   { href: "/recherche", label: "Annonce", icon: Search },
-  { href: "/favoris", label: "Favoris", icon: Heart },
+  { href: "/compte/gestion-locative", label: "Gestion", icon: Building2 },
   { href: "/compte", label: "Compte", icon: User },
 ];
 
@@ -21,7 +21,7 @@ export const BottomNav = () => {
         paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
       }}
     >
-      <div className="mx-auto flex w-full max-w-md items-center justify-between px-2 py-2 text-[10px] font-medium">
+      <div className="mx-auto flex w-full max-w-full items-center justify-between px-2 py-2 text-[10px] font-medium">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;

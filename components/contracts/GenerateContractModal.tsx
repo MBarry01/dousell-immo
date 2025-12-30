@@ -89,7 +89,17 @@ export function GenerateContractModal({ leaseId, tenantName, onSuccess, children
                 }
                 const blob = new Blob([arr], { type: 'application/pdf' });
                 const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
+
+                // Pour Mobile/PWA : window.open est souvent bloqué. On force le téléchargement/ouverture via lien.
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Contrat_Bail_${tenantName?.replace(/\s+/g, '_') || 'Brouillon'}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Nettoyage après un court délai pour laisser le temps au téléchargement de démarrer
+                setTimeout(() => window.URL.revokeObjectURL(url), 100);
             } else {
                 toast.error(result.error || "Erreur de prévisualisation");
             }

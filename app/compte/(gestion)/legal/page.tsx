@@ -2,14 +2,16 @@ import { AlertTriangle, CheckCircle, FileText, Gavel, ShieldCheck, Clock, Scale,
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { getLegalStats, getLeaseAlerts } from "./actions";
+import { getLegalStats, getLeaseAlerts, getAllActiveLeases } from "./actions";
 import { DecisionModal } from "./components/DecisionModal";
+import { CreateContractDialog } from "./components/CreateContractDialog";
 
 export const dynamic = 'force-dynamic';
 
 export default async function LegalAssistantPage() {
     const stats = await getLegalStats();
     const alerts = await getLeaseAlerts();
+    const leases = await getAllActiveLeases();
 
     return (
         <div className="min-h-screen bg-slate-950">
@@ -140,14 +142,8 @@ export default async function LegalAssistantPage() {
                         <p className="text-sm text-slate-400 mt-2">Créer manuellement une quittance pour un paiement hors plateforme.</p>
                     </div>
 
-                    {/* Carte Nouveau Bail */}
-                    <div className="p-6 rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900 to-black hover:border-slate-700 transition-all cursor-pointer group">
-                        <div className="h-10 w-10 rounded-lg bg-slate-800 flex items-center justify-center mb-4 group-hover:bg-slate-700 transition-colors">
-                            <ShieldCheck className="h-5 w-5 text-white" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-white">Nouveau Contrat de Bail</h3>
-                        <p className="text-sm text-slate-400 mt-2">Modèle conforme OHADA / Sénégal pré-rempli.</p>
-                    </div>
+                    {/* Carte Nouveau Bail (Interactive) */}
+                    <CreateContractDialog leases={leases} />
                 </div>
 
                 {/* Référence juridique */}

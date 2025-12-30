@@ -306,7 +306,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                         )}
 
                         {/* Actions selon le statut */}
-                        <div className="flex gap-2 pt-1">
+                        <div className="flex gap-2 pt-1 flex-wrap">
                             {/* Artisan trouvé → Saisir devis */}
                             {req.status === 'artisan_found' && (
                                 <Button

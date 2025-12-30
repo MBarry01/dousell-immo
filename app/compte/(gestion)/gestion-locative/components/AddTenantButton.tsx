@@ -65,7 +65,7 @@ export function AddTenantButton({ ownerId }: AddTenantButtonProps) {
                     <Plus className="w-4 h-4 mr-1.5" /> Nouveau
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[550px] bg-slate-900 border-slate-800 text-white">
+            <DialogContent className="w-[95vw] sm:w-full max-w-lg max-h-[85vh] overflow-y-auto bg-slate-900 border-slate-800 text-white p-4 sm:p-6">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold text-white">Nouveau Locataire</DialogTitle>
                     <DialogDescription className="text-slate-400">

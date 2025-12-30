@@ -133,7 +133,7 @@ export default async function GestionLocativePage({
             {/* Sub-header avec filtres Actifs/Résiliés */}
             <div className="border-b border-slate-800 bg-slate-900/50">
                 <div className="w-full mx-auto px-4 md:px-6 py-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg">
                             <Link
                                 href="/compte/gestion-locative"
@@ -176,7 +176,7 @@ export default async function GestionLocativePage({
                 </div>
 
                 {/* Widgets Dashboard - Vue d'ensemble */}
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-w-0">
                     {/* Interventions - Aperçu */}
                     <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-4">

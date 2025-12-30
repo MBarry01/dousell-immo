@@ -55,7 +55,7 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minD
     };
 
     return (
-        <div className="flex items-center gap-2 px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg">
+        <div className="flex items-center justify-between sm:justify-start gap-2 px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg w-full sm:w-auto">
             {/* Bouton Mois précédent */}
             <Button
                 variant="ghost"
@@ -69,7 +69,7 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minD
             </Button>
 
             {/* Affichage du mois et année */}
-            <div className="flex items-center gap-2 px-2">
+            <div className="flex items-center justify-center gap-2 px-2 flex-1 sm:flex-none">
                 <span className="text-sm font-medium text-white whitespace-nowrap">
                     {MONTHS_FR[selectedMonth - 1]} {selectedYear}
                 </span>

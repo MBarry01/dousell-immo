@@ -3,8 +3,9 @@
 import { ReceiptModal } from './ReceiptModal';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, ArrowUpDown, ArrowUp, ArrowDown, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { GenerateContractButton } from '@/components/contracts/GenerateContractButton';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -30,6 +31,8 @@ interface Tenant {
     period_year?: number;
     period_start?: string | null;
     period_end?: string | null;
+    lease_pdf_url?: string | null;
+    tenant_name?: string; // Often redundant with name but useful if explicit
 }
 
 interface ProfileData {
@@ -319,12 +322,12 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
             />
 
             {/* Table Dark Enterprise - Responsive */}
-            <div className="bg-black border border-slate-800 rounded-lg overflow-x-auto">
-                <table className="w-full text-left text-sm min-w-[600px]">
+            <div className="bg-black border border-slate-800 rounded-lg overflow-x-auto max-w-[100vw] w-full">
+                <table className="w-full text-left text-sm">
                     <thead className="border-b border-slate-800">
                         <tr>
                             {/* Locataire - Always visible */}
-                            <th className="py-3 px-4">
+                            <th className="py-3 px-2 sm:px-4">
                                 <button
                                     onClick={() => handleSort('name')}
                                     className="flex items-center gap-1.5 text-xs font-medium text-slate-500 uppercase tracking-wider hover:text-slate-300 transition-colors"
@@ -391,9 +394,9 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
                                 : '-';
 
                             return (
-                                <tr key={tenant.id} className="hover:bg-slate-900/50 transition-colors">
+                                <tr key={tenant.last_transaction_id || tenant.id} className="hover:bg-slate-900/50 transition-colors">
                                     {/* Locataire */}
-                                    <td className="py-3 px-4">
+                                    <td className="py-3 px-2 sm:px-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-xs font-medium shrink-0">
                                                 {getInitials(tenant.name)}
@@ -454,8 +457,19 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
                                                     onClick={() => onEdit?.(tenant)}
                                                     className="text-slate-300 hover:bg-slate-800 focus:bg-slate-800"
                                                 >
-                                                    <Edit2 className="mr-2 h-4 w-4" />
                                                     Modifier
+                                                </DropdownMenuItem>
+
+                                                <DropdownMenuItem asChild>
+                                                    <div className="w-full cursor-pointer text-slate-300 hover:bg-slate-800 focus:bg-slate-800">
+                                                        <GenerateContractButton
+                                                            leaseId={tenant.id}
+                                                            tenantName={tenant.name || tenant.tenant_name || "Locataire"}
+                                                            existingContractUrl={tenant.lease_pdf_url || undefined}
+                                                            variant="ghost"
+                                                            className="w-full justify-start px-2 py-1.5 h-auto font-normal"
+                                                        />
+                                                    </div>
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuSeparator className="bg-slate-800" />
