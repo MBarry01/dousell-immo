@@ -313,8 +313,8 @@ export function GestionLocativeClient({
             {/* ========================================
                 KPI STRIP - Bandeau Dense Dark Enterprise
                 ======================================== */}
-            <div className="border-b border-slate-800 bg-black py-3 mb-4 overflow-x-auto max-w-[100vw] w-full">
-                <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
+            <div className="border-b border-slate-800 bg-black py-3 px-4 mb-4 overflow-x-auto max-w-[100vw] w-full">
+                <div className="flex flex-nowrap items-center justify-between gap-6 text-sm min-w-max">
                     <div className="flex items-center gap-4 md:gap-6 font-mono">
                         {/* Total Attendu */}
                         <div className="flex items-center gap-2">
