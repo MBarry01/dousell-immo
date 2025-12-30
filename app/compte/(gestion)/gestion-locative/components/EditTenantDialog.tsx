@@ -86,7 +86,7 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="w-[95vw] sm:w-full sm:max-w-[550px] max-h-[85vh] overflow-y-auto bg-slate-900 border-slate-800 text-white p-4 sm:p-6">
+            <DialogContent className="z-[100] fixed top-[4%] left-[50%] translate-x-[-50%] translate-y-0 sm:top-[50%] sm:translate-y-[-50%] w-[96%] sm:w-full sm:max-w-[550px] max-h-[92vh] overflow-y-auto bg-slate-900 border-slate-800 text-white p-4 sm:p-6">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold text-white">Modifier le bail</DialogTitle>
                     <DialogDescription className="text-slate-400">
