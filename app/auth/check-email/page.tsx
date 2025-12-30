@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
+
 
 function CheckEmailContent() {
   const searchParams = useSearchParams()
