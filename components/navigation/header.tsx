@@ -57,54 +57,55 @@ export const Header = () => {
         }}
       >
         <div className="flex h-16 w-full items-center justify-between">
-        <Link
-          href="/"
-          className="flex items-center transition-opacity active:opacity-70 hover:opacity-80"
-          aria-label="Dousell Immo - Accueil"
-        >
-          <Image
-            src="/Logo.svg"
-            alt="Dousell Immo"
-            width={120}
-            height={40}
-            className="h-8 w-auto"
-            priority
-          />
-        </Link>
-        
-        {/* Actions droite - Connecté */}
-        {!loading && user && (
-          <div className="flex items-center gap-2">
-            <Link
-              href="/compte/deposer"
-              className="relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-              aria-label="Déposer une annonce"
-            >
-              <Plus className="h-5 w-5 text-white" />
-            </Link>
-            <NotificationBell userId={user.id} />
-            {/* Menu utilisateur avec avatar */}
-            <div className="relative" style={{ zIndex: 2 }}>
-              <UserNav />
-            </div>
-          </div>
-        )}
-
-        {/* Bouton "Se connecter" si non connecté */}
-        {!loading && !user && (
-          <Button
-            size="sm"
-            className="rounded-xl px-4 text-sm transition-all hover:scale-105 active:scale-95"
-            onClick={() => router.push("/login")}
+          <Link
+            href="/"
+            className="flex items-center transition-opacity active:opacity-70 hover:opacity-80"
+            aria-label="Dousell Immo - Accueil"
           >
-            Se connecter
-          </Button>
-        )}
+            <Image
+              src="/Logo.svg"
+              alt="Dousell Immo"
+              width={120}
+              height={40}
+              className="h-8 w-auto"
+              priority
+            />
+          </Link>
 
-        {/* Placeholder pendant le chargement */}
-        {loading && (
-          <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
-        )}
+          {/* Actions droite - Connecté */}
+          {!loading && user && (
+            <div className="flex items-center gap-2">
+              <Link
+                id="tour-home-add-mobile"
+                href="/compte/deposer"
+                className="relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                aria-label="Déposer une annonce"
+              >
+                <Plus className="h-5 w-5 text-white" />
+              </Link>
+              <NotificationBell userId={user.id} />
+              {/* Menu utilisateur avec avatar */}
+              <div id="tour-home-menu-mobile" className="relative" style={{ zIndex: 2 }}>
+                <UserNav />
+              </div>
+            </div>
+          )}
+
+          {/* Bouton "Se connecter" si non connecté */}
+          {!loading && !user && (
+            <Button
+              size="sm"
+              className="rounded-xl px-4 text-sm transition-all hover:scale-105 active:scale-95"
+              onClick={() => router.push("/login")}
+            >
+              Se connecter
+            </Button>
+          )}
+
+          {/* Placeholder pendant le chargement */}
+          {loading && (
+            <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
+          )}
         </div>
       </header>
 
@@ -138,6 +139,7 @@ export const Header = () => {
               return (
                 <Link
                   key={link.href}
+                  id={link.label === "Annonce" ? "tour-home-nav-search-desktop" : undefined}
                   href={link.href}
                   className={cn(
                     "relative transition-colors duration-200 hover:text-white",
@@ -156,6 +158,7 @@ export const Header = () => {
             {!loading && user && (
               <>
                 <Link
+                  id="tour-home-add-desktop"
                   href="/compte/deposer"
                   className="relative flex items-center justify-center rounded-full p-2 transition-all active:scale-95 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                   aria-label="Déposer une annonce"
@@ -168,7 +171,7 @@ export const Header = () => {
                 </div>
               </>
             )}
-            <div className="relative" style={{ zIndex: 2 }}>
+            <div id="tour-home-menu-desktop" className="relative" style={{ zIndex: 2 }}>
               <UserNav />
             </div>
           </div>

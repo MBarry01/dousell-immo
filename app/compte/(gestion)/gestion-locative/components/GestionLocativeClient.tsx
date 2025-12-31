@@ -8,6 +8,7 @@ import { SendRemindersButton } from './SendRemindersButton';
 import { Search, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { deleteTransaction, deleteLease } from '../actions';
+import { RentalTour } from '@/components/onboarding/RentalTour';
 
 import { calculateFinancials, LeaseInput, TransactionInput } from '@/lib/finance';
 
@@ -71,6 +72,7 @@ interface GestionLocativeClientProps {
     transactions: Transaction[];
     profile: Profile | null;
     userEmail?: string;
+    ownerId: string;
     isViewingTerminated?: boolean;
     minDate?: string;
 }
@@ -80,6 +82,7 @@ export function GestionLocativeClient({
     transactions,
     profile,
     userEmail,
+    ownerId,
     isViewingTerminated = false,
     minDate
 }: GestionLocativeClientProps) {
@@ -310,10 +313,11 @@ export function GestionLocativeClient({
 
     return (
         <div className="space-y-0 w-full">
+            <RentalTour hasProperties={leases.length > 0} page="dashboard" />
             {/* ========================================
                 KPI STRIP - Bandeau Dense Dark Enterprise
                 ======================================== */}
-            <div className="border-b border-slate-800 bg-black py-3 px-4 mb-4 overflow-x-auto max-w-[100vw] w-full">
+            <div id="tour-stats" className="border-b border-slate-800 bg-black py-3 px-4 mb-4 overflow-x-auto max-w-[100vw] w-full">
                 <div className="flex flex-nowrap items-center justify-between gap-6 text-sm min-w-max">
                     <div className="flex items-center gap-4 md:gap-6 font-mono">
                         {/* Total Attendu */}
@@ -411,11 +415,12 @@ export function GestionLocativeClient({
             {/* ========================================
                 TABLE ENTERPRISE
                 ======================================== */}
-            <div>
+            <div id="tour-add-tenant">
                 <TenantTable
                     tenants={formattedTenants}
                     profile={profile}
                     userEmail={userEmail}
+                    ownerId={ownerId}
                     isViewingTerminated={isViewingTerminated}
                     searchQuery={searchQuery}
                     onEdit={(tenant) => setEditingTenant(tenant)}

@@ -14,13 +14,20 @@ interface GenerateContractModalProps {
     leaseId: string;
     tenantName?: string;
     onSuccess?: (url: string) => void;
-    children: React.ReactNode;
+    children?: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    autoOpen?: boolean;
 }
 
-export function GenerateContractModal({ leaseId, tenantName, onSuccess, children }: GenerateContractModalProps) {
-    const [open, setOpen] = useState(false);
+export function GenerateContractModal({ leaseId, tenantName, onSuccess, children, open: controlledOpen, onOpenChange: controlledOnOpenChange }: GenerateContractModalProps) {
+    const [internalOpen, setInternalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [mode, setMode] = useState<'standard' | 'custom'>('standard');
+
+    const isControlled = controlledOpen !== undefined;
+    const open = isControlled ? controlledOpen : internalOpen;
+    const setOpen = isControlled ? controlledOnOpenChange! : setInternalOpen;
 
     // State local initialisé avec les textes par défaut
     const [texts, setTexts] = useState<ContractTexts>(DEFAULT_CONTRACT_TEXTS);
@@ -113,9 +120,11 @@ export function GenerateContractModal({ leaseId, tenantName, onSuccess, children
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                {children}
-            </DialogTrigger>
+            {children && (
+                <DialogTrigger asChild>
+                    {children}
+                </DialogTrigger>
+            )}
             <DialogContent className={mode === 'custom' ? "w-[95vw] sm:w-full max-w-3xl max-h-[85vh] overflow-y-auto bg-slate-900 border-slate-800 text-slate-100" : "w-[95vw] sm:w-full sm:max-w-md bg-slate-900 border-slate-800 text-slate-100"}>
                 <DialogHeader>
                     <DialogTitle className="text-slate-100">

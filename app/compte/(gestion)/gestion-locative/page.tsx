@@ -155,7 +155,7 @@ export default async function GestionLocativePage({
                             </Link>
                         </div>
                         <div className="flex items-center gap-2">
-                            {!isViewingTerminated && <AddTenantButton ownerId={user.id} />}
+                            {!isViewingTerminated && <AddTenantButton ownerId={user.id} profile={profile} />}
                         </div>
                     </div>
                 </div>
@@ -170,6 +170,7 @@ export default async function GestionLocativePage({
                         transactions={transactions || []}
                         profile={profile}
                         userEmail={user.email}
+                        ownerId={user.id}
                         isViewingTerminated={isViewingTerminated}
                         minDate={minDateStr}
                     />

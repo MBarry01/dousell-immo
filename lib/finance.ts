@@ -220,7 +220,7 @@ export async function validateTenantCreation(
     if (existingLeases && existingLeases.length > 0) {
         return {
             valid: false,
-            error: `⛔ ERREUR : L'email ${email} est déjà utilisé par "${existingLeases[0].tenant_name}". doublon interdit.`
+            error: `L'adresse email choisie est déjà utilisée par "${existingLeases[0].tenant_name}". Veuillez en choisir une autre.`
         };
     }
 

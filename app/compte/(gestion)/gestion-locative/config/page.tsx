@@ -43,7 +43,7 @@ export default async function ConfigPremiumPage() {
             <ConfigForm initialData={profile} />
 
             {/* Section API / Envois automatiques */}
-            <ApiSettings />
+            <ApiSettings profile={profile} />
         </div>
     );
 }

@@ -18,9 +18,9 @@ import {
   MapPin,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Dialog,
   DialogContent,
@@ -439,22 +439,15 @@ export default function MesDocumentsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Card className="bg-background border-white/10 p-12 text-center">
-              <LockKey weight="light" className="h-16 w-16 mx-auto mb-4 text-white/20" />
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Votre coffre-fort est vide
-              </h3>
-              <p className="text-white/60 mb-6">
-                Commencez par ajouter vos documents importants
-              </p>
-              <Button
-                onClick={() => setDialogOpen(true)}
-                className="bg-primary text-black hover:bg-primary/90 font-semibold"
-              >
-                <UploadSimple weight="light" className="mr-2 h-4 w-4" />
-                Ajouter mon premier document
-              </Button>
-            </Card>
+            <EmptyState
+              title="Votre coffre-fort est vide"
+              description="Commencez par ajouter vos documents importants"
+              actionLabel="Ajouter mon premier document"
+              onAction={() => setDialogOpen(true)}
+              icon={undefined} // Using children for Phosphor icon
+            >
+              <LockKey weight="light" className="h-10 w-10 text-white/40" />
+            </EmptyState>
           </motion.div>
         ) : (
           <div className="space-y-12">

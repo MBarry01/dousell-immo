@@ -146,8 +146,7 @@ export default function MesBiensPage() {
           description="Déposez votre premier bien et commencez à toucher des revenus. C'est simple, rapide et gratuit avec le mandat agence."
           actionLabel="Déposer mon bien"
           onAction={() => router.push("/compte/deposer")}
-          icon={<Package className="h-12 w-12 text-white/40" />}
-          variant="large"
+          icon={Package}
         />
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from 'react';
 import { createMaintenanceRequest, getActiveLeases, submitQuote, approveQuoteByOwner, completeIntervention } from '../actions';
 import { toast } from 'sonner';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface MaintenanceRequest {
     id: string;
@@ -366,10 +367,13 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                         </div>
                     </div>
                 )) : (
-                    <div className="text-center py-6 border border-dashed border-gray-800 rounded-xl">
-                        <AlertTriangle className="w-6 h-6 text-gray-700 mx-auto mb-2" />
-                        <p className="text-gray-500 text-xs">Aucune panne signalée</p>
-                    </div>
+                    <EmptyState
+                        title="Aucun signalement à traiter"
+                        description="Vos locataires n'ont signalé aucun incident pour le moment. Vous pouvez créer une intervention manuellement si nécessaire."
+                        icon={Wrench}
+                        actionLabel="Créer une intervention"
+                        onAction={() => setShowForm(true)}
+                    />
                 )}
             </div>
 

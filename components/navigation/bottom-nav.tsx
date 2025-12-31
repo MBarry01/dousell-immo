@@ -28,6 +28,9 @@ export const BottomNav = () => {
           return (
             <Link
               key={item.href}
+              id={item.label === "Annonce" ? "tour-home-search" :
+                item.label === "Gestion" ? "tour-home-gestion" :
+                  item.label === "Compte" ? "tour-home-account" : undefined}
               href={item.href}
               className="flex flex-1 flex-col items-center gap-0.5 px-1 py-1 min-w-0"
             >

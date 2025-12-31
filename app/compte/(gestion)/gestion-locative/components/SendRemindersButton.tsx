@@ -6,7 +6,11 @@ import { Bell } from 'lucide-react';
 import { processLateReminders } from '@/app/actions/reminders';
 import { toast } from 'sonner';
 
-export function SendRemindersButton() {
+interface SendRemindersButtonProps {
+    daysLate?: number;
+}
+
+export function SendRemindersButton({ daysLate = 5 }: SendRemindersButtonProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSendReminders = async () => {
@@ -44,7 +48,7 @@ export function SendRemindersButton() {
             className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300 h-9 px-3"
         >
             <Bell className="w-4 h-4 mr-2" />
-            {isLoading ? 'Envoi...' : 'Relances J+5'}
+            {isLoading ? 'Envoi...' : `Relances J+${daysLate}`}
         </Button>
     );
 }
