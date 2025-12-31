@@ -132,7 +132,7 @@ export const PropertyDetailView = ({
   ].filter((a) => a.active);
 
   return (
-    <div className="min-h-screen bg-white pb-32 text-gray-900 dark:bg-[#05080c] dark:text-white md:pb-40">
+    <div className="min-h-screen pb-32 text-gray-900 dark:text-white md:pb-40">
       {/* Mobile: Gallery avec overlay */}
       <div className="relative md:hidden">
         <GalleryGrid
@@ -388,6 +388,31 @@ export const PropertyDetailView = ({
               {property.description}
             </p>
           </div>
+
+          {/* Visite Virtuelle 360° */}
+          {property.virtual_tour_url && (
+            <div className="mb-8 scroll-mt-20" id="visite-virtuelle">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+                <span className="text-2xl">👀</span> Visite Virtuelle
+              </h2>
+
+              <div className="relative w-full overflow-hidden rounded-xl border border-gray-200 dark:border-white/10 shadow-sm bg-gray-100 dark:bg-white/5" style={{ paddingTop: '56.25%' /* Ratio 16:9 */ }}>
+                <iframe
+                  src={property.virtual_tour_url}
+                  className="absolute top-0 left-0 w-full h-full"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Visite Virtuelle du bien"
+                />
+
+                {/* Badge "360° VIEW" en surimpression */}
+                <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm pointer-events-none">
+                  360° VIEW
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Détails techniques */}
           {(property.details.year || property.details.heating || property.details.charges || property.details.parking) && (

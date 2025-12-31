@@ -90,9 +90,8 @@ export const GalleryGrid = ({
               key={`dot-${index}`}
               type="button"
               onClick={() => scrollTo(index)}
-              className={`h-2.5 rounded-full transition-all ${
-                selectedIndex === index ? "w-8 bg-white" : "w-2 bg-white/40"
-              }`}
+              className={`h-2.5 rounded-full transition-all ${selectedIndex === index ? "w-8 bg-white" : "w-2 bg-white/40"
+                }`}
               aria-label={`Aller à l'image ${index + 1}`}
             />
           ))}
@@ -101,50 +100,176 @@ export const GalleryGrid = ({
     </div>
   );
 
-  // Desktop: Bento Grid
+  // Desktop: Bento Grid Adaptive
   const desktopView = (
     <div className="relative hidden h-[400px] w-full overflow-hidden rounded-2xl md:grid md:grid-cols-4 md:grid-rows-2 md:gap-2">
-      {/* Image 1 - Grande à gauche */}
-      {images[0] && (
-        <div className="relative col-span-2 row-span-2 overflow-hidden rounded-l-2xl">
+      {/* 1 Image: Full Screen */}
+      {images.length === 1 && (
+        <div className="relative col-span-4 row-span-2 overflow-hidden rounded-2xl">
           <Image
             src={images[0]}
             alt={`${title} - Photo principale`}
             fill
             priority
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            quality={75}
+            sizes="100vw"
+            quality={85}
           />
         </div>
       )}
 
-      {/* Images 2-5 */}
-      {images.slice(1, 5).map((src, index) => {
-        const positions = [
-          { rounded: "rounded-tr-2xl" }, // Image 2
-          {}, // Image 3
-          {}, // Image 4
-          { rounded: "rounded-br-2xl" }, // Image 5
-        ];
-        return (
-          <div
-            key={`grid-${index + 1}`}
-            className={`relative overflow-hidden ${positions[index]?.rounded || ""}`}
-          >
+      {/* 2 Images: Split 50/50 */}
+      {images.length === 2 && (
+        <>
+          <div className="relative col-span-2 row-span-2 overflow-hidden rounded-l-2xl">
             <Image
-              src={src}
-              alt={`${title} - Photo ${index + 2}`}
+              src={images[0]}
+              alt={`${title} - Photo 1`}
+              fill
+              priority
+              className="object-cover"
+              sizes="50vw"
+              quality={80}
+            />
+          </div>
+          <div className="relative col-span-2 row-span-2 overflow-hidden rounded-r-2xl">
+            <Image
+              src={images[1]}
+              alt={`${title} - Photo 2`}
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 100vw, 25vw"
+              sizes="50vw"
+              quality={80}
+            />
+          </div>
+        </>
+      )}
+
+      {/* 3 Images: 1 Large Left, 2 Stacked Right */}
+      {images.length === 3 && (
+        <>
+          <div className="relative col-span-2 row-span-2 overflow-hidden rounded-l-2xl">
+            <Image
+              src={images[0]}
+              alt={`${title} - Photo 1`}
+              fill
+              priority
+              className="object-cover"
+              sizes="50vw"
+              quality={80}
+            />
+          </div>
+          <div className="relative col-span-2 row-span-1 overflow-hidden rounded-tr-2xl">
+            <Image
+              src={images[1]}
+              alt={`${title} - Photo 2`}
+              fill
+              className="object-cover"
+              sizes="25vw"
               quality={75}
             />
           </div>
-        );
-      })}
+          <div className="relative col-span-2 row-span-1 overflow-hidden rounded-br-2xl">
+            <Image
+              src={images[2]}
+              alt={`${title} - Photo 3`}
+              fill
+              className="object-cover"
+              sizes="25vw"
+              quality={75}
+            />
+          </div>
+        </>
+      )}
 
-      {/* Bouton "Afficher toutes les photos" */}
+      {/* 4 Images: 1 Large Left, 2 Small Top Right, 1 Wide Bottom Right */}
+      {images.length === 4 && (
+        <>
+          <div className="relative col-span-2 row-span-2 overflow-hidden rounded-l-2xl">
+            <Image
+              src={images[0]}
+              alt={`${title} - Photo 1`}
+              fill
+              priority
+              className="object-cover"
+              sizes="50vw"
+              quality={80}
+            />
+          </div>
+          <div className="relative col-span-1 row-span-1 overflow-hidden">
+            <Image
+              src={images[1]}
+              alt={`${title} - Photo 2`}
+              fill
+              className="object-cover"
+              sizes="25vw"
+              quality={75}
+            />
+          </div>
+          <div className="relative col-span-1 row-span-1 overflow-hidden rounded-tr-2xl">
+            <Image
+              src={images[2]}
+              alt={`${title} - Photo 3`}
+              fill
+              className="object-cover"
+              sizes="25vw"
+              quality={75}
+            />
+          </div>
+          <div className="relative col-span-2 row-span-1 overflow-hidden rounded-br-2xl">
+            <Image
+              src={images[3]}
+              alt={`${title} - Photo 4`}
+              fill
+              className="object-cover"
+              sizes="25vw"
+              quality={75}
+            />
+          </div>
+        </>
+      )}
+
+      {/* 5+ Images: Standard Layout (1 Large, 4 Small) */}
+      {images.length >= 5 && (
+        <>
+          <div className="relative col-span-2 row-span-2 overflow-hidden rounded-l-2xl">
+            <Image
+              src={images[0]}
+              alt={`${title} - Photo principale`}
+              fill
+              priority
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              quality={75}
+            />
+          </div>
+          {images.slice(1, 5).map((src, index) => {
+            const positions = [
+              { rounded: "rounded-tr-2xl" }, // Image 2 (Top Right)
+              {}, // Image 3
+              {}, // Image 4
+              { rounded: "rounded-br-2xl" }, // Image 5 (Bottom Right)
+            ];
+            return (
+              <div
+                key={`grid-${index + 1}`}
+                className={`relative overflow-hidden ${positions[index]?.rounded || ""}`}
+              >
+                <Image
+                  src={src}
+                  alt={`${title} - Photo ${index + 2}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                  quality={75}
+                />
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      {/* Bouton "Afficher toutes les photos" (Only if > 5) */}
       {images.length > 5 && (
         <motion.div
           initial={{ opacity: 0 }}
