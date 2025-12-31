@@ -23,9 +23,9 @@ export function RentalTour({ hasProperties = true, page }: RentalTourProps) {
 
         // 2. Condition de déclenchement :
         // - Si jamais vu sur cette page
-        // - ET (pas de propriétés OU contexte spécifique qui ne dépend pas des propriétés)
-        // Pour 'home', on veut cibler les NOUVEAUX utilisateurs sans données (comme le dashboard)
-        const shouldRun = !tourSeen && (!hasProperties || (page !== 'dashboard' && page !== 'home'));
+        // - Pour 'home', on veut cibler les NOUVEAUX utilisateurs sans données (comme le dashboard)
+        // EDIT: On autorise le tour Dashboard même avec des propriétés pour être sûr qu'il s'affiche
+        const shouldRun = !tourSeen && (page === 'dashboard' || !hasProperties);
 
         if (shouldRun) {
             // Définition des étapes selon la page

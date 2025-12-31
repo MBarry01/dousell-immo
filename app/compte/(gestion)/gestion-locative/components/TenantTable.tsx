@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, ArrowUpDown, ArrowUp, ArrowDown, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GenerateContractButton } from '@/components/contracts/GenerateContractButton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { AddTenantButton } from './AddTenantButton';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -54,6 +56,7 @@ interface TenantTableProps {
     onEdit?: (tenant: Tenant) => void;
     onDelete?: (transactionId: string) => void;
     onDeleteLease?: (leaseId: string) => void;
+    ownerId?: string;
 }
 
 const statusConfig = {
@@ -96,7 +99,7 @@ interface ReceiptData {
     receiptImage?: string | null;
 }
 
-export function TenantTable({ tenants = [], profile, userEmail, isViewingTerminated = false, searchQuery = '', onEdit, onDelete, onDeleteLease }: TenantTableProps) {
+export function TenantTable({ tenants = [], profile, userEmail, ownerId, isViewingTerminated = false, searchQuery = '', onEdit, onDelete, onDeleteLease }: TenantTableProps) {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [isReceiptOpen, setIsReceiptOpen] = useState(false);
@@ -494,9 +497,54 @@ export function TenantTable({ tenants = [], profile, userEmail, isViewingTermina
                 </table>
 
                 {filteredTenants.length === 0 && (
-                    <div className="text-center py-16 px-4">
-                        <div className="text-slate-500 text-sm">Aucune échéance pour cette période</div>
-                        <div className="text-slate-600 text-xs mt-1">Les loyers sont générés automatiquement chaque mois</div>
+                    <div className="py-8 px-4">
+                        {!searchQuery ? (
+                            <EmptyState
+                                title="Votre gestion commence ici"
+                                description="Créez un bail pour générer automatiquement vos contrats et quittances."
+                                icon={FileText}
+                                actionComponent={
+                                    ownerId ? (
+                                        <AddTenantButton
+                                            ownerId={ownerId}
+                                            trigger={
+                                                <Button size="lg" className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90 font-semibold w-full sm:w-auto">
+                                                    Créer un Bail
+                                                </Button>
+                                            }
+                                        />
+                                    ) : null
+                                }
+                                secondaryActionComponent={
+                                    ownerId ? (
+                                        <AddTenantButton
+                                            ownerId={ownerId}
+                                            initialData={{
+                                                name: "Moussa Diop",
+                                                phone: "+221 77 123 45 67",
+                                                email: "moussa.diop@example.com",
+                                                address: "Appartement F4, Sacré-Cœur 3, Dakar",
+                                                amount: 250000,
+                                                day: 5,
+                                                startDate: new Date().toISOString().split('T')[0],
+                                                endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]
+                                            }}
+                                            trigger={
+                                                <Button variant="ghost" className="mt-2 sm:mt-0 sm:ml-2">
+                                                    Voir un exemple de bail
+                                                </Button>
+                                            }
+                                        />
+                                    ) : null
+                                }
+                            />
+                        ) : (
+                            <div className="text-center py-16">
+                                <div className="text-slate-500 text-sm">
+                                    Aucun résultat pour cette recherche
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div >

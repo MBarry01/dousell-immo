@@ -4,17 +4,33 @@ import { useState } from 'react';
 import { Mail, CheckCircle2, ShieldCheck, Lock, MessageSquare, Send, RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
-export function ApiSettings() {
+import { sendTestEmail } from './actions';
+import { toast } from 'sonner';
+
+interface ApiSettingsProps {
+    profile?: any;
+}
+
+export function ApiSettings({ profile }: ApiSettingsProps) {
     const [testing, setTesting] = useState(false);
     const [testSuccess, setTestSuccess] = useState(false);
 
     const handleTestEmail = async () => {
         setTesting(true);
-        // TODO: Envoyer un email de test via n8n
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setTesting(false);
-        setTestSuccess(true);
-        setTimeout(() => setTestSuccess(false), 5000);
+        try {
+            const result = await sendTestEmail(profile);
+            if (result.success) {
+                setTestSuccess(true);
+                toast.success("Email de test envoyé avec vos paramètres !");
+                setTimeout(() => setTestSuccess(false), 5000);
+            } else {
+                toast.error(result.error || "Erreur lors de l'envoi");
+            }
+        } catch (e) {
+            toast.error("Erreur technique");
+        } finally {
+            setTesting(false);
+        }
     };
 
     return (
@@ -52,32 +68,15 @@ export function ApiSettings() {
                                 Certificats PDF envoyés avec succès via votre adresse liée.
                             </div>
 
-                            {/* Documents envoyés */}
-                            <div className="mt-4 p-4 bg-gray-900/30 rounded-xl space-y-2">
-                                <p className="text-xs text-gray-500 uppercase font-bold">Documents générés automatiquement:</p>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                    <div className="flex items-center gap-2 text-sm text-gray-300">
-                                        <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-                                        Contrats de bail (PDF)
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-gray-300">
-                                        <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
-                                        Avis d&apos;échéance mensuels
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-gray-300">
-                                        <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                                        Quittances de loyer
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
 
                         <div className="w-full md:w-auto">
                             <Button
                                 variant="outline"
                                 className={`w-full md:w-auto border-gray-700 transition-all ${testSuccess
-                                        ? 'border-green-500/50 text-green-400 bg-green-500/10'
-                                        : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                    ? 'border-green-500/50 text-green-400 bg-green-500/10'
+                                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
                                     }`}
                                 onClick={handleTestEmail}
                                 disabled={testing}
