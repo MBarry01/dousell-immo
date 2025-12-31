@@ -36,9 +36,9 @@ export default function FavorisPage() {
             ) : (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {favorites.map((favId) => (
-                        <Card key={favId} className="border-zinc-800 bg-zinc-900/50">
+                        <Card key={String(favId)} className="border-zinc-800 bg-zinc-900/50">
                             <CardHeader>
-                                <CardTitle className="text-white">Bien #{favId}</CardTitle>
+                                <CardTitle className="text-white">Bien #{String(favId)}</CardTitle>
                                 <CardDescription>Annonce sauvegardée</CardDescription>
                                 <Button asChild className="w-full mt-4" variant="secondary">
                                     <Link href={`/biens/${favId}`}>Voir l'annonce</Link>
