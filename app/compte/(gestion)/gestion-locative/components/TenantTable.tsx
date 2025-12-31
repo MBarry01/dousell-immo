@@ -502,7 +502,6 @@ export function TenantTable({ tenants = [], profile, userEmail, ownerId, isViewi
                             <EmptyState
                                 title="Votre gestion commence ici"
                                 description="Créez un bail pour générer automatiquement vos contrats et quittances."
-                                icon={FileText}
                                 actionComponent={
                                     ownerId ? (
                                         <AddTenantButton
