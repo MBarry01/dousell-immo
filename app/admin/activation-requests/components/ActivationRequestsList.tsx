@@ -192,6 +192,27 @@ export function ActivationRequestsList({ requests }: { requests: Request[] }) {
                                 </Button>
                             </div>
                         )}
+
+                        {/* Force Sync Action for Approved Requests (Maintenance) */}
+                        {request.status === 'approved' && (
+                            <div className="mt-4">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleApprove(request.id)}
+                                    disabled={isLoading === request.id}
+                                    className="text-xs h-7 border-dashed border-zinc-700 text-zinc-500 hover:text-white"
+                                    title="Forcer la synchronisation du profil"
+                                >
+                                    {isLoading === request.id ? (
+                                        <Loader2 className="w-3 h-3 animate-spin mr-2" />
+                                    ) : (
+                                        <ExternalLink className="w-3 h-3 mr-2" />
+                                    )}
+                                    Resynchroniser
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
