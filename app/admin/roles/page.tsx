@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shield, UserPlus } from "lucide-react";
+import { Shield } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import { requireAdmin } from "@/lib/admin-auth";
@@ -91,9 +91,8 @@ export default async function AdminRolesPage() {
                         user.roles.map((role) => (
                           <span
                             key={role}
-                            className={`rounded-full border px-3 py-1 text-xs font-semibold ${
-                              roleColors[role]
-                            }`}
+                            className={`rounded-full border px-3 py-1 text-xs font-semibold ${roleColors[role]
+                              }`}
                           >
                             {roleLabels[role]}
                           </span>

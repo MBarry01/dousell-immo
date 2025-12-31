@@ -3,25 +3,13 @@ import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import { requireAnyRole } from "@/lib/permissions";
-import { getLeads, updateLeadStatus, type Lead, type LeadStatus } from "./actions";
+import { getLeads, type LeadStatus } from "./actions";
 import { Button } from "@/components/ui/button";
 import { LeadStatusSelect } from "./lead-status-select";
 import { LeadMessageDialog } from "./lead-message-dialog";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
-
-const statusLabels: Record<LeadStatus, string> = {
-  nouveau: "Nouveau",
-  contacté: "Contacté",
-  clos: "Clos",
-};
-
-const statusColors: Record<LeadStatus, string> = {
-  nouveau: "bg-red-500/20 text-red-300 border-red-500/30",
-  contacté: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-  clos: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-};
 
 const availabilityLabels: Record<string, string> = {
   "semaine-matin": "Semaine (Matin)",

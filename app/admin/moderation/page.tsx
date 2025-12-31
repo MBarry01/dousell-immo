@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
   Filter,
   SortAsc,
@@ -87,7 +87,7 @@ export default function ModerationPage() {
 
   // États pour les actions en cours
   const [approvingIds, setApprovingIds] = useState<Set<string>>(new Set());
-  const [rejectingIds, setRejectingIds] = useState<Set<string>>(new Set());
+  const [rejectingIds] = useState<Set<string>>(new Set());
 
   // États pour filtres et tri
   const [searchQuery, setSearchQuery] = useState("");
