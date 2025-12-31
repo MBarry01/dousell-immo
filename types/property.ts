@@ -58,6 +58,7 @@ export type Property = {
   };
   service_type?: "mandat_confort" | "boost_visibilite";
   contact_phone?: string;
+  virtual_tour_url?: string; // Lien d'intégration (Embed SRC) Google Maps ou YouTube 360
   view_count?: number; // Compteur incrémental des vues (optimisé)
 };
 

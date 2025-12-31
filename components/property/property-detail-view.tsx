@@ -132,7 +132,7 @@ export const PropertyDetailView = ({
   ].filter((a) => a.active);
 
   return (
-    <div className="min-h-screen pb-32 text-gray-900 dark:text-white md:pb-40">
+    <div className="min-h-screen bg-white pb-32 text-gray-900 dark:bg-[#05080c] dark:text-white md:pb-40">
       {/* Mobile: Gallery avec overlay */}
       <div className="relative md:hidden">
         <GalleryGrid
