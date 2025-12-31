@@ -5,12 +5,28 @@ import { fr } from "date-fns/locale";
 import { getLegalStats, getLeaseAlerts, getAllActiveLeases } from "./actions";
 import { DecisionModal } from "./components/DecisionModal";
 import { CreateContractDialog } from "./components/CreateContractDialog";
+import { CreateReceiptDialog } from "./components/CreateReceiptDialog";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
 import { RentalTour } from "@/components/onboarding/RentalTour";
 
 export const dynamic = 'force-dynamic';
 
 export default async function LegalAssistantPage() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect('/auth');
+    }
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
     const stats = await getLegalStats();
     const alerts = await getLeaseAlerts();
     const leases = await getAllActiveLeases();
@@ -137,13 +153,7 @@ export default async function LegalAssistantPage() {
                 {/* SECTION 4 : GÉNÉRATEUR RAPIDE */}
                 <div id="tour-legal-tools" className="grid gap-6 md:grid-cols-2">
                     {/* Carte Quittance */}
-                    <div className="p-6 rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900 to-black hover:border-slate-700 transition-all cursor-pointer group">
-                        <div className="h-10 w-10 rounded-lg bg-slate-800 flex items-center justify-center mb-4 group-hover:bg-slate-700 transition-colors">
-                            <FileText className="h-5 w-5 text-white" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-white">Générer une Quittance</h3>
-                        <p className="text-sm text-slate-400 mt-2">Créer manuellement une quittance pour un paiement hors plateforme.</p>
-                    </div>
+                    <CreateReceiptDialog leases={leases} userEmail={user.email} profile={profile} />
 
                     {/* Carte Nouveau Bail (Interactive) */}
                     <CreateContractDialog leases={leases} />

@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Scale, Settings, Building2, Wrench } from "lucide-react";
+import { LayoutDashboard, Scale, Settings, Building2, Wrench, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
@@ -56,7 +56,7 @@ export default function GestionLayout({
                         <NavLink
                             href="/compte/gestion-locative"
                             icon={Building2}
-                            isActive={pathname?.startsWith('/compte/gestion-locative')}
+                            isActive={pathname === '/compte/gestion-locative' || pathname?.startsWith('/compte/gestion-locative/locations')}
                         >
                             Gestion Locative
                         </NavLink>
@@ -68,6 +68,15 @@ export default function GestionLayout({
                             isActive={pathname?.startsWith('/compte/interventions')}
                         >
                             Interventions
+                        </NavLink>
+
+                        <NavLink
+                            id="tour-nav-messages"
+                            href="/compte/gestion-locative/messages"
+                            icon={MessageSquare}
+                            isActive={pathname?.startsWith('/compte/gestion-locative/messages')}
+                        >
+                            Messagerie
                         </NavLink>
 
                         <NavLink

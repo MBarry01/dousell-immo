@@ -90,7 +90,7 @@ export function PropertyCardActions({
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 bg-background border-white/10">
+      <DropdownMenuContent align="end" className="w-56 bg-neutral-950 border-white/10">
         <DropdownMenuItem
           onClick={handleEdit}
           className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white"

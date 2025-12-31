@@ -8,6 +8,8 @@
   --muted-foreground: #9da7b9;
   --card: #0b0f18;
   --card-foreground: #fafbfd;
+  --popover: #0b0f18;
+  --popover-foreground: #fafbfd;
   --accent: #f2c94c;
   --accent-foreground: #05080c;
   /* Couleur primaire - Jaune Or de marque #F4C430 */
@@ -29,6 +31,8 @@
     --muted-foreground: #4b5563;
     --card: #ffffff;
     --card-foreground: #0f172a;
+    --popover: #ffffff;
+    --popover-foreground: #0f172a;
     --accent: #111827;
     --accent-foreground: #f5f5f5;
     /* Couleur primaire - Jaune Or de marque #F4C430 (identique en mode light) */

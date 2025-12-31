@@ -16,6 +16,7 @@ import { PropertyCardActions } from "./property-card-actions";
 import { VerificationUploadForm } from "@/components/dashboard/verification-upload-form";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ShieldCheck, Timer } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type PropertyWithStatus = Property & {
   validation_status: "pending" | "payment_pending" | "approved" | "rejected";
@@ -27,7 +28,7 @@ type PropertyWithStatus = Property & {
 
 const statusConfig = {
   pending: {
-    label: "Vérification en cours",
+    label: "Validation en cours",
     color: "bg-amber-500/20 text-amber-300",
     icon: Clock,
   },
@@ -104,8 +105,30 @@ export default function MesBiensPage() {
 
   if (loading || loadingProperties) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="text-white/70">Chargement...</div>
+      <div className="space-y-6 py-6 text-white">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="spacing-y-2">
+            <Skeleton className="h-4 w-32 bg-white/10" />
+            <Skeleton className="h-10 w-48 bg-white/10" />
+          </div>
+          <Skeleton className="h-10 w-40 rounded-full bg-primary/20" />
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="overflow-hidden rounded-2xl border border-white/10 bg-background/5">
+              <Skeleton className="h-48 w-full bg-white/10" />
+              <div className="p-4 space-y-3">
+                <div className="flex justify-between">
+                  <Skeleton className="h-6 w-2/3 bg-white/10" />
+                  <Skeleton className="h-6 w-1/4 bg-white/10" />
+                </div>
+                <Skeleton className="h-8 w-1/3 bg-white/10" />
+                <Skeleton className="h-4 w-1/2 bg-white/10" />
+                <Skeleton className="h-10 w-full rounded-full bg-white/10" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

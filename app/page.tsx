@@ -11,7 +11,23 @@ export const revalidate = 3600;
 // Force dynamic to avoid build-time errors if env vars are missing
 export const dynamic = 'force-dynamic';
 
+import { createClient } from "@/utils/supabase/server";
+import { RentalTour } from "@/components/onboarding/RentalTour";
+
 export default async function Home() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Vérifier si l'utilisateur a des propriétés (pour le tour)
+  let hasProperties = false;
+  if (user) {
+    const { count } = await supabase
+      .from('properties')
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_id', user.id);
+    hasProperties = (count || 0) > 0;
+  }
+
   // Récupération optimisée des 3 sections de la home page
   // Toutes les propriétés sont automatiquement filtrées pour être :
   // - Approuvées (validation_status = 'approved')
@@ -20,6 +36,9 @@ export default async function Home() {
 
   return (
     <div className="space-y-6">
+      {/* Tour pour les nouveaux utilisateurs (Mobile/PWA Focus) */}
+      {user && <RentalTour page="home" hasProperties={hasProperties} />}
+
       {/* Toast de succès après vérification d'email */}
       <Suspense fallback={null}>
         <VerificationSuccessToast />

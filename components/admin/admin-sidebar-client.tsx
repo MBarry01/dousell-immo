@@ -15,6 +15,7 @@ import {
   UserCheck,
   ChevronDown,
   ChevronRight,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -77,6 +78,12 @@ const navItems: NavItem[] = [
     ]
   },
   {
+    href: "/admin/activation-requests",
+    label: "Demandes Activation",
+    icon: Building2,
+    roles: ["admin", "superadmin"]
+  },
+  {
     href: "/admin/leads",
     label: "Leads/Messages",
     icon: MessageSquare,
@@ -95,6 +102,7 @@ const navItems: NavItem[] = [
     roles: ["admin", "superadmin"]
   },
 ];
+
 
 type SidebarContentProps = {
   filteredNavItems: NavItem[];

@@ -69,6 +69,7 @@ const depositSchema = z
     service_type: z.enum(["mandat_confort", "boost_visibilite"]),
     payment_ref: z.string().optional(),
     contact_phone: z.string().optional(),
+    virtual_tour_url: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     const isTerrain = data.type === "terrain";
@@ -1489,6 +1490,44 @@ function DeposerPageContent() {
                               </p>
                             )}
                           </div>
+                        </div>
+
+                        {/* --- SECTION VISITE VIRTUELLE 360° --- */}
+                        <div className="space-y-4 p-4 border border-white/10 rounded-2xl bg-white/[0.02] mt-6">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-white">Visite Virtuelle</h3>
+                            <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">Optionnel</span>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-sm text-white/70">Lien YouTube de la visite</label>
+                            <Input
+                              type="url"
+                              {...register('virtual_tour_url')}
+                              placeholder="https://www.youtube.com/watch?v=..."
+                              className="text-[16px] bg-card"
+                            />
+                            <p className="text-xs text-white/50">
+                              Collez simplement le lien YouTube de votre vidéo de visite. La conversion est automatique ! ✨
+                            </p>
+                          </div>
+
+                          {/* LE TUTO INTÉGRÉ (Accordion) */}
+                          <details className="text-sm text-white/60 border-t border-white/10 pt-3 mt-3 cursor-pointer group">
+                            <summary className="font-medium text-blue-400 hover:text-blue-300 flex items-center gap-2 list-none">
+                              <span>📹 Comment créer une visite vidéo ?</span>
+                              <span className="group-open:rotate-180 transition-transform text-xs">▼</span>
+                            </summary>
+                            <div className="pl-4 mt-3 space-y-2 text-xs leading-relaxed text-white/50">
+                              <ol className="list-decimal pl-4 space-y-1">
+                                <li>Filmez votre bien avec votre téléphone (1-2 min max)</li>
+                                <li>Uploadez la vidéo sur <strong className="text-white/70">YouTube</strong></li>
+                                <li>Mettez-la en <strong className="text-white/70">&quot;Non répertorié&quot;</strong> (visible uniquement avec le lien)</li>
+                                <li>Cliquez sur <strong className="text-white/70">Partager</strong> et copiez le lien</li>
+                                <li>Collez-le ici, c&apos;est tout ! 🎉</li>
+                              </ol>
+                            </div>
+                          </details>
                         </div>
                       </div>
                     </motion.div>

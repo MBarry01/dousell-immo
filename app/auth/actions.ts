@@ -374,7 +374,24 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+
+  // Vérifier si c'est un locataire
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user?.email) {
+    const { data: lease } = await supabase
+      .from('leases')
+      .select('id')
+      .eq('tenant_email', user.email)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (lease) {
+      redirect("/portal");
+    }
+  }
+
+  // Si pas locataire, direction le dashboard propriétaire
+  redirect("/compte");
 }
 
 export async function signInWithGoogle() {

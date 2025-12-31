@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { sendEmail, getAdminNotificationEmails, getAdminEmail } from "@/lib/mail";
 import { ListingSubmittedEmail } from "@/emails/listing-submitted-email";
@@ -37,7 +38,47 @@ type SubmitListingData = {
     };
   };
   proof_document_url?: string;
+  virtual_tour_url?: string;
 };
+
+// Fonction de nettoyage et conversion de l'URL de visite virtuelle
+// - Extrait le src si l'utilisateur colle un code iframe complet
+// - Convertit les liens YouTube classiques en liens embed
+function cleanVirtualTourUrl(rawUrl: string | undefined): string | null {
+  if (!rawUrl) return null;
+  const trimmedUrl = rawUrl.trim();
+  if (!trimmedUrl) return null;
+
+  // Si l'utilisateur a collé tout le code HTML iframe par erreur
+  if (trimmedUrl.includes('<iframe')) {
+    const match = trimmedUrl.match(/src="([^"]+)"/);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  // Conversion automatique des liens YouTube classiques en embed
+  // Format: https://www.youtube.com/watch?v=VIDEO_ID
+  const youtubeWatchMatch = trimmedUrl.match(/(?:youtube\.com\/watch\?v=|youtube\.com\/watch\?.*&v=)([a-zA-Z0-9_-]{11})/);
+  if (youtubeWatchMatch && youtubeWatchMatch[1]) {
+    return `https://www.youtube.com/embed/${youtubeWatchMatch[1]}`;
+  }
+
+  // Format court: https://youtu.be/VIDEO_ID
+  const youtubeShortMatch = trimmedUrl.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  if (youtubeShortMatch && youtubeShortMatch[1]) {
+    return `https://www.youtube.com/embed/${youtubeShortMatch[1]}`;
+  }
+
+  // Format Shorts: https://www.youtube.com/shorts/VIDEO_ID
+  const youtubeShortsMatch = trimmedUrl.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
+  if (youtubeShortsMatch && youtubeShortsMatch[1]) {
+    return `https://www.youtube.com/embed/${youtubeShortsMatch[1]}`;
+  }
+
+  // Si c'est déjà un lien embed YouTube ou Google Maps, on le garde tel quel
+  return trimmedUrl;
+}
 
 export async function submitUserListing(data: SubmitListingData) {
   try {
@@ -60,6 +101,32 @@ export async function submitUserListing(data: SubmitListingData) {
     }
 
     console.log("✅ Utilisateur récupéré:", { userId: user.id, email: user.email });
+
+    // Vérifier si le profil existe, sinon le créer automatiquement avec admin client
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .single();
+
+    if (!existingProfile) {
+      console.log("⚠️ Profil non trouvé, création automatique avec admin client...");
+      // Utiliser le client admin pour contourner les politiques RLS
+      const adminClient = createAdminClient();
+      const { error: profileError } = await adminClient
+        .from("profiles")
+        .insert({
+          id: user.id,
+          full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Utilisateur",
+        });
+
+      if (profileError) {
+        console.error("❌ Erreur création profil:", profileError);
+        return { error: "Erreur lors de la création de votre profil. Veuillez réessayer." };
+      }
+      console.log("✅ Profil créé avec succès");
+    }
+
 
     // Déterminer le statut selon le service et le paiement
     let validationStatus: "pending" | "payment_pending" | "approved" | "rejected" =
@@ -138,7 +205,8 @@ export async function submitUserListing(data: SubmitListingData) {
       images: data.images,
       views_count: 0,
       proof_document_url: data.proof_document_url || null,
-      verification_status: data.proof_document_url ? "pending" : "pending", // Si document, on peut mettre un statut spécifique
+      virtual_tour_url: cleanVirtualTourUrl(data.virtual_tour_url),
+      verification_status: data.proof_document_url ? "pending" : null, // Si document, demande auto, sinon null (affichage bouton certifier)
     };
 
     const { data: insertedProperty, error } = await supabase

@@ -93,6 +93,7 @@ export default async function GestionLocativePage({
         .from('maintenance_requests')
         .select('id, description, status, created_at, lease_id, artisan_name, artisan_phone, artisan_rating, artisan_address, quoted_price, intervention_date, owner_approved')
         .order('created_at', { ascending: false })
+        .neq('status', 'completed')
         .limit(5); // Limiter à 5 pour l'aperçu
 
     const maintenanceRequests = maintenanceData || [];

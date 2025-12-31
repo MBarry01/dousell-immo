@@ -141,7 +141,7 @@ export async function createPayDunyaInvoice(
   }
 
   const data = await response.json();
-  
+
   if (data.response_code !== "00") {
     throw new Error(
       `Erreur PayDunya: ${data.response_text} - ${data.description}`
@@ -229,6 +229,102 @@ export async function initializePayment(
       cancel_url: `${appUrl}/compte/mes-biens?status=cancel`,
       callback_url: callbackUrl,
     },
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "PAYDUNYA-MASTER-KEY": config.masterKey,
+      "PAYDUNYA-PRIVATE-KEY": config.privateKey,
+      "PAYDUNYA-TOKEN": config.token,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Erreur PayDunya (${response.status}): ${errorText}`
+    );
+  }
+
+  const data = await response.json();
+
+  if (data.response_code !== "00") {
+    throw new Error(
+      `Erreur PayDunya: ${data.response_text} - ${data.description}`
+    );
+  }
+
+  return {
+    token: data.token,
+    redirectUrl: getPayDunyaCheckoutUrl(data.token, config.mode),
+    raw: data,
+  };
+}
+
+/**
+ * Initialiser un paiement de loyer
+ */
+export async function initializeRentalPayment(
+  leaseId: string,
+  amount: number,
+  periodMonth: number,
+  periodYear: number,
+  tenantEmail: string,
+  tenantName: string,
+  tenantPhone?: string
+) {
+  const config = getPayDunyaConfig();
+  const baseUrl = getPayDunyaApiBaseUrl(config.mode);
+  const url = `${baseUrl}/checkout-invoice/create`;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://doussel-immo.vercel.app";
+  // En dev (localhost), le callback ne fonctionnera pas sans ngrok.
+  // On utilise une URL ngrok si définie, sinon l'URL de l'app (qui échouera en local d'où l'importance de ngrok)
+  const callbackUrl =
+    process.env.PAYDUNYA_CALLBACK_URL ||
+    process.env.NGROK_CALLBACK_URL ||
+    `${appUrl}/api/webhooks/paydunya`;
+
+  const description = `Loyer ${periodMonth}/${periodYear}`;
+
+  const payload = {
+    invoice: {
+      total_amount: amount,
+      description: description,
+      items: [
+        {
+          name: description,
+          quantity: 1,
+          unit_price: amount,
+          total_price: amount,
+          description: `Règlement du loyer pour le bail ${leaseId}`
+        }
+      ]
+    },
+    store: {
+      name: "Doussel Immo",
+      tagline: "Gestion Locative Simplifiée",
+      website_url: appUrl,
+    },
+    custom_data: {
+      type: 'rent',
+      lease_id: leaseId,
+      period_month: periodMonth,
+      period_year: periodYear
+    },
+    actions: {
+      return_url: `${appUrl}/portal?status=success`,
+      cancel_url: `${appUrl}/portal?status=cancel`,
+      callback_url: callbackUrl,
+    },
+    customer: {
+      name: tenantName,
+      email: tenantEmail,
+      phone: tenantPhone
+    }
   };
 
   const response = await fetch(url, {

@@ -632,7 +632,7 @@ export async function getAllActiveLeases() {
 
     const { data: leases, error } = await supabase
         .from('leases')
-        .select('id, tenant_name, property_address, lease_pdf_url')
+        .select('id, tenant_name, property_address, lease_pdf_url, monthly_amount, tenant_email, tenant_phone')
         .eq('owner_id', user.id)
         .eq('status', 'active');
 

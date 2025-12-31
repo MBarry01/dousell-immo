@@ -39,10 +39,73 @@ export async function POST(request: Request) {
     // Sinon, le token sera utilisé lors de la création de l'annonce
     if (payload.invoice.status === "completed") {
       const supabase = await createClient();
-      const customData = payload.custom_data as { property_id?: string; user_id?: string } | undefined;
-      const propertyId = customData?.property_id;
+      const customData = payload.custom_data as {
+        type?: string;
+        property_id?: string;
+        lease_id?: string;
+        period_month?: number;
+        period_year?: number;
+      } | undefined;
 
-      if (propertyId) {
+      // CAS 1: Paiement de Loyer
+      if (customData?.type === 'rent' && customData.lease_id && customData.period_month && customData.period_year) {
+        // Récupérer infos pour l'email (email locataire, email proprio)
+        const { data: lease } = await supabase
+          .from('leases')
+          .select('tenant_email, tenant_name, monthly_amount, owner:profiles(email, full_name)')
+          .eq('id', customData.lease_id)
+          .single();
+
+        const { error: rentError } = await supabase
+          .from('rental_transactions')
+          .update({
+            status: 'paid',
+            paid_at: new Date().toISOString(),
+            payment_ref: payload.invoice.token,
+            payment_method: 'paydunya'
+          })
+          .eq('lease_id', customData.lease_id)
+          .eq('period_month', customData.period_month)
+          .eq('period_year', customData.period_year);
+
+        if (rentError) {
+          console.error("Erreur maj loyer:", rentError);
+        } else {
+          console.log(`✅ Loyer payé via PayDunya: Bail ${customData.lease_id}`);
+
+          // Envoyer Email de confirmation
+          if (lease && lease.tenant_email) {
+            const subject = `Reçu de paiement - Loyer ${customData.period_month}/${customData.period_year}`;
+            const amountFmt = lease.monthly_amount?.toLocaleString('fr-FR');
+
+            // Contenu HTML simple
+            const html = `
+                    <h1>Paiement reçu !</h1>
+                    <p>Bonjour ${lease.tenant_name || 'Locataire'},</p>
+                    <p>Nous confirmons la réception de votre paiement de <strong>${amountFmt} FCFA</strong> pour le loyer de <strong>${customData.period_month}/${customData.period_year}</strong>.</p>
+                    <p>Votre quittance est désormais disponible dans votre espace locataire.</p>
+                    <br/>
+                    <p>Cordialement,<br/>L'équipe Doussel Immo</p>
+                  `;
+
+            await sendEmail({
+              to: lease.tenant_email,
+              subject,
+              html
+            });
+
+            // Notification Proprio (CC)
+            // @ts-ignore
+            if (lease.owner?.email) {
+              // @ts-ignore
+              await sendEmail({ to: lease.owner.email, subject: `[Paiement] Loyer reçu - ${lease.tenant_name}`, html: `<p>Le locataire ${lease.tenant_name} a réglé son loyer de ${amountFmt} FCFA via PayDunya.</p>` });
+            }
+          }
+        }
+      }
+      // CAS 2: Boost Annonce (Legacy / Property)
+      else if (customData?.property_id) {
+        const propertyId = customData.property_id;
         // Extraire les détails du paiement depuis le payload PayDunya
         const paymentAmount = payload.invoice.total_amount;
         const serviceName = payload.invoice.items && payload.invoice.items.length > 0
