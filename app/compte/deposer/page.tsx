@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, Home, Building2, Mountain, Store, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Home, Building2, Mountain, Store, X, Sparkles } from "lucide-react";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { AddressInputWithMap } from "@/components/forms/address-input-with-map";
 import { DocumentSelector } from "@/components/document/document-selector";
 import { useAuth } from "@/hooks/use-auth";
-import { submitUserListing } from "@/app/compte/deposer/actions";
+import { submitUserListing, generateAIDescription } from "@/app/compte/deposer/actions";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 
@@ -166,6 +166,7 @@ function DeposerPageContent() {
   const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [proofDocumentId, setProofDocumentId] = useState<string | null>(null);
   const [formSaving, setFormSaving] = useState(false);
+  const [generatingDescription, setGeneratingDescription] = useState(false);
 
   // États accordéon intelligent
   const [activeSection, setActiveSection] = useState<string>("essentials");
@@ -927,9 +928,8 @@ function DeposerPageContent() {
             <div key={s} className="flex-1">
               <div className="relative h-2 rounded-full bg-white/10 overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    s <= step ? "bg-primary" : "bg-transparent"
-                  }`}
+                  className={`h-full rounded-full transition-all duration-500 ${s <= step ? "bg-primary" : "bg-transparent"
+                    }`}
                   style={{
                     width: s < step ? "100%" : s === step ? "50%" : "0%"
                   }}
@@ -995,438 +995,506 @@ function DeposerPageContent() {
                       transition={{ duration: 0.4, ease: "easeInOut" }}
                     >
                       <div className="px-5 pb-5 space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="text-sm text-white/70">Type de bien</label>
-                  <select
-                    {...register("type")}
-                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 appearance-none bg-no-repeat bg-right pr-10"
-                    style={{
-                      colorScheme: "dark",
-                      fontSize: "16px",
-                      backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
-                      backgroundPosition: "right 0.75rem center",
-                      backgroundSize: "1.5em 1.5em"
-                    }}
-                  >
-                    {typesBien.map((t) => (
-                      <option key={t.value} value={t.value} className="bg-[#121212] text-white py-2">
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div>
+                            <label className="text-sm text-white/70">Type de bien</label>
+                            <select
+                              {...register("type")}
+                              className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 appearance-none bg-no-repeat bg-right pr-10"
+                              style={{
+                                colorScheme: "dark",
+                                fontSize: "16px",
+                                backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
+                                backgroundPosition: "right 0.75rem center",
+                                backgroundSize: "1.5em 1.5em"
+                              }}
+                            >
+                              {typesBien.map((t) => (
+                                <option key={t.value} value={t.value} className="bg-[#121212] text-white py-2">
+                                  {t.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
 
-                <div>
-                  <label className="text-sm text-white/70">Catégorie</label>
-                  <select
-                    {...register("category")}
-                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 appearance-none bg-no-repeat bg-right pr-10"
-                    style={{
-                      colorScheme: "dark",
-                      fontSize: "16px",
-                      backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
-                      backgroundPosition: "right 0.75rem center",
-                      backgroundSize: "1.5em 1.5em"
-                    }}
-                  >
-                    <option value="vente" className="bg-[#121212] text-white py-2">
-                      Vente
-                    </option>
-                    <option value="location" className="bg-[#121212] text-white py-2">
-                      Location
-                    </option>
-                  </select>
-                </div>
+                          <div>
+                            <label className="text-sm text-white/70">Catégorie</label>
+                            <select
+                              {...register("category")}
+                              className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 appearance-none bg-no-repeat bg-right pr-10"
+                              style={{
+                                colorScheme: "dark",
+                                fontSize: "16px",
+                                backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
+                                backgroundPosition: "right 0.75rem center",
+                                backgroundSize: "1.5em 1.5em"
+                              }}
+                            >
+                              <option value="vente" className="bg-[#121212] text-white py-2">
+                                Vente
+                              </option>
+                              <option value="location" className="bg-[#121212] text-white py-2">
+                                Location
+                              </option>
+                            </select>
+                          </div>
 
-                <div className="sm:col-span-2">
-                  <label className="text-sm text-white/70">Titre</label>
-                  <div className="relative">
-                    <Input {...register("title")} className="mt-2 text-[16px] pr-10" />
-                    {!errors.title && watch("title") && watch("title").length >= 3 && (
-                      <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-400" />
-                    )}
-                  </div>
-                  {errors.title && (
-                    <p className="mt-1 text-sm text-amber-300">
-                      {errors.title.message}
-                    </p>
-                  )}
-                </div>
+                          <div className="sm:col-span-2">
+                            <label className="text-sm text-white/70">Titre</label>
+                            <div className="relative">
+                              <Input {...register("title")} className="mt-2 text-[16px] pr-10" />
+                              {!errors.title && watch("title") && watch("title").length >= 3 && (
+                                <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-400" />
+                              )}
+                            </div>
+                            {errors.title && (
+                              <p className="mt-1 text-sm text-amber-300">
+                                {errors.title.message}
+                              </p>
+                            )}
+                          </div>
 
-                <div className="sm:col-span-2">
-                  <label className="text-sm text-white/70">{priceLabel}</label>
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      {...register("price")}
-                      className="mt-2 text-[16px] pr-10"
-                      placeholder={category === "location" ? "Ex: 250000" : "Ex: 45000000"}
-                    />
-                    {!errors.price && watch("price") && Number(watch("price")) > 0 && (
-                      <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-400" />
-                    )}
-                  </div>
-                  {errors.price && (
-                    <p className="mt-1 text-sm text-amber-300">
-                      {errors.price.message}
-                    </p>
-                  )}
-                </div>
-              </div>
+                          <div className="sm:col-span-2">
+                            <label className="text-sm text-white/70">{priceLabel}</label>
+                            <div className="relative">
+                              <Input
+                                type="number"
+                                {...register("price")}
+                                className="mt-2 text-[16px] pr-10"
+                                placeholder={category === "location" ? "Ex: 250000" : "Ex: 45000000"}
+                              />
+                              {!errors.price && watch("price") && Number(watch("price")) > 0 && (
+                                <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-400" />
+                              )}
+                            </div>
+                            {errors.price && (
+                              <p className="mt-1 text-sm text-amber-300">
+                                {errors.price.message}
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-            {/* Section: Localisation */}
-            <div id="section-location" className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setActiveSection(activeSection === "location" ? "" : "location")}
-                className="w-full p-5 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-              >
-                <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  Localisation
-                </h3>
-                <div className="flex items-center gap-2">
-                  {completedSections.includes("location") && (
-                    <Check className="h-5 w-5 text-emerald-400" />
-                  )}
-                  <motion.div
-                    animate={{ rotate: activeSection === "location" ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <svg className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </motion.div>
-                </div>
-              </button>
-              <AnimatePresence>
-                {activeSection === "location" && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.4, ease: "easeInOut" }}
-                  >
-                    <div className="px-5 pb-5 space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="text-sm text-white/70">Région</label>
-                  <Input {...register("city")} className="mt-2 text-base" />
-                  {errors.city && (
-                    <p className="mt-1 text-sm text-amber-300">
-                      {errors.city.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-sm text-white/70">Quartier (ville)</label>
-                  <Input {...register("district")} className="mt-2 text-base" />
-                  {errors.district && (
-                    <p className="mt-1 text-sm text-amber-300">
-                      {errors.district.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="text-sm text-white/70">Adresse</label>
-                  <AddressInputWithMap
-                    register={register("address")}
-                    error={errors.address?.message}
-                    setValue={setValue}
-                    currentAddress={watch("address")}
-                    city={watch("city")}
-                    district={watch("district")}
-                    onLocationSelect={(lat, lng) => {
-                      setManualCoordinates({ lat, lng });
-                      console.log("📍 Coordonnées sélectionnées manuellement:", { lat, lng });
-                    }}
-                    onAddressFound={(details) => {
-                      if (details.city) {
-                        setValue("city", details.city, { shouldValidate: true });
-                      }
-                      if (details.district) {
-                        setValue("district", details.district, { shouldValidate: true });
-                      }
-                    }}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
+              {/* Section: Localisation */}
+              <div id="section-location" className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setActiveSection(activeSection === "location" ? "" : "location")}
+                  className="w-full p-5 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+                >
+                  <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    Localisation
+                  </h3>
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-white/70">Point de repère <span className="text-white/40">(optionnel)</span></label>
-                    <InfoTooltip content="Ex: Près de la station Total, à côté de l'école primaire Liberté, face à la mosquée..." />
+                    {completedSections.includes("location") && (
+                      <Check className="h-5 w-5 text-emerald-400" />
+                    )}
+                    <motion.div
+                      animate={{ rotate: activeSection === "location" ? 180 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <svg className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </motion.div>
                   </div>
-                  <Input {...register("landmark")} className="mt-2 text-[16px]" placeholder="Ex: Près de la station Total..." />
-                  {errors.landmark && (
-                    <p className="mt-1 text-sm text-amber-300">
-                      {errors.landmark.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                </button>
+                <AnimatePresence>
+                  {activeSection === "location" && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                    >
+                      <div className="px-5 pb-5 space-y-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div>
+                            <label className="text-sm text-white/70">Région</label>
+                            <Input {...register("city")} className="mt-2 text-base" />
+                            {errors.city && (
+                              <p className="mt-1 text-sm text-amber-300">
+                                {errors.city.message}
+                              </p>
+                            )}
+                          </div>
 
-            {/* Section: Caractéristiques (conditionnelle selon le type) */}
-            <div id="section-characteristics" className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setActiveSection(activeSection === "characteristics" ? "" : "characteristics")}
-                className="w-full p-5 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-              >
-                <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  Caractéristiques
-                </h3>
-                <div className="flex items-center gap-2">
-                  {completedSections.includes("characteristics") && (
-                    <Check className="h-5 w-5 text-emerald-400" />
-                  )}
-                  <motion.div
-                    animate={{ rotate: activeSection === "characteristics" ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <svg className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </motion.div>
-                </div>
-              </button>
-              <AnimatePresence>
-                {activeSection === "characteristics" && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.4, ease: "easeInOut" }}
-                  >
-                    <div className="px-5 pb-5 space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                {/* Champs conditionnels selon le type */}
-                {isTerrain ? (
-                  <>
-                    <div className="sm:col-span-2">
-                      <label className="text-sm text-white/70">Surface totale (m²)</label>
-                      <Input
-                        type="number"
-                        {...register("surfaceTotale", { valueAsNumber: true })}
-                        className="mt-2 text-[16px]"
-                      />
-                      {errors.surfaceTotale && (
-                        <p className="mt-1 text-sm text-amber-300">
-                          {errors.surfaceTotale.message}
-                        </p>
-                      )}
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="text-sm text-white/70">Situation juridique</label>
-                      <select
-                        {...register("juridique")}
-                        className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 appearance-none bg-no-repeat bg-right pr-10"
-                        style={{
-                          colorScheme: "dark",
-                          fontSize: "16px",
-                          backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
-                          backgroundPosition: "right 0.75rem center",
-                          backgroundSize: "1.5em 1.5em"
-                        }}
-                      >
-                        <option value="" className="bg-[#121212] text-white py-2">
-                          Sélectionnez
-                        </option>
-                        {situationsJuridiques.map((sj) => (
-                          <option
-                            key={sj.value}
-                            value={sj.value}
-                            className="bg-[#121212] text-white py-2"
-                          >
-                            {sj.label}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.juridique && (
-                        <p className="mt-1 text-sm text-amber-300">
-                          {errors.juridique.message}
-                        </p>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <label className="text-sm text-white/70">Surface habitable (m²)</label>
-                      <Input
-                        type="number"
-                        {...register("surface", { valueAsNumber: true })}
-                        className="mt-2 text-[16px]"
-                      />
-                      {errors.surface && (
-                        <p className="mt-1 text-sm text-amber-300">
-                          {errors.surface.message}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="text-sm text-white/70">Pièces</label>
-                      <Input
-                        type="number"
-                        {...register("rooms", { valueAsNumber: true })}
-                        className="mt-2 text-[16px]"
-                      />
-                      {errors.rooms && (
-                        <p className="mt-1 text-sm text-amber-300">
-                          {errors.rooms.message}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="text-sm text-white/70">Chambres</label>
-                      <Input
-                        type="number"
-                        {...register("bedrooms", { valueAsNumber: true })}
-                        className="mt-2 text-[16px]"
-                      />
-                      {errors.bedrooms && (
-                        <p className="mt-1 text-sm text-amber-300">
-                          {errors.bedrooms.message}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="text-sm text-white/70">Salles de bain</label>
-                      <Input
-                        type="number"
-                        {...register("bathrooms", { valueAsNumber: true })}
-                        className="mt-2 text-[16px]"
-                      />
-                      {errors.bathrooms && (
-                        <p className="mt-1 text-sm text-amber-300">
-                          {errors.bathrooms.message}
-                        </p>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                          <div>
+                            <label className="text-sm text-white/70">Quartier (ville)</label>
+                            <Input {...register("district")} className="mt-2 text-base" />
+                            {errors.district && (
+                              <p className="mt-1 text-sm text-amber-300">
+                                {errors.district.message}
+                              </p>
+                            )}
+                          </div>
 
-            {/* Section: Description & Photos */}
-            <div id="section-description" className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setActiveSection(activeSection === "description" ? "" : "description")}
-                className="w-full p-5 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-              >
-                <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  Description & Photos
-                </h3>
-                <div className="flex items-center gap-2">
-                  {completedSections.includes("description") && (
-                    <Check className="h-5 w-5 text-emerald-400" />
-                  )}
-                  <motion.div
-                    animate={{ rotate: activeSection === "description" ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <svg className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </motion.div>
-                </div>
-              </button>
-              <AnimatePresence>
-                {activeSection === "description" && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.4, ease: "easeInOut" }}
-                  >
-                    <div className="px-5 pb-5 space-y-4">
+                          <div className="sm:col-span-2">
+                            <label className="text-sm text-white/70">Adresse</label>
+                            <AddressInputWithMap
+                              register={register("address")}
+                              error={errors.address?.message}
+                              setValue={setValue}
+                              currentAddress={watch("address")}
+                              city={watch("city")}
+                              district={watch("district")}
+                              onLocationSelect={(lat, lng) => {
+                                setManualCoordinates({ lat, lng });
+                                console.log("📍 Coordonnées sélectionnées manuellement:", { lat, lng });
+                              }}
+                              onAddressFound={(details) => {
+                                if (details.city) {
+                                  setValue("city", details.city, { shouldValidate: true });
+                                }
+                                if (details.district) {
+                                  setValue("district", details.district, { shouldValidate: true });
+                                }
+                              }}
+                              className="mt-2"
+                            />
+                          </div>
 
-              <div>
-                <label className="text-sm text-white/70">Description</label>
-                <Textarea
-                  {...register("description")}
-                  className="mt-2 min-h-[120px]"
-                  placeholder="Décrivez votre bien en détail..."
-                />
-                {errors.description && (
-                  <p className="mt-1 text-sm text-amber-300">
-                    {errors.description.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="text-sm text-white/70">Photos</label>
-                <div className="mt-2 rounded-2xl border border-dashed border-white/20 bg-white/5 p-6 text-center">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    className="hidden"
-                    id="photo-upload"
-                    onChange={(e) => e.target.files && handleImageUpload(e.target.files)}
-                    disabled={uploading}
-                  />
-                  <label
-                    htmlFor="photo-upload"
-                    className={`inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm text-white hover:bg-white/10 ${uploading ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                  >
-                    {uploading ? "Upload en cours..." : "Choisir des photos"}
-                  </label>
-                  {imageUrls.length > 0 && (
-                    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                      {imageUrls.map((url, index) => (
-                        <div key={index} className="relative aspect-square overflow-hidden rounded-xl">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={url}
-                            alt={`Photo ${index + 1}`}
-                            className="h-full w-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setImageUrls((prev) => prev.filter((_, i) => i !== index))}
-                            className="absolute right-2 top-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
+                          <div className="sm:col-span-2">
+                            <div className="flex items-center gap-2">
+                              <label className="text-sm text-white/70">Point de repère <span className="text-white/40">(optionnel)</span></label>
+                              <InfoTooltip content="Ex: Près de la station Total, à côté de l'école primaire Liberté, face à la mosquée..." />
+                            </div>
+                            <Input {...register("landmark")} className="mt-2 text-[16px]" placeholder="Ex: Près de la station Total..." />
+                            {errors.landmark && (
+                              <p className="mt-1 text-sm text-amber-300">
+                                {errors.landmark.message}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    </motion.div>
                   )}
-                  {imageUrls.length === 0 && (
-                    <p className="mt-2 text-xs text-white/50">
-                      Au moins une photo est requise
-                    </p>
-                  )}
-                </div>
+                </AnimatePresence>
               </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+
+              {/* Section: Caractéristiques (conditionnelle selon le type) */}
+              <div id="section-characteristics" className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setActiveSection(activeSection === "characteristics" ? "" : "characteristics")}
+                  className="w-full p-5 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+                >
+                  <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    Caractéristiques
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {completedSections.includes("characteristics") && (
+                      <Check className="h-5 w-5 text-emerald-400" />
+                    )}
+                    <motion.div
+                      animate={{ rotate: activeSection === "characteristics" ? 180 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <svg className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </motion.div>
+                  </div>
+                </button>
+                <AnimatePresence>
+                  {activeSection === "characteristics" && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                    >
+                      <div className="px-5 pb-5 space-y-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          {/* Champs conditionnels selon le type */}
+                          {isTerrain ? (
+                            <>
+                              <div className="sm:col-span-2">
+                                <label className="text-sm text-white/70">Surface totale (m²)</label>
+                                <Input
+                                  type="number"
+                                  {...register("surfaceTotale", { valueAsNumber: true })}
+                                  className="mt-2 text-[16px]"
+                                />
+                                {errors.surfaceTotale && (
+                                  <p className="mt-1 text-sm text-amber-300">
+                                    {errors.surfaceTotale.message}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="sm:col-span-2">
+                                <label className="text-sm text-white/70">Situation juridique</label>
+                                <select
+                                  {...register("juridique")}
+                                  className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-card px-4 text-[16px] text-white focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 appearance-none bg-no-repeat bg-right pr-10"
+                                  style={{
+                                    colorScheme: "dark",
+                                    fontSize: "16px",
+                                    backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
+                                    backgroundPosition: "right 0.75rem center",
+                                    backgroundSize: "1.5em 1.5em"
+                                  }}
+                                >
+                                  <option value="" className="bg-[#121212] text-white py-2">
+                                    Sélectionnez
+                                  </option>
+                                  {situationsJuridiques.map((sj) => (
+                                    <option
+                                      key={sj.value}
+                                      value={sj.value}
+                                      className="bg-[#121212] text-white py-2"
+                                    >
+                                      {sj.label}
+                                    </option>
+                                  ))}
+                                </select>
+                                {errors.juridique && (
+                                  <p className="mt-1 text-sm text-amber-300">
+                                    {errors.juridique.message}
+                                  </p>
+                                )}
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div>
+                                <label className="text-sm text-white/70">Surface habitable (m²)</label>
+                                <Input
+                                  type="number"
+                                  {...register("surface", { valueAsNumber: true })}
+                                  className="mt-2 text-[16px]"
+                                />
+                                {errors.surface && (
+                                  <p className="mt-1 text-sm text-amber-300">
+                                    {errors.surface.message}
+                                  </p>
+                                )}
+                              </div>
+                              <div>
+                                <label className="text-sm text-white/70">Pièces</label>
+                                <Input
+                                  type="number"
+                                  {...register("rooms", { valueAsNumber: true })}
+                                  className="mt-2 text-[16px]"
+                                />
+                                {errors.rooms && (
+                                  <p className="mt-1 text-sm text-amber-300">
+                                    {errors.rooms.message}
+                                  </p>
+                                )}
+                              </div>
+                              <div>
+                                <label className="text-sm text-white/70">Chambres</label>
+                                <Input
+                                  type="number"
+                                  {...register("bedrooms", { valueAsNumber: true })}
+                                  className="mt-2 text-[16px]"
+                                />
+                                {errors.bedrooms && (
+                                  <p className="mt-1 text-sm text-amber-300">
+                                    {errors.bedrooms.message}
+                                  </p>
+                                )}
+                              </div>
+                              <div>
+                                <label className="text-sm text-white/70">Salles de bain</label>
+                                <Input
+                                  type="number"
+                                  {...register("bathrooms", { valueAsNumber: true })}
+                                  className="mt-2 text-[16px]"
+                                />
+                                {errors.bathrooms && (
+                                  <p className="mt-1 text-sm text-amber-300">
+                                    {errors.bathrooms.message}
+                                  </p>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Section: Description & Photos */}
+              <div id="section-description" className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setActiveSection(activeSection === "description" ? "" : "description")}
+                  className="w-full p-5 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+                >
+                  <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    Description & Photos
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {completedSections.includes("description") && (
+                      <Check className="h-5 w-5 text-emerald-400" />
+                    )}
+                    <motion.div
+                      animate={{ rotate: activeSection === "description" ? 180 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <svg className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </motion.div>
+                  </div>
+                </button>
+                <AnimatePresence>
+                  {activeSection === "description" && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                    >
+                      <div className="px-5 pb-5 space-y-4">
+
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="text-sm text-white/70">Description</label>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              disabled={generatingDescription}
+                              onClick={async () => {
+                                const values = getValues();
+
+                                // Vérifier qu'on a assez d'infos
+                                if (!values.type || !values.city) {
+                                  toast.error("Informations manquantes", {
+                                    description: "Veuillez remplir au moins le type et la ville du bien."
+                                  });
+                                  return;
+                                }
+
+                                setGeneratingDescription(true);
+                                try {
+                                  const result = await generateAIDescription({
+                                    type: values.type,
+                                    category: values.category || "vente",
+                                    city: values.city,
+                                    district: values.district,
+                                    price: Number(values.price) || 0,
+                                    surface: values.surface || values.surfaceTotale,
+                                    rooms: values.rooms,
+                                    bedrooms: values.bedrooms,
+                                    bathrooms: values.bathrooms,
+                                  });
+
+                                  if (result.success && result.description) {
+                                    setValue("description", result.description, { shouldValidate: true });
+                                    toast.success("Description générée !", {
+                                      description: "Vous pouvez la modifier si besoin."
+                                    });
+                                  } else {
+                                    toast.error("Erreur de génération", {
+                                      description: result.error || "Veuillez réessayer."
+                                    });
+                                  }
+                                } catch (error) {
+                                  console.error("Erreur génération IA:", error);
+                                  toast.error("Erreur inattendue", {
+                                    description: "La génération a échoué. Veuillez réessayer."
+                                  });
+                                } finally {
+                                  setGeneratingDescription(false);
+                                }
+                              }}
+                              className="h-8 gap-1.5 text-xs border-primary/30 text-primary hover:bg-primary/10"
+                            >
+                              {generatingDescription ? (
+                                <>
+                                  <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                  </svg>
+                                  Génération...
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles className="h-3.5 w-3.5" />
+                                  Générer avec l'IA
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                          <Textarea
+                            {...register("description")}
+                            className="min-h-[120px]"
+                            placeholder="Décrivez votre bien en détail..."
+                          />
+                          {errors.description && (
+                            <p className="mt-1 text-sm text-amber-300">
+                              {errors.description.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="text-sm text-white/70">Photos</label>
+                          <div className="mt-2 rounded-2xl border border-dashed border-white/20 bg-white/5 p-6 text-center">
+                            <input
+                              type="file"
+                              multiple
+                              accept="image/*"
+                              className="hidden"
+                              id="photo-upload"
+                              onChange={(e) => e.target.files && handleImageUpload(e.target.files)}
+                              disabled={uploading}
+                            />
+                            <label
+                              htmlFor="photo-upload"
+                              className={`inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm text-white hover:bg-white/10 ${uploading ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
+                            >
+                              {uploading ? "Upload en cours..." : "Choisir des photos"}
+                            </label>
+                            {imageUrls.length > 0 && (
+                              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                {imageUrls.map((url, index) => (
+                                  <div key={index} className="relative aspect-square overflow-hidden rounded-xl">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={url}
+                                      alt={`Photo ${index + 1}`}
+                                      className="h-full w-full object-cover"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setImageUrls((prev) => prev.filter((_, i) => i !== index))}
+                                      className="absolute right-2 top-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {imageUrls.length === 0 && (
+                              <p className="mt-2 text-xs text-white/50">
+                                Au moins une photo est requise
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </motion.div>
           )}
 

@@ -226,4 +226,115 @@ export async function submitUserListing(data: SubmitListingData) {
   }
 }
 
+// ============================================
+// GÉNÉRATEUR DE DESCRIPTION IA
+// ============================================
 
+type AIDescriptionParams = {
+  type: string;
+  category: "vente" | "location";
+  city: string;
+  district?: string;
+  price: number;
+  surface?: number;
+  rooms?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+};
+
+export async function generateAIDescription(params: AIDescriptionParams): Promise<{
+  success: boolean;
+  description?: string;
+  error?: string
+}> {
+  try {
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+
+    if (!openaiApiKey) {
+      console.error("❌ OPENAI_API_KEY non configurée");
+      return {
+        success: false,
+        error: "La génération IA n'est pas configurée. Veuillez contacter l'administrateur."
+      };
+    }
+
+    // Construire le prompt
+    const categoryLabel = params.category === "vente" ? "à vendre" : "à louer";
+    const typeLabel = params.type.charAt(0).toUpperCase() + params.type.slice(1);
+    const locationLabel = params.district
+      ? `${params.district}, ${params.city}`
+      : params.city;
+
+    const specs = [];
+    if (params.surface) specs.push(`${params.surface} m²`);
+    if (params.rooms) specs.push(`${params.rooms} pièces`);
+    if (params.bedrooms) specs.push(`${params.bedrooms} chambre(s)`);
+    if (params.bathrooms) specs.push(`${params.bathrooms} salle(s) de bain`);
+
+    const specsText = specs.length > 0 ? specs.join(", ") : "Détails non spécifiés";
+    const priceFormatted = params.price.toLocaleString("fr-SN");
+
+    const prompt = `Tu es un expert en immobilier au Sénégal. Génère une description professionnelle, engageante et concise (2-3 paragraphes, max 150 mots) pour une annonce immobilière.
+
+Bien : ${typeLabel} ${categoryLabel}
+Localisation : ${locationLabel}
+Caractéristiques : ${specsText}
+Prix : ${priceFormatted} FCFA${params.category === "location" ? " / mois" : ""}
+
+Règles :
+- Ton professionnel mais chaleureux
+- Mets en valeur les atouts du bien et du quartier
+- Inclus un appel à l'action à la fin
+- N'invente pas de caractéristiques non mentionnées
+- Écris en français
+
+Génère uniquement la description, sans titre ni en-tête.`;
+
+    // Appeler OpenAI
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${openaiApiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: "Tu es un rédacteur immobilier professionnel spécialisé au Sénégal." },
+          { role: "user", content: prompt }
+        ],
+        max_tokens: 300,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("❌ Erreur OpenAI:", response.status, errorData);
+      return {
+        success: false,
+        error: "Erreur lors de la génération. Veuillez réessayer."
+      };
+    }
+
+    const data = await response.json();
+    const description = data.choices?.[0]?.message?.content?.trim();
+
+    if (!description) {
+      return {
+        success: false,
+        error: "La description générée est vide. Veuillez réessayer."
+      };
+    }
+
+    console.log("✅ Description IA générée avec succès");
+    return { success: true, description };
+
+  } catch (error) {
+    console.error("❌ Erreur inattendue dans generateAIDescription:", error);
+    return {
+      success: false,
+      error: "Une erreur est survenue lors de la génération."
+    };
+  }
+}
