@@ -6,6 +6,8 @@ import { getLegalStats, getLeaseAlerts, getAllActiveLeases } from "./actions";
 import { DecisionModal } from "./components/DecisionModal";
 import { CreateContractDialog } from "./components/CreateContractDialog";
 
+import { RentalTour } from "@/components/onboarding/RentalTour";
+
 export const dynamic = 'force-dynamic';
 
 export default async function LegalAssistantPage() {
@@ -15,6 +17,7 @@ export default async function LegalAssistantPage() {
 
     return (
         <div className="min-h-screen bg-slate-950">
+            <RentalTour page="legal" />
             <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 space-y-8 animate-in fade-in duration-500">
 
                 {/* SECTION 1 : EN-TÊTE */}
@@ -28,7 +31,7 @@ export default async function LegalAssistantPage() {
                 </div>
 
                 {/* SECTION 2 : LES KPI (Indicateurs Clés) */}
-                <div className="grid gap-4 md:grid-cols-3">
+                <div id="tour-legal-kpi" className="grid gap-4 md:grid-cols-3">
                     <Card className="bg-slate-900 border-slate-800">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-slate-200">Baux Actifs</CardTitle>
@@ -70,7 +73,7 @@ export default async function LegalAssistantPage() {
                 </div>
 
                 {/* SECTION 3 : LE RADAR DES ÉCHÉANCES */}
-                <div className="space-y-4">
+                <div id="tour-legal-alerts" className="space-y-4">
                     <h2 className="text-xl font-semibold text-white">Radar des Échéances</h2>
                     <div className="rounded-lg border border-slate-800 bg-black/50 overflow-hidden">
                         {alerts.length > 0 ? (
@@ -132,7 +135,7 @@ export default async function LegalAssistantPage() {
                 </div>
 
                 {/* SECTION 4 : GÉNÉRATEUR RAPIDE */}
-                <div className="grid gap-6 md:grid-cols-2">
+                <div id="tour-legal-tools" className="grid gap-6 md:grid-cols-2">
                     {/* Carte Quittance */}
                     <div className="p-6 rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900 to-black hover:border-slate-700 transition-all cursor-pointer group">
                         <div className="h-10 w-10 rounded-lg bg-slate-800 flex items-center justify-center mb-4 group-hover:bg-slate-700 transition-colors">
@@ -147,7 +150,7 @@ export default async function LegalAssistantPage() {
                 </div>
 
                 {/* Référence juridique */}
-                <div className="p-6 bg-slate-900 border border-slate-800 rounded-lg">
+                <div id="tour-legal-reference" className="p-6 bg-slate-900 border border-slate-800 rounded-lg">
                     <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                         <BookOpen className="w-5 h-5 text-green-500" />
                         Cadre Juridique de Référence

@@ -62,6 +62,7 @@ export default function GestionLayout({
                         </NavLink>
 
                         <NavLink
+                            id="tour-nav-interventions"
                             href="/compte/interventions"
                             icon={Wrench}
                             isActive={pathname?.startsWith('/compte/interventions')}
@@ -70,6 +71,7 @@ export default function GestionLayout({
                         </NavLink>
 
                         <NavLink
+                            id="tour-nav-legal"
                             href="/compte/legal"
                             icon={Scale}
                             isActive={pathname === '/compte/legal'}
@@ -100,11 +102,13 @@ export default function GestionLayout({
 
 // Composant pour les liens de navigation avec état actif
 function NavLink({
+    id,
     href,
     icon: Icon,
     isActive,
     children,
 }: {
+    id?: string;
     href: string;
     icon: React.ComponentType<{ className?: string }>;
     isActive?: boolean;
@@ -112,6 +116,7 @@ function NavLink({
 }) {
     return (
         <Link
+            id={id}
             href={href}
             className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${isActive
                 ? 'bg-green-500/10 text-green-400'

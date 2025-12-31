@@ -41,7 +41,7 @@ export function CreateContractDialog({ leases }: CreateContractDialogProps) {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <button className="w-full text-left p-6 rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900 to-black hover:border-slate-700 transition-all group outline-none focus:ring-2 focus:ring-blue-500/50">
+                <button id="tour-generate-contract" className="w-full text-left p-6 rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900 to-black hover:border-slate-700 transition-all group outline-none focus:ring-2 focus:ring-blue-500/50">
                     <div className="h-10 w-10 rounded-lg bg-slate-800 flex items-center justify-center mb-4 group-hover:bg-slate-700 transition-colors">
                         <ShieldCheck className="h-5 w-5 text-white" />
                     </div>

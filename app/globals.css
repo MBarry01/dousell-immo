@@ -83,13 +83,6 @@
     }
   }
 
-  /* Lien entre Tailwind v4 et les variables CSS Shadcn UI */
-  :root {
-    --tw-color-primary: hsl(var(--primary));
-    --tw-color-primary-foreground: hsl(var(--primary-foreground));
-    --tw-color-ring: hsl(var(--ring));
-  }
-
   /* Empêcher le zoom automatique sur mobile quand on focus les inputs */
   input,
   textarea,

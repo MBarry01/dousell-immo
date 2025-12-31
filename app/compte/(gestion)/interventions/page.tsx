@@ -1,6 +1,7 @@
 import { MaintenanceHub } from "../gestion-locative/components/MaintenanceHub";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { RentalTour } from "@/components/onboarding/RentalTour";
 
 export default async function InterventionsPage() {
     const supabase = await createClient();
@@ -49,8 +50,10 @@ export default async function InterventionsPage() {
 
     return (
         <div className="min-h-screen bg-slate-950">
+            <RentalTour page="interventions" />
+
             {/* Header */}
-            <div className="border-b border-slate-800 bg-slate-900/50">
+            <div id="tour-intervention-stats" className="border-b border-slate-800 bg-slate-900/50">
                 <div className="w-full mx-auto px-4 md:px-6 py-4">
                     <h1 className="text-2xl font-bold text-white">Interventions & Maintenance</h1>
                     <p className="text-sm text-slate-400 mt-1">Gérez les demandes d'intervention de vos locataires</p>
@@ -59,7 +62,7 @@ export default async function InterventionsPage() {
 
             {/* Contenu principal */}
             <div className="w-full mx-auto px-4 md:px-6 py-6">
-                <div className="max-w-4xl mx-auto">
+                <div id="tour-intervention-list" className="max-w-4xl mx-auto">
                     <MaintenanceHub requests={formattedRequests} />
                 </div>
             </div>
