@@ -69,10 +69,13 @@ export async function approveActivationRequest(requestId: string) {
         .single();
 
     if (fetchError || !request) {
+        console.error('Error fetching request:', fetchError);
         return { error: 'Demande introuvable' };
     }
 
-    // Update the request
+    console.log('Approving request for user:', request.user_id);
+
+    // Update the request status
     const { error: updateError } = await supabase
         .from('gestion_locative_requests')
         .update({
@@ -83,18 +86,25 @@ export async function approveActivationRequest(requestId: string) {
         .eq('id', requestId);
 
     if (updateError) {
-        console.error('Error approving request:', updateError);
-        return { error: 'Erreur lors de la validation' };
+        console.error('Error updating request:', updateError);
+        return { error: 'Erreur lors de la mise à jour de la demande' };
     }
 
-    // Update user profile
-    await supabase
+    // Update user profile - CRITICAL: this enables the feature
+    const { error: profileError } = await supabase
         .from('profiles')
         .update({
             gestion_locative_enabled: true,
             gestion_locative_status: 'approved'
         })
         .eq('id', request.user_id);
+
+    if (profileError) {
+        console.error('Error updating profile:', profileError);
+        return { error: 'Erreur lors de la mise à jour du profil utilisateur' };
+    }
+
+    console.log('Successfully approved and updated profile for:', request.user_id);
 
     revalidatePath('/admin/activation-requests');
     revalidatePath('/compte');
