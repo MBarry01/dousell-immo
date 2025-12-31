@@ -34,11 +34,24 @@ export async function getActivationRequests() {
         .select('id, full_name, email')
         .in('id', userIds);
 
-    // Merge user data
-    const requestsWithUsers = requests?.map(req => ({
-        ...req,
-        user: profiles?.find(p => p.id === req.user_id) || null
-    })) || [];
+    // Also fetch from auth.users for email fallback
+    const { data: authUsers } = await supabase
+        .from('auth.users')
+        .select('id, email')
+        .in('id', userIds);
+
+    // Merge user data with fallback to auth.users for email
+    const requestsWithUsers = requests?.map(req => {
+        const profile = profiles?.find(p => p.id === req.user_id);
+        const authUser = (authUsers as any)?.find((u: any) => u.id === req.user_id);
+        return {
+            ...req,
+            user: {
+                full_name: profile?.full_name || 'Utilisateur',
+                email: profile?.email || authUser?.email || 'Email inconnu'
+            }
+        };
+    }) || [];
 
     return requestsWithUsers;
 }
