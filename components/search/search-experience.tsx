@@ -150,13 +150,12 @@ export const SearchExperience = ({
             onAction={
               activeFilters
                 ? () => {
-                    const clearedFilters: PropertyFilters = {};
-                    setFilters(clearedFilters);
-                    applyFilters(clearedFilters);
-                  }
+                  const clearedFilters: PropertyFilters = {};
+                  setFilters(clearedFilters);
+                  applyFilters(clearedFilters);
+                }
                 : undefined
             }
-            variant="default"
           />
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&>*]:w-full">
