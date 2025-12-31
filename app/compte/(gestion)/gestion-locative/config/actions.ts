@@ -179,3 +179,53 @@ export async function getPremiumBranding() {
 
     return { success: true, data };
 }
+
+const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
+
+export async function sendTestEmail(profileData: any) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { success: false, error: "Non autorisé" };
+    }
+
+    if (!N8N_WEBHOOK_URL) {
+        console.warn('N8N_WEBHOOK_URL non configuré');
+        // Fallback simulation for dev environment if no webhook
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return { success: true, message: "Simulation (Webhook non configuré)" };
+    }
+
+    try {
+        // Construct the test payload with user's specific branding
+        const payload = {
+            type: 'test_email',
+            recipientEmail: user.email, // Send to the logged-in user
+            ownerName: profileData?.full_name || "Nom Propriétaire",
+            companyName: profileData?.company_name || "Nom Agence",
+            companyAddress: profileData?.company_address || "Adresse Agence",
+            companyLogo: profileData?.logo_url || "",
+            companySignature: profileData?.signature_url || "",
+            // Add dummy data for template preview
+            tenantName: "Jean Dupont (Exemple)",
+            amount: 150000,
+            month: new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+        };
+
+        const response = await fetch(`${N8N_WEBHOOK_URL}/generate-lease-pdf`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Webhook error: ${response.status}`);
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('Erreur envoi test:', error);
+        return { success: false, error: "Erreur lors de l'envoi" };
+    }
+}
