@@ -138,6 +138,31 @@ export async function createNewLease(formData: Record<string, unknown>) {
         }
     }
 
+    // 1.5 Vérifier que le profil utilisateur existe (Contrainte FK leases_owner_id_fkey)
+    const { data: userProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (!userProfile) {
+        // Fallback: Créer le profil s'il n'existe pas (Mode résilient)
+        const { error: insertProfileError } = await supabase
+            .from('profiles')
+            .insert([{
+                id: user.id,
+                email: user.email,
+                full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Propriétaire',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            }]);
+
+        if (insertProfileError) {
+            console.error("Erreur auto-création profil:", insertProfileError);
+            return { success: false, error: "Impossible de créer le bail : Votre profil propriétaire est introuvable." };
+        }
+    }
+
     const { data: lease, error } = await supabase
         .from('leases')
         .insert([finalData])
