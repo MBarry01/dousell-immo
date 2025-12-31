@@ -1,119 +1,84 @@
-import { type ReactNode } from "react";
-import { Search, Home, AlertCircle, Package } from "lucide-react";
+"use strict";
 
-import { Button } from "@/components/ui/button";
+import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
-type EmptyStateProps = {
-  /**
-   * Titre principal de l'état vide
-   */
+interface EmptyStateProps {
   title: string;
-  /**
-   * Description ou message secondaire
-   */
-  description?: string;
-  /**
-   * Label du bouton d'action
-   */
+  description: string;
+  icon?: LucideIcon;
   actionLabel?: string;
-  /**
-   * Callback appelé au clic sur le bouton
-   */
   onAction?: () => void;
-  /**
-   * Icône personnalisée (par défaut: Search)
-   */
-  icon?: ReactNode;
-  /**
-   * Variante visuelle
-   */
-  variant?: "default" | "compact" | "large";
-  /**
-   * Classes CSS additionnelles
-   */
+  actionComponent?: React.ReactNode;
+  secondaryActionComponent?: React.ReactNode;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
   className?: string;
-};
+  children?: React.ReactNode; // Custom content (e.g. illustration)
+}
 
-const defaultIcons = {
-  default: Search,
-  compact: Package,
-  large: Home,
-};
-
-/**
- * Composant EmptyState - Affiche un état vide élégant
- * 
- * Utilisé quand il n'y a pas de résultats, pas de données, etc.
- * Design centré avec icône, texte et bouton d'action optionnel.
- */
 export function EmptyState({
   title,
   description,
+  icon: Icon,
   actionLabel,
   onAction,
-  icon,
-  variant = "default",
+  actionComponent,
+  secondaryActionLabel,
+  onSecondaryAction,
+  secondaryActionComponent,
   className,
+  children
 }: EmptyStateProps) {
-  const DefaultIcon = defaultIcons[variant];
-  const IconComponent = icon || <DefaultIcon className="h-12 w-12 text-white/40" />;
-
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center rounded-[32px] border border-white/10 bg-white/5 p-8 text-center",
-        variant === "compact" && "p-6",
-        variant === "large" && "p-12",
-        className
-      )}
-    >
-      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/5">
-        {typeof icon === "undefined" ? (
-          <DefaultIcon className="h-10 w-10 text-white/40" />
-        ) : (
-          <div className="text-white/40">{IconComponent}</div>
-        )}
+    <div className={cn(
+      "flex flex-col items-center justify-center p-8 md:p-12 text-center rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/40",
+      className
+    )}>
+      <div className="flex flex-col items-center max-w-md space-y-4">
+        {/* Illustration / Icon */}
+        <div className="bg-slate-800/50 p-4 rounded-full mb-2">
+          {children ? children : Icon && <Icon className="w-8 h-8 md:w-10 md:h-10 text-slate-400" />}
+        </div>
+
+        {/* Text Content */}
+        <div className="space-y-2">
+          <h3 className="text-xl font-semibold text-white">
+            {title}
+          </h3>
+          <p className="text-slate-400 text-sm md:text-base leading-relaxed">
+            {description}
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row gap-3 pt-4 w-full sm:w-auto items-center">
+          {actionComponent ? (
+            actionComponent
+          ) : actionLabel && onAction ? (
+            <Button
+              onClick={onAction}
+              size="lg"
+              className="w-full sm:w-auto bg-[#F4C430] text-black hover:bg-[#F4C430]/90 font-semibold"
+            >
+              {actionLabel}
+            </Button>
+          ) : null}
+
+          {secondaryActionComponent ? (
+            secondaryActionComponent
+          ) : secondaryActionLabel && onSecondaryAction ? (
+            <Button
+              variant="ghost"
+              onClick={onSecondaryAction}
+              className="w-full sm:w-auto text-slate-400 hover:text-white hover:bg-slate-800"
+            >
+              {secondaryActionLabel}
+            </Button>
+          ) : null}
+        </div>
       </div>
-
-      <h3
-        className={cn(
-          "font-semibold text-white",
-          variant === "compact" && "text-lg",
-          variant === "default" && "text-xl",
-          variant === "large" && "text-2xl"
-        )}
-      >
-        {title}
-      </h3>
-
-      {description && (
-        <p
-          className={cn(
-            "mt-2 max-w-md text-white/60",
-            variant === "compact" && "text-sm",
-            variant === "default" && "text-base",
-            variant === "large" && "text-lg"
-          )}
-        >
-          {description}
-        </p>
-      )}
-
-      {actionLabel && onAction && (
-        <Button
-          onClick={onAction}
-          className={cn(
-            "mt-6 rounded-full",
-            variant === "compact" && "mt-4",
-            variant === "large" && "mt-8"
-          )}
-        >
-          {actionLabel}
-        </Button>
-      )}
     </div>
   );
 }
-
-
