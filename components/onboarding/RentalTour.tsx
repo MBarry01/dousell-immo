@@ -224,8 +224,7 @@ export function RentalTour({ hasProperties = true, page }: RentalTourProps) {
                     },
                     steps: steps,
                     allowKeyboardControl: true,
-                    allowClose: false,
-                    overlayClickNext: true // Permettre de cliquer à côté pour avancer si bloqué
+                    allowClose: false
                 });
 
                 setTimeout(() => {
