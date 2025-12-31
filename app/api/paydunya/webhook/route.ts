@@ -1,5 +1,6 @@
 import { validatePayDunyaWebhook, type PayDunyaWebhookPayload } from "@/lib/paydunya";
 import { createClient } from "@/utils/supabase/server";
+import { sendEmail } from "@/lib/mail";
 
 export async function POST(request: Request) {
   try {
