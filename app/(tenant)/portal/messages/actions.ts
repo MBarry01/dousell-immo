@@ -39,7 +39,7 @@ export async function getTenantMessages() {
         return [];
     }
 
-    return { messages, leaseId: lease.id, ownerName: lease.owner?.full_name };
+    return { messages, leaseId: lease.id, ownerName: (lease.owner as any)?.[0]?.full_name || (lease.owner as any)?.full_name };
 }
 
 export async function sendTenantMessage(leaseId: string, content: string) {
