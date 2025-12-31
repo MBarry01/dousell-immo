@@ -14,8 +14,10 @@
     /* Ombre portée profonde */
     max-width: min(350px, 90vw);
     /* Plus compact et responsive */
-    z-index: 10000 !important;
+    z-index: 100000000 !important;
     /* Assurer qu'il est au-dessus du reste */
+    pointer-events: auto !important;
+    /* Force l'interactivité */
 }
 
 /* 2. La Flèche (Le petit triangle) */

@@ -7,7 +7,7 @@ import "./dousell-driver-theme.css";
 import { Button } from "@/components/ui/button";
 import { HelpCircle } from "lucide-react";
 
-type PageContext = 'dashboard' | 'interventions' | 'legal';
+type PageContext = 'dashboard' | 'interventions' | 'legal' | 'home';
 
 interface RentalTourProps {
     hasProperties?: boolean;
@@ -24,7 +24,8 @@ export function RentalTour({ hasProperties = true, page }: RentalTourProps) {
         // 2. Condition de déclenchement :
         // - Si jamais vu sur cette page
         // - ET (pas de propriétés OU contexte spécifique qui ne dépend pas des propriétés)
-        const shouldRun = !tourSeen && (page !== 'dashboard' || !hasProperties);
+        // Pour 'home', on veut cibler les NOUVEAUX utilisateurs sans données (comme le dashboard)
+        const shouldRun = !tourSeen && (!hasProperties || (page !== 'dashboard' && page !== 'home'));
 
         if (shouldRun) {
             // Définition des étapes selon la page
@@ -65,6 +66,85 @@ export function RentalTour({ hasProperties = true, page }: RentalTourProps) {
                         }
                     }
                 ];
+            } else if (page === 'home') {
+                // Détection responsive simple
+                const isMobile = window.innerWidth < 768; // 768px est le breakpoint 'md' de Tailwind
+
+                if (isMobile) {
+                    // --- VERSION MOBILE (5 Étapes avec BottomNav) ---
+                    steps = [
+                        {
+                            element: '#tour-home-add-mobile',
+                            popover: {
+                                title: 'Publier une Annonce 🏠',
+                                description: 'Cliquez sur le + pour mettre en location ou vendre un bien gratuitement.',
+                                side: "bottom",
+                                align: 'end'
+                            }
+                        },
+                        {
+                            element: '#tour-home-menu-mobile',
+                            popover: {
+                                title: 'Menu Principal ☰',
+                                description: 'Accédez à vos paramètres, notifications et profil.',
+                                side: "bottom",
+                                align: 'end'
+                            }
+                        },
+                        {
+                            element: '#tour-home-search',
+                            popover: {
+                                title: 'Rechercher 🔍',
+                                description: 'Explorez milliers d\'annonces immobilières vérifiées au Sénégal.',
+                                side: "top"
+                            }
+                        },
+                        {
+                            element: '#tour-home-gestion',
+                            popover: {
+                                title: 'Gestion Locative 🏢',
+                                description: 'Gérez vos biens, loyers et locataires en toute simplicité (Gratuit).',
+                                side: "top"
+                            }
+                        },
+                        {
+                            element: '#tour-home-account',
+                            popover: {
+                                title: 'Votre Compte 👤',
+                                description: 'Retrouvez vos favoris, documents et informations personnelles.',
+                                side: "top"
+                            }
+                        }
+                    ];
+                } else {
+                    // --- VERSION DESKTOP (Interface différente) ---
+                    steps = [
+                        {
+                            element: '#tour-home-add-desktop',
+                            popover: {
+                                title: 'Publier une Annonce 🏠',
+                                description: 'Mettez en location ou vendez un bien gratuitement en un clic.',
+                                side: "bottom"
+                            }
+                        },
+                        {
+                            element: '#tour-home-nav-search-desktop',
+                            popover: {
+                                title: 'Rechercher 🔍',
+                                description: 'Trouvez la perle rare parmi nos annonces vérifiées.',
+                                side: "bottom"
+                            }
+                        },
+                        {
+                            element: '#tour-home-menu-desktop',
+                            popover: {
+                                title: 'Votre Espace Perso 👤',
+                                description: 'Gérez votre compte, vos favoris et accédez à votre Tableau de Bord de Gestion.',
+                                side: "left"
+                            }
+                        }
+                    ];
+                }
             } else if (page === 'interventions') {
                 steps = [
                     {
@@ -142,7 +222,10 @@ export function RentalTour({ hasProperties = true, page }: RentalTourProps) {
                     onDestroyed: () => {
                         localStorage.setItem(storageKey, 'true');
                     },
-                    steps: steps
+                    steps: steps,
+                    allowKeyboardControl: true,
+                    allowClose: false,
+                    overlayClickNext: true // Permettre de cliquer à côté pour avancer si bloqué
                 });
 
                 setTimeout(() => {
