@@ -174,7 +174,7 @@ const PriceMarker = memo(({
         <Marker
             position={position}
             icon={icon}
-            zIndexOffset={property.verification_status === "verified" ? 100 : 0}
+            zIndexOffset={isActive ? 1000 : (property.verification_status === "verified" ? 100 : 0)}
             eventHandlers={{
                 click: (e) => {
                     // Simple clic : faire défiler vers la carte dans le carousel
@@ -419,6 +419,9 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
                     center={mapCenter}
                     zoom={zoomLevel}
                     scrollWheelZoom={false} // Désactiver le zoom molette pour ne pas gêner le scroll
+                    dragging={false} // Désactiver le drag pour permettre le scroll du carousel sur mobile
+                    touchZoom={false} // Désactiver le pinch-to-zoom sur mobile
+                    doubleClickZoom={false} // Désactiver le double-tap zoom
                     className="h-full w-full rounded-[32px] z-0"
                     style={{ height: "100%", width: "100%", zIndex: 0 }}
                     zoomControl={true}
@@ -494,6 +497,7 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
                             }
                         }}
                         className="pointer-events-auto scrollbar-hide flex gap-3 overflow-x-auto pb-2 relative snap-x snap-mandatory scroll-smooth"
+                        style={{ touchAction: 'pan-x' }}
                     >
                         {propertiesWithCoords.slice(0, visibleCount).map((property) => (
                             <div
@@ -502,7 +506,8 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
                                 onClick={() => {
                                     handleMarkerRedirect(property.id);
                                 }}
-                                className="min-w-[280px] cursor-pointer flex-shrink-0 snap-start"
+                                className="min-w-[280px] cursor-pointer flex-shrink-0 snap-start select-none"
+                                style={{ touchAction: 'pan-x' }}
                             >
                                 <PropertyCard
                                     property={property}
