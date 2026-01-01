@@ -9,6 +9,7 @@
  */
 
 // Type-safe pour les deux clients
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RedisClient = any; // On typage plus tard
 
 /**
@@ -23,6 +24,7 @@ function createRedisClient(): RedisClient {
     console.log('🚀 Using Upstash Redis (HTTP Serverless)');
 
     // Lazy import (évite l'erreur si package pas installé)
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Redis } = require('@upstash/redis');
 
     return new Redis({
@@ -35,6 +37,7 @@ function createRedisClient(): RedisClient {
   if (process.env.REDIS_URL) {
     console.log('🏗️ Using Valkey/Redis (TCP Connection)');
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const IORedis = require('ioredis');
     return new IORedis(process.env.REDIS_URL, {
       maxRetriesPerRequest: 3,
@@ -49,6 +52,7 @@ function createRedisClient(): RedisClient {
   if (!isProduction) {
     console.log('💻 Using Local Valkey (Docker)');
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const IORedis = require('ioredis');
     return new IORedis('redis://localhost:6379', {
       lazyConnect: true, // Ne plante pas si Redis absent en dev

@@ -115,7 +115,7 @@ export default function RegisterPage() {
                 type="submit"
                 variant="secondary"
                 disabled={isPending}
-                className="w-full rounded-xl border border-gray-200 bg-background text-foreground hover:bg-gray-50"
+                className="w-full rounded-xl border border-gray-200 bg-white text-black hover:bg-gray-100"
               >
                 <svg
                   className="mr-2 h-5 w-5"

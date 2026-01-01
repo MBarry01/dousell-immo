@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { User, Home, Heart, LogOut, Calculator, Shield, Info, Menu } from "lucide-react";
+import { User, Home, Heart, LogOut, Calculator, Shield, Info, Menu, Building2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
@@ -169,6 +169,22 @@ export function UserNav() {
             >
               <Home className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
               Mes Annonces
+            </DropdownMenuItem>
+          </motion.div>
+
+          <motion.div
+            variants={{
+              open: { opacity: 1, x: 0 },
+              closed: { opacity: 0, x: -8 }
+            }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          >
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => router.push("/compte/gestion-locative")}
+            >
+              <Building2 className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+              Gestion Locative
             </DropdownMenuItem>
           </motion.div>
 

@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
-import { useEffect, useMemo, useState, useCallback, memo } from "react";
+import { useEffect, useMemo, useState, useCallback, memo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import type { LatLngExpression, DivIcon } from "leaflet";
@@ -14,8 +14,13 @@ import { Button } from "@/components/ui/button";
 import type { Property } from "@/types/property";
 
 // Import dynamique pour éviter les erreurs SSR
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const L = typeof window !== "undefined" ? require("leaflet") : null;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const MarkerClusterGroup = typeof window !== "undefined" ? require("leaflet.markercluster") : null;
+
+// Offset vertical pour remonter les marqueurs au-dessus du carousel
+const LATITUDE_OFFSET = -0.6; // Décalage vers le sud
 
 // Fix pour les icônes Leaflet avec Next.js
 if (typeof window !== "undefined" && L) {
@@ -30,11 +35,15 @@ if (typeof window !== "undefined" && L) {
 type MapViewProps = {
     properties: Property[];
     showCarousel?: boolean;
+    onClose?: () => void;
+    searchQuery?: string;
+    onSearchChange?: (value: string) => void;
 };
 
 // Coordonnées de Dakar par défaut
-const DAKAR_CENTER: LatLngExpression = [14.7167, -17.4677];
-const DEFAULT_ZOOM = 11;
+const DAKAR_CENTER: LatLngExpression = [14.5, -10];
+const DEFAULT_ZOOM = 7.6;
+const MOBILE_ZOOM = 7; // Zoom plus reculé sur mobile
 
 // Formatage du prix en format court (ex: "1.5M", "500k")
 const formatPrice = (price: number): string => {
@@ -135,7 +144,7 @@ const PriceMarker = memo(({
 
         // Style actif (cliqué)
         const activeClass = isActive
-            ? "scale-110 bg-white text-black z-50 border-white"
+            ? "scale-150 bg-white text-black z-50 border-white border-2 animate-bounce-subtle"
             : verifiedClass;
 
         // Z-index supérieur pour les biens vérifiés
@@ -145,7 +154,12 @@ const PriceMarker = memo(({
             className: "custom-price-marker",
             html: `
         <div class="price-pill ${activeClass} inline-flex items-center justify-center rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition-all duration-200 cursor-pointer" style="font-size: 12px; min-width: 50px; white-space: nowrap; z-index: ${zIndex};">
-          ${isVerified ? '<span style="margin-right: 4px">🛡️</span>' : ''}${priceText}
+          ${isVerified ? `
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#F4C430" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="min-width: 14px; margin-right: 4px;">
+              <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.78 4.78 4 4 0 0 1-6.74 0 4 4 0 0 1-4.78-4.78Z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          ` : ''}${priceText}
         </div>
       `,
             iconSize: [isVerified ? 90 : 80, 28],
@@ -210,11 +224,16 @@ const PriceMarker = memo(({
     );
 });
 
-export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
+export const MapView = ({ properties, showCarousel = true, onClose, searchQuery = "", onSearchChange }: MapViewProps) => {
     const router = useRouter();
     const [activeId, setActiveId] = useState<string | undefined>(properties[0]?.id);
     const [mapEnabled, setMapEnabled] = useState(true);
-    const [mounted, setMounted] = useState(true); // Déjà monté si ce composant client s'exécute
+    const [mounted, setMounted] = useState(false); // Fix hydration mismatch
+    const [visibleCount, setVisibleCount] = useState(15); // Pagination du carousel
+    const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM);
+    const [longitudeOffset, setLongitudeOffset] = useState(2);
+    const carouselRef = useRef<HTMLDivElement>(null); // Ref pour le scroll detection
+    const initialCenterDone = useRef(false); // Ref pour le centrage initial
 
     // Filtrer les propriétés qui ont des coordonnées valides
     const propertiesWithCoords = useMemo(
@@ -231,6 +250,10 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
     );
 
     // Calculer le centre de la carte (moyenne des coordonnées ou Dakar par défaut)
+
+
+    // Offset vertical déplacé en dehors du composant
+
     const mapCenter = useMemo<LatLngExpression>(() => {
         if (propertiesWithCoords.length === 0) return DAKAR_CENTER;
 
@@ -245,9 +268,11 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
         center.lat /= propertiesWithCoords.length;
         center.lng /= propertiesWithCoords.length;
 
-        return [center.lat, center.lng];
-    }, [propertiesWithCoords]);
+        // Appliquer les offsets
+        return [center.lat + LATITUDE_OFFSET, center.lng + longitudeOffset];
+    }, [propertiesWithCoords, longitudeOffset]);
 
+    // Gestion de l'activation de la carte selon le contexte
     // Gestion de l'activation de la carte selon le contexte
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -267,18 +292,62 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
         enableBasedOnContext();
 
         const media = window.matchMedia("(max-width: 768px)");
-        const handler = () => enableBasedOnContext();
+        // Initial check
+        if (media.matches) {
+            setZoomLevel(MOBILE_ZOOM);
+            setLongitudeOffset(0.5); // Moins de décalage sur mobile
+        } else {
+            setZoomLevel(DEFAULT_ZOOM);
+            setLongitudeOffset(2);
+        }
+
+        const handler = () => {
+            enableBasedOnContext();
+            if (media.matches) {
+                setZoomLevel(MOBILE_ZOOM);
+                setLongitudeOffset(0.5);
+            } else {
+                setZoomLevel(DEFAULT_ZOOM);
+                setLongitudeOffset(2);
+            }
+        };
+
         media.addEventListener("change", handler);
         return () => media.removeEventListener("change", handler);
     }, []);
 
+    useEffect(() => {
+        setTimeout(() => setMounted(true), 0);
+    }, []);
+
+    // Effet pour centrer la carte active au chargement
+    useEffect(() => {
+        if (mounted && activeId && !initialCenterDone.current && carouselRef.current) {
+            // Petit délai pour laisser le temps au rendu
+            setTimeout(() => {
+                const element = document.getElementById(`property-${activeId}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: "auto", block: "nearest", inline: "start" });
+                    initialCenterDone.current = true;
+                }
+            }, 100);
+        }
+    }, [mounted, activeId]);
+
     const handleMarkerClick = useCallback((propertyId: string) => {
         setActiveId(propertyId);
+
+        // Si la propriété n'est pas encore visible dans le carousel, augmenter la limite pour l'inclure
+        const index = propertiesWithCoords.findIndex(p => p.id === propertyId);
+        if (index >= visibleCount) {
+            setVisibleCount(prev => Math.max(prev, index + 5)); // +5 de marge
+        }
+
         // Scroll vers la carte correspondante dans le carousel
         setTimeout(() => {
             const element = document.getElementById(`property-${propertyId}`);
             if (element) {
-                element.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+                element.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
             }
         }, 100);
     }, []);
@@ -318,11 +387,37 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
     }
 
     return (
-        <div className="relative h-[70vh] w-full overflow-hidden rounded-[32px] border border-white/10 bg-black/20">
+        <div className="fixed inset-0 z-[9999] w-full overflow-hidden bg-black">
+            {/* Barre de recherche discrète + bouton fermer sur mobile */}
+            {onClose && (
+                <div className="absolute top-4 left-14 right-4 z-50 flex items-center gap-2">
+                    <div className="flex-1 flex items-center gap-2 px-4 py-2 rounded-full bg-black/80 backdrop-blur-sm border border-white/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="Ville ou code postal"
+                            value={searchQuery}
+                            onChange={(e) => onSearchChange?.(e.target.value)}
+                            className="flex-1 bg-transparent text-white text-sm placeholder:text-white/50 border-none outline-none"
+                        />
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-black/80 backdrop-blur-sm border border-white/20 text-white shadow-lg hover:bg-black transition-colors"
+                        aria-label="Fermer la carte"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            )}
             {mapEnabled ? (
                 <MapContainer
                     center={mapCenter}
-                    zoom={DEFAULT_ZOOM}
+                    zoom={zoomLevel}
                     scrollWheelZoom={false} // Désactiver le zoom molette pour ne pas gêner le scroll
                     className="h-full w-full rounded-[32px] z-0"
                     style={{ height: "100%", width: "100%", zIndex: 0 }}
@@ -338,7 +433,7 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
                     />
 
                     {/* Centrer la carte */}
-                    <MapCenter center={mapCenter} zoom={DEFAULT_ZOOM} />
+                    <MapCenter center={mapCenter} zoom={zoomLevel} />
 
                     {/* Marqueurs avec prix */}
                     {propertiesWithCoords.map((property) => (
@@ -369,16 +464,45 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
             {/* Carousel des biens en bas - Optimisé: affiche seulement les 10 premiers + actif */}
             {showCarousel && propertiesWithCoords.length > 0 && (
                 <div className="pointer-events-none absolute inset-x-0 bottom-4 px-4 z-10">
-                    <div className="pointer-events-auto scrollbar-hide flex gap-3 overflow-x-auto pb-2">
-                        {propertiesWithCoords.slice(0, 15).map((property) => (
+                    <div
+                        ref={carouselRef}
+                        onScroll={(e) => {
+                            const container = e.currentTarget;
+                            // Point de focalisation à gauche (avec une marge)
+                            const focusPoint = container.scrollLeft + 50;
+
+                            // Trouver la carte la plus proche du début (gauche)
+                            const cards = Array.from(container.children);
+                            let closestId = null;
+                            let minDistance = Infinity;
+
+                            cards.forEach((card) => {
+                                if (card.id.startsWith("property-")) {
+                                    // Distance entre le début de la carte et le point focal
+                                    const cardStart = (card as HTMLElement).offsetLeft;
+                                    const distance = Math.abs(cardStart - focusPoint);
+                                    if (distance < minDistance) {
+                                        minDistance = distance;
+                                        closestId = card.id.replace("property-", "");
+                                    }
+                                }
+                            });
+
+                            if (closestId && closestId !== activeId) {
+                                // Mettre à jour l'ID actif sans scroller (car on scrolle déjà)
+                                setActiveId(closestId);
+                            }
+                        }}
+                        className="pointer-events-auto scrollbar-hide flex gap-3 overflow-x-auto pb-2 relative snap-x snap-mandatory scroll-smooth"
+                    >
+                        {propertiesWithCoords.slice(0, visibleCount).map((property) => (
                             <div
                                 key={`mini-${property.id}`}
                                 id={`property-${property.id}`}
                                 onClick={() => {
-                                    // Rediriger vers la page de détail du bien
                                     handleMarkerRedirect(property.id);
                                 }}
-                                className="min-w-[280px] cursor-pointer flex-shrink-0"
+                                className="min-w-[280px] cursor-pointer flex-shrink-0 snap-start"
                             >
                                 <PropertyCard
                                     property={property}
@@ -391,9 +515,13 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
                                 />
                             </div>
                         ))}
-                        {propertiesWithCoords.length > 15 && (
-                            <div className="min-w-[280px] flex-shrink-0 flex items-center justify-center rounded-[28px] border border-white/10 bg-white/5 p-6 text-center text-white/70">
-                                <p className="text-sm">+{propertiesWithCoords.length - 15} autres biens</p>
+                        {propertiesWithCoords.length > visibleCount && (
+                            <div
+                                onClick={() => setVisibleCount(prev => prev + 15)}
+                                className="min-w-[280px] flex-shrink-0 flex flex-col items-center justify-center rounded-[28px] border border-white/10 bg-white/5 p-6 text-center text-white/70 cursor-pointer hover:bg-white/10 transition-colors snap-center"
+                            >
+                                <p className="text-lg font-bold mb-1">Voir plus</p>
+                                <p className="text-sm">+{propertiesWithCoords.length - visibleCount} autres biens</p>
                             </div>
                         )}
                     </div>
@@ -404,6 +532,15 @@ export const MapView = ({ properties, showCarousel = true }: MapViewProps) => {
             <style jsx global>{`
         .leaflet-container {
           background: #1a1a1a;
+        }
+        
+        @keyframes bounce-subtle {
+          0%, 100% { transform: translateY(0) scale(1.25); }
+          50% { transform: translateY(-10px) scale(1.25); }
+        }
+        
+        .animate-bounce-subtle {
+          animation: bounce-subtle 2s infinite;
         }
         .custom-price-marker {
           background: transparent !important;

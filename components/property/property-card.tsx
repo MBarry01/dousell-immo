@@ -3,7 +3,7 @@
 import type { MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Bookmark, Bed, Bath, Square, MapPin } from "lucide-react";
-import { motion } from "framer-motion";
+
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -60,17 +60,9 @@ export const PropertyCard = ({
 
   if (variant === "horizontal") {
     return (
-      <motion.article
-        layout
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.99 }}
-        transition={{
-          type: "spring",
-          stiffness: 400,
-          damping: 20,
-        }}
+      <article
         className={cn(
-          "group relative flex min-w-[280px] items-center gap-4 rounded-[24px] border border-white/10 bg-background p-3 text-white transition-all hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30 isolate",
+          "group relative flex min-w-[280px] items-center gap-4 rounded-[24px] border border-white/10 bg-background p-3 text-white transition-all duration-200 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30 active:scale-[0.99] isolate",
           className
         )}
       >
@@ -122,23 +114,15 @@ export const PropertyCard = ({
             </span>
           </div>
         </div>
-      </motion.article>
+      </article>
     );
   }
 
   return (
-    <motion.article
-      layout
-      whileHover={{ y: -6, scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      transition={{
-        type: "spring",
-        stiffness: 300,
-        damping: 20,
-      }}
+    <article
       className={cn(
         // Mobile: largeur fixe pour scroll horizontal
-        "group relative flex w-72 flex-none flex-col overflow-hidden rounded-[28px] bg-background border border-white/10 p-3 text-white transition-all hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 isolate",
+        "group relative flex w-72 flex-none flex-col overflow-hidden rounded-[28px] bg-background border border-white/10 p-3 text-white transition-all duration-200 hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 active:scale-[0.99] isolate",
         // Desktop: dans une grille, la largeur est gérée par la grille CSS automatiquement
         className
       )}
@@ -254,7 +238,7 @@ export const PropertyCard = ({
           }
         }}
       />
-    </motion.article>
+    </article>
   );
 };
 

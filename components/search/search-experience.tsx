@@ -165,7 +165,12 @@ export const SearchExperience = ({
           </div>
         )
       ) : (
-        <MapView properties={results} />
+        <MapView
+          properties={results}
+          onClose={() => setView("list")}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
       )}
 
       <Button

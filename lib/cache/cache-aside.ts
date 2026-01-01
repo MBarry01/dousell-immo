@@ -83,6 +83,10 @@ export async function getOrSetCache<T>(
       if (debug) console.log(`🚀 CACHE HIT: ${fullKey}`);
 
       try {
+        // Upstash auto-parse JSON - check if already an object
+        if (typeof cachedData === 'object') {
+          return cachedData as T;
+        }
         return JSON.parse(cachedData);
       } catch (parseError) {
         // Si le JSON est corrompu, on invalide et refetch

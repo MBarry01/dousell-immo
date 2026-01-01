@@ -369,6 +369,7 @@ export function validatePayDunyaWebhook(
 ): boolean {
   try {
     const config = getPayDunyaConfig();
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const crypto = require("crypto");
     const expectedSignature = crypto
       .createHmac("sha256", config.privateKey)
