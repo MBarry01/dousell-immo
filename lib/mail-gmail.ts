@@ -319,3 +319,105 @@ export async function sendInvoiceEmail({
 export function getAdminEmail() {
   return process.env.ADMIN_EMAIL || process.env.GMAIL_USER || "barrymohamadou98@gmail.com";
 }
+
+/**
+ * Envoie un email de confirmation d'activation de la gestion locative
+ */
+export async function sendActivationApprovedEmail({
+  to,
+  firstName,
+}: {
+  to: string;
+  firstName: string;
+}) {
+  const html = `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .button { background-color: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 20px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Félicitations ! 🎉</h1>
+        </div>
+        <p>Bonjour <strong>${firstName}</strong>,</p>
+        <p>Bonne nouvelle ! Votre demande d'activation de la <strong>Gestion Locative</strong> a été approuvée.</p>
+        <p>Vous avez désormais accès à tous les outils pour gérer vos biens immobiliers :</p>
+        <ul>
+          <li>Création de biens et baux</li>
+          <li>Suivi des paiements et quittances</li>
+          <li>Gestion des locataires</li>
+        </ul>
+        <div style="text-align: center;">
+          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://doussel-immo.app'}/compte" class="button">Accéder à mon espace</a>
+        </div>
+        <p>Merci de votre confiance.</p>
+        <p>L'équipe Doussel Immo</p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: "Gestion Locative Activée ! 🎉",
+    html,
+  });
+}
+
+/**
+ * Envoie un email de refus d'activation
+ */
+export async function sendActivationRejectedEmail({
+  to,
+  firstName,
+  reason,
+}: {
+  to: string;
+  firstName: string;
+  reason: string;
+}) {
+  const html = `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .reason { background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Mise à jour de votre demande</h1>
+        </div>
+        <p>Bonjour <strong>${firstName}</strong>,</p>
+        <p>Nous avons examiné votre demande d'activation de la Gestion Locative.</p>
+        <p>Malheureusement, nous ne pouvons pas l'approuver pour le moment pour la raison suivante :</p>
+        <div class="reason">
+          <strong>Motif :</strong> ${reason}
+        </div>
+        <p>Vous pouvez soumettre une nouvelle demande en corrigeant les points mentionnés.</p>
+        <p>Si vous avez des questions, n'hésitez pas à répondre à cet email.</p>
+        <p>L'équipe Doussel Immo</p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: "Mise à jour concernant votre demande Gestion Locative",
+    html,
+  });
+}

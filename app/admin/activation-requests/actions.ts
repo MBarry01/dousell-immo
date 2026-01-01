@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { revalidatePath } from 'next/cache';
+import { sendActivationApprovedEmail, sendActivationRejectedEmail } from '@/lib/mail';
 
 export async function getActivationRequests() {
     // Utiliser le client admin pour bypasser RLS
@@ -71,8 +72,6 @@ export async function getActivationRequests() {
 export async function approveActivationRequest(requestId: string) {
     const supabase = createAdminClient();
     const serverSupabase = await createClient();
-    // Safe check for user, though in admin context we usually have one. 
-    // For server actions invoked by client, getUser checks the session.
     const { data: { user } } = await serverSupabase.auth.getUser();
 
     // Get the request
@@ -120,6 +119,49 @@ export async function approveActivationRequest(requestId: string) {
 
     console.log('Successfully approved and updated profile for:', request.user_id);
 
+    // --- Send Notification Email ---
+    try {
+        let email: string | undefined;
+        let firstName = 'Utilisateur';
+
+        // 1. Try from Profile
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('email, full_name')
+            .eq('id', request.user_id)
+            .single();
+
+        if (profile) {
+            email = profile.email;
+            if (profile.full_name) {
+                firstName = profile.full_name.split(' ')[0];
+            }
+        }
+
+        // 2. Fallback to Auth Admin API
+        if (!email) {
+            const { data: authUser } = await supabase.auth.admin.getUserById(request.user_id);
+            if (authUser?.user?.email) {
+                email = authUser.user.email;
+                const metadataName = authUser.user.user_metadata?.full_name;
+                // Update firstName only if we still have the default generic name
+                if (metadataName && firstName === 'Utilisateur') {
+                    firstName = metadataName.split(' ')[0];
+                }
+            }
+        }
+
+        if (email) {
+            console.log(`Sending approval email to ${email}`);
+            await sendActivationApprovedEmail({ to: email, firstName });
+        } else {
+            console.warn(`Could not send approval email: No email found for user ${request.user_id}`);
+        }
+    } catch (emailError) {
+        // Non-blocking error
+        console.error('Error sending approval email:', emailError);
+    }
+
     revalidatePath('/admin/activation-requests');
     revalidatePath('/compte');
     return { success: true };
@@ -164,6 +206,47 @@ export async function rejectActivationRequest(requestId: string, reason: string)
             gestion_locative_status: 'rejected'
         })
         .eq('id', request.user_id);
+
+    // --- Send Notification Email ---
+    try {
+        let email: string | undefined;
+        let firstName = 'Utilisateur';
+
+        // 1. Try from Profile
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('email, full_name')
+            .eq('id', request.user_id)
+            .single();
+
+        if (profile) {
+            email = profile.email;
+            if (profile.full_name) {
+                firstName = profile.full_name.split(' ')[0];
+            }
+        }
+
+        // 2. Fallback to Auth Admin API
+        if (!email) {
+            const { data: authUser } = await supabase.auth.admin.getUserById(request.user_id);
+            if (authUser?.user?.email) {
+                email = authUser.user.email;
+                const metadataName = authUser.user.user_metadata?.full_name;
+                if (metadataName && firstName === 'Utilisateur') {
+                    firstName = metadataName.split(' ')[0];
+                }
+            }
+        }
+
+        if (email) {
+            console.log(`Sending rejection email to ${email}`);
+            await sendActivationRejectedEmail({ to: email, firstName, reason });
+        } else {
+            console.warn(`Could not send rejection email: No email found for user ${request.user_id}`);
+        }
+    } catch (emailError) {
+        console.error('Error sending rejection email:', emailError);
+    }
 
     revalidatePath('/admin/activation-requests');
     return { success: true };

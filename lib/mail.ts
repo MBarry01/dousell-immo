@@ -1,4 +1,10 @@
-import { sendEmail as sendEmailGmail, sendInvoiceEmail as sendInvoiceEmailGmail, getAdminEmail as getAdminEmailGmail } from "./mail-gmail";
+import {
+  sendEmail as sendEmailGmail,
+  sendInvoiceEmail as sendInvoiceEmailGmail,
+  getAdminEmail as getAdminEmailGmail,
+  sendActivationApprovedEmail as sendActivationApprovedEmailGmail,
+  sendActivationRejectedEmail as sendActivationRejectedEmailGmail
+} from "./mail-gmail";
 import { render } from "@react-email/render";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import React from "react";
@@ -134,6 +140,7 @@ export async function getAdminNotificationEmails(): Promise<string[]> {
       const { data, error } = await supabase.auth.admin.listUsers({
         page,
         perPage,
+        perPage,
       });
 
       if (error) {
@@ -159,3 +166,17 @@ export async function getAdminNotificationEmails(): Promise<string[]> {
   }
 }
 
+export async function sendActivationApprovedEmail(params: {
+  to: string;
+  firstName: string;
+}) {
+  return sendActivationApprovedEmailGmail(params);
+}
+
+export async function sendActivationRejectedEmail(params: {
+  to: string;
+  firstName: string;
+  reason: string;
+}) {
+  return sendActivationRejectedEmailGmail(params);
+}
