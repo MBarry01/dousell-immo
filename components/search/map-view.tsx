@@ -142,18 +142,25 @@ const PriceMarker = memo(({
             ? "bg-[#F4C430] text-black border-2 border-white shadow-[0_0_15px_rgba(244,196,48,0.5)]"
             : "bg-primary text-primary-foreground";
 
-        // Style actif (cliqué)
+        // Style actif (cliqué) - sans scale CSS, on gère la taille via iconSize
         const activeClass = isActive
-            ? "scale-150 bg-white text-black z-50 border-white border-2 animate-bounce-subtle"
+            ? "bg-white text-black z-50 border-white border-2 animate-bounce-subtle"
             : verifiedClass;
 
         // Z-index supérieur pour les biens vérifiés
         const zIndex = isActive ? 1000 : (isVerified ? 100 : 1);
 
+        // Tailles adaptées : actif + vérifié = encore plus large pour le badge
+        const iconWidth = isActive
+            ? (isVerified ? 160 : 100)  // Actif: vérifié 160px, normal 100px
+            : (isVerified ? 90 : 80);   // Inactif: vérifié 90px, normal 80px
+        const iconHeight = isActive ? 36 : 28;
+        const fontSize = isActive ? 14 : 12;
+
         return L.divIcon({
             className: "custom-price-marker",
             html: `
-        <div class="price-pill ${activeClass} inline-flex items-center justify-center rounded-full px-3 py-1.5 text-xs font-bold shadow-md transition-all duration-200 cursor-pointer" style="font-size: 12px; min-width: 50px; white-space: nowrap; z-index: ${zIndex};">
+        <div class="price-pill ${activeClass} inline-flex items-center justify-center rounded-full px-3 py-1.5 font-bold shadow-md transition-all duration-200 cursor-pointer" style="font-size: ${fontSize}px; min-width: 50px; white-space: nowrap; z-index: ${zIndex};">
           ${isVerified ? `
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#F4C430" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="min-width: 14px; margin-right: 4px;">
               <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.78 4.78 4 4 0 0 1-6.74 0 4 4 0 0 1-4.78-4.78Z"/>
@@ -162,9 +169,9 @@ const PriceMarker = memo(({
           ` : ''}${priceText}
         </div>
       `,
-            iconSize: [isVerified ? 90 : 80, 28],
-            iconAnchor: [isVerified ? 45 : 40, 14],
-            popupAnchor: [0, -14],
+            iconSize: [iconWidth, iconHeight],
+            iconAnchor: [iconWidth / 2, iconHeight / 2],
+            popupAnchor: [0, -iconHeight / 2],
         }) as DivIcon;
     }, [property.price, property.verification_status, isActive]);
 
@@ -176,8 +183,7 @@ const PriceMarker = memo(({
             icon={icon}
             zIndexOffset={isActive ? 1000 : (property.verification_status === "verified" ? 100 : 0)}
             eventHandlers={{
-                click: (e) => {
-                    // Simple clic : faire défiler vers la carte dans le carousel
+                click: () => {
                     onClick();
                 },
                 mouseover: (e) => {
@@ -186,10 +192,8 @@ const PriceMarker = memo(({
                     if (element) {
                         const pill = element.querySelector(".price-pill");
                         if (pill && !isActive) {
-                            // Effet hover sans casser le style verified
                             const currentBg = property.verification_status === "verified" ? "bg-[#F4C430]" : "bg-primary";
                             const currentText = property.verification_status === "verified" ? "text-black" : "text-primary-foreground";
-
                             pill.classList.remove(currentBg, currentText);
                             pill.classList.add("bg-white", "text-black", "scale-105");
                         }
@@ -202,7 +206,6 @@ const PriceMarker = memo(({
                         const pill = element.querySelector(".price-pill");
                         if (pill && !isActive) {
                             pill.classList.remove("bg-white", "text-black", "scale-105");
-
                             if (property.verification_status === "verified") {
                                 pill.classList.add("bg-[#F4C430]", "text-black");
                             } else {
@@ -215,7 +218,6 @@ const PriceMarker = memo(({
         />
     );
 }, (prevProps, nextProps) => {
-    // Custom comparator pour éviter re-renders inutiles
     return (
         prevProps.property.id === nextProps.property.id &&
         prevProps.isActive === nextProps.isActive &&
@@ -418,10 +420,7 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
                 <MapContainer
                     center={mapCenter}
                     zoom={zoomLevel}
-                    scrollWheelZoom={false} // Désactiver le zoom molette pour ne pas gêner le scroll
-                    dragging={false} // Désactiver le drag pour permettre le scroll du carousel sur mobile
-                    touchZoom={false} // Désactiver le pinch-to-zoom sur mobile
-                    doubleClickZoom={false} // Désactiver le double-tap zoom
+                    scrollWheelZoom={false} // Désactiver le zoom molette pour ne pas gêner le scroll page
                     className="h-full w-full rounded-[32px] z-0"
                     style={{ height: "100%", width: "100%", zIndex: 0 }}
                     zoomControl={true}
@@ -497,7 +496,6 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
                             }
                         }}
                         className="pointer-events-auto scrollbar-hide flex gap-3 overflow-x-auto pb-2 relative snap-x snap-mandatory scroll-smooth"
-                        style={{ touchAction: 'pan-x' }}
                     >
                         {propertiesWithCoords.slice(0, visibleCount).map((property) => (
                             <div
@@ -506,8 +504,7 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
                                 onClick={() => {
                                     handleMarkerRedirect(property.id);
                                 }}
-                                className="min-w-[280px] cursor-pointer flex-shrink-0 snap-start select-none"
-                                style={{ touchAction: 'pan-x' }}
+                                className="min-w-[280px] cursor-pointer flex-shrink-0 snap-start"
                             >
                                 <PropertyCard
                                     property={property}
@@ -550,6 +547,16 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
         .custom-price-marker {
           background: transparent !important;
           border: none !important;
+          overflow: visible !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        .leaflet-marker-icon {
+          overflow: visible !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
         }
         .price-pill {
           user-select: none;
