@@ -34,24 +34,36 @@ export async function getActivationRequests() {
         .select('id, full_name, email')
         .in('id', userIds);
 
-    // Also fetch from auth.users for email fallback
-    const { data: authUsers } = await supabase
-        .from('auth.users')
-        .select('id, email')
-        .in('id', userIds);
-
-    // Merge user data with fallback to auth.users for email
-    const requestsWithUsers = requests?.map(req => {
+    // Map requests to include user data
+    // Use Promise.all to fetch user data for each request, falling back to auth.admin.getUserById if needed
+    const requestsWithUsers = await Promise.all((requests || []).map(async (req) => {
         const profile = profiles?.find(p => p.id === req.user_id);
-        const authUser = (authUsers as any)?.find((u: any) => u.id === req.user_id);
+        let email = profile?.email;
+        let fullName = profile?.full_name || 'Utilisateur';
+
+        // If email is missing in profile, fetch from Auth Admin API (more reliable for email)
+        if (!email) {
+            const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(req.user_id);
+            if (!authError && authUser?.user) {
+                email = authUser.user.email;
+
+                // Also try to get metadata name if profile name is generic
+                if (fullName === 'Utilisateur' && authUser.user.user_metadata?.full_name) {
+                    fullName = authUser.user.user_metadata.full_name;
+                }
+            } else if (authError) {
+                console.error(`Error fetching auth user ${req.user_id}:`, authError);
+            }
+        }
+
         return {
             ...req,
             user: {
-                full_name: profile?.full_name || 'Utilisateur',
-                email: profile?.email || authUser?.email || 'Email inconnu'
+                full_name: fullName,
+                email: email || 'Email inconnu'
             }
         };
-    }) || [];
+    }));
 
     return requestsWithUsers;
 }
@@ -59,6 +71,8 @@ export async function getActivationRequests() {
 export async function approveActivationRequest(requestId: string) {
     const supabase = createAdminClient();
     const serverSupabase = await createClient();
+    // Safe check for user, though in admin context we usually have one. 
+    // For server actions invoked by client, getUser checks the session.
     const { data: { user } } = await serverSupabase.auth.getUser();
 
     // Get the request
