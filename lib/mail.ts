@@ -140,7 +140,6 @@ export async function getAdminNotificationEmails(): Promise<string[]> {
       const { data, error } = await supabase.auth.admin.listUsers({
         page,
         perPage,
-        perPage,
       });
 
       if (error) {
