@@ -66,10 +66,12 @@ type SupabasePropertyRow = {
   view_count?: number;
   verification_status?: Property["verification_status"];
   proof_document_url?: string;
+  virtual_tour_url?: string;
   verification_requested_at?: string;
   featured?: boolean;
   exclusive?: boolean;
   created_at: string;
+
   owner?: {
     id: string;
     full_name: string;
@@ -168,6 +170,7 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
     view_count: row.view_count,
     verification_status: row.verification_status,
     proof_document_url: row.proof_document_url,
+    virtual_tour_url: row.virtual_tour_url,
     verification_requested_at: row.verification_requested_at,
     featured: row.featured,
     exclusive: row.exclusive,

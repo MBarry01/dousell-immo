@@ -7,7 +7,7 @@ import {
   getPropertyById,
   getSimilarProperties,
   getApprovedPropertyIds,
-} from "@/services/propertyService";
+} from "@/services/propertyService.cached";
 import {
   getPropertyReviews,
   getPropertyReviewStats,

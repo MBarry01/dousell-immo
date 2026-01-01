@@ -1,9 +1,9 @@
 import { SearchExperience } from "@/components/search/search-experience";
 import {
   getLatestProperties,
-  getProperties,
+  getPropertiesWithFilters as getProperties,
   type PropertyFilters,
-} from "@/services/propertyService";
+} from "@/services/propertyService.cached";
 
 type SearchPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

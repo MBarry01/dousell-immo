@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { HeroSection } from "@/components/sections/hero";
 import { PropertySection } from "@/components/sections/property-section";
 import { QuickSearch } from "@/components/search/quick-search";
-import { getHomePageSections } from "@/services/homeService";
+import { getHomePageSections } from "@/services/homeService.cached";
 import { VerificationSuccessToast } from "@/components/auth/verification-success-toast";
 
 // Cache la page d'accueil pendant 1 heure (3600 secondes)

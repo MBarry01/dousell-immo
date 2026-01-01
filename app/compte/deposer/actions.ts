@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { sendEmail, getAdminNotificationEmails, getAdminEmail } from "@/lib/mail";
 import { ListingSubmittedEmail } from "@/emails/listing-submitted-email";
 import { getBaseUrl } from "@/lib/utils";
+import { invalidatePropertyCaches } from "@/lib/cache/invalidation";
 
 type SubmitListingData = {
   type: string;
@@ -282,6 +283,15 @@ export async function submitUserListing(data: SubmitListingData) {
     if (emailResult.error) {
       console.error("❌ Erreur lors de l'envoi de l'email admin:", emailResult.error);
     }
+
+    // 🔥 INVALIDER LE CACHE REDIS
+    await invalidatePropertyCaches(insertedProperty.id, data.city, {
+      invalidateHomepage: true,
+      invalidateSearch: true,
+      invalidateDetail: false, // Pas encore visible (pending)
+      invalidateOwner: true,
+      ownerId: user.id,
+    });
 
     revalidatePath("/compte/mes-biens");
     revalidatePath("/admin/moderation");

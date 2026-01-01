@@ -7,6 +7,7 @@ import { LegalAlertsWidget } from "./components/LegalAlertsWidget";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getLeasesByOwner, getRentalTransactions, getOwnerProfileForReceipts } from "@/services/rentalService.cached";
 
 export default async function GestionLocativePage({
     searchParams,
@@ -31,31 +32,16 @@ export default async function GestionLocativePage({
     // RÉCUPÉRATION DES VRAIES DONNÉES SUPABASE
     // ========================================
 
-    // 0. Récupérer le profil pour les infos de quittance (Branding)
-    // IMPORTANT: On récupère TOUS les champs nécessaires pour le fallback intelligent
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('company_name, company_address, company_email, company_ninea, signature_url, logo_url, full_name')
-        .eq('id', user.id)
-        .maybeSingle();
+    // 0. Récupérer le profil pour les infos de quittance (Branding) - AVEC CACHE
+    const profile = await getOwnerProfileForReceipts(user.id);
 
-    // 1. Récupérer tous les baux du propriétaire (colonnes explicites)
-    const { data: leases, error: leasesError } = await supabase
-        .from('leases')
-        .select('id, tenant_name, tenant_phone, tenant_email, property_address, monthly_amount, billing_day, start_date, end_date, status, created_at')
-        .eq('owner_id', user.id)
-        // TEMPORAIRE: Afficher TOUS les baux pour diagnostic
-        // .eq('status', viewMode) // Dynamique: 'active' ou 'terminated'
-        .order('created_at', { ascending: false });
+    // 1. Récupérer tous les baux du propriétaire - AVEC CACHE
+    const allLeases = await getLeasesByOwner(user.id, "all");
 
     // Filtrer côté client selon le statut
     const filteredLeases = isViewingTerminated
-        ? (leases || []).filter(l => l.status === 'terminated')
-        : (leases || []).filter(l => !l.status || l.status === 'active' || l.status === 'pending');
-
-    if (leasesError) {
-        console.error("Erreur récupération baux:", leasesError.message);
-    }
+        ? allLeases.filter(l => l.status === 'terminated')
+        : allLeases.filter(l => !l.status || l.status === 'active' || l.status === 'pending');
 
     // 1.5 Récupérer la date du tout premier bail (pour bloquer la navigation avant l'activité)
     const { data: earliestLease } = await supabase
@@ -68,25 +54,17 @@ export default async function GestionLocativePage({
 
     const minDateStr = earliestLease?.start_date || new Date().toISOString();
 
-    // 2. Récupérer TOUTES les transactions de loyer (pour tous les mois)
-    const { data: rawTransactions, error: transError } = await supabase
-        .from('rental_transactions')
-        .select('id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end')
-        .in('lease_id', (filteredLeases || []).map(l => l.id))
-        .order('period_year', { ascending: false })
-        .order('period_month', { ascending: false });
+    // 2. Récupérer TOUTES les transactions de loyer (pour tous les mois) - AVEC CACHE
+    const leaseIds = filteredLeases.map(l => l.id);
+    const rawTransactions = await getRentalTransactions(leaseIds);
 
     // Polyfill pour amount_paid (car la colonne n'existe pas encore en base)
     // Cela permet au Finance Guard de fonctionner (Règle : Encaissé = amount_paid)
     // En attendant la migration DB, on assume que Payé = Totalité.
-    const transactions = (rawTransactions || []).map(t => ({
+    const transactions = rawTransactions.map(t => ({
         ...t,
         amount_paid: (t.status?.toLowerCase() === 'paid') ? t.amount_due : 0
     }));
-
-    if (transError) {
-        console.error("Erreur récupération transactions:", transError.message);
-    }
 
     // 3. Récupérer les demandes de maintenance (avec infos artisan) - Aperçu seulement
     const { data: maintenanceData, error: maintenanceError } = await supabase

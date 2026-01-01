@@ -10,7 +10,7 @@ openssl rand -base64 32
 
 Ou utiliser un générateur en ligne : https://generate-secret.vercel.app/32
 
-Copiez le résultat (exemple) : `8xK9mP2qW5vN7tL3jR6sH4fD1gY0cB5a`
+Copiez le résultat (exemple) : `8xK9mP2qW5vN7tL3jR6sH4fD1gY0cB5a` 
 
 ---
 
@@ -22,7 +22,7 @@ Copiez le résultat (exemple) : `8xK9mP2qW5vN7tL3jR6sH4fD1gY0cB5a`
 4. Cliquez sur **Add New**
 5. Remplissez :
    - **Key** : `CRON_SECRET`
-   - **Value** : `8xK9mP2qW5vN7tL3jR6sH4fD1gY0cB5a` (votre clé générée)
+   - **Value** : `f1e61e17586eadf48e94d0e28c61ed7a` (votre clé générée)
    - **Environments** : Cochez **Production**, **Preview**, et **Development**
 6. Cliquez sur **Save**
 

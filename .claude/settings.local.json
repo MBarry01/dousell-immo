@@ -33,7 +33,11 @@
       "Bash(git rm:*)",
       "Bash(npm run check:signup:*)",
       "Bash(source:*)",
-      "Bash(npx dotenv-cli -e .env.local npx tsx scripts/test-auth-flow.ts)"
+      "Bash(npx dotenv-cli -e .env.local npx tsx scripts/test-auth-flow.ts)",
+      "Bash(npm run test:contract-generation:*)",
+      "Bash(npm run quality:*)",
+      "Bash(npx eslint:*)",
+      "Bash(timeout /t 10)"
     ]
   }
 }

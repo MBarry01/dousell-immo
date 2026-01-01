@@ -29,12 +29,29 @@
   - Email: `npm run test:email` ou `npx tsx scripts/test-email.ts`
   - Signup: `npm run check:signup` ou `npx tsx scripts/check-signup-issues.ts`
   - Images: `npm run fix-images` ou `npx tsx scripts/fix-broken-images.ts`
+  - **Redis/Cache:** `npx tsx scripts/test-redis.ts` (test connexion + cache + locks)
 
 ## 4. Operational Knowledge (Dousell Specifics)
 - **Certification:** Upload User -> Supabase Storage -> Admin Queue (`pending` -> `verified`).
 - **Paiement:** PayDunya via `/api/paydunya`. Factures via `lib/invoice.ts`.
 - **Emails:** Stratégie Double (Gmail Primaire / Supabase Fallback). Templates dans `emails/`.
+- **Cache/Performance (Nouveau - Jan 2026):**
+  - **Pattern:** Cache-Aside (Redis/Valkey) pour lectures fréquentes.
+  - **Environnements:**
+    - Vercel : Upstash Redis (HTTP serverless)
+    - Serveur dédié : Valkey local (TCP ultra-rapide)
+  - **Fichiers clés:**
+    - `lib/cache/redis-client.ts` - Client unifié multi-env
+    - `lib/cache/cache-aside.ts` - Pattern Cache-Aside + invalidation
+    - `lib/cache/distributed-locks.ts` - Verrous pour paiements/réservations
+    - `lib/cache/examples.ts` - Exemples concrets Dousell
+  - **Règles d'or:**
+    - Toujours invalider cache après mutation (Server Actions)
+    - Utiliser verrous (`withLock`) pour paiements/réservations
+    - TTL courts pour données changeantes (2-10 min)
+  - **Docs complètes:** Voir `REDIS_CACHE_STRATEGY.md`
 
 ## 5. Lessons Learned (Mise à jour dynamique)
 - *Ajoutez ici les erreurs récurrentes pour ne plus les reproduire.*
 - [Exemple: Attention, le champ 'prix' est en centimes (int), pas en float.]
+- **Jan 2026:** Design System enrichi avec shimmer or (#F4C430) et micro-interactions (voir `DESIGN_SYSTEM_UPGRADES.md`)

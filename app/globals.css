@@ -188,6 +188,16 @@
   }
 }
 
+/* Animation shimmer luxueux pour skeletons - Thème "Luxe & Teranga" */
+@keyframes shimmer-luxury {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 /* Amélioration des transitions pour les dropdowns Radix UI */
 [data-radix-dropdown-menu-content],
 [data-radix-popover-content] {

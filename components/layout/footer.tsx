@@ -52,7 +52,7 @@ export const Footer = () => {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="hover:text-white transition"
+                    className="inline-block hover:text-white hover:translate-x-1 transition-all duration-200"
                   >
                     {link.label}
                   </Link>
@@ -67,7 +67,7 @@ export const Footer = () => {
             <ul className="space-y-1">
               {legalLinks.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="hover:text-white transition">
+                  <Link href={link.href} className="inline-block hover:text-white hover:translate-x-1 transition-all duration-200">
                     {link.label}
                   </Link>
                 </li>
@@ -85,7 +85,7 @@ export const Footer = () => {
                   href={social.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 hover:text-white"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 hover:text-white hover:border-primary/30 hover:bg-primary/10 hover:scale-110 hover:-translate-y-1 transition-all duration-200 active:scale-95"
                 >
                   <social.icon className="h-5 w-5" />
                 </Link>
@@ -102,13 +102,13 @@ export const Footer = () => {
             <span className="text-white/40">Dakar, Sénégal</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-white/40">
-            <Link href="/legal" className="hover:text-white/70 transition-colors">
+            <Link href="/legal" className="hover:text-white/70 hover:translate-x-0.5 transition-all duration-200">
               Mentions légales
             </Link>
-            <Link href="/cgu" className="hover:text-white/70 transition-colors">
+            <Link href="/cgu" className="hover:text-white/70 hover:translate-x-0.5 transition-all duration-200">
               CGU
             </Link>
-            <Link href="/contact" className="hover:text-white/70 transition-colors">
+            <Link href="/contact" className="hover:text-white/70 hover:translate-x-0.5 transition-all duration-200">
               Contact
             </Link>
           </div>
