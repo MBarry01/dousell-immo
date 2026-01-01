@@ -16,9 +16,17 @@ import { RentalTour } from "@/components/onboarding/RentalTour";
 
 export default async function Home() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
-  // Vérifier si l'utilisateur a des propriétés (pour le tour)
+  // Paralléliser toutes les requêtes pour performance mobile
+  const [userResult, sectionsResult] = await Promise.all([
+    supabase.auth.getUser(),
+    getHomePageSections()
+  ]);
+
+  const user = userResult.data?.user;
+  const { locations, ventes, terrains } = sectionsResult;
+
+  // Vérifier si l'utilisateur a des propriétés (pour le tour) - séparé car dépend de user
   let hasProperties = false;
   if (user) {
     const { count } = await supabase
@@ -27,12 +35,6 @@ export default async function Home() {
       .eq('owner_id', user.id);
     hasProperties = (count || 0) > 0;
   }
-
-  // Récupération optimisée des 3 sections de la home page
-  // Toutes les propriétés sont automatiquement filtrées pour être :
-  // - Approuvées (validation_status = 'approved')
-  // - Disponibles (status = 'disponible')
-  const { locations, ventes, terrains } = await getHomePageSections();
 
   return (
     <div className="space-y-6">

@@ -29,61 +29,64 @@ export default async function GestionLocativePage({
     const isViewingTerminated = viewMode === 'terminated';
 
     // ========================================
-    // RÉCUPÉRATION DES VRAIES DONNÉES SUPABASE
+    // RÉCUPÉRATION OPTIMISÉE - PARALLÉLISATION
     // ========================================
 
-    // 0. Récupérer le profil pour les infos de quittance (Branding) - AVEC CACHE
-    const profile = await getOwnerProfileForReceipts(user.id);
+    // Étape 1 : Lancer toutes les requêtes indépendantes EN PARALLÈLE
+    const [
+        profile,
+        allLeases,
+        earliestLeaseResult,
+        maintenanceResult,
+        stats
+    ] = await Promise.all([
+        // Profil pour les infos de quittance (AVEC CACHE)
+        getOwnerProfileForReceipts(user.id),
+        // Tous les baux du propriétaire (AVEC CACHE)
+        getLeasesByOwner(user.id, "all"),
+        // Date du premier bail
+        supabase
+            .from('leases')
+            .select('start_date')
+            .eq('owner_id', user.id)
+            .order('start_date', { ascending: true })
+            .limit(1)
+            .single(),
+        // Demandes de maintenance (aperçu)
+        supabase
+            .from('maintenance_requests')
+            .select('id, description, status, created_at, lease_id, artisan_name, artisan_phone, artisan_rating, artisan_address, quoted_price, intervention_date, owner_approved')
+            .order('created_at', { ascending: false })
+            .neq('status', 'completed')
+            .limit(5),
+        // Statistiques
+        getRentalStats()
+    ]);
 
-    // 1. Récupérer tous les baux du propriétaire - AVEC CACHE
-    const allLeases = await getLeasesByOwner(user.id, "all");
+    // Extraire les données des résultats
+    const earliestLease = earliestLeaseResult.data;
+    const maintenanceRequests = maintenanceResult.data || [];
 
-    // Filtrer côté client selon le statut
+    if (maintenanceResult.error) {
+        console.error("Erreur récupération maintenance:", maintenanceResult.error.message);
+    }
+
+    // Filtrer les baux côté client selon le statut
     const filteredLeases = isViewingTerminated
         ? allLeases.filter(l => l.status === 'terminated')
         : allLeases.filter(l => !l.status || l.status === 'active' || l.status === 'pending');
 
-    // 1.5 Récupérer la date du tout premier bail (pour bloquer la navigation avant l'activité)
-    const { data: earliestLease } = await supabase
-        .from('leases')
-        .select('start_date')
-        .eq('owner_id', user.id)
-        .order('start_date', { ascending: true })
-        .limit(1)
-        .single();
-
     const minDateStr = earliestLease?.start_date || new Date().toISOString();
 
-    // 2. Récupérer TOUTES les transactions de loyer (pour tous les mois) - AVEC CACHE
+    // Étape 2 : Récupérer les transactions (dépend des leases filtrés)
     const leaseIds = filteredLeases.map(l => l.id);
     const rawTransactions = await getRentalTransactions(leaseIds);
 
-    // Polyfill pour amount_paid (car la colonne n'existe pas encore en base)
-    // Cela permet au Finance Guard de fonctionner (Règle : Encaissé = amount_paid)
-    // En attendant la migration DB, on assume que Payé = Totalité.
+    // Polyfill pour amount_paid
     const transactions = rawTransactions.map(t => ({
         ...t,
         amount_paid: (t.status?.toLowerCase() === 'paid') ? t.amount_due : 0
     }));
-
-    // 3. Récupérer les demandes de maintenance (avec infos artisan) - Aperçu seulement
-    const { data: maintenanceData, error: maintenanceError } = await supabase
-        .from('maintenance_requests')
-        .select('id, description, status, created_at, lease_id, artisan_name, artisan_phone, artisan_rating, artisan_address, quoted_price, intervention_date, owner_approved')
-        .order('created_at', { ascending: false })
-        .neq('status', 'completed')
-        .limit(5); // Limiter à 5 pour l'aperçu
-
-    const maintenanceRequests = maintenanceData || [];
-
-    if (maintenanceError) {
-        console.error("Erreur récupération maintenance:", maintenanceError.message);
-    }
-
-    // ========================================
-    // CALCUL DES STATISTIQUES (MODE RÉEL)
-    // ========================================
-    const stats = await getRentalStats();
 
     // Transformer les demandes de maintenance pour MaintenanceHub
     const formattedRequests = (maintenanceRequests || []).map(req => {
