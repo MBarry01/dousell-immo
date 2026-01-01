@@ -101,24 +101,9 @@ export async function GET(request: Request) {
 
       // Sinon, rediriger vers la page demandée
       // MAIS : Vérifier si c'est un locataire pour le rediriger vers le portail
-      // sauf si une URL spécifique autre que la racine a été demandée
-      let redirectUrl = `${origin}${next}`;
+      // Rediriger vers la page demandée (ou / par défaut)
+      const redirectUrl = `${origin}${next}`;
 
-      if (next === '/' || next === '/compte') {
-        const { data: lease } = await supabase
-          .from('leases')
-          .select('id')
-          .eq('tenant_email', data.user.email!)
-          .eq('status', 'active')
-          .maybeSingle();
-
-        if (lease) {
-          redirectUrl = `${origin}/portal`;
-        } else if (next === '/') {
-          // Par défaut pour les propriétaires/utilisateurs
-          redirectUrl = `${origin}/compte`;
-        }
-      }
 
       return NextResponse.redirect(redirectUrl);
     }

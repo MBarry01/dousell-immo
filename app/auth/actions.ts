@@ -375,23 +375,11 @@ export async function login(formData: FormData) {
 
   revalidatePath("/", "layout");
 
-  // Vérifier si c'est un locataire
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user?.email) {
-    const { data: lease } = await supabase
-      .from('leases')
-      .select('id')
-      .eq('tenant_email', user.email)
-      .eq('status', 'active')
-      .maybeSingle();
+  // Remplacer la redirection /portal et /compte par / qui est la racine
+  // redirect("/portal"); -> Désactivé
+  // redirect("/compte"); -> Désactivé
+  redirect("/");
 
-    if (lease) {
-      redirect("/portal");
-    }
-  }
-
-  // Si pas locataire, direction le dashboard propriétaire
-  redirect("/compte");
 }
 
 export async function signInWithGoogle() {
