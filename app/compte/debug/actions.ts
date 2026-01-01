@@ -3,12 +3,13 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export async function fixMissingProfile() {
+export async function fixMissingProfile(formData: FormData) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        return { error: "Non connecté" };
+        console.error("Non connecté");
+        return;
     }
 
     const { error } = await supabase
@@ -25,10 +26,9 @@ export async function fixMissingProfile() {
 
     if (error) {
         console.error("Error creating profile:", error);
-        return { error: error.message };
+        return;
     }
 
     revalidatePath('/compte/debug');
     revalidatePath('/compte');
-    return { success: true };
 }
