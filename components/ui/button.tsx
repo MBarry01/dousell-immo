@@ -63,6 +63,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <motion.button
         className={cn(buttonVariants({ variant, size }), className)}
         ref={ref}
+        suppressHydrationWarning
         disabled={disabled}
         whileTap={disabled ? undefined : { scale: 0.96 }}
         transition={{
