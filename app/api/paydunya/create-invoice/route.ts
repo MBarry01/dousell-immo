@@ -29,22 +29,51 @@ export async function POST(request: Request) {
       );
     }
 
-    // Récupérer le prix depuis la base de données
-    const { data: service, error: serviceError } = await supabase
-      .from("services")
-      .select("*")
-      .eq("code", serviceType)
-      .single();
+    let amount = 0;
+    let service: { name: string; price: number; code: string } | null = null;
+    let customData: Record<string, unknown> = {};
 
-    if (serviceError || !service) {
-      console.error("Erreur récupération service:", serviceError);
-      return Response.json(
-        { error: "Service invalide ou introuvable" },
-        { status: 400 }
-      );
+    if (serviceType === "rent_payment") {
+      // Pour le loyer, le montant est variable et vient du body
+      const requestedAmount = Number(body.amount);
+      if (!requestedAmount || requestedAmount <= 0) {
+        return Response.json(
+          { error: "Montant invalide pour le paiement du loyer" },
+          { status: 400 }
+        );
+      }
+      amount = requestedAmount;
+      service = { name: description, price: amount, code: "rent_payment" };
+
+      // Custom data spécifique pour le loyer
+      customData = {
+        lease_id: propertyId, // propertyId sert de leaseId dans ce contexte
+        type: "rent_payment",
+      };
+    } else {
+      // Pour les autres services, on récupère le prix depuis la base de données
+      const { data: dbService, error: serviceError } = await supabase
+        .from("services")
+        .select("*")
+        .eq("code", serviceType)
+        .single();
+
+      if (serviceError || !dbService) {
+        console.error("Erreur récupération service:", serviceError);
+        return Response.json(
+          { error: "Service invalide ou introuvable" },
+          { status: 400 }
+        );
+      }
+      amount = dbService.price;
+      service = dbService;
+
+      customData = {
+        property_id: propertyId || null,
+        type: "listing_payment",
+        service_code: dbService.code,
+      };
     }
-
-    const amount = service.price;
 
     // Si le montant est 0, on ne crée pas de facture PayDunya (ou on gère différemment)
     // Mais ici on suppose que cette route est appelée pour payer.
@@ -55,6 +84,14 @@ export async function POST(request: Request) {
     const baseUrl = getBaseUrl();
     const callbackUrl =
       process.env.PAYDUNYA_CALLBACK_URL || `${baseUrl}/api/paydunya/webhook`;
+
+    // TypeScript check
+    if (!service) {
+      return Response.json(
+        { error: "Erreur interne: Service non défini" },
+        { status: 500 }
+      );
+    }
 
     // Créer la facture PayDunya
     const invoice = await createPayDunyaInvoice({

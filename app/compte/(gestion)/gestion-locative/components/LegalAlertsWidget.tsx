@@ -1,5 +1,4 @@
-import { Scale, AlertTriangle, Clock } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Scale, AlertTriangle, Clock, ArrowRight, CheckCircle, Calendar } from "lucide-react";
 import { getLeaseAlerts } from "../../legal/actions";
 import Link from "next/link";
 
@@ -11,68 +10,103 @@ export async function LegalAlertsWidget() {
     const j90Count = alerts.filter(a => a.alert_type === 'J-90').length;
     const totalAlerts = alerts.length;
 
+    // Empty state - tout va bien
     if (totalAlerts === 0) {
         return (
-            <Card className="bg-slate-900 border-slate-800">
-                <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-slate-200 flex items-center gap-2">
-                        <Scale className="h-4 w-4 text-green-500" />
-                        Conformité Juridique
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center gap-2 text-green-500">
-                        <div className="h-2 w-2 bg-green-500 rounded-full" />
-                        <span className="text-xs">Aucune échéance à venir</span>
+            <div className="relative overflow-hidden rounded-xl bg-slate-900 border border-slate-800 p-5 group hover:border-slate-700 transition-colors">
+                <div className="relative">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2.5 rounded-xl bg-slate-800 border border-slate-700">
+                            <Scale className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-white text-sm">Conformité Juridique</h3>
+                            <p className="text-xs text-slate-400">Statut des échéances légales</p>
+                        </div>
                     </div>
-                    <p className="text-xs text-slate-500 mt-2">Tous vos baux sont à jour</p>
-                </CardContent>
-            </Card>
+
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-800">
+                        <CheckCircle className="h-5 w-5 text-slate-400" />
+                        <div>
+                            <p className="text-sm font-medium text-white">Tout est en ordre</p>
+                            <p className="text-xs text-slate-500">Aucune échéance à venir</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         );
     }
 
+    // Avec des alertes
     return (
-        <Link href="/compte/legal">
-            <Card className="bg-slate-900 border-slate-800 hover:border-orange-500/50 transition-colors cursor-pointer group">
-                <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-slate-200 flex items-center gap-2">
-                        <Scale className="h-4 w-4 text-orange-500" />
-                        Conformité Juridique
-                        {totalAlerts > 0 && (
-                            <span className="ml-auto bg-orange-500/20 text-orange-400 text-xs px-2 py-0.5 rounded-full">
-                                {totalAlerts}
+        <Link href="/compte/legal" className="block group">
+            <div className="relative overflow-hidden rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all duration-300 p-5">
+                <div className="relative">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-xl bg-slate-800 border border-slate-700 group-hover:scale-105 transition-transform">
+                                <Scale className="h-5 w-5 text-white" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-white text-sm">Conformité Juridique</h3>
+                                <p className="text-xs text-slate-400">Échéances à surveiller</p>
+                            </div>
+                        </div>
+
+                        {/* Badge total */}
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
                             </span>
-                        )}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    {j180Count > 0 && (
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <AlertTriangle className="h-3.5 w-3.5 text-orange-500" />
-                                <span className="text-xs text-slate-300">J-180 (Congé Reprise)</span>
-                            </div>
-                            <span className="text-sm font-semibold text-orange-500">{j180Count}</span>
+                            <span className="text-xs font-bold text-white">{totalAlerts}</span>
                         </div>
-                    )}
-
-                    {j90Count > 0 && (
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <Clock className="h-3.5 w-3.5 text-blue-500" />
-                                <span className="text-xs text-slate-300">J-90 (Reconduction)</span>
-                            </div>
-                            <span className="text-sm font-semibold text-blue-500">{j90Count}</span>
-                        </div>
-                    )}
-
-                    <div className="pt-2 border-t border-slate-800">
-                        <p className="text-xs text-slate-400 group-hover:text-slate-300 transition-colors">
-                            Cliquer pour voir les détails →
-                        </p>
                     </div>
-                </CardContent>
-            </Card>
+
+                    {/* Alertes par type */}
+                    <div className="space-y-2 mb-4">
+                        {j180Count > 0 && (
+                            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-800 hover:bg-slate-800 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-1.5 rounded-lg bg-slate-700">
+                                        <AlertTriangle className="h-4 w-4 text-white" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-white">Congé Reprise</p>
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-wide">J-180 • 6 mois</p>
+                                    </div>
+                                </div>
+                                <span className="text-lg font-bold text-white">{j180Count}</span>
+                            </div>
+                        )}
+
+                        {j90Count > 0 && (
+                            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-800 hover:bg-slate-800 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-1.5 rounded-lg bg-slate-700">
+                                        <Clock className="h-4 w-4 text-white" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-white">Reconduction</p>
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-wide">J-90 • 3 mois</p>
+                                    </div>
+                                </div>
+                                <span className="text-lg font-bold text-white">{j90Count}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* CTA */}
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-800">
+                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span>Voir le calendrier complet</span>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                    </div>
+                </div>
+            </div>
         </Link>
     );
 }

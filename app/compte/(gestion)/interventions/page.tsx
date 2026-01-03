@@ -62,7 +62,7 @@ export default async function InterventionsPage() {
 
             {/* Contenu principal */}
             <div className="w-full mx-auto px-4 md:px-6 py-6">
-                <div id="tour-intervention-list" className="max-w-4xl mx-auto">
+                <div id="tour-intervention-list" className="w-full">
                     <MaintenanceHub requests={formattedRequests} />
                 </div>
             </div>

@@ -4,6 +4,9 @@ import { GestionLocativeClient } from "./components/GestionLocativeClient";
 import { AddTenantButton } from "./components/AddTenantButton";
 import { MaintenanceHub } from "./components/MaintenanceHub";
 import { LegalAlertsWidget } from "./components/LegalAlertsWidget";
+import { DocumentGeneratorDialog } from "./components/DocumentGeneratorDialog";
+import { Button } from "@/components/ui/button";
+import { FileText, Plus } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -114,7 +117,7 @@ export default async function GestionLocativePage({
         <div className="min-h-screen bg-slate-950 print:hidden">
             {/* Sub-header avec filtres Actifs/Résiliés */}
             <div className="border-b border-slate-800 bg-slate-900/50">
-                <div className="w-full mx-auto px-4 md:px-6 py-3">
+                <div className="w-full mx-auto px-2 py-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg">
                             <Link
@@ -137,14 +140,29 @@ export default async function GestionLocativePage({
                             </Link>
                         </div>
                         <div className="flex items-center gap-2">
-                            {!isViewingTerminated && <AddTenantButton ownerId={user.id} profile={profile} />}
+                            {!isViewingTerminated && (
+                                <>
+                                    <DocumentGeneratorDialog
+                                        leases={filteredLeases}
+                                        userEmail={user.email}
+                                        profile={profile}
+                                        trigger={
+                                            <Button variant="outline" className="bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-200 hover:text-white h-9 px-3 gap-2">
+                                                <FileText className="w-4 h-4" />
+                                                <span className="hidden sm:inline">Générer</span>
+                                            </Button>
+                                        }
+                                    />
+                                    <AddTenantButton ownerId={user.id} profile={profile} />
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Contenu principal */}
-            <div className="w-full mx-auto px-4 md:px-6 py-6">
+            <div className="w-full mx-auto px-2 py-6">
                 {/* Table des locataires - Pleine largeur */}
                 <div className="mb-6">
                     <GestionLocativeClient

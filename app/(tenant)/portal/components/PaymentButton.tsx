@@ -12,14 +12,22 @@ export function PaymentButton({ leaseId }: { leaseId: string }) {
         setIsLoading(true);
         try {
             const result = await processRentalPayment(leaseId);
-            if (result.error) {
+
+            // Gestion des différents formats de retour
+            if ('error' in result && result.error) {
                 toast.error(result.error);
                 setIsLoading(false);
-            } else if (result.url) {
+            } else if ('success' in result && result.success && result.data?.url) {
                 // Redirection vers PayDunya
-                window.location.href = result.url;
+                window.location.href = result.data.url;
+            } else if ('success' in result && !result.success && 'error' in result) {
+                toast.error(result.error || "Erreur lors du paiement");
+                setIsLoading(false);
+            } else {
+                toast.error("Erreur technique");
+                setIsLoading(false);
             }
-        } catch (e) {
+        } catch {
             toast.error("Erreur technique lors du paiement.");
             setIsLoading(false);
         }

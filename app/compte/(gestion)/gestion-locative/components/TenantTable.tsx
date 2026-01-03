@@ -2,6 +2,7 @@
 
 import { ReceiptModal } from './ReceiptModal';
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, ArrowUpDown, ArrowUp, ArrowDown, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -47,7 +48,7 @@ interface ProfileData {
     logo_url?: string | null;
 }
 
-interface TenantTableProps {
+export interface TenantTableProps {
     tenants?: Tenant[];
     profile?: ProfileData | null;
     userEmail?: string;
@@ -57,6 +58,10 @@ interface TenantTableProps {
     onDelete?: (transactionId: string) => void;
     onDeleteLease?: (leaseId: string) => void;
     ownerId?: string;
+    onConfirmPayment?: (leaseId: string, transactionId?: string) => void;
+    onViewReceipt?: (tenant: Tenant) => void;
+    onTerminate?: (leaseId: string, tenantName: string) => void;
+    onReactivate?: (leaseId: string, tenantName: string) => void;
 }
 
 const statusConfig = {
@@ -68,42 +73,22 @@ const statusConfig = {
 type SortField = 'name' | 'property' | 'rentAmount' | 'status' | 'period';
 type SortOrder = 'asc' | 'desc';
 
-interface ReceiptData {
-    tenant?: {
-        tenant_name?: string;
-        name?: string;
-        email?: string;
-        phone?: string;
-        address?: string;
-    };
-    property_address?: string;
-    amount?: number;
-    period?: string;
-    month?: string | number;
-    year?: number;
-    periodStart?: string;
-    periodEnd?: string;
-    receiptNumber?: string;
-    userEmail?: string;
-    profile?: {
-        company_name?: string | null;
-        full_name?: string | null;
-        company_address?: string | null;
-        company_email?: string | null;
-        email?: string;
-        logo_url?: string | null;
-        signature_url?: string | null;
-        ninea?: string | null;
-        company_ninea?: string | null;
-    };
-    receiptImage?: string | null;
-}
-
-export function TenantTable({ tenants = [], profile, userEmail, ownerId, isViewingTerminated = false, searchQuery = '', onEdit, onDelete, onDeleteLease }: TenantTableProps) {
+export function TenantTable({
+    tenants = [],
+    profile,
+    userEmail,
+    ownerId,
+    isViewingTerminated = false,
+    searchQuery = '',
+    onEdit,
+    onDelete,
+    onDeleteLease,
+    onConfirmPayment,
+    onViewReceipt,
+    onTerminate,
+    onReactivate
+}: TenantTableProps) {
     const router = useRouter();
-    const [saving, setSaving] = useState(false);
-    const [isReceiptOpen, setIsReceiptOpen] = useState(false);
-    const [currentReceipt, setCurrentReceipt] = useState<ReceiptData | null>(null);
     const [sortField, setSortField] = useState<SortField>('name');
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
@@ -174,157 +159,11 @@ export function TenantTable({ tenants = [], profile, userEmail, ownerId, isViewi
             return 0;
         });
 
-    const handleConfirmPayment = async (leaseId: string, transactionId?: string) => {
-        const tenant = tenants.find(t => t.id === leaseId);
-        if (!tenant) {
-            toast.error('Locataire introuvable');
-            return;
-        }
-
-        const result = await confirmPayment(leaseId, transactionId);
-
-        if (!result.success) {
-            toast.error(result.error || 'Erreur inconnue');
-            return;
-        }
-
-        const shouldSendReceipt = window.confirm(
-            `Le loyer est marqué comme payé. Envoyer la quittance par email à ${tenant.name} ?`
-        );
-
-        if (shouldSendReceipt) {
-            if (!tenant.email) {
-                toast.error('Email manquant pour ce locataire');
-                return;
-            }
-
-            const periodMonth = tenant.period_month?.toString().padStart(2, '0') || '01';
-            const periodYear = tenant.period_year || new Date().getFullYear();
-            const periodStartDate = tenant.period_start
-                ? new Date(tenant.period_start)
-                : new Date(periodYear, parseInt(periodMonth) - 1, 1);
-            const periodEndDate = tenant.period_end
-                ? new Date(tenant.period_end)
-                : new Date(periodYear, parseInt(periodMonth), 0);
-
-            const receiptData = {
-                tenantName: tenant.name,
-                tenantEmail: tenant.email,
-                tenantPhone: tenant.phone || '',
-                tenantAddress: tenant.property,
-                amount: Number(tenant.rentAmount) || 0,
-                periodMonth: `${periodMonth}/${periodYear}`,
-                periodStart: periodStartDate.toLocaleDateString('fr-FR'),
-                periodEnd: periodEndDate.toLocaleDateString('fr-FR'),
-                receiptNumber: `QUITT-${Date.now().toString().slice(-6)}`,
-                ownerName: profile?.company_name || profile?.full_name || "Propriétaire",
-                ownerAddress: profile?.company_address || "Adresse non renseignée",
-                ownerNinea: profile?.company_ninea || undefined,
-                ownerLogo: profile?.logo_url || undefined,
-                ownerSignature: profile?.signature_url || undefined,
-                ownerEmail: profile?.company_email || undefined,
-                ownerAccountEmail: userEmail || undefined,
-                propertyAddress: tenant.property,
-            };
-
-            toast.promise(
-                fetch('/api/send-receipt', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(receiptData),
-                }).then(async (res) => {
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || 'Erreur lors de l\'envoi');
-                    return data;
-                }),
-                {
-                    loading: 'Envoi de la quittance...',
-                    success: 'Quittance envoyée !',
-                    error: (err) => `Erreur: ${err.message}`,
-                }
-            );
-        } else {
-            toast.success(result.message || "Paiement enregistré !");
-        }
-
-        router.refresh();
-    };
-
-    const handleViewReceipt = (tenant: Tenant) => {
-        const periodMonth = tenant.period_month?.toString().padStart(2, '0') || '01';
-        const periodYear = tenant.period_year || new Date().getFullYear();
-
-        setCurrentReceipt({
-            tenant: {
-                tenant_name: tenant.name,
-                email: tenant.email,
-                phone: tenant.phone,
-                address: tenant.property
-            },
-            profile: {
-                company_name: profile?.company_name || profile?.full_name || "Propriétaire",
-                company_address: profile?.company_address || "Adresse non renseignée",
-                company_email: profile?.company_email || undefined,
-                company_ninea: profile?.company_ninea || undefined,
-                logo_url: profile?.logo_url || undefined,
-                signature_url: profile?.signature_url || undefined
-            },
-            userEmail: userEmail,
-            amount: tenant.rentAmount,
-            month: periodMonth,
-            year: periodYear,
-            property_address: tenant.property
-        });
-        setIsReceiptOpen(true);
-    };
-
-    const handleTerminateLease = async (leaseId: string, tenantName: string) => {
-        const confirmed = window.confirm(
-            `⚠️ Voulez-vous vraiment résilier le bail de ${tenantName} ?`
-        );
-        if (!confirmed) return;
-
-        setSaving(true);
-        const result = await terminateLease(leaseId);
-        setSaving(false);
-
-        if (result.success) {
-            toast.success(result.message || 'Bail résilié');
-            router.refresh();
-        } else {
-            toast.error(result.error || 'Erreur');
-        }
-    };
-
-    const handleReactivateLease = async (leaseId: string, tenantName: string) => {
-        const confirmed = window.confirm(
-            `✅ Réactiver le bail de ${tenantName} ?`
-        );
-        if (!confirmed) return;
-
-        setSaving(true);
-        const result = await reactivateLease(leaseId);
-        setSaving(false);
-
-        if (result.success) {
-            toast.success(result.message || 'Bail réactivé');
-            router.refresh();
-        } else {
-            toast.error(result.error || 'Erreur');
-        }
-    };
-
     const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
 
     return (
         <>
-            <ReceiptModal
-                isOpen={isReceiptOpen}
-                onClose={() => setIsReceiptOpen(false)}
-                data={currentReceipt}
-            />
 
-            {/* Desktop Table View */}
             <div className="bg-black border border-slate-800 rounded-lg overflow-x-auto max-w-[100vw] w-full">
                 <table className="w-full text-left text-sm">
                     <thead className="border-b border-slate-800">
@@ -405,7 +244,11 @@ export function TenantTable({ tenants = [], profile, userEmail, ownerId, isViewi
                                                 {getInitials(tenant.name)}
                                             </div>
                                             <div className="min-w-0">
-                                                <div className="font-medium text-white text-sm truncate">{tenant.name}</div>
+                                                <Link href={`/compte/gestion-locative/locataires/${tenant.id}`} className="block group/link">
+                                                    <div className="font-medium text-white text-sm truncate group-hover/link:text-blue-400 transition-colors">
+                                                        {tenant.name}
+                                                    </div>
+                                                </Link>
                                                 <div className="text-xs text-slate-500 truncate">{tenant.email || 'Email manquant'}</div>
                                             </div>
                                         </div>
@@ -444,14 +287,14 @@ export function TenantTable({ tenants = [], profile, userEmail, ownerId, isViewi
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-44 bg-slate-900 border-slate-800">
-                                                {tenant.status === 'paid' && (
-                                                    <DropdownMenuItem onClick={() => handleViewReceipt(tenant)} className="text-slate-300 hover:bg-slate-800 focus:bg-slate-800">
+                                                {tenant.status === 'paid' && onViewReceipt && (
+                                                    <DropdownMenuItem onClick={() => onViewReceipt(tenant)} className="text-slate-300 hover:bg-slate-800 focus:bg-slate-800">
                                                         <Eye className="mr-2 h-4 w-4" />
                                                         Voir quittance
                                                     </DropdownMenuItem>
                                                 )}
-                                                {(tenant.status === 'pending' || tenant.status === 'overdue') && (
-                                                    <DropdownMenuItem onClick={() => handleConfirmPayment(tenant.id, tenant.last_transaction_id)} className="text-slate-300 hover:bg-slate-800 focus:bg-slate-800">
+                                                {(tenant.status === 'pending' || tenant.status === 'overdue') && onConfirmPayment && (
+                                                    <DropdownMenuItem onClick={() => onConfirmPayment(tenant.id, tenant.last_transaction_id)} className="text-slate-300 hover:bg-slate-800 focus:bg-slate-800">
                                                         <CheckCircle className="mr-2 h-4 w-4" />
                                                         Marquer payé
                                                     </DropdownMenuItem>
@@ -465,13 +308,13 @@ export function TenantTable({ tenants = [], profile, userEmail, ownerId, isViewi
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuSeparator className="bg-slate-800" />
-                                                {isViewingTerminated ? (
-                                                    <DropdownMenuItem onClick={() => handleReactivateLease(tenant.id, tenant.name)} className="text-green-400 hover:bg-slate-800 focus:bg-slate-800">
+                                                {isViewingTerminated && onReactivate ? (
+                                                    <DropdownMenuItem onClick={() => onReactivate(tenant.id, tenant.name)} className="text-green-400 hover:bg-slate-800 focus:bg-slate-800">
                                                         <RotateCcw className="mr-2 h-4 w-4" />
                                                         Réactiver
                                                     </DropdownMenuItem>
-                                                ) : (
-                                                    <DropdownMenuItem onClick={() => handleTerminateLease(tenant.id, tenant.name)} className="text-orange-400 hover:bg-slate-800 focus:bg-slate-800">
+                                                ) : onTerminate && (
+                                                    <DropdownMenuItem onClick={() => onTerminate(tenant.id, tenant.name)} className="text-orange-400 hover:bg-slate-800 focus:bg-slate-800">
                                                         <Trash2 className="mr-2 h-4 w-4" />
                                                         Résilier
                                                     </DropdownMenuItem>

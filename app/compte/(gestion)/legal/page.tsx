@@ -34,7 +34,7 @@ export default async function LegalAssistantPage() {
     return (
         <div className="min-h-screen bg-slate-950">
             <RentalTour page="legal" />
-            <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 space-y-8 animate-in fade-in duration-500">
+            <div className="w-full mx-auto px-4 md:px-6 py-8 space-y-8 animate-in fade-in duration-500">
 
                 {/* SECTION 1 : EN-TÊTE */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

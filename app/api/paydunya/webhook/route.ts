@@ -1,43 +1,57 @@
 import { validatePayDunyaWebhook, type PayDunyaWebhookPayload } from "@/lib/paydunya";
 import { createClient } from "@/utils/supabase/server";
 import { sendEmail } from "@/lib/mail";
+import { invalidateRentalCaches } from "@/lib/cache/invalidation";
+import { invalidateCacheBatch } from "@/lib/cache/cache-aside";
 
 export async function POST(request: Request) {
   try {
-    // Récupérer la signature depuis les headers
-    const signature = request.headers.get("PAYDUNYA-SIGNATURE");
+    // PayDunya envoie les données en application/x-www-form-urlencoded
+    // Les données sont dans la clé "data"
+    const formData = await request.formData();
+    const dataString = formData.get('data') as string;
 
-    if (!signature) {
-      console.error("Webhook PayDunya: Signature manquante");
+    if (!dataString) {
+      console.error("Webhook PayDunya: Données manquantes (clé 'data' absente)");
       return Response.json(
-        { error: "Signature manquante" },
+        { error: "Données manquantes" },
         { status: 400 }
       );
     }
 
-    // Lire le body brut pour la validation
-    const rawBody = await request.text();
+    // Parser le JSON contenu dans la clé "data"
+    const payload: PayDunyaWebhookPayload = JSON.parse(dataString);
 
-    // Valider la signature
-    if (!validatePayDunyaWebhook(rawBody, signature)) {
-      console.error("Webhook PayDunya: Signature invalide");
+    // Vérifier que le hash est présent
+    if (!payload.hash) {
+      console.error("Webhook PayDunya: Hash manquant dans le payload");
       return Response.json(
-        { error: "Signature invalide" },
+        { error: "Hash manquant" },
+        { status: 400 }
+      );
+    }
+
+    // Valider le hash SHA-512 de la MasterKey
+    if (!validatePayDunyaWebhook(payload.hash)) {
+      console.error("Webhook PayDunya: Hash invalide", {
+        receivedHash: payload.hash.substring(0, 20) + '...',
+      });
+      return Response.json(
+        { error: "Hash invalide" },
         { status: 401 }
       );
     }
 
-    // Parser le payload
-    const payload: PayDunyaWebhookPayload = JSON.parse(rawBody);
-
-    console.log("Webhook PayDunya reçu:", {
+    console.log("✅ Webhook PayDunya validé:", {
       token: payload.invoice.token,
       status: payload.invoice.status,
       amount: payload.invoice.total_amount,
+      mode: payload.mode,
+      response_code: payload.response_code,
+      custom_data: payload.custom_data,
     });
 
-    // Si le paiement est complété, on peut mettre à jour la propriété si elle existe
-    // Sinon, le token sera utilisé lors de la création de l'annonce
+    // Gérer les différents statuts de paiement
     if (payload.invoice.status === "completed") {
       const supabase = await createClient();
       const customData = payload.custom_data as {
@@ -53,7 +67,7 @@ export async function POST(request: Request) {
         // Récupérer infos pour l'email (email locataire, email proprio)
         const { data: lease } = await supabase
           .from('leases')
-          .select('tenant_email, tenant_name, monthly_amount, owner:profiles(email, full_name)')
+          .select('tenant_email, tenant_name, monthly_amount, owner_id, owner:profiles(email, full_name)')
           .eq('id', customData.lease_id)
           .single();
 
@@ -72,7 +86,27 @@ export async function POST(request: Request) {
         if (rentError) {
           console.error("Erreur maj loyer:", rentError);
         } else {
-          console.log(`✅ Loyer payé via PayDunya: Bail ${customData.lease_id}`);
+          console.log(`✅ Loyer payé via PayDunya: Bail ${customData.lease_id}`, {
+            receipt_url: payload.receipt_url,
+          });
+
+          // 🔥 INVALIDATION DU CACHE (Critical!)
+          if (lease?.owner_id) {
+            // Utiliser la fonction dédiée pour invalider les caches locatifs
+            await invalidateRentalCaches(lease.owner_id, customData.lease_id, {
+              invalidateLeases: true,
+              invalidateTransactions: true,
+              invalidateStats: true,
+            });
+          }
+
+          // Invalider aussi le cache du dashboard locataire
+          if (lease?.tenant_email) {
+            await invalidateCacheBatch([
+              `tenant_dashboard:${lease.tenant_email}`,
+              `tenant_payments:${customData.lease_id}`,
+            ], 'rentals');
+          }
 
           // Envoyer Email de confirmation
           if (lease && lease.tenant_email) {
@@ -96,9 +130,9 @@ export async function POST(request: Request) {
             });
 
             // Notification Proprio (CC)
-            // @ts-ignore
+            // @ts-expect-error - owner peut être undefined selon le join
             if (lease.owner?.email) {
-              // @ts-ignore
+              // @ts-expect-error - owner.email existe si la condition précédente passe
               await sendEmail({ to: lease.owner.email, subject: `[Paiement] Loyer reçu - ${lease.tenant_name}`, html: `<p>Le locataire ${lease.tenant_name} a réglé son loyer de ${amountFmt} FCFA via PayDunya.</p>` });
             }
           }
@@ -109,9 +143,12 @@ export async function POST(request: Request) {
         const propertyId = customData.property_id;
         // Extraire les détails du paiement depuis le payload PayDunya
         const paymentAmount = payload.invoice.total_amount;
-        const serviceName = payload.invoice.items && payload.invoice.items.length > 0
-          ? payload.invoice.items[0].name  // Premier item (ex: "Diffusion Simple - Studio")
-          : payload.invoice.description;   // Fallback sur la description
+
+        // items est un objet Record<string, Item>, pas un tableau
+        const firstItem = payload.invoice.items
+          ? Object.values(payload.invoice.items)[0]
+          : undefined;
+        const serviceName = firstItem?.name || payload.invoice.description;
 
         // Mettre à jour uniquement les informations de paiement, SANS changer le statut de validation
         // Le statut reste "payment_pending" pour que l'admin puisse valider manuellement
@@ -135,6 +172,26 @@ export async function POST(request: Request) {
         // Si la propriété n'existe pas encore, le token sera utilisé lors de la création
         console.log("Paiement confirmé, token disponible pour création d'annonce:", payload.invoice.token);
       }
+    } else if (payload.invoice.status === "failed") {
+      console.warn("❌ Paiement échoué:", {
+        token: payload.invoice.token,
+        fail_reason: payload.fail_reason,
+        errors: payload.errors,
+        custom_data: payload.custom_data,
+      });
+      // TODO: Notifier l'utilisateur de l'échec
+    } else if (payload.invoice.status === "cancelled") {
+      console.warn("⚠️ Paiement annulé:", {
+        token: payload.invoice.token,
+        fail_reason: payload.fail_reason,
+        custom_data: payload.custom_data,
+      });
+      // TODO: Notifier l'utilisateur de l'annulation
+    } else if (payload.invoice.status === "pending") {
+      console.log("⏳ Paiement en attente:", {
+        token: payload.invoice.token,
+        custom_data: payload.custom_data,
+      });
     }
 
     // Toujours retourner 200 pour confirmer la réception du webhook

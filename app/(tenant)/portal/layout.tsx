@@ -12,26 +12,33 @@ export default async function TenantLayout({
     const { data: { user } } = await supabase.auth.getUser();
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
-            {/* Header Desktop / Tablette */}
-            <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
-                <div className="max-w-md mx-auto md:max-w-5xl px-4 h-16 flex items-center justify-between">
-                    <div className="font-bold text-xl text-slate-900">
-                        <span className="text-blue-600">Doussel</span>Loc
+        <div className="min-h-screen bg-slate-950 pb-20 md:pb-0">
+            {/* Header style Gestion Locative */}
+            <header className="bg-slate-900/50 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-lg">
+                <div className="w-full mx-auto px-4 md:px-6 h-14 sm:h-16 flex items-center justify-between">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="text-base sm:text-lg font-bold text-white">
+                            <span className="text-orange-400">Doussel</span>Loc
+                        </div>
+                        <span className="hidden sm:inline-block text-xs text-slate-500">|</span>
+                        <span className="text-xs text-slate-400">Espace Locataire</span>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <span className="text-sm text-slate-500 hidden md:block">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="text-[10px] sm:text-xs text-slate-400 hidden md:block max-w-[200px] truncate">
                             {user?.email}
                         </span>
-                        <Link href="/auth/signout" className="p-2 text-slate-400 hover:text-red-500 transition-colors">
-                            <LogOut className="w-5 h-5" />
+                        <Link
+                            href="/auth/signout"
+                            className="p-2 sm:p-2.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 transition-colors"
+                        >
+                            <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300" />
                         </Link>
                     </div>
                 </div>
             </header>
 
-            <main className="max-w-md mx-auto md:max-w-5xl py-6 animate-in fade-in duration-300">
+            <main className="w-full mx-auto px-4 md:px-6 py-4 sm:py-6 animate-in fade-in duration-500">
                 {children}
             </main>
 

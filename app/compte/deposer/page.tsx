@@ -20,6 +20,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { submitUserListing, generateAIDescription } from "@/app/compte/deposer/actions";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
+import PayDunyaPopupPayment from "@/components/payment/paydunya-popup-payment";
 
 // Schéma de validation complet
 const depositSchema = z
@@ -1728,81 +1729,39 @@ function DeposerPageContent() {
                       </Button>
                     </div>
                   ) : (
-                    // CAS 2 : PAS ENCORE PAYÉ -> BOUTON PAYER
-                    <div className="rounded-2xl border border-white/10 bg-card p-6 text-center">
-                      <p className="text-sm text-white/70 mb-4">
-                        Paiement sécurisé via PayDunya
-                      </p>
-                      <p className="text-lg font-semibold text-white mb-2">
-                        {services.find(s => s.code === "boost_visibilite")?.price.toLocaleString("fr-SN") || "1 500"} FCFA
-                      </p>
-                      <p className="text-sm text-white/60 mb-4">
-                        Accepte Wave, Orange Money et Free Money
-                      </p>
-                      <Button
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            setSubmitting(true);
-                            const values = getValues();
+                    // CAS 2 : PAS ENCORE PAYÉ -> FORMULAIRE ONSITE (PSR)
+                    <div className="rounded-2xl border border-white/10 bg-card p-6">
+                      <div className="text-center mb-6">
+                        <p className="text-sm text-white/70 mb-2">
+                          Paiement sécurisé via PayDunya
+                        </p>
+                        <p className="text-lg font-semibold text-white">
+                          {services.find(s => s.code === "boost_visibilite")?.price.toLocaleString("fr-SN") || "1 500"} FCFA
+                        </p>
+                        <p className="text-xs text-white/50">
+                          Sans redirection : payez directement ici
+                        </p>
+                      </div>
 
-                            // Créer la facture PayDunya
-                            const response = await fetch("/api/paydunya/create-invoice", {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify({
-                                serviceType: "boost_visibilite", // On envoie le CODE du service, pas le montant
-                                description: `Diffusion Simple - ${values.title}`,
-                                propertyId: null,
-                                returnUrl: `${window.location.origin}/compte/deposer?payment=success`,
-                                cancelUrl: `${window.location.origin}/compte/deposer?payment=canceled`,
-                              }),
-                            });
+                      <PayDunyaPopupPayment
+                        serviceType="boost_visibilite"
+                        description={`Diffusion Simple - ${getValues("title")}`}
+                        amount={services.find(s => s.code === "boost_visibilite")?.price || 1500}
+                        propertyId={undefined}
+                        buttonText="Payer maintenant"
+                        onSuccess={() => {
+                          // Marquer le paiement comme réussi
+                          const token = "popup-verified-" + Date.now();
+                          setPaymentToken(token);
+                          setPaymentVerification("success");
+                          setIsPaymentConfirmed(true);
+                          setPaymentMessage(null);
+                          localStorage.setItem("paydunya_payment_verified", "true");
+                          localStorage.setItem("paydunya_payment_token", token);
 
-                            const data = await response.json();
-
-                            if (!response.ok || !data.success) {
-                              throw new Error(data.error || "Erreur lors de la création du paiement");
-                            }
-
-                            // Stocker le token avant la redirection
-                            if (data.token) {
-                              localStorage.removeItem("paydunya_payment_verified");
-                              localStorage.setItem("paydunya_payment_token", data.token);
-                              setPaymentToken(null);
-                              setPaymentVerification("idle");
-                              setIsPaymentConfirmed(false); // Réinitialiser l'état de confirmation avant redirection
-                              setPaymentMessage(null);
-                            }
-
-                            // Rediriger vers PayDunya
-                            window.location.href = data.checkout_url;
-                          } catch (error) {
-                            console.error("Erreur PayDunya:", error);
-                            toast.error("Erreur lors de la création du paiement", {
-                              description: error instanceof Error ? error.message : "Veuillez réessayer",
-                            });
-                            setSubmitting(false);
-                          }
+                          toast.success("Paiement validé avec succès !");
                         }}
-                        disabled={submitting}
-                        className="w-full h-12 rounded-xl bg-primary text-black hover:bg-primary/90 disabled:opacity-50"
-                      >
-                        {submitting ? "Redirection..." : "Payer avec PayDunya"}
-                      </Button>
-
-                      {paymentVerification === "checking" && (
-                        <div className="mt-4 rounded-2xl border border-white/10 bg-card p-4 text-center text-sm text-white/70">
-                          Vérification du paiement en cours...
-                        </div>
-                      )}
-                      {paymentMessage && paymentVerification === "error" && (
-                        <div className="mt-4 rounded-2xl border border-primary/40 bg-primary/10 p-4 text-center text-sm text-primary">
-                          {paymentMessage}
-                        </div>
-                      )}
+                      />
                     </div>
                   )}
                 </>
@@ -1832,11 +1791,12 @@ function DeposerPageContent() {
                 </div>
               )}
             </motion.div>
-          )}
-        </AnimatePresence>
+          )
+          }
+        </AnimatePresence >
 
         {/* Navigation Buttons - CACHÉ À L'ÉTAPE 3 SI PAIEMENT REQUIS */}
-        <div className="mt-8 flex justify-between gap-4">
+        < div className="mt-8 flex justify-between gap-4" >
           {step > 1 ? (
             <Button
               type="button"
@@ -1852,77 +1812,81 @@ function DeposerPageContent() {
             <div />
           )}
 
-          {step < 3 ? (
-            <Button
-              type="button"
-              size="lg"
-              onClick={handleNext}
-              className="h-12 rounded-full bg-primary text-black text-base"
-            >
-              Suivant
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          ) : !needsPayment ? (
-            // Bouton visible uniquement pour les annonces GRATUITES à l'étape 3
-            // (Pour les payantes, le bouton est dans le bloc de paiement)
-            <Button
-              type="button"
-              size="lg"
-              onClick={(e) => {
-                e.preventDefault();
-                handleSubmitClick(e);
-              }}
-              disabled={submitting || uploading}
-              className="h-12 rounded-full bg-primary text-black text-base disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {submitting ? (
-                <>
-                  <svg
-                    className="mr-2 h-5 w-5 animate-spin"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Envoi en cours...
-                </>
-              ) : (
-                "Confirmer le dépôt"
-              )}
-            </Button>
-          ) : null}
-        </div>
-      </form>
+          {
+            step < 3 ? (
+              <Button
+                type="button"
+                size="lg"
+                onClick={handleNext}
+                className="h-12 rounded-full bg-primary text-black text-base"
+              >
+                Suivant
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            ) : !needsPayment ? (
+              // Bouton visible uniquement pour les annonces GRATUITES à l'étape 3
+              // (Pour les payantes, le bouton est dans le bloc de paiement)
+              <Button
+                type="button"
+                size="lg"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSubmitClick(e);
+                }}
+                disabled={submitting || uploading}
+                className="h-12 rounded-full bg-primary text-black text-base disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? (
+                  <>
+                    <svg
+                      className="mr-2 h-5 w-5 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Envoi en cours...
+                  </>
+                ) : (
+                  "Confirmer le dépôt"
+                )}
+              </Button>
+            ) : null
+          }
+        </div >
+      </form >
 
       {/* Auto-save Indicator */}
       <AnimatePresence>
-        {formSaving && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
-          >
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm text-white shadow-lg">
-              <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-medium">Sauvegarde automatique...</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {
+          formSaving && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
+            >
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm text-white shadow-lg">
+                <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="font-medium">Sauvegarde automatique...</span>
+              </div>
+            </motion.div>
+          )
+        }
+      </AnimatePresence >
     </div >
   );
 }

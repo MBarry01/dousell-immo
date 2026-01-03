@@ -10,8 +10,7 @@ export async function getOwnerMessages(leaseId: string) {
 
     if (!user) return { error: "Non authentifié" };
 
-    // Vérifier que le bail appartient bien au owner (RLS le fera mais bon)
-    // On récupère aussi le nom du locataire pour l'affichage
+    // Vérifier que le bail appartient bien au owner
     const { data: lease } = await supabase
         .from('leases')
         .select('id, tenant_name, owner_id')
