@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Tailwind v4: Configure dark mode to use .dark class */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   color-scheme: dark;
   --background: #05080c;
@@ -22,26 +25,7 @@
   --radius: 1.5rem;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color-scheme: light;
-    --background: #f9fafb;
-    --foreground: #0f172a;
-    --muted: #ffffff;
-    --muted-foreground: #4b5563;
-    --card: #ffffff;
-    --card-foreground: #0f172a;
-    --popover: #ffffff;
-    --popover-foreground: #0f172a;
-    --accent: #111827;
-    --accent-foreground: #f5f5f5;
-    /* Couleur primaire - Jaune Or de marque #F4C430 (identique en mode light) */
-    --primary: 45 91% 57%;
-    --primary-foreground: 0 0% 0%;
-    --ring: 45 91% 57%;
-    --border: rgba(15, 23, 42, 0.08);
-  }
-}
+/* Pas de mode light - Application toujours en dark mode */
 
 @theme inline {
   --font-sans: var(--font-geist-sans);

@@ -60,7 +60,8 @@ export async function getOrSetCacheSWR<T>(
     const cachedMeta = await redis.get(metaKey);
 
     if (cachedData) {
-      const data = JSON.parse(cachedData);
+      // Si c'est déjà un objet (Upstash retourne parfois des objets), on l'utilise directement
+      const data = typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData;
 
       // 2. Vérifier si stale (>50% du TTL écoulé)
       const cacheAge = cachedMeta ? Date.now() - parseInt(cachedMeta) : ttl * 1000;

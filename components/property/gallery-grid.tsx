@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { PropertyLightbox } from "@/components/property/property-lightbox";
 
 type GalleryGridProps = {
   propertyId: string;
@@ -27,6 +28,9 @@ export const GalleryGrid = ({
   images,
 }: GalleryGridProps) => {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [initialLightboxIndex, setInitialLightboxIndex] = useState(0);
+
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -36,7 +40,12 @@ export const GalleryGrid = ({
     watchResize: true,
   });
 
-  // Suivre l'index sélectionné dans le carousel
+  const openLightbox = (index: number) => {
+    setInitialLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
+  // Suivre l'index sélectionné dans le carousel mobile
   useEffect(() => {
     if (!emblaApi) return;
     const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
@@ -63,6 +72,7 @@ export const GalleryGrid = ({
             <div
               key={`${propertyId}-${src}-${index}`}
               className="relative h-[50vh] min-w-full shrink-0 overflow-hidden touch-none"
+              onClick={() => openLightbox(index)}
             >
               <Image
                 src={src}
@@ -89,7 +99,10 @@ export const GalleryGrid = ({
             <button
               key={`dot-${index}`}
               type="button"
-              onClick={() => scrollTo(index)}
+              onClick={(e) => {
+                e.stopPropagation();
+                scrollTo(index);
+              }}
               className={`h-2.5 rounded-full transition-all ${selectedIndex === index ? "w-8 bg-white" : "w-2 bg-white/40"
                 }`}
               aria-label={`Aller à l'image ${index + 1}`}
@@ -105,7 +118,10 @@ export const GalleryGrid = ({
     <div className="relative hidden h-[400px] w-full overflow-hidden rounded-2xl md:grid md:grid-cols-4 md:grid-rows-2 md:gap-2">
       {/* Image 1 - Grande à gauche */}
       {images[0] && (
-        <div className="relative col-span-2 row-span-2 overflow-hidden rounded-l-2xl">
+        <div
+          className="relative col-span-2 row-span-2 overflow-hidden rounded-l-2xl cursor-pointer hover:opacity-95 transition-opacity"
+          onClick={() => openLightbox(0)}
+        >
           <Image
             src={images[0]}
             alt={`${title} - Photo principale`}
@@ -129,7 +145,8 @@ export const GalleryGrid = ({
         return (
           <div
             key={`grid-${index + 1}`}
-            className={`relative overflow-hidden ${positions[index]?.rounded || ""}`}
+            className={`relative overflow-hidden cursor-pointer hover:opacity-95 transition-opacity ${positions[index]?.rounded || ""}`}
+            onClick={() => openLightbox(index + 1)}
           >
             <Image
               src={src}
@@ -171,7 +188,7 @@ export const GalleryGrid = ({
       {mobileView}
       {desktopView}
 
-      {/* Dialog pour toutes les photos */}
+      {/* Dialog pour toutes les photos (Grid View de secours) */}
       <Dialog open={showAllPhotos} onOpenChange={setShowAllPhotos}>
         <DialogContent className="max-h-[90vh] max-w-7xl overflow-y-auto">
           <DialogHeader>
@@ -184,7 +201,14 @@ export const GalleryGrid = ({
             {images.map((src, index) => (
               <div
                 key={`modal-${index}`}
-                className="relative aspect-square overflow-hidden rounded-xl"
+                className="relative aspect-square overflow-hidden rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => {
+                  // Close dialog and open lightbox
+                  // setShowAllPhotos(false); // Optional: keep dialog open or close it. 
+                  // Common pattern: click in modal opens lightbox on top, or switches view.
+                  // Lightbox z-index should be higher than dialog.
+                  openLightbox(index);
+                }}
               >
                 <Image
                   src={src}
@@ -199,6 +223,14 @@ export const GalleryGrid = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Full Screen Lightbox */}
+      <PropertyLightbox
+        images={images}
+        initialIndex={initialLightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
     </>
   );
 };

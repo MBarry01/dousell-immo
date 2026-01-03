@@ -26,6 +26,11 @@ export interface PayDunyaInvoice {
     total_amount: number;
     description: string;
     taxes?: Record<string, number>;
+    customer?: {
+      name?: string;
+      email?: string;
+      phone?: string;
+    };
   };
   store: {
     name: string;
@@ -52,13 +57,21 @@ export interface PayDunyaInvoiceResponse {
   response_code_detail?: string;
 }
 
+/**
+ * Structure complète du webhook PayDunya
+ * Envoyé en application/x-www-form-urlencoded sous la clé "data"
+ */
 export interface PayDunyaWebhookPayload {
+  response_code: string;
+  response_text: string;
+  hash: string; // SHA-512 hash de la MasterKey
   invoice: {
     token: string;
-    status: "completed" | "pending" | "cancelled";
+    status: "completed" | "pending" | "cancelled" | "failed";
     total_amount: number;
     description: string;
-    items: PayDunyaInvoiceItem[];
+    items?: Record<string, PayDunyaInvoiceItem>;
+    taxes?: Record<string, { name: string; amount: number }>;
   };
   customer: {
     name?: string;
@@ -66,6 +79,18 @@ export interface PayDunyaWebhookPayload {
     phone?: string;
   };
   custom_data?: Record<string, unknown>;
+  actions?: {
+    cancel_url?: string;
+    return_url?: string;
+    callback_url?: string;
+  };
+  mode: "test" | "live";
+  receipt_url?: string;
+  fail_reason?: string; // Pour les paiements par carte échoués/annulés
+  errors?: {
+    message?: string;
+    description?: string;
+  };
 }
 
 /**
@@ -110,6 +135,42 @@ export function getPayDunyaApiBaseUrl(mode: PayDunyaMode): string {
 
 export function getPayDunyaCheckoutBaseUrl(mode: PayDunyaMode): string {
   return PAYDUNYA_CHECKOUT_BASE[mode];
+}
+
+/**
+ * Interface pour la requête de création de facture OPR (Onsite)
+ */
+export interface PayDunyaOnsiteRequest {
+  invoice_data: PayDunyaInvoice;
+  opr_data: {
+    account_alias: string; // Numéro de téléphone ou email
+  };
+}
+
+/**
+ * Réponse de création OPR
+ */
+export interface PayDunyaOnsiteResponse {
+  response_code: string;
+  response_text: string;
+  token: string;        // OPR Token
+  invoice_token: string; // Token de facture classique
+  description?: string;
+}
+
+/**
+ * Réponse de confirmation OPR
+ */
+export interface PayDunyaOnsiteChargeResponse {
+  response_code: string;
+  response_text: string;
+  invoice_data?: {
+    status: string;
+    receipt_url: string;
+    invoice: {
+      total_amount: number;
+    };
+  };
 }
 
 /**
@@ -181,6 +242,116 @@ export async function checkPayDunyaInvoiceStatus(
 }
 
 /**
+ * Créer une facture PayDunya OPR (Onsite Payment Request)
+ * Cette méthode déclenche l'envoi du code OTP au client.
+ */
+export async function createOnsiteInvoice(
+  invoice: PayDunyaInvoice,
+  accountAlias: string
+): Promise<PayDunyaOnsiteResponse> {
+  const config = getPayDunyaConfig();
+  // Utilisation de l'URL dynamique (confirmée par Setup.php)
+  const baseUrl = getPayDunyaApiBaseUrl(config.mode);
+  const url = `${baseUrl}/opr/create`;
+
+  const payload: PayDunyaOnsiteRequest = {
+    invoice_data: invoice,
+    opr_data: {
+      account_alias: accountAlias
+    }
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "PAYDUNYA-MASTER-KEY": config.masterKey,
+      "PAYDUNYA-PRIVATE-KEY": config.privateKey,
+      "PAYDUNYA-TOKEN": config.token,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    // Provide a clean error message instead of raw HTML
+    if (response.status === 404) {
+      throw new Error(
+        "Service de paiement direct indisponible. Veuillez utiliser le paiement par redirection."
+      );
+    }
+    const errorText = await response.text();
+    // Extract error message if JSON, otherwise use generic message
+    let cleanError = "Erreur lors de la création du paiement";
+    try {
+      const errorJson = JSON.parse(errorText);
+      cleanError = errorJson.response_text || errorJson.message || cleanError;
+    } catch {
+      // Not JSON, check if it's HTML (404 page)
+      if (errorText.includes("<!DOCTYPE") || errorText.includes("<html")) {
+        cleanError = `Erreur PayDunya (${response.status}): Service temporairement indisponible`;
+      }
+    }
+    throw new Error(cleanError);
+  }
+
+  const data = await response.json();
+
+  // PayDunya retourne "00" pour succès
+  if (data.response_code !== "00") {
+    throw new Error(
+      `Erreur PayDunya OPR Create: ${data.response_text}`
+    );
+  }
+
+  return data;
+}
+
+/**
+ * Confirmer un paiement PayDunya OPR avec le code OTP
+ */
+export async function chargeOnsiteInvoice(
+  oprToken: string,
+  confirmToken: string
+): Promise<PayDunyaOnsiteChargeResponse> {
+  const config = getPayDunyaConfig();
+  const baseUrl = getPayDunyaApiBaseUrl(config.mode);
+  const url = `${baseUrl}/opr/charge`;
+
+  const payload = {
+    token: oprToken,
+    confirm_token: confirmToken
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "PAYDUNYA-MASTER-KEY": config.masterKey,
+      "PAYDUNYA-PRIVATE-KEY": config.privateKey,
+      "PAYDUNYA-TOKEN": config.token,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Erreur PayDunya OPR Charge (${response.status}): ${errorText}`
+    );
+  }
+
+  const data = await response.json();
+
+  if (data.response_code !== "00") {
+    throw new Error(
+      `Erreur PayDunya OPR Charge: ${data.response_text}`
+    );
+  }
+
+  return data;
+}
+
+/**
  * URL de redirection vers le checkout PayDunya
  */
 export function getPayDunyaCheckoutUrl(token: string, mode: PayDunyaMode): string {
@@ -214,6 +385,7 @@ export async function initializePayment(
     invoice: {
       total_amount: price,
       description: `Boost annonce : ${title}`,
+      channels: ['wave-senegal', 'orange-money-senegal']
     },
     store: {
       name: "Doussel Immo",
@@ -257,9 +429,11 @@ export async function initializePayment(
     );
   }
 
+  // ✅ CORRECTION: Utiliser directement l'URL retournée par PayDunya (response_text)
+  // au lieu de construire l'URL manuellement (qui était incorrecte)
   return {
     token: data.token,
-    redirectUrl: getPayDunyaCheckoutUrl(data.token, config.mode),
+    redirectUrl: data.response_text, // URL complète retournée par PayDunya
     raw: data,
   };
 }
@@ -281,8 +455,6 @@ export async function initializeRentalPayment(
   const url = `${baseUrl}/checkout-invoice/create`;
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://doussel-immo.vercel.app";
-  // En dev (localhost), le callback ne fonctionnera pas sans ngrok.
-  // On utilise une URL ngrok si définie, sinon l'URL de l'app (qui échouera en local d'où l'importance de ngrok)
   const callbackUrl =
     process.env.PAYDUNYA_CALLBACK_URL ||
     process.env.NGROK_CALLBACK_URL ||
@@ -302,7 +474,8 @@ export async function initializeRentalPayment(
           total_price: amount,
           description: `Règlement du loyer pour le bail ${leaseId}`
         }
-      ]
+      ],
+      channels: ['wave-senegal', 'orange-money-senegal', 'card-senegal']
     },
     store: {
       name: "Doussel Immo",
@@ -323,7 +496,7 @@ export async function initializeRentalPayment(
     customer: {
       name: tenantName,
       email: tenantEmail,
-      phone: tenantPhone
+      phone: tenantPhone ? tenantPhone.replace(/^(\+221|00221|221|\+)/g, '') : undefined
     }
   };
 
@@ -355,38 +528,39 @@ export async function initializeRentalPayment(
 
   return {
     token: data.token,
-    redirectUrl: getPayDunyaCheckoutUrl(data.token, config.mode),
+    redirectUrl: data.response_text,
     raw: data,
   };
 }
 
 /**
- * Valider la signature HMAC d'un webhook PayDunya
+ * Valider le hash SHA-512 d'un webhook PayDunya
+ * PayDunya envoie un hash SHA-512 de la MasterKey dans le payload
+ * Documentation: https://developers.paydunya.com/doc/FR/http_json
  */
-export function validatePayDunyaWebhook(
-  payload: string,
-  signature: string
-): boolean {
+export function validatePayDunyaWebhook(receivedHash: string): boolean {
   try {
     const config = getPayDunyaConfig();
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const crypto = require("crypto");
-    const expectedSignature = crypto
-      .createHmac("sha256", config.privateKey)
-      .update(payload)
+
+    // Calculer le hash SHA-512 de la MasterKey
+    const expectedHash = crypto
+      .createHash("sha512")
+      .update(config.masterKey)
       .digest("hex");
 
-    // Comparaison sécurisée des signatures
-    if (signature.length !== expectedSignature.length) {
+    // Comparaison sécurisée des hash
+    if (receivedHash.length !== expectedHash.length) {
       return false;
     }
 
     return crypto.timingSafeEqual(
-      Buffer.from(signature, "hex"),
-      Buffer.from(expectedSignature, "hex")
+      Buffer.from(receivedHash, "hex"),
+      Buffer.from(expectedHash, "hex")
     );
   } catch (error) {
-    console.error("Erreur lors de la validation de la signature:", error);
+    console.error("Erreur lors de la validation du hash:", error);
     return false;
   }
 }
