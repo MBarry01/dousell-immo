@@ -5,11 +5,12 @@ import { createClient } from '@/utils/supabase/server';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const supabase = await createClient();
-        const { id: transactionId } = params;
+        const transactionId = id;
 
         // 1. Vérifier l'authentification
         const { data: { user } } = await supabase.auth.getUser();
