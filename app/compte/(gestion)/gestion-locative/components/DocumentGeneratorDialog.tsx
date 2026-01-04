@@ -74,6 +74,7 @@ export function DocumentGeneratorDialog({ leases, userEmail, profile, trigger }:
 
     // Receipt Data Construction
     const receiptData = selectedReceiptLease ? {
+        leaseId: receiptLeaseId, // Ajout pour stockage automatique
         tenant: {
             tenant_name: selectedReceiptLease.tenant_name,
             email: selectedReceiptLease.tenant_email,
@@ -93,9 +94,9 @@ export function DocumentGeneratorDialog({ leases, userEmail, profile, trigger }:
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogTrigger asChild>
                     {trigger ? trigger : (
-                        <Button variant="outline" className="gap-2">
+                        <Button variant="outline" className="bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-200 hover:text-white h-9 px-3 gap-2">
                             <FileText className="w-4 h-4" />
-                            Documents
+                            <span>Générer</span>
                         </Button>
                     )}
                 </DialogTrigger>

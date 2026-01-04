@@ -76,7 +76,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
         switch (status) {
             case 'open': return "bg-blue-500/10 text-blue-400";
             case 'artisan_found': return "bg-emerald-500/10 text-emerald-400";
-            case 'awaiting_approval': return "bg-orange-500/10 text-orange-400";
+            case 'awaiting_approval': return "bg-brand/10 text-brand";
             case 'approved': return "bg-purple-500/10 text-purple-400";
             case 'in_progress': return "bg-yellow-500/10 text-yellow-400";
             case 'completed': return "bg-green-500/10 text-green-400";
@@ -197,7 +197,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                 {/* Formulaire */}
                 {showForm && (
                     <div className="p-4 bg-gray-800/50 border border-gray-700 rounded-xl space-y-3">
-                        <p className="text-xs font-medium text-orange-400">Nouvelle intervention</p>
+                        <p className="text-xs font-medium text-brand">Nouvelle intervention</p>
 
                         {leases.length > 0 && (
                             <div className="relative">
@@ -220,7 +220,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                             placeholder="Décrivez le problème..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm resize-none h-16 focus:border-orange-500/50 focus:outline-none"
+                            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm resize-none h-16 focus:border-brand/50 focus:outline-none"
                         />
 
                         <div className="flex gap-2">
@@ -242,7 +242,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                 onClick={handleSubmit}
                                 disabled={!description.trim() || submitting}
                                 size="sm"
-                                className="bg-orange-600 hover:bg-orange-700 h-9 px-4"
+                                className="bg-brand hover:bg-brand/90 h-9 px-4 text-black"
                             >
                                 {submitting ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -332,7 +332,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                         onClick={() => handleApproveQuote(req.id)}
                                         disabled={processingId === req.id}
                                         size="sm"
-                                        className="bg-orange-600 hover:bg-orange-700 text-xs h-8"
+                                        className="bg-brand hover:bg-brand/90 text-xs h-8 text-black"
                                     >
                                         {processingId === req.id ? (
                                             <Loader2 className="w-3 h-3 animate-spin" />
@@ -403,7 +403,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                         value={quotePrice}
                                         onChange={(e) => setQuotePrice(e.target.value)}
                                         placeholder="Ex: 25000"
-                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500/50 focus:outline-none"
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-brand/50 focus:outline-none"
                                     />
                                 </div>
                                 <div>
@@ -412,7 +412,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                         type="date"
                                         value={quoteDate}
                                         onChange={(e) => setQuoteDate(e.target.value)}
-                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500/50 focus:outline-none"
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-brand/50 focus:outline-none"
                                     />
                                 </div>
                             </div>
@@ -430,7 +430,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                     onClick={handleSubmitQuote}
                                     disabled={!quotePrice || !quoteDate || processingId === quoteRequestId}
                                     size="sm"
-                                    className="flex-1 bg-orange-600 hover:bg-orange-700"
+                                    className="flex-1 bg-brand hover:bg-brand/90 text-black"
                                 >
                                     {processingId === quoteRequestId ? (
                                         <Loader2 className="w-4 h-4 animate-spin" />

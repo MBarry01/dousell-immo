@@ -29,6 +29,7 @@ interface TenantCardGridProps {
     onEdit?: (tenant: Tenant) => void;
     onTerminate?: (leaseId: string, name: string) => void;
     onReactivate?: (leaseId: string, name: string) => void;
+    onInvite?: (leaseId: string) => void;
     isViewingTerminated?: boolean;
     ownerId?: string;
     searchQuery?: string;
@@ -41,6 +42,7 @@ export function TenantCardGrid({
     onEdit,
     onTerminate,
     onReactivate,
+    onInvite,
     isViewingTerminated = false,
     ownerId,
     searchQuery = ''
@@ -87,6 +89,7 @@ export function TenantCardGrid({
                     onEdit={onEdit}
                     onTerminate={onTerminate}
                     onReactivate={onReactivate}
+                    onInvite={onInvite}
                     isViewingTerminated={isViewingTerminated}
                 />
             ))}

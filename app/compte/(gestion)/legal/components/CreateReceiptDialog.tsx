@@ -66,6 +66,7 @@ export function CreateReceiptDialog({ leases, userEmail, profile }: CreateReceip
 
     // Construct data for ReceiptModal
     const receiptData = selectedLease ? {
+        leaseId: selectedLease.id,
         tenant: {
             tenant_name: selectedLease.tenant_name,
             email: selectedLease.tenant_email,

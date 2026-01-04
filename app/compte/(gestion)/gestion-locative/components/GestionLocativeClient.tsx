@@ -11,7 +11,7 @@ import { QuickActions } from './QuickActions';
 import { TenantCardGrid } from './TenantCardGrid';
 import { Search, Download, LayoutGrid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { deleteTransaction, deleteLease, confirmPayment, terminateLease, reactivateLease } from '../actions';
+import { deleteTransaction, deleteLease, confirmPayment, terminateLease, reactivateLease, sendTenantInvitation } from '../actions';
 import { RentalTour } from '@/components/onboarding/RentalTour';
 import { ReceiptModal } from './ReceiptModal';
 import { toast } from 'sonner';
@@ -529,6 +529,17 @@ export function GestionLocativeClient({
         }
     };
 
+    const handleInvite = async (leaseId: string) => {
+        toast.promise(sendTenantInvitation(leaseId), {
+            loading: 'Envoi de l\'invitation...',
+            success: (data) => {
+                if (!data.success) throw new Error(data.error);
+                return data.message || 'Invitation envoyée avec succès';
+            },
+            error: (err) => `Erreur: ${err.message}`
+        });
+    };
+
     return (
         <div className="space-y-0 w-full">
             <ReceiptModal
@@ -654,6 +665,7 @@ export function GestionLocativeClient({
                         onViewReceipt={handleViewReceipt}
                         onTerminate={handleTerminateLease}
                         onReactivate={handleReactivateLease}
+                        onInvite={handleInvite}
                     />
                 ) : (
                     <TenantTable
@@ -666,6 +678,11 @@ export function GestionLocativeClient({
                         onEdit={(tenant) => setEditingTenant(tenant)}
                         onDelete={deleteTransaction}
                         onDeleteLease={deleteLease}
+                        onConfirmPayment={handleConfirmPayment}
+                        onViewReceipt={handleViewReceipt}
+                        onTerminate={handleTerminateLease}
+                        onReactivate={handleReactivateLease}
+                        onInvite={handleInvite}
                     />
                 )}
             </div>

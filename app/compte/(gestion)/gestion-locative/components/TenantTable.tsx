@@ -4,7 +4,7 @@ import { ReceiptModal } from './ReceiptModal';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, ArrowUpDown, ArrowUp, ArrowDown, FileText } from 'lucide-react';
+import { MoreHorizontal, Eye, Edit2, CheckCircle, Trash2, RotateCcw, ArrowUpDown, ArrowUp, ArrowDown, FileText, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GenerateContractButton } from '@/components/contracts/GenerateContractButton';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -62,6 +62,7 @@ export interface TenantTableProps {
     onViewReceipt?: (tenant: Tenant) => void;
     onTerminate?: (leaseId: string, tenantName: string) => void;
     onReactivate?: (leaseId: string, tenantName: string) => void;
+    onInvite?: (leaseId: string) => void;
 }
 
 const statusConfig = {
@@ -86,7 +87,8 @@ export function TenantTable({
     onConfirmPayment,
     onViewReceipt,
     onTerminate,
-    onReactivate
+    onReactivate,
+    onInvite
 }: TenantTableProps) {
     const router = useRouter();
     const [sortField, setSortField] = useState<SortField>('name');
@@ -303,9 +305,18 @@ export function TenantTable({
                                                     onClick={() => onEdit?.(tenant)}
                                                     className="text-slate-300 hover:bg-slate-800 focus:bg-slate-800"
                                                 >
-                                                    <Edit2 className="mr-2 h-4 w-4" />
                                                     Modifier
                                                 </DropdownMenuItem>
+
+                                                {onInvite && tenant.email && (
+                                                    <DropdownMenuItem
+                                                        onClick={() => onInvite(tenant.id)}
+                                                        className="text-slate-300 hover:bg-slate-800 focus:bg-slate-800"
+                                                    >
+                                                        <Send className="mr-2 h-4 w-4 text-purple-400" />
+                                                        Inviter au portail
+                                                    </DropdownMenuItem>
+                                                )}
 
                                                 <DropdownMenuSeparator className="bg-slate-800" />
                                                 {isViewingTerminated && onReactivate ? (
@@ -314,7 +325,7 @@ export function TenantTable({
                                                         Réactiver
                                                     </DropdownMenuItem>
                                                 ) : onTerminate && (
-                                                    <DropdownMenuItem onClick={() => onTerminate(tenant.id, tenant.name)} className="text-orange-400 hover:bg-slate-800 focus:bg-slate-800">
+                                                    <DropdownMenuItem onClick={() => onTerminate(tenant.id, tenant.name)} className="text-brand hover:bg-slate-800 focus:bg-slate-800">
                                                         <Trash2 className="mr-2 h-4 w-4" />
                                                         Résilier
                                                     </DropdownMenuItem>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
     User,
     MapPin,
@@ -14,7 +14,8 @@ import {
     Edit2,
     Trash2,
     RotateCcw,
-    FileText
+    FileText,
+    Send
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,6 +50,7 @@ interface TenantCardProps {
     onEdit?: (tenant: Tenant) => void;
     onTerminate?: (leaseId: string, name: string) => void;
     onReactivate?: (leaseId: string, name: string) => void;
+    onInvite?: (leaseId: string) => void;
     isViewingTerminated?: boolean;
 }
 
@@ -89,8 +91,11 @@ export function TenantCard({
     onEdit,
     onTerminate,
     onReactivate,
+    onInvite,
     isViewingTerminated = false
 }: TenantCardProps) {
+    const router = useRouter();
+
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     };
@@ -105,9 +110,15 @@ export function TenantCard({
 
     const status = statusConfig[tenant.status];
 
+    const handleCardClick = () => {
+        router.push(`/compte/gestion-locative/locataires/${tenant.id}`);
+    };
+
     return (
-        <div className={`
-            relative group
+        <div
+            onClick={handleCardClick}
+            className={`
+            relative group cursor-pointer
             bg-slate-900/80 border ${status.border} rounded-xl
             p-4 md:p-5
             hover:bg-slate-900 hover:border-slate-700
@@ -116,7 +127,7 @@ export function TenantCard({
         `}>
 
 
-            <div className="absolute top-3 right-3 flex items-center gap-2">
+            <div className="absolute top-3 right-3 flex items-center gap-2" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                 {/* Status Badge REMOVED as per user request for uniformity (dots only) */}
 
                 <DropdownMenu>
@@ -156,6 +167,16 @@ export function TenantCard({
                             </DropdownMenuItem>
                         )}
 
+                        {onInvite && tenant.email && (
+                            <DropdownMenuItem
+                                onClick={() => onInvite(tenant.id)}
+                                className="text-slate-300 focus:text-white hover:bg-slate-800 focus:bg-slate-800 cursor-pointer mb-1"
+                            >
+                                <Send className="mr-2 h-4 w-4 text-purple-400" />
+                                Inviter au portail
+                            </DropdownMenuItem>
+                        )}
+
                         {onEdit && (
                             <DropdownMenuItem
                                 onClick={() => onEdit(tenant)}
@@ -179,7 +200,7 @@ export function TenantCard({
                         ) : onTerminate && (
                             <DropdownMenuItem
                                 onClick={() => onTerminate(tenant.id, tenant.name)}
-                                className="text-orange-400 focus:text-orange-300 hover:bg-orange-500/10 focus:bg-orange-500/10 cursor-pointer"
+                                className="text-brand focus:text-brand hover:bg-brand/10 focus:bg-brand/10 cursor-pointer"
                             >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Résilier
@@ -193,7 +214,7 @@ export function TenantCard({
             {/* Main content */}
             <div className="flex items-start gap-4">
                 {/* Avatar */}
-                <Link href={`/compte/gestion-locative/locataires/${tenant.id}`} className="shrink-0">
+                <div className="shrink-0">
                     <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/20 flex items-center justify-center text-blue-400 text-sm font-semibold hover:border-blue-500/40 transition-colors">
                         {getInitials(tenant.name)}
 
@@ -209,18 +230,18 @@ export function TenantCard({
                             `}></span>
                         </span>
                     </div>
-                </Link>
+                </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0 pr-8">
-                    <Link href={`/compte/gestion-locative/locataires/${tenant.id}`} className="block group/link">
+                    <div className="block group/link">
                         <h3
                             className="font-semibold text-white text-base truncate mb-1 group-hover/link:text-blue-400 transition-colors"
                             title={tenant.name}
                         >
                             {tenant.name}
                         </h3>
-                    </Link>
+                    </div>
 
                     <div className="space-y-1.5">
                         {/* Property */}
@@ -265,21 +286,23 @@ export function TenantCard({
 
             {/* Quick action button for pending/overdue */}
             {(tenant.status === 'pending' || tenant.status === 'overdue') && onConfirmPayment && (
-                <Button
-                    onClick={() => onConfirmPayment(tenant.id, tenant.last_transaction_id)}
-                    className={`
-                        w-full mt-4
-                        ${tenant.status === 'overdue'
-                            ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20'
-                            : 'bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20'
-                        }
-                    `}
-                    variant="ghost"
-                    size="sm"
-                >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Encaisser le loyer
-                </Button>
+                <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                    <Button
+                        onClick={() => onConfirmPayment(tenant.id, tenant.last_transaction_id)}
+                        className={`
+                            w-full mt-4
+                            ${tenant.status === 'overdue'
+                                ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20'
+                                : 'bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20'
+                            }
+                        `}
+                        variant="ghost"
+                        size="sm"
+                    >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Encaisser le loyer
+                    </Button>
+                </div>
             )}
         </div>
     );

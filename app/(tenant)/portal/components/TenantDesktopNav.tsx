@@ -2,10 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Wrench, FileText, User, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Home, Wrench, FileText, MessageSquare, User } from 'lucide-react';
 
-export function TenantMobileNav() {
+export function TenantDesktopNav() {
     const pathname = usePathname();
 
     const navItems = [
@@ -27,14 +27,14 @@ export function TenantMobileNav() {
             icon: Wrench,
             isActive: pathname?.startsWith('/portal/maintenance')
         },
+        // {
+        //     href: '/portal/messages',
+        //     label: 'Messages',
+        //     icon: MessageSquare,
+        //     isActive: pathname?.startsWith('/portal/messages')
+        // },
         {
-            href: '/portal/messages',
-            label: 'Messages',
-            icon: MessageSquare,
-            isActive: pathname?.startsWith('/portal/messages')
-        },
-        {
-            href: '/compte/profil', // On peut rediriger vers le profil global ou une page spécifique
+            href: '/compte/profil',
             label: 'Profil',
             icon: User,
             isActive: pathname === '/compte/profil'
@@ -42,22 +42,22 @@ export function TenantMobileNav() {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 px-4 py-2 flex justify-between items-center z-50 md:hidden">
+        <nav className="hidden md:flex items-center gap-1 mx-6">
             {navItems.map((item) => (
                 <Link
                     key={item.href}
                     href={item.href}
                     className={cn(
-                        "flex flex-col items-center gap-1 p-2 rounded-lg transition-colors min-w-[64px]",
+                        "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                         item.isActive
-                            ? "text-orange-400"
-                            : "text-slate-400 hover:text-white"
+                            ? "text-white bg-slate-800"
+                            : "text-slate-400 hover:text-white hover:bg-slate-800/50"
                     )}
                 >
-                    <item.icon className={cn("h-6 w-6", item.isActive && "fill-current")} />
-                    <span className="text-[10px] font-medium">{item.label}</span>
+                    <item.icon className={cn("h-4 w-4", item.isActive ? "text-orange-400" : "text-slate-500")} />
+                    {item.label}
                 </Link>
             ))}
-        </div>
+        </nav>
     );
 }

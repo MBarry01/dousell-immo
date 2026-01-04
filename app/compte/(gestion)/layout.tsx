@@ -13,7 +13,9 @@ import {
     X,
     ChevronLeft,
     Home,
-    Wallet
+    Wallet,
+    ClipboardList,
+    FolderOpen
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
@@ -54,13 +56,26 @@ export default function GestionLayout({
     }
 
     const navItems = [
-
+        {
+            id: "tour-nav-etats-lieux",
+            href: "/compte/etats-lieux",
+            icon: ClipboardList,
+            label: "États des Lieux",
+            isActive: pathname?.startsWith('/compte/etats-lieux'),
+        },
         {
             id: "tour-nav-interventions",
             href: "/compte/interventions",
             icon: Wrench,
             label: "Interventions",
             isActive: pathname?.startsWith('/compte/interventions'),
+        },
+        {
+            id: "tour-nav-documents",
+            href: "/compte/gestion-locative/documents",
+            icon: FolderOpen,
+            label: "Documents",
+            isActive: pathname?.startsWith('/compte/gestion-locative/documents'),
         },
         {
             id: "tour-nav-messages",
@@ -108,6 +123,7 @@ export default function GestionLayout({
                 lg:translate-x-0 lg:static
                 ${isCollapsed ? 'w-16' : 'w-64'}
                 flex flex-col
+                print:hidden
             `}>
                 {/* Sidebar Header */}
                 <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800 shrink-0">

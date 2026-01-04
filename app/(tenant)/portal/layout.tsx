@@ -1,3 +1,4 @@
+import { TenantDesktopNav } from "./components/TenantDesktopNav";
 import { TenantMobileNav } from "./components/TenantMobileNav";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
@@ -16,12 +17,15 @@ export default async function TenantLayout({
             {/* Header style Gestion Locative */}
             <header className="bg-slate-900/50 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-lg">
                 <div className="w-full mx-auto px-4 md:px-6 h-14 sm:h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="text-base sm:text-lg font-bold text-white">
-                            <span className="text-orange-400">Doussel</span>Loc
+                    <div className="flex items-center">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="text-base sm:text-lg font-bold text-white">
+                                <span className="text-orange-400">Doussel</span>Loc
+                            </div>
+                            <span className="hidden sm:inline-block text-xs text-slate-500">|</span>
+                            <span className="text-xs text-slate-400">Espace Locataire</span>
                         </div>
-                        <span className="hidden sm:inline-block text-xs text-slate-500">|</span>
-                        <span className="text-xs text-slate-400">Espace Locataire</span>
+                        <TenantDesktopNav />
                     </div>
 
                     <div className="flex items-center gap-2 sm:gap-3">

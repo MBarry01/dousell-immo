@@ -46,8 +46,13 @@ export async function POST(request: NextRequest) {
             });
 
         if (uploadError) {
-            console.error('Erreur upload:', uploadError);
-            return NextResponse.json({ success: false, error: uploadError.message }, { status: 500 });
+            console.error('Erreur upload Supabase Storage:', uploadError);
+            console.error('Details - Bucket: branding, File:', fileName, 'Type:', file.type, 'Size:', file.size);
+            return NextResponse.json({
+                success: false,
+                error: `Erreur storage: ${uploadError.message}`,
+                details: uploadError
+            }, { status: 500 });
         }
 
         // Obtenir l'URL publique

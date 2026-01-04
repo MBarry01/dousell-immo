@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Download, Mail } from 'lucide-react';
 import { ReceiptPreview } from './ReceiptPreview';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import { createQuittanceDocument } from '@/components/pdf/QuittancePDF_v2';
 
 interface ReceiptData {
+    leaseId?: string; // Pour stockage automatique du PDF
     tenant?: {
         tenant_name?: string;
         name?: string;
@@ -46,12 +47,14 @@ interface ReceiptModalProps {
 }
 
 export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
-    if (!isOpen || !data) return null;
-
     const [isSending, setIsSending] = useState(false);
+    const [hasSaved, setHasSaved] = useState(false); // Eviter double save
 
-    // Préparer les données pour le PDF
-    const receiptData = {
+    // Préparer les données pour le PDF (variable dérivée stable) - SAFE CHECK
+    const receiptDetails = data ? {
+        // IDs pour stockage automatique
+        leaseId: data.leaseId,
+
         // Locataire
         tenantName: data.tenant?.tenant_name || data.tenant?.name || 'Locataire',
         tenantEmail: data.tenant?.email || '',
@@ -80,17 +83,47 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
 
         // Propriété
         propertyAddress: data.property_address || 'Adresse non renseignée',
-    };
+    } : null;
+
+    // Auto-save effect
+    useEffect(() => {
+        const autoSave = async () => {
+            // On ne sauvegarde que si on a un leaseId et que ce n'est pas déjà fait
+            if (isOpen && receiptDetails?.leaseId && !hasSaved) {
+                console.log("💾 Sauvegarde automatique de la quittance...", receiptDetails.leaseId);
+                try {
+                    setHasSaved(true); // Optimistic blocking
+                    const response = await fetch('/api/save-receipt', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(receiptDetails),
+                    });
+
+                    if (response.ok) {
+                        console.log("✅ Quittance sauvegardée automatiquement");
+                    } else {
+                        console.error("Erreur sauvegarde auto", await response.text());
+                    }
+                } catch (e) {
+                    console.error("Auto-save error", e);
+                }
+            }
+        };
+        autoSave();
+    }, [isOpen, data, hasSaved]); // data change = new receipt usually
+
+    if (!isOpen || !data || !receiptDetails) return null;
+
 
     // Nom de fichier pour le téléchargement
-    const filename = `Quittance_${receiptData.tenantName.replace(/\s+/g, '_')}_${String(data.month).padStart(2, '0')}_${data.year}.pdf`;
+    const filename = `Quittance_${receiptDetails.tenantName.replace(/\s+/g, '_')}_${String(data.month).padStart(2, '0')}_${data.year}.pdf`;
 
     const handleSendEmail = async () => {
         if (isSending) return;
         setIsSending(true);
 
         try {
-            console.log("📤 Envoi de la quittance...", receiptData);
+            console.log("📤 Envoi de la quittance...", receiptDetails);
 
             // Appeler l'API Next.js interne
             const response = await fetch('/api/send-receipt', {
@@ -98,14 +131,14 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(receiptData),
+                body: JSON.stringify(receiptDetails),
             });
 
             const result = await response.json();
 
             if (result.success) {
-                toast.success(`Quittance envoyée à ${receiptData.tenantEmail} !`, {
-                    description: `N° ${receiptData.receiptNumber}`,
+                toast.success(`Quittance envoyée à ${receiptDetails.tenantEmail} !`, {
+                    description: `N° ${receiptDetails.receiptNumber}`,
                 });
             } else {
                 toast.error("Erreur : " + (result.error || "Problème inconnu"));
@@ -129,7 +162,7 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 print:hidden flex gap-2">
                 {/* Bouton Télécharger PDF avec @react-pdf/renderer */}
                 <PDFDownloadLink
-                    document={createQuittanceDocument(receiptData)}
+                    document={createQuittanceDocument(receiptDetails)}
                     fileName={filename}
                     className="inline-flex items-center gap-1 md:gap-2 bg-white text-black hover:bg-gray-100 border-none shadow-lg rounded-full text-xs md:text-sm px-3 md:px-4 h-9 md:h-10 font-medium transition-colors"
                     onClick={(e) => e.stopPropagation()}

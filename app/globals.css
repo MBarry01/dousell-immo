@@ -229,17 +229,60 @@
   }
 }
 
-/* Print Optimizations - Quittance de loyer */
+/* Print Optimizations */
 @media print {
+  @page {
+    margin: 0 !important;
+    size: auto;
+  }
 
-  /* Optimisation des images pour l'impression */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: white !important;
+  }
+
+  /* Hide everything by default using visibility */
+  /* This keeps the layout structure but hides the paint */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Only show the print content container and its children */
+  #print-content,
+  #print-content * {
+    visibility: visible;
+  }
+
+  /* Position the print content on top of everything at the start of the page */
+  #print-content {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 1.5cm !important;
+    /* Marge interne propre */
+    background: white !important;
+    z-index: 9999 !important;
+  }
+
+  /* Ensure text colors are printed correctly */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Optimisation des images */
   img {
     max-width: 100% !important;
     page-break-inside: avoid !important;
   }
 
-  /* Éviter les coupures de page dans les sections importantes */
+  /* Éviter les coupures */
   table,
+  tr,
+  td,
   .signature-block {
     page-break-inside: avoid !important;
   }

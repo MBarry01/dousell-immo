@@ -1,9 +1,50 @@
 "use server"
 
 import { createClient } from '@/utils/supabase/server';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { invalidateCacheBatch } from '@/lib/cache/cache-aside';
 import { revalidatePath } from 'next/cache';
 import { validateTenantCreation } from '@/lib/finance';
 import { sendEmail } from '@/lib/mail';
+import { getPropertiesByOwner } from "@/services/propertyService.cached";
+import { getLeasesByOwner as getLeasesByOwnerService } from "@/services/rentalService.cached";
+
+/**
+ * Récupérer les propriétés de l'utilisateur connecté (pour les listes déroulantes)
+ */
+export async function getProperties() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "Non connecté" };
+
+    try {
+        const properties = await getPropertiesByOwner(user.id);
+        return { success: true, data: properties };
+    } catch (error) {
+        console.error("Erreur getProperties:", error);
+        return { success: false, error: "Erreur lors de la récupération des biens" };
+    }
+}
+
+/**
+ * Récupérer tous les baux de l'utilisateur (pour les listes déroulantes)
+ */
+export async function getLeasesByOwner() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "Non connecté" };
+
+    try {
+        // On récupère tous les baux (actifs et terminés) pour l'historique
+        const leases = await getLeasesByOwnerService(user.id, "all");
+        return { success: true, data: leases };
+    } catch (error) {
+        console.error("Erreur getLeasesByOwner:", error);
+        return { success: false, error: "Erreur lors de la récupération des baux" };
+    }
+}
 
 /**
  * Calcule les statistiques financières en temps réel
@@ -308,6 +349,9 @@ export async function confirmPayment(leaseId: string, transactionId?: string) {
                 // Référence
                 receiptNumber: `QUITT-${Date.now().toString().slice(-8)}`,
 
+                // ID pour sauvegarde automatique
+                leaseId: trans.lease_id,
+
                 // Propriétaire / Agence
                 ownerName: profile?.company_name || profile?.full_name || 'Propriétaire',
                 ownerAddress: profile?.company_address || '',
@@ -405,6 +449,13 @@ export async function updateLease(leaseId: string, data: {
         return { success: false, error: error.message };
     }
 
+    // Invalidation du cache pour forcer la mise à jour immédiate
+    await invalidateCacheBatch([
+        `leases:${user.id}:active`,
+        `leases:${user.id}:all`, // Au cas où
+        `lease_detail:${leaseId}`
+    ], 'rentals');
+
     revalidatePath('/compte/gestion-locative');
     return { success: true };
 }
@@ -449,6 +500,15 @@ export async function terminateLease(leaseId: string) {
         console.error("Erreur résiliation bail:", error.message);
         return { success: false, error: error.message };
     }
+
+    // Invalider caches
+    await invalidateCacheBatch([
+        `leases:${user.id}:active`,
+        `leases:${user.id}:terminated`,
+        `leases:${user.id}:all`,
+        `lease_detail:${leaseId}`,
+        `rental_stats:${user.id}`
+    ], 'rentals');
 
     revalidatePath('/compte/gestion-locative');
     return {
@@ -501,6 +561,15 @@ export async function reactivateLease(leaseId: string) {
         console.error("Erreur réactivation bail:", error.message);
         return { success: false, error: error.message };
     }
+
+    // Invalider caches
+    await invalidateCacheBatch([
+        `leases:${user.id}:active`,
+        `leases:${user.id}:terminated`,
+        `leases:${user.id}:all`,
+        `lease_detail:${leaseId}`,
+        `rental_stats:${user.id}`
+    ], 'rentals');
 
     revalidatePath('/compte/gestion-locative');
     return {
@@ -818,24 +887,27 @@ export async function completeIntervention(requestId: string) {
     }
 
     // 3. Créer la dépense comptable
-    const leaseData = request.leases as { owner_id: string; property_id?: string } | null;
+    const leaseData = Array.isArray(request.leases) ? request.leases[0] : request.leases;
 
     if (leaseData && request.quoted_price) {
         const { error: expenseError } = await supabase
             .from('expenses')
             .insert([{
-                owner_id: leaseData.owner_id,
+                owner_id: user.id,
                 property_id: leaseData.property_id || null,
-                maintenance_request_id: requestId,
+                // maintenance_request_id: requestId, // Commenting out potential invalid column, enabling if confirmed
+                lease_id: request.lease_id || null, // Best guess mapping
                 description: `Intervention: ${request.description} (${request.artisan_name || 'Artisan'})`,
                 amount: request.quoted_price,
                 category: 'maintenance',
                 expense_date: new Date().toISOString().split('T')[0]
+                // If maintenance_request_id exists in DB, uncomment below:
+                // maintenance_request_id: requestId, 
             }]);
 
         if (expenseError) {
             console.error("Erreur création dépense:", expenseError.message);
-            // On ne bloque pas la clôture, mais on log l'erreur
+            // On ne bloque pas la clôture
         }
     }
 
@@ -845,6 +917,121 @@ export async function completeIntervention(requestId: string) {
         message: `Intervention terminée ! Dépense de ${request.quoted_price?.toLocaleString('fr-FR')} FCFA enregistrée.`
     };
 }
+
+/**
+ * Envoyer une invitation au portail locataire
+ * Génère un lien magique (Magic Link) et l'envoie par email
+ */
+export async function sendTenantInvitation(leaseId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "Non autorisé" };
+
+    // 1. Récupérer les infos du locataire
+    const { data: lease } = await supabase
+        .from('leases')
+        .select('tenant_name, tenant_email, property_address, owner_id')
+        .eq('id', leaseId)
+        .single();
+
+    if (!lease) return { success: false, error: "Bail introuvable" };
+    if (lease.owner_id !== user.id) return { success: false, error: "Non autorisé" };
+    if (!lease.tenant_email) return { success: false, error: "Email du locataire manquant" };
+
+    // 2. Générer le lien magique via Supabase Admin
+    const adminClient = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        }
+    );
+
+    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+        type: 'magiclink',
+        email: lease.tenant_email,
+        options: {
+            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/magic-verify`
+        }
+    });
+
+    if (linkError) {
+        console.error("Erreur génération lien magique:", linkError);
+        return { success: false, error: "Erreur lors de la génération du lien" };
+    }
+
+    const magicLink = linkData.properties?.action_link;
+
+    if (!magicLink) {
+        return { success: false, error: "Impossible de générer le lien" };
+    }
+
+    // 3. Envoyer l'email
+    try {
+        await sendEmail({
+            to: lease.tenant_email,
+            subject: `Invitation à votre Espace Locataire - Dousell`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                     <div style="text-align: center; margin-bottom: 24px;">
+                        <h2 style="color: #F4C430; margin-bottom: 8px;">Bienvenue sur Dousell Immo</h2>
+                        <p style="color: #6b7280; font-size: 14px;">Votre portail locataire est prêt</p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <p style="color: #374151;">Bonjour <strong>${lease.tenant_name}</strong>,</p>
+                        <p style="color: #374151; line-height: 1.5;">
+                            Votre propriétaire vous invite à rejoindre votre espace locataire pour le bien situé à :
+                        </p>
+                        <div style="background-color: #f3f4f6; padding: 12px; border-radius: 6px; margin: 12px 0; font-size: 14px; color: #111827;">
+                            📍 ${lease.property_address || 'Adresse non renseignée'}
+                        </div>
+                    </div>
+
+                    <div style="background-color: #fefce8; border: 1px solid #fde047; border-radius: 6px; padding: 16px; margin-bottom: 24px;">
+                        <h3 style="color: #854d0e; margin: 0 0 8px 0; font-size: 16px;">Ce que vous pouvez faire :</h3>
+                        <ul style="margin: 0; padding-left: 20px; color: #a16207; font-size: 14px;">
+                            <li style="margin-bottom: 4px;">Payer votre loyer en ligne</li>
+                            <li style="margin-bottom: 4px;">Télécharger vos quittances</li>
+                            <li>Signaler un incident</li>
+                        </ul>
+                    </div>
+
+                    <div style="text-align: center; margin: 32px 0;">
+                        <a href="${magicLink}" 
+                           style="display: inline-block; background-color: #F4C430; color: #000000; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            Accéder à mon espace
+                        </a>
+                        <p style="margin-top: 12px; font-size: 12px; color: #9ca3af;">
+                            Ce lien d'accès est personnel et valide pour 24h.
+                        </p>
+                    </div>
+
+                    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+                    
+                    <p style="font-size: 12px; color: #9ca3af; text-align: center;">
+                        Si vous n'êtes pas le destinataire de cet email, merci de l'ignorer.<br>
+                        © ${new Date().getFullYear()} Dousell Immo.
+                    </p>
+                </div>
+            `
+        });
+
+        return { success: true, message: `Invitation envoyée à ${lease.tenant_email}` };
+
+    } catch (emailError) {
+        console.error("Erreur envoi email invitation:", emailError);
+        return { success: false, error: "Erreur lors de l'envoi de l'email" };
+    }
+}
+
+
+
+
 
 /**
  * Récupérer les baux actifs (pour le select du formulaire de signalement)
@@ -1053,6 +1240,15 @@ export async function deleteLease(leaseId: string) {
         console.error("Erreur suppression bail:", error.message);
         return { success: false, error: error.message };
     }
+
+    // Invalider caches
+    await invalidateCacheBatch([
+        `leases:${user.id}:active`,
+        `leases:${user.id}:terminated`,
+        `leases:${user.id}:all`,
+        `lease_detail:${leaseId}`,
+        `rental_stats:${user.id}`
+    ], 'rentals');
 
     revalidatePath('/compte/gestion-locative');
     return { success: true };

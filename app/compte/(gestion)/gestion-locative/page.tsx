@@ -132,7 +132,7 @@ export default async function GestionLocativePage({
                             <Link
                                 href="/compte/gestion-locative?view=terminated"
                                 className={`px-3 py-1 text-xs font-medium rounded transition-all ${isViewingTerminated
-                                    ? 'bg-orange-500/10 text-orange-400'
+                                    ? 'bg-brand/10 text-brand'
                                     : 'text-slate-400 hover:text-white'
                                     }`}
                             >
@@ -146,12 +146,6 @@ export default async function GestionLocativePage({
                                         leases={filteredLeases}
                                         userEmail={user.email}
                                         profile={profile}
-                                        trigger={
-                                            <Button variant="outline" className="bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-200 hover:text-white h-9 px-3 gap-2">
-                                                <FileText className="w-4 h-4" />
-                                                <span className="hidden sm:inline">Générer</span>
-                                            </Button>
-                                        }
                                     />
                                     <AddTenantButton ownerId={user.id} profile={profile} />
                                 </>

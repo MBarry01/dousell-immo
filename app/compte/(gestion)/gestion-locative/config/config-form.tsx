@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Upload, PenTool, Building2, Save, Check, Phone, Mail, MapPin, Loader2, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,12 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
     const [saved, setSaved] = useState(false);
     const [uploadingLogo, setUploadingLogo] = useState(false);
     const [uploadingSignature, setUploadingSignature] = useState(false);
+    const [signatureMode, setSignatureMode] = useState<'upload' | 'draw'>('upload');
+
+    // Canvas drawing state
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [hasDrawn, setHasDrawn] = useState(false);
 
     const [formData, setFormData] = useState({
         company_name: initialData?.company_name || '',
@@ -37,18 +43,84 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
         company_ninea: initialData?.company_ninea || ''
     });
 
+    // Initialize canvas
+    useEffect(() => {
+        if (signatureMode === 'draw' && canvasRef.current) {
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, rect.width, rect.height);
+        }
+    }, [signatureMode]);
+
+    const getCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return { x: 0, y: 0 };
+        const rect = canvas.getBoundingClientRect();
+        if ('touches' in e) {
+            return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+        }
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
+
+    const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+        e.preventDefault();
+        const ctx = canvasRef.current?.getContext('2d');
+        if (!ctx) return;
+        const { x, y } = getCoordinates(e);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        setIsDrawing(true);
+    };
+
+    const draw = (e: React.MouseEvent | React.TouchEvent) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const ctx = canvasRef.current?.getContext('2d');
+        if (!ctx) return;
+        const { x, y } = getCoordinates(e);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        setHasDrawn(true);
+    };
+
+    const stopDrawing = () => {
+        setIsDrawing(false);
+    };
+
+    const clearCanvas = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext('2d');
+        if (!ctx || !canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, rect.width, rect.height);
+        setHasDrawn(false);
+        setSignaturePreview(null);
+    };
+
     const handleFileUpload = async (file: File, type: 'logo' | 'signature') => {
         const isLogo = type === 'logo';
         isLogo ? setUploadingLogo(true) : setUploadingSignature(true);
 
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('type', type);
+            const uploadFormData = new FormData();
+            uploadFormData.append('file', file);
+            uploadFormData.append('type', type);
 
             const response = await fetch('/api/branding/upload', {
                 method: 'POST',
-                body: formData
+                body: uploadFormData
             });
 
             const result = await response.json();
@@ -71,15 +143,57 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
         }
     };
 
+    const saveDrawnSignature = async () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        setUploadingSignature(true);
+
+        // Use toBlob instead of fetch(dataUrl) to avoid CSP violation
+        canvas.toBlob(async (blob) => {
+            if (!blob) {
+                toast.error('Erreur lors de la création de l\'image');
+                setUploadingSignature(false);
+                return;
+            }
+
+            try {
+                const file = new File([blob], 'signature.png', { type: 'image/png' });
+
+                const uploadFormData = new FormData();
+                uploadFormData.append('file', file);
+                uploadFormData.append('type', 'signature');
+
+                const response = await fetch('/api/branding/upload', {
+                    method: 'POST',
+                    body: uploadFormData
+                });
+
+                const result = await response.json();
+                console.log('API Response:', result);
+
+                if (result.success) {
+                    setSignaturePreview(result.url);
+                    toast.success('Signature enregistrée!');
+                } else {
+                    console.error('Upload failed:', result);
+                    toast.error(result.error || 'Erreur lors de l\'upload');
+                }
+            } catch (error) {
+                console.error('Erreur upload:', error);
+                toast.error('Erreur lors de l\'upload de la signature');
+            } finally {
+                setUploadingSignature(false);
+            }
+        }, 'image/png');
+    };
+
     const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // Prévisualisation immédiate
             const reader = new FileReader();
             reader.onloadend = () => setLogoPreview(reader.result as string);
             reader.readAsDataURL(file);
-
-            // Upload vers Supabase
             handleFileUpload(file, 'logo');
         }
     };
@@ -90,7 +204,6 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
             const reader = new FileReader();
             reader.onloadend = () => setSignaturePreview(reader.result as string);
             reader.readAsDataURL(file);
-
             handleFileUpload(file, 'signature');
         }
     };
@@ -105,8 +218,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
         if (formData.company_email) formDataObj.append('company_email', formData.company_email);
         if (formData.company_ninea) formDataObj.append('company_ninea', formData.company_ninea);
 
-        // Appel à la nouvelle server action (Step 3)
-        const result = await updateBranding(formDataObj); // utilisation de updateBranding importé depuis ./actions (ou config/actions)
+        const result = await updateBranding(formDataObj);
 
         setSaving(false);
         if (result.success) {
@@ -180,7 +292,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                     )}
                 </section>
 
-                {/* Section Signature */}
+                {/* Section Signature - With Tabs */}
                 <section className="space-y-4 p-6 bg-gray-900/40 rounded-3xl border border-gray-800">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-purple-400 font-bold">
@@ -192,32 +304,104 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                             </div>
                         )}
                     </div>
-                    <label className="block">
-                        <div className={`h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${signaturePreview
-                            ? 'border-purple-500/50 bg-purple-500/5'
-                            : 'border-gray-700 bg-gray-900/20 hover:border-purple-500/50'
-                            } ${uploadingSignature ? 'opacity-50 pointer-events-none' : ''}`}>
-                            {signaturePreview ? (
-                                <img src={signaturePreview} alt="Signature" className="max-h-32 object-contain" />
-                            ) : (
-                                <>
-                                    <Upload className="w-8 h-8 text-gray-600 mb-2" />
-                                    <p className="text-xs text-gray-500 text-center px-4">
-                                        Importez votre signature scannée
-                                    </p>
-                                    <p className="text-[10px] text-gray-600 mt-1">PNG avec fond transparent recommandé</p>
-                                </>
-                            )}
+
+                    {/* Mode Toggle */}
+                    <div className="flex gap-2 p-1 bg-gray-800 rounded-xl">
+                        <button
+                            onClick={() => setSignatureMode('upload')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${signatureMode === 'upload'
+                                ? 'bg-purple-600 text-white'
+                                : 'text-gray-400 hover:text-white'
+                                }`}
+                        >
+                            <Upload className="w-4 h-4" /> Importer
+                        </button>
+                        <button
+                            onClick={() => setSignatureMode('draw')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${signatureMode === 'draw'
+                                ? 'bg-purple-600 text-white'
+                                : 'text-gray-400 hover:text-white'
+                                }`}
+                        >
+                            <PenTool className="w-4 h-4" /> Dessiner
+                        </button>
+                    </div>
+
+                    {signatureMode === 'upload' ? (
+                        /* Upload Mode */
+                        <label className="block">
+                            <div className={`h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${signaturePreview
+                                ? 'border-purple-500/50 bg-purple-500/5'
+                                : 'border-gray-700 bg-gray-900/20 hover:border-purple-500/50'
+                                } ${uploadingSignature ? 'opacity-50 pointer-events-none' : ''}`}>
+                                {signaturePreview ? (
+                                    <img src={signaturePreview} alt="Signature" className="max-h-32 object-contain" />
+                                ) : (
+                                    <>
+                                        <Upload className="w-8 h-8 text-gray-600 mb-2" />
+                                        <p className="text-xs text-gray-500 text-center px-4">
+                                            Importez votre signature scannée
+                                        </p>
+                                        <p className="text-[10px] text-gray-600 mt-1">PNG avec fond transparent recommandé</p>
+                                    </>
+                                )}
+                            </div>
+                            <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                className="hidden"
+                                onChange={handleSignatureUpload}
+                                disabled={uploadingSignature}
+                            />
+                        </label>
+                    ) : (
+                        /* Draw Mode */
+                        <div className="space-y-2">
+                            <div className="relative">
+                                <canvas
+                                    ref={canvasRef}
+                                    className="w-full h-40 bg-white rounded-2xl cursor-crosshair touch-none"
+                                    onMouseDown={startDrawing}
+                                    onMouseMove={draw}
+                                    onMouseUp={stopDrawing}
+                                    onMouseLeave={stopDrawing}
+                                    onTouchStart={startDrawing}
+                                    onTouchMove={draw}
+                                    onTouchEnd={stopDrawing}
+                                />
+                                {!hasDrawn && (
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        <p className="text-gray-400 text-sm">Signez ici avec la souris ou le doigt</p>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={clearCanvas}
+                                    className="flex-1 border-gray-700 text-gray-400"
+                                >
+                                    <Trash2 className="w-3 h-3 mr-1" /> Effacer
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    onClick={saveDrawnSignature}
+                                    disabled={!hasDrawn || uploadingSignature}
+                                    className="flex-1 bg-purple-600 hover:bg-purple-700"
+                                >
+                                    {uploadingSignature ? (
+                                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                    ) : (
+                                        <Check className="w-3 h-3 mr-1" />
+                                    )}
+                                    Valider
+                                </Button>
+                            </div>
                         </div>
-                        <input
-                            type="file"
-                            accept="image/png,image/jpeg,image/webp"
-                            className="hidden"
-                            onChange={handleSignatureUpload}
-                            disabled={uploadingSignature}
-                        />
-                    </label>
-                    {signaturePreview && !uploadingSignature && (
+                    )}
+
+                    {signaturePreview && !uploadingSignature && signatureMode === 'upload' && (
                         <div className="flex items-center justify-between">
                             <span className="text-xs text-green-400 flex items-center gap-1">
                                 <Check className="w-3 h-3" /> Signature enregistrée

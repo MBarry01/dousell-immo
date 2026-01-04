@@ -99,7 +99,7 @@ export async function getTenantMaintenanceRequests() {
 
     const { data: requests, error } = await supabaseAdmin
         .from('maintenance_requests')
-        .select('*')
+        .select('id, category, description, status, photo_urls, created_at, artisan_name, artisan_phone, artisan_rating, quoted_price, intervention_date')
         .eq('lease_id', lease.id)
         .order('created_at', { ascending: false });
 
@@ -109,4 +109,64 @@ export async function getTenantMaintenanceRequests() {
     }
 
     return requests;
+}
+
+/**
+ * Annuler une demande de maintenance (uniquement si status = 'open')
+ */
+export async function cancelMaintenanceRequest(requestId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user || !user.email) {
+        return { error: "Non autorisé" };
+    }
+
+    const { createClient: createAdminClient } = await import("@supabase/supabase-js");
+    const supabaseAdmin = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Vérifier que la demande appartient au locataire
+    const { data: lease } = await supabaseAdmin
+        .from('leases')
+        .select('id')
+        .eq('tenant_email', user.email)
+        .eq('status', 'active')
+        .maybeSingle();
+
+    if (!lease) {
+        return { error: "Bail non trouvé" };
+    }
+
+    // Vérifier que la demande est bien 'open' et appartient au bail
+    const { data: request } = await supabaseAdmin
+        .from('maintenance_requests')
+        .select('id, status')
+        .eq('id', requestId)
+        .eq('lease_id', lease.id)
+        .single();
+
+    if (!request) {
+        return { error: "Demande non trouvée" };
+    }
+
+    if (request.status !== 'open') {
+        return { error: "Impossible d'annuler une demande déjà en traitement" };
+    }
+
+    // Supprimer la demande
+    const { error } = await supabaseAdmin
+        .from('maintenance_requests')
+        .delete()
+        .eq('id', requestId);
+
+    if (error) {
+        console.error("Erreur suppression demande:", error);
+        return { error: "Erreur lors de l'annulation" };
+    }
+
+    revalidatePath('/portal/maintenance');
+    return { success: true };
 }

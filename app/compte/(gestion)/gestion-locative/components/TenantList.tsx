@@ -424,7 +424,7 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
                                         placeholder="Adresse du bien loué *"
                                         value={editData.property || ''}
                                         onChange={(e) => setEditData({ ...editData, property: e.target.value })}
-                                        className={`bg-gray-800/50 border-gray-700 h-10 ${!editData.property || editData.property === 'Adresse non renseignée' ? 'border-orange-500/50' : ''}`}
+                                        className={`bg-gray-800/50 border-gray-700 h-10 ${!editData.property || editData.property === 'Adresse non renseignée' ? 'border-brand/50' : ''}`}
                                     />
 
                                     <div className="flex gap-2">
@@ -506,7 +506,7 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
                                                 <span className="text-xs text-gray-600 truncate">{tenant.email}</span>
                                             )}
                                             {(!tenant.property || tenant.property === 'Adresse non renseignée') && (
-                                                <span className="text-xs text-orange-400 flex items-center gap-1">
+                                                <span className="text-xs text-brand flex items-center gap-1">
                                                     <MapPin className="w-3 h-3" /> Adresse manquante
                                                 </span>
                                             )}
@@ -519,7 +519,7 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
                                                     size="sm"
                                                     onClick={() => handleConfirmPayment(tenant.id, tenant.last_transaction_id)}
                                                     className={`${tenant.status === 'overdue'
-                                                        ? 'bg-orange-600 hover:bg-orange-700 shadow-orange-500/20'
+                                                        ? 'bg-brand hover:bg-brand/90 shadow-brand/20 text-black'
                                                         : 'bg-green-600 hover:bg-green-700 shadow-green-500/20'
                                                         } text-white font-bold rounded-xl h-9 shadow-lg transition-all active:scale-95`}
                                                 >

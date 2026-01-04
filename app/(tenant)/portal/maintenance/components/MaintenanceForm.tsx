@@ -10,10 +10,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createClient } from '@/utils/supabase/client';
 import { createMaintenanceRequest } from '../actions';
 
@@ -27,12 +25,22 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const CATEGORIES = [
+    { value: 'plomberie', label: 'Plomberie', emoji: '🔧' },
+    { value: 'electricite', label: 'Électricité', emoji: '⚡' },
+    { value: 'maconnerie', label: 'Maçonnerie', emoji: '🧱' },
+    { value: 'climatisation', label: 'Climatisation', emoji: '❄️' },
+    { value: 'electromenager', label: 'Électroménager', emoji: '🔌' },
+    { value: 'autre', label: 'Autre', emoji: '📋' },
+];
+
 export function MaintenanceForm() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string>('');
 
-    const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormValues>({
+    const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             category: '',
@@ -40,14 +48,15 @@ export function MaintenanceForm() {
         }
     });
 
-    const photos = watch('photos');
+    const handleCategorySelect = (value: string) => {
+        setSelectedCategory(value);
+        setValue('category', value, { shouldValidate: true });
+    };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (files && files.length > 0) {
             setValue('photos', files, { shouldValidate: true });
-
-            // Generate previews
             const newPreviews: string[] = [];
             Array.from(files).forEach(file => {
                 newPreviews.push(URL.createObjectURL(file));
@@ -65,7 +74,6 @@ export function MaintenanceForm() {
             const fileExt = file.name.split('.').pop();
             const fileName = `maintenance/${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExt}`;
 
-            // Utilisation du bucket 'properties' par défaut (à changer si un bucket 'maintenance' existe)
             const { error: uploadError } = await supabase.storage
                 .from('properties')
                 .upload(fileName, file);
@@ -87,10 +95,8 @@ export function MaintenanceForm() {
     const onSubmit = async (data: FormValues) => {
         setIsSubmitting(true);
         try {
-            // 1. Upload images
             const photoUrls = await uploadPhotos(data.photos);
 
-            // 2. Create Request
             const result = await createMaintenanceRequest({
                 category: data.category,
                 description: data.description,
@@ -115,47 +121,53 @@ export function MaintenanceForm() {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
+            {/* Category Selection - Visual Grid */}
             <div className="space-y-2">
-                <Label>Type de problème</Label>
-                <Select onValueChange={(val) => setValue('category', val, { shouldValidate: true })}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner le type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="plomberie">Plomberie (Fuite, Canalisation...)</SelectItem>
-                        <SelectItem value="electricite">Électricité (Panne, Prise...)</SelectItem>
-                        <SelectItem value="maconnerie">Maçonnerie / Murs</SelectItem>
-                        <SelectItem value="electromenager">Électroménager</SelectItem>
-                        <SelectItem value="autre">Autre</SelectItem>
-                    </SelectContent>
-                </Select>
-                {errors.category && <p className="text-sm text-red-500">{errors.category.message}</p>}
+                <Label className="text-slate-300">Type de problème</Label>
+                <div className="grid grid-cols-3 gap-2">
+                    {CATEGORIES.map((cat) => (
+                        <button
+                            key={cat.value}
+                            type="button"
+                            onClick={() => handleCategorySelect(cat.value)}
+                            className={`p-3 rounded-xl border text-center transition-all ${selectedCategory === cat.value
+                                    ? 'bg-[#F4C430]/20 border-[#F4C430] text-white'
+                                    : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'
+                                }`}
+                        >
+                            <span className="text-xl block mb-1">{cat.emoji}</span>
+                            <span className="text-xs">{cat.label}</span>
+                        </button>
+                    ))}
+                </div>
+                {errors.category && <p className="text-sm text-red-400">{errors.category.message}</p>}
             </div>
 
+            {/* Description */}
             <div className="space-y-2">
-                <Label>Description détaillée</Label>
+                <Label className="text-slate-300">Description détaillée</Label>
                 <Textarea
                     placeholder="Décrivez le problème, sa localisation et depuis quand..."
-                    className="min-h-[120px]"
+                    className="min-h-[120px] bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#F4C430] focus:ring-[#F4C430]/20"
                     {...register('description')}
                 />
-                {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
+                {errors.description && <p className="text-sm text-red-400">{errors.description.message}</p>}
             </div>
 
-            <div className="space-y-4">
-                <Label>Photos (Obligatoire)</Label>
+            {/* Photos */}
+            <div className="space-y-3">
+                <Label className="text-slate-300">Photos (Obligatoire)</Label>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-4 gap-2">
                     {imagePreviews.map((src, i) => (
-                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden border bg-slate-100">
+                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-slate-700">
                             <Image src={src} alt="Preview" fill className="object-cover" />
                         </div>
                     ))}
 
-                    <label className="flex flex-col items-center justify-center aspect-square rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors">
-                        <Camera className="w-6 h-6 text-slate-400 mb-1" />
-                        <span className="text-xs text-slate-500">Ajouter</span>
+                    <label className="flex flex-col items-center justify-center aspect-square rounded-lg border-2 border-dashed border-slate-600 bg-slate-800/30 cursor-pointer hover:border-[#F4C430]/50 hover:bg-slate-800/50 transition-colors">
+                        <Camera className="w-6 h-6 text-slate-500 mb-1" />
+                        <span className="text-[10px] text-slate-500">Ajouter</span>
                         <input
                             type="file"
                             accept="image/*"
@@ -166,10 +178,14 @@ export function MaintenanceForm() {
                     </label>
                 </div>
 
-                {errors.photos && <p className="text-sm text-red-500">{errors.photos.message as string}</p>}
+                {errors.photos && <p className="text-sm text-red-400">{errors.photos.message as string}</p>}
             </div>
 
-            <Button type="submit" disabled={isSubmitting} className="w-full h-12 text-base">
+            <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full h-12 text-base bg-[#F4C430] hover:bg-[#D4A420] text-black font-semibold"
+            >
                 {isSubmitting ? (
                     <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Envoi en cours...
@@ -178,7 +194,6 @@ export function MaintenanceForm() {
                     "Envoyer le signalement"
                 )}
             </Button>
-
         </form>
     );
 }

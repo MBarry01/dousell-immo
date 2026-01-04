@@ -238,23 +238,43 @@ export default async function TenantProfilePage({ params }: { params: Promise<{ 
                         {/* TAB: DOCUMENTS */}
                         <TabsContent value="documents" className="space-y-6 mt-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Contract */}
-                                <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors cursor-pointer group">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="p-2 bg-blue-500/10 rounded-lg">
-                                            <FileCheck className="w-6 h-6 text-blue-400" />
+                                {/* Contract - Conditionnel: afficher uniquement si un vrai contrat existe */}
+                                {lease.lease_pdf_url ? (
+                                    <a
+                                        href={lease.lease_pdf_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 hover:border-blue-500/50 transition-colors cursor-pointer group block"
+                                    >
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className="p-2 bg-green-500/10 rounded-lg">
+                                                <FileCheck className="w-6 h-6 text-green-400" />
+                                            </div>
+                                            <Button variant="ghost" size="icon" className="text-slate-500 group-hover:text-white">
+                                                <Download className="w-4 h-4" />
+                                            </Button>
                                         </div>
-                                        <Button variant="ghost" size="icon" className="text-slate-500 group-hover:text-white">
-                                            <Download className="w-4 h-4" />
-                                        </Button>
+                                        <h3 className="font-semibold mb-1">Contrat de Bail</h3>
+                                        <p className="text-sm text-slate-400 mb-2">Signé le {new Date(lease.start_date).toLocaleDateString('fr-FR')}</p>
+                                        <div className="flex gap-2">
+                                            <span className="text-xs px-2 py-1 bg-green-500/20 rounded text-green-400">PDF Disponible</span>
+                                        </div>
+                                    </a>
+                                ) : (
+                                    <div className="bg-slate-900/50 border border-dashed border-slate-700 rounded-xl p-5 flex flex-col items-center justify-center text-center min-h-[160px]">
+                                        <div className="p-3 bg-brand/10 rounded-full mb-3">
+                                            <FileText className="w-8 h-8 text-brand" />
+                                        </div>
+                                        <h3 className="font-semibold text-white mb-1">Aucun contrat</h3>
+                                        <p className="text-slate-400 text-sm mb-4">Générez un bail pour ce locataire</p>
+                                        <Link href={`/compte/gestion-locative/locataires/${id}?openContract=true`}>
+                                            <Button className="bg-brand hover:bg-brand/90 gap-2 text-black">
+                                                <FileCheck className="w-4 h-4" />
+                                                Générer le contrat
+                                            </Button>
+                                        </Link>
                                     </div>
-                                    <h3 className="font-semibold mb-1">Contrat de Bail</h3>
-                                    <p className="text-sm text-slate-400 mb-2">Signé le {new Date(lease.start_date).toLocaleDateString('fr-FR')}</p>
-                                    <div className="flex gap-2">
-                                        <span className="text-xs px-2 py-1 bg-slate-800 rounded text-slate-300">PDF</span>
-                                        <span className="text-xs px-2 py-1 bg-slate-800 rounded text-slate-300">2.4 MB</span>
-                                    </div>
-                                </div>
+                                )}
 
                                 {/* Placeholder for other documents */}
                                 <div className="border border-dashed border-slate-800 rounded-xl p-5 flex flex-col items-center justify-center text-center hover:bg-slate-900/50 transition-colors cursor-pointer text-slate-500 hover:text-slate-300 h-full min-h-[160px]">

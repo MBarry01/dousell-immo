@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import ReactPDF from '@react-pdf/renderer';
 import { createQuittanceDocument } from '@/components/pdf/QuittancePDF_v2';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,7 +43,57 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ PDF généré:', pdfBuffer.length, 'bytes');
 
-    // 4. Configuration de Nodemailer (Gmail)
+    // 4. NOUVEAU: Sauvegarder le PDF dans Supabase Storage + user_documents
+    if (data.leaseId) {
+      try {
+        const supabaseAdmin = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+
+        // Récupérer le owner_id depuis le bail
+        const { data: lease } = await supabaseAdmin
+          .from('leases')
+          .select('owner_id')
+          .eq('id', data.leaseId)
+          .single();
+
+        if (lease?.owner_id) {
+          const fileName = `${lease.owner_id}/quittances/${data.receiptNumber}_${Date.now()}.pdf`;
+
+          // Upload vers Storage
+          const { error: uploadError } = await supabaseAdmin.storage
+            .from('verification-docs')
+            .upload(fileName, pdfBuffer, {
+              contentType: 'application/pdf',
+              upsert: false
+            });
+
+          if (!uploadError) {
+            // Créer l'entrée dans user_documents
+            await supabaseAdmin.from('user_documents').insert({
+              user_id: lease.owner_id,
+              file_name: `Quittance_${data.receiptNumber}.pdf`,
+              file_path: fileName,
+              file_type: 'quittance',
+              file_size: pdfBuffer.length,
+              mime_type: 'application/pdf',
+              source: 'generated',
+              lease_id: data.leaseId,
+              category: 'quittance'
+            });
+            console.log('💾 Quittance sauvegardée dans la GED:', fileName);
+          } else {
+            console.error('⚠️ Erreur upload Storage:', uploadError.message);
+          }
+        }
+      } catch (storageError) {
+        // Ne pas bloquer l'envoi d'email si le stockage échoue
+        console.error('⚠️ Erreur stockage GED (non bloquant):', storageError);
+      }
+    }
+
+    // 5. Configuration de Nodemailer (Gmail)
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {

@@ -38,7 +38,7 @@ export function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
 
     const getCategoryColor = (cat: ExpenseCategory) => {
         const colors: Record<ExpenseCategory, string> = {
-            maintenance: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+            maintenance: 'bg-brand/10 text-brand border-brand/20',
             tax: 'bg-red-500/10 text-red-400 border-red-500/20',
             utility: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
             insurance: 'bg-purple-500/10 text-purple-400 border-purple-500/20',

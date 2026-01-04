@@ -98,10 +98,11 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300">
-                                Nom complet
+                                Nom complet <span className="text-red-400">*</span>
                             </label>
                             <Input
                                 name="tenant_name"
+                                required
                                 defaultValue={tenant.name}
                                 placeholder="ex: Mamadou Diop"
                                 className="bg-slate-800 border-slate-700 text-white"
@@ -109,9 +110,12 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">Téléphone</label>
+                            <label className="text-sm font-medium text-slate-300">
+                                Téléphone <span className="text-red-400">*</span>
+                            </label>
                             <Input
                                 name="tenant_phone"
+                                required
                                 defaultValue={tenant.phone}
                                 placeholder="ex: +221 77..."
                                 className="bg-slate-800 border-slate-700 text-white"
@@ -122,11 +126,12 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-300">
-                            Email
+                            Email <span className="text-red-400">*</span>
                         </label>
                         <Input
                             name="tenant_email"
                             type="email"
+                            required
                             defaultValue={tenant.email}
                             placeholder="ex: locataire@email.com"
                             className="bg-slate-800 border-slate-700 text-white"
@@ -135,9 +140,12 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-300">Adresse du bien</label>
+                        <label className="text-sm font-medium text-slate-300">
+                            Adresse du bien <span className="text-red-400">*</span>
+                        </label>
                         <Input
                             name="property_address"
+                            required
                             defaultValue={tenant.property}
                             placeholder="ex: Appartement F3, Almadies, Dakar"
                             className="bg-slate-800 border-slate-700 text-white"
@@ -148,11 +156,12 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300">
-                                Loyer (FCFA)
+                                Loyer (FCFA) <span className="text-red-400">*</span>
                             </label>
                             <Input
                                 name="monthly_amount"
                                 type="number"
+                                required
                                 defaultValue={tenant.rentAmount}
                                 placeholder="500000"
                                 className="bg-slate-800 border-slate-700 text-white font-mono"
@@ -160,12 +169,15 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">Jour paiement</label>
+                            <label className="text-sm font-medium text-slate-300">
+                                Jour paiement <span className="text-red-400">*</span>
+                            </label>
                             <Input
                                 name="billing_day"
                                 type="number"
                                 min="1"
                                 max="31"
+                                required
                                 defaultValue={tenant.dueDate || 5}
                                 className="bg-slate-800 border-slate-700 text-white"
                                 whileFocus={{ scale: 1 }}
