@@ -16,7 +16,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <motion.input
         type={type}
         className={cn(
-          "flex h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-[16px] text-white transition-all duration-200 placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:border-white/30",
+          "flex h-12 w-full rounded-2xl border border-input bg-background px-4 text-[16px] text-foreground transition-all duration-200 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-ring",
           className
         )}
         ref={ref}

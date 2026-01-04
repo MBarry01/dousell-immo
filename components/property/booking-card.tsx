@@ -6,7 +6,7 @@ import { MessageCircle, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
-import { trackPropertyAction } from "@/app/api/property-stats/actions";
+import { trackPropertyAction } from "@/app/(vitrine)/api/property-stats/actions";
 import { useAuth } from "@/hooks/use-auth";
 import { sendGTMEvent } from "@/lib/gtm";
 import {

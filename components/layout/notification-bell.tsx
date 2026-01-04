@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useNotifications, type Notification, type NotificationType } from "@/hooks/use-notifications";
-import { markNotificationAsRead, markAllNotificationsAsRead } from "@/app/notifications/actions";
+import { markNotificationAsRead, markAllNotificationsAsRead } from "@/app/(vitrine)/notifications/actions";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 

@@ -37,7 +37,19 @@
       "Bash(npm run test:contract-generation:*)",
       "Bash(npm run quality:*)",
       "Bash(npx eslint:*)",
-      "Bash(timeout /t 10)"
+      "Bash(timeout /t 10)",
+      "Bash(timeout /t 5)",
+      "Bash(ngrok http:*)",
+      "Bash(mkdir:*)",
+      "Bash(powershell -Command \"Move-Item -Path ''admin'' -Destination ''\\(vitrine\\)\\\\admin'' -Force\")",
+      "Bash(powershell -Command \"Move-Item -Path ''api'' -Destination ''\\(vitrine\\)\\\\api'' -Force; Move-Item -Path ''auth'' -Destination ''\\(vitrine\\)\\\\auth'' -Force; Move-Item -Path ''biens'' -Destination ''\\(vitrine\\)\\\\biens'' -Force; Move-Item -Path ''compte'' -Destination ''\\(vitrine\\)\\\\compte'' -Force; Move-Item -Path ''legal'' -Destination ''\\(vitrine\\)\\\\legal'' -Force; Move-Item -Path ''\\(tenant\\)'' -Destination ''\\(vitrine\\)\\\\\\\\\\(tenant\\)'' -Force\")",
+      "Bash(powershell -Command \"Move-Item -Path ''app\\\\\\\\\\(vitrine\\)\\\\compte\\\\\\\\\\(gestion\\)\\\\gestion-locative'' -Destination ''app\\\\\\\\\\(webapp\\)\\\\gestion-locative'' -Force\")",
+      "Bash(powershell -Command:*)",
+      "Bash(while read file)",
+      "Bash(do sed -i 's|/compte/gestion-locative|/gestion-locative|g' \"$file\")",
+      "Bash(for file in \"app/\\(webapp\\)/gestion-locative/components/TenantCard.tsx\" \"app/\\(webapp\\)/gestion-locative/components/TenantTable.tsx\" \"app/\\(webapp\\)/gestion-locative/page.tsx\" \"app/\\(webapp\\)/gestion-locative/actions.ts\" \"app/\\(webapp\\)/etats-lieux/page.tsx\" \"app/\\(webapp\\)/etats-lieux/new/page.tsx\")",
+      "Bash(for file in \"app/\\(webapp\\)/gestion-locative/comptabilite/page.tsx\" \"app/\\(webapp\\)/gestion-locative/messages/page.tsx\" \"app/\\(webapp\\)/documents-legaux/actions.ts\" \"app/\\(webapp\\)/gestion-locative/config/page.tsx\" \"app/\\(webapp\\)/gestion-locative/config/actions.ts\" \"app/\\(webapp\\)/gestion-locative/components/QuickActions.tsx\")",
+      "Bash(for file in \"app/\\(webapp\\)/gestion-locative/locataires/[id]/page.tsx\" \"app/\\(webapp\\)/gestion-locative/comptabilite/expenses-actions.ts\" \"app/\\(webapp\\)/gestion-locative/messages/[leaseId]/OwnerChatInterface.tsx\" \"app/\\(webapp\\)/gestion-locative/messages/actions.ts\" \"app/\\(webapp\\)/gestion-locative/components/AddTenantButton.tsx\")"
     ]
   }
 }

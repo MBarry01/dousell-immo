@@ -1,0 +1,22 @@
+[2026-01-03T21:36:51.248Z] ERROR: {"code":"PGRST204","details":null,"hint":null,"message":"Could not find the 'description' column of 'user_documents' in the schema cache"}
+DATA: {"user_id":"663e7240-67fc-470a-b780-13ca27df48f5","file_name":"Contrat_Bail_Sidy Dia_2026-01-03.pdf","file_path":"663e7240-67fc-470a-b780-13ca27df48f5/contract-4b47e8a4-15d6-401a-8a28-eb5a06bc90a4.pdf","file_type":"application/pdf","mime_type":"application/pdf","file_size":19783,"category":"lease_contract","entity_type":"lease","entity_id":"4b47e8a4-15d6-401a-8a28-eb5a06bc90a4","description":"Contrat de bail - Sidy Dia","created_at":"2026-01-03T21:36:51.162Z","updated_at":"2026-01-03T21:36:51.162Z","lease_id":"4b47e8a4-15d6-401a-8a28-eb5a06bc90a4"}
+
+[2026-01-03T21:40:48.693Z] ERROR: {"code":"23514","details":null,"hint":null,"message":"new row for relation \"user_documents\" violates check constraint \"user_documents_file_type_check\""}
+DATA: {"user_id":"663e7240-67fc-470a-b780-13ca27df48f5","file_name":"Contrat_Bail_Sidy Dia_2026-01-03.pdf","file_path":"663e7240-67fc-470a-b780-13ca27df48f5/contract-4b47e8a4-15d6-401a-8a28-eb5a06bc90a4.pdf","file_type":"application/pdf","mime_type":"application/pdf","file_size":19783,"category":"lease_contract","created_at":"2026-01-03T21:40:48.608Z","updated_at":"2026-01-03T21:40:48.608Z","lease_id":"4b47e8a4-15d6-401a-8a28-eb5a06bc90a4"}
+
+[2026-01-03T21:43:17.880Z] SUCCESS: Contract saved to user_documents
+[2026-01-03T21:43:49.885Z] ERROR: {"code":"23505","details":null,"hint":null,"message":"duplicate key value violates unique constraint \"user_documents_file_path_key\""}
+DATA: {"user_id":"663e7240-67fc-470a-b780-13ca27df48f5","file_name":"Contrat_Bail_Sidy Dia_2026-01-03.pdf","file_path":"663e7240-67fc-470a-b780-13ca27df48f5/contract-4b47e8a4-15d6-401a-8a28-eb5a06bc90a4.pdf","file_type":"bail","mime_type":"application/pdf","file_size":19783,"category":"lease_contract","created_at":"2026-01-03T21:43:49.775Z","updated_at":"2026-01-03T21:43:49.775Z","lease_id":"4b47e8a4-15d6-401a-8a28-eb5a06bc90a4"}
+
+[2026-01-03T21:45:39.976Z] ERROR: {"code":"23505","details":null,"hint":null,"message":"duplicate key value violates unique constraint \"user_documents_file_path_key\""}
+DATA: {"user_id":"663e7240-67fc-470a-b780-13ca27df48f5","file_name":"Contrat_Bail_Sidy Dia_2026-01-03.pdf","file_path":"663e7240-67fc-470a-b780-13ca27df48f5/contract-4b47e8a4-15d6-401a-8a28-eb5a06bc90a4.pdf","file_type":"bail","mime_type":"application/pdf","file_size":19783,"category":"lease_contract","created_at":"2026-01-03T21:45:39.898Z","updated_at":"2026-01-03T21:45:39.898Z","lease_id":"4b47e8a4-15d6-401a-8a28-eb5a06bc90a4"}
+
+[2026-01-03T22:06:52.134Z] SUCCESS: Contract saved to user_documents
+[2026-01-03T22:19:16.771Z] SUCCESS: Contract saved to user_documents
+[2026-01-03T22:27:48.053Z] SUCCESS: Contract saved to user_documents
+[2026-01-03T22:33:45.815Z] SUCCESS: Contract saved to user_documents
+[2026-01-03T22:35:40.975Z] SUCCESS: Contract saved to user_documents
+[2026-01-03T22:37:36.254Z] SUCCESS: Contract saved to user_documents
+[2026-01-03T22:41:01.251Z] SUCCESS: Contract saved to user_documents
+[2026-01-03T22:49:58.636Z] SUCCESS: Contract saved to user_documents
+[2026-01-03T23:48:02.168Z] SUCCESS: Contract saved to user_documents

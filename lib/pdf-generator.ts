@@ -625,7 +625,7 @@ export async function uploadPDFToStorage(
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
     const { data, error } = await supabaseClient.storage
-      .from('lease-contracts') // Bucket à créer dans Supabase
+      .from('lease-contracts') // Bucket privé
       .upload(filename, pdfBytes, {
         contentType: 'application/pdf',
         upsert: true
@@ -635,14 +635,23 @@ export async function uploadPDFToStorage(
       return { success: false, error: error.message };
     }
 
-    // Obtenir l'URL publique
-    const { data: urlData } = supabaseClient.storage
+    // Créer une URL signée (valide 1 an = 31536000 secondes) pour bucket privé
+    const { data: signedData, error: signedError } = await supabaseClient.storage
       .from('lease-contracts')
-      .getPublicUrl(filename);
+      .createSignedUrl(filename, 31536000);
+
+    if (signedError) {
+      console.error('Erreur création URL signée:', signedError);
+      // Fallback: retourner le chemin du fichier à la place
+      return {
+        success: true,
+        url: `storage://lease-contracts/${filename}` // URL interne pour référence
+      };
+    }
 
     return {
       success: true,
-      url: urlData.publicUrl
+      url: signedData.signedUrl
     };
 
   } catch (error) {

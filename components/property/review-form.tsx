@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
-import { createReviewAction } from "@/app/biens/[id]/actions";
+import { createReviewAction } from "@/app/(vitrine)/biens/[id]/actions";
 
 type ReviewFormProps = {
   propertyId: string;

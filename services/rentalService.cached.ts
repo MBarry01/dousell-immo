@@ -30,7 +30,7 @@ export async function getLeasesByOwner(
       let query = supabase
         .from("leases")
         .select(
-          "id, tenant_name, tenant_phone, tenant_email, property_address, monthly_amount, billing_day, start_date, end_date, status, created_at"
+          "id, tenant_name, tenant_phone, tenant_email, property_address, monthly_amount, billing_day, start_date, end_date, status, created_at, lease_pdf_url"
         )
         .eq("owner_id", ownerId)
         .order("created_at", { ascending: false });

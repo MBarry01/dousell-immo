@@ -22,7 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { getMyDocuments, uploadDocument } from "@/app/compte/mes-documents/actions";
+import { getMyDocuments, uploadDocument } from "@/app/(vitrine)/compte/mes-documents/actions";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 type Document = {

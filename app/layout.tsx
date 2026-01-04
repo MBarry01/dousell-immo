@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 
-import { AppShell } from "@/components/layout/app-shell";
 import { Toaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
@@ -165,7 +164,7 @@ export default function RootLayout({
         <SuppressHydrationWarning />
         <ServiceWorkerRegister />
         <SplashProvider>
-          <AppShell>{children}</AppShell>
+          {children}
           <InstallPrompt />
           <Toaster position="top-center" theme="dark" richColors />
           <CookieConsent />

@@ -191,6 +191,73 @@ export async function generateLeaseContract(
       // On continue quand même, le PDF est généré
     }
 
+    // 9.5 NOUVEAU: Enregistrer dans user_documents pour la GED
+    // Tentative d'insertion avec logs détaillés
+    // 9.5 NOUVEAU: Enregistrer dans user_documents pour la GED
+    // Tentative d'insertion avec logs détaillés
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const fileName = `Contrat_Bail_${lease.tenant_name || 'Locataire'}_${timestamp}.pdf`;
+    const filePath = filename; // Chemin dans Storage (user.id/contract-leaseId.pdf - inchangé pour le storage mais le nom fichier DB change)
+    // NOTE: filePath dans DB devrait matcher le storage path si possible, mais ici on garde le storage path du point 8
+
+    // Pour éviter confusion: le file_path DB est celui utilisé pour le download.
+    // Le point 8 utilise `filename` (user.id/contract-leaseId.pdf).
+    // Si on veut permettre plusieurs versions, il faudrait changer le storage path aussi.
+    // Mais ici on veut juste que la DB accepte l'insertion.
+    // LE PROBLEME: file_path est unique ?
+    // Check migration: ADD CONSTRAINT user_documents_file_path_key UNIQUE (file_path);
+    // Donc si on garde le meme file_path (contract-leaseId.pdf), on ne peut pas insérer une ligne duplicate.
+
+    // SOLUTION: On ne change PAS le chemin storage (on écrase le fichier PDF), 
+    // MAIS on ne peut pas insérer une NOUVELLE ligne si le file_path existe déjà.
+
+    // On doit faire un UPSERT au lieu de INSERT si le fichier existe déjà.
+
+    const pdfBuffer = pdfResult.pdfBytes;
+
+    const docData = {
+      user_id: user.id,
+      file_name: fileName,
+      file_path: filePath,
+      file_type: 'bail',
+      mime_type: 'application/pdf',
+      file_size: pdfBuffer.length,
+      category: 'lease_contract',
+      entity_type: 'lease',
+      entity_id: lease.id,
+      property_id: lease.property_id,  // CRITICAL: Required for GED property grouping
+      description: `Contrat de bail - ${lease.tenant_name}`,
+      source: 'generated', // Important: distinguish from manual uploads
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      lease_id: lease.id
+    };
+
+    console.log('📄 Tentative upsert user_documents:', JSON.stringify(docData, null, 2));
+
+    const { error: docError } = await supabase
+      .from('user_documents')
+      .upsert(docData, { onConflict: 'file_path' }); // Utiliser Upsert sur file_path
+
+    if (docError) {
+      console.error('❌ Erreur insertion user_documents:', docError);
+      // Log to file for easier access
+      try {
+        const fs = require('fs');
+        const logMessage = `[${new Date().toISOString()}] ERROR: ${JSON.stringify(docError)}\nDATA: ${JSON.stringify(docData)}\n\n`;
+        fs.appendFileSync('debug-log.txt', logMessage);
+      } catch (e) {
+        console.error('Failed to write to debug log', e);
+      }
+    } else {
+      console.log('✅ Contrat enregistré dans la GED');
+      try {
+        const fs = require('fs');
+        const logMessage = `[${new Date().toISOString()}] SUCCESS: Contract saved to user_documents\n`;
+        fs.appendFileSync('debug-log.txt', logMessage);
+      } catch (e) { }
+    }
+
     // 10. Revalidation
     revalidatePath('/compte/(gestion)/locataires');
     revalidatePath(`/compte/(gestion)/locataires/${leaseId}`);

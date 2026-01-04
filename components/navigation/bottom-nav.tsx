@@ -7,7 +7,7 @@ import { Home, Search, User, Building2 } from "lucide-react";
 const navItems = [
   { href: "/", label: "Accueil", icon: Home },
   { href: "/recherche", label: "Annonce", icon: Search },
-  { href: "/compte/gestion-locative", label: "Gestion", icon: Building2 },
+  { href: "/gestion-locative", label: "Gestion", icon: Building2 },
   { href: "/compte", label: "Compte", icon: User },
 ];
 

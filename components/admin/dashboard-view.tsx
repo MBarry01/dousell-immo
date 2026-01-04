@@ -18,8 +18,8 @@ import type {
   DashboardStats,
   RecentActivity,
   PerformanceStats,
-} from "@/app/admin/actions";
-import type { RecentProperty } from "@/app/admin/actions";
+} from "@/app/(vitrine)/admin/actions";
+import type { RecentProperty } from "@/app/(vitrine)/admin/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

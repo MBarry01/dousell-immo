@@ -9,7 +9,7 @@ import { formatCurrency } from "@/lib/utils";
 import { hapticFeedback } from "@/lib/haptic";
 import { analyticsEvents } from "@/lib/analytics";
 import { AGENCY_PHONE_DISPLAY } from "@/lib/constants";
-import { trackPropertyAction } from "@/app/api/property-stats/actions";
+import { trackPropertyAction } from "@/app/(vitrine)/api/property-stats/actions";
 import { useAuth } from "@/hooks/use-auth";
 import { sendGTMEvent } from "@/lib/gtm";
 import type { Property } from "@/types/property";
