@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from '../../theme-provider';
+import { AddTenantButton } from './AddTenantButton';
 
 interface QuickActionsProps {
     onAddTenant?: () => void;
@@ -20,6 +21,8 @@ interface QuickActionsProps {
     onSendReminders?: () => void;
     pendingCount?: number;
     overdueCount?: number;
+    ownerId: string;
+    profile: any;
 }
 
 export function QuickActions({
@@ -27,7 +30,9 @@ export function QuickActions({
     onExportCSV,
     onSendReminders,
     pendingCount = 0,
-    overdueCount = 0
+    overdueCount = 0,
+    ownerId,
+    profile
 }: QuickActionsProps) {
     const [hoveredAction, setHoveredAction] = useState<string | null>(null);
     const { isDark } = useTheme();
@@ -42,8 +47,9 @@ export function QuickActions({
             bgColor: 'bg-slate-900',
             hoverBg: 'hover:bg-slate-800',
             borderColor: 'border-slate-800',
-            onClick: onAddTenant,
-            type: 'button' as const,
+
+            // onClick: onAddTenant, // Handled by AddTenantButton trigger
+            type: 'custom' as const,
         },
         {
             id: 'send-reminders',
@@ -67,7 +73,7 @@ export function QuickActions({
             bgColor: 'bg-slate-900',
             hoverBg: 'hover:bg-slate-800',
             borderColor: 'border-slate-800',
-            href: '/compte/interventions',
+            href: '/interventions',
             type: 'link' as const,
         },
         {
@@ -91,7 +97,7 @@ export function QuickActions({
             bgColor: 'bg-slate-900',
             hoverBg: 'hover:bg-slate-800',
             borderColor: 'border-slate-800',
-            href: '/compte/legal',
+            href: '/documents-legaux',
             type: 'link' as const,
         },
         {
@@ -118,9 +124,8 @@ export function QuickActions({
                     ${hoveredAction === action.id ? 'scale-110' : ''}
                     ${isDark ? 'bg-slate-800' : 'bg-gray-100'}
                 `}>
-                    <Icon className={`w-4 h-4 ${
-                        isDark ? 'text-white' : 'text-gray-700'
-                    }`} />
+                    <Icon className={`w-4 h-4 ${isDark ? 'text-white' : 'text-gray-700'
+                        }`} />
                 </div>
                 <span className={`
                     text-xs font-medium
@@ -160,9 +165,8 @@ export function QuickActions({
         <div className="mb-6">
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
-                <span className={`text-xs font-semibold uppercase tracking-wider ${
-                    isDark ? 'text-slate-500' : 'text-gray-500'
-                }`}>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-slate-500' : 'text-gray-500'
+                    }`}>
                     Actions Rapides
                 </span>
                 <div className={`flex-1 h-px ${isDark ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
@@ -201,6 +205,25 @@ export function QuickActions({
                                     ${isDark ? 'text-slate-600' : 'text-gray-400'}
                                 `} />
                             </Link>
+                        );
+                    }
+
+                    if (action.type === 'custom' && action.id === 'add-tenant') {
+                        return (
+                            <AddTenantButton
+                                key={action.id}
+                                ownerId={ownerId}
+                                profile={profile}
+                                trigger={
+                                    <button
+                                        className={baseClasses}
+                                        onMouseEnter={() => setHoveredAction(action.id)}
+                                        onMouseLeave={() => setHoveredAction(null)}
+                                    >
+                                        <ActionContent action={action} />
+                                    </button>
+                                }
+                            />
                         );
                     }
 

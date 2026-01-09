@@ -63,6 +63,26 @@ export function replacePlaceholders(template: string, data: ContractData): strin
             return `${data.tenant.firstName} ${data.tenant.lastName}`;
         }
 
+        // Mappings spécifiques pour les templates français (contract-defaults.ts uses French keys)
+        const frenchMappings: Record<string, string> = {
+            'montant_caution': 'lease.securityDeposit',
+            'montant_loyer': 'lease.monthlyRent',
+            'duree_bail': 'lease.duration',
+            'date_debut': 'lease.startDate',
+            'jour_paiement': 'lease.billingDay',
+            'adresse_bien': 'property.address',
+            'description_bien': 'property.description',
+            'répartition_frais': 'lease.frais' // Pas standard, mais au cas où
+        };
+
+        if (frenchMappings[trimmedKey]) {
+            const mappedPath = frenchMappings[trimmedKey];
+            const mappedValue = getValue(data, mappedPath);
+            if (mappedValue !== undefined && mappedValue !== null) {
+                return formatValue(mappedValue, mappedPath);
+            }
+        }
+
         return ''; // Ou `[${trimmedKey}]` pour voir les manquants
     });
 }

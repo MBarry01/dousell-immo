@@ -49,7 +49,14 @@
       "Bash(do sed -i 's|/compte/gestion-locative|/gestion-locative|g' \"$file\")",
       "Bash(for file in \"app/\\(webapp\\)/gestion-locative/components/TenantCard.tsx\" \"app/\\(webapp\\)/gestion-locative/components/TenantTable.tsx\" \"app/\\(webapp\\)/gestion-locative/page.tsx\" \"app/\\(webapp\\)/gestion-locative/actions.ts\" \"app/\\(webapp\\)/etats-lieux/page.tsx\" \"app/\\(webapp\\)/etats-lieux/new/page.tsx\")",
       "Bash(for file in \"app/\\(webapp\\)/gestion-locative/comptabilite/page.tsx\" \"app/\\(webapp\\)/gestion-locative/messages/page.tsx\" \"app/\\(webapp\\)/documents-legaux/actions.ts\" \"app/\\(webapp\\)/gestion-locative/config/page.tsx\" \"app/\\(webapp\\)/gestion-locative/config/actions.ts\" \"app/\\(webapp\\)/gestion-locative/components/QuickActions.tsx\")",
-      "Bash(for file in \"app/\\(webapp\\)/gestion-locative/locataires/[id]/page.tsx\" \"app/\\(webapp\\)/gestion-locative/comptabilite/expenses-actions.ts\" \"app/\\(webapp\\)/gestion-locative/messages/[leaseId]/OwnerChatInterface.tsx\" \"app/\\(webapp\\)/gestion-locative/messages/actions.ts\" \"app/\\(webapp\\)/gestion-locative/components/AddTenantButton.tsx\")"
+      "Bash(for file in \"app/\\(webapp\\)/gestion-locative/locataires/[id]/page.tsx\" \"app/\\(webapp\\)/gestion-locative/comptabilite/expenses-actions.ts\" \"app/\\(webapp\\)/gestion-locative/messages/[leaseId]/OwnerChatInterface.tsx\" \"app/\\(webapp\\)/gestion-locative/messages/actions.ts\" \"app/\\(webapp\\)/gestion-locative/components/AddTenantButton.tsx\")",
+      "Bash(npx kill-port:*)",
+      "Bash(Get-Content \"$env:TEMP\\\\claude\\\\c--Users-Barry-Downloads-Doussel-immo\\\\tasks\\\\b70ac3a.output\" -Tail 50)",
+      "Bash(git restore:*)",
+      "Skill(frontend-design)",
+      "Skill(frontend-design:*)",
+      "Bash(if not exist \"c:\\\\Users\\\\Barry\\\\Downloads\\\\Doussel_immo\\\\components\\\\landing\" mkdir \"c:\\\\Users\\\\Barry\\\\Downloads\\\\Doussel_immo\\\\components\\\\landing\")",
+      "Bash(dir:*)"
     ]
   }
 }

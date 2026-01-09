@@ -104,7 +104,7 @@ function WebAppLayoutContent({
     ];
 
     return (
-        <div className={`flex flex-col h-screen w-screen overflow-hidden transition-colors ${isDark
+        <div className={`flex flex-col h-[100dvh] w-screen overflow-hidden transition-colors ${isDark
             ? 'bg-black text-gray-100'
             : 'bg-gray-50 text-gray-900'
             }`}>
@@ -187,7 +187,7 @@ function WebAppLayoutContent({
 
                 {/* Sidebar */}
                 <aside className={`
-                    fixed top-16 left-0 z-50 h-[calc(100vh-4rem)]
+                    fixed top-16 left-0 z-50 h-[calc(100dvh-4rem)]
                     border-r
                     transform transition-all duration-300 ease-in-out
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}

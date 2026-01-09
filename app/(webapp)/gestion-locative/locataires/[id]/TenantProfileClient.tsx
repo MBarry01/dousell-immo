@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PaymentHistory } from "./PaymentHistory";
 import { useTheme } from "../../../theme-provider";
+import { DocumentGeneratorDialog } from "../../components/DocumentGeneratorDialog";
 
 interface TenantProfileClientProps {
     lease: any;
@@ -26,6 +27,7 @@ interface TenantProfileClientProps {
     pendingAmount: number;
     overdueCount: number;
     user: any;
+    profile: any;
 }
 
 export function TenantProfileClient({
@@ -34,7 +36,8 @@ export function TenantProfileClient({
     totalPaid,
     pendingAmount,
     overdueCount,
-    user
+    user,
+    profile
 }: TenantProfileClientProps) {
     const { isDark } = useTheme();
 
@@ -92,16 +95,24 @@ export function TenantProfileClient({
                             </div>
                             <div className="flex items-center gap-3 text-sm">
                                 <FileText className={`w-4 h-4 ${isDark ? 'text-slate-500' : 'text-gray-400'}`} />
-                                <span>Bail #{lease.id.slice(0, 8)}</span>
+                                {lease.lease_pdf_url ? (
+                                    <span>Contrat signé</span>
+                                ) : (
+                                    <span className="text-amber-500">Pas encore de bail</span>
+                                )}
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3 pt-4">
-                            <Button className={`w-full ${isDark ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'} text-white`} size="sm">
-                                <Mail className="w-4 h-4 mr-2" /> Message
+                            <Button className={`w-full ${isDark ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'} text-white`} size="sm" asChild>
+                                <Link href={`/gestion-locative/messages/${lease.id}`}>
+                                    <Mail className="w-4 h-4 mr-2" /> Message
+                                </Link>
                             </Button>
-                            <Button variant="outline" className={`w-full ${isDark ? 'border-slate-700 hover:bg-slate-800 text-slate-200 hover:text-white' : 'border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-900 shadow-sm'}`} size="sm">
-                                <Phone className="w-4 h-4 mr-2" /> Appeler
+                            <Button variant="outline" className={`w-full ${isDark ? 'border-slate-700 hover:bg-slate-800 text-slate-200 hover:text-white' : 'border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-900 shadow-sm'}`} size="sm" asChild>
+                                <a href={`tel:${lease.tenant_phone}`}>
+                                    <Phone className="w-4 h-4 mr-2" /> Appeler
+                                </a>
                             </Button>
                         </div>
                     </div>
@@ -252,12 +263,18 @@ export function TenantProfileClient({
                                         </div>
                                         <h3 className={`font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Aucun contrat</h3>
                                         <p className={`text-sm mb-4 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>Générez un bail pour ce locataire</p>
-                                        <Link href={`/gestion-locative/locataires/${lease.id}?openContract=true`}>
-                                            <Button className={`${isDark ? 'bg-brand hover:bg-brand/90 text-black' : 'bg-slate-900 hover:bg-slate-800 text-white'} gap-2`}>
-                                                <FileCheck className="w-4 h-4" />
-                                                Générer le contrat
-                                            </Button>
-                                        </Link>
+                                        <div className="w-full">
+                                            <DocumentGeneratorDialog
+                                                leases={[lease]}
+                                                profile={profile}
+                                                trigger={
+                                                    <Button className={`w-full ${isDark ? 'bg-brand hover:bg-brand/90 text-black' : 'bg-slate-900 hover:bg-slate-800 text-white'} gap-2`}>
+                                                        <FileCheck className="w-4 h-4" />
+                                                        Générer le contrat
+                                                    </Button>
+                                                }
+                                            />
+                                        </div>
                                     </div>
                                 )}
 

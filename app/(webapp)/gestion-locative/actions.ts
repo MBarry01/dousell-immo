@@ -265,7 +265,7 @@ export async function createNewLease(formData: Record<string, unknown>) {
  * Déclenche l'envoi automatique de la quittance par EMAIL via n8n
  * Si pas d'ID de transaction, en crée une pour le mois courant
  */
-export async function confirmPayment(leaseId: string, transactionId?: string) {
+export async function confirmPayment(leaseId: string, transactionId?: string, month?: number, year?: number) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -274,33 +274,53 @@ export async function confirmPayment(leaseId: string, transactionId?: string) {
     let targetId = transactionId;
 
     // 1. Si pas de transactionID, on en crée une pour le mois actuel
+    // 1. Si pas de transactionID, on cherche ou on crée
     if (!targetId) {
-        // Récupérer le montant du bail
-        const { data: lease } = await supabase
-            .from('leases')
-            .select('monthly_amount')
-            .eq('id', leaseId)
-            .single();
+        // Déterminer la période cible (Mois sélectionné OU Mois actuel par défaut)
+        const targetMonth = month || (new Date().getMonth() + 1);
+        const targetYear = year || new Date().getFullYear();
 
-        if (!lease) return { success: false, error: "Bail introuvable" };
-
-        const { data: newTrans, error: insertError } = await supabase
+        // A) Vérifier s'il existe DÉJÀ une transaction pour ce bail/mois/année
+        const { data: existingTx } = await supabase
             .from('rental_transactions')
-            .insert([{
-                lease_id: leaseId,
-                period_month: new Date().getMonth() + 1,
-                period_year: new Date().getFullYear(),
-                amount_due: lease.monthly_amount,
-                status: 'pending'
-            }])
-            .select()
-            .single();
+            .select('id, status')
+            .eq('lease_id', leaseId)
+            .eq('period_month', targetMonth)
+            .eq('period_year', targetYear)
+            .limit(1)
+            .maybeSingle(); // maybeSingle pour éviter erreur si 0
 
-        if (insertError) {
-            console.error("Erreur création transaction:", insertError.message);
-            return { success: false, error: insertError.message };
+        if (existingTx) {
+            // Si elle existe déjà, on l'utilise (même si elle est payée, on la mettra à jour en 'paid')
+            targetId = existingTx.id;
+        } else {
+            // B) Sinon, on en crée une nouvelle
+            const { data: lease } = await supabase
+                .from('leases')
+                .select('monthly_amount')
+                .eq('id', leaseId)
+                .single();
+
+            if (!lease) return { success: false, error: "Bail introuvable" };
+
+            const { data: newTrans, error: insertError } = await supabase
+                .from('rental_transactions')
+                .insert([{
+                    lease_id: leaseId,
+                    period_month: targetMonth,
+                    period_year: targetYear,
+                    amount_due: lease.monthly_amount,
+                    status: 'pending'
+                }])
+                .select()
+                .single();
+
+            if (insertError) {
+                console.error("Erreur création transaction:", insertError.message);
+                return { success: false, error: insertError.message };
+            }
+            targetId = newTrans.id;
         }
-        targetId = newTrans.id;
     }
 
     // 2. Mise à jour de la transaction en 'paid' avec récupération des données pour email

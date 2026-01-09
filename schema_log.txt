@@ -1,0 +1,16 @@
+[
+  "id",
+  "lease_id",
+  "period_month",
+  "period_year",
+  "amount_due",
+  "status",
+  "notice_url",
+  "receipt_url",
+  "paid_at",
+  "created_at",
+  "period_start",
+  "period_end",
+  "tenant_id",
+  "reminder_sent"
+]

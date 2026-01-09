@@ -1,0 +1,20 @@
+Starting Ghost Hunt...
+Fetching active leases...
+Checking against Current Date: 9/1/2026
+Scanning 8 active leases...
+[GHOST FOUND] Lease: Samba Barry (ID: 85eaba9c-63ab-4fc4-baad-039a19a3140b)
+   -> Active Lease but NO Transaction for 1/2026
+   -> Billing Day: 5, Today: 9 (Overdue!)
+[PENDING GHOST] Lease: Barry BARRY
+   -> No Transaction yet, but not late yet (Billing: 29)
+[GHOST FOUND] Lease: Massamba Dikhité (ID: b1622d95-a359-4263-83cb-2b7e93314861)
+   -> Active Lease but NO Transaction for 1/2026
+   -> Billing Day: 5, Today: 9 (Overdue!)
+[GHOST FOUND] Lease: Mamour Sidibé (ID: 5e61bff6-9460-479c-ae24-84ef39dffd8d)
+   -> Active Lease but NO Transaction for 1/2026
+   -> Billing Day: 5, Today: 9 (Overdue!)
+[GHOST FOUND] Lease: Mohamadou Barry (ID: 08646b2f-daaf-4968-9f42-12c7381a24a8)
+   -> Active Lease but NO Transaction for 1/2026
+   -> Billing Day: 5, Today: 9 (Overdue!)
+
+Found 4 GHOST overdue items (UI counts them, Backend misses them).

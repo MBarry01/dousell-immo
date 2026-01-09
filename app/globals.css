@@ -61,9 +61,51 @@
   /* Couleurs destructives */
   --color-destructive: #ef4444;
   --color-destructive-foreground: #fafafa;
+
+  /* Animations custom pour Shadcn UI */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+
+    to {
+      height: 0;
+    }
+  }
+
+  @keyframes enter {
+    from {
+      opacity: var(--tw-enter-opacity, 1);
+      transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), var(--tw-enter-scale, 1)) rotate(var(--tw-enter-rotate, 0));
+    }
+  }
+
+  @keyframes exit {
+    to {
+      opacity: var(--tw-exit-opacity, 1);
+      transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1)) rotate(var(--tw-exit-rotate, 0));
+    }
+  }
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   * {
     border-color: var(--border);
   }
@@ -177,6 +219,64 @@
   .ring-primary {
     --tw-ring-color: hsl(var(--ring));
   }
+
+  /* Shadcn Manual Animations Utilities */
+  .animate-in {
+    animation-name: enter;
+    animation-duration: 0.15s;
+    --tw-enter-opacity: initial;
+    --tw-enter-scale: initial;
+    --tw-enter-rotate: initial;
+    --tw-enter-translate-x: initial;
+    --tw-enter-translate-y: initial;
+  }
+
+  .animate-out {
+    animation-name: exit;
+    animation-duration: 0.15s;
+    --tw-exit-opacity: initial;
+    --tw-exit-scale: initial;
+    --tw-exit-rotate: initial;
+    --tw-exit-translate-x: initial;
+    --tw-exit-translate-y: initial;
+  }
+
+  .fade-in-0 {
+    --tw-enter-opacity: 0;
+  }
+
+  .fade-out-0 {
+    --tw-exit-opacity: 0;
+  }
+
+  .zoom-in-95 {
+    --tw-enter-scale: 0.95;
+  }
+
+  .zoom-out-95 {
+    --tw-exit-scale: 0.95;
+  }
+
+  .slide-in-from-top-48 {
+    --tw-enter-translate-y: -48%;
+  }
+
+  /* Correct syntax for complex selectors in v4 might need escaping or simpler classes */
+  .slide-in-from-top-\[48\%\] {
+    --tw-enter-translate-y: -48%;
+  }
+
+  .slide-in-from-left-1\/2 {
+    --tw-enter-translate-x: -50%;
+  }
+
+  .slide-out-to-top-\[48\%\] {
+    --tw-exit-translate-y: -48%;
+  }
+
+  .slide-out-to-left-1\/2 {
+    --tw-exit-translate-x: -50%;
+  }
 }
 
 /* Animations smooth pour les menus */
@@ -236,6 +336,279 @@
 @media all and (display-mode: standalone) {
   .pwa-hero-pb {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 43px) !important;
+  }
+}
+
+/* ===== LANDING PAGE LUXE ANIMATIONS ===== */
+
+/* Grain/Noise texture overlay */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Gold shimmer effect for buttons */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg,
+      #F4C430 0%,
+      #FFD700 25%,
+      #FFF8DC 50%,
+      #FFD700 75%,
+      #F4C430 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.btn-shimmer:hover {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Gold glow effect */
+.gold-glow {
+  box-shadow:
+    0 0 20px rgba(244, 196, 48, 0.3),
+    0 0 40px rgba(244, 196, 48, 0.2),
+    0 0 60px rgba(244, 196, 48, 0.1);
+}
+
+.gold-glow-text {
+  text-shadow:
+    0 0 10px rgba(244, 196, 48, 0.5),
+    0 0 20px rgba(244, 196, 48, 0.3),
+    0 0 30px rgba(244, 196, 48, 0.2);
+}
+
+/* Stagger reveal animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-gold {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(244, 196, 48, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(244, 196, 48, 0.6);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s ease-in-out infinite;
+}
+
+/* Stagger delays */
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+.delay-600 {
+  animation-delay: 600ms;
+}
+
+.delay-700 {
+  animation-delay: 700ms;
+}
+
+.delay-800 {
+  animation-delay: 800ms;
+}
+
+/* Luxury card styling */
+.luxury-card {
+  background: linear-gradient(145deg,
+      rgba(20, 20, 20, 0.9) 0%,
+      rgba(10, 10, 10, 0.95) 100%);
+  border: 1px solid rgba(244, 196, 48, 0.15);
+  backdrop-filter: blur(20px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.luxury-card:hover {
+  border-color: rgba(244, 196, 48, 0.4);
+  transform: translateY(-8px);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(244, 196, 48, 0.1);
+}
+
+/* Elegant divider */
+.gold-divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(244, 196, 48, 0.5),
+      transparent);
+}
+
+/* Typography classes - utilise Geist (police du projet) */
+.font-display {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* Gradient text with animation */
+.gradient-text-animated {
+  background: linear-gradient(90deg,
+      #F4C430,
+      #FFD700,
+      #FFF8DC,
+      #FFD700,
+      #F4C430);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+/* Shooting Stars Effect - Background stars animation */
+.stars {
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #eee, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 90px 40px, #fff, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 130px 80px, #fff, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0, 0, 0, 0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  animation: twinkle 5s ease-in-out infinite;
+  opacity: 0.5;
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
   }
 }
 

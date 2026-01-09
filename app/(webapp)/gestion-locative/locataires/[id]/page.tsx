@@ -34,6 +34,12 @@ export default async function TenantProfilePage({ params }: { params: Promise<{ 
         .eq("owner_id", user.id)
         .single();
 
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
     if (!lease) notFound();
 
     // Calculate generic stats
@@ -55,7 +61,10 @@ export default async function TenantProfilePage({ params }: { params: Promise<{ 
             totalPaid={totalPaid}
             pendingAmount={pendingAmount}
             overdueCount={overdueCount}
+            pendingAmount={pendingAmount}
+            overdueCount={overdueCount}
             user={user}
+            profile={profile}
         />
     );
 }

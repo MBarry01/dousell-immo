@@ -100,7 +100,8 @@ export function GenerateContractModal({ leaseId, tenantName, onSuccess, children
                 // Pour Mobile/PWA : window.open est souvent bloqué. On force le téléchargement/ouverture via lien.
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `Contrat_Bail_${tenantName?.replace(/\s+/g, '_') || 'Brouillon'}.pdf`;
+                link.target = '_blank'; // Ouvrir dans un nouvel onglet
+                // link.download = ... // On laisse le navigateur décider (affichage)
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -170,12 +171,12 @@ export function GenerateContractModal({ leaseId, tenantName, onSuccess, children
                                 <Button variant="ghost" size="sm" onClick={() => setMode('standard')} className="text-xs h-7 text-slate-400 hover:text-white hover:bg-slate-800">Retour au Standard</Button>
                             </div>
 
-                            <div className="grid gap-4">
+                            <div className="grid gap-8">
                                 {(Object.keys(DEFAULT_CONTRACT_TEXTS) as Array<keyof typeof DEFAULT_CONTRACT_TEXTS>).map((key) => {
                                     const label = key.replace(/_/g, ' ').replace('article', 'Article').replace(/\d+/, (match) => match + ' :');
                                     return (
-                                        <div key={key} className="space-y-2">
-                                            <Label className="text-slate-300 capitalize">{label}</Label>
+                                        <div key={key} className="space-y-6">
+                                            <Label className="text-slate-300 capitalize text-base font-medium">{label}</Label>
                                             <Textarea
                                                 value={texts[key] ?? DEFAULT_CONTRACT_TEXTS[key]}
                                                 onChange={(e) => handleChange(key, e.target.value)}

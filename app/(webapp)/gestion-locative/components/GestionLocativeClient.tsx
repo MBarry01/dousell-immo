@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import { TenantTable } from './TenantTable';
 import { MonthSelector } from './MonthSelector';
 import { EditTenantDialog } from './EditTenantDialog';
-import { SendRemindersButton } from './SendRemindersButton';
+
 import { DashboardStats } from './DashboardStats';
 import { QuickActions } from './QuickActions';
 import { TenantCardGrid } from './TenantCardGrid';
 import { Search, Download, LayoutGrid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { deleteTransaction, deleteLease, confirmPayment, terminateLease, reactivateLease, sendTenantInvitation } from '../actions';
+import { processLateReminders } from '@/app/(vitrine)/actions/reminders';
 import { RentalTour } from '@/components/onboarding/RentalTour';
 import { ReceiptModal } from './ReceiptModal';
 import { toast } from 'sonner';
@@ -154,29 +155,7 @@ export function GestionLocativeClient({
     // ========================================
     // AUTO-UPDATE MONTH DETECTION (Passage automatique au nouveau mois)
     // ========================================
-    useEffect(() => {
-        // ... (existing code)
-        const checkMonthChange = () => {
-            const now = new Date();
-            const currentMonth = now.getMonth() + 1;
-            const currentYear = now.getFullYear();
 
-            // Si le mois ou l'année a changé, mettre à jour automatiquement
-            if (currentMonth !== selectedMonth || currentYear !== selectedYear) {
-                console.log(`[AUTO-UPDATE] Changement détecté: ${selectedMonth}/${selectedYear} → ${currentMonth}/${currentYear}`);
-                setSelectedMonth(currentMonth);
-                setSelectedYear(currentYear);
-            }
-        };
-
-        // Vérifier immédiatement au montage
-        checkMonthChange();
-
-        // Puis vérifier toutes les 60 secondes
-        const interval = setInterval(checkMonthChange, 60000);
-
-        return () => clearInterval(interval);
-    }, [selectedMonth, selectedYear]);
 
     // ========================================
     // FILTRAGE STRICT PAR PÉRIODE
@@ -369,7 +348,12 @@ export function GestionLocativeClient({
             return;
         }
 
-        const result = await confirmPayment(leaseId, transactionId);
+        const result = await confirmPayment(
+            leaseId,
+            transactionId,
+            selectedMonth,
+            selectedYear
+        );
 
         if (!result.success) {
             toast.error(result.error || 'Erreur inconnue');
@@ -542,6 +526,30 @@ export function GestionLocativeClient({
         });
     };
 
+    const handleSendReminders = async () => {
+        // Optimistic UI interaction
+        const promise = processLateReminders();
+
+        toast.promise(promise, {
+            loading: 'Envoi des relances...',
+            success: (result) => {
+                if (result.count > 0) {
+                    return `✅ ${result.count} relance(s) envoyée(s)`;
+                } else {
+                    return 'ℹ️ Aucune relance à envoyer';
+                }
+            },
+            error: '❌ Erreur lors de l\'envoi'
+        });
+
+        try {
+            await promise;
+            router.refresh(); // Refresh to update reminder status/counts
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <div className="space-y-0 w-full">
             <ReceiptModal
@@ -577,6 +585,9 @@ export function GestionLocativeClient({
                 onExportCSV={handleExportCSV}
                 pendingCount={kpiStats.pendingCount}
                 overdueCount={kpiStats.overdueCount}
+                onSendReminders={handleSendReminders}
+                ownerId={ownerId}
+                profile={profile}
             />
 
             {/* ========================================
@@ -587,8 +598,8 @@ export function GestionLocativeClient({
                 <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
                     {/* Recherche */}
                     <div className={`flex-1 flex items-center gap-2 rounded-md px-3 h-9 border min-w-0 transition-colors ${isDark
-                            ? 'bg-black border-slate-800 focus-within:border-slate-700'
-                            : 'bg-white border-gray-200 focus-within:border-gray-400'
+                        ? 'bg-black border-slate-800 focus-within:border-slate-700'
+                        : 'bg-white border-gray-200 focus-within:border-gray-400'
                         }`}>
                         <Search className={`h-4 w-4 shrink-0 ${isDark ? 'text-slate-500' : 'text-gray-500'}`} />
                         <input
@@ -597,14 +608,13 @@ export function GestionLocativeClient({
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className={`flex-1 bg-transparent text-sm outline-none min-w-0 ${isDark
-                                    ? 'text-white placeholder:text-slate-600'
-                                    : 'text-gray-900 placeholder:text-gray-400'
+                                ? 'text-white placeholder:text-slate-600'
+                                : 'text-gray-900 placeholder:text-gray-400'
                                 }`}
                         />
                     </div>
 
-                    {/* Bouton Relances J+5 */}
-                    <SendRemindersButton />
+
                 </div>
 
                 {/* Ligne 2: Sélecteur de mois (gauche) + CSV (droite) */}
@@ -654,8 +664,8 @@ export function GestionLocativeClient({
                             variant="outline"
                             size="sm"
                             className={`h-9 px-3 shrink-0 ${isDark
-                                    ? 'bg-black border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-white'
-                                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                                ? 'bg-black border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-white'
+                                : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
                                 }`}
                             disabled={formattedTenants.length === 0}
                         >

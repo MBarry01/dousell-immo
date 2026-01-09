@@ -1,0 +1,19 @@
+Starting check...
+Checking ALL overdue transactions...
+[OVERDUE UI] Mamour Sidibé - Due: 2025-12-04 - Late by 35 days
+   -> [MAILER CANDIDATE] (>= 5 days)
+[OVERDUE UI] Samba Barry - Due: 2025-12-04 - Late by 35 days
+   -> [MAILER CANDIDATE] (>= 5 days)
+[OVERDUE UI] Mohamadou Barry - Due: 2025-12-26 - Late by 13 days
+   -> [MAILER CANDIDATE] (>= 5 days)
+
+Summary:
+UI Badge Count (Total Overdue): 3
+Mailer Candidates (Overdue >= 5 days): 3
+
+Transactions for current month (1/2026): 5
+ - Tx 6cbc7d93-fb72-4746-bc82-97a4f6f6b244 Status: paid
+ - Tx be615b2d-0cfd-43aa-8c3d-7ad06fb4e93d Status: paid
+ - Tx 7954aac9-55f5-4611-a9ff-99798162deee Status: paid
+ - Tx bd8f9e5e-20ba-4d08-a82b-0f36a955f10c Status: paid
+ - Tx d3723c58-709b-485d-8f72-f04983aee3e6 Status: paid

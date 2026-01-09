@@ -2,8 +2,7 @@ import { RentalStats } from "./components/RentalStats";
 import { getRentalStats } from "./actions";
 import { GestionLocativeClient } from "./components/GestionLocativeClient";
 import { AddTenantButton } from "./components/AddTenantButton";
-import { MaintenanceHub } from "./components/MaintenanceHub";
-import { LegalAlertsWidget } from "./components/LegalAlertsWidget";
+
 import { DocumentGeneratorDialog } from "./components/DocumentGeneratorDialog";
 import { ThemedContent, ThemedWidget } from "./components/ThemedContent";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getLeasesByOwner, getRentalTransactions, getOwnerProfileForReceipts } from "@/services/rentalService.cached";
-import { getLeaseAlerts } from "@/app/(webapp)/documents-legaux/actions";
+
 
 export default async function GestionLocativePage({
     searchParams,
@@ -41,10 +40,7 @@ export default async function GestionLocativePage({
     const [
         profile,
         allLeases,
-        earliestLeaseResult,
-        maintenanceResult,
-        stats,
-        legalAlerts
+        earliestLeaseResult
     ] = await Promise.all([
         // Profil pour les infos de quittance (AVEC CACHE)
         getOwnerProfileForReceipts(user.id),
@@ -57,33 +53,19 @@ export default async function GestionLocativePage({
             .eq('owner_id', user.id)
             .order('start_date', { ascending: true })
             .limit(1)
-            .single(),
-        // Demandes de maintenance (aperçu)
-        supabase
-            .from('maintenance_requests')
-            .select('id, description, status, created_at, lease_id, artisan_name, artisan_phone, artisan_rating, artisan_address, quoted_price, intervention_date, owner_approved')
-            .order('created_at', { ascending: false })
-            .neq('status', 'completed')
-            .limit(5),
-        // Statistiques
-        getRentalStats(),
-        // Alertes juridiques
-        getLeaseAlerts()
+            .single()
     ]);
 
     // Extraire les données des résultats
     const earliestLease = earliestLeaseResult.data;
-    const maintenanceRequests = maintenanceResult.data || [];
 
-    if (maintenanceResult.error) {
-        console.error("Erreur récupération maintenance:", maintenanceResult.error.message);
-    }
 
     // Filtrer les baux côté client selon le statut
     const filteredLeases = isViewingTerminated
         ? allLeases.filter(l => l.status === 'terminated')
         : allLeases.filter(l => !l.status || l.status === 'active' || l.status === 'pending');
 
+    // On limite la navigation à la date du premier bail
     const minDateStr = earliestLease?.start_date || new Date().toISOString();
 
     // Étape 2 : Récupérer les transactions (dépend des leases filtrés)
@@ -96,27 +78,7 @@ export default async function GestionLocativePage({
         amount_paid: (t.status?.toLowerCase() === 'paid') ? t.amount_due : 0
     }));
 
-    // Transformer les demandes de maintenance pour MaintenanceHub
-    const formattedRequests = (maintenanceRequests || []).map(req => {
-        const categoryMatch = req.description?.match(/\[([^\]]+)\]$/);
-        const category = categoryMatch ? categoryMatch[1] : undefined;
-        const cleanDescription = category ? req.description.replace(` [${category}]`, '') : req.description;
 
-        return {
-            id: req.id,
-            description: cleanDescription,
-            category: category,
-            status: req.status,
-            created_at: req.created_at,
-            artisan_name: req.artisan_name,
-            artisan_phone: req.artisan_phone,
-            artisan_rating: req.artisan_rating,
-            artisan_address: req.artisan_address,
-            quoted_price: req.quoted_price,
-            intervention_date: req.intervention_date,
-            owner_approved: req.owner_approved
-        };
-    });
 
     return (
         <ThemedContent
@@ -147,26 +109,7 @@ export default async function GestionLocativePage({
                 />
             </div>
 
-            {/* Widgets Dashboard - Vue d'ensemble */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-w-0">
-                {/* Interventions - Aperçu */}
-                <ThemedWidget
-                    title="Interventions Récentes"
-                    linkHref="/interventions"
-                    linkText="Voir tout"
-                >
-                    <MaintenanceHub requests={formattedRequests} />
-                </ThemedWidget>
 
-                {/* Alertes Juridiques */}
-                <ThemedWidget
-                    title="Alertes Juridiques"
-                    linkHref="/documents-legaux"
-                    linkText="Voir tout"
-                >
-                    <LegalAlertsWidget alerts={legalAlerts} />
-                </ThemedWidget>
-            </div>
         </ThemedContent>
     );
 }
