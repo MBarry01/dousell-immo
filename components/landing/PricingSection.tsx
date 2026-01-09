@@ -70,7 +70,7 @@ export default function PricingSection() {
     },
   };
 
-  const cardVariants = {
+  const cardVariants: any = {
     hidden: {
       opacity: 0,
       y: 20,
@@ -147,9 +147,8 @@ export default function PricingSection() {
             className="flex items-center justify-center gap-4"
           >
             <span
-              className={`text-sm font-medium transition-colors ${
-                !isAnnual ? "text-[#F4C430]" : "text-gray-500"
-              }`}
+              className={`text-sm font-medium transition-colors ${!isAnnual ? "text-[#F4C430]" : "text-gray-500"
+                }`}
             >
               Mensuel
             </span>
@@ -159,9 +158,8 @@ export default function PricingSection() {
               className="data-[state=checked]:bg-[#F4C430] data-[state=unchecked]:bg-white/20"
             />
             <span
-              className={`text-sm font-medium transition-colors flex items-center gap-2 ${
-                isAnnual ? "text-[#F4C430]" : "text-gray-500"
-              }`}
+              className={`text-sm font-medium transition-colors flex items-center gap-2 ${isAnnual ? "text-[#F4C430]" : "text-gray-500"
+                }`}
             >
               Annuel
               <span className="text-xs bg-[#F4C430]/20 text-[#F4C430] px-2 py-0.5 rounded-full font-semibold">
@@ -184,11 +182,10 @@ export default function PricingSection() {
               key={plan.name}
               variants={cardVariants}
               whileHover="hover"
-              className={`relative rounded-2xl p-8 backdrop-blur-sm transition-all duration-300 ${
-                plan.popular
+              className={`relative rounded-2xl p-8 backdrop-blur-sm transition-all duration-300 ${plan.popular
                   ? "bg-gradient-to-b from-[#F4C430]/10 to-transparent border-2 border-[#F4C430]/50 shadow-2xl shadow-[#F4C430]/10"
                   : "bg-white/5 border border-white/10 hover:border-[#F4C430]/30"
-              }`}
+                }`}
             >
               {/* Badge Populaire */}
               {plan.popular && (
@@ -220,11 +217,10 @@ export default function PricingSection() {
               {/* CTA Button */}
               <Link
                 href={plan.href}
-                className={`block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 ${
-                  plan.popular
+                className={`block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 ${plan.popular
                     ? "bg-[#F4C430] text-black hover:bg-[#FFD700] shadow-lg shadow-[#F4C430]/25 hover:shadow-[#F4C430]/40 hover:-translate-y-1"
                     : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
-                }`}
+                  }`}
               >
                 {plan.cta}
               </Link>
