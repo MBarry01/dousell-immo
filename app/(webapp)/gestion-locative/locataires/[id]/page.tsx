@@ -61,8 +61,7 @@ export default async function TenantProfilePage({ params }: { params: Promise<{ 
             totalPaid={totalPaid}
             pendingAmount={pendingAmount}
             overdueCount={overdueCount}
-            pendingAmount={pendingAmount}
-            overdueCount={overdueCount}
+
             user={user}
             profile={profile}
         />
