@@ -12,7 +12,7 @@ export const revalidate = 3600;
 export const dynamic = 'force-dynamic';
 
 import { createClient } from "@/utils/supabase/server";
-import { RentalTour } from "@/components/onboarding/RentalTour";
+import { HomeTour } from "@/components/home/HomeTour";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -39,7 +39,7 @@ export default async function Home() {
   return (
     <div className="space-y-6">
       {/* Tour pour les nouveaux utilisateurs (Mobile/PWA Focus) */}
-      {user && <RentalTour page="home" hasProperties={hasProperties} />}
+      {user && <HomeTour hasProperties={hasProperties} />}
 
       {/* Toast de succès après vérification d'email */}
       <Suspense fallback={null}>

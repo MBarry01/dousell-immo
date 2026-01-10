@@ -80,18 +80,19 @@ export function TenantCardGrid({
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {tenants.map((tenant) => (
-                <TenantCard
-                    key={tenant.last_transaction_id || tenant.id}
-                    tenant={tenant}
-                    onConfirmPayment={onConfirmPayment}
-                    onViewReceipt={onViewReceipt}
-                    onEdit={onEdit}
-                    onTerminate={onTerminate}
-                    onReactivate={onReactivate}
-                    onInvite={onInvite}
-                    isViewingTerminated={isViewingTerminated}
-                />
+            {tenants.map((tenant, index) => (
+                <div key={tenant.last_transaction_id || tenant.id} id={index === 0 ? 'tour-first-tenant' : undefined}>
+                    <TenantCard
+                        tenant={tenant}
+                        onConfirmPayment={onConfirmPayment}
+                        onViewReceipt={onViewReceipt}
+                        onEdit={onEdit}
+                        onTerminate={onTerminate}
+                        onReactivate={onReactivate}
+                        onInvite={onInvite}
+                        isViewingTerminated={isViewingTerminated}
+                    />
+                </div>
             ))}
         </div>
     );

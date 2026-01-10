@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { MessageSquare, ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import {
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "../../theme-provider";
+import { OnboardingTour, useOnboardingTour, TourStep } from "@/components/onboarding/OnboardingTour";
 
 interface Lease {
     id: string;
@@ -27,9 +29,36 @@ export function MessagesPageClient({
     tenantsWithoutConversation
 }: MessagesPageClientProps) {
     const { isDark } = useTheme();
+    const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_messagerie_tour', 1500);
+
+    const tourSteps: TourStep[] = useMemo(() => [
+        {
+            targetId: 'tour-msg-new',
+            title: 'Nouveau message',
+            description: 'Démarrez une conversation avec un locataire. Sélectionnez-le dans la liste pour lui envoyer un message.',
+            imageSrc: 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'Nouveau message'
+        },
+        {
+            targetId: 'tour-msg-list',
+            title: 'Vos conversations',
+            description: 'Retrouvez ici toutes vos conversations avec vos locataires. Cliquez sur une conversation pour l\'ouvrir.',
+            imageSrc: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'Liste des conversations'
+        }
+    ], []);
 
     return (
         <div className="space-y-6 p-4 md:p-6">
+            {/* Premium Onboarding Tour */}
+            <OnboardingTour
+                steps={tourSteps}
+                isOpen={showTour}
+                onClose={closeTour}
+                onComplete={closeTour}
+                storageKey="dousell_messagerie_tour"
+            />
+
             <div className="flex items-center justify-between">
                 <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     Messagerie
@@ -40,6 +69,7 @@ export function MessagesPageClient({
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
+                                id="tour-msg-new"
                                 variant="outline"
                                 size="sm"
                                 className={`gap-2 ${isDark
@@ -77,7 +107,7 @@ export function MessagesPageClient({
                 )}
             </div>
 
-            <div className="grid gap-4">
+            <div id="tour-msg-list" className="grid gap-4">
                 {activeConversations.length > 0 ? (
                     activeConversations.map((lease) => (
                         <Link
@@ -123,6 +153,23 @@ export function MessagesPageClient({
                     </div>
                 )}
             </div>
+
+            {/* Bouton pour relancer le tour */}
+            <button
+                onClick={resetTour}
+                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${
+                    isDark
+                        ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
+                        : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
+                }`}
+                title="Relancer le tutoriel"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <path d="M12 17h.01"/>
+                </svg>
+            </button>
         </div>
     );
 }

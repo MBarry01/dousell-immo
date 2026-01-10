@@ -13,7 +13,7 @@ import { Search, Download, LayoutGrid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { deleteTransaction, deleteLease, confirmPayment, terminateLease, reactivateLease, sendTenantInvitation } from '../actions';
 import { processLateReminders } from '@/app/(vitrine)/actions/reminders';
-import { RentalTour } from '@/components/onboarding/RentalTour';
+import { OnboardingTour, useOnboardingTour, TourStep } from '@/components/onboarding/OnboardingTour';
 import { ReceiptModal } from './ReceiptModal';
 import { toast } from 'sonner';
 import { useTheme } from '../../theme-provider';
@@ -146,6 +146,42 @@ export function GestionLocativeClient({
     const [currentReceipt, setCurrentReceipt] = useState<ReceiptData | null>(null);
     const [saving, setSaving] = useState(false);
     const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'pending' | 'overdue'>('all');
+
+    // ========================================
+    // PREMIUM ONBOARDING TOUR (Style HP OMEN)
+    // ========================================
+    const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_gestion_premium_tour', 1500);
+
+    const premiumTourSteps: TourStep[] = useMemo(() => [
+        {
+            targetId: 'tour-add-tenant',
+            title: 'Créez votre premier bail',
+            description: 'Cliquez ici pour ajouter un locataire. Le système générera automatiquement les contrats et quittances.',
+            imageSrc: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'Ajouter un locataire'
+        },
+        {
+            targetId: 'tour-stats',
+            title: 'Suivez vos finances',
+            description: 'Un coup d\'œil suffit. Visualisez les loyers encaissés, en attente et les retards en temps réel. Cliquez sur une carte pour filtrer.',
+            imageSrc: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'Tableau de bord financier'
+        },
+        {
+            targetId: 'tour-first-tenant',
+            title: 'Vos dossiers locataires',
+            description: 'Accédez à la fiche complète de chaque locataire : historique des paiements, contrats et documents stockés.',
+            imageSrc: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'Dossier locataire'
+        },
+        {
+            targetId: 'tour-export-csv',
+            title: 'Export Comptable',
+            description: 'Téléchargez toutes vos données en CSV pour votre comptable ou vos archives personnelles en un seul clic.',
+            imageSrc: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'Export comptable'
+        }
+    ], []);
 
     const handleMonthChange = (month: number, year: number) => {
         setSelectedMonth(month);
@@ -557,7 +593,16 @@ export function GestionLocativeClient({
                 onClose={() => setIsReceiptOpen(false)}
                 data={currentReceipt}
             />
-            <RentalTour hasProperties={leases.length > 0} page="dashboard" />
+
+            {/* Premium Onboarding Tour (Style HP OMEN) */}
+            <OnboardingTour
+                steps={premiumTourSteps}
+                isOpen={showTour && leases.length > 0}
+                onClose={closeTour}
+                onComplete={closeTour}
+                storageKey="dousell_gestion_premium_tour"
+            />
+
             {/* ========================================
                 DASHBOARD STATS - Style Noflaye
                 ======================================== */}
@@ -660,6 +705,7 @@ export function GestionLocativeClient({
 
                         {/* Bouton Export CSV */}
                         <Button
+                            id="tour-export-csv"
                             onClick={handleExportCSV}
                             variant="outline"
                             size="sm"
@@ -721,6 +767,23 @@ export function GestionLocativeClient({
                     tenant={editingTenant}
                 />
             )}
+
+            {/* Bouton pour relancer le tour */}
+            <button
+                onClick={resetTour}
+                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${
+                    isDark
+                        ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
+                        : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
+                }`}
+                title="Relancer le tutoriel"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <path d="M12 17h.01"/>
+                </svg>
+            </button>
         </div>
     );
 }

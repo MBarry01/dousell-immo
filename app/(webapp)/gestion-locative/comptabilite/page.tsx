@@ -40,6 +40,7 @@ import { calculateFinancials, LeaseInput, TransactionInput } from '@/lib/finance
 import { AddExpenseDialog } from './components/AddExpenseDialog';
 import { ExpenseList } from './components/ExpenseList';
 import { getExpensesByYear, Expense } from './expenses-actions';
+import { OnboardingTour, useOnboardingTour, TourStep } from '@/components/onboarding/OnboardingTour';
 
 interface MonthlyData {
     month: string;
@@ -66,6 +67,7 @@ const fullMonthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', '
 export default function ComptabilitePage() {
     const { isDark } = useTheme();
     const { user, loading: authLoading } = useAuth();
+    const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_comptabilite_tour', 1500);
     const [leases, setLeases] = useState<LeaseInput[]>([]);
     const [transactions, setTransactions] = useState<TransactionInput[]>([]);
     const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -73,6 +75,38 @@ export default function ComptabilitePage() {
     const [loading, setLoading] = useState(true);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [activeTab, setActiveTab] = useState<'revenus' | 'depenses'>('revenus');
+
+    // Tour Steps
+    const tourSteps: TourStep[] = useMemo(() => [
+        {
+            targetId: 'tour-compta-kpi',
+            title: 'Indicateurs financiers',
+            description: 'Visualisez vos revenus attendus, encaissés, en attente et les retards de paiement en un coup d\'œil.',
+            imageSrc: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'KPIs financiers'
+        },
+        {
+            targetId: 'tour-compta-chart',
+            title: 'Graphiques de revenus',
+            description: 'Analysez vos revenus mensuels et la répartition des paiements avec des graphiques interactifs.',
+            imageSrc: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'Graphiques financiers'
+        },
+        {
+            targetId: 'tour-compta-tabs',
+            title: 'Revenus & Dépenses',
+            description: 'Basculez entre la vue des revenus (loyers) et celle des dépenses pour une comptabilité complète.',
+            imageSrc: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'Tabs comptabilité'
+        },
+        {
+            targetId: 'tour-compta-export',
+            title: 'Export & Actions',
+            description: 'Exportez vos données financières et ajoutez des dépenses directement depuis cette page.',
+            imageSrc: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'Export financier'
+        }
+    ], []);
 
     useEffect(() => {
         if (!user) return;
@@ -297,6 +331,15 @@ export default function ComptabilitePage() {
 
     return (
         <div className={`p-4 md:p-6 space-y-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            {/* Premium Onboarding Tour */}
+            <OnboardingTour
+                steps={tourSteps}
+                isOpen={showTour}
+                onClose={closeTour}
+                onComplete={closeTour}
+                storageKey="dousell_comptabilite_tour"
+            />
+
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
@@ -305,7 +348,7 @@ export default function ComptabilitePage() {
                 </div>
 
                 {/* Year Selector */}
-                <div className="flex items-center gap-3">
+                <div id="tour-compta-export" className="flex items-center gap-3">
                     <div className={`flex items-center gap-2 rounded-lg px-3 py-2 border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'
                         }`}>
                         <Calendar className={`w-4 h-4 ${isDark ? 'text-slate-500' : 'text-gray-400'}`} />
@@ -331,7 +374,7 @@ export default function ComptabilitePage() {
             </div>
 
             {/* Tabs for Revenue vs Expenses */}
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'revenus' | 'depenses')} className="w-full">
+            <Tabs id="tour-compta-tabs" value={activeTab} onValueChange={(v) => setActiveTab(v as 'revenus' | 'depenses')} className="w-full">
                 <TabsList className={isDark ? 'bg-slate-900 border border-slate-800' : 'bg-gray-100 border border-gray-200'}>
                     <TabsTrigger value="revenus" className={isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}>
                         Revenus (Loyers)
@@ -344,7 +387,7 @@ export default function ComptabilitePage() {
                 {/* REVENUS TAB CONTENT */}
                 <TabsContent value="revenus" className="mt-6 space-y-6">
                     {/* KPI Cards */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div id="tour-compta-kpi" className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         {/* Total Expected */}
                         <div className={`p-5 rounded-lg border shadow-sm ${isDark ? 'bg-black border-gray-800' : 'bg-white border-gray-200'}`}>
                             <div className="flex items-center gap-3 mb-3">
@@ -415,7 +458,7 @@ export default function ComptabilitePage() {
                     </div>
 
                     {/* Charts Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div id="tour-compta-chart" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Bar Chart - Monthly Revenue */}
                         <div className={`lg:col-span-2 p-5 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'
                             }`}>
@@ -529,6 +572,23 @@ export default function ComptabilitePage() {
                     <ExpenseList expenses={expenses} onExpenseDeleted={refreshExpenses} />
                 </TabsContent>
             </Tabs>
+
+            {/* Bouton pour relancer le tour */}
+            <button
+                onClick={resetTour}
+                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${
+                    isDark
+                        ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
+                        : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
+                }`}
+                title="Relancer le tutoriel"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <path d="M12 17h.01"/>
+                </svg>
+            </button>
         </div>
     );
 }

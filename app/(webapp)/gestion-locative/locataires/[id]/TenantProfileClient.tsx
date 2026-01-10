@@ -48,7 +48,7 @@ export function TenantProfileClient({
         <div className={`min-h-screen p-6 space-y-6 ${isDark ? 'bg-slate-950 text-white' : 'bg-gray-50 text-gray-900'}`}>
             {/* Header / Navigation */}
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" asChild className={`rounded-full ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-200'}`}>
+                <Button variant="ghost" size="icon" asChild className={`rounded-full ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-200 text-gray-700'}`}>
                     <Link href="/gestion-locative">
                         <ChevronLeft className="w-5 h-5" />
                     </Link>

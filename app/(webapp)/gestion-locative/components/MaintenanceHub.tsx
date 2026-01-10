@@ -188,19 +188,21 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                             <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>Maintenance & travaux</p>
                         </div>
                     </div>
-                    <Button
-                        size="sm"
-                        variant={showForm ? "ghost" : "outline"}
-                        className={`text-xs h-8 ${showForm
-                                ? isDark ? 'text-white hover:bg-slate-800' : 'text-gray-900 hover:bg-gray-100'
-                                : isDark
-                                    ? 'border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
-                                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                            }`}
-                        onClick={() => setShowForm(!showForm)}
-                    >
-                        {showForm ? <><X className="w-3 h-3 mr-1" /> Annuler</> : '+ Signaler'}
-                    </Button>
+                    <div id="tour-intervention-signaler">
+                        <Button
+                            size="sm"
+                            variant={showForm ? "ghost" : "outline"}
+                            className={`text-xs h-8 ${showForm
+                                    ? isDark ? 'text-white hover:bg-slate-800' : 'text-gray-900 hover:bg-gray-100'
+                                    : isDark
+                                        ? 'border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
+                                        : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                                }`}
+                            onClick={() => setShowForm(!showForm)}
+                        >
+                            {showForm ? <><X className="w-3 h-3 mr-1" /> Annuler</> : '+ Signaler'}
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Formulaire */}

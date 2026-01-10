@@ -162,7 +162,7 @@ export function QuickActions({
     };
 
     return (
-        <div className="mb-6">
+        <div id="tour-quick-actions" className="mb-6">
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
                 <span className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-slate-500' : 'text-gray-500'
@@ -210,20 +210,21 @@ export function QuickActions({
 
                     if (action.type === 'custom' && action.id === 'add-tenant') {
                         return (
-                            <AddTenantButton
-                                key={action.id}
-                                ownerId={ownerId}
-                                profile={profile}
-                                trigger={
-                                    <button
-                                        className={baseClasses}
-                                        onMouseEnter={() => setHoveredAction(action.id)}
-                                        onMouseLeave={() => setHoveredAction(null)}
-                                    >
-                                        <ActionContent action={action} />
-                                    </button>
-                                }
-                            />
+                            <div key={action.id} id="tour-add-tenant">
+                                <AddTenantButton
+                                    ownerId={ownerId}
+                                    profile={profile}
+                                    trigger={
+                                        <button
+                                            className={baseClasses}
+                                            onMouseEnter={() => setHoveredAction(action.id)}
+                                            onMouseLeave={() => setHoveredAction(null)}
+                                        >
+                                            <ActionContent action={action} />
+                                        </button>
+                                    }
+                                />
+                            </div>
                         );
                     }
 
