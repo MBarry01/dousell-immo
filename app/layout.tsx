@@ -159,7 +159,7 @@ export default function RootLayout({
           easing="ease"
           speed={200}
           shadow="0 0 10px rgb(244, 196, 48), 0 0 5px rgb(244, 196, 48)"
-          zIndex={9000}
+          zIndex={10001}
         />
         <SuppressHydrationWarning />
         <ServiceWorkerRegister />

@@ -6,7 +6,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 import { useEffect, useMemo, useState, useCallback, memo, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from "react-leaflet";
 import type { LatLngExpression, DivIcon } from "leaflet";
 
 import { PropertyCard } from "@/components/property/property-card";
@@ -425,9 +425,10 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
                     scrollWheelZoom={false} // Désactiver le zoom molette pour ne pas gêner le scroll page
                     className="h-full w-full rounded-[32px] z-0"
                     style={{ height: "100%", width: "100%", zIndex: 0 }}
-                    zoomControl={true}
+                    zoomControl={false}
                     attributionControl={false}
                 >
+                    <ZoomControl position="bottomright" />
                     {/* TileLayer CartoDB Dark Matter */}
                     <TileLayer
                         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
