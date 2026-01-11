@@ -111,14 +111,14 @@ export async function POST(request: NextRequest) {
     });
 
     const keysToDelete: string[] = [];
-    let cursor = 0;
+    let cursor: string | number = 0;
 
     do {
       const result = await upstash.scan(cursor, { match: 'rentals:*', count: 100 });
-      cursor = result[0] as number;
+      cursor = result[0];
       const keys = result[1] as string[];
       keysToDelete.push(...keys);
-    } while (cursor !== 0);
+    } while (cursor !== 0 && cursor !== '0');
 
     if (keysToDelete.length > 0) {
       // Supprimer par lots
