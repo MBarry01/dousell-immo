@@ -37,7 +37,7 @@ export function PaymentHistory({ transactions, lease, tenant, user, profile }: P
         ownerLogo: profile?.logo_url || undefined,
         transactions: transactions.map((t: any) => ({
             id: t.id,
-            period: `${monthNames[t.period_month - 1]} ${t.period_year}`,
+            period: t.period_month === 0 ? 'Caution' : `${monthNames[t.period_month - 1]} ${t.period_year}`,
             amount: t.amount_due || 0,
             amountPaid: t.amount_paid || t.amount_due || 0, // Fallback logic same as display
             status: t.status,
@@ -96,10 +96,16 @@ export function PaymentHistory({ transactions, lease, tenant, user, profile }: P
                         {transactions.map((t: any) => (
                             <tr key={t.id} className={`transition-colors ${isDark ? 'hover:bg-slate-800/30' : 'hover:bg-gray-50'}`}>
                                 <td className={`p-4 font-medium capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                    {new Date(t.period_year, t.period_month - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                                    {t.period_month === 0
+                                        ? <span className="text-[#F4C430] flex items-center gap-2">Caution (Dépôt de garantie)</span>
+                                        : new Date(t.period_year, t.period_month - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+                                    }
                                 </td>
                                 <td className={`p-4 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-                                    05/{String(t.period_month).padStart(2, '0')}
+                                    {t.period_month === 0
+                                        ? "-"
+                                        : `05/${String(t.period_month).padStart(2, '0')}`
+                                    }
                                 </td>
                                 <td className={`p-4 font-mono ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                     {formatMoney(t.amount_due)}

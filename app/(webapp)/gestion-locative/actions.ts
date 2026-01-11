@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { invalidateCacheBatch } from '@/lib/cache/cache-aside';
+import { invalidateRentalCaches } from '@/lib/cache/invalidation';
 import { revalidatePath } from 'next/cache';
 import { validateTenantCreation } from '@/lib/finance';
 import { sendEmail } from '@/lib/mail';
@@ -121,6 +122,11 @@ export async function getRentalStats() {
  */
 async function triggerN8N(webhookPath: string, payload: Record<string, unknown>) {
     const N8N_URL = process.env.N8N_WEBHOOK_URL; // URL de l'instance n8n
+    console.log(`[triggerN8N] Tentative envoi vers ${webhookPath}`, {
+        hasUrl: !!N8N_URL,
+        payloadKeys: Object.keys(payload)
+    });
+
     if (!N8N_URL) {
         console.warn('N8N_WEBHOOK_URL non configuré - webhook ignoré');
         return;
@@ -138,7 +144,9 @@ async function triggerN8N(webhookPath: string, payload: Record<string, unknown>)
         });
 
         if (!response.ok) {
-            console.error(`Webhook n8n (${webhookPath}) - Erreur HTTP:`, response.status);
+            console.error(`Webhook n8n (${webhookPath}) - Erreur HTTP:`, response.status, await response.text());
+        } else {
+            console.log(`[triggerN8N] Succès envoi ${webhookPath}`);
         }
     } catch (err) {
         console.error(`Erreur Webhook n8n (${webhookPath}):`, err);
@@ -165,6 +173,10 @@ export async function createNewLease(formData: Record<string, unknown>) {
         ...formData,
         owner_id: user.id  // Toujours forcer l'ID du propriétaire connecté
     };
+
+    // Extraire deposit_months pour ne pas l'envoyer à la table leases
+    const depositMonths = (finalData as any).deposit_months || 2;
+    delete (finalData as any).deposit_months;
 
     // 1. Vérification STRICTE d'unicité via FinanceGuard (Pilier 2)
     const emailToCheck = (finalData as Record<string, unknown>).tenant_email as string | undefined;
@@ -202,6 +214,9 @@ export async function createNewLease(formData: Record<string, unknown>) {
             console.error("Erreur auto-création profil:", insertProfileError);
             return { success: false, error: "Impossible de créer le bail : Votre profil propriétaire est introuvable." };
         }
+
+        // IMPORTANT: Invalider le cache du profil après création
+        await invalidateCacheBatch([`owner_profile:${user.id}`], 'rentals');
     }
 
     const { data: lease, error } = await supabase
@@ -215,18 +230,39 @@ export async function createNewLease(formData: Record<string, unknown>) {
         return { success: false, error: error.message };
     }
 
-    // 2. Créer automatiquement la transaction pour le mois en cours
     const today = new Date();
     const currentMonth = today.getMonth() + 1;
     const currentYear = today.getFullYear();
+    const monthlyAmount = Number(lease.monthly_amount);
 
+    // 2. Créer transaction CAUTION (Mois 0)
+    // On utilise month=0 pour identifier la caution dans l'historique sans changer le schéma
+    if (depositMonths > 0) {
+        const depositAmount = monthlyAmount * depositMonths;
+        const { error: depositError } = await supabase
+            .from('rental_transactions')
+            .insert([{
+                lease_id: lease.id,
+                period_month: 0, // Convention pour Caution
+                period_year: currentYear,
+                amount_due: depositAmount,
+                status: 'pending',
+                period_start: today.toISOString().split('T')[0],
+                period_end: today.toISOString().split('T')[0],
+                reminder_sent: false
+            }]);
+
+        if (depositError) console.error("Erreur création caution:", depositError);
+    }
+
+    // 3. Créer automatiquement la transaction pour le mois en cours (Loyer)
     const { error: transError } = await supabase
         .from('rental_transactions')
         .insert([{
             lease_id: lease.id,
             period_month: currentMonth,
             period_year: currentYear,
-            amount_due: lease.monthly_amount,
+            amount_due: monthlyAmount,
             status: 'pending',
             period_start: new Date(currentYear, currentMonth - 1, 1).toISOString().split('T')[0],
             period_end: new Date(currentYear, currentMonth, 0).toISOString().split('T')[0],
@@ -239,6 +275,8 @@ export async function createNewLease(formData: Record<string, unknown>) {
     }
 
     // DÉCLENCHEUR N8N : Génération du contrat de bail PDF (email)
+    // Note: On ne l'envoie plus automatiquement ici si on veut faire un "Pack de Bienvenue" groupé
+    // MAIS pour l'instant on garde la génération du PDF pour qu'il soit prêt.
     await triggerN8N('generate-lease-pdf', {
         leaseId: lease.id,
         tenantName: lease.tenant_name,
@@ -252,8 +290,390 @@ export async function createNewLease(formData: Record<string, unknown>) {
         ownerId: user.id
     });
 
+    // Invalidation complète du cache pour mise à jour UI immédiate
+    await invalidateRentalCaches(user.id, lease.id, {
+        invalidateLeases: true,
+        invalidateTransactions: true,
+        invalidateStats: true
+    });
+
+    // Invalider aussi le cache du profil propriétaire (pour s'assurer qu'il s'affiche)
+    await invalidateCacheBatch([`owner_profile:${user.id}`], 'rentals');
+
     revalidatePath('/gestion-locative');
+    revalidatePath('/gestion-locative/locataires');
     return { success: true, id: lease.id };
+}
+
+/**
+ * Envoie le "Pack de Bienvenue" au locataire
+ * Comprend : Lien Invitation + Contrat PDF (en pièce jointe)
+ * Envoi direct via Nodemailer (sans n8n)
+ */
+export async function sendWelcomePack(leaseId: string) {
+    console.log("[sendWelcomePack] Start for lease:", leaseId);
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        console.error("[sendWelcomePack] User not found");
+        return { success: false, error: "Non autorisé" };
+    }
+
+    // 1. Récupérer les infos du bail
+    const { data: lease } = await supabase
+        .from('leases')
+        .select('*, lease_pdf_url')
+        .eq('id', leaseId)
+        .single();
+
+    if (!lease) {
+        console.error("[sendWelcomePack] Lease not found");
+        return { success: false, error: "Bail introuvable" };
+    }
+
+    // 2. Récupérer le profil du propriétaire
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_name, full_name, company_address')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    const ownerName = profile?.company_name || profile?.full_name || "Votre Gestionnaire";
+
+    // 3. Générer le lien d'invitation (Magic Link) via Admin API
+    let inviteLink = "https://doussell-immo.com/auth/login"; // Fallback
+
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        try {
+            console.log("[sendWelcomePack] Generating magic link...");
+            const adminAuth = createAdminClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY
+            ).auth;
+
+            const { data: linkData, error: linkError } = await adminAuth.admin.generateLink({
+                type: 'magiclink',
+                email: lease.tenant_email,
+                options: {
+                    redirectTo: 'https://doussell-immo.com/espace-locataire'
+                }
+            });
+
+            if (linkError) {
+                console.error("[sendWelcomePack] Link gen error:", linkError);
+            } else if (linkData?.properties?.action_link) {
+                inviteLink = linkData.properties.action_link;
+                console.log("[sendWelcomePack] Magic link generated successfully");
+            }
+        } catch (e) {
+            console.error("[sendWelcomePack] Erreur génération lien admin:", e);
+        }
+    } else {
+        console.warn("[sendWelcomePack] No SERVICE_ROLE_KEY found, using fallback link");
+    }
+
+    // 4. Préparer les pièces jointes (Contrat PDF + Reçu de Caution + Quittance si applicable)
+    const attachments: Array<{ filename: string; content: Buffer | string; contentType?: string }> = [];
+
+    // IMPORTANT: Re-fetch lease data to get the latest lease_pdf_url (may have been updated by generateLeaseContract)
+    const { data: freshLease } = await supabase
+        .from('leases')
+        .select('*, lease_pdf_url')
+        .eq('id', leaseId)
+        .single();
+
+    console.log("[sendWelcomePack] Fresh lease data - PDF URL:", freshLease?.lease_pdf_url || "NOT SET");
+
+    // 4a. Contrat de bail (si déjà généré)
+    if (freshLease?.lease_pdf_url) {
+        try {
+            console.log("[sendWelcomePack] Fetching contract PDF from:", freshLease.lease_pdf_url);
+            const pdfResponse = await fetch(freshLease.lease_pdf_url);
+            if (pdfResponse.ok) {
+                const pdfArrayBuffer = await pdfResponse.arrayBuffer();
+                attachments.push({
+                    filename: `Contrat_Bail_${lease.tenant_name.replace(/\s+/g, '_')}.pdf`,
+                    content: Buffer.from(pdfArrayBuffer),
+                    contentType: 'application/pdf'
+                });
+                console.log("[sendWelcomePack] Contract PDF attached");
+            } else {
+                console.error("[sendWelcomePack] Failed to fetch contract PDF, status:", pdfResponse.status);
+            }
+        } catch (e) {
+            console.error("[sendWelcomePack] Error fetching contract PDF:", e);
+        }
+    } else {
+        console.log("[sendWelcomePack] No contract PDF URL available - skipping contract attachment");
+    }
+
+    // 4b. Reçu de Caution (si caution payée)
+    try {
+        // Vérifier si la caution est payée
+        console.log("[sendWelcomePack] Looking for deposit transaction with lease_id:", leaseId, "period_month: 0, status: paid");
+        const { data: depositTx, error: depositError } = await supabase
+            .from('rental_transactions')
+            .select('*')
+            .eq('lease_id', leaseId)
+            .eq('period_month', 0) // Caution = mois 0
+            .eq('status', 'paid')
+            .maybeSingle();
+
+        console.log("[sendWelcomePack] Deposit tx found:", depositTx ? `YES (amount: ${depositTx.amount_due})` : "NO", depositError ? `Error: ${depositError.message}` : "");
+
+        if (depositTx) {
+            console.log("[sendWelcomePack] Generating deposit receipt PDF...");
+            const ReactPDF = await import('@react-pdf/renderer');
+            const { createDepositReceiptDocument } = await import('@/components/pdf/DepositReceiptPDF');
+
+            // Récupérer le profil complet pour le PDF
+            const { data: fullProfile } = await supabase
+                .from('profiles')
+                .select('company_name, full_name, company_address, company_ninea, logo_url, signature_url')
+                .eq('id', user.id)
+                .maybeSingle();
+
+            const depositReceiptData = {
+                tenantName: lease.tenant_name,
+                tenantEmail: lease.tenant_email,
+                tenantPhone: lease.tenant_phone,
+                depositAmount: depositTx.amount_due,
+                depositMonths: Math.round(depositTx.amount_due / lease.monthly_amount),
+                monthlyRent: lease.monthly_amount,
+                receiptNumber: `CAUT-${Date.now().toString().slice(-8)}`,
+                ownerName: fullProfile?.company_name || fullProfile?.full_name || ownerName,
+                ownerAddress: fullProfile?.company_address || '',
+                ownerNinea: fullProfile?.company_ninea,
+                ownerLogo: fullProfile?.logo_url,
+                ownerSignature: fullProfile?.signature_url,
+                propertyAddress: lease.property_address,
+                leaseStartDate: new Date(lease.start_date).toLocaleDateString('fr-FR'),
+            };
+
+            const depositDoc = createDepositReceiptDocument(depositReceiptData);
+            const stream = await ReactPDF.default.renderToStream(depositDoc);
+
+            // Convertir le stream en buffer
+            const chunks: Uint8Array[] = [];
+            const depositBuffer = await new Promise<Buffer>((resolve, reject) => {
+                stream.on('data', (chunk: Uint8Array) => chunks.push(chunk));
+                stream.on('end', () => resolve(Buffer.concat(chunks)));
+                stream.on('error', reject);
+            });
+
+            attachments.push({
+                filename: `Recu_Caution_${lease.tenant_name.replace(/\s+/g, '_')}.pdf`,
+                content: depositBuffer,
+                contentType: 'application/pdf'
+            });
+            console.log("[sendWelcomePack] Deposit receipt PDF attached");
+        }
+    } catch (e) {
+        console.error("[sendWelcomePack] Error generating deposit receipt:", e);
+    }
+
+    // 4c. Quittance de Loyer (si premier loyer payé)
+    try {
+        // Vérifier si le loyer du mois en cours est payé
+        const currentMonth = new Date().getMonth() + 1;
+        const currentYear = new Date().getFullYear();
+
+        const { data: rentTx } = await supabase
+            .from('rental_transactions')
+            .select('*')
+            .eq('lease_id', leaseId)
+            .eq('period_month', currentMonth)
+            .eq('period_year', currentYear)
+            .eq('status', 'paid')
+            .maybeSingle();
+
+        if (rentTx) {
+            console.log("[sendWelcomePack] Generating rent receipt PDF...");
+            const ReactPDF = await import('@react-pdf/renderer');
+            const { createQuittanceDocument } = await import('@/components/pdf/QuittancePDF_v2');
+
+            // Récupérer le profil complet pour le PDF
+            const { data: fullProfile } = await supabase
+                .from('profiles')
+                .select('company_name, full_name, company_address, company_ninea, logo_url, signature_url')
+                .eq('id', user.id)
+                .maybeSingle();
+
+            const periodDate = new Date(rentTx.period_year, rentTx.period_month - 1);
+            const lastDayOfMonth = new Date(rentTx.period_year, rentTx.period_month, 0).getDate();
+
+            const quittanceData = {
+                tenantName: lease.tenant_name,
+                tenantEmail: lease.tenant_email,
+                tenantPhone: lease.tenant_phone,
+                tenantAddress: lease.property_address,
+                amount: rentTx.amount_due,
+                periodMonth: periodDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
+                periodStart: `01/${String(rentTx.period_month).padStart(2, '0')}/${rentTx.period_year}`,
+                periodEnd: `${lastDayOfMonth}/${String(rentTx.period_month).padStart(2, '0')}/${rentTx.period_year}`,
+                receiptNumber: `QUITT-${Date.now().toString().slice(-8)}`,
+                ownerName: fullProfile?.company_name || fullProfile?.full_name || ownerName,
+                ownerAddress: fullProfile?.company_address || '',
+                ownerNinea: fullProfile?.company_ninea,
+                ownerLogo: fullProfile?.logo_url,
+                ownerSignature: fullProfile?.signature_url,
+                propertyAddress: lease.property_address,
+            };
+
+            const quittanceDoc = createQuittanceDocument(quittanceData);
+            const stream = await ReactPDF.default.renderToStream(quittanceDoc);
+
+            // Convertir le stream en buffer
+            const chunks: Uint8Array[] = [];
+            const quittanceBuffer = await new Promise<Buffer>((resolve, reject) => {
+                stream.on('data', (chunk: Uint8Array) => chunks.push(chunk));
+                stream.on('end', () => resolve(Buffer.concat(chunks)));
+                stream.on('error', reject);
+            });
+
+            attachments.push({
+                filename: `Quittance_${periodDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }).replace(/\s+/g, '_')}_${lease.tenant_name.replace(/\s+/g, '_')}.pdf`,
+                content: quittanceBuffer,
+                contentType: 'application/pdf'
+            });
+            console.log("[sendWelcomePack] Rent receipt PDF attached");
+        }
+    } catch (e) {
+        console.error("[sendWelcomePack] Error generating rent receipt:", e);
+    }
+
+    // 5. Construire le contenu HTML de l'email
+    const documentsList = [];
+    if (attachments.find(a => a.filename.includes('Contrat'))) documentsList.push('Contrat de bail');
+    if (attachments.find(a => a.filename.includes('Caution'))) documentsList.push('Reçu de dépôt de garantie');
+    if (attachments.find(a => a.filename.includes('Quittance'))) documentsList.push('Quittance de loyer');
+
+    const emailHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="UTF-8"></head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+                <h1 style="color: white; margin: 0;">Bienvenue ${lease.tenant_name} ! 🎉</h1>
+            </div>
+            
+            <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+                <p>Nous avons le plaisir de vous accueillir en tant que nouveau locataire.</p>
+                
+                <h3 style="color: #667eea;">📋 Récapitulatif de votre bail</h3>
+                <ul style="background: white; padding: 20px 30px; border-radius: 8px; border-left: 4px solid #667eea;">
+                    <li><strong>Adresse :</strong> ${lease.property_address}</li>
+                    <li><strong>Loyer mensuel :</strong> ${new Intl.NumberFormat('fr-FR').format(lease.monthly_amount)} FCFA</li>
+                    <li><strong>Date de début :</strong> ${new Date(lease.start_date).toLocaleDateString('fr-FR')}</li>
+                    <li><strong>Jour de paiement :</strong> Le ${lease.billing_day} de chaque mois</li>
+                </ul>
+
+                <h3 style="color: #667eea;">🔗 Accéder à votre espace locataire</h3>
+                <p>Cliquez sur le bouton ci-dessous pour accéder à votre espace personnel :</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="${inviteLink}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                        Accéder à mon espace
+                    </a>
+                </div>
+
+                ${attachments.length > 0 ? `
+                <h3 style="color: #667eea;">📎 Documents joints</h3>
+                <ul style="background: white; padding: 15px 30px; border-radius: 8px; border-left: 4px solid #B8860B;">
+                    ${documentsList.map(doc => `<li>📄 ${doc}</li>`).join('')}
+                </ul>
+                ` : ''}
+
+                <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+                
+                <p>Cordialement,<br><strong>${ownerName}</strong></p>
+                ${profile?.company_address ? `<p style="color: #666; font-size: 14px;">${profile.company_address}</p>` : ''}
+                
+                <p style="font-size: 12px; color: #999; margin-top: 30px; text-align: center;">
+                    Email généré automatiquement par Dousell Immo
+                </p>
+            </div>
+        </body>
+        </html>
+    `;
+
+    // 6. Envoyer l'email via Nodemailer (lib/mail.ts)
+    try {
+        const result = await sendEmail({
+            to: lease.tenant_email,
+            subject: `🏠 Bienvenue ${lease.tenant_name} - Votre Pack Locataire`,
+            html: emailHtml,
+            attachments: attachments.length > 0 ? attachments : undefined
+        });
+
+        console.log("[sendWelcomePack] Email sent successfully");
+
+        // 7. Sauvegarder le pack dans la GED (user_documents)
+        if (attachments.length > 0 && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            try {
+                const { createClient: createAdminSupabase } = await import('@supabase/supabase-js');
+                const supabaseAdmin = createAdminSupabase(
+                    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                    process.env.SUPABASE_SERVICE_ROLE_KEY
+                );
+
+                for (const attachment of attachments) {
+                    const fileName = `${user.id}/welcome-pack/${leaseId}_${Date.now()}.pdf`;
+                    const contentBuffer = typeof attachment.content === 'string'
+                        ? Buffer.from(attachment.content)
+                        : attachment.content;
+
+                    // Upload vers Storage
+                    const { error: uploadError } = await supabaseAdmin.storage
+                        .from('verification-docs')
+                        .upload(fileName, contentBuffer, {
+                            contentType: 'application/pdf',
+                            upsert: false
+                        });
+
+                    if (!uploadError) {
+                        // Enregistrer dans user_documents
+                        await supabaseAdmin.from('user_documents').insert({
+                            user_id: user.id,
+                            file_name: attachment.filename,
+                            file_path: fileName,
+                            file_type: 'welcome_pack',
+                            file_size: contentBuffer.length,
+                            mime_type: 'application/pdf',
+                            source: 'generated',
+                            lease_id: leaseId,
+                            category: 'welcome_pack',
+                            description: `Pack de bienvenue - ${lease.tenant_name}`
+                        });
+                        console.log("[sendWelcomePack] Document saved to GED:", fileName);
+                    } else {
+                        console.error("[sendWelcomePack] Storage upload error:", uploadError.message);
+                    }
+                }
+            } catch (storageError) {
+                console.error("[sendWelcomePack] GED storage error (non-blocking):", storageError);
+            }
+        }
+
+        // 8. Invalider le cache et revalider les paths pour que l'UI se mette à jour
+        try {
+            await invalidateRentalCaches(user.id, leaseId, {
+                invalidateLeases: true,
+                invalidateTransactions: true,
+                invalidateStats: true
+            });
+            revalidatePath('/gestion-locative');
+            revalidatePath(`/gestion-locative/locataires/${leaseId}`);
+            console.log("[sendWelcomePack] Cache invalidated and paths revalidated");
+        } catch (e) {
+            console.error("[sendWelcomePack] Cache invalidation error (non-blocking):", e);
+        }
+
+        return { success: true, message: "Pack de bienvenue envoyé !" };
+    } catch (emailError) {
+        console.error("[sendWelcomePack] Email error:", emailError);
+        return { success: false, error: "Erreur lors de l'envoi de l'email" };
+    }
 }
 
 /**
@@ -265,7 +685,7 @@ export async function createNewLease(formData: Record<string, unknown>) {
  * Déclenche l'envoi automatique de la quittance par EMAIL via n8n
  * Si pas d'ID de transaction, en crée une pour le mois courant
  */
-export async function confirmPayment(leaseId: string, transactionId?: string, month?: number, year?: number) {
+export async function confirmPayment(leaseId: string, transactionId?: string, month?: number, year?: number, silent: boolean = false) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -277,18 +697,27 @@ export async function confirmPayment(leaseId: string, transactionId?: string, mo
     // 1. Si pas de transactionID, on cherche ou on crée
     if (!targetId) {
         // Déterminer la période cible (Mois sélectionné OU Mois actuel par défaut)
-        const targetMonth = month || (new Date().getMonth() + 1);
+        const targetMonth = month !== undefined ? month : (new Date().getMonth() + 1);
         const targetYear = year || new Date().getFullYear();
 
-        // A) Vérifier s'il existe DÉJÀ une transaction pour ce bail/mois/année
-        const { data: existingTx } = await supabase
+        // Pour les CAUTIONS (month=0), on ne filtre PAS par année
+        const isDeposit = targetMonth === 0;
+
+        // A) Vérifier s'il existe DÉJÀ une transaction pour ce bail/mois(/année)
+        let query = supabase
             .from('rental_transactions')
             .select('id, status')
             .eq('lease_id', leaseId)
-            .eq('period_month', targetMonth)
-            .eq('period_year', targetYear)
-            .limit(1)
-            .maybeSingle(); // maybeSingle pour éviter erreur si 0
+            .eq('period_month', targetMonth);
+
+        // Ne filtrer par année QUE pour les loyers (pas pour les cautions)
+        if (!isDeposit) {
+            query = query.eq('period_year', targetYear);
+        }
+
+        const { data: existingTx } = await query.limit(1).maybeSingle();
+
+        console.log(`[confirmPayment] Looking for transaction: lease=${leaseId}, month=${targetMonth}, year=${isDeposit ? 'N/A (deposit)' : targetYear}, found=${!!existingTx}`);
 
         if (existingTx) {
             // Si elle existe déjà, on l'utilise (même si elle est payée, on la mettra à jour en 'paid')
@@ -346,10 +775,10 @@ export async function confirmPayment(leaseId: string, transactionId?: string, mo
         .eq('id', user.id)
         .maybeSingle();
 
-    // 5. Envoi automatique de la quittance par email (Gmail direct)
+    // 5. Envoi automatique de la quittance par email (Gmail direct) - SAUF si mode silent
     let emailSent = false;
 
-    if (trans && trans.leases && trans.leases.tenant_email) {
+    if (!silent && trans && trans.leases && trans.leases.tenant_email) {
         try {
             // Préparer les données pour la quittance
             const receiptData = {
@@ -385,29 +814,50 @@ export async function confirmPayment(leaseId: string, transactionId?: string, mo
                 propertyAddress: trans.leases.property_address || 'Adresse non renseignée',
             };
 
-            // Appel à l'API /api/send-receipt (pas d'await pour ne pas bloquer)
-            fetch('/api/send-receipt', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(receiptData),
-            })
-                .then(res => res.json())
-                .then(result => {
-                    if (result.success) {
-                        console.log('✅ Quittance envoyée:', result.messageId);
-                    } else {
-                        console.error('❌ Erreur envoi quittance:', result.error);
-                    }
-                })
-                .catch(err => console.error('❌ Erreur appel API quittance:', err));
+            try {
+                // Appeler l'API de génération de quittance (PDF)
+                // Note: fetch interne nécessite l'URL absolue en Server Actions
+                const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://doussell-immo.com';
+                const start = performance.now();
+                const response = await fetch(`${baseUrl}/api/send-receipt`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(receiptData),
+                });
+                console.log(`[confirmPayment] Receipt API call took ${Math.round(performance.now() - start)}ms`);
 
-            emailSent = true;
+                if (response.ok) {
+                    emailSent = true;
+                    console.log("[confirmPayment] Quittance envoyée par email");
+                } else {
+                    console.error("[confirmPayment] Erreur API quittance:", await response.text());
+                }
+            } catch (err) {
+                console.error("[confirmPayment] Exception API quittance:", err);
+            }
         } catch (err) {
-            console.error('❌ Erreur préparation quittance:', err);
+            console.error("Erreur générale quittance:", err);
         }
     }
 
+    // PRIORITÉ : Invalider le cache AVANT revalidatePath pour màj UI immédiate
+    try {
+        // Invalidation directe de la clé de transaction spécifique
+        await invalidateCacheBatch([`rental_transactions:${leaseId}`], 'rentals');
+
+        // Puis invalidation globale
+        await invalidateRentalCaches(user.id, leaseId, {
+            invalidateLeases: true,
+            invalidateTransactions: true,
+            invalidateStats: true
+        });
+    } catch (e) {
+        console.error("[confirmPayment] Cache invalidation error:", e);
+    }
+
+    // Revalider les pages APRÈS l'invalidation du cache
     revalidatePath('/gestion-locative');
+    revalidatePath(`/gestion-locative/locataires/${leaseId}`);
 
     // Message personnalisé selon si l'email a été déclenché
     const message = emailSent

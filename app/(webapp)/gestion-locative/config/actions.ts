@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { invalidateCache } from '@/lib/cache/cache-aside';
 
 export async function updateBranding(formData: FormData) {
     const supabase = await createClient();
@@ -24,6 +25,9 @@ export async function updateBranding(formData: FormData) {
         .eq('id', user.id);
 
     if (!error) {
+        // IMPORTANT: Invalider le cache du profil
+        await invalidateCache(`owner_profile:${user.id}`, 'rentals');
+
         // IMPORTANT: Revalider TOUTES les pages qui utilisent le profil
         revalidatePath('/gestion-locative/config');
         revalidatePath('/gestion-locative');
@@ -169,7 +173,7 @@ export async function getPremiumBranding() {
 
     const { data, error } = await supabase
         .from('profiles')
-        .select('company_name, company_address, company_phone, company_email, company_ninea, logo_url, signature_url')
+        .select('company_name, company_address, company_phone, company_email, company_ninea, logo_url, signature_url, full_name')
         .eq('id', user.id)
         .single();
 

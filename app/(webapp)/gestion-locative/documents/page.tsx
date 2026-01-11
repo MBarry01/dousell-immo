@@ -361,108 +361,109 @@ export default function RentalDocumentsPage() {
                 </Card>
 
                 {/* Content */}
-                {loading ? (
-                    <div className={`text-center py-12 ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>Chargement de vos documents...</div>
-                ) : filteredDocuments.length === 0 ? (
-                    <EmptyState
-                        title="Aucun document trouvé"
-                        description="Commencez par ajouter des baux, quittances ou factures pour vos biens."
-                        actionLabel="Ajouter un document"
-                        onAction={() => setUploadDialogOpen(true)}
-                        icon={Folder}
-                    />
-                ) : (
-                    <div id="tour-ged-list" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {filteredDocuments.map((doc) => (
-                            <motion.div
-                                key={doc.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className={`group relative rounded-xl p-4 transition-all hover:shadow-lg border ${isDark
-                                    ? 'bg-slate-900 border-slate-800 hover:border-brand/30 hover:shadow-brand/5'
-                                    : 'bg-white border-gray-200 hover:border-brand/30 hover:shadow-brand/5'
-                                    }`}
-                            >
-                                <div className="flex items-start justify-between mb-3">
-                                    <div className={`p-2 rounded-lg ${isDark ? 'bg-slate-950' : 'bg-gray-100'}`}>
-                                        {getFileIcon(doc.type || "")}
+                <div id="tour-ged-list">
+                    {loading ? (
+                        <div className={`text-center py-12 ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>Chargement de vos documents...</div>
+                    ) : filteredDocuments.length === 0 ? (
+                        <EmptyState
+                            title="Aucun document trouvé"
+                            description="Commencez par ajouter des baux, quittances ou factures pour vos biens."
+                            actionLabel="Ajouter un document"
+                            onAction={() => setUploadDialogOpen(true)}
+                            icon={Folder}
+                        />
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {filteredDocuments.map((doc) => (
+                                <motion.div
+                                    key={doc.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className={`group relative rounded-xl p-4 transition-all hover:shadow-lg border ${isDark
+                                        ? 'bg-slate-900 border-slate-800 hover:border-brand/30 hover:shadow-brand/5'
+                                        : 'bg-white border-gray-200 hover:border-brand/30 hover:shadow-brand/5'
+                                        }`}
+                                >
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className={`p-2 rounded-lg ${isDark ? 'bg-slate-950' : 'bg-gray-100'}`}>
+                                            {getFileIcon(doc.type || "")}
+                                        </div>
+                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <a
+                                                href={doc.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={`p-1.5 rounded-md ${isDark ? 'hover:bg-slate-800 text-slate-400 hover:text-blue-400' : 'hover:bg-gray-100 text-gray-400 hover:text-blue-600'}`}
+                                                title="Prévisualiser"
+                                            >
+                                                <Eye size={18} />
+                                            </a>
+                                            <a
+                                                href={doc.url}
+                                                download
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={`p-1.5 rounded-md ${isDark ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-900'}`}
+                                                title="Télécharger"
+                                            >
+                                                <DownloadSimple size={18} />
+                                            </a>
+                                            <button
+                                                onClick={() => handleDelete(doc.id)}
+                                                className={`p-1.5 rounded-md ${isDark ? 'hover:bg-red-900/20 text-slate-400 hover:text-red-400' : 'hover:bg-red-50 text-gray-400 hover:text-red-600'}`}
+                                                title="Supprimer"
+                                            >
+                                                <Trash size={18} />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <a
-                                            href={doc.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className={`p-1.5 rounded-md ${isDark ? 'hover:bg-slate-800 text-slate-400 hover:text-blue-400' : 'hover:bg-gray-100 text-gray-400 hover:text-blue-600'}`}
-                                            title="Prévisualiser"
-                                        >
-                                            <Eye size={18} />
-                                        </a>
-                                        <a
-                                            href={doc.url}
-                                            download
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className={`p-1.5 rounded-md ${isDark ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-900'}`}
-                                            title="Télécharger"
-                                        >
-                                            <DownloadSimple size={18} />
-                                        </a>
-                                        <button
-                                            onClick={() => handleDelete(doc.id)}
-                                            className={`p-1.5 rounded-md ${isDark ? 'hover:bg-red-900/20 text-slate-400 hover:text-red-400' : 'hover:bg-red-50 text-gray-400 hover:text-red-600'}`}
-                                            title="Supprimer"
-                                        >
-                                            <Trash size={18} />
-                                        </button>
+
+                                    <div className="space-y-1">
+                                        <h3 className={`font-medium truncate ${isDark ? 'text-slate-200' : 'text-gray-900'}`} title={doc.name}>
+                                            {doc.name}
+                                        </h3>
+                                        <p className={`text-xs uppercase tracking-wider font-semibold ${isDark ? 'text-brand' : 'text-slate-500'}`}>
+                                            {DOCUMENT_CATEGORIES.find(c => c.value === doc.category)?.label || doc.category}
+                                        </p>
                                     </div>
-                                </div>
 
-                                <div className="space-y-1">
-                                    <h3 className={`font-medium truncate ${isDark ? 'text-slate-200' : 'text-gray-900'}`} title={doc.name}>
-                                        {doc.name}
-                                    </h3>
-                                    <p className={`text-xs uppercase tracking-wider font-semibold ${isDark ? 'text-brand' : 'text-slate-500'}`}>
-                                        {DOCUMENT_CATEGORIES.find(c => c.value === doc.category)?.label || doc.category}
-                                    </p>
-                                </div>
-
-                                <div className={`mt-4 pt-3 flex items-center justify-between text-xs border-t ${isDark ? 'border-slate-800 text-slate-500' : 'border-gray-200 text-gray-500'}`}>
-                                    <span className="flex items-center gap-1.5">
-                                        {doc.tenant_name && (
-                                            <>
-                                                <User size={12} />
-                                                {doc.tenant_name}
-                                            </>
-                                        )}
-                                        {doc.property_title && !doc.tenant_name && (
-                                            <>
-                                                <House size={12} />
-                                                {doc.property_title}
-                                            </>
-                                        )}
-                                    </span>
-                                    <span>{doc.uploaded_at ? format(new Date(doc.uploaded_at), "d MMM yyyy", { locale: fr }) : 'Date inconnue'}</span>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                )}
+                                    <div className={`mt-4 pt-3 flex items-center justify-between text-xs border-t ${isDark ? 'border-slate-800 text-slate-500' : 'border-gray-200 text-gray-500'}`}>
+                                        <span className="flex items-center gap-1.5">
+                                            {doc.tenant_name && (
+                                                <>
+                                                    <User size={12} />
+                                                    {doc.tenant_name}
+                                                </>
+                                            )}
+                                            {doc.property_title && !doc.tenant_name && (
+                                                <>
+                                                    <House size={12} />
+                                                    {doc.property_title}
+                                                </>
+                                            )}
+                                        </span>
+                                        <span>{doc.uploaded_at ? format(new Date(doc.uploaded_at), "d MMM yyyy", { locale: fr }) : 'Date inconnue'}</span>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Bouton pour relancer le tour */}
             <button
                 onClick={resetTour}
-                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${
-                    isDark
+                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${isDark
                         ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
                         : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
-                }`}
+                    }`}
                 title="Relancer le tutoriel"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                    <path d="M12 17h.01"/>
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <path d="M12 17h.01" />
                 </svg>
             </button>
         </div>

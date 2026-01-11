@@ -38,7 +38,7 @@ export default async function Home() {
 
   return (
     <div className="space-y-6">
-      {/* Tour pour les nouveaux utilisateurs (Mobile/PWA Focus) */}
+      {/* Tour pour les nouveaux utilisateurs connectés (Mobile/PWA Focus) */}
       {user && <HomeTour hasProperties={hasProperties} />}
 
       {/* Toast de succès après vérification d'email */}

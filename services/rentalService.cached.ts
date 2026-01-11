@@ -63,32 +63,39 @@ export async function getRentalTransactions(leaseIds: string[]) {
     return [];
   }
 
-  // Hash simple pour clé de cache
-  const leaseIdsHash = leaseIds.sort().join(",").slice(0, 100);
+  // Stratégie : Cache par Bail (Granulaire)
+  // Cela permet d'invalider facilement le cache d'un seul bail lors d'un paiement
+  // Clé : rental_transactions:lease:{leaseId}
 
-  return getOrSetCache(
-    `rental_transactions:${leaseIdsHash}`,
-    async () => {
-      const supabase = await createClient();
+  const transactionsPromises = leaseIds.map(async (leaseId) => {
+    return getOrSetCache(
+      `rental_transactions:${leaseId}`, // Clé simple prédicible !
+      async () => {
+        const supabase = await createClient();
+        const { data, error } = await supabase
+          .from("rental_transactions")
+          .select(
+            "id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end"
+          )
+          .eq("lease_id", leaseId)
+          .order("period_year", { ascending: false })
+          .order("period_month", { ascending: false });
 
-      const { data, error } = await supabase
-        .from("rental_transactions")
-        .select(
-          "id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end"
-        )
-        .in("lease_id", leaseIds)
-        .order("period_year", { ascending: false })
-        .order("period_month", { ascending: false });
+        if (error) throw error;
+        return data || [];
+      },
+      {
+        ttl: 300, // 5 minutes
+        namespace: "rentals",
+        debug: true,
+      }
+    );
+  });
 
-      if (error) throw error;
-      return data || [];
-    },
-    {
-      ttl: 120, // 2 minutes
-      namespace: "rentals",
-      debug: true,
-    }
-  );
+  const results = await Promise.all(transactionsPromises);
+
+  // Aplatir les résultats (tableau de tableaux -> tableau plat)
+  return results.flat();
 }
 
 /**
@@ -364,3 +371,5 @@ export async function getUserDashboardInfo(userId: string, email: string) {
     }
   );
 }
+
+

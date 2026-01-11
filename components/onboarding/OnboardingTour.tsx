@@ -35,11 +35,24 @@ export function OnboardingTour({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [isPositioned, setIsPositioned] = useState(false);
 
   // SSR Safety
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Bloquer le scroll quand le tour est ouvert
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   // Position de l'élément cible
   const updateTargetPosition = useCallback(() => {
@@ -51,15 +64,20 @@ export function OnboardingTour({
     const element = document.getElementById(step.targetId);
 
     if (element) {
+      // Cacher le tooltip pendant le repositionnement
+      setIsPositioned(false);
+
       // Scroll vers l'élément
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
       // Petit délai pour laisser le scroll finir
       setTimeout(() => {
         setTargetRect(element.getBoundingClientRect());
-      }, 300);
+        setIsPositioned(true);
+      }, 350);
     } else {
       setTargetRect(null);
+      setIsPositioned(false);
     }
   }, [currentStepIndex, isOpen, steps]);
 
@@ -249,25 +267,26 @@ export function OnboardingTour({
         {targetRect && (
           <motion.div
             key={`highlight-${currentStepIndex}`}
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="absolute pointer-events-none rounded-xl"
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="absolute pointer-events-none rounded-lg"
             style={{
               top: targetRect.top - 6,
               left: targetRect.left - 6,
               width: targetRect.width + 12,
               height: targetRect.height + 12,
-              border: '2px solid #F4C430',
-              boxShadow: '0 0 20px rgba(244, 196, 48, 0.4), 0 0 40px rgba(244, 196, 48, 0.2), inset 0 0 20px rgba(244, 196, 48, 0.05)'
+              borderRadius: 12,
+              border: '2.5px solid #F4C430',
+              boxShadow: '0 0 0 4px rgba(244, 196, 48, 0.15), 0 0 20px rgba(244, 196, 48, 0.4), 0 0 40px rgba(244, 196, 48, 0.2)',
             }}
           >
             {/* Shimmer effect */}
             <div
-              className="absolute inset-0 rounded-xl overflow-hidden"
+              className="absolute inset-0 overflow-hidden rounded-[10px]"
               style={{
-                background: 'linear-gradient(90deg, transparent, rgba(244,196,48,0.15), transparent)',
+                background: 'linear-gradient(90deg, transparent, rgba(244,196,48,0.2), transparent)',
                 animation: 'shimmer 2s infinite'
               }}
             />
@@ -277,18 +296,19 @@ export function OnboardingTour({
 
       {/* LE TOOLTIP CARD (Style HP OMEN Premium) */}
       <AnimatePresence mode="wait">
-        <motion.div
-          key={currentStepIndex}
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.95 }}
-          transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-          className="absolute pointer-events-auto w-[340px]"
-          style={{
-            top: tooltipStyle.top,
-            left: tooltipStyle.left,
-          }}
-        >
+        {isPositioned && (
+          <motion.div
+            key={currentStepIndex}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            className="absolute pointer-events-auto w-[340px]"
+            style={{
+              top: tooltipStyle.top,
+              left: tooltipStyle.left,
+            }}
+          >
           <div className="relative">
             {/* Arrow */}
             {tooltipStyle.placement !== 'center' && (
@@ -414,6 +434,7 @@ export function OnboardingTour({
             </div>
           </div>
         </motion.div>
+        )}
       </AnimatePresence>
 
       {/* CSS pour l'animation shimmer */}

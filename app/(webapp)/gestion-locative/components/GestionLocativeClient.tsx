@@ -152,36 +152,55 @@ export function GestionLocativeClient({
     // ========================================
     const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_gestion_premium_tour', 1500);
 
-    const premiumTourSteps: TourStep[] = useMemo(() => [
-        {
-            targetId: 'tour-add-tenant',
-            title: 'Créez votre premier bail',
-            description: 'Cliquez ici pour ajouter un locataire. Le système générera automatiquement les contrats et quittances.',
-            imageSrc: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Ajouter un locataire'
-        },
-        {
-            targetId: 'tour-stats',
-            title: 'Suivez vos finances',
-            description: 'Un coup d\'œil suffit. Visualisez les loyers encaissés, en attente et les retards en temps réel. Cliquez sur une carte pour filtrer.',
-            imageSrc: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Tableau de bord financier'
-        },
-        {
-            targetId: 'tour-first-tenant',
-            title: 'Vos dossiers locataires',
-            description: 'Accédez à la fiche complète de chaque locataire : historique des paiements, contrats et documents stockés.',
-            imageSrc: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Dossier locataire'
-        },
-        {
-            targetId: 'tour-export-csv',
-            title: 'Export Comptable',
-            description: 'Téléchargez toutes vos données en CSV pour votre comptable ou vos archives personnelles en un seul clic.',
-            imageSrc: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Export comptable'
-        }
-    ], []);
+    // Étapes du tour (affichées tout le temps)
+    const premiumTourSteps: TourStep[] = useMemo(() => {
+
+        const baseSteps: TourStep[] = [
+            {
+                targetId: 'tour-add-tenant',
+                title: 'Créez votre premier bail',
+                description: 'Cliquez ici pour ajouter un locataire. Le système générera automatiquement les contrats et quittances.',
+                imageSrc: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600',
+                imageAlt: 'Ajouter un locataire'
+            },
+            {
+                targetId: 'tour-stats',
+                title: 'Suivez vos finances',
+                description: 'Un coup d\'œil suffit. Visualisez les loyers encaissés, en attente et les retards en temps réel. Cliquez sur une carte pour filtrer.',
+                imageSrc: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600',
+                imageAlt: 'Tableau de bord financier'
+            }
+        ];
+
+
+        // Ajouter toutes les étapes du tour
+        baseSteps.push(
+            {
+                targetId: 'tour-tenants-list',
+                title: 'Gérez vos locataires',
+                description: 'C\'est ici que vos locataires apparaîtront. Vous pourrez suivre les paiements, envoyer des quittances et gérer les baux en un clic.',
+                imageSrc: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&q=80&w=600',
+                imageAlt: 'Gestion des locataires'
+            },
+            {
+                targetId: 'tour-quick-actions',
+                title: 'Actions Rapides',
+                description: 'Accédez en un clic aux fonctions essentielles : relances, interventions, messagerie et documents juridiques.',
+                imageSrc: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600',
+                imageAlt: 'Actions rapides'
+            },
+            {
+                targetId: 'tour-export-csv',
+                title: 'Export Comptable',
+                description: 'Téléchargez toutes vos données en CSV pour votre comptable ou vos archives personnelles en un seul clic.',
+                imageSrc: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600',
+                imageAlt: 'Export comptable'
+            }
+        );
+
+
+        return baseSteps;
+    }, [leases]);
 
     const handleMonthChange = (month: number, year: number) => {
         setSelectedMonth(month);
@@ -597,7 +616,7 @@ export function GestionLocativeClient({
             {/* Premium Onboarding Tour (Style HP OMEN) */}
             <OnboardingTour
                 steps={premiumTourSteps}
-                isOpen={showTour && leases.length > 0}
+                isOpen={showTour}
                 onClose={closeTour}
                 onComplete={closeTour}
                 storageKey="dousell_gestion_premium_tour"
@@ -725,38 +744,40 @@ export function GestionLocativeClient({
             {/* ========================================
                 TENANT VIEW - Cards or Table
                 ======================================== */}
-            <div id="tour-add-tenant">
-                {viewMode === 'cards' ? (
-                    <TenantCardGrid
-                        tenants={filteredTenants}
-                        onEdit={(tenant) => setEditingTenant(tenant)}
-                        ownerId={ownerId}
-                        isViewingTerminated={isViewingTerminated}
-                        searchQuery={searchQuery}
-                        onConfirmPayment={handleConfirmPayment}
-                        onViewReceipt={handleViewReceipt}
-                        onTerminate={handleTerminateLease}
-                        onReactivate={handleReactivateLease}
-                        onInvite={handleInvite}
-                    />
-                ) : (
-                    <TenantTable
-                        tenants={filteredTenants}
-                        profile={profile}
-                        userEmail={userEmail}
-                        ownerId={ownerId}
-                        isViewingTerminated={isViewingTerminated}
-                        searchQuery={searchQuery}
-                        onEdit={(tenant) => setEditingTenant(tenant)}
-                        onDelete={deleteTransaction}
-                        onDeleteLease={deleteLease}
-                        onConfirmPayment={handleConfirmPayment}
-                        onViewReceipt={handleViewReceipt}
-                        onTerminate={handleTerminateLease}
-                        onReactivate={handleReactivateLease}
-                        onInvite={handleInvite}
-                    />
-                )}
+            <div id="tour-tenants-list">
+                <div id="tour-add-tenant">
+                    {viewMode === 'cards' ? (
+                        <TenantCardGrid
+                            tenants={filteredTenants}
+                            onEdit={(tenant) => setEditingTenant(tenant)}
+                            ownerId={ownerId}
+                            isViewingTerminated={isViewingTerminated}
+                            searchQuery={searchQuery}
+                            onConfirmPayment={handleConfirmPayment}
+                            onViewReceipt={handleViewReceipt}
+                            onTerminate={handleTerminateLease}
+                            onReactivate={handleReactivateLease}
+                            onInvite={handleInvite}
+                        />
+                    ) : (
+                        <TenantTable
+                            tenants={filteredTenants}
+                            profile={profile}
+                            userEmail={userEmail}
+                            ownerId={ownerId}
+                            isViewingTerminated={isViewingTerminated}
+                            searchQuery={searchQuery}
+                            onEdit={(tenant) => setEditingTenant(tenant)}
+                            onDelete={deleteTransaction}
+                            onDeleteLease={deleteLease}
+                            onConfirmPayment={handleConfirmPayment}
+                            onViewReceipt={handleViewReceipt}
+                            onTerminate={handleTerminateLease}
+                            onReactivate={handleReactivateLease}
+                            onInvite={handleInvite}
+                        />
+                    )}
+                </div>
             </div>
 
             {/* Modale d'édition */}
@@ -771,17 +792,16 @@ export function GestionLocativeClient({
             {/* Bouton pour relancer le tour */}
             <button
                 onClick={resetTour}
-                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${
-                    isDark
-                        ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
-                        : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
-                }`}
+                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${isDark
+                    ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
+                    : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
+                    }`}
                 title="Relancer le tutoriel"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                    <path d="M12 17h.01"/>
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <path d="M12 17h.01" />
                 </svg>
             </button>
         </div>

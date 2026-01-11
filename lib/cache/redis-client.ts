@@ -117,7 +117,20 @@ export const redis = {
     if (!client) return;
 
     try {
-      await client.del(key);
+      const isUpstash = process.env.UPSTASH_REDIS_REST_URL;
+      const keys = Array.isArray(key) ? key : [key];
+
+      if (keys.length === 0) return;
+
+      if (isUpstash) {
+        // Upstash: del accepts spread args for multiple keys
+        await client.del(...keys);
+      } else {
+        // ioredis: del can accept array or spread
+        await client.del(...keys);
+      }
+
+      console.log(`🗑️ REDIS DEL: ${keys.length} key(s) deleted`);
     } catch (error) {
       console.error('Redis DEL error:', error);
     }

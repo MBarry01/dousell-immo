@@ -34,7 +34,6 @@ export function QuickActions({
     ownerId,
     profile
 }: QuickActionsProps) {
-    const [hoveredAction, setHoveredAction] = useState<string | null>(null);
     const { isDark } = useTheme();
 
     const actions = [
@@ -43,12 +42,6 @@ export function QuickActions({
             label: 'Nouveau Locataire',
             shortLabel: 'Nouveau',
             icon: UserPlus,
-            color: 'text-white',
-            bgColor: 'bg-slate-900',
-            hoverBg: 'hover:bg-slate-800',
-            borderColor: 'border-slate-800',
-
-            // onClick: onAddTenant, // Handled by AddTenantButton trigger
             type: 'custom' as const,
         },
         {
@@ -56,10 +49,6 @@ export function QuickActions({
             label: 'Envoyer Relances',
             shortLabel: 'Relances',
             icon: Bell,
-            color: 'text-white',
-            bgColor: 'bg-slate-900',
-            hoverBg: 'hover:bg-slate-800',
-            borderColor: 'border-slate-800',
             onClick: onSendReminders,
             type: 'button' as const,
             badge: overdueCount > 0 ? overdueCount : undefined,
@@ -69,10 +58,6 @@ export function QuickActions({
             label: 'Interventions',
             shortLabel: 'Travaux',
             icon: Wrench,
-            color: 'text-white',
-            bgColor: 'bg-slate-900',
-            hoverBg: 'hover:bg-slate-800',
-            borderColor: 'border-slate-800',
             href: '/interventions',
             type: 'link' as const,
         },
@@ -81,10 +66,6 @@ export function QuickActions({
             label: 'Messagerie',
             shortLabel: 'Messages',
             icon: MessageSquare,
-            color: 'text-white',
-            bgColor: 'bg-slate-900',
-            hoverBg: 'hover:bg-slate-800',
-            borderColor: 'border-slate-800',
             href: '/gestion-locative/messages',
             type: 'link' as const,
         },
@@ -93,10 +74,6 @@ export function QuickActions({
             label: 'Documents Juridiques',
             shortLabel: 'Juridique',
             icon: FileText,
-            color: 'text-white',
-            bgColor: 'bg-slate-900',
-            hoverBg: 'hover:bg-slate-800',
-            borderColor: 'border-slate-800',
             href: '/documents-legaux',
             type: 'link' as const,
         },
@@ -105,10 +82,6 @@ export function QuickActions({
             label: 'Exporter CSV',
             shortLabel: 'Export',
             icon: Download,
-            color: 'text-white',
-            bgColor: 'bg-slate-900',
-            hoverBg: 'hover:bg-slate-800',
-            borderColor: 'border-slate-800',
             onClick: onExportCSV,
             type: 'button' as const,
         },
@@ -121,20 +94,18 @@ export function QuickActions({
                 <div className={`
                     p-2 rounded-lg
                     transition-transform duration-200
-                    ${hoveredAction === action.id ? 'scale-110' : ''}
+                    group-hover:scale-110
                     ${isDark ? 'bg-slate-800' : 'bg-gray-100'}
                 `}>
-                    <Icon className={`w-4 h-4 ${isDark ? 'text-white' : 'text-gray-700'
-                        }`} />
+                    <Icon className={`w-4 h-4 ${isDark ? 'text-white' : 'text-gray-700'}`} />
                 </div>
                 <span className={`
                     text-xs font-medium
                     hidden sm:inline
                     transition-colors duration-200
-                    ${hoveredAction === action.id
-                        ? isDark ? 'text-white' : 'text-gray-900'
-                        : isDark ? 'text-slate-300' : 'text-gray-600'
-                    }
+                    ${isDark
+                        ? 'text-slate-300 group-hover:text-white'
+                        : 'text-gray-600 group-hover:text-gray-900'}
                 `}>
                     {action.label}
                 </span>
@@ -142,10 +113,9 @@ export function QuickActions({
                     text-xs font-medium
                     sm:hidden
                     transition-colors duration-200
-                    ${hoveredAction === action.id
-                        ? isDark ? 'text-white' : 'text-gray-900'
-                        : isDark ? 'text-slate-300' : 'text-gray-600'
-                    }
+                    ${isDark
+                        ? 'text-slate-300 group-hover:text-white'
+                        : 'text-gray-600 group-hover:text-gray-900'}
                 `}>
                     {action.shortLabel}
                 </span>
@@ -165,8 +135,7 @@ export function QuickActions({
         <div id="tour-quick-actions" className="mb-6">
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
-                <span className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-slate-500' : 'text-gray-500'
-                    }`}>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
                     Actions Rapides
                 </span>
                 <div className={`flex-1 h-px ${isDark ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
@@ -193,8 +162,6 @@ export function QuickActions({
                                 key={action.id}
                                 href={action.href!}
                                 className={baseClasses}
-                                onMouseEnter={() => setHoveredAction(action.id)}
-                                onMouseLeave={() => setHoveredAction(null)}
                             >
                                 <ActionContent action={action} />
                                 <ChevronRight className={`
@@ -215,11 +182,7 @@ export function QuickActions({
                                     ownerId={ownerId}
                                     profile={profile}
                                     trigger={
-                                        <button
-                                            className={baseClasses}
-                                            onMouseEnter={() => setHoveredAction(action.id)}
-                                            onMouseLeave={() => setHoveredAction(null)}
-                                        >
+                                        <button className={baseClasses}>
                                             <ActionContent action={action} />
                                         </button>
                                     }
@@ -233,8 +196,6 @@ export function QuickActions({
                             key={action.id}
                             onClick={action.onClick}
                             className={baseClasses}
-                            onMouseEnter={() => setHoveredAction(action.id)}
-                            onMouseLeave={() => setHoveredAction(null)}
                             disabled={!action.onClick}
                         >
                             <ActionContent action={action} />

@@ -121,9 +121,8 @@ export async function invalidateRentalCaches(
   }
 
   if (invalidateTransactions && leaseId) {
-    // Note: On invalide par pattern (difficile de hash leaseIds exactement)
-    // On pourrait améliorer avec un wildcard pattern
-    rentalKeys.push(`rental_transactions:*`);
+    // Clé précise qui matche la nouvelle stratégie de cache par bail
+    rentalKeys.push(`rental_transactions:${leaseId}`);
   }
 
   if (invalidateStats) {
@@ -148,10 +147,10 @@ export async function invalidateRentalCaches(
     await invalidateCacheBatch(rentalKeys, "rentals");
   }
 
-  // Revalider pages
-  revalidatePath("/compte/gestion-locative");
+  // Revalider pages (corrected paths)
+  revalidatePath("/gestion-locative");
   if (leaseId) {
-    revalidatePath(`/compte/gestion-locative/messages/${leaseId}`);
+    revalidatePath(`/gestion-locative/locataires/${leaseId}`);
   }
 }
 

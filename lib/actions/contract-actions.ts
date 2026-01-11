@@ -139,9 +139,9 @@ export async function generateLeaseContract(
         securityDeposit: Number(lease.monthly_amount) * 2, // Par défaut 2 mois (max légal)
         depositMonths: 2,
         startDate: new Date(lease.start_date),
-        duration: lease.end_date
-          ? differenceInMonths(addDays(new Date(lease.end_date), 1), new Date(lease.start_date))
-          : 12, // Défaut 12 mois si pas de date de fin
+        duration: (lease.end_date && lease.start_date)
+          ? Math.max(1, differenceInMonths(addDays(new Date(lease.end_date), 1), new Date(lease.start_date)))
+          : 12, // Défaut 12 mois si pas de dates valides
         billingDay: lease.billing_day || 5,
       },
       signatures: {

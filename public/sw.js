@@ -117,6 +117,14 @@ self.addEventListener("fetch", (event) => {
     "supabase.in",              // Backend Supabase
     "cloudflare.com",           // Cloudflare Turnstile
     "vercel-scripts.com",       // Scripts Vercel Analytics
+    "gstatic.com",              // Google Translate styles/fonts
+    "translate.google.com",     // Google Translate API
+    "translate.googleapis.com", // Google Translate API
+    "clarity.ms",               // Microsoft Clarity
+    "bing.com",                 // Bing/Clarity
+    "fonts.googleapis.com",     // Google Fonts
+    "kkiapay.me",               // Kkiapay payment
+    "rokt.com",                 // Rokt (extension ads)
   ];
 
   // Vérifie si l'URL contient un des domaines externes
