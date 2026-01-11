@@ -112,63 +112,65 @@ function WebAppLayoutContent({
             {/* ========================================
                 HEADER GLOBAL (Logo + Quitter)
                 ======================================== */}
-            <header className={`h-16 flex items-center justify-between px-6 border-b shrink-0 z-50 transition-colors ${isDark
+            <header className={`pt-[env(safe-area-inset-top)] border-b shrink-0 z-50 transition-colors ${isDark
                 ? 'bg-[#121212] border-gray-800'
                 : 'bg-white border-gray-200'
                 }`}>
-                <div className="flex items-center gap-3">
-                    {/* Hamburger Menu - Mobile only */}
-                    <button
-                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
-                    >
-                        <Sidebar className="w-5 h-5" />
-                    </button>
+                <div className="h-16 flex items-center justify-between px-6">
+                    <div className="flex items-center gap-3">
+                        {/* Hamburger Menu - Mobile only */}
+                        <button
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                        >
+                            <Sidebar className="w-5 h-5" />
+                        </button>
 
-                    {/* Logo */}
-                    <Link href="/" className="flex items-center">
-                        <Image
-                            src="/icons/icon-192.png"
-                            width={32}
-                            height={32}
-                            alt="Dousell Immo"
-                            className="rounded"
-                        />
-                    </Link>
-                    <span className={`font-semibold text-lg border-l border-gray-700 pl-3 ${isDark ? 'text-[#F4C430]' : 'text-slate-900'}`}>
-                        Gestion Locative
-                    </span>
-                </div>
+                        {/* Logo */}
+                        <Link href="/" className="flex items-center">
+                            <Image
+                                src="/icons/icon-192.png"
+                                width={32}
+                                height={32}
+                                alt="Dousell Immo"
+                                className="rounded"
+                            />
+                        </Link>
+                        <span className={`font-semibold text-lg border-l border-gray-700 pl-3 ${isDark ? 'text-[#F4C430]' : 'text-slate-900'}`}>
+                            Gestion Locative
+                        </span>
+                    </div>
 
-                {/* Actions à droite */}
-                <div className="flex items-center gap-2">
-                    {/* Bouton Theme Toggle */}
-                    <button
-                        onClick={toggleTheme}
-                        className={`p-2 rounded-lg transition-colors ${isDark
-                            ? 'hover:bg-slate-800 text-slate-400 hover:text-white'
-                            : 'hover:bg-gray-200 text-gray-600 hover:text-gray-900'
-                            }`}
-                        title={isDark ? "Activer le mode clair" : "Activer le mode sombre"}
-                    >
-                        {isDark ? (
-                            <Sun className="w-5 h-5" />
-                        ) : (
-                            <Moon className="w-5 h-5" />
-                        )}
-                    </button>
+                    {/* Actions à droite */}
+                    <div className="flex items-center gap-2">
+                        {/* Bouton Theme Toggle */}
+                        <button
+                            onClick={toggleTheme}
+                            className={`p-2 rounded-lg transition-colors ${isDark
+                                ? 'hover:bg-slate-800 text-slate-400 hover:text-white'
+                                : 'hover:bg-gray-200 text-gray-600 hover:text-gray-900'
+                                }`}
+                            title={isDark ? "Activer le mode clair" : "Activer le mode sombre"}
+                        >
+                            {isDark ? (
+                                <Sun className="w-5 h-5" />
+                            ) : (
+                                <Moon className="w-5 h-5" />
+                            )}
+                        </button>
 
-                    {/* Bouton Quitter */}
-                    <Link
-                        href="/compte"
-                        className={`text-sm px-3 py-2 rounded transition-colors ${isDark
-                            ? 'text-gray-400 hover:text-white hover:bg-gray-800'
-                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
-                            }`}
-                    >
-                        <span className="hidden sm:inline">Quitter</span>
-                        <X className="w-5 h-5 sm:hidden" />
-                    </Link>
+                        {/* Bouton Quitter */}
+                        <Link
+                            href="/compte"
+                            className={`text-sm px-3 py-2 rounded transition-colors ${isDark
+                                ? 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
+                                }`}
+                        >
+                            <span className="hidden sm:inline">Quitter</span>
+                            <X className="w-5 h-5 sm:hidden" />
+                        </Link>
+                    </div>
                 </div>
             </header>
 
@@ -187,7 +189,7 @@ function WebAppLayoutContent({
 
                 {/* Sidebar */}
                 <aside className={`
-                    fixed top-16 left-0 z-50 h-[calc(100dvh-4rem)]
+                    fixed top-[calc(4rem+env(safe-area-inset-top))] left-0 z-50 h-[calc(100dvh-(4rem+env(safe-area-inset-top)))]
                     border-r
                     transform transition-all duration-300 ease-in-out
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
