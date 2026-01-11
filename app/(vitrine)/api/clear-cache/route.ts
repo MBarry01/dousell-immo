@@ -48,14 +48,14 @@ export async function DELETE(request: NextRequest) {
       deletedKeys: keysToDelete,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[clear-cache] Error:', error);
 
     return NextResponse.json(
       {
         success: false,
         error: 'Erreur lors du vidage du cache',
-        details: error.message,
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );
@@ -111,14 +111,14 @@ export async function POST(request: NextRequest) {
     });
 
     const keysToDelete: string[] = [];
-    let cursor: string | number = 0;
+    let cursor = '0';
 
     do {
-      const result = await upstash.scan(cursor, { match: 'rentals:*', count: 100 });
+      const result = await upstash.scan(cursor, { match: 'rentals:*', count: 100 }) as [string, string[]];
       cursor = result[0];
       const keys = result[1] as string[];
       keysToDelete.push(...keys);
-    } while (cursor !== 0 && cursor !== '0');
+    } while (cursor !== '0');
 
     if (keysToDelete.length > 0) {
       // Supprimer par lots
@@ -136,14 +136,14 @@ export async function POST(request: NextRequest) {
       deletedKeys: keysToDelete,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[clear-cache] Error:', error);
 
     return NextResponse.json(
       {
         success: false,
         error: 'Erreur lors du vidage du cache',
-        details: error.message,
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );
