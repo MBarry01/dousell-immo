@@ -112,7 +112,7 @@ export default function VitrineLayout({ children }: VitrineLayoutProps) {
       <main
         className="mx-auto w-full max-w-6xl md:pb-4 md:pt-6 print:p-0 print:max-w-none"
         style={{
-          paddingTop: "calc(env(safe-area-inset-top, 0px) + 4rem)",
+          paddingTop: "calc(max(env(safe-area-inset-top, 0px), 20px) + 4rem)",
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)"
         }}
       >

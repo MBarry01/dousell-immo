@@ -337,6 +337,16 @@
   .pwa-hero-pb {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 43px) !important;
   }
+
+  /* Safe area padding renforcé pour PWA standalone */
+  .pt-safe {
+    padding-top: calc(env(safe-area-inset-top, 20px) + 1rem) !important;
+  }
+
+  /* Header mobile en mode PWA - padding extra pour la barre d'état */
+  .pwa-header-safe {
+    padding-top: max(env(safe-area-inset-top, 0px), 20px) !important;
+  }
 }
 
 /* ===== LANDING PAGE LUXE ANIMATIONS ===== */

@@ -46,9 +46,9 @@ export const Header = () => {
             : "bg-transparent border-transparent"
         )}
         style={{
-          height: "calc(env(safe-area-inset-top, 0px) + 4rem)",
-          minHeight: "calc(env(safe-area-inset-top, 0px) + 4rem)",
-          paddingTop: "env(safe-area-inset-top, 0px)",
+          height: "calc(max(env(safe-area-inset-top, 0px), 20px) + 4rem)",
+          minHeight: "calc(max(env(safe-area-inset-top, 0px), 20px) + 4rem)",
+          paddingTop: "max(env(safe-area-inset-top, 0px), 20px)",
           willChange: "transform",
           transform: "translateZ(0)",
           WebkitTransform: "translateZ(0)",

@@ -112,10 +112,11 @@ function WebAppLayoutContent({
             {/* ========================================
                 HEADER GLOBAL (Logo + Quitter)
                 ======================================== */}
-            <header className={`pt-[env(safe-area-inset-top)] border-b shrink-0 z-50 transition-colors ${isDark
+            <header className={`border-b shrink-0 z-50 transition-colors ${isDark
                 ? 'bg-[#121212] border-gray-800'
                 : 'bg-white border-gray-200'
-                }`}>
+                }`}
+                style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 20px)" }}>
                 <div className="h-16 flex items-center justify-between px-6">
                     <div className="flex items-center gap-3">
                         {/* Hamburger Menu - Mobile only */}
@@ -188,8 +189,9 @@ function WebAppLayoutContent({
                 )}
 
                 {/* Sidebar */}
-                <aside className={`
-                    fixed top-[calc(4rem+env(safe-area-inset-top))] left-0 z-50 h-[calc(100dvh-(4rem+env(safe-area-inset-top)))]
+                <aside
+                    className={`
+                    fixed left-0 z-50
                     border-r
                     transform transition-all duration-300 ease-in-out
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -198,7 +200,11 @@ function WebAppLayoutContent({
                     ${isDark ? 'bg-black border-gray-800' : 'bg-white border-gray-200'}
                     flex flex-col
                     print:hidden
-                `}>
+                `}
+                    style={{
+                        top: "calc(4rem + max(env(safe-area-inset-top, 0px), 20px))",
+                        height: "calc(100dvh - (4rem + max(env(safe-area-inset-top, 0px), 20px)))"
+                    }}>
 
                     {/* Sidebar Header avec bouton collapse */}
                     <div className={`h-12 flex items-center justify-between px-4 border-b shrink-0 ${isDark ? 'border-gray-800' : 'border-gray-200'
