@@ -62,7 +62,7 @@ export default function FollowUS({ heading = true, color }: any) {
                                 ':hover': { bgcolor: 'grey.300' }
                             }}
                         >
-                            <SvgIcon type={IconType.FILL} {...(typeof item.icon === 'string' ? { name: item.icon } : { ...item.icon })} />
+                            <SvgIcon type={IconType.FILL} name={item.icon} />
                         </Avatar>
                     </Link>
                 ))}
