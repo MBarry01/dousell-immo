@@ -114,7 +114,7 @@ export default function Sitemap({ list, isMenuDesign }: any) {
 
     return (
         <Grid container spacing={{ xs: 2.5, md: 4 }} sx={{ justifyContent: 'space-between' }}>
-            {(list || menuItems).map((item, index) => (
+            {(list || menuItems).map((item: any, index: number) => (
                 <Grid key={index} {...item.grid}>
                     <Stack sx={{ alignItems: 'flex-start', gap: { md: 3 } }}>
                         <Typography variant="h4">{item.title}</Typography>
