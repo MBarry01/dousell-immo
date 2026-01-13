@@ -22,6 +22,10 @@ import { createVisitRequest, createAppointment } from "@/app/(vitrine)/planifier
 import { sendGTMEvent } from "@/lib/gtm";
 import { visitRequestSchema, type VisitRequestFormValues } from "@/lib/schemas/visit-request";
 
+// Saasable Integration
+import SaasableSectionWrapper from "@/components/saasable/SaasableSectionWrapper";
+import Feature18 from "@/components/saasable/blocks/Feature18";
+
 const faq = [
   {
     question: "Quels documents fournir pour louer ?",
@@ -65,6 +69,52 @@ const timeSlots = [
   { time: "16:00", available: true },
   { time: "16:30", available: true },
   { time: "17:00", available: true },
+];
+
+// Data for Feature18 (Saasable Tabbed Features)
+const featuresDataSaasable = [
+  {
+    title: "Gestion Complète",
+    title2: "Centralisez votre patrimoine",
+    description: "Une vue à 360° sur vos biens, locataires et finances.",
+    isCoverImage: true,
+    image: "/Gif/Dasboard1.gif",
+    bgImage: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80", // Immobilier
+    icon: "tabler-building",
+    list: [
+      { primary: "Tableau de bord intuitif" },
+      { primary: "Suivi des loyers en temps réel" },
+      { primary: "Gestion des documents" }
+    ]
+  },
+  {
+    title: "Automatisation",
+    title2: "Gagnez du temps",
+    description: "Laissez l'IA gérer les tâches répétitives.",
+    isCoverImage: true,
+    image: "/Gif/Generer.gif",
+    bgImage: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80", // Robot/AI
+    icon: "tabler-sparkles",
+    list: [
+      { primary: "Rappels automatiques" },
+      { primary: "Génération de contrats" },
+      { primary: "Quittances digitalisées" }
+    ]
+  },
+  {
+    title: "Sérénité",
+    title2: "Sécurité & Conformité",
+    description: "Vos données et vos biens sont protégés.",
+    isCoverImage: true,
+    image: "/Gif/security.gif",
+    bgImage: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80", // Sécurité/Lock
+    icon: "tabler-shield",
+    list: [
+      { primary: "Stockage sécurisé" },
+      { primary: "Conformité juridique" },
+      { primary: "Support dédié 7j/7" }
+    ]
+  }
 ];
 
 const features = [
@@ -200,6 +250,20 @@ export default function LandingPage() {
 
       {/* Hero Section avec Shooting Stars */}
       <section className="relative h-screen w-full overflow-hidden bg-black">
+        {/* Background Image with fade effect */}
+        <div className="absolute inset-0 w-full h-full">
+          <Image
+            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80"
+            alt=""
+            fill
+            priority
+            className="object-cover object-center opacity-25"
+            sizes="100vw"
+          />
+          {/* Gradient overlay for fade effect */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
+        </div>
+
         {/* Static stars background */}
         <div className="absolute inset-0 w-full h-full">
           <div className="stars absolute inset-0" />
@@ -325,6 +389,105 @@ export default function LandingPage() {
           />
         </ContainerScroll>
       </section>
+
+      {/* Laptop Mockup Section - Dashboard Gestion Locative */}
+      <section className="relative py-12 md:py-20 bg-black overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.06)_0%,_transparent_70%)]" />
+
+        <div className="container mx-auto px-6 relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-12 md:mb-16">
+            <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
+              Gestion Locative
+            </span>
+            <h2 className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-6">
+              Votre tableau de bord{" "}
+              <span className="gradient-text-animated">intelligent</span>
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              Gérez vos biens, locataires et finances depuis une interface moderne et intuitive.
+            </p>
+          </div>
+
+          {/* Laptop Mockup */}
+          <div className="relative max-w-5xl mx-auto">
+            {/* Glow effect */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-[#F4C430]/10 rounded-full blur-[120px]" />
+
+            {/* Laptop Frame */}
+            <div className="relative">
+              {/* Screen bezel */}
+              <div className="relative bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 rounded-t-xl md:rounded-t-2xl p-2 md:p-3 pt-4 md:pt-6 shadow-2xl">
+                {/* Camera & Sensors */}
+                <div className="absolute top-1.5 md:top-2 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-zinc-600 rounded-full" />
+                  <div className="w-2 h-2 md:w-3 md:h-3 bg-zinc-800 rounded-full border border-zinc-600" />
+                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-zinc-600 rounded-full" />
+                </div>
+
+                {/* Screen Content */}
+                <div className="relative bg-zinc-900 rounded-lg md:rounded-xl overflow-hidden">
+                  <Image
+                    src="/images/dasboard.webp"
+                    alt="Dashboard Gestion Locative"
+                    width={1200}
+                    height={750}
+                    className="w-full h-auto"
+                    draggable={false}
+                  />
+                  {/* Screen reflection */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Laptop Base/Keyboard */}
+              <div className="relative">
+                {/* Hinge */}
+                <div className="h-3 md:h-4 bg-gradient-to-b from-zinc-800 to-zinc-700 rounded-b-lg" />
+                {/* Base */}
+                <div className="h-4 md:h-6 bg-gradient-to-b from-zinc-600 to-zinc-700 rounded-b-xl mx-[5%] shadow-lg" />
+                {/* Bottom edge */}
+                <div className="h-1 md:h-1.5 bg-zinc-800 rounded-b-xl mx-[10%]" />
+              </div>
+            </div>
+
+            {/* Label */}
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-[#F4C430] rounded-full px-5 py-2 shadow-lg shadow-[#F4C430]/20">
+              <span className="text-sm font-semibold text-black">Dashboard Gestion Locative</span>
+            </div>
+          </div>
+
+          {/* Features highlights */}
+          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 text-center max-w-4xl mx-auto">
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-[#F4C430]">100%</div>
+              <div className="text-sm text-gray-400">Automatisé</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-white">24/7</div>
+              <div className="text-sm text-gray-400">Accessible</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-[#F4C430]">2x</div>
+              <div className="text-sm text-gray-400">Plus rapide</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-white">0</div>
+              <div className="text-sm text-gray-400">Paperasse</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Saasable Feature18 - Tabbed Features */}
+      <SaasableSectionWrapper>
+        <Feature18
+          heading=""
+          caption=""
+          topics={featuresDataSaasable}
+        />
+      </SaasableSectionWrapper>
 
       {/* Features Section */}
       <section id="features" className="relative py-32 bg-black">

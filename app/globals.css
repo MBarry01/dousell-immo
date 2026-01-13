@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Tailwind v4: Configurer les sources à scanner (exclure saasable-ui) */
+@source "../app/**/*.{ts,tsx,js,jsx}";
+@source "../components/**/*.{ts,tsx,js,jsx}";
+@source "../lib/**/*.{ts,tsx,js,jsx}";
+@source "../data/**/*.{ts,tsx,js,jsx}";
+
 /* Tailwind v4: Configure dark mode to use .dark class */
 @custom-variant dark (&:where(.dark, .dark *));
 

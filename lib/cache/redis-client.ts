@@ -16,6 +16,12 @@ type RedisClient = any; // On typage plus tard
  * Factory qui retourne le bon client selon l'environnement
  */
 function createRedisClient(): RedisClient {
+  // Emergency kill switch - set DISABLE_REDIS=true to bypass Redis entirely
+  if (process.env.DISABLE_REDIS === 'true') {
+    console.warn('⚠️ Redis disabled via DISABLE_REDIS env var. Running without cache.');
+    return null;
+  }
+
   const isVercel = process.env.VERCEL === '1';
   const isProduction = process.env.NODE_ENV === 'production';
 
@@ -67,7 +73,38 @@ function createRedisClient(): RedisClient {
 // Singleton global (évite 50 connexions en dev)
 let redisClient: RedisClient | null = null;
 
+// Circuit breaker pour les erreurs de quota
+let redisDisabledUntil: number = 0;
+const REDIS_DISABLE_DURATION_MS = 60 * 1000; // Désactivé pendant 1 minute après erreur quota
+
+function isRedisTemporarilyDisabled(): boolean {
+  if (redisDisabledUntil > Date.now()) {
+    return true;
+  }
+  return false;
+}
+
+function disableRedisTemporarily(reason: string): void {
+  redisDisabledUntil = Date.now() + REDIS_DISABLE_DURATION_MS;
+  console.warn(`⚠️ Redis temporairement désactivé (${reason}). Reprise dans 1 minute.`);
+}
+
+function isQuotaExceededError(error: unknown): boolean {
+  if (error && typeof error === 'object' && 'message' in error) {
+    const message = (error as Error).message || '';
+    return message.includes('max requests limit exceeded') ||
+      message.includes('quota') ||
+      message.includes('rate limit');
+  }
+  return false;
+}
+
 export function getRedisClient(): RedisClient | null {
+  // Si Redis est temporairement désactivé, retourner null
+  if (isRedisTemporarilyDisabled()) {
+    return null;
+  }
+
   if (!redisClient) {
     redisClient = createRedisClient();
   }
@@ -86,6 +123,9 @@ export const redis = {
       return await client.get(key);
     } catch (error) {
       console.error('Redis GET error:', error);
+      if (isQuotaExceededError(error)) {
+        disableRedisTemporarily('quota exceeded');
+      }
       return null;
     }
   },
@@ -109,6 +149,9 @@ export const redis = {
       }
     } catch (error) {
       console.error('Redis SET error:', error);
+      if (isQuotaExceededError(error)) {
+        disableRedisTemporarily('quota exceeded');
+      }
     }
   },
 
