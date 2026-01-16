@@ -64,37 +64,34 @@ export default function FeaturedPropertiesHero() {
   }, []);
 
   return (
-    <section className="relative py-20 bg-black overflow-hidden">
+    <section className="relative py-12 md:py-20 bg-black overflow-hidden">
       {/* Gradient de fond */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(244,196,48,0.08)_0%,_transparent_60%)]" />
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 relative z-10">
         {/* Header avec animation */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
-          <div className="inline-flex items-center gap-2 bg-[#F4C430]/10 border border-[#F4C430]/20 rounded-full px-4 py-2 mb-6">
-            <Sparkles className="w-4 h-4 text-[#F4C430]" />
-            <span className="text-[#F4C430] text-sm font-medium tracking-wide">
-              Coups de coeur
-            </span>
-          </div>
+          <span className="inline-block text-[#F4C430] text-[11px] md:text-sm font-medium tracking-widest uppercase mb-2">
+            Sélection
+          </span>
 
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl text-white mb-4">
+          <h2 className="font-display text-2xl md:text-4xl lg:text-5xl text-white mb-3 md:mb-4">
             Ces biens <span className="gradient-text-animated">vous attendent</span>
           </h2>
 
-          <p className="text-gray-400 text-base md:text-lg max-w-xl mx-auto">
-            Une sélection exclusive de propriétés d'exception, prêtes à vous accueillir.
+          <p className="text-gray-400 text-sm md:text-lg max-w-xs md:max-w-xl mx-auto">
+            Une sélection exclusive de propriétés d'exception.
           </p>
         </motion.div>
 
         {/* Grille des biens */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
           {properties.map((property, index) => (
             <motion.div
               key={property.id}
@@ -110,10 +107,10 @@ export default function FeaturedPropertiesHero() {
                 <div className="relative rounded-2xl bg-zinc-900/80 border border-white/5 overflow-hidden transition-all duration-500 hover:border-[#F4C430]/30 hover:shadow-[0_20px_50px_-15px_rgba(244,196,48,0.15)]">
 
                   {/* Image Container avec overlay */}
-                  <div className="relative h-56 overflow-hidden">
+                  <div className="relative h-48 md:h-56 overflow-hidden">
                     {/* Badge Transaction */}
-                    <div className="absolute top-4 left-4 z-20">
-                      <span className="inline-flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/10">
+                    <div className="absolute top-3 left-3 md:top-4 md:left-4 z-20">
+                      <span className="inline-flex items-center gap-1 md:gap-1.5 bg-black/70 backdrop-blur-sm text-white text-[11px] md:text-xs font-semibold px-2.5 py-1 md:px-3 md:py-1.5 rounded-full border border-white/10">
                         {property.transaction === "vente" ? (
                           <>
                             <Star className="w-3 h-3 text-[#F4C430]" />
@@ -128,20 +125,6 @@ export default function FeaturedPropertiesHero() {
                       </span>
                     </div>
 
-                    {/* Badge Coup de coeur */}
-                    {index === 0 && (
-                      <div className="absolute top-4 right-4 z-20">
-                        <motion.span
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.5, type: "spring" }}
-                          className="inline-flex items-center gap-1 bg-[#F4C430] text-black text-xs font-bold px-3 py-1.5 rounded-full shadow-lg shadow-[#F4C430]/30"
-                        >
-                          <Sparkles className="w-3 h-3" />
-                          Top
-                        </motion.span>
-                      </div>
-                    )}
 
                     {/* Image */}
                     {property.images && property.images.length > 0 ? (
@@ -162,30 +145,30 @@ export default function FeaturedPropertiesHero() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
 
                     {/* Prix flottant */}
-                    <div className="absolute bottom-4 left-4 z-20">
+                    <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4 z-20">
                       <motion.div
                         animate={hoveredIndex === index ? { y: -4, scale: 1.02 } : { y: 0, scale: 1 }}
                         transition={{ duration: 0.3 }}
-                        className="bg-black/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/10"
+                        className="bg-black/80 backdrop-blur-sm rounded-lg md:rounded-xl px-3 py-1.5 md:px-4 md:py-2 border border-white/10"
                       >
-                        <span className="text-[#F4C430] font-bold text-lg">
+                        <span className="text-[#F4C430] font-bold text-base md:text-lg">
                           {new Intl.NumberFormat("fr-FR").format(property.price || 0)} F
                         </span>
                         {property.transaction === "location" && (
-                          <span className="text-white/60 text-sm"> /mois</span>
+                          <span className="text-white/60 text-xs md:text-sm"> /mois</span>
                         )}
                       </motion.div>
                     </div>
                   </div>
 
                   {/* Contenu */}
-                  <div className="p-5">
-                    <h3 className="text-lg font-semibold text-white mb-2 line-clamp-1 group-hover:text-[#F4C430] transition-colors duration-300">
+                  <div className="p-4 md:p-5">
+                    <h3 className="text-base md:text-lg font-semibold text-white mb-1.5 md:mb-2 line-clamp-1 group-hover:text-[#F4C430] transition-colors duration-300">
                       {property.title}
                     </h3>
 
-                    <div className="flex items-center text-gray-400 text-sm mb-4">
-                      <MapPin className="w-4 h-4 mr-1.5 text-[#F4C430] flex-shrink-0" />
+                    <div className="flex items-center text-gray-400 text-xs md:text-sm mb-3 md:mb-4">
+                      <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-1.5 text-[#F4C430] flex-shrink-0" />
                       <span className="line-clamp-1">
                         {property.location?.city}
                         {property.location?.address && `, ${property.location.address}`}
@@ -193,8 +176,8 @@ export default function FeaturedPropertiesHero() {
                     </div>
 
                     {/* Specs */}
-                    <div className="flex items-center justify-between border-t border-white/5 pt-4">
-                      <div className="flex items-center gap-4 text-sm text-gray-300">
+                    <div className="flex items-center justify-between border-t border-white/5 pt-3 md:pt-4">
+                      <div className="flex items-center gap-3 md:gap-4 text-xs md:text-sm text-gray-300">
                         {property.specs?.bedrooms !== undefined && (
                           <div className="flex items-center gap-1.5">
                             <Bed className="w-4 h-4 text-white/40" />
@@ -237,11 +220,11 @@ export default function FeaturedPropertiesHero() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="text-center mt-12"
+          className="text-center mt-8 md:mt-12"
         >
           <Link
             href="/recherche"
-            className="inline-flex items-center gap-2 bg-transparent border border-[#F4C430]/30 text-[#F4C430] hover:bg-[#F4C430]/10 px-8 py-3.5 rounded-full font-medium transition-all duration-300 hover:border-[#F4C430]/50 group"
+            className="inline-flex items-center gap-2 bg-transparent border border-[#F4C430]/30 text-[#F4C430] hover:bg-[#F4C430]/10 px-6 md:px-8 py-3 md:py-3.5 rounded-full text-sm md:text-base font-medium transition-all duration-300 hover:border-[#F4C430]/50 active:scale-[0.98] group"
           >
             Voir toutes les annonces
             <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />

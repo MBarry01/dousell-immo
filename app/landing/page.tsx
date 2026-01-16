@@ -316,7 +316,8 @@ export default function LandingPage() {
             quality={85}
           />
           {/* Gradient overlay for fade effect - Smoother transition */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black" />
+          {/* Desktop: subtle gradient | Mobile: strong gradient from bottom (70%) for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent md:bg-gradient-to-b md:from-black/60 md:via-black/40 md:to-black" />
         </div>
 
         {/* Static stars background - GPU accelerated */}
@@ -332,15 +333,80 @@ export default function LandingPage() {
 
         {/* Hero Content - Two column layout on desktop */}
         <div className={cn(
-          "relative z-10 h-full px-4 sm:px-6 lg:px-8 pt-24 pb-12 md:pt-28 md:pb-16",
-          "flex flex-col lg:flex-row items-center justify-center lg:justify-between max-w-7xl mx-auto gap-8 lg:gap-12"
+          "relative z-10 h-full px-4 sm:px-6 lg:px-8 pt-28 pb-8 md:pt-28 md:pb-16",
+          "flex flex-col lg:flex-row items-center justify-center lg:justify-between max-w-7xl mx-auto gap-6 lg:gap-12"
         )}>
           {/* Left side - Text content */}
           <div className={cn(
             "pointer-events-none flex-1 text-center lg:text-left max-w-2xl lg:max-w-xl"
           )}>
             {/* ========== TABS: Je suis Propriétaire / Je cherche un bien ========== */}
-            <div className="animate-fade-in-up delay-100 mb-6 md:mb-8 pointer-events-auto flex justify-center lg:justify-start">
+            {/* MOBILE: Big tactile buttons side by side */}
+            <div className="animate-fade-in-up delay-100 mb-4 pointer-events-auto flex md:hidden w-full gap-2.5">
+              <button
+                onClick={() => handleModeChange("owner")}
+                className={cn(
+                  "relative flex-1 py-3 rounded-xl text-[13px] font-semibold transition-all duration-200 overflow-hidden",
+                  userMode === "owner"
+                    ? "text-black shadow-lg shadow-[#F4C430]/30"
+                    : "bg-black/50 backdrop-blur-md border border-white/10 text-white/70 active:scale-[0.98]"
+                )}
+              >
+                {/* Active state background with shimmer */}
+                {userMode === "owner" && (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#F4C430] to-[#E5B82A]" />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background: "linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.35) 50%, transparent 75%)",
+                        backgroundSize: "250% 100%",
+                        animation: "shimmer 2.5s ease-in-out infinite"
+                      }}
+                    />
+                  </>
+                )}
+                <span className="relative z-10 flex items-center justify-center gap-1.5">
+                  <svg className={cn("w-4 h-4", userMode === "owner" ? "text-black" : "text-[#F4C430]")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  Propriétaire
+                </span>
+              </button>
+              <button
+                onClick={() => handleModeChange("tenant")}
+                className={cn(
+                  "relative flex-1 py-3 rounded-xl text-[13px] font-semibold transition-all duration-200 overflow-hidden",
+                  userMode === "tenant"
+                    ? "text-black shadow-lg shadow-[#F4C430]/30"
+                    : "bg-black/50 backdrop-blur-md border border-white/10 text-white/70 active:scale-[0.98]"
+                )}
+              >
+                {/* Active state background with shimmer */}
+                {userMode === "tenant" && (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#F4C430] to-[#E5B82A]" />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background: "linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.35) 50%, transparent 75%)",
+                        backgroundSize: "250% 100%",
+                        animation: "shimmer 2.5s ease-in-out infinite"
+                      }}
+                    />
+                  </>
+                )}
+                <span className="relative z-10 flex items-center justify-center gap-1.5">
+                  <svg className={cn("w-4 h-4", userMode === "tenant" ? "text-black" : "text-[#F4C430]")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Chercher un bien
+                </span>
+              </button>
+            </div>
+
+            {/* DESKTOP: Original pill toggle with animation */}
+            <div className="animate-fade-in-up delay-100 mb-8 pointer-events-auto hidden md:flex justify-center lg:justify-start">
               <div className="relative inline-flex items-center">
                 {/* Glow effect behind tabs */}
                 <div className="absolute inset-0 bg-[#F4C430]/10 blur-2xl rounded-full scale-110 opacity-50" />
@@ -374,7 +440,7 @@ export default function LandingPage() {
                   <button
                     onClick={() => handleModeChange("owner")}
                     className={cn(
-                      "relative z-10 px-5 md:px-7 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-medium transition-all duration-300 min-w-[130px] md:min-w-[160px]",
+                      "relative z-10 px-7 py-3 rounded-full text-sm font-medium transition-all duration-300 min-w-[160px]",
                       userMode === "owner"
                         ? "text-black font-semibold"
                         : "text-white/60 hover:text-white/90"
@@ -390,7 +456,7 @@ export default function LandingPage() {
                   <button
                     onClick={() => handleModeChange("tenant")}
                     className={cn(
-                      "relative z-10 px-5 md:px-7 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-medium transition-all duration-300 min-w-[130px] md:min-w-[160px]",
+                      "relative z-10 px-7 py-3 rounded-full text-sm font-medium transition-all duration-300 min-w-[160px]",
                       userMode === "tenant"
                         ? "text-black font-semibold"
                         : "text-white/60 hover:text-white/90"
@@ -421,21 +487,21 @@ export default function LandingPage() {
             </h1>
 
             {/* Description - Better readability */}
-            <p className="animate-fade-in-up delay-300 mb-8 md:mb-10 text-white/60 font-light leading-relaxed text-sm sm:text-base md:text-lg max-w-md lg:max-w-lg">
+            <p className="animate-fade-in-up delay-300 mb-6 md:mb-10 text-white/70 md:text-white/60 font-light leading-relaxed text-[15px] md:text-lg max-w-[320px] sm:max-w-md lg:max-w-lg mx-auto lg:mx-0">
               {currentContent.desc}
             </p>
 
             {/* CTAs - Enhanced interaction */}
-            <div className="animate-fade-in-up delay-400 flex flex-col gap-3 sm:gap-4 sm:flex-row pointer-events-auto justify-center lg:justify-start">
+            <div className="animate-fade-in-up delay-400 flex flex-col gap-3 sm:flex-row pointer-events-auto justify-center lg:justify-start">
               <Link
                 href={currentContent.ctaPrimary.href}
-                className="btn-shimmer rounded-full px-8 sm:px-10 py-3.5 sm:py-4 font-semibold text-black transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] gold-glow text-sm sm:text-base"
+                className="btn-shimmer rounded-full w-full sm:w-auto px-8 sm:px-10 py-4 font-semibold text-black transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] gold-glow text-[15px] sm:text-base text-center"
               >
                 {currentContent.ctaPrimary.text}
               </Link>
               <a
                 href={currentContent.ctaSecondary.href}
-                className="group rounded-full border border-white/20 bg-white/5 px-8 sm:px-10 py-3.5 sm:py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-[#F4C430]/40 active:scale-[0.98] text-sm sm:text-base"
+                className="group rounded-full w-full sm:w-auto border border-white/20 bg-white/5 px-8 sm:px-10 py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-[#F4C430]/40 active:scale-[0.97] text-[15px] sm:text-base"
               >
                 <span className="flex items-center justify-center gap-2">
                   {currentContent.ctaSecondary.text}
@@ -446,15 +512,15 @@ export default function LandingPage() {
               </a>
             </div>
 
-            {/* Trust indicators - Better spacing */}
-            <div className="animate-fade-in-up delay-500 mt-10 md:mt-14 flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-white/50 text-xs sm:text-sm relative z-20 justify-center lg:justify-start">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
-                <span>100+ Propriétaires actifs</span>
+            {/* Trust indicators - Inline on mobile */}
+            <div className="animate-fade-in-up delay-500 mt-8 md:mt-14 flex flex-row items-center justify-center lg:justify-start gap-4 sm:gap-6 text-white/50 text-[11px] sm:text-sm relative z-20">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
+                <span>100+ Propriétaires</span>
               </div>
-              <div className="hidden sm:block w-px h-4 bg-white/20" />
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[#F4C430] shadow-[0_0_8px_rgba(244,196,48,0.5)]" />
+              <div className="w-px h-3 sm:h-4 bg-white/20" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#F4C430] shadow-[0_0_8px_rgba(244,196,48,0.5)]" />
                 <span>500+ Biens gérés</span>
               </div>
             </div>
@@ -492,17 +558,17 @@ export default function LandingPage() {
 
       {/* Barre de recherche Hero pour locataires */}
       {userMode === "tenant" && (
-        <section id="locataire-section" className="relative py-16 bg-zinc-950">
+        <section id="locataire-section" className="relative py-10 md:py-16 bg-zinc-950">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.05)_0%,_transparent_70%)]" />
-          <div className="container mx-auto px-6 relative z-10">
-            <div className="text-center mb-8">
-              <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
+          <div className="container mx-auto px-4 md:px-6 relative z-10">
+            <div className="text-center mb-6 md:mb-8">
+              <span className="inline-block text-[#F4C430] text-[11px] md:text-sm font-medium tracking-widest uppercase mb-2 md:mb-4">
                 Je suis locataire
               </span>
-              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl text-white mb-4">
+              <h2 className="font-display text-2xl md:text-4xl lg:text-5xl text-white mb-3 md:mb-4">
                 Trouvez votre <span className="gradient-text-animated">prochain chez-vous</span>
               </h2>
-              <p className="text-gray-400 text-lg max-w-xl mx-auto">
+              <p className="text-gray-400 text-sm md:text-lg max-w-xs md:max-w-xl mx-auto">
                 Appartements, villas, studios... Des biens vérifiés à Dakar et Saly.
               </p>
             </div>

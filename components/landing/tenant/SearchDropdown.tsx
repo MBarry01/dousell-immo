@@ -115,13 +115,13 @@ export default function SearchDropdown({
         <>
             <div
                 ref={triggerRef}
-                className="relative flex-1 h-14 md:h-16"
+                className="relative flex-1 h-12 md:h-16"
                 onMouseEnter={() => setIsOpen(true)}
                 onMouseLeave={() => setIsOpen(false)}
             >
                 {/* Trigger */}
                 <div className="flex items-center h-full px-4 cursor-pointer">
-                    <div className="mr-3">{icon}</div>
+                    <div className="mr-2 md:mr-3">{icon}</div>
                     <span
                         className={`text-sm font-medium ${value ? "text-white" : "text-gray-400"} hover:text-[#F4C430] transition-colors`}
                     >
