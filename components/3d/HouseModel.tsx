@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { getHouse3DConfig } from "./config";
+import { prefersReducedMotion } from "@/hooks/use-reduced-motion";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -19,6 +20,21 @@ export function HouseModel() {
 
   useGSAP(() => {
     if (!houseRef.current || typeof window === "undefined") return;
+
+    // Respect user's preference for reduced motion
+    if (prefersReducedMotion()) {
+      // Set final position without animation
+      if (config.scrollTransition.enabled) {
+        gsap.set(houseRef.current.position, {
+          x: config.scrollTransition.finalPosition.x,
+          z: config.scrollTransition.finalPosition.z,
+        });
+        gsap.set(houseRef.current.rotation, {
+          y: config.scrollTransition.finalRotation.y,
+        });
+      }
+      return;
+    }
 
     // SCÈNE 1 : Vitrine (Rotation douce au début)
     if (config.rotation.enabled) {

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import confetti from "canvas-confetti";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +16,8 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
 import { propertySchema, type PropertyFormValues } from "@/lib/schemas/propertySchema";
+import { PropertyCard } from "@/app/(vitrine)/compte/mes-biens/PropertyCard";
+import type { Property } from "@/types/property";
 
 const AUTHORIZED_ADMIN_EMAIL = "barrymohamadou98@gmail.com";
 
@@ -55,6 +59,7 @@ const typesBien = [
   { value: "appartement", label: "Appartement" },
   { value: "terrain", label: "Terrain" },
   { value: "immeuble", label: "Immeuble / Commercial" },
+  { value: "studio", label: "Studio" },
 ];
 
 const situationsJuridiques = [
@@ -69,6 +74,8 @@ export default function NewPropertyPage() {
   const { user, loading } = useAuth();
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [createdProperty, setCreatedProperty] = useState<any | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -111,6 +118,37 @@ export default function NewPropertyPage() {
     return null;
   }
 
+  const triggereMagic = () => {
+    const duration = 3000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    const randomInRange = (min: number, max: number) => {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval: any = setInterval(function () {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+      });
+    }, 250);
+  };
+
   const onDrop = async (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     const files = Array.from(event.dataTransfer.files);
@@ -148,29 +186,29 @@ export default function NewPropertyPage() {
       // Préparer les specs selon le type
       const specs = isTerrain
         ? {
-            surface: values.surfaceTotale ?? 0,
-            rooms: 0,
-            bedrooms: 0,
-            bathrooms: 0,
-            dpe: "B" as const,
-          }
+          surface: values.surfaceTotale ?? 0,
+          rooms: 0,
+          bedrooms: 0,
+          bathrooms: 0,
+          dpe: "B" as const,
+        }
         : {
-            surface: values.surface ?? 0,
-            rooms: values.rooms ?? 0,
-            bedrooms: values.bedrooms ?? 0,
-            bathrooms: values.bathrooms ?? 0,
-            dpe: "B" as const,
-          };
+          surface: values.surface ?? 0,
+          rooms: values.rooms ?? 0,
+          bedrooms: values.bedrooms ?? 0,
+          bathrooms: values.bathrooms ?? 0,
+          dpe: "B" as const,
+        };
 
       // Préparer les features (masqués pour les terrains)
       const features = isTerrain
         ? {}
         : {
-            hasGenerator: values.hasGenerator ?? false,
-            hasWaterTank: values.hasWaterTank ?? false,
-            security: values.security ?? false,
-            pool: values.pool ?? false,
-          };
+          hasGenerator: values.hasGenerator ?? false,
+          hasWaterTank: values.hasWaterTank ?? false,
+          security: values.security ?? false,
+          pool: values.pool ?? false,
+        };
 
       // Mapper le type pour details
       const typeMap: Record<string, "Appartement" | "Maison" | "Studio"> = {
@@ -178,6 +216,7 @@ export default function NewPropertyPage() {
         appartement: "Appartement",
         immeuble: "Appartement",
         terrain: "Appartement", // Valeur par défaut, non utilisée pour terrain
+        studio: "Studio",
       };
 
       const payload = {
@@ -185,36 +224,70 @@ export default function NewPropertyPage() {
         description: values.description,
         price: values.price,
         category: values.category,
+        transaction: values.category, // Ajout pour conformité type
         status: "disponible",
         location: {
           city: values.city,
           district: values.district,
           address: values.address,
           landmark: values.landmark,
-          coords: { lat: 0, lng: 0 }, // À améliorer avec géolocalisation
+          coords: { lat: 14.7167, lng: -17.4677 }, // Default Dakar coords
         },
         specs,
-        features,
+        features, // Sera ignoré si pas dans le type, mais utile pour le stockage
         details: isTerrain
           ? {
-              type: "Appartement" as const, // Non utilisé pour terrain
-              year: new Date().getFullYear(),
-              heating: "",
-              juridique: values.juridique,
-            }
+            type: "Appartement" as const, // Non utilisé pour terrain
+            year: new Date().getFullYear(),
+            heating: "",
+            juridique: values.juridique,
+          }
           : {
-              type: typeMap[values.type] ?? "Appartement",
-              year: new Date().getFullYear(),
-              heating: "Climatisation",
-            },
+            type: typeMap[values.type] ?? "Appartement",
+            year: new Date().getFullYear(),
+            heating: "Climatisation",
+            ...features, // Spread features into details for compatibility if needed
+          },
         images: imageUrls,
+        agent: {
+          name: "Admin",
+          photo: "",
+          phone: ""
+        },
+        disponibilite: "Immédiate"
       };
 
-      const { error } = await supabase.from("properties").insert([payload]);
+      const { data, error } = await supabase
+        .from("properties")
+        .insert([payload])
+        .select()
+        .single();
+
       if (error) throw error;
-      toast.success("Bien publié !");
-      router.push("/admin/dashboard");
-      router.refresh();
+
+      // Construire l'objet complet pour la PropertyCard
+      const completeProperty = {
+        ...data,
+        validation_status: 'approved',
+        occupation_status: 'vacant',
+        // S'assurer que les champs requis par le type Property sont présents
+        transaction: payload.transaction,
+        location: payload.location,
+        specs: payload.specs,
+        details: payload.details,
+        images: payload.images,
+        agent: payload.agent,
+        disponibilite: payload.disponibilite
+      };
+
+      setCreatedProperty(completeProperty);
+      triggereMagic();
+
+      // Scroll to bottom to see effects
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }, 100);
+
     } catch (error) {
       console.error(error);
       toast.error("Impossible d'enregistrer ce bien");
@@ -227,8 +300,57 @@ export default function NewPropertyPage() {
       ? "Loyer Mensuel (FCFA)"
       : "Prix de Vente (FCFA)";
 
+  if (createdProperty) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[80vh] py-10 space-y-8">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", duration: 0.8 }}
+          className="w-full max-w-md"
+        >
+          <PropertyCard
+            property={createdProperty}
+            viewMode="grid"
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="relative">
+            <div className="absolute inset-0 bg-yellow-400/20 blur-xl rounded-full animate-pulse" />
+            <div className="relative bg-[#FFD700] text-black px-8 py-3 rounded-full font-bold text-lg flex items-center gap-2 shadow-[0_0_30px_rgba(255,215,0,0.3)] border border-[#FFD700]/50">
+              <SparklesIcon className="w-5 h-5 animate-spin-slow" />
+              Magie opérée ✨
+            </div>
+          </div>
+
+          <div className="flex gap-4 mt-4">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setCreatedProperty(null);
+                setImageUrls([]);
+                window.scrollTo({ top: 0, behavior: 'instant' });
+              }}
+            >
+              Nouveau bien
+            </Button>
+            <Button onClick={() => router.push('/admin/dashboard')}>
+              Aller au tableau de bord
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 py-6 text-white">
+    <div className="space-y-6 py-6 text-white relative">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-white/40">
@@ -342,18 +464,18 @@ export default function NewPropertyPage() {
                   backgroundSize: "1.5em 1.5em"
                 }}
               >
-                  <option value="" className="bg-[#121212] text-white py-2">
-                    Sélectionnez
+                <option value="" className="bg-[#121212] text-white py-2">
+                  Sélectionnez
+                </option>
+                {quartiers.map((q) => (
+                  <option
+                    key={q}
+                    value={q}
+                    className="bg-[#121212] text-white py-2"
+                  >
+                    {q}
                   </option>
-                  {quartiers.map((q) => (
-                    <option
-                      key={q}
-                      value={q}
-                      className="bg-[#121212] text-white py-2"
-                    >
-                      {q}
-                    </option>
-                  ))}
+                ))}
               </select>
               {errors.district && (
                 <p className="text-sm text-primary">
@@ -575,6 +697,32 @@ export default function NewPropertyPage() {
           Publier le bien
         </Button>
       </div>
+
+      {/* Badge Saisie Admin en bas à droite comme sur la maquette */}
+      <div className="fixed bottom-6 right-6 pointer-events-none">
+        <div className="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 text-xs text-white/50 font-medium">
+          Saisie Admin
+        </div>
+      </div>
     </div>
   );
+}
+
+function SparklesIcon(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+    </svg>
+  )
 }

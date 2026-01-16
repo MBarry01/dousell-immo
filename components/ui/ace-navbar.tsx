@@ -46,7 +46,7 @@ export const MenuItem = ({
               <motion.div
                 transition={transition}
                 layoutId="active"
-                className="bg-black/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-[#F4C430]/20 shadow-2xl"
+                className="bg-black/80 backdrop-blur-md rounded-2xl overflow-hidden border border-[#F4C430]/20 shadow-2xl"
               >
                 <motion.div layout className="w-max h-full p-4">
                   {children}
@@ -144,7 +144,7 @@ export default function AceNavbar({
             </div>
 
             {/* Navigation Desktop */}
-            <div className="hidden md:flex flex-1 items-center justify-center space-x-8">
+            <div className="hidden md:flex flex-1 items-center justify-center space-x-6">
               <MenuItem
                 setActive={setActive}
                 active={active}

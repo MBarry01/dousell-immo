@@ -45,7 +45,7 @@ export default function MagicTransformation() {
           <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
             De la donnée à la vitrine
           </span>
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-white mb-6">
+          <h2 className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-6">
             Remplissez un formulaire,<br />
             <span className="gradient-text-animated">obtenez une annonce premium</span>
           </h2>
@@ -56,8 +56,8 @@ export default function MagicTransformation() {
         </div>
 
         {/* Card Container */}
-        <div className="w-full max-w-4xl mx-auto p-4 perspective-1000 -mt-20">
-          <div className="relative h-[520px] w-full">
+        <div className="w-full max-w-4xl mx-auto p-4 perspective-1000 mt-8 md:-mt-20">
+          <div className="relative h-[450px] md:h-[520px] w-full">
 
             {/* CONTENEUR ANIMÉ (La carte qui tourne) */}
             <motion.div
@@ -76,7 +76,7 @@ export default function MagicTransformation() {
                   FACE 1 : CÔTÉ ADMIN (SAISIE)
                  ======================================================== */}
               <div className="absolute inset-0 backface-hidden">
-                <div className="h-full w-full bg-[#0a0a0a] border border-white/10 rounded-2xl p-8 flex flex-col gap-6 shadow-2xl relative overflow-hidden">
+                <div className="h-full w-full bg-[#0a0a0a] border border-white/10 rounded-2xl p-4 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl relative overflow-hidden">
 
                   {/* En-tête style "Code" */}
                   <div className="flex gap-2 mb-2">
@@ -95,16 +95,16 @@ export default function MagicTransformation() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-slate-500 block mb-1.5">Prix / Mois (FCFA)</label>
-                        <div className="bg-white/5 border border-white/10 rounded-md p-3 text-white">
+                    <div className="grid grid-cols-2 gap-4 items-end">
+                      <div className="flex flex-col h-full">
+                        <label className="text-slate-500 block mb-1.5 text-xs md:text-sm">Prix / Mois (FCFA)</label>
+                        <div className="bg-white/5 border border-white/10 rounded-md p-3 text-white mt-auto">
                           1.500.000
                         </div>
                       </div>
-                      <div>
-                        <label className="text-slate-500 block mb-1.5">Surface (m2)</label>
-                        <div className="bg-white/5 border border-white/10 rounded-md p-3 text-white">
+                      <div className="flex flex-col h-full">
+                        <label className="text-slate-500 block mb-1.5 text-xs md:text-sm">Surface (m2)</label>
+                        <div className="bg-white/5 border border-white/10 rounded-md p-3 text-white mt-auto">
                           350
                         </div>
                       </div>
@@ -112,7 +112,7 @@ export default function MagicTransformation() {
 
                     <div>
                       <label className="text-slate-500 block mb-1.5">Photos (Upload)</label>
-                      <div className="border-2 border-dashed border-white/10 rounded-lg p-8 flex flex-col items-center justify-center text-slate-500 bg-white/5">
+                      <div className="border-2 border-dashed border-white/10 rounded-lg p-8 flex flex-col items-center text-center justify-center text-slate-500 bg-white/5">
                         <Upload className="w-8 h-8 mb-2 opacity-50" />
                         <span>Glisser-déposer les fichiers</span>
                       </div>
@@ -145,34 +145,34 @@ export default function MagicTransformation() {
                 </div>
 
                 {/* Contenu de la carte Vitrine */}
-                <div className="absolute bottom-0 left-0 right-0 p-8">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-3xl font-bold text-white">Villa Saly Portudal</h3>
-                    <span className="bg-black/60 backdrop-blur-md text-[#F4C430] px-3 py-1 rounded-full font-bold border border-[#F4C430]/30">
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
+                  <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-1 md:gap-0 mb-2">
+                    <h3 className="text-xl md:text-3xl font-bold text-white">Villa Saly Portudal</h3>
+                    <span className="bg-black/60 backdrop-blur-md text-[#F4C430] px-2 py-0.5 md:px-3 md:py-1 rounded-full font-bold border border-[#F4C430]/30 text-xs md:text-sm w-fit">
                       À Louer
                     </span>
                   </div>
 
-                  <p className="text-slate-300 mb-6 flex items-center gap-2">
-                    <Home size={16} /> Saly, Sénégal • <Ruler size={16} /> 350 m²
+                  <p className="text-slate-300 mb-3 md:mb-6 flex items-center gap-1 md:gap-2 text-sm md:text-base">
+                    <Home size={14} className="md:hidden" /><Home size={16} className="hidden md:block" /> Saly, Sénégal • <Ruler size={14} className="md:hidden" /><Ruler size={16} className="hidden md:block" /> 350 m²
                   </p>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-2">
-                      {["4 Chambres", "Piscine", "Meublé"].map(tag => (
-                        <span key={tag} className="text-xs bg-white/10 backdrop-blur text-white px-2 py-1 rounded-md border border-white/10">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+                    <div className="flex flex-wrap gap-1 md:gap-2">
+                      {["4 Ch.", "Piscine", "Meublé"].map(tag => (
+                        <span key={tag} className="text-[10px] md:text-xs bg-white/10 backdrop-blur text-white px-1.5 py-0.5 md:px-2 md:py-1 rounded-md border border-white/10">
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <div className="text-right">
-                      <span className="text-2xl font-bold text-[#F4C430]">1.5M</span>
-                      <span className="text-sm text-slate-400"> /mois</span>
+                    <div className="text-left md:text-right">
+                      <span className="text-xl md:text-2xl font-bold text-[#F4C430]">1.5M</span>
+                      <span className="text-xs md:text-sm text-slate-400"> /mois</span>
                     </div>
                   </div>
 
-                  <button className="w-full mt-6 bg-white text-black font-bold py-3 rounded-full hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
-                    Demander une visite <ArrowRight size={16} />
+                  <button className="w-full mt-3 md:mt-6 bg-white text-black font-bold py-2 md:py-3 rounded-full hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 text-sm md:text-base">
+                    Demander une visite <ArrowRight size={14} className="md:hidden" /><ArrowRight size={16} className="hidden md:block" />
                   </button>
                 </div>
 

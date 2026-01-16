@@ -14,7 +14,8 @@ import PricingSection from "@/components/landing/PricingSection";
 import DousellNavbar from "@/components/landing/DousellNavbar";
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, Shield, BarChart3, Users, Sparkles, Clock, FileText, Calendar, CheckCircle, Phone, Mail } from "lucide-react";
+import { Buildings, ShieldCheck, ChartLineUp, UsersThree, MagicWand, BellRinging, FileText, CalendarDots, CheckCircle, Phone, Envelope } from "@phosphor-icons/react";
+import { SoftwareIcon } from "@/components/ui/software-icon";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AppointmentScheduler } from "@/components/ui/appointment-scheduler";
 import { Button } from "@/components/ui/button";
@@ -133,32 +134,32 @@ const featuresDataSaasable = [
 
 const features = [
   {
-    icon: Building2,
+    icon: Buildings,
     title: "Gestion des Biens",
     description: "Centralisez tous vos biens immobiliers en un seul endroit avec une vue d'ensemble intuitive.",
   },
   {
-    icon: Users,
+    icon: UsersThree,
     title: "Suivi Locataires",
     description: "Gérez vos locataires, leurs contrats et historiques de paiements sans effort.",
   },
   {
-    icon: BarChart3,
+    icon: ChartLineUp,
     title: "Analyses Financières",
     description: "Tableaux de bord détaillés pour suivre vos revenus et optimiser votre rentabilité.",
   },
   {
-    icon: Shield,
+    icon: ShieldCheck,
     title: "Documents Sécurisés",
     description: "Stockage sécurisé de tous vos documents : baux, quittances, états des lieux.",
   },
   {
-    icon: Clock,
+    icon: BellRinging,
     title: "Rappels Automatiques",
     description: "Ne manquez plus aucune échéance grâce aux notifications intelligentes.",
   },
   {
-    icon: Sparkles,
+    icon: MagicWand,
     title: "Interface Intuitive",
     description: "Design moderne et élégant pensé pour une expérience utilisateur optimale.",
   },
@@ -725,7 +726,7 @@ export default function LandingPage() {
               {/* Label - Clickable Button with Shimmer */}
               <Link
                 href="/gestion-locative"
-                className="absolute -bottom-8 left-1/2 -translate-x-1/2 rounded-full px-5 py-2 shadow-lg shadow-[#F4C430]/20 transition-all hover:scale-105 hover:shadow-xl hover:shadow-[#F4C430]/30 overflow-hidden"
+                className="relative mt-6 mx-auto w-fit block md:absolute md:mt-0 md:-bottom-8 md:left-1/2 md:-translate-x-1/2 rounded-full px-5 py-2 shadow-lg shadow-[#F4C430]/20 transition-all hover:scale-105 hover:shadow-xl hover:shadow-[#F4C430]/30 overflow-hidden"
               >
                 {/* Base gradient */}
                 <div className="absolute inset-0 bg-gradient-to-r from-[#F4C430] to-[#E5B82A]" />
@@ -774,7 +775,7 @@ export default function LandingPage() {
               </h2>
               <div className="gold-divider w-24 mx-auto mb-6" />
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Une suite complète d'outils conçus pour simplifier la gestion de votre patrimoine immobilier.
+                Une suite complète d&apos;outils conçus pour simplifier la gestion de votre patrimoine immobilier.
               </p>
             </div>
 
@@ -787,9 +788,11 @@ export default function LandingPage() {
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {/* Icon */}
-                  <div className="w-14 h-14 rounded-xl bg-[#F4C430]/10 flex items-center justify-center mb-6 group-hover:bg-[#F4C430]/20 transition-colors duration-300">
-                    <feature.icon className="w-7 h-7 text-[#F4C430]" />
-                  </div>
+                  <SoftwareIcon
+                    icon={feature.icon}
+                    variant="glow"
+                    className="w-14 h-14 mb-6 group-hover:shadow-[0_0_25px_rgba(245,158,11,0.5)]"
+                  />
 
                   {/* Title */}
                   <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-[#F4C430] transition-colors duration-300">
@@ -863,15 +866,15 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
               <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-[#F4C430]" />
+                <Buildings size={16} className="text-[#F4C430]" />
                 <span>Sacré-Cœur 3, VDN, Dakar</span>
               </div>
               <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-[#F4C430]" />
+                <Phone size={16} className="text-[#F4C430]" />
                 <span>+221 33 860 00 00</span>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#F4C430]" />
+                <Envelope size={16} className="text-[#F4C430]" />
                 <span>contact@dousell.immo</span>
               </div>
             </div>
@@ -886,7 +889,7 @@ export default function LandingPage() {
                 : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
                 }`}
             >
-              <FileText className="w-4 h-4" />
+              <FileText size={16} />
               Formulaire rapide
             </button>
             <button
@@ -896,7 +899,7 @@ export default function LandingPage() {
                 : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
                 }`}
             >
-              <Calendar className="w-4 h-4" />
+              <CalendarDots size={16} />
               Prendre rendez-vous
             </button>
           </div>
@@ -928,7 +931,7 @@ export default function LandingPage() {
                     rel="noopener noreferrer"
                     className="w-full inline-flex items-center justify-center gap-2 bg-white text-black hover:bg-white/90 rounded-full py-3 px-4 font-medium transition-colors"
                   >
-                    <Calendar className="w-4 h-4" />
+                    <CalendarDots size={16} />
                     Ajouter à Google Agenda
                   </a>
                 )}

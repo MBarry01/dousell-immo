@@ -7,6 +7,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import * as THREE from "three";
+import { prefersReducedMotion } from "@/hooks/use-reduced-motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -41,6 +42,24 @@ const SceneContent = () => {
     const { scene: coinScene } = useGLTF(MODEL_PATHS.coin);
 
     useGSAP(() => {
+        // Respect user's preference for reduced motion
+        if (prefersReducedMotion()) {
+            // Set final "solution" state without animation
+            if (houseRef.current) {
+                gsap.set(houseRef.current.position, { x: -3, y: -1.5, z: 0 });
+                gsap.set(houseRef.current.scale, { x: 1, y: 1, z: 1 });
+                gsap.set(houseRef.current.rotation, { y: 0.8 });
+            }
+            if (chaosRef.current) {
+                gsap.set(chaosRef.current.scale, { x: 0, y: 0, z: 0 });
+            }
+            if (solutionRef.current) {
+                gsap.set(solutionRef.current.scale, { x: 1, y: 1, z: 1 });
+                gsap.set(solutionRef.current.position, { x: 3, y: 0, z: 1 });
+            }
+            return;
+        }
+
         // --- Initial States ---
         // House: Centered, lower
         gsap.set(houseRef.current!.position, { x: 0, y: -1, z: 0 });

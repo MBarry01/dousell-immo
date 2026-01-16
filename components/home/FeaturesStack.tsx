@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { prefersReducedMotion } from "@/hooks/use-reduced-motion";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -40,6 +41,17 @@ export default function FeaturesStack() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    // Respect user's preference for reduced motion
+    if (prefersReducedMotion()) {
+      // Show cards in their final state without animation
+      cardsRef.current.forEach((card) => {
+        if (card) {
+          gsap.set(card, { y: 0, opacity: 1 });
+        }
+      });
+      return;
+    }
 
     cardsRef.current.forEach((card, index) => {
       if (!card) return;
