@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import { ShootingStars } from "@/components/ui/shooting-stars";
 import CompareSection from "@/components/landing/CompareSection";
+import MagicTransformation from "@/components/landing/MagicTransformation";
 import PricingSection from "@/components/landing/PricingSection";
 import DousellNavbar from "@/components/landing/DousellNavbar";
 import Image from "next/image";
@@ -25,6 +28,17 @@ import { visitRequestSchema, type VisitRequestFormValues } from "@/lib/schemas/v
 // Saasable Integration
 import SaasableSectionWrapper from "@/components/saasable/SaasableSectionWrapper";
 import Feature18 from "@/components/saasable/blocks/Feature18";
+
+// Tenant Sections (Je suis locataire / Je veux un bien)
+import TenantHeroSearch from "@/components/landing/tenant/TenantHeroSearch";
+import PropertyCategories from "@/components/landing/tenant/PropertyCategories";
+import TenantSteps from "@/components/landing/tenant/TenantSteps";
+import TenantTestimonials from "@/components/landing/tenant/TenantTestimonials";
+import FeaturedPropertiesHero from "@/components/landing/tenant/FeaturedPropertiesHero";
+import TrustSection from "@/components/landing/tenant/TrustSection";
+import TenantBentoGrid from "@/components/landing/tenant/TenantBentoGrid";
+import HeroIllustration from "@/components/landing/HeroIllustration";
+import HeroOwnerIllustration from "@/components/landing/HeroOwnerIllustration";
 
 const faq = [
   {
@@ -153,6 +167,45 @@ const features = [
 export default function LandingPage() {
   const availableDates = getAvailableDates();
 
+  // Mode Propriétaire / Locataire
+  const [userMode, setUserMode] = useState<"owner" | "tenant">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("dousell_user_mode");
+      if (saved === "owner" || saved === "tenant") return saved;
+    }
+    return "owner";
+  });
+
+  // Sauvegarder le choix dans localStorage
+  const handleModeChange = (mode: "owner" | "tenant") => {
+    setUserMode(mode);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dousell_user_mode", mode);
+    }
+  };
+
+  // Contenu dynamique selon le mode
+  const contentMap = {
+    owner: {
+      h1Line1: "Gérez vos biens.",
+      h1Highlight: "Encaissez sans effort.",
+      h1Line2: "",
+      desc: "Loyers automatiques, contrats générés, quittances envoyées. La gestion locative premium enfin accessible aux propriétaires sénégalais.",
+      ctaPrimary: { text: "Commencer gratuitement", href: "/auth/signup" },
+      ctaSecondary: { text: "Voir la démo", href: "#demo" },
+    },
+    tenant: {
+      h1Line1: "Trouvez le",
+      h1Highlight: "bien idéal",
+      h1Line2: "au cœur du Sénégal",
+      desc: "Accédez à une sélection exclusive de villas et appartements. Payez votre loyer en ligne et retrouvez tous vos documents en un clic.",
+      ctaPrimary: { text: "Voir les annonces", href: "/recherche" },
+      ctaSecondary: { text: "Espace Locataire", href: "/portal" },
+    },
+  };
+
+  const currentContent = contentMap[userMode];
+
   // Form states
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -249,300 +302,450 @@ export default function LandingPage() {
       <div className="noise-overlay" />
 
       {/* Hero Section avec Shooting Stars */}
-      <section className="relative h-screen w-full overflow-hidden bg-black">
-        {/* Background Image with fade effect */}
-        <div className="absolute inset-0 w-full h-full">
+      <section className="relative min-h-[100dvh] w-full overflow-hidden bg-black">
+        {/* Background Image with fade effect - Optimized LCP */}
+        <div className="absolute inset-0 w-full h-full will-change-transform">
           <Image
             src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80"
             alt=""
             fill
             priority
-            className="object-cover object-center opacity-25"
+            fetchPriority="high"
+            className="object-cover object-center opacity-30"
             sizes="100vw"
+            quality={85}
           />
-          {/* Gradient overlay for fade effect */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
+          {/* Gradient overlay for fade effect - Smoother transition */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black" />
         </div>
 
-        {/* Static stars background */}
-        <div className="absolute inset-0 w-full h-full">
+        {/* Static stars background - GPU accelerated */}
+        <div className="absolute inset-0 w-full h-full will-change-opacity">
           <div className="stars absolute inset-0" />
         </div>
 
-        {/* Radial gradient overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.08)_0%,_transparent_70%)]" />
+        {/* Radial gradient overlay - Enhanced glow */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.12)_0%,_transparent_60%)]" />
 
         {/* Navigation Ace Navbar */}
         <DousellNavbar />
 
-        {/* Hero Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 pointer-events-none mt-10">
-          {/* Main Title */}
-          <h1 className="animate-fade-in-up delay-200 mb-6 max-w-5xl text-5xl font-bold leading-tight md:text-7xl lg:text-8xl text-white">
-            <span className="font-display text-gray-200">L'immobilier de</span>{" "}
-            <span className="font-display gradient-text-animated gold-glow-text">
-              prestige
-            </span>
-            <br />
-            <span className="text-4xl md:text-5xl lg:text-6xl font-light tracking-wide text-gray-300">
-              au Sénégal
-            </span>
-          </h1>
+        {/* Hero Content - Two column layout on desktop */}
+        <div className={cn(
+          "relative z-10 h-full px-4 sm:px-6 lg:px-8 pt-24 pb-12 md:pt-28 md:pb-16",
+          "flex flex-col lg:flex-row items-center justify-center lg:justify-between max-w-7xl mx-auto gap-8 lg:gap-12"
+        )}>
+          {/* Left side - Text content */}
+          <div className={cn(
+            "pointer-events-none flex-1 text-center lg:text-left max-w-2xl lg:max-w-xl"
+          )}>
+            {/* ========== TABS: Je suis Propriétaire / Je cherche un bien ========== */}
+            <div className="animate-fade-in-up delay-100 mb-6 md:mb-8 pointer-events-auto flex justify-center lg:justify-start">
+              <div className="relative inline-flex items-center">
+                {/* Glow effect behind tabs */}
+                <div className="absolute inset-0 bg-[#F4C430]/10 blur-2xl rounded-full scale-110 opacity-50" />
 
-          {/* Description */}
-          <p className="animate-fade-in-up delay-300 mb-12 max-w-2xl text-lg text-gray-400 md:text-xl font-light leading-relaxed">
-            La plateforme de gestion immobilière de référence.
-            <span className="text-gray-300"> Simplifiez la gestion de vos biens, contrats et locataires </span>
-            avec élégance.
-          </p>
+                <div className="relative inline-flex bg-black/60 backdrop-blur-xl border border-white/[0.08] rounded-full p-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)]">
 
-          {/* CTAs */}
-          <div className="animate-fade-in-up delay-400 flex flex-col gap-4 sm:flex-row pointer-events-auto">
-            <Link
-              href="/auth/signup"
-              className="btn-shimmer rounded-full px-10 py-4 font-semibold text-black transition-all duration-300 hover:scale-105 gold-glow"
-            >
-              Essayer gratuitement
-            </Link>
-            <a
-              href="#demo"
-              className="group rounded-full border border-white/20 bg-white/5 px-10 py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-[#F4C430]/30"
-            >
-              <span className="flex items-center gap-2">
-                Voir la démo
-                <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
+                  {/* Animated Background Indicator with Shimmer */}
+                  <motion.div
+                    className="absolute inset-y-1.5 rounded-full overflow-hidden shadow-[0_2px_16px_rgba(244,196,48,0.5)]"
+                    initial={false}
+                    animate={{
+                      left: userMode === "owner" ? "6px" : "calc(50% + 2px)",
+                      width: "calc(50% - 8px)"
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                  >
+                    {/* Base gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#F4C430] to-[#E5B82A]" />
+
+                    {/* Shimmer wave effect - same as btn-shimmer */}
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background: "linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.35) 50%, transparent 75%)",
+                        backgroundSize: "250% 100%",
+                        animation: "shimmer 2.5s ease-in-out infinite"
+                      }}
+                    />
+                  </motion.div>
+
+                  <button
+                    onClick={() => handleModeChange("owner")}
+                    className={cn(
+                      "relative z-10 px-5 md:px-7 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-medium transition-all duration-300 min-w-[130px] md:min-w-[160px]",
+                      userMode === "owner"
+                        ? "text-black font-semibold"
+                        : "text-white/60 hover:text-white/90"
+                    )}
+                  >
+                    <span className="flex items-center justify-center gap-1.5">
+                      <svg className={cn("w-4 h-4 transition-colors", userMode === "owner" ? "text-black" : "text-white/40")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                      Propriétaire
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => handleModeChange("tenant")}
+                    className={cn(
+                      "relative z-10 px-5 md:px-7 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-medium transition-all duration-300 min-w-[130px] md:min-w-[160px]",
+                      userMode === "tenant"
+                        ? "text-black font-semibold"
+                        : "text-white/60 hover:text-white/90"
+                    )}
+                  >
+                    <span className="flex items-center justify-center gap-1.5">
+                      <svg className={cn("w-4 h-4 transition-colors", userMode === "tenant" ? "text-black" : "text-white/40")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      Chercher un bien
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Title - Optimized typography */}
+            <h1 className="animate-fade-in-up delay-200 mb-4 md:mb-6 font-bold leading-[1.1] text-white will-change-transform text-3xl sm:text-4xl md:text-5xl lg:text-6xl max-w-lg lg:max-w-xl">
+              <span className="font-display text-white/90 block">{currentContent.h1Line1}</span>
+              <span className="font-display gradient-text-animated gold-glow-text block mt-1 md:mt-2">
+                {currentContent.h1Highlight}
               </span>
-            </a>
+              {currentContent.h1Line2 && (
+                <span className="block mt-2 md:mt-3 font-light tracking-wide text-white/70 text-xl sm:text-2xl md:text-3xl">
+                  {currentContent.h1Line2}
+                </span>
+              )}
+            </h1>
+
+            {/* Description - Better readability */}
+            <p className="animate-fade-in-up delay-300 mb-8 md:mb-10 text-white/60 font-light leading-relaxed text-sm sm:text-base md:text-lg max-w-md lg:max-w-lg">
+              {currentContent.desc}
+            </p>
+
+            {/* CTAs - Enhanced interaction */}
+            <div className="animate-fade-in-up delay-400 flex flex-col gap-3 sm:gap-4 sm:flex-row pointer-events-auto justify-center lg:justify-start">
+              <Link
+                href={currentContent.ctaPrimary.href}
+                className="btn-shimmer rounded-full px-8 sm:px-10 py-3.5 sm:py-4 font-semibold text-black transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] gold-glow text-sm sm:text-base"
+              >
+                {currentContent.ctaPrimary.text}
+              </Link>
+              <a
+                href={currentContent.ctaSecondary.href}
+                className="group rounded-full border border-white/20 bg-white/5 px-8 sm:px-10 py-3.5 sm:py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-[#F4C430]/40 active:scale-[0.98] text-sm sm:text-base"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  {currentContent.ctaSecondary.text}
+                  <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </span>
+              </a>
+            </div>
+
+            {/* Trust indicators - Better spacing */}
+            <div className="animate-fade-in-up delay-500 mt-10 md:mt-14 flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-white/50 text-xs sm:text-sm relative z-20 justify-center lg:justify-start">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
+                <span>100+ Propriétaires actifs</span>
+              </div>
+              <div className="hidden sm:block w-px h-4 bg-white/20" />
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-[#F4C430] shadow-[0_0_8px_rgba(244,196,48,0.5)]" />
+                <span>500+ Biens gérés</span>
+              </div>
+            </div>
           </div>
 
-          {/* Trust indicators */}
-          <div className="animate-fade-in-up delay-500 mt-16 flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-gray-500 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>100+ Propriétaires actifs</span>
-            </div>
-            <div className="hidden sm:block w-px h-4 bg-gray-700" />
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#F4C430]" />
-              <span>500+ Biens gérés</span>
-            </div>
-          </div>
+          {/* Right side - Illustration (different for each mode) */}
+          <motion.div
+            key={userMode}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="hidden lg:flex flex-1 items-center justify-center max-w-md xl:max-w-lg"
+          >
+            {userMode === "tenant" ? <HeroIllustration /> : <HeroOwnerIllustration />}
+          </motion.div>
         </div>
 
-        {/* Animated Shooting Stars - Gold theme */}
+        {/* Animated Shooting Stars - Optimized single instance */}
         <ShootingStars
           starColor="#F4C430"
           trailColor="#FFD700"
           minSpeed={15}
-          maxSpeed={40}
-          starWidth={20}
-          starHeight={2}
-          minDelay={500}
-          maxDelay={2000}
-        />
-        <ShootingStars
-          starColor="#FFD700"
-          trailColor="#F4C430"
-          minSpeed={12}
           maxSpeed={35}
-          starWidth={18}
+          starWidth={24}
           starHeight={2}
-          minDelay={700}
-          maxDelay={2500}
-        />
-        <ShootingStars
-          starColor="#FFFFFF"
-          trailColor="#F4C430"
-          minSpeed={20}
-          maxSpeed={45}
-          starWidth={15}
-          starHeight={1.5}
-          minDelay={600}
-          maxDelay={2200}
+          minDelay={1500}
+          maxDelay={4000}
+          className="opacity-80"
         />
       </section>
+
+      {/* ============================================
+          SECTION LOCATAIRES - "Je cherche un bien"
+          ============================================ */}
+
+      {/* Barre de recherche Hero pour locataires */}
+      {userMode === "tenant" && (
+        <section id="locataire-section" className="relative py-16 bg-zinc-950">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.05)_0%,_transparent_70%)]" />
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="text-center mb-8">
+              <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
+                Je suis locataire
+              </span>
+              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl text-white mb-4">
+                Trouvez votre <span className="gradient-text-animated">prochain chez-vous</span>
+              </h2>
+              <p className="text-gray-400 text-lg max-w-xl mx-auto">
+                Appartements, villas, studios... Des biens vérifiés à Dakar et Saly.
+              </p>
+            </div>
+            <TenantHeroSearch />
+          </div>
+        </section>
+      )}
+
+      {/* Biens en Vedette - Coups de coeur */}
+      {userMode === "tenant" && <FeaturedPropertiesHero />}
+
+      {/* Catégories de biens */}
+      {userMode === "tenant" && <PropertyCategories />}
+
+      {/* Section Sécurité & Confiance */}
+      {userMode === "tenant" && <TrustSection />}
+
+      {/* Bento Grid - Espace Locataire */}
+      {userMode === "tenant" && <TenantBentoGrid />}
+
+      {/* 3 étapes pour locataires */}
+      {userMode === "tenant" && <TenantSteps />}
+
+      {/* Témoignages locataires */}
+      {userMode === "tenant" && <TenantTestimonials />}
+
+      {/* ============================================
+          SECTION PROPRIETAIRES - "Je suis Propriétaire"
+          ============================================ */}
+
+      {/* Magic Transformation Section (SaaS -> Vitrine) */}
+      {userMode === "owner" && <MagicTransformation />}
 
       {/* Container Scroll Section */}
-      <section id="demo" className="flex flex-col overflow-hidden w-full bg-zinc-950 -mt-20 md:-mt-64">
-        <ContainerScroll
-          titleComponent={
-            <div className="h-0"></div>
-          }
-        >
-          <Image
-            src="/couv.png"
-            alt="Dashboard Dousell Immo"
-            height={2160}
-            width={1400}
-            className="mx-auto rounded-2xl w-full block"
-            style={{
-              height: 'auto',
-              objectFit: 'contain',
-              objectPosition: 'top',
-              margin: 0,
-              padding: 0,
-            }}
-            draggable={false}
-            unoptimized
-          />
-        </ContainerScroll>
-      </section>
+      {userMode === "owner" && (
+        <section id="proprietaire-section" className="flex flex-col overflow-hidden w-full bg-zinc-950 -mt-20 md:-mt-40">
+          <ContainerScroll
+            titleComponent={
+              <div className="h-0"></div>
+            }
+          >
+            <Image
+              src="/couv.png"
+              alt="Dashboard Dousell Immo"
+              height={2160}
+              width={1400}
+              className="mx-auto rounded-2xl w-full block"
+              style={{
+                height: 'auto',
+                objectFit: 'contain',
+                objectPosition: 'top',
+                margin: 0,
+                padding: 0,
+              }}
+              draggable={false}
+              unoptimized
+            />
+          </ContainerScroll>
+        </section>
+      )}
 
       {/* Laptop Mockup Section - Dashboard Gestion Locative */}
-      <section className="relative py-12 md:py-20 bg-black overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.06)_0%,_transparent_70%)]" />
+      {userMode === "owner" && (
+        <section className="relative py-12 md:py-20 bg-black overflow-hidden">
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.06)_0%,_transparent_70%)]" />
 
-        <div className="container mx-auto px-6 relative z-10">
-          {/* Section Header */}
-          <div className="text-center mb-12 md:mb-16">
-            <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
-              Gestion Locative
-            </span>
-            <h2 className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-6">
-              Votre tableau de bord{" "}
-              <span className="gradient-text-animated">intelligent</span>
-            </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Gérez vos biens, locataires et finances depuis une interface moderne et intuitive.
-            </p>
-          </div>
+          <div className="container mx-auto px-6 relative z-10">
+            {/* Section Header */}
+            <div className="text-center mb-12 md:mb-16">
+              <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
+                Tout en un seul endroit
+              </span>
+              <h2 className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-6">
+                Pilotez tout depuis{" "}
+                <span className="gradient-text-animated">un seul écran</span>
+              </h2>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                Loyers, contrats, quittances, alertes; plus besoin de jongler entre 10 outils.
+              </p>
+            </div>
 
-          {/* Laptop Mockup */}
-          <div className="relative max-w-5xl mx-auto">
-            {/* Glow effect */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-[#F4C430]/10 rounded-full blur-[120px]" />
+            {/* Laptop Mockup */}
+            <div className="relative max-w-5xl mx-auto">
+              {/* Glow effect */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-[#F4C430]/10 rounded-full blur-[120px]" />
 
-            {/* Laptop Frame */}
-            <div className="relative">
-              {/* Screen bezel */}
-              <div className="relative bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 rounded-t-xl md:rounded-t-2xl p-2 md:p-3 pt-4 md:pt-6 shadow-2xl">
-                {/* Camera & Sensors */}
-                <div className="absolute top-1.5 md:top-2 left-1/2 -translate-x-1/2 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-zinc-600 rounded-full" />
-                  <div className="w-2 h-2 md:w-3 md:h-3 bg-zinc-800 rounded-full border border-zinc-600" />
-                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-zinc-600 rounded-full" />
-                </div>
-
-                {/* Screen Content */}
-                <div className="relative bg-zinc-900 rounded-lg md:rounded-xl overflow-hidden">
-                  <Image
-                    src="/images/dasboard.webp"
-                    alt="Dashboard Gestion Locative"
-                    width={1200}
-                    height={750}
-                    className="w-full h-auto"
-                    draggable={false}
-                  />
-                  {/* Screen reflection */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
+              {/* Floating Stats Badges - Premium Glassmorphism */}
+              <div className="hidden md:block absolute -left-14 lg:-left-24 top-12 lg:top-20 z-20 animate-float-slow">
+                <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
+                  <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">100%</div>
+                  <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Automatisé</div>
                 </div>
               </div>
 
-              {/* Laptop Base/Keyboard */}
+              <div className="hidden md:block absolute -right-14 lg:-right-24 top-20 lg:top-28 z-20 animate-float-delayed-1">
+                <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
+                  <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">24/7</div>
+                  <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Accessible</div>
+                </div>
+              </div>
+
+              <div className="hidden md:block absolute -left-12 lg:-left-20 bottom-24 lg:bottom-32 z-20 animate-float-delayed-2">
+                <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
+                  <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">2x</div>
+                  <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Plus rapide</div>
+                </div>
+              </div>
+
+              <div className="hidden md:block absolute -right-12 lg:-right-20 bottom-32 lg:bottom-40 z-20 animate-float-delayed-3">
+                <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
+                  <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">0</div>
+                  <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Paperasse</div>
+                </div>
+              </div>
+
+              {/* Laptop Frame */}
               <div className="relative">
-                {/* Hinge */}
-                <div className="h-3 md:h-4 bg-gradient-to-b from-zinc-800 to-zinc-700 rounded-b-lg" />
-                {/* Base */}
-                <div className="h-4 md:h-6 bg-gradient-to-b from-zinc-600 to-zinc-700 rounded-b-xl mx-[5%] shadow-lg" />
-                {/* Bottom edge */}
-                <div className="h-1 md:h-1.5 bg-zinc-800 rounded-b-xl mx-[10%]" />
-              </div>
-            </div>
+                {/* Screen bezel */}
+                <div className="relative bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 rounded-t-xl md:rounded-t-2xl p-2 md:p-3 pt-4 md:pt-6 shadow-2xl">
+                  {/* Camera & Sensors */}
+                  <div className="absolute top-1.5 md:top-2 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-zinc-600 rounded-full" />
+                    <div className="w-2 h-2 md:w-3 md:h-3 bg-zinc-800 rounded-full border border-zinc-600" />
+                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-zinc-600 rounded-full" />
+                  </div>
 
-            {/* Label */}
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-[#F4C430] rounded-full px-5 py-2 shadow-lg shadow-[#F4C430]/20">
-              <span className="text-sm font-semibold text-black">Dashboard Gestion Locative</span>
-            </div>
-          </div>
-
-          {/* Features highlights */}
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 text-center max-w-4xl mx-auto">
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-[#F4C430]">100%</div>
-              <div className="text-sm text-gray-400">Automatisé</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-white">24/7</div>
-              <div className="text-sm text-gray-400">Accessible</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-[#F4C430]">2x</div>
-              <div className="text-sm text-gray-400">Plus rapide</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-white">0</div>
-              <div className="text-sm text-gray-400">Paperasse</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Saasable Feature18 - Tabbed Features */}
-      <SaasableSectionWrapper>
-        <Feature18
-          heading=""
-          caption=""
-          topics={featuresDataSaasable}
-        />
-      </SaasableSectionWrapper>
-
-      {/* Features Section */}
-      <section id="features" className="relative py-32 bg-black">
-        {/* Subtle gradient background */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(244,196,48,0.05)_0%,_transparent_50%)]" />
-
-        <div className="container mx-auto px-6 relative z-10">
-          {/* Section Header */}
-          <div className="text-center mb-20">
-            <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
-              Fonctionnalités
-            </span>
-            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-white mb-6">
-              Tout ce dont vous avez{" "}
-              <span className="gradient-text-animated">besoin</span>
-            </h2>
-            <div className="gold-divider w-24 mx-auto mb-6" />
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Une suite complète d'outils conçus pour simplifier la gestion de votre patrimoine immobilier.
-            </p>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {features.map((feature, index) => (
-              <div
-                key={feature.title}
-                className="luxury-card rounded-2xl p-8 group"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                {/* Icon */}
-                <div className="w-14 h-14 rounded-xl bg-[#F4C430]/10 flex items-center justify-center mb-6 group-hover:bg-[#F4C430]/20 transition-colors duration-300">
-                  <feature.icon className="w-7 h-7 text-[#F4C430]" />
+                  {/* Screen Content */}
+                  <div className="relative bg-zinc-900 rounded-lg md:rounded-xl overflow-hidden">
+                    <Image
+                      src="/images/dasboard.webp"
+                      alt="Dashboard Gestion Locative"
+                      width={1200}
+                      height={750}
+                      className="w-full h-auto"
+                      draggable={false}
+                    />
+                    {/* Screen reflection */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
+                  </div>
                 </div>
 
-                {/* Title */}
-                <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-[#F4C430] transition-colors duration-300">
-                  {feature.title}
-                </h3>
-
-                {/* Description */}
-                <p className="text-gray-400 leading-relaxed">
-                  {feature.description}
-                </p>
+                {/* Laptop Base/Keyboard */}
+                <div className="relative">
+                  {/* Hinge */}
+                  <div className="h-3 md:h-4 bg-gradient-to-b from-zinc-800 to-zinc-700 rounded-b-lg" />
+                  {/* Base */}
+                  <div className="h-4 md:h-6 bg-gradient-to-b from-zinc-600 to-zinc-700 rounded-b-xl mx-[5%] shadow-lg" />
+                  {/* Bottom edge */}
+                  <div className="h-1 md:h-1.5 bg-zinc-800 rounded-b-xl mx-[10%]" />
+                </div>
               </div>
-            ))}
+
+              {/* Label - Clickable Button with Shimmer */}
+              <Link
+                href="/gestion-locative"
+                className="absolute -bottom-8 left-1/2 -translate-x-1/2 rounded-full px-5 py-2 shadow-lg shadow-[#F4C430]/20 transition-all hover:scale-105 hover:shadow-xl hover:shadow-[#F4C430]/30 overflow-hidden"
+              >
+                {/* Base gradient */}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#F4C430] to-[#E5B82A]" />
+                {/* Shimmer wave effect */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: "linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.35) 50%, transparent 75%)",
+                    backgroundSize: "250% 100%",
+                    animation: "shimmer 2.5s ease-in-out infinite"
+                  }}
+                />
+                <span className="relative z-10 text-sm font-semibold text-black">Dashboard Gestion Locative</span>
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Compare Section - Avant/Après */}
-      <CompareSection />
+      {/* Saasable Feature18 - Tabbed Features (Propriétaire uniquement) */}
+      {userMode === "owner" && (
+        <SaasableSectionWrapper>
+          <Feature18
+            heading=""
+            caption=""
+            topics={featuresDataSaasable}
+          />
+        </SaasableSectionWrapper>
+      )}
 
-      {/* Pricing Section - Tarifs */}
-      <PricingSection />
+      {/* Features Section (Propriétaire uniquement) */}
+      {userMode === "owner" && (
+        <section id="features" className="relative py-32 bg-black">
+          {/* Subtle gradient background */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(244,196,48,0.05)_0%,_transparent_50%)]" />
+
+          <div className="container mx-auto px-6 relative z-10">
+            {/* Section Header */}
+            <div className="text-center mb-20">
+              <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
+                Fonctionnalités
+              </span>
+              <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-white mb-6">
+                Tout ce dont vous avez{" "}
+                <span className="gradient-text-animated">besoin</span>
+              </h2>
+              <div className="gold-divider w-24 mx-auto mb-6" />
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                Une suite complète d'outils conçus pour simplifier la gestion de votre patrimoine immobilier.
+              </p>
+            </div>
+
+            {/* Features Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {features.map((feature, index) => (
+                <div
+                  key={feature.title}
+                  className="luxury-card rounded-2xl p-8 group"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  {/* Icon */}
+                  <div className="w-14 h-14 rounded-xl bg-[#F4C430]/10 flex items-center justify-center mb-6 group-hover:bg-[#F4C430]/20 transition-colors duration-300">
+                    <feature.icon className="w-7 h-7 text-[#F4C430]" />
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-[#F4C430] transition-colors duration-300">
+                    {feature.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-gray-400 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Compare Section - Avant/Après (Propriétaire uniquement) */}
+      {userMode === "owner" && <CompareSection />}
+
+      {/* Pricing Section - Tarifs (Propriétaire uniquement) */}
+      {userMode === "owner" && <PricingSection />}
 
       {/* CTA Section */}
       <section className="relative py-32 bg-zinc-950 overflow-hidden">
