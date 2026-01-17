@@ -28,10 +28,17 @@ export async function POST(req: Request) {
         const ads = await response.json();
 
         const now = new Date().toISOString();
-        console.log(`Traitement de ${ads.length} annonces...`);
+        console.log(`Traitement de ${ads.length} annonces brutes...`);
 
-        // 2. Traitement et Classification Automatique
-        const processedAds = ads.map((ad: any) => {
+        // 2. VALIDATION : Ne garder que les annonces avec titre et URL valides
+        const validAds = ads.filter((ad: any) =>
+            ad.title && ad.title.trim() !== "" &&
+            ad.url && ad.url.trim() !== ""
+        );
+        console.log(`${validAds.length} annonces valides sur ${ads.length}`);
+
+        // 3. Traitement et Classification Automatique
+        const processedAds = validAds.map((ad: any) => {
             const title = (ad.title || "").toLowerCase();
             const loc = (ad.location || "").toLowerCase();
 
