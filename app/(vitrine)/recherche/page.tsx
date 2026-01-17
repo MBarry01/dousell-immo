@@ -1,9 +1,6 @@
 import { SearchExperience } from "@/components/search/search-experience";
-import {
-  getLatestProperties,
-  getPropertiesWithFilters as getProperties,
-  type PropertyFilters,
-} from "@/services/propertyService.cached";
+import { getUnifiedListings } from "@/services/gatewayService";
+import { type PropertyFilters } from "@/services/propertyService.cached";
 
 type SearchPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -25,27 +22,32 @@ const recordToFilters = (
   params: Record<string, string | string[] | undefined>
 ) => {
   const filters: PropertyFilters = {};
-  
+
   // Recherche textuelle (q ou location)
   if (params.q && typeof params.q === "string") {
     filters.location = params.q;
   }
-  
+
   // Catégorie (category) : location ou vente
   if (params.category && typeof params.category === "string") {
     filters.category = params.category as PropertyFilters["category"];
   }
-  
+
   // Type de bien (type) : Maison, Appartement, Studio, Terrain, etc.
   if (params.type && typeof params.type === "string") {
     filters.type = params.type as PropertyFilters["type"];
   }
-  
+
+  // Types multiples (types)
+  if (params.types && typeof params.types === "string") {
+    filters.types = params.types.split(",") as PropertyFilters["types"];
+  }
+
   // Ville (city)
   if (params.city && typeof params.city === "string") {
     filters.city = params.city;
   }
-  
+
   // Prix
   if (params.minPrice) {
     filters.minPrice = Number(params.minPrice);
@@ -53,7 +55,7 @@ const recordToFilters = (
   if (params.maxPrice) {
     filters.maxPrice = Number(params.maxPrice);
   }
-  
+
   // Spécifications
   if (params.rooms) {
     filters.rooms = Number(params.rooms);
@@ -61,7 +63,7 @@ const recordToFilters = (
   if (params.bedrooms) {
     filters.bedrooms = Number(params.bedrooms);
   }
-  
+
   // Features Dakar
   if (params.hasBackupGenerator === "true") {
     filters.hasBackupGenerator = true;
@@ -69,19 +71,17 @@ const recordToFilters = (
   if (params.hasWaterTank === "true") {
     filters.hasWaterTank = true;
   }
-  
+
   return filters;
 };
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const resolved = await searchParams;
   const filters = recordToFilters(resolved);
-  const hasActiveFilters = Object.keys(filters).length > 0;
-  // Sans filtres, afficher toutes les annonces approuvées (pas de limite)
-  // Avec filtres, utiliser getProperties qui respecte les filtres
-  const properties = hasActiveFilters
-    ? await getProperties(filters)
-    : await getProperties({}); // Pas de limite = toutes les annonces approuvées
+
+  // Appel du service unifié (Fusion Interne + Externe)
+  // Utilisation de getUnifiedListings au lieu de getProperties
+  const properties = await getUnifiedListings(filters);
 
   return (
     <div className="space-y-6 py-6">
@@ -90,10 +90,3 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     </div>
   );
 }
-
-
-
-
-
-
-

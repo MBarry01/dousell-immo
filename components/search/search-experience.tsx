@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Filter, Map, Search as SearchIcon, Bell } from "lucide-react";
 
-import { PropertyCard } from "@/components/property/property-card";
+import { PropertyCardUnified } from "@/components/property/property-card-unified";
 import { FilterDrawer } from "@/components/search/filter-drawer";
 import { CreateAlertDialog } from "@/components/search/create-alert-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -16,7 +16,8 @@ import { useDebounce } from "@/hooks/use-debounce";
 import type { Property } from "@/types/property";
 import { hasActiveFilters } from "@/lib/search-filters";
 import { useSearchFilters } from "@/hooks/use-search-filters";
-import { getProperties, type PropertyFilters } from "@/services/propertyService";
+import { getUnifiedListings } from "@/services/gatewayService";
+import { type PropertyFilters } from "@/services/propertyService";
 
 const MapView = dynamic(
   () => import("@/components/search/map-view").then((mod) => mod.MapView),
@@ -70,7 +71,7 @@ export const SearchExperience = ({
         setIsSearching(true);
         const nextFilters = { ...filters, q: debouncedSearchQuery || undefined };
         setFilters(nextFilters);
-        const data = await getProperties(nextFilters);
+        const data = await getUnifiedListings(nextFilters);
         setResults(data);
         setIsSearching(false);
       };
@@ -81,7 +82,7 @@ export const SearchExperience = ({
   const applyFilters = useCallback(async (nextFilters: PropertyFilters) => {
     setIsSearching(true);
     setFilters(nextFilters);
-    const data = await getProperties(nextFilters);
+    const data = await getUnifiedListings(nextFilters);
     setResults(data);
     setIsSearching(false);
   }, [setFilters]);
@@ -160,7 +161,7 @@ export const SearchExperience = ({
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&>*]:w-full">
             {results.map((property) => (
-              <PropertyCard key={property.id} property={property} />
+              <PropertyCardUnified key={property.id} property={property} />
             ))}
           </div>
         )

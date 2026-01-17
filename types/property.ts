@@ -24,7 +24,7 @@ export type Property = {
     dpe: "A" | "B" | "C" | "D" | "E" | "F" | "G";
   };
   details: {
-    type: "Appartement" | "Maison" | "Studio";
+    type: "Appartement" | "Maison" | "Studio" | "Terrain" | "Villa" | string;
     year: number;
     heating: string;
     charges?: number;
@@ -60,5 +60,10 @@ export type Property = {
   contact_phone?: string;
   virtual_tour_url?: string; // Lien d'intégration (Embed SRC) Google Maps ou YouTube 360
   view_count?: number; // Compteur incrémental des vues (optimisé)
+
+  // Champs pour les annonces externes (Scraping)
+  isExternal?: boolean;
+  source_site?: string;
+  source_url?: string;
 };
 
