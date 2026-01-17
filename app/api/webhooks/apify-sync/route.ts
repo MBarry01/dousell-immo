@@ -64,11 +64,21 @@ export async function POST(req: Request) {
             };
         });
 
-        // 3. Upsert dans Supabase (Mise à jour ou Insertion)
+        // 3. Déduplication (éviter les doublons d'URL dans le même batch)
+        const uniqueAdsMap = new Map<string, typeof processedAds[0]>();
+        for (const ad of processedAds) {
+            if (ad.source_url) {
+                uniqueAdsMap.set(ad.source_url, ad);
+            }
+        }
+        const uniqueAds = Array.from(uniqueAdsMap.values());
+        console.log(`${uniqueAds.length} annonces uniques sur ${processedAds.length}`);
+
+        // 4. Upsert dans Supabase (Mise à jour ou Insertion)
         // Note: upsert returns { data, error }
         const { error: upsertError } = await supabase
             .from('external_listings')
-            .upsert(processedAds, { onConflict: 'source_url' });
+            .upsert(uniqueAds, { onConflict: 'source_url' });
 
         if (upsertError) throw upsertError;
 
