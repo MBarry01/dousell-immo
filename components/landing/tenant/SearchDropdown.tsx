@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const transition = {
@@ -36,102 +35,68 @@ export default function SearchDropdown({
     align = "center",
 }: SearchDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
     const triggerRef = useRef<HTMLDivElement>(null);
 
     const selectedLabel = options.find((opt) => opt.value === value)?.label || placeholder;
 
-    // Calculate dropdown position when opened
-    useEffect(() => {
-        if (isOpen && triggerRef.current) {
-            const rect = triggerRef.current.getBoundingClientRect();
-            setDropdownPosition({
-                top: rect.bottom + window.scrollY,
-                left: rect.left + window.scrollX,
-                width: rect.width,
-            });
-        }
-    }, [isOpen]);
-
     // Positioning offset based on alignment
-    const getTransformX = () => {
-        if (align === "left") return "0%";
-        if (align === "right") return "-100%";
-        return "-50%"; // center
+    const getAlignmentClass = () => {
+        if (align === "left") return "left-0 origin-top-left";
+        if (align === "right") return "right-0 origin-top-right";
+        return "left-1/2 -translate-x-1/2 origin-top";
     };
 
-    const getLeftOffset = () => {
-        if (align === "left") return dropdownPosition.left;
-        if (align === "right") return dropdownPosition.left + dropdownPosition.width;
-        return dropdownPosition.left + dropdownPosition.width / 2; // center
-    };
-
-    const dropdownContent = (
-        <AnimatePresence>
-            {isOpen && (
-                <div
-                    style={{
-                        position: "absolute",
-                        top: `${dropdownPosition.top}px`,
-                        left: `${getLeftOffset()}px`,
-                        transform: `translateX(${getTransformX()})`,
-                        zIndex: 9999,
-                    }}
-                    onMouseEnter={() => setIsOpen(true)}
-                    onMouseLeave={() => setIsOpen(false)}
+    return (
+        <div
+            ref={triggerRef}
+            className="relative flex-1 h-12 md:h-16"
+            onMouseEnter={() => setIsOpen(true)}
+            onMouseLeave={() => setIsOpen(false)}
+        >
+            {/* Trigger */}
+            <div className="flex items-center h-full px-4 cursor-pointer">
+                <div className="mr-2 md:mr-3">{icon}</div>
+                <span
+                    className={`text-sm font-medium ${value ? "text-white" : "text-gray-400"} hover:text-[#F4C430] transition-colors`}
                 >
-                    {/* Invisible bridge */}
-                    <div className="h-4 w-full" />
+                    {selectedLabel}
+                </span>
+            </div>
+
+            {/* Dropdown Content - Positioned Absolutely relative to container */}
+            <AnimatePresence>
+                {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                        initial={{ opacity: 0, scale: 0.95, y: -5 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.85, y: 10 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -5 }}
                         transition={transition}
-                        className="bg-black/80 backdrop-blur-md rounded-2xl overflow-hidden border border-[#F4C430]/20 shadow-2xl"
+                        className={`absolute top-[calc(100%+4px)] ${getAlignmentClass()} z-50 min-w-[200px] w-full`}
                     >
-                        <div className="w-max h-full p-4">
-                            <div className="flex flex-col space-y-4 text-sm">
-                                {options.map((option) => (
-                                    <button
-                                        key={option.value}
-                                        onClick={() => {
-                                            onValueChange(option.value);
-                                            setIsOpen(false);
-                                        }}
-                                        className="text-left text-gray-400 hover:text-[#F4C430] transition-colors cursor-pointer whitespace-nowrap"
-                                    >
-                                        {option.label}
-                                    </button>
-                                ))}
+                        <div className="bg-black/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] ring-1 ring-[#F4C430]/20">
+                            <div className="p-2">
+                                <div className="flex flex-col space-y-1">
+                                    {options.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            onClick={() => {
+                                                onValueChange(option.value);
+                                                setIsOpen(false);
+                                            }}
+                                            className={`w-full text-left px-4 py-2.5 text-sm rounded-xl transition-all ${value === option.value
+                                                ? "bg-[#F4C430] text-black font-semibold"
+                                                : "text-gray-300 hover:bg-white/10 hover:text-white"
+                                                }`}
+                                        >
+                                            {option.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </motion.div>
-                </div>
-            )}
-        </AnimatePresence>
-    );
-
-    return (
-        <>
-            <div
-                ref={triggerRef}
-                className="relative flex-1 h-12 md:h-16"
-                onMouseEnter={() => setIsOpen(true)}
-                onMouseLeave={() => setIsOpen(false)}
-            >
-                {/* Trigger */}
-                <div className="flex items-center h-full px-4 cursor-pointer">
-                    <div className="mr-2 md:mr-3">{icon}</div>
-                    <span
-                        className={`text-sm font-medium ${value ? "text-white" : "text-gray-400"} hover:text-[#F4C430] transition-colors`}
-                    >
-                        {selectedLabel}
-                    </span>
-                </div>
-            </div>
-
-            {/* Portal for dropdown */}
-            {typeof window !== "undefined" && createPortal(dropdownContent, document.body)}
-        </>
+                )}
+            </AnimatePresence>
+        </div>
     );
 }

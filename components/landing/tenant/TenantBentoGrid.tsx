@@ -19,9 +19,8 @@ export default function TenantBentoGrid() {
           transition={{ duration: 0.6 }}
           className="text-center mb-14"
         >
-          <div className="inline-flex items-center gap-2 bg-[#F4C430]/10 border border-[#F4C430]/20 rounded-full px-4 py-2 mb-6">
-            <Smartphone className="w-4 h-4 text-[#F4C430]" />
-            <span className="text-[#F4C430] text-sm font-medium tracking-wide">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="text-[#F4C430] text-sm font-medium tracking-widest uppercase">
               Espace Locataire
             </span>
           </div>
@@ -54,9 +53,9 @@ export default function TenantBentoGrid() {
               <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center gap-6 h-full">
                 {/* Text content */}
                 <div className="flex-1">
-                  <div className="inline-flex items-center gap-2 bg-[#F4C430]/20 rounded-full px-3 py-1.5 mb-4">
-                    <Zap className="w-4 h-4 text-[#F4C430]" />
-                    <span className="text-[#F4C430] text-xs font-semibold">Paiement Express</span>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Zap className="w-5 h-5 text-[#F4C430]" fill="#F4C430" />
+                    <span className="text-[#F4C430] text-sm font-semibold tracking-wide uppercase">Paiement Express</span>
                   </div>
 
                   <h3 className="text-2xl lg:text-3xl font-bold text-white mb-3">
@@ -187,9 +186,9 @@ export default function TenantBentoGrid() {
               <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
 
               <div className="relative z-10 h-full flex flex-col">
-                <div className="inline-flex items-center gap-2 bg-blue-500/20 rounded-full px-3 py-1.5 mb-4 w-fit">
-                  <FileText className="w-4 h-4 text-blue-400" />
-                  <span className="text-blue-400 text-xs font-semibold">Documents</span>
+                <div className="flex items-center gap-2 mb-4">
+                  <FileText className="w-5 h-5 text-[#F4C430]" />
+                  <span className="text-[#F4C430] text-sm font-semibold tracking-wide uppercase">Documents</span>
                 </div>
 
                 <h3 className="text-xl font-bold text-white mb-2">
@@ -247,9 +246,9 @@ export default function TenantBentoGrid() {
               <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/10 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
 
               <div className="relative z-10 h-full flex flex-col">
-                <div className="inline-flex items-center gap-2 bg-orange-500/20 rounded-full px-3 py-1.5 mb-4 w-fit">
-                  <MessageCircle className="w-4 h-4 text-orange-400" />
-                  <span className="text-orange-400 text-xs font-semibold">Support</span>
+                <div className="flex items-center gap-2 mb-4">
+                  <MessageCircle className="w-5 h-5 text-[#F4C430]" />
+                  <span className="text-[#F4C430] text-sm font-semibold tracking-wide uppercase">Support</span>
                 </div>
 
                 <h3 className="text-xl font-bold text-white mb-2">
@@ -318,10 +317,10 @@ export default function TenantBentoGrid() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="group"
           >
-            <div className="relative h-full min-h-[180px] rounded-3xl bg-gradient-to-br from-emerald-950/50 to-zinc-900/50 border border-emerald-500/10 p-6 overflow-hidden transition-all duration-500 hover:border-emerald-500/30">
+            <div className="relative h-full min-h-[180px] rounded-3xl bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-white/5 p-6 overflow-hidden transition-all duration-500 hover:border-[#F4C430]/30">
               <div className="relative z-10 flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                  <Shield className="w-7 h-7 text-emerald-400" />
+                <div className="w-14 h-14 rounded-2xl bg-[#F4C430]/10 flex items-center justify-center flex-shrink-0 border border-[#F4C430]/20">
+                  <Shield className="w-7 h-7 text-[#F4C430]" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white mb-1">Données sécurisées</h3>

@@ -25,6 +25,7 @@ import { Captcha } from "@/components/ui/captcha";
 import { createVisitRequest, createAppointment } from "@/app/(vitrine)/planifier-visite/actions";
 import { sendGTMEvent } from "@/lib/gtm";
 import { visitRequestSchema, type VisitRequestFormValues } from "@/lib/schemas/visit-request";
+import { ShuffleCards } from "@/components/ui/testimonial-cards";
 
 // Saasable Integration
 import SaasableSectionWrapper from "@/components/saasable/SaasableSectionWrapper";
@@ -169,20 +170,22 @@ export default function LandingPage() {
   const availableDates = getAvailableDates();
 
   // Mode Propriétaire / Locataire
-  const [userMode, setUserMode] = useState<"owner" | "tenant">(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("dousell_user_mode");
-      if (saved === "owner" || saved === "tenant") return saved;
+  const [userMode, setUserMode] = useState<"owner" | "tenant">("owner");
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Charger le mode depuis localStorage après hydratation
+  useEffect(() => {
+    const saved = localStorage.getItem("dousell_user_mode");
+    if (saved === "owner" || saved === "tenant") {
+      setUserMode(saved);
     }
-    return "owner";
-  });
+    setIsHydrated(true);
+  }, []);
 
   // Sauvegarder le choix dans localStorage
   const handleModeChange = (mode: "owner" | "tenant") => {
     setUserMode(mode);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("dousell_user_mode", mode);
-    }
+    localStorage.setItem("dousell_user_mode", mode);
   };
 
   // Contenu dynamique selon le mode
@@ -201,7 +204,7 @@ export default function LandingPage() {
       h1Line2: "au cœur du Sénégal",
       desc: "Accédez à une sélection exclusive de villas et appartements. Payez votre loyer en ligne et retrouvez tous vos documents en un clic.",
       ctaPrimary: { text: "Voir les annonces", href: "/recherche" },
-      ctaSecondary: { text: "Espace Locataire", href: "/portal" },
+      ctaSecondary: { text: "Espace Locataire", href: "/locataire" },
     },
   };
 
@@ -559,7 +562,7 @@ export default function LandingPage() {
 
       {/* Barre de recherche Hero pour locataires */}
       {userMode === "tenant" && (
-        <section id="locataire-section" className="relative py-10 md:py-16 bg-zinc-950">
+        <section id="locataire-section" className="relative py-10 md:py-16 bg-zinc-950 z-30">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.05)_0%,_transparent_70%)]" />
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <div className="text-center mb-6 md:mb-8">
@@ -593,8 +596,12 @@ export default function LandingPage() {
       {/* 3 étapes pour locataires */}
       {userMode === "tenant" && <TenantSteps />}
 
-      {/* Témoignages locataires */}
-      {userMode === "tenant" && <TenantTestimonials />}
+      {/* Témoignages locataires (Shuffle Cards) */}
+      {userMode === "tenant" && (
+        <section className="relative overflow-hidden bg-black pb-20">
+          <ShuffleCards mode="tenant" />
+        </section>
+      )}
 
       {/* ============================================
           SECTION PROPRIETAIRES - "Je suis Propriétaire"
@@ -633,7 +640,7 @@ export default function LandingPage() {
 
       {/* Laptop Mockup Section - Dashboard Gestion Locative */}
       {userMode === "owner" && (
-        <section className="relative py-12 md:py-20 bg-black overflow-hidden">
+        <section id="demo" className="relative py-12 md:py-20 bg-black overflow-hidden">
           {/* Background gradient */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.06)_0%,_transparent_70%)]" />
 
@@ -725,7 +732,7 @@ export default function LandingPage() {
 
               {/* Label - Clickable Button with Shimmer */}
               <Link
-                href="/gestion-locative"
+                href="/gestion"
                 className="relative mt-6 mx-auto w-fit block md:absolute md:mt-0 md:-bottom-8 md:left-1/2 md:-translate-x-1/2 rounded-full px-5 py-2 shadow-lg shadow-[#F4C430]/20 transition-all hover:scale-105 hover:shadow-xl hover:shadow-[#F4C430]/30 overflow-hidden"
               >
                 {/* Base gradient */}
@@ -807,6 +814,12 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
+        </section>
+      )}
+      {/* Start Testimonials Section (Propriétaire uniquement) */}
+      {userMode === "owner" && (
+        <section className="relative overflow-hidden bg-black pb-20">
+          <ShuffleCards mode="owner" />
         </section>
       )}
 
@@ -1147,8 +1160,8 @@ export default function LandingPage() {
               © 2026 Dousell Immo. Tous droits réservés.
             </p>
             <div className="flex gap-6">
-              <a href="#" className="text-gray-600 hover:text-[#F4C430] transition-colors text-sm">Mentions légales</a>
-              <a href="#" className="text-gray-600 hover:text-[#F4C430] transition-colors text-sm">Confidentialité</a>
+              <a href="/legal/cgu" className="text-gray-600 hover:text-[#F4C430] transition-colors text-sm">Mentions légales</a>
+              <a href="/legal/privacy" className="text-gray-600 hover:text-[#F4C430] transition-colors text-sm">Confidentialité</a>
             </div>
           </div>
         </div>
