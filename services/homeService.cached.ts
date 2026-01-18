@@ -9,34 +9,73 @@
  * @see REDIS_CACHE_STRATEGY.md
  */
 
-// ... imports
 import {
   getOrSetCacheSWR,
   getOrSetCacheWithMetrics,
 } from "@/lib/cache/advanced-patterns";
-import { getProperties, type PropertyFilters } from "./propertyService";
+import { getProperties, getPropertiesCount, type PropertyFilters } from "./propertyService";
+import { getExternalListingsByType } from "./gatewayService";
 import type { Property } from "@/types/property";
+
+type SectionResult = {
+  properties: Property[];
+  total: number;
+};
+
+/**
+ * Helper: Fusionne internes + externes avec stratégie de remplissage
+ * - Priorité aux annonces internes
+ * - Complète avec externes si besoin
+ */
+function mergeWithExternals(
+  internal: Property[],
+  external: Property[],
+  limit: number
+): Property[] {
+  // On prend toutes les internes disponibles
+  const merged = [...internal];
+
+  // On complète avec les externes jusqu'à la limite
+  const spotsRemaining = limit - merged.length;
+  if (spotsRemaining > 0) {
+    merged.push(...external.slice(0, spotsRemaining));
+  }
+
+  return merged.slice(0, limit);
+}
 
 /**
  * Récupère les locations populaires à Dakar (VERSION CACHÉE + MÉTRIQUES)
  * TTL : 5 minutes (données changent rarement)
  */
-export async function getPopularLocations(limit = 8): Promise<Property[]> {
+export async function getPopularLocations(limit = 8): Promise<SectionResult> {
   return getOrSetCacheWithMetrics(
-    `popular_locations_${limit}`,
+    `popular_locations_v3_${limit}`, // v3: with partner listings
     async () => {
       try {
-        return await getProperties({
+        const filters = {
           category: "location",
           city: "Dakar",
           limit,
-        } as PropertyFilters);
+        } as PropertyFilters;
+
+        // Requêtes parallèles: internes + externes
+        const [internalProperties, total, externalProperties] = await Promise.all([
+          getProperties(filters),
+          getPropertiesCount(filters),
+          getExternalListingsByType("location", { city: "Dakar", limit }),
+        ]);
+
+        // Fusion avec priorité aux internes
+        const properties = mergeWithExternals(internalProperties, externalProperties, limit);
+
+        return { properties, total };
       } catch (error) {
         console.error(
           "[homeService.cached] Error fetching popular locations:",
           error
         );
-        return [];
+        return { properties: [], total: 0 };
       }
     },
     {
@@ -47,37 +86,34 @@ export async function getPopularLocations(limit = 8): Promise<Property[]> {
   );
 }
 
-/**
- * Récupère les propriétés à vendre (VERSION CACHÉE + MÉTRIQUES)
- * Exclut automatiquement les terrains
- * TTL : 5 minutes
- */
-export async function getPropertiesForSale(limit = 8): Promise<Property[]> {
+export async function getPropertiesForSale(limit = 8): Promise<SectionResult> {
   return getOrSetCacheWithMetrics(
-    `properties_for_sale_${limit}`,
+    `properties_for_sale_v3_${limit}`, // v3: with partner listings
     async () => {
       try {
-        // Récupérer plus de propriétés pour avoir assez après filtrage
-        const allProperties = await getProperties({
+        const filters = {
           category: "vente",
-          limit: limit * 3,
-        } as PropertyFilters);
+          types: ["Maison", "Appartement", "Studio"],
+          limit: limit,
+        } as PropertyFilters;
 
-        // Filtrer pour exclure les terrains
-        return allProperties
-          .filter(
-            (p) =>
-              p.details.type === "Maison" ||
-              p.details.type === "Appartement" ||
-              p.details.type === "Studio"
-          )
-          .slice(0, limit);
+        // Requêtes parallèles: internes + externes (Appartement/Villa/Maison)
+        const [internalProperties, total, externalProperties] = await Promise.all([
+          getProperties(filters),
+          getPropertiesCount(filters),
+          getExternalListingsByType("vente", { limit }),
+        ]);
+
+        // Fusion avec priorité aux internes
+        const properties = mergeWithExternals(internalProperties, externalProperties, limit);
+
+        return { properties, total };
       } catch (error) {
         console.error(
           "[homeService.cached] Error fetching properties for sale:",
           error
         );
-        return [];
+        return { properties: [], total: 0 };
       }
     },
     {
@@ -92,29 +128,31 @@ export async function getPropertiesForSale(limit = 8): Promise<Property[]> {
  * Récupère les terrains à vendre (VERSION CACHÉE + MÉTRIQUES)
  * TTL : 5 minutes
  */
-export async function getLandForSale(limit = 8): Promise<Property[]> {
+export async function getLandForSale(limit = 8): Promise<SectionResult> {
   return getOrSetCacheWithMetrics(
-    `land_for_sale_${limit}`,
+    `land_for_sale_v3_${limit}`, // v3: with partner listings
     async () => {
       try {
-        // Récupérer plus de propriétés pour avoir assez après filtrage
-        const allProperties = await getProperties({
+        const filters = {
           category: "vente",
-          limit: limit * 3,
-        } as PropertyFilters);
+          type: "Terrain",
+          limit: limit,
+        } as PropertyFilters;
 
-        // Filtrer pour ne garder que les terrains
-        return allProperties
-          .filter(
-            (p) =>
-              p.details.type?.toLowerCase().includes("terrain") ||
-              p.title.toLowerCase().includes("terrain") ||
-              p.description.toLowerCase().includes("terrain")
-          )
-          .slice(0, limit);
+        // Requêtes parallèles: internes + externes (Terrains)
+        const [internalProperties, total, externalProperties] = await Promise.all([
+          getProperties(filters),
+          getPropertiesCount(filters),
+          getExternalListingsByType("vente", { category: "Terrain", limit }),
+        ]);
+
+        // Fusion avec priorité aux internes
+        const properties = mergeWithExternals(internalProperties, externalProperties, limit);
+
+        return { properties, total };
       } catch (error) {
         console.error("[homeService.cached] Error fetching land for sale:", error);
-        return [];
+        return { properties: [], total: 0 };
       }
     },
     {
@@ -138,7 +176,7 @@ export async function getLandForSale(limit = 8): Promise<Property[]> {
  */
 export async function getHomePageSections() {
   return getOrSetCacheSWR(
-    "all_sections",
+    "all_sections_v3", // v3: with partner listings fill strategy
     async () => {
       try {
         // Les 3 sections utilisent getOrSetCacheWithMetrics individuellement
@@ -159,9 +197,9 @@ export async function getHomePageSections() {
           error
         );
         return {
-          locations: [],
-          ventes: [],
-          terrains: [],
+          locations: { properties: [], total: 0 },
+          ventes: { properties: [], total: 0 },
+          terrains: { properties: [], total: 0 },
         };
       }
     },

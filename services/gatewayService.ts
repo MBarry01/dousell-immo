@@ -63,6 +63,61 @@ const mapExternalListing = (row: ExternalListingRow): Property => {
     };
 };
 
+/**
+ * Récupère les annonces partenaires par type de transaction
+ * Utilisé par homeService pour la stratégie de remplissage
+ * 
+ * @param transactionType - "location" ou "vente"
+ * @param category - Optionnel: "Appartement", "Villa", "Terrain", etc.
+ * @param limit - Nombre max d'annonces à récupérer
+ * @param city - Optionnel: Ville pour filtrer
+ */
+export async function getExternalListingsByType(
+    transactionType: "location" | "vente",
+    options: {
+        category?: string;
+        city?: string;
+        limit?: number;
+    } = {}
+): Promise<Property[]> {
+    const { category, city, limit = 8 } = options;
+
+    try {
+        // On ne récupère que les annonces vues récemment (< 4 jours)
+        const fourDaysAgo = new Date();
+        fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
+
+        let query = supabase
+            .from("external_listings")
+            .select("*")
+            .gt("last_seen_at", fourDaysAgo.toISOString())
+            .ilike("type", `%${transactionType}%`)
+            .limit(limit);
+
+        // Filtre optionnel par catégorie (Appartement, Villa, Terrain)
+        if (category) {
+            query = query.ilike("category", `%${category}%`);
+        }
+
+        // Filtre optionnel par ville
+        if (city) {
+            query = query.ilike("city", `%${city}%`);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+            console.error("[gatewayService] Error fetching external listings:", error);
+            return [];
+        }
+
+        return (data || []).map(mapExternalListing);
+    } catch (err) {
+        console.error("[gatewayService] getExternalListingsByType error:", err);
+        return [];
+    }
+}
+
 export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
     try {
         // 1. Récupération des annonces internes (via propertyService existant)
