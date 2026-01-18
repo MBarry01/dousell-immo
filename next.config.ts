@@ -17,6 +17,56 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  // Redirections legacy → nouveaux chemins workspace
+  async redirects() {
+    return [
+      // Route dupliquée CGU
+      {
+        source: '/cgu',
+        destination: '/legal/cgu',
+        permanent: true,
+      },
+      // Gestion locative → /gestion
+      {
+        source: '/gestion-locative',
+        destination: '/gestion',
+        permanent: true,
+      },
+      {
+        source: '/gestion-locative/:path*',
+        destination: '/gestion/:path*',
+        permanent: true,
+      },
+      // États des lieux → /gestion/etats-lieux
+      {
+        source: '/etats-lieux',
+        destination: '/gestion/etats-lieux',
+        permanent: true,
+      },
+      {
+        source: '/etats-lieux/:path*',
+        destination: '/gestion/etats-lieux/:path*',
+        permanent: true,
+      },
+      // Interventions → /gestion/interventions
+      {
+        source: '/interventions',
+        destination: '/gestion/interventions',
+        permanent: true,
+      },
+      {
+        source: '/interventions/:path*',
+        destination: '/gestion/interventions/:path*',
+        permanent: true,
+      },
+      // Documents légaux → /gestion/documents-legaux
+      {
+        source: '/documents-legaux',
+        destination: '/gestion/documents-legaux',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
@@ -55,7 +105,7 @@ const nextConfig: NextConfig = {
               // En production, cette directive n'est pas nécessaire
               `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ""} https://challenges.cloudflare.com https://*.cloudflare.com https://www.googletagmanager.com https://va.vercel-scripts.com https://www.clarity.ms https://*.clarity.ms https://scripts.clarity.ms https://c.bing.com https://cdn.kkiapay.me https://translate.google.com https://translate.googleapis.com https://www.gstatic.com`,
               "style-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.gstatic.com https://translate.googleapis.com",
-              "img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com https://images.pexels.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.basemaps.cartocdn.com https://*.openstreetmap.org https://*.tile.openstreetmap.org https://cdnjs.cloudflare.com https://unpkg.com https://a.basemaps.cartocdn.com https://b.basemaps.cartocdn.com https://c.basemaps.cartocdn.com https://d.basemaps.cartocdn.com https://*.google-analytics.com https://*.googletagmanager.com https://c.bing.com https://*.clarity.ms https://fonts.gstatic.com https://www.gstatic.com https://translate.google.com",
+              "img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com https://images.pexels.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.basemaps.cartocdn.com https://*.openstreetmap.org https://*.tile.openstreetmap.org https://cdnjs.cloudflare.com https://unpkg.com https://a.basemaps.cartocdn.com https://b.basemaps.cartocdn.com https://c.basemaps.cartocdn.com https://d.basemaps.cartocdn.com https://*.google-analytics.com https://*.googletagmanager.com https://c.bing.com https://*.clarity.ms https://fonts.gstatic.com https://www.gstatic.com https://translate.google.com https://*.coinafrique.com",
               "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self' https://*.supabase.co https://*.supabase.in https://challenges.cloudflare.com https://*.google-analytics.com https://www.googletagmanager.com https://va.vercel-scripts.com https://*.basemaps.cartocdn.com https://*.openstreetmap.org https://images.unsplash.com https://images.pexels.com https://*.googleusercontent.com wss://*.supabase.co https://www.clarity.ms https://*.clarity.ms https://c.bing.com https://api.kkiapay.me https://*.kkiapay.me https://raw.githack.com https://translate.google.com https://translate.googleapis.com https://www.gstatic.com https://fonts.gstatic.com",
               "frame-src 'self' https://*.supabase.co https://challenges.cloudflare.com https://www.youtube.com https://youtube.com https://www.google.com https://maps.google.com https://*.kkiapay.me https://translate.google.com",
@@ -101,6 +151,14 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.coinafrique.com",
+      },
+      {
+        protocol: "https",
+        hostname: "sn.coinafrique.com",
       },
     ],
   },

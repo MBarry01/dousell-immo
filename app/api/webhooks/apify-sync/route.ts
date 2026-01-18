@@ -62,7 +62,7 @@ export async function POST(req: Request) {
                 title: ad.title,
                 price: ad.price,
                 location: ad.location,
-                image_url: ad.image_url,
+                image_url: ad.image || ad.image_url || null, // Apify envoie 'image', pas 'image_url'
                 source_site: "CoinAfrique",
                 category,
                 type,
