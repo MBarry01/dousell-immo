@@ -235,16 +235,21 @@ export const getProperties = async (filters: PropertyFilters = {}) => {
       query = query.eq("verification_status", "verified");
     }
     // Support pour un seul type ou plusieurs types (OR)
+    // Support pour types multiples
+    // On cherche dans details->>type ET property_type car certains biens (terrains) n'ont que property_type
     if (filters.types && filters.types.length > 0) {
-      // Si plusieurs types sont sélectionnés, utiliser OR
-      // Syntaxe Supabase: "field.eq.value1,field.eq.value2"
       const orConditions = filters.types
-        .map((type) => `details->>type.eq.${type}`)
+        .flatMap((type) => [
+          `details->>type.ilike.${type}`,
+          `property_type.ilike.${type}`,
+        ])
         .join(",");
       query = query.or(orConditions);
     } else if (filters.type) {
-      // Support rétrocompatibilité pour un seul type
-      query = query.eq("details->>type", filters.type);
+      // Chercher dans details.type OU property_type (case-insensitive)
+      query = query.or(
+        `details->>type.ilike.${filters.type},property_type.ilike.${filters.type}`
+      );
     }
 
     query = query.order("created_at", {
@@ -273,6 +278,83 @@ export const getProperties = async (filters: PropertyFilters = {}) => {
       errorStack: error instanceof Error ? error.stack : undefined,
     });
     return [];
+  }
+};
+
+export const getPropertiesCount = async (filters: PropertyFilters = {}) => {
+  try {
+    let query = supabase
+      .from("properties")
+      .select("*", { count: "exact", head: true });
+
+    // Même logique de filtrage que getProperties
+    query = query.eq("validation_status", "approved");
+    query = query.eq("status", "disponible");
+
+    if (filters.q) {
+      query = query.or(
+        `title.ilike.%${filters.q}%,description.ilike.%${filters.q}%,location->>city.ilike.%${filters.q}%`
+      );
+    }
+
+    if (filters.category) {
+      query = query.eq("category", filters.category);
+    }
+    if (filters.city) {
+      query = query.eq("location->>city", filters.city);
+    }
+    if (filters.minPrice) {
+      query = query.gte("price", filters.minPrice);
+    }
+    if (filters.maxPrice) {
+      query = query.lte("price", filters.maxPrice);
+    }
+    if (filters.status) {
+      query = query.eq("status", filters.status);
+    }
+    if (filters.location) {
+      query = query.ilike("location->>city", `%${filters.location}%`);
+    } else if (filters.city) {
+      query = query.eq("location->>city", filters.city);
+    }
+    if (filters.rooms) {
+      query = query.gte("specs->>rooms", String(filters.rooms));
+    }
+    if (filters.bedrooms) {
+      query = query.gte("specs->>bedrooms", String(filters.bedrooms));
+    }
+    if (filters.hasBackupGenerator) {
+      query = query.eq("features->>hasGenerator", "true");
+    }
+    if (filters.hasWaterTank) {
+      query = query.eq("features->>hasWaterTank", "true");
+    }
+    if (filters.isVerified) {
+      query = query.eq("verification_status", "verified");
+    }
+
+    // Support pour types multiples
+    if (filters.types && filters.types.length > 0) {
+      const orConditions = filters.types
+        .flatMap((type) => [
+          `details->>type.ilike.${type}`,
+          `property_type.ilike.${type}`,
+        ])
+        .join(",");
+      query = query.or(orConditions);
+    } else if (filters.type) {
+      query = query.or(
+        `details->>type.ilike.${filters.type},property_type.ilike.${filters.type}`
+      );
+    }
+
+    const { count, error } = await query;
+    if (error) throw error;
+
+    return count || 0;
+  } catch (error) {
+    console.error("getPropertiesCount error:", error);
+    return 0;
   }
 };
 
