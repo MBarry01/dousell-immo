@@ -2,9 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Bed, Bath, Square, ArrowUpRight, Bookmark } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { MapPin, Bed, Bath, Square, ArrowUpRight } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import type { Property } from "@/types/property";
 
@@ -15,10 +13,17 @@ interface PropertyCardUnifiedProps {
 
 export const PropertyCardUnified = ({ property, className }: PropertyCardUnifiedProps) => {
     const isExternal = property.isExternal;
+    const href = isExternal ? property.source_url : `/biens/${property.id}`;
+
+    const CardWrapper = isExternal ? 'a' : Link;
+    const cardProps = isExternal
+        ? { href: href || '#', target: "_blank", rel: "noopener noreferrer" }
+        : { href };
 
     return (
-        <article
-            className={`group relative flex w-72 flex-none flex-col overflow-hidden rounded-[28px] bg-background border border-white/10 p-3 text-white transition-all duration-200 hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 active:scale-[0.99] isolate ${className || ""}`}
+        <CardWrapper
+            {...cardProps}
+            className={`group relative flex w-72 flex-none flex-col overflow-hidden rounded-[28px] bg-background border border-white/10 p-3 text-white transition-all duration-200 hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 active:scale-[0.99] isolate cursor-pointer ${className || ""}`}
         >
             {/* Image Container */}
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] z-10">
@@ -55,7 +60,9 @@ export const PropertyCardUnified = ({ property, className }: PropertyCardUnified
 
                 {/* Prix */}
                 <div className="absolute bottom-4 left-4 rounded-full bg-black/80 backdrop-blur-sm px-4 py-2 border border-primary/30">
-                    <p className="text-sm font-bold text-primary">{formatCurrency(property.price)}</p>
+                    <p className="text-sm font-bold text-primary">
+                        {property.price > 0 ? formatCurrency(property.price) : "Prix sur demande"}
+                    </p>
                 </div>
             </div>
 
@@ -99,39 +106,19 @@ export const PropertyCardUnified = ({ property, className }: PropertyCardUnified
                     </p>
                 )}
 
-                {/* Type de bien */}
+                {/* Type de bien + indicateur externe */}
                 <div className="flex flex-wrap gap-2 text-[11px] text-white/60">
                     <span className="rounded-full border border-white/10 bg-background px-3 py-1">
                         {property.details.type}
                     </span>
-                </div>
-
-                {/* Action Button */}
-                <div className="pt-2">
-                    {isExternal ? (
-                        <a
-                            href={property.source_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex w-full justify-between items-center rounded-2xl bg-white/10 border border-white/10 text-white hover:bg-white/20 font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg px-4 py-2.5"
-                        >
-                            <span>Voir l&apos;annonce</span>
-                            <ArrowUpRight className="h-4 w-4" />
-                        </a>
-                    ) : (
-                        <Button
-                            variant="secondary"
-                            className="w-full justify-between rounded-2xl bg-primary text-black hover:bg-primary/90 font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
-                            asChild
-                        >
-                            <Link href={`/biens/${property.id}`}>
-                                Découvrir
-                                <span aria-hidden>→</span>
-                            </Link>
-                        </Button>
+                    {isExternal && (
+                        <span className="rounded-full border border-white/10 bg-background px-3 py-1 inline-flex items-center gap-1">
+                            <ArrowUpRight className="h-3 w-3" />
+                            Externe
+                        </span>
                     )}
                 </div>
             </div>
-        </article>
+        </CardWrapper>
     );
 };
