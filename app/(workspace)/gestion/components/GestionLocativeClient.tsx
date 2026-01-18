@@ -1,0 +1,809 @@
+'use client';
+
+import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { TenantTable } from './TenantTable';
+import { MonthSelector } from './MonthSelector';
+import { EditTenantDialog } from './EditTenantDialog';
+
+import { DashboardStats } from './DashboardStats';
+import { QuickActions } from './QuickActions';
+import { TenantCardGrid } from './TenantCardGrid';
+import { Search, Download, LayoutGrid, List } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { deleteTransaction, deleteLease, confirmPayment, terminateLease, reactivateLease, sendTenantInvitation } from '../actions';
+import { processLateReminders } from '@/app/(vitrine)/actions/reminders';
+import { OnboardingTour, useOnboardingTour, TourStep } from '@/components/onboarding/OnboardingTour';
+import { ReceiptModal } from './ReceiptModal';
+import { toast } from 'sonner';
+import { useTheme } from '@/components/workspace/providers/theme-provider';
+
+import { calculateFinancials, LeaseInput, TransactionInput } from '@/lib/finance';
+
+interface Tenant {
+    id: string;
+    name: string;
+    property: string;
+    phone?: string;
+    email?: string;
+    rentAmount: number;
+    status: 'paid' | 'pending' | 'overdue';
+    dueDate?: number;
+    startDate?: string;
+    endDate?: string;
+    last_transaction_id?: string;
+    period_month?: number;
+    period_year?: number;
+    period_start?: string | null;
+    period_end?: string | null;
+}
+
+interface Transaction {
+    id: string;
+    lease_id: string;
+    period_month: number;
+    period_year: number;
+    status: string;
+    amount_due?: number;
+    amount_paid?: number | null;
+    paid_at?: string | null;
+    period_start?: string | null;
+    period_end?: string | null;
+}
+
+interface Lease {
+    id: string;
+    tenant_name: string;
+    tenant_phone?: string;
+    tenant_email?: string;
+    property_address?: string;
+    monthly_amount: number;
+    billing_day?: number;
+    start_date?: string;
+    end_date?: string;
+    status?: 'active' | 'terminated' | 'pending';
+    created_at?: string;
+}
+
+interface Profile {
+    company_name?: string | null;
+    full_name?: string | null;
+    company_address?: string | null;
+    company_email?: string | null;
+    company_ninea?: string | null;
+    signature_url?: string | null;
+    logo_url?: string | null;
+}
+
+interface ReceiptData {
+    tenant?: {
+        tenant_name?: string;
+        name?: string;
+        email?: string;
+        phone?: string;
+        address?: string;
+    };
+    property_address?: string;
+    amount?: number;
+    period?: string;
+    month?: string | number;
+    year?: number;
+    periodStart?: string;
+    periodEnd?: string;
+    receiptNumber?: string;
+    userEmail?: string;
+    profile?: {
+        company_name?: string | null;
+        full_name?: string | null;
+        company_address?: string | null;
+        company_email?: string | null;
+        email?: string;
+        logo_url?: string | null;
+        signature_url?: string | null;
+        ninea?: string | null;
+        company_ninea?: string | null;
+    };
+    receiptImage?: string | null;
+}
+
+interface GestionLocativeClientProps {
+    leases: Lease[];
+    transactions: Transaction[];
+    profile: Profile | null;
+    userEmail?: string;
+    ownerId: string;
+    isViewingTerminated?: boolean;
+    minDate?: string;
+}
+
+export function GestionLocativeClient({
+    leases,
+    transactions,
+    profile,
+    userEmail,
+    ownerId,
+    isViewingTerminated = false,
+    minDate
+}: GestionLocativeClientProps) {
+    const router = useRouter();
+    const { isDark } = useTheme();
+    // État pour le mois/année sélectionné - Initialisé à aujourd'hui
+    const today = useMemo(() => new Date(), []);
+    const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1); // 1-12
+    const [selectedYear, setSelectedYear] = useState(today.getFullYear());
+    // Local state for optimistic updates
+    const [localTransactions, setLocalTransactions] = useState<Transaction[]>(transactions);
+
+    // Sync props to local state when they change (re-fetch)
+    useEffect(() => {
+        setLocalTransactions(transactions);
+    }, [transactions]);
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
+    const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards'); // Default to cards (Noflaye style)
+    const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+    const [currentReceipt, setCurrentReceipt] = useState<ReceiptData | null>(null);
+    const [saving, setSaving] = useState(false);
+    const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'pending' | 'overdue'>('all');
+
+    // ========================================
+    // PREMIUM ONBOARDING TOUR (Style HP OMEN)
+    // ========================================
+    const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_gestion_premium_tour', 1500);
+
+    // Étapes du tour (affichées tout le temps)
+    const premiumTourSteps: TourStep[] = useMemo(() => {
+
+        const baseSteps: TourStep[] = [
+            {
+                targetId: 'tour-add-tenant',
+                title: 'Créez votre premier bail',
+                description: 'Cliquez ici pour ajouter un locataire. Le système générera automatiquement les contrats et quittances.',
+                imageSrc: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600',
+                imageAlt: 'Ajouter un locataire'
+            },
+            {
+                targetId: 'tour-stats',
+                title: 'Suivez vos finances',
+                description: 'Un coup d\'œil suffit. Visualisez les loyers encaissés, en attente et les retards en temps réel. Cliquez sur une carte pour filtrer.',
+                imageSrc: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600',
+                imageAlt: 'Tableau de bord financier'
+            }
+        ];
+
+
+        // Ajouter toutes les étapes du tour
+        baseSteps.push(
+            {
+                targetId: 'tour-tenants-list',
+                title: 'Gérez vos locataires',
+                description: 'C\'est ici que vos locataires apparaîtront. Vous pourrez suivre les paiements, envoyer des quittances et gérer les baux en un clic.',
+                imageSrc: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&q=80&w=600',
+                imageAlt: 'Gestion des locataires'
+            },
+            {
+                targetId: 'tour-quick-actions',
+                title: 'Actions Rapides',
+                description: 'Accédez en un clic aux fonctions essentielles : relances, interventions, messagerie et documents juridiques.',
+                imageSrc: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600',
+                imageAlt: 'Actions rapides'
+            },
+            {
+                targetId: 'tour-export-csv',
+                title: 'Export Comptable',
+                description: 'Téléchargez toutes vos données en CSV pour votre comptable ou vos archives personnelles en un seul clic.',
+                imageSrc: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600',
+                imageAlt: 'Export comptable'
+            }
+        );
+
+
+        return baseSteps;
+    }, [leases]);
+
+    const handleMonthChange = (month: number, year: number) => {
+        setSelectedMonth(month);
+        setSelectedYear(year);
+    };
+
+    // ========================================
+    // AUTO-UPDATE MONTH DETECTION (Passage automatique au nouveau mois)
+    // ========================================
+
+
+    // ========================================
+    // FILTRAGE STRICT PAR PÉRIODE
+    // ========================================
+    const currentTransactions = useMemo(() => {
+        return localTransactions.filter(t =>
+            t.period_month === selectedMonth &&
+            t.period_year === selectedYear
+        );
+    }, [localTransactions, selectedMonth, selectedYear]);
+
+    // ========================================
+    // KPI CALCULATIONS (Source Unique de Vérité : lib/finance.ts)
+    // ========================================
+    const kpiStats = useMemo(() => {
+        // Préparer les données pour le Finance Guard
+        const targetDate = new Date(selectedYear, selectedMonth - 1, 1);
+
+        const safeLeases: LeaseInput[] = leases.map(l => ({
+            id: l.id,
+            monthly_amount: l.monthly_amount,
+            status: l.status || 'active',
+            start_date: l.start_date || null,
+            billing_day: l.billing_day || 5
+        }));
+
+        const safeTransactions: TransactionInput[] = currentTransactions.map(t => ({
+            id: t.id,
+            lease_id: t.lease_id,
+            amount_due: t.amount_due || 0,
+            amount_paid: t.amount_paid,
+            status: t.status
+        }));
+
+        const kpis = calculateFinancials(safeLeases, safeTransactions, targetDate);
+
+        return {
+            totalExpected: kpis.totalExpected,
+            totalCollected: kpis.totalCollected,
+            totalPending: kpis.totalExpected - kpis.totalCollected, // Reste = Attendu - Encaissé
+            paidCount: kpis.paidCount,
+            pendingCount: kpis.pendingCount,
+            overdueCount: kpis.overdueCount,
+            collectedPercent: kpis.collectionRate,
+            transactionCount: currentTransactions.length // Juste pour info debug si besoin
+        };
+    }, [leases, currentTransactions, selectedMonth, selectedYear]);
+
+    // ========================================
+    // FORMATER LES LOCATAIRES POUR LE TABLEAU
+    // ========================================
+    // ========================================
+    // FORMATER LES LOCATAIRES POUR LE TABLEAU
+    // ========================================
+    const formattedTenants: Tenant[] = useMemo(() => {
+        const result: Tenant[] = [];
+
+        (leases || []).forEach(lease => {
+            // Trouver TOUTES les transactions pour CE mois sélectionné
+            const leaseTransactions = currentTransactions.filter(t => t.lease_id === lease.id);
+
+            // Consolider le statut pour éviter les doublons
+            const paidTx = leaseTransactions.find(t => t.status === 'paid' || t.status?.toLowerCase() === 'paid');
+            const hasPayment = !!paidTx;
+
+            // Calcul du jour actuel (pour déterminer si overdue)
+            const currentDay = today.getDate();
+            const currentMonthIndex = today.getMonth() + 1;
+            const currentYearValue = today.getFullYear();
+
+            const isCurrentMonth = selectedMonth === currentMonthIndex && selectedYear === currentYearValue;
+            const isPastMonth = selectedYear < currentYearValue || (selectedYear === currentYearValue && selectedMonth < currentMonthIndex);
+
+            let displayStatus: 'paid' | 'pending' | 'overdue' = 'pending';
+
+            if (hasPayment) {
+                displayStatus = 'paid';
+            } else {
+                const billingDay = lease.billing_day || 5;
+                if (isPastMonth) {
+                    displayStatus = 'overdue';
+                } else if (isCurrentMonth && currentDay > billingDay) {
+                    displayStatus = 'overdue';
+                }
+                // sinon pending (futur ou courant avant échéance)
+            }
+
+            result.push({
+                id: lease.id,
+                name: lease.tenant_name,
+                property: lease.property_address || 'Adresse non renseignée',
+                phone: lease.tenant_phone,
+                email: lease.tenant_email,
+                rentAmount: lease.monthly_amount,
+                status: displayStatus,
+                dueDate: lease.billing_day,
+                startDate: lease.start_date,
+                endDate: lease.end_date,
+                last_transaction_id: paidTx?.id, // ID unique de la transaction payée si elle existe
+                period_month: selectedMonth,
+                period_year: selectedYear,
+                period_start: paidTx?.period_start || null,
+                period_end: paidTx?.period_end || null
+            });
+        });
+
+        return result;
+    }, [leases, currentTransactions, selectedMonth, selectedYear, today]);
+
+    // ========================================
+    // FILTERED TENANTS (Search + Status Filter)
+    // ========================================
+    const filteredTenants = useMemo(() => {
+        let result = formattedTenants;
+
+        // 1. Status Filter (KPI Cards)
+        if (filterStatus !== 'all') {
+            result = result.filter(t => t.status === filterStatus);
+        }
+
+        return result;
+    }, [formattedTenants, filterStatus]);
+
+    // Helper function to format CSV data
+    const formatCSVValue = (value: string | number | null | undefined): string => {
+        if (value === null || value === undefined) return '';
+        const stringValue = String(value);
+        if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+    };
+
+    // Export to CSV function
+    const handleExportCSV = () => {
+        const headers = ['Locataire', 'Email', 'Téléphone', 'Bien', 'Période', 'Statut', 'Montant (FCFA)'];
+
+        const csvRows = formattedTenants.map(tenant => {
+            const periodStr = selectedMonth && selectedYear
+                ? `${selectedMonth.toString().padStart(2, '0')}/${selectedYear}`
+                : '';
+
+            const statusLabels = {
+                paid: 'Payé',
+                pending: 'En attente',
+                overdue: 'Retard'
+            };
+
+            return [
+                formatCSVValue(tenant.name),
+                formatCSVValue(tenant.email),
+                formatCSVValue(tenant.phone),
+                formatCSVValue(tenant.property),
+                formatCSVValue(periodStr),
+                formatCSVValue(statusLabels[tenant.status]),
+                formatCSVValue(tenant.rentAmount)
+            ].join(',');
+        });
+
+        const csvContent = [headers.join(','), ...csvRows].join('\n');
+
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+            'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+        const filename = `loyers-${monthNames[selectedMonth - 1]}-${selectedYear}.csv`;
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    // Format montant avec espaces
+    const formatAmount = (amount: number) => {
+        return amount.toLocaleString('fr-FR');
+    };
+
+    // ========================================
+    // ACTION HANDLERS (LIFTED FROM TENANT TABLE)
+    // ========================================
+    const handleConfirmPayment = async (leaseId: string, transactionId?: string) => {
+        const tenant = formattedTenants.find(t => t.id === leaseId);
+        if (!tenant) {
+            toast.error('Locataire introuvable');
+            return;
+        }
+
+        const result = await confirmPayment(
+            leaseId,
+            transactionId,
+            selectedMonth,
+            selectedYear
+        );
+
+        if (!result.success) {
+            toast.error(result.error || 'Erreur inconnue');
+            return;
+        }
+
+        // --- OPTIMISTIC UPDATE ---
+        const txIndex = localTransactions.findIndex(t =>
+            (transactionId && t.id === transactionId) ||
+            (!transactionId && t.lease_id === leaseId && t.period_month === selectedMonth && t.period_year === selectedYear)
+        );
+
+        const updatedTx: Transaction = txIndex >= 0
+            ? { ...localTransactions[txIndex], status: 'paid', amount_paid: tenant.rentAmount, amount_due: tenant.rentAmount }
+            : {
+                id: transactionId || `temp-${Date.now()}`,
+                lease_id: leaseId,
+                period_month: selectedMonth,
+                period_year: selectedYear,
+                status: 'paid',
+                amount_due: tenant.rentAmount,
+                amount_paid: tenant.rentAmount,
+                paid_at: new Date().toISOString()
+            };
+
+        if (txIndex >= 0) {
+            const newTxs = [...localTransactions];
+            newTxs[txIndex] = updatedTx;
+            setLocalTransactions(newTxs);
+        } else {
+            setLocalTransactions([...localTransactions, updatedTx]);
+        }
+        // ------------------------
+
+        const shouldSendReceipt = window.confirm(
+            `Le loyer est marqué comme payé. Envoyer la quittance par email à ${tenant.name} ?`
+        );
+
+        if (shouldSendReceipt) {
+            if (!tenant.email) {
+                toast.error('Email manquant pour ce locataire');
+                return;
+            }
+
+            const periodMonth = tenant.period_month?.toString().padStart(2, '0') || '01';
+            const periodYear = tenant.period_year || new Date().getFullYear();
+            const periodStartDate = tenant.period_start
+                ? new Date(tenant.period_start)
+                : new Date(periodYear, parseInt(periodMonth) - 1, 1);
+            const periodEndDate = tenant.period_end
+                ? new Date(tenant.period_end)
+                : new Date(periodYear, parseInt(periodMonth), 0);
+
+            const receiptData = {
+                tenantName: tenant.name,
+                tenantEmail: tenant.email,
+                tenantPhone: tenant.phone || '',
+                tenantAddress: tenant.property,
+                amount: Number(tenant.rentAmount) || 0,
+                periodMonth: `${periodMonth}/${periodYear}`,
+                periodStart: periodStartDate.toLocaleDateString('fr-FR'),
+                periodEnd: periodEndDate.toLocaleDateString('fr-FR'),
+                receiptNumber: `QUITT-${Date.now().toString().slice(-6)}`,
+                ownerName: profile?.company_name || profile?.full_name || "Propriétaire",
+                ownerAddress: profile?.company_address || "Adresse non renseignée",
+                ownerNinea: profile?.company_ninea || undefined,
+                ownerLogo: profile?.logo_url || undefined,
+                ownerSignature: profile?.signature_url || undefined,
+                ownerEmail: profile?.company_email || undefined,
+                ownerAccountEmail: userEmail || undefined,
+                propertyAddress: tenant.property,
+            };
+
+            toast.promise(
+                fetch('/api/send-receipt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(receiptData),
+                }).then(async (res) => {
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || 'Erreur lors de l\'envoi');
+                    return data;
+                }),
+                {
+                    loading: 'Envoi de la quittance...',
+                    success: 'Quittance envoyée !',
+                    error: (err) => `Erreur: ${err.message}`,
+                }
+            );
+        } else {
+            toast.success(result.message || "Paiement enregistré !");
+        }
+
+        // Background refresh to true data
+        router.refresh();
+    };
+
+    const handleViewReceipt = (tenant: Tenant) => {
+        const periodMonth = tenant.period_month?.toString().padStart(2, '0') || '01';
+        const periodYear = tenant.period_year || new Date().getFullYear();
+
+        setCurrentReceipt({
+            tenant: {
+                tenant_name: tenant.name,
+                email: tenant.email,
+                phone: tenant.phone,
+                address: tenant.property
+            },
+            profile: {
+                company_name: profile?.company_name || profile?.full_name || "Propriétaire",
+                company_address: profile?.company_address || "Adresse non renseignée",
+                company_email: profile?.company_email || undefined,
+                company_ninea: profile?.company_ninea || undefined,
+                logo_url: profile?.logo_url || undefined,
+                signature_url: profile?.signature_url || undefined
+            },
+            userEmail: userEmail,
+            amount: tenant.rentAmount,
+            month: periodMonth,
+            year: periodYear,
+            property_address: tenant.property
+        });
+        setIsReceiptOpen(true);
+    };
+
+    const handleTerminateLease = async (leaseId: string, tenantName: string) => {
+        const confirmed = window.confirm(
+            `⚠️ Voulez-vous vraiment résilier le bail de ${tenantName} ?`
+        );
+        if (!confirmed) return;
+
+        setSaving(true);
+        const result = await terminateLease(leaseId);
+        setSaving(false);
+
+        if (result.success) {
+            toast.success(result.message || 'Bail résilié');
+            window.location.reload();
+        } else {
+            toast.error(result.error || 'Erreur');
+        }
+    };
+
+    const handleReactivateLease = async (leaseId: string, tenantName: string) => {
+        const confirmed = window.confirm(
+            `✅ Réactiver le bail de ${tenantName} ?`
+        );
+        if (!confirmed) return;
+
+        setSaving(true);
+        const result = await reactivateLease(leaseId);
+        setSaving(false);
+
+        if (result.success) {
+            toast.success(result.message || 'Bail réactivé');
+            window.location.reload();
+        } else {
+            toast.error(result.error || 'Erreur');
+        }
+    };
+
+    const handleInvite = async (leaseId: string) => {
+        toast.promise(sendTenantInvitation(leaseId), {
+            loading: 'Envoi de l\'invitation...',
+            success: (data) => {
+                if (!data.success) throw new Error(data.error);
+                return data.message || 'Invitation envoyée avec succès';
+            },
+            error: (err) => `Erreur: ${err.message}`
+        });
+    };
+
+    const handleSendReminders = async () => {
+        // Optimistic UI interaction
+        const promise = processLateReminders();
+
+        toast.promise(promise, {
+            loading: 'Envoi des relances...',
+            success: (result) => {
+                if (result.count > 0) {
+                    return `✅ ${result.count} relance(s) envoyée(s)`;
+                } else {
+                    return 'ℹ️ Aucune relance à envoyer';
+                }
+            },
+            error: '❌ Erreur lors de l\'envoi'
+        });
+
+        try {
+            await promise;
+            router.refresh(); // Refresh to update reminder status/counts
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    return (
+        <div className="space-y-0 w-full">
+            <ReceiptModal
+                isOpen={isReceiptOpen}
+                onClose={() => setIsReceiptOpen(false)}
+                data={currentReceipt}
+            />
+
+            {/* Premium Onboarding Tour (Style HP OMEN) */}
+            <OnboardingTour
+                steps={premiumTourSteps}
+                isOpen={showTour}
+                onClose={closeTour}
+                onComplete={closeTour}
+                storageKey="dousell_gestion_premium_tour"
+            />
+
+            {/* ========================================
+                DASHBOARD STATS - Style Noflaye
+                ======================================== */}
+            <div id="tour-stats">
+                <DashboardStats
+                    stats={{
+                        totalExpected: kpiStats.totalExpected,
+                        totalCollected: kpiStats.totalCollected,
+                        totalPending: kpiStats.totalPending,
+                        paidCount: kpiStats.paidCount,
+                        pendingCount: kpiStats.pendingCount,
+                        overdueCount: kpiStats.overdueCount,
+                        collectedPercent: kpiStats.collectedPercent,
+                        totalTenants: leases.length,
+                    }}
+                    onFilterChange={setFilterStatus}
+                    activeFilter={filterStatus}
+                />
+            </div>
+
+            {/* ========================================
+                QUICK ACTIONS - Style Noflaye
+                ======================================== */}
+            <QuickActions
+                onExportCSV={handleExportCSV}
+                pendingCount={kpiStats.pendingCount}
+                overdueCount={kpiStats.overdueCount}
+                onSendReminders={handleSendReminders}
+                ownerId={ownerId}
+                profile={profile}
+            />
+
+            {/* ========================================
+                BARRE DE CONTRÔLES
+                ======================================== */}
+            <div className="flex flex-col gap-3 mb-4">
+                {/* Ligne 1: Recherche + Relances */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                    {/* Recherche */}
+                    <div className={`flex-1 flex items-center gap-2 rounded-md px-3 h-9 border min-w-0 transition-colors ${isDark
+                        ? 'bg-black border-slate-800 focus-within:border-slate-700'
+                        : 'bg-white border-gray-200 focus-within:border-gray-400'
+                        }`}>
+                        <Search className={`h-4 w-4 shrink-0 ${isDark ? 'text-slate-500' : 'text-gray-500'}`} />
+                        <input
+                            type="text"
+                            placeholder="Rechercher..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className={`flex-1 bg-transparent text-sm outline-none min-w-0 ${isDark
+                                ? 'text-white placeholder:text-slate-600'
+                                : 'text-gray-900 placeholder:text-gray-400'
+                                }`}
+                        />
+                    </div>
+
+
+                </div>
+
+                {/* Ligne 2: Sélecteur de mois (gauche) + CSV (droite) */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
+                    {/* Sélecteur de mois - Aligné à gauche */}
+                    <MonthSelector
+                        selectedMonth={selectedMonth}
+                        selectedYear={selectedYear}
+                        onMonthChange={handleMonthChange}
+                        minDate={minDate}
+                    />
+
+                    {/* View Toggle + Export CSV */}
+                    <div className="flex items-center gap-2">
+                        {/* View Mode Toggle */}
+                        <div className={`flex items-center rounded-lg p-0.5 border ${isDark ? 'bg-black border-slate-800' : 'bg-gray-100 border-gray-200'
+                            }`}>
+                            <button
+                                onClick={() => setViewMode('cards')}
+                                className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards'
+                                    ? 'bg-blue-500/10 text-blue-400'
+                                    : isDark
+                                        ? 'text-slate-500 hover:text-slate-300'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                                title="Vue cartes"
+                            >
+                                <LayoutGrid className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('table')}
+                                className={`p-1.5 rounded-md transition-colors ${viewMode === 'table'
+                                    ? 'bg-blue-500/10 text-blue-400'
+                                    : isDark
+                                        ? 'text-slate-500 hover:text-slate-300'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                                title="Vue tableau"
+                            >
+                                <List className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Bouton Export CSV */}
+                        <Button
+                            id="tour-export-csv"
+                            onClick={handleExportCSV}
+                            variant="outline"
+                            size="sm"
+                            className={`h-9 px-3 shrink-0 ${isDark
+                                ? 'bg-black border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-white'
+                                : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                                }`}
+                            disabled={formattedTenants.length === 0}
+                        >
+                            <Download className="w-4 h-4 mr-2" />
+                            CSV
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* ========================================
+                TENANT VIEW - Cards or Table
+                ======================================== */}
+            <div id="tour-tenants-list">
+                <div id="tour-add-tenant">
+                    {viewMode === 'cards' ? (
+                        <TenantCardGrid
+                            tenants={filteredTenants}
+                            onEdit={(tenant) => setEditingTenant(tenant)}
+                            ownerId={ownerId}
+                            isViewingTerminated={isViewingTerminated}
+                            searchQuery={searchQuery}
+                            onConfirmPayment={handleConfirmPayment}
+                            onViewReceipt={handleViewReceipt}
+                            onTerminate={handleTerminateLease}
+                            onReactivate={handleReactivateLease}
+                            onInvite={handleInvite}
+                        />
+                    ) : (
+                        <TenantTable
+                            tenants={filteredTenants}
+                            profile={profile}
+                            userEmail={userEmail}
+                            ownerId={ownerId}
+                            isViewingTerminated={isViewingTerminated}
+                            searchQuery={searchQuery}
+                            onEdit={(tenant) => setEditingTenant(tenant)}
+                            onDelete={deleteTransaction}
+                            onDeleteLease={deleteLease}
+                            onConfirmPayment={handleConfirmPayment}
+                            onViewReceipt={handleViewReceipt}
+                            onTerminate={handleTerminateLease}
+                            onReactivate={handleReactivateLease}
+                            onInvite={handleInvite}
+                        />
+                    )}
+                </div>
+            </div>
+
+            {/* Modale d'édition */}
+            {editingTenant && (
+                <EditTenantDialog
+                    isOpen={!!editingTenant}
+                    onClose={() => setEditingTenant(null)}
+                    tenant={editingTenant}
+                />
+            )}
+
+            {/* Bouton pour relancer le tour */}
+            <button
+                onClick={resetTour}
+                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${isDark
+                    ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
+                    : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
+                    }`}
+                title="Relancer le tutoriel"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <path d="M12 17h.01" />
+                </svg>
+            </button>
+        </div>
+    );
+}
