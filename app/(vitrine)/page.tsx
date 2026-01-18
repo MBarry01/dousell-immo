@@ -55,47 +55,49 @@ export default async function Home() {
       {/* Sections de propriétés style Netflix/Airbnb */}
       <div className="space-y-12 pb-4 pt-8">
         {/* Section 1: Locations populaires */}
-        {locations.length > 0 && (
+        {locations.properties.length > 0 && (
           <PropertySection
             title="Locations populaires · Dakar"
-            subtitle={`${locations.length} biens disponibles`}
-            properties={locations}
+            subtitle={`${locations.total} biens disponibles`}
+            properties={locations.properties}
             href="/recherche?category=location&city=Dakar"
             limit={8}
           />
         )}
 
         {/* Section 2: Ventes (Villas & Studios) */}
-        {ventes.length > 0 && (
+        {ventes.properties.length > 0 && (
           <PropertySection
             title="Devenez propriétaire · Villas & Studios"
-            subtitle={`${ventes.length} biens à vendre`}
-            properties={ventes}
+            subtitle={`${ventes.total} biens à vendre`}
+            properties={ventes.properties}
             href="/recherche?category=vente"
           />
         )}
 
         {/* Section 3: Terrains */}
-        {terrains.length > 0 && (
+        {terrains.properties.length > 0 && (
           <PropertySection
             title="Terrains à vendre · Investissement"
-            subtitle={`${terrains.length} terrains disponibles`}
-            properties={terrains}
+            subtitle={`${terrains.total} terrains disponibles`}
+            properties={terrains.properties}
             href="/recherche?category=vente&type=terrain"
           />
         )}
 
         {/* Message si aucune section n'a de résultats */}
-        {locations.length === 0 && ventes.length === 0 && terrains.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-lg text-white/70">
-              Aucun bien disponible pour le moment.
-            </p>
-            <p className="mt-2 text-sm text-white/50">
-              Revenez bientôt pour découvrir nos nouvelles offres.
-            </p>
-          </div>
-        )}
+        {locations.properties.length === 0 &&
+          ventes.properties.length === 0 &&
+          terrains.properties.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-lg text-white/70">
+                Aucun bien disponible pour le moment.
+              </p>
+              <p className="mt-2 text-sm text-white/50">
+                Revenez bientôt pour découvrir nos nouvelles offres.
+              </p>
+            </div>
+          )}
       </div>
     </div>
   );
