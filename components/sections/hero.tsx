@@ -71,12 +71,12 @@ export const HeroSection = () => {
           <div className="space-y-4">
             <FadeIn delay={0.2}>
               <h1 className="text-4xl font-semibold leading-tight text-white">
-                Achète ou investis en toute confiance au Sénégal
+                Immobilier au Sénégal : Achète ou investis en toute confiance
               </h1>
             </FadeIn>
             <FadeIn delay={0.3}>
-              <p className="text-lg text-white/90">
-                Villas, terrains et appartements à Dakar et sur la Petite Côte.
+              <p className="text-lg text-white/90 max-w-xl">
+                Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte, Dousell Immo s&apos;impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l&apos;achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.
               </p>
             </FadeIn>
           </div>
@@ -108,12 +108,12 @@ export const HeroSection = () => {
           <div className="space-y-4">
             <FadeIn delay={0.2}>
               <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
-                Achète ou investis en toute confiance au Sénégal
+                Immobilier au Sénégal : Achète ou investis en toute confiance
               </h1>
             </FadeIn>
             <FadeIn delay={0.3}>
               <p className="text-lg text-white/70 sm:text-xl">
-                Villas, terrains et appartements à Dakar et sur la Petite Côte.
+                Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte, Dousell Immo s&apos;impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l&apos;achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.
               </p>
             </FadeIn>
           </div>

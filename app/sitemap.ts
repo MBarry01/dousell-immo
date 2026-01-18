@@ -28,8 +28,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             url: `${baseUrl}/landing`,
             lastModified: new Date(),
             changeFrequency: 'weekly',
+            priority: 0.9,
+        },
+        // Nouvelles pages landing
+        {
+            url: `${baseUrl}/landing/a-propos`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.7,
+        },
+        {
+            url: `${baseUrl}/landing/blog`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
             priority: 0.8,
         },
+        {
+            url: `${baseUrl}/landing/carrieres`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.6,
+        },
+        {
+            url: `${baseUrl}/landing/investissement`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.7,
+        },
+        {
+            url: `${baseUrl}/landing/syndic`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.7,
+        },
+        {
+            url: `${baseUrl}/landing/signup`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
+        // Pages légales et informatives
         {
             url: `${baseUrl}/a-propos`,
             lastModified: new Date(),

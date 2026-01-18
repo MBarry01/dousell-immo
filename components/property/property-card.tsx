@@ -6,14 +6,12 @@ import { Bookmark, Bed, Bath, Square, MapPin } from "lucide-react";
 
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ListingImageCarousel } from "@/components/property/listing-image-carousel";
 import { cn, formatCurrency } from "@/lib/utils";
 import { hapticFeedback } from "@/lib/haptic";
 import { useFavoritesStore } from "@/store/use-store";
 import type { Property } from "@/types/property";
-import Link from "next/link";
 
 type PropertyCardProps = {
   property: Property;
@@ -122,10 +120,12 @@ export const PropertyCard = ({
     <article
       className={cn(
         // Mobile: largeur fixe pour scroll horizontal
-        "group relative flex w-72 flex-none flex-col overflow-hidden rounded-[28px] bg-background border border-white/10 p-3 text-white transition-all duration-200 hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 active:scale-[0.99] isolate",
+        "group relative flex w-72 flex-none flex-col overflow-hidden rounded-[28px] bg-background border border-white/10 p-3 text-white transition-all duration-200 hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 active:scale-[0.99] isolate cursor-pointer",
         // Desktop: dans une grille, la largeur est gérée par la grille CSS automatiquement
         className
       )}
+      onClick={handleCardClick}
+      role="article"
     >
       <div
         className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] z-10"
@@ -206,38 +206,7 @@ export const PropertyCard = ({
             </span>
           )}
         </div>
-        <div className="pt-2 pointer-events-auto">
-          <Button
-            variant="secondary"
-            className="w-full justify-between rounded-2xl bg-primary text-black hover:bg-primary/90 font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(`/biens/${property.id}`);
-            }}
-          >
-            Découvrir
-            <span aria-hidden>→</span>
-          </Button>
-        </div>
       </div>
-      {/* Zone cliquable uniquement sur la partie inférieure (sous le carousel) */}
-      <div
-        className="absolute bottom-0 left-0 right-0 z-5 cursor-pointer"
-        style={{
-          top: 'calc(100% * 0.65)', // Après le carousel (aspect 4/3 + padding ≈ 65% de la hauteur)
-          pointerEvents: 'auto'
-        }}
-        onClick={handleCardClick}
-        aria-label={`Voir ${property.title}`}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            router.push(`/biens/${property.id}`);
-          }
-        }}
-      />
     </article>
   );
 };

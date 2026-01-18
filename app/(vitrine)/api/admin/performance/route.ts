@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAnyRole } from "@/lib/permissions";
-import { getPerformanceStats } from "@/app/(vitrine)/admin/actions";
+import { getPerformanceStats } from "@/app/(workspace)/admin/actions";
 
 /**
  * Route API pour récupérer les statistiques de performance selon la période

@@ -3,6 +3,16 @@ import { getFeaturedProperties, getLatestProperties } from "@/services/propertyS
 
 export const dynamic = "force-dynamic";
 
+// Mapper les données DB vers le format frontend attendu
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapPropertyForFrontend(property: any) {
+  return {
+    ...property,
+    // Mapper 'category' (DB) vers 'transaction' (frontend)
+    transaction: property.category || "location",
+  };
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -19,7 +29,10 @@ export async function GET(request: Request) {
       properties = [...properties, ...additionalProperties].slice(0, limit);
     }
 
-    return NextResponse.json({ properties });
+    // Mapper les propriétés pour le frontend
+    const mappedProperties = properties.map(mapPropertyForFrontend);
+
+    return NextResponse.json({ properties: mappedProperties });
   } catch (error) {
     console.error("Error fetching featured properties:", error);
     return NextResponse.json({ properties: [], error: "Erreur lors du chargement" }, { status: 500 });

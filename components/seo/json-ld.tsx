@@ -37,6 +37,12 @@ interface RealEstateJsonLdProps {
     };
 }
 
+// FAQ Item interface for FAQPage schema
+interface FAQItem {
+    question: string;
+    answer: string;
+}
+
 export function RealEstateJsonLd({
     type = 'RealEstateAgent',
     name = 'Dousell Immo',
@@ -211,5 +217,263 @@ export function LandingPageJsonLd() {
                 }}
             />
         </>
+    );
+}
+
+// FAQPage JSON-LD pour rich snippets Google
+export function FAQPageJsonLd({ faqs }: { faqs: FAQItem[] }) {
+    const faqSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((faq) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+                '@type': 'Answer',
+                text: faq.answer,
+            },
+        })),
+    };
+
+    return (
+        <Script
+            id="faq-jsonld"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+                __html: JSON.stringify(faqSchema),
+            }}
+        />
+    );
+}
+
+// BreadcrumbList JSON-LD pour navigation
+export function BreadcrumbJsonLd({ items }: { items: { name: string; url: string }[] }) {
+    const breadcrumbSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: items.map((item, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: item.name,
+            item: item.url,
+        })),
+    };
+
+    return (
+        <Script
+            id="breadcrumb-jsonld"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+                __html: JSON.stringify(breadcrumbSchema),
+            }}
+        />
+    );
+}
+
+// HowTo JSON-LD pour guides et tutoriels (rich snippets Google)
+interface HowToStep {
+    name: string;
+    text: string;
+    image?: string;
+}
+
+export function HowToJsonLd({
+    name,
+    description,
+    steps,
+    totalTime,
+    image
+}: {
+    name: string;
+    description: string;
+    steps: HowToStep[];
+    totalTime?: string; // Format ISO 8601: PT30M = 30 minutes
+    image?: string;
+}) {
+    const howToSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name,
+        description,
+        ...(image && { image }),
+        ...(totalTime && { totalTime }),
+        step: steps.map((step, index) => ({
+            '@type': 'HowToStep',
+            position: index + 1,
+            name: step.name,
+            text: step.text,
+            ...(step.image && { image: step.image }),
+        })),
+    };
+
+    return (
+        <Script
+            id="howto-jsonld"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+                __html: JSON.stringify(howToSchema),
+            }}
+        />
+    );
+}
+
+// Review/Aggregated Rating JSON-LD pour les avis
+export function AggregateRatingJsonLd({
+    itemName,
+    itemType = 'Organization',
+    ratingValue,
+    reviewCount,
+    bestRating = 5,
+    worstRating = 1
+}: {
+    itemName: string;
+    itemType?: string;
+    ratingValue: number;
+    reviewCount: number;
+    bestRating?: number;
+    worstRating?: number;
+}) {
+    const ratingSchema = {
+        '@context': 'https://schema.org',
+        '@type': itemType,
+        name: itemName,
+        aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue,
+            reviewCount,
+            bestRating,
+            worstRating,
+        },
+    };
+
+    return (
+        <Script
+            id="aggregate-rating-jsonld"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+                __html: JSON.stringify(ratingSchema),
+            }}
+        />
+    );
+}
+
+// LocalBusiness JSON-LD pour SEO local Sénégal
+export function LocalBusinessJsonLd() {
+    const localBusinessSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'RealEstateAgent',
+        '@id': 'https://dousell-immo.app/#organization',
+        name: 'Dousell Immo',
+        alternateName: 'Dousell Immobilier Sénégal',
+        description: "Plateforme de gestion locative et annonces immobilières au Sénégal. Villas, appartements et terrains à Dakar, Saly, Thiès.",
+        url: 'https://dousell-immo.app',
+        logo: {
+            '@type': 'ImageObject',
+            url: 'https://dousell-immo.app/icons/icon-512.png',
+            width: 512,
+            height: 512,
+        },
+        image: 'https://dousell-immo.app/og-landing.png',
+        telephone: '+221338600000',
+        email: 'contact@dousell.immo',
+        address: {
+            '@type': 'PostalAddress',
+            streetAddress: 'Sacré-Cœur 3, VDN',
+            addressLocality: 'Dakar',
+            addressRegion: 'Dakar',
+            postalCode: '10000',
+            addressCountry: 'SN',
+        },
+        geo: {
+            '@type': 'GeoCoordinates',
+            latitude: 14.7167,
+            longitude: -17.4677,
+        },
+        areaServed: [
+            {
+                '@type': 'City',
+                name: 'Dakar',
+                '@id': 'https://www.wikidata.org/wiki/Q3718',
+            },
+            {
+                '@type': 'City',
+                name: 'Saly',
+            },
+            {
+                '@type': 'City',
+                name: 'Thiès',
+            },
+            {
+                '@type': 'City',
+                name: 'Saint-Louis',
+            },
+            {
+                '@type': 'Country',
+                name: 'Sénégal',
+            },
+        ],
+        priceRange: 'CFA 50 000 - CFA 500 000 000',
+        currenciesAccepted: 'XOF',
+        paymentAccepted: 'Mobile Money, Carte bancaire, Virement',
+        openingHoursSpecification: [
+            {
+                '@type': 'OpeningHoursSpecification',
+                dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                opens: '08:00',
+                closes: '18:00',
+            },
+            {
+                '@type': 'OpeningHoursSpecification',
+                dayOfWeek: 'Saturday',
+                opens: '09:00',
+                closes: '13:00',
+            },
+        ],
+        sameAs: [
+            'https://www.facebook.com/dousellimmo',
+            'https://www.instagram.com/dousellimmo',
+            'https://twitter.com/dousell_immo',
+            'https://www.linkedin.com/company/dousell-immo',
+        ],
+        hasOfferCatalog: {
+            '@type': 'OfferCatalog',
+            name: 'Services Immobiliers',
+            itemListElement: [
+                {
+                    '@type': 'Offer',
+                    itemOffered: {
+                        '@type': 'Service',
+                        name: 'Gestion Locative',
+                        description: 'Gestion complète de vos biens: loyers, contrats, quittances automatiques',
+                    },
+                },
+                {
+                    '@type': 'Offer',
+                    itemOffered: {
+                        '@type': 'Service',
+                        name: 'Location Immobilière',
+                        description: 'Appartements, villas et studios à louer à Dakar et Saly',
+                    },
+                },
+                {
+                    '@type': 'Offer',
+                    itemOffered: {
+                        '@type': 'Service',
+                        name: 'Vente Immobilière',
+                        description: 'Terrains et propriétés à vendre au Sénégal',
+                    },
+                },
+            ],
+        },
+    };
+
+    return (
+        <Script
+            id="local-business-jsonld"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+                __html: JSON.stringify(localBusinessSchema),
+            }}
+        />
     );
 }

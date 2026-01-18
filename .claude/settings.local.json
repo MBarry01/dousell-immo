@@ -58,7 +58,8 @@
       "Bash(if not exist \"c:\\\\Users\\\\Barry\\\\Downloads\\\\Doussel_immo\\\\components\\\\landing\" mkdir \"c:\\\\Users\\\\Barry\\\\Downloads\\\\Doussel_immo\\\\components\\\\landing\")",
       "Bash(dir:*)",
       "Bash(git push:*)",
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Bash(npx next dev:*)"
     ]
   }
 }

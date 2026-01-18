@@ -57,13 +57,27 @@ export async function updateSession(request: NextRequest) {
     console.warn("Middleware: Error getting user (this is OK if Supabase is not configured):", error);
   }
 
+  // Routes protégées (workspace)
+  const protectedPaths = [
+    "/compte",
+    "/admin",
+    "/gestion",        // Nouveau chemin workspace
+    "/locataire",      // Nouveau chemin workspace
+    "/gestion-locative", // Legacy (sera redirigé)
+    "/etats-lieux",      // Legacy (sera redirigé)
+    "/interventions",    // Legacy (sera redirigé)
+  ];
+
+  const isProtectedRoute = protectedPaths.some(path =>
+    request.nextUrl.pathname.startsWith(path)
+  );
+
   if (
     !user &&
     !request.nextUrl.pathname.startsWith("/login") &&
     !request.nextUrl.pathname.startsWith("/register") &&
     !request.nextUrl.pathname.startsWith("/auth") &&
-    (request.nextUrl.pathname.startsWith("/compte") ||
-      request.nextUrl.pathname.startsWith("/admin"))
+    isProtectedRoute
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();

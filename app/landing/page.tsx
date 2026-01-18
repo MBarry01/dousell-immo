@@ -311,7 +311,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 w-full h-full will-change-transform">
           <Image
             src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80"
-            alt=""
+            alt="Villa de luxe au Sénégal - Immobilier Dakar"
             fill
             priority
             fetchPriority="high"
@@ -620,7 +620,7 @@ export default function LandingPage() {
           >
             <Image
               src="/couv.png"
-              alt="Dashboard Dousell Immo"
+              alt="Dashboard de gestion locative Dousell Immo - Interface propriétaire Sénégal"
               height={2160}
               width={1400}
               className="mx-auto rounded-2xl w-full block"
@@ -708,7 +708,7 @@ export default function LandingPage() {
                   <div className="relative bg-zinc-900 rounded-lg md:rounded-xl overflow-hidden">
                     <Image
                       src="/images/dasboard.webp"
-                      alt="Dashboard Gestion Locative"
+                      alt="Tableau de bord gestion locative - Suivi loyers et locataires Dakar Sénégal"
                       width={1200}
                       height={750}
                       className="w-full h-auto"

@@ -156,13 +156,20 @@ export async function getPropertiesWithFilters(
       }
 
       // Support pour types multiples
+      // On cherche dans details->>type ET property_type car certains biens (terrains) n'ont que property_type
+      // Support pour types multiples
+      // On cherche dans details->>type ET property_type car certains biens (terrains) n'ont que property_type
       if (filters.types && filters.types.length > 0) {
         const orConditions = filters.types
-          .map((type) => `details->>type.eq.${type}`)
+          .flatMap((type) => [
+            `details->>type.ilike.${type}`,
+            `property_type.ilike.${type}`
+          ])
           .join(",");
         query = query.or(orConditions);
       } else if (filters.type) {
-        query = query.eq("details->>type", filters.type);
+        // Chercher dans details.type OU property_type (case-insensitive)
+        query = query.or(`details->>type.ilike.${filters.type},property_type.ilike.${filters.type}`);
       }
 
       query = query.order("created_at", { ascending: false });
@@ -178,7 +185,7 @@ export async function getPropertiesWithFilters(
     },
     {
       ttl: 300, // 5 minutes
-      namespace: "properties",
+      namespace: "properties_v2", // Force refresh
       debug: true,
     }
   );
@@ -218,6 +225,9 @@ export async function getPropertiesByOwner(
 /**
  * ⭐ Récupérer les biens en vedette (avec cache)
  *
+ * Critères : biens approuvés, disponibles, avec service premium (boost_visibilite)
+ * Fallback : les biens les plus récents si pas assez de biens premium
+ *
  * TTL : 30 minutes (change rarement, beaucoup de lectures)
  * Cache key : `featured`
  */
@@ -229,16 +239,39 @@ export async function getFeaturedProperties(
     async () => {
       const supabase = await createClient();
 
-      const { data, error } = await supabase
+      // Priorité aux biens avec service premium (boost_visibilite)
+      const { data: premiumData, error: premiumError } = await supabase
         .from("properties")
         .select("*")
         .eq("status", "disponible")
-        .eq("featured", true)
+        .eq("validation_status", "approved")
+        .eq("service_type", "boost_visibilite")
         .order("created_at", { ascending: false })
         .limit(limit);
 
-      if (error) throw error;
-      return (data || []) as Property[];
+      if (premiumError) throw premiumError;
+
+      // Si assez de biens premium, retourner directement
+      if (premiumData && premiumData.length >= limit) {
+        return premiumData as Property[];
+      }
+
+      // Sinon, compléter avec les biens récents approuvés
+      const remaining = limit - (premiumData?.length || 0);
+      const premiumIds = premiumData?.map(p => p.id) || [];
+
+      const { data: recentData, error: recentError } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("status", "disponible")
+        .eq("validation_status", "approved")
+        .not("id", "in", `(${premiumIds.length > 0 ? premiumIds.join(",") : "00000000-0000-0000-0000-000000000000"})`)
+        .order("created_at", { ascending: false })
+        .limit(remaining);
+
+      if (recentError) throw recentError;
+
+      return [...(premiumData || []), ...(recentData || [])] as Property[];
     },
     {
       ttl: 1800, // 30 minutes

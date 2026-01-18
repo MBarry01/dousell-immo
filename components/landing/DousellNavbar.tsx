@@ -14,9 +14,9 @@ const dousellConfig: NavbarConfig = {
     firstGroup: {
       title: "Immobilier",
       items: [
-        { title: "Acheter un bien", href: "/annonces?type=achat" },
-        { title: "Louer un bien", href: "/annonces?type=location" },
-        { title: "Vendre mon bien", href: "/vendre" },
+        { title: "Acheter un bien", href: "/recherche?transaction=vente" },
+        { title: "Louer un bien", href: "/recherche?transaction=location" },
+        { title: "Vendre mon bien", href: "/compte/deposer" },
         { title: "Faire estimer", href: "/estimation" },
       ],
     },
@@ -26,28 +26,28 @@ const dousellConfig: NavbarConfig = {
       items: [
         {
           title: "Gestion Locative",
-          href: "/gestion-locative",
+          href: "/gestion",
           src: "/images/gestionNav1.webp",
           description:
             "Automatisez l'envoi des quittances et encaissez vos loyers sans stress.",
         },
         {
           title: "Espace Locataire",
-          href: "/portal",
+          href: "/locataire",
           src: "/images/payement.webp",
           description:
             "Payez votre loyer en 1 clic (Wave/OM) et téléchargez vos contrats.",
         },
         {
           title: "Syndic de Copro",
-          href: "/syndic",
+          href: "/landing/syndic",
           src: "/images/copro.webp",
           description:
             "Une gestion transparente, des AG en ligne et une comptabilité claire.",
         },
         {
           title: "Investissement",
-          href: "/investissement",
+          href: "/landing/investissement",
           src: "/images/Invesstissement.webp",
           description:
             "Projets clés en main à haute rentabilité locative au Sénégal.",
@@ -58,16 +58,16 @@ const dousellConfig: NavbarConfig = {
     lastGroup: {
       title: "Dousell",
       items: [
-        { title: "Qui sommes-nous ?", href: "/apropos" },
+        { title: "Qui sommes-nous ?", href: "/landing/a-propos" },
         { title: "Nous contacter", href: "#contact" },
-        { title: "Blog Immobilier", href: "/blog" },
-        { title: "Recrutement", href: "/carrieres" },
+        { title: "Blog Immobilier", href: "/landing/blog" },
+        { title: "Recrutement", href: "/landing/carrieres" },
       ],
     },
   },
   cta: {
     text: "Commencer",
-    href: "/auth/signup",
+    href: "/landing/signup",
   },
 };
 

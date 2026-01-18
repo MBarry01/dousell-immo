@@ -111,7 +111,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <button
-          className="relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+          className="relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 text-foreground"
           aria-label="Notifications"
           onClick={() => {
             // Forcer un refetch quand on ouvre le popover
@@ -120,27 +120,27 @@ export function NotificationBell({ userId }: NotificationBellProps) {
             }
           }}
         >
-          <Bell className="h-5 w-5 text-white" />
+          <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white animate-pulse">
+            <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground animate-pulse">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-96 max-w-[90vw] p-0 rounded-2xl border border-white/10 bg-[#05080c] text-white shadow-2xl z-[100]"
+        className="w-96 max-w-[90vw] p-0 rounded-2xl border border-border bg-popover text-popover-foreground shadow-2xl z-[100]"
         align="end"
         sideOffset={8}
       >
         <div className="flex flex-col">
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-            <h3 className="text-sm font-semibold text-white">Notifications</h3>
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
             <Button
               variant="ghost"
               size="sm"
               disabled={unreadCount === 0}
-              className="h-auto gap-1 px-2 py-1 text-xs text-white/70 hover:text-white disabled:cursor-not-allowed disabled:text-white/30"
+              className="h-auto gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:text-muted-foreground/50"
               onClick={handleMarkAllAsRead}
             >
               <CheckCheck className="h-3 w-3" />
@@ -155,12 +155,12 @@ export function NotificationBell({ userId }: NotificationBellProps) {
               </div>
             ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 px-6 text-center">
-                <BellOff className="mb-3 h-8 w-8 text-white/40" />
-                <p className="text-sm font-medium text-white">Vous êtes à jour</p>
-                <p className="text-xs text-white/50">Revenez plus tard pour de nouvelles alertes.</p>
+                <BellOff className="mb-3 h-8 w-8 text-muted-foreground" />
+                <p className="text-sm font-medium text-foreground">Vous êtes à jour</p>
+                <p className="text-xs text-muted-foreground">Revenez plus tard pour de nouvelles alertes.</p>
               </div>
             ) : (
-              <div className="divide-y divide-white/5">
+              <div className="divide-y divide-border">
                 <AnimatePresence mode="popLayout">
                   {notifications.map((notification) => {
                     const Icon = notificationIcons[notification.type];
@@ -173,8 +173,8 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         className={cn(
-                          "flex gap-4 p-4 transition-colors hover:bg-white/5 cursor-pointer relative border-b border-white/5 last:border-b-0",
-                          !notification.is_read && "bg-white/5"
+                          "flex gap-4 p-4 transition-colors hover:bg-muted/50 cursor-pointer relative",
+                          !notification.is_read && "bg-muted/30"
                         )}
                         onClick={() => handleNotificationClick(notification)}
                       >
@@ -188,17 +188,17 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                         </div>
                         <div className="flex-1 min-w-0 space-y-2">
                           <div className="flex items-start justify-between gap-3">
-                            <p className="text-sm font-medium leading-tight text-white">
+                            <p className="text-sm font-medium leading-tight text-foreground">
                               {notification.title}
                             </p>
                             {!notification.is_read && (
-                              <span className="h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+                              <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
                             )}
                           </div>
-                          <p className="text-xs text-white/70 line-clamp-2">
+                          <p className="text-xs text-muted-foreground line-clamp-2">
                             {notification.message}
                           </p>
-                          <p className="text-[10px] uppercase tracking-wide text-white/40">
+                          <p className="text-[10px] uppercase tracking-wide text-muted-foreground/70">
                             {formatTimeAgo(notification.created_at)}
                           </p>
                         </div>

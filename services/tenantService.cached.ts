@@ -58,7 +58,8 @@ export async function getTenantDashboardData(userEmail: string) {
         .eq("status", "active")
         .maybeSingle();
 
-      if (error) {
+      // Ne logger que les vraies erreurs (pas les résultats vides)
+      if (error && error.code && error.code !== 'PGRST116') {
         console.error("Erreur récupération bail locataire:", error);
       }
 

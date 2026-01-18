@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { uploadVerificationDoc } from "@/app/(vitrine)/compte/mes-biens/actions";
+import { uploadVerificationDoc } from "@/app/(workspace)/compte/mes-biens/actions";
 
 type VerificationUploadFormProps = {
   propertyId: string;

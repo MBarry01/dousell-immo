@@ -3,7 +3,7 @@
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/app/(webapp)/theme-provider";
+
 
 interface EmptyStateProps {
   title: string;
@@ -32,28 +32,24 @@ export function EmptyState({
   className,
   children
 }: EmptyStateProps) {
-  const { isDark } = useTheme();
-
   return (
     <div className={cn(
       "flex flex-col items-center justify-center p-8 md:p-12 text-center rounded-2xl border-2 border-dashed transition-colors",
-      isDark
-        ? "border-slate-800 bg-slate-900/40"
-        : "border-gray-300 bg-gray-50/50",
+      "border-gray-300 bg-gray-50/50 dark:border-slate-800 dark:bg-slate-900/40",
       className
     )}>
       <div className="flex flex-col items-center max-w-md space-y-4">
         {/* Illustration / Icon */}
-        <div className={`p-4 rounded-full mb-2 ${isDark ? 'bg-slate-800/50' : 'bg-white shadow-sm border border-gray-100'}`}>
-          {children ? children : Icon && <Icon className={`w-8 h-8 md:w-10 md:h-10 ${isDark ? 'text-slate-400' : 'text-gray-400'}`} />}
+        <div className={`p-4 rounded-full mb-2 bg-white shadow-sm border border-gray-100 dark:bg-slate-800/50 dark:border-none`}>
+          {children ? children : Icon && <Icon className="w-8 h-8 md:w-10 md:h-10 text-gray-400 dark:text-slate-400" />}
         </div>
 
         {/* Text Content */}
         <div className="space-y-2">
-          <h3 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
             {title}
           </h3>
-          <p className={`text-sm md:text-base leading-relaxed ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+          <p className="text-sm md:text-base leading-relaxed text-gray-500 dark:text-slate-400">
             {description}
           </p>
         </div>
@@ -66,7 +62,7 @@ export function EmptyState({
             <Button
               onClick={onAction}
               size="lg"
-              className={`w-full sm:w-auto font-semibold ${isDark ? 'bg-[#F4C430] text-black hover:bg-[#F4C430]/90' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+              className="w-full sm:w-auto font-semibold bg-slate-900 text-white hover:bg-slate-800 dark:bg-[#F4C430] dark:text-black dark:hover:bg-[#F4C430]/90"
             >
               {actionLabel}
             </Button>
@@ -78,7 +74,7 @@ export function EmptyState({
             <Button
               variant="ghost"
               onClick={onSecondaryAction}
-              className={`w-full sm:w-auto ${isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'}`}
+              className="w-full sm:w-auto text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800"
             >
               {secondaryActionLabel}
             </Button>

@@ -1,5 +1,7 @@
+
+
 import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { getPropertiesCount, getProperties, type PropertyFilters } from "@/services/propertyService";
 
 export const dynamic = "force-dynamic";
 
@@ -8,62 +10,57 @@ type CategoryStats = {
   name: string;
   count: number;
   image: string | null;
-  searchType: string; // Type à utiliser dans l'URL de recherche
+  searchType: string;
 };
 
-// Types en minuscules comme stockés en DB (via le formulaire de dépôt)
-// Note: immeuble est groupé avec appartements pour la UI
-// searchType: le premier type DB (minuscule) à utiliser pour la recherche
-const CATEGORY_MAPPING: Record<string, { dbTypes: string[]; name: string; searchType: string }> = {
-  villas: { dbTypes: ["villa", "Villa", "Maison", "maison"], name: "Villas de Luxe", searchType: "villa" },
-  appartements: { dbTypes: ["appartement", "Appartement", "immeuble", "Immeuble"], name: "Appartements", searchType: "appartement" },
-  terrains: { dbTypes: ["terrain", "Terrain"], name: "Terrains", searchType: "terrain" },
-  studios: { dbTypes: ["studio", "Studio"], name: "Studios", searchType: "studio" },
+// Configuration des catégories avec les filtres correspondants pour le service
+const CATEGORY_CONFIG: Record<string, {
+  name: string;
+  searchType: string; // Pour l'URL
+  filters: PropertyFilters; // Pour la requête DB
+}> = {
+  villas: {
+    name: "Villas de Luxe",
+    searchType: "Maison",
+    filters: { types: ["Villa", "Maison"] }
+  },
+  appartements: {
+    name: "Appartements",
+    searchType: "Appartement",
+    filters: { types: ["Appartement", "Immeuble"] }
+  },
+  terrains: {
+    name: "Terrains",
+    searchType: "Terrain",
+    filters: { type: "Terrain" }
+  },
+  studios: {
+    name: "Studios",
+    searchType: "Studio",
+    filters: { type: "Studio" }
+  },
 };
 
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const categories: CategoryStats[] = await Promise.all(
+      Object.entries(CATEGORY_CONFIG).map(async ([id, config]) => {
+        // 1. Récupérer le compte total
+        const count = await getPropertiesCount(config.filters);
 
-    // Récupérer tous les biens (disponibles ou approuvés) avec leur type et images
-    const { data: properties, error } = await supabase
-      .from("properties")
-      .select("id, details, images, status, validation_status")
-      .or("status.eq.disponible,validation_status.eq.approved");
-
-    if (error) {
-      console.error("Error fetching properties for categories:", error);
-      return NextResponse.json(
-        { categories: [], error: "Erreur lors du chargement" },
-        { status: 500 }
-      );
-    }
-
-    // Calculer les stats et trouver une image représentative pour chaque catégorie
-    const categories: CategoryStats[] = Object.entries(CATEGORY_MAPPING).map(
-      ([id, { dbTypes, name, searchType }]) => {
-        const categoryProperties = (properties || []).filter((p) => {
-          const propertyType = p.details?.type;
-          return dbTypes.includes(propertyType);
-        });
-
-        // Trouver la première image disponible pour cette catégorie
-        let image: string | null = null;
-        for (const prop of categoryProperties) {
-          if (prop.images && prop.images.length > 0 && prop.images[0]) {
-            image = prop.images[0];
-            break;
-          }
-        }
+        // 2. Récupérer une image représentative (le bien le plus récent ayant une image)
+        // On demande un peu plus (5) au cas où les premiers n'aient pas d'images valide
+        const recentProps = await getProperties({ ...config.filters, limit: 5 });
+        const image = recentProps.find(p => p.images && p.images.length > 0)?.images[0] || null;
 
         return {
           id,
-          name,
-          count: categoryProperties.length,
+          name: config.name,
+          count,
           image,
-          searchType,
+          searchType: config.searchType,
         };
-      }
+      })
     );
 
     return NextResponse.json({ categories });

@@ -25,6 +25,11 @@ export default function robots(): MetadataRoute.Robots {
                 allow: '/',
                 disallow: ['/api/', '/admin/', '/compte/'],
             },
+            {
+                userAgent: ['GPTBot', 'OAI-SearchBot', 'PerplexityBot', 'ClaudeBot'],
+                allow: '/',
+                disallow: ['/api/', '/admin/', '/compte/', '/private/'],
+            },
         ],
         sitemap: `${baseUrl}/sitemap.xml`,
     }

@@ -90,13 +90,18 @@ function disableRedisTemporarily(reason: string): void {
 }
 
 function isQuotaExceededError(error: unknown): boolean {
-  if (error && typeof error === 'object' && 'message' in error) {
-    const message = (error as Error).message || '';
-    return message.includes('max requests limit exceeded') ||
-      message.includes('quota') ||
-      message.includes('rate limit');
+  try {
+    const errorString = String(error);
+    const jsonString = typeof error === 'object' ? JSON.stringify(error) : '';
+    const combined = (errorString + jsonString).toLowerCase();
+
+    return combined.includes('max requests limit exceeded') ||
+      combined.includes('quota') ||
+      combined.includes('rate limit') ||
+      combined.includes('daily request limit');
+  } catch {
+    return false;
   }
-  return false;
 }
 
 export function getRedisClient(): RedisClient | null {
@@ -122,10 +127,13 @@ export const redis = {
     try {
       return await client.get(key);
     } catch (error) {
-      console.error('Redis GET error:', error);
       if (isQuotaExceededError(error)) {
+        console.warn('⚠️ Redis Quota Exceeded (GET). Disabling Redis temporarily.');
         disableRedisTemporarily('quota exceeded');
+        return null; // Graceful fallback
       }
+
+      console.error('Redis GET error:', error);
       return null;
     }
   },
@@ -148,10 +156,13 @@ export const redis = {
         await client.set(key, value);
       }
     } catch (error) {
-      console.error('Redis SET error:', error);
       if (isQuotaExceededError(error)) {
+        console.warn('⚠️ Redis Quota Exceeded (SET). Disabling Redis temporarily.');
         disableRedisTemporarily('quota exceeded');
+        return; // Graceful fallback
       }
+
+      console.error('Redis SET error:', error);
     }
   },
 

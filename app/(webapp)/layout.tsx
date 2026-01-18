@@ -41,7 +41,7 @@ function WebAppLayoutContent({
             const { data: { user } } = await supabase.auth.getUser();
 
             if (!user) {
-                router.push('/auth');
+                router.push('/login');
                 setIsAuthenticated(false);
             }
         };

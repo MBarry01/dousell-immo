@@ -13,6 +13,7 @@ import { GoogleTagManager } from "@next/third-parties/google";
 import { MicrosoftClarity } from "@/components/analytics/microsoft-clarity";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PhoneMissingDialog } from "@/components/auth/phone-missing-dialog";
+import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
 import "react-medium-image-zoom/dist/styles.css";
@@ -104,7 +105,7 @@ export default function RootLayout({
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
   return (
-    <html lang="fr" className="dark" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning>
       <head>
         {/* Script inline pour afficher écran noir AVANT React (anti-flash) */}
         <script
@@ -130,6 +131,49 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Schema.org GEO Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "@id": "https://dousell-immo.app/#organization",
+                  "name": "Dousell Immo",
+                  "url": "https://dousell-immo.app",
+                  "logo": "https://dousell-immo.app/icons/icon-512.png",
+                  "description": "Plateforme immobilière de référence au Sénégal pour l'achat, la vente et la gestion locative.",
+                  "sameAs": [
+                    "https://facebook.com",
+                    "https://instagram.com",
+                    "https://linkedin.com"
+                  ]
+                },
+                {
+                  "@type": "RealEstateAgent",
+                  "@id": "https://dousell-immo.app/#localbusiness",
+                  "url": "https://dousell-immo.app",
+                  "name": "Dousell Immo",
+                  "image": "https://dousell-immo.app/monument.png",
+                  "areaServed": [
+                    { "@type": "City", "name": "Dakar" },
+                    { "@type": "City", "name": "Saly" },
+                    { "@type": "City", "name": "Mbour" },
+                    { "@type": "Place", "name": "Petite Côte" }
+                  ],
+                  "address": {
+                    "@type": "PostalAddress",
+                    "addressCountry": "SN",
+                    "addressLocality": "Dakar"
+                  },
+                  "priceRange": "$$"
+                }
+              ]
+            }),
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} bg-background antialiased`}
@@ -148,32 +192,39 @@ export default function RootLayout({
         )}
         {/* End Google Tag Manager (noscript) */}
 
-        {/* Top Loader - Barre de progression dorée style YouTube */}
-        <NextTopLoader
-          color="rgb(244, 196, 48)"
-          initialPosition={0.08}
-          crawlSpeed={200}
-          height={3}
-          crawl={true}
-          showSpinner={false}
-          easing="ease"
-          speed={200}
-          shadow="0 0 10px rgb(244, 196, 48), 0 0 5px rgb(244, 196, 48)"
-          zIndex={10001}
-        />
-        <SuppressHydrationWarning />
-        <ServiceWorkerRegister />
-        <SplashProvider>
-          {children}
-          <InstallPrompt />
-          <Toaster position="top-center" theme="dark" richColors />
-          <CookieConsent />
-          <PhoneMissingDialog />
-        </SplashProvider>
-        {gaId && <ConditionalGoogleAnalytics gaId={gaId} />}
-        <MicrosoftClarity clarityId={clarityId} />
-        {gtmId && <GoogleTagManager gtmId={gtmId} />}
-        <SpeedInsights />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {/* Top Loader - Barre de progression dorée style YouTube */}
+          <NextTopLoader
+            color="rgb(244, 196, 48)"
+            initialPosition={0.08}
+            crawlSpeed={200}
+            height={3}
+            crawl={true}
+            showSpinner={false}
+            easing="ease"
+            speed={200}
+            shadow="0 0 10px rgb(244, 196, 48), 0 0 5px rgb(244, 196, 48)"
+            zIndex={10001}
+          />
+          <SuppressHydrationWarning />
+          <ServiceWorkerRegister />
+          <SplashProvider>
+            {children}
+            <InstallPrompt />
+            <Toaster position="top-center" richColors />
+            <CookieConsent />
+            <PhoneMissingDialog />
+          </SplashProvider>
+          {gaId && <ConditionalGoogleAnalytics gaId={gaId} />}
+          <MicrosoftClarity clarityId={clarityId} />
+          {gtmId && <GoogleTagManager gtmId={gtmId} />}
+          <SpeedInsights />
+        </ThemeProvider>
       </body>
     </html>
   );

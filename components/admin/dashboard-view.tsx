@@ -18,8 +18,8 @@ import type {
   DashboardStats,
   RecentActivity,
   PerformanceStats,
-} from "@/app/(vitrine)/admin/actions";
-import type { RecentProperty } from "@/app/(vitrine)/admin/actions";
+} from "@/app/(workspace)/admin/actions";
+import type { RecentProperty } from "@/app/(workspace)/admin/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -147,13 +147,13 @@ export function DashboardView({
         <div>
           {/* Header avec Filtre */}
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-medium text-white/80">Performance</h2>
+            <h2 className="text-lg font-medium text-muted-foreground">Performance</h2>
             <Select
               value={timeRange}
               onValueChange={(value) => setTimeRange(value as TimeRange)}
               disabled={isLoading}
             >
-              <SelectTrigger className={`w-[180px] ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}>
+              <SelectTrigger className={`w-[180px] bg-background border-border ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}>
                 <SelectValue placeholder="Sélectionner une période" />
               </SelectTrigger>
               <SelectContent>
@@ -172,24 +172,24 @@ export function DashboardView({
             <Card
               onClick={() => setActiveMetric("views")}
               className={`cursor-pointer transition-all ${activeMetric === "views"
-                ? "border-blue-500/50 bg-white/10 shadow-lg shadow-blue-500/10"
-                : "border-white/10 bg-white/5 opacity-70 hover:opacity-100 hover:bg-white/10"
+                ? "border-blue-500/50 bg-blue-500/5 shadow-lg shadow-blue-500/10"
+                : "border-border bg-card opacity-70 hover:opacity-100 hover:bg-accent/50"
                 }`}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white/70">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   Vues Totales
                 </CardTitle>
                 <Eye
-                  className={`h-4 w-4 ${activeMetric === "views" ? "text-blue-400" : "text-white/40"
+                  className={`h-4 w-4 ${activeMetric === "views" ? "text-blue-500" : "text-muted-foreground"
                     }`}
                 />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-2xl font-bold text-foreground">
                   {perfStats.totals.views.toLocaleString()}
                 </div>
-                <p className="text-xs text-white/50 mt-1">Pages vues sur les annonces</p>
+                <p className="text-xs text-muted-foreground mt-1">Pages vues sur les annonces</p>
               </CardContent>
             </Card>
 
@@ -197,25 +197,25 @@ export function DashboardView({
             <Card
               onClick={() => setActiveMetric("contacts")}
               className={`cursor-pointer transition-all ${activeMetric === "contacts"
-                ? "border-emerald-500/50 bg-white/10 shadow-lg shadow-emerald-500/10"
-                : "border-white/10 bg-white/5 opacity-70 hover:opacity-100 hover:bg-white/10"
+                ? "border-emerald-500/50 bg-emerald-500/5 shadow-lg shadow-emerald-500/10"
+                : "border-border bg-card opacity-70 hover:opacity-100 hover:bg-accent/50"
                 }`}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white/70">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   Contacts Générés
                 </CardTitle>
                 <div className="flex gap-1">
                   <MessageSquare
                     className={`h-4 w-4 ${activeMetric === "contacts"
-                      ? "text-emerald-400"
-                      : "text-white/40"
+                      ? "text-emerald-500"
+                      : "text-muted-foreground"
                       }`}
                   />
                   <Phone
                     className={`h-4 w-4 ${activeMetric === "contacts"
-                      ? "text-emerald-400"
-                      : "text-white/40"
+                      ? "text-emerald-500"
+                      : "text-muted-foreground"
                       }`}
                   />
                 </div>
@@ -224,29 +224,29 @@ export function DashboardView({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="text-2xl font-bold text-white cursor-help underline decoration-dotted decoration-white/40 underline-offset-4 hover:decoration-white/60 transition-colors">
+                      <div className="text-2xl font-bold text-foreground cursor-help underline decoration-dotted decoration-muted-foreground/40 underline-offset-4 hover:decoration-muted-foreground/60 transition-colors">
                         {perfStats.totals.clicks.toLocaleString()}
                       </div>
                     </TooltipTrigger>
                     <TooltipContent
                       side="top"
-                      className="bg-[#0b0f18] border-white/10 shadow-lg"
+                      className="bg-popover border-border text-popover-foreground shadow-lg"
                     >
                       <div className="space-y-2 text-xs">
                         <div className="flex items-center gap-2">
                           <MessageSquare className="h-3.5 w-3.5 text-[#25D366]" />
-                          <span className="text-white/90">
+                          <span className="text-foreground/90">
                             WhatsApp :{" "}
-                            <span className="font-semibold text-white">
+                            <span className="font-semibold text-foreground">
                               {perfStats.totals.whatsappCount}
                             </span>
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Phone className="h-3.5 w-3.5 text-blue-400" />
-                          <span className="text-white/90">
+                          <span className="text-foreground/90">
                             Appels :{" "}
-                            <span className="font-semibold text-white">
+                            <span className="font-semibold text-foreground">
                               {perfStats.totals.phoneCount}
                             </span>
                           </span>
@@ -255,21 +255,21 @@ export function DashboardView({
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <p className="text-xs text-white/50 mt-1">Clics WhatsApp & Téléphone</p>
+                <p className="text-xs text-muted-foreground mt-1">Clics WhatsApp & Téléphone</p>
               </CardContent>
             </Card>
 
             {/* Carte Taux de Contact */}
-            <Card className="border-white/10 bg-white/5">
+            <Card className="border-border bg-card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white/70">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   Taux de Contact
                 </CardTitle>
-                <MousePointerClick className="h-4 w-4 text-amber-400" />
+                <MousePointerClick className="h-4 w-4 text-amber-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{conversionRate}%</div>
-                <p className="text-xs text-white/50 mt-1">Clics / Vues</p>
+                <div className="text-2xl font-bold text-foreground">{conversionRate}%</div>
+                <p className="text-xs text-muted-foreground mt-1">Clics / Vues</p>
               </CardContent>
             </Card>
           </div>
@@ -277,15 +277,15 @@ export function DashboardView({
           {/* Graphique et Top Biens */}
           <div className="grid gap-4 md:grid-cols-3 mt-4">
             {/* Graphique Performance Dynamique */}
-            <Card className="md:col-span-2 border-white/10 bg-white/5">
+            <Card className="md:col-span-2 border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-white text-base flex items-center gap-2">
+                <CardTitle className="text-foreground text-base flex items-center gap-2">
                   <span>
                     Évolution des {activeMetric === "views" ? "Vues" : "Contacts"} (
                     {timeRangeLabels[timeRange]})
                   </span>
                   {isLoading && (
-                    <span className="text-xs text-white/40 animate-pulse">
+                    <span className="text-xs text-muted-foreground animate-pulse">
                       Chargement...
                     </span>
                   )}
@@ -293,7 +293,7 @@ export function DashboardView({
               </CardHeader>
               <CardContent className="pl-0">
                 {isLoading ? (
-                  <div className="flex h-[350px] items-center justify-center text-white/40">
+                  <div className="flex h-[350px] items-center justify-center text-muted-foreground">
                     Chargement des données...
                   </div>
                 ) : (
@@ -303,15 +303,15 @@ export function DashboardView({
             </Card>
 
             {/* Top Biens Dynamique */}
-            <Card className="border-white/10 bg-white/5 flex flex-col">
+            <Card className="border-border bg-card flex flex-col">
               <CardHeader>
-                <CardTitle className="text-white text-base flex items-center justify-between">
+                <CardTitle className="text-foreground text-base flex items-center justify-between">
                   <span>
                     Top Biens ({activeMetric === "views" ? "Vues" : "Contacts"})
                   </span>
                   <Badge
                     variant="secondary"
-                    className="bg-white/10 text-white/70 hover:bg-white/20"
+                    className="bg-accent text-muted-foreground hover:bg-accent/80"
                   >
                     {activeMetric === "views" ? "Populaires" : "Performants"}
                   </Badge>
@@ -328,9 +328,9 @@ export function DashboardView({
       {/* Section Activité Récente & Derniers ajouts */}
       <div className="grid gap-4 md:grid-cols-3">
         {/* Activité Récente */}
-        <Card className="border-white/10 bg-white/5">
+        <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle className="text-white text-lg">Activité récente</CardTitle>
+            <CardTitle className="text-foreground text-lg">Activité récente</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -340,10 +340,10 @@ export function DashboardView({
                     key={activity.id}
                     className="flex items-start gap-3 text-sm"
                   >
-                    <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-white/40" />
+                    <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
                     <div className="flex-1">
-                      <p className="text-white/80">{activity.message}</p>
-                      <p className="text-xs text-white/40 mt-0.5">
+                      <p className="text-foreground/90">{activity.message}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {formatDistanceToNow(activity.date, {
                           addSuffix: true,
                           locale: fr,
@@ -353,22 +353,22 @@ export function DashboardView({
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-white/50">Aucune activité récente</p>
+                <p className="text-sm text-muted-foreground">Aucune activité récente</p>
               )}
             </div>
           </CardContent>
         </Card>
 
         {/* Tableau Derniers Biens */}
-        <Card className="md:col-span-2 border-white/10 bg-white/5">
+        <Card className="md:col-span-2 border-border bg-card">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-white text-lg">Derniers ajouts</CardTitle>
+              <CardTitle className="text-foreground text-lg">Derniers ajouts</CardTitle>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="text-white/60 hover:text-white"
+              className="text-muted-foreground hover:text-foreground"
               asChild
             >
               <Link href="/admin/biens">
@@ -380,7 +380,7 @@ export function DashboardView({
             {recentProperties.length > 0 ? (
               <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <table className="w-full text-left text-sm">
-                  <thead className="border-b border-white/5 bg-white/5 text-xs uppercase tracking-wider text-white/60">
+                  <thead className="border-b border-border bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="px-6 py-3">ID</th>
                       <th className="px-6 py-3">Bien</th>
@@ -389,13 +389,13 @@ export function DashboardView({
                       <th className="px-6 py-3 text-right">Date</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-border">
                     {recentProperties.map((property) => (
                       <tr
                         key={property.id}
-                        className="transition-colors hover:bg-white/5 group"
+                        className="transition-colors hover:bg-muted/50 group"
                       >
-                        <td className="px-6 py-4 text-xs font-mono text-white/30">
+                        <td className="px-6 py-4 text-xs font-mono text-muted-foreground/60">
                           #{property.id.slice(-4)}
                         </td>
                         <td className="px-6 py-4">
@@ -415,40 +415,40 @@ export function DashboardView({
                                 />
                               </div>
                             ) : (
-                              <div className="h-10 w-10 rounded-md bg-white/10" />
+                              <div className="h-10 w-10 rounded-md bg-muted" />
                             )}
                             <div className="max-w-[200px]">
                               <div className="flex items-center gap-1.5">
-                                <p className="font-medium text-white truncate group-hover/link:text-amber-400 transition-colors">
+                                <p className="font-medium text-foreground truncate group-hover/link:text-primary transition-colors">
                                   {property.title}
                                 </p>
-                                <ExternalLink className="h-3 w-3 text-white/30 opacity-0 -translate-x-1 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all" />
+                                <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 -translate-x-1 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all" />
                               </div>
                               {property.validationStatus === "pending" && (
-                                <span className="text-[10px] text-amber-400 block mt-0.5">
+                                <span className="text-[10px] text-amber-500 block mt-0.5">
                                   • En attente de validation
                                 </span>
                               )}
                             </div>
                           </Link>
                         </td>
-                        <td className="px-6 py-4 text-white/80 whitespace-nowrap">
+                        <td className="px-6 py-4 text-foreground/80 whitespace-nowrap">
                           {new Intl.NumberFormat("fr-SN", {
                             maximumFractionDigits: 0,
                           }).format(property.price)}{" "}
-                          <span className="text-xs text-white/40">FCFA</span>
+                          <span className="text-xs text-muted-foreground">FCFA</span>
                         </td>
                         <td className="px-6 py-4">
                           <Badge
                             variant="outline"
                             className={`${statusColors[property.status] ||
-                              "border-white/20 text-white/60"
+                              "border-border text-muted-foreground"
                               } border-0`}
                           >
                             {property.status}
                           </Badge>
                         </td>
-                        <td className="px-6 py-4 text-right text-xs text-white/50 whitespace-nowrap">
+                        <td className="px-6 py-4 text-right text-xs text-muted-foreground whitespace-nowrap">
                           {formatDistanceToNow(property.createdAt, {
                             addSuffix: true,
                             locale: fr,
@@ -460,7 +460,7 @@ export function DashboardView({
                 </table>
               </div>
             ) : (
-              <div className="py-12 text-center text-white/40">
+              <div className="py-12 text-center text-muted-foreground">
                 Aucun bien ajouté récemment
               </div>
             )}

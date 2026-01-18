@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { createSearchAlert } from "@/app/(vitrine)/compte/alertes/actions";
+import { createSearchAlert } from "@/app/(workspace)/compte/alertes/actions";
 import type { PropertyFilters } from "@/services/propertyService";
 
 const alertSchema = z.object({

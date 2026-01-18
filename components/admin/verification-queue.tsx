@@ -129,41 +129,41 @@ export function VerificationQueue() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-white">Vérifications en attente</h2>
-          <p className="mt-1 text-sm text-white/60">
+          <h2 className="text-2xl font-semibold text-foreground">Vérifications en attente</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             {verifications.length} demande{verifications.length > 1 ? "s" : ""} à traiter
           </p>
         </div>
         {verifications.length > 0 && (
-          <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30">
+          <Badge className="bg-amber-500/20 text-amber-600 dark:text-amber-300 border-amber-500/30">
             {verifications.length} en attente
           </Badge>
         )}
       </div>
 
       {verifications.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center">
-          <CheckCircle2 className="mx-auto h-12 w-12 text-white/40 mb-4" />
-          <p className="text-lg text-white/70">Aucune vérification en attente</p>
-          <p className="mt-2 text-sm text-white/50">
+        <div className="rounded-2xl border border-border bg-card p-12 text-center">
+          <CheckCircle2 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-lg text-foreground">Aucune vérification en attente</p>
+          <p className="mt-2 text-sm text-muted-foreground">
             Toutes les demandes ont été traitées.
           </p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="border-white/10">
-                <TableHead className="text-white/70">Bien</TableHead>
-                <TableHead className="text-white/70">Propriétaire</TableHead>
-                <TableHead className="text-white/70">Document</TableHead>
-                <TableHead className="text-white/70">Date</TableHead>
-                <TableHead className="text-white/70 text-right">Actions</TableHead>
+              <TableRow className="border-border hover:bg-muted/50">
+                <TableHead className="text-muted-foreground">Bien</TableHead>
+                <TableHead className="text-muted-foreground">Propriétaire</TableHead>
+                <TableHead className="text-muted-foreground">Document</TableHead>
+                <TableHead className="text-muted-foreground">Date</TableHead>
+                <TableHead className="text-muted-foreground text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {verifications.map((verification) => (
-                <TableRow key={verification.id} className="border-white/10">
+                <TableRow key={verification.id} className="border-border hover:bg-muted/50">
                   <TableCell>
                     <div className="flex items-center gap-3">
                       {verification.propertyImages && verification.propertyImages[0] && (
@@ -178,8 +178,8 @@ export function VerificationQueue() {
                         </div>
                       )}
                       <div>
-                        <p className="font-medium text-white">{verification.propertyTitle}</p>
-                        <p className="text-sm text-white/60">
+                        <p className="font-medium text-foreground">{verification.propertyTitle}</p>
+                        <p className="text-sm text-muted-foreground">
                           {formatPrice(verification.propertyPrice)} FCFA
                         </p>
                       </div>
@@ -187,8 +187,8 @@ export function VerificationQueue() {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="text-white">{verification.ownerName}</p>
-                      <p className="text-sm text-white/60">{verification.ownerEmail}</p>
+                      <p className="text-foreground">{verification.ownerName}</p>
+                      <p className="text-sm text-muted-foreground">{verification.ownerEmail}</p>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -204,11 +204,11 @@ export function VerificationQueue() {
                         <ExternalLink className="h-3 w-3" />
                       </a>
                     ) : (
-                      <span className="text-white/40 text-sm">Aucun document</span>
+                      <span className="text-muted-foreground text-sm">Aucun document</span>
                     )}
                   </TableCell>
                   <TableCell>
-                    <span className="text-white/70 text-sm">
+                    <span className="text-muted-foreground text-sm">
                       {formatDate(verification.verificationRequestedAt)}
                     </span>
                   </TableCell>
@@ -218,7 +218,7 @@ export function VerificationQueue() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleReview(verification, "approve")}
-                        className="text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                        className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
                       >
                         <CheckCircle2 className="h-4 w-4 mr-1" />
                         Approuver
@@ -227,7 +227,7 @@ export function VerificationQueue() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleReview(verification, "reject")}
-                        className="text-red-400 border-red-500/30 hover:bg-red-500/10"
+                        className="text-red-600 dark:text-red-400 border-red-500/30 hover:bg-red-500/10"
                       >
                         <XCircle className="h-4 w-4 mr-1" />
                         Refuser
@@ -243,12 +243,12 @@ export function VerificationQueue() {
 
       {/* Dialog de confirmation */}
       <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
-        <DialogContent className="border-white/10 bg-[#05080c] text-white">
+        <DialogContent className="border-border bg-background text-foreground sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
               {reviewAction === "approve" ? "Approuver la vérification" : "Refuser la vérification"}
             </DialogTitle>
-            <DialogDescription className="text-white/60">
+            <DialogDescription className="text-muted-foreground">
               {reviewAction === "approve" ? (
                 <>
                   Confirmez-vous l&apos;approbation de la vérification pour{" "}
@@ -278,7 +278,7 @@ export function VerificationQueue() {
               variant={reviewAction === "approve" ? "default" : "outline"}
               onClick={confirmReview}
               disabled={isPending}
-              className={reviewAction === "reject" ? "border-red-500/30 text-red-400 hover:bg-red-500/10" : ""}
+              className={reviewAction === "reject" ? "border-red-500/30 text-red-500 hover:bg-red-500/10" : ""}
             >
               {isPending ? (
                 <>
