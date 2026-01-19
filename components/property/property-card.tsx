@@ -52,6 +52,13 @@ export const PropertyCard = ({
     ) {
       return;
     }
+
+    // Pour les annonces partenaires (externes), ouvrir dans un nouvel onglet
+    if (property.isExternal && property.source_url) {
+      window.open(property.source_url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
     // Permettre la navigation même si on clique sur le bouton "Découvrir"
     router.push(`/biens/${property.id}`);
   };
@@ -154,6 +161,11 @@ export const PropertyCard = ({
           {property.exclusive && (
             <span className="rounded-full bg-black border-2 border-primary px-3 py-1 text-xs font-semibold text-primary">
               Exclusivité
+            </span>
+          )}
+          {property.isExternal && (
+            <span className="rounded-full bg-black/70 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white border border-white/20">
+              Partenaire
             </span>
           )}
         </div>
