@@ -10,13 +10,9 @@ export const metadata = {
   title: "Recherche · Dousell Immo",
 };
 
-// Utiliser ISR pour optimiser les performances
-// Revalidation toutes les 10 minutes (600s)
-export const revalidate = 600;
-
-// Rendre la page dynamique seulement si nécessaire
-export const dynamic = "auto";
-export const dynamicParams = true;
+// Désactivation du cache pour garantir des résultats frais (surtout pour les coords géocodées)
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const recordToFilters = (
   params: Record<string, string | string[] | undefined>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { smartGeocode } from '@/lib/geocoding';
 
 // Initialisation de Supabase
 const supabase = createClient(
@@ -194,11 +195,35 @@ export async function POST(req: Request) {
         category,
         type,
         city,
+        location_for_geocode: location, // Temporaire pour le géocodage
+        city_for_geocode: city,
         last_seen_at: now,
       });
     }
 
     console.log(`[${source}] ${processedAds.length} annonces valides (${skipped} ignorées)`);
+
+    // 4.5 Géocodage dynamique via Nominatim (avec rate limiting)
+    console.log(`[${source}] Géocodage en cours...`);
+    for (const ad of processedAds) {
+      try {
+        // smartGeocode utilise Nominatim API + fallback intelligent
+        const coords = await smartGeocode(
+          undefined, // Pas d'adresse précise
+          (ad as { location_for_geocode?: string }).location_for_geocode,
+          (ad as { city_for_geocode?: string }).city_for_geocode
+        );
+        (ad as Record<string, unknown>).coords_lat = coords.lat;
+        (ad as Record<string, unknown>).coords_lng = coords.lng;
+      } catch (err) {
+        console.warn(`[${source}] Geocoding failed for "${ad.location}":`, err);
+        (ad as Record<string, unknown>).coords_lat = null;
+        (ad as Record<string, unknown>).coords_lng = null;
+      }
+      // Supprimer les champs temporaires
+      delete (ad as Record<string, unknown>).location_for_geocode;
+      delete (ad as Record<string, unknown>).city_for_geocode;
+    }
 
     // 5. Déduplication dans le batch (même URL)
     const uniqueAdsMap = new Map<string, typeof processedAds[0]>();

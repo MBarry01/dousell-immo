@@ -14,6 +14,8 @@ type ExternalListingRow = {
     category: string;
     type: string;
     city: string;
+    coords_lat: number | null;  // Coordonnées GPS géocodées
+    coords_lng: number | null;
     created_at: string;
     last_seen_at: string;
 };
@@ -34,7 +36,10 @@ const mapExternalListing = (row: ExternalListingRow): Property => {
             city: row.city || "Sénégal",
             address: row.location || "",
             landmark: "",
-            coords: { lat: 14.6928, lng: -17.4467 }, // Coordonnées par défaut (Dakar)
+            coords: {
+                lat: row.coords_lat ?? 14.6928,  // Utilise coords géocodées ou fallback Dakar
+                lng: row.coords_lng ?? -17.4467,
+            },
         },
         specs: {
             surface: 0,
@@ -172,10 +177,33 @@ export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
         const externalPromise = externalQuery;
 
         // 3. Exécution parallèle
-        const [internalRes, externalRes] = await Promise.all([internalPromise, externalPromise]);
+        // 3. Exécution parallèle avec gestion d'erreurs indépendante
+        const [internalResult, externalResult] = await Promise.allSettled([internalPromise, externalPromise]);
 
-        const internalProps = internalRes || [];
-        let externalProps = (externalRes.data || []).map(mapExternalListing);
+        let internalProps: Property[] = [];
+        if (internalResult.status === 'fulfilled') {
+            internalProps = internalResult.value || [];
+        } else {
+            console.error("[gatewayService] Failed to load internal properties:", internalResult.reason);
+        }
+
+        let externalProps: Property[] = [];
+        if (externalResult.status === 'fulfilled') {
+            const data = externalResult.value.data || [];
+            externalProps = data.map(mapExternalListing);
+
+            // Debug: Vérifier quelques coordonnées pour le monitoring
+            if (externalProps.length > 0) {
+                const sample = externalProps.find(p => p.location.coords.lat !== 14.6928); // Chercher un non-default
+                if (sample) {
+                    console.log(`[gatewayService] ✅ Coords loaded for ${sample.id}:`, sample.location.coords);
+                } else {
+                    console.warn(`[gatewayService] ⚠️ All ${externalProps.length} external props seem to use default fallback coords (Dakar)`);
+                }
+            }
+        } else {
+            console.error("[gatewayService] Failed to load external properties:", externalResult.reason);
+        }
 
         // Filtrage JS du prix pour les externes
         if (filters.minPrice || filters.maxPrice) {
@@ -189,31 +217,8 @@ export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
         // 4. Fusion
         const unifiedListings = [...internalProps, ...externalProps];
 
-        // 5. Tri par nouveauté (created_at ou ingestion récente)
-        // On peut utiliser un champ commun virtuelle 'sortDate'
-        // Pour l'externe, last_seen_at est un bon proxy de fraicheur
-        unifiedListings.sort((a, b) => {
-            // Pour l'externe on prend source_url comme ID, mais pour le tri on veut une date.
-            // Property n'a pas last_seen_at en standard, mais on peut utiliser created_at (mapping)
-            // mapExternalListing ne mappe pas created_at, ajoutons-le implicitement via le type Property qui ne l'a pas en direct mais bon...
-            // PropertyService renvoie des objets Property qui n'ont pas forcément created_at au top level dans l'interface, 
-            // mais getProperties de propertyService le fait sortir du Row mais ne le mappe pas dans l'interface Property ?
-            // Vérifions Property type... Il n'a PAS created_at.
-            // On va assumer pour le tri que l'ordre par défaut est correct ou random.
-            // Mais l'utilisateur VEUT "Tri par date de création".
-            // Le type Property a verification_requested_at, mais pas created_at public.
-            // Bon, on va faire un tri heuristique simple : les internes d'abord ? Non, mélangés.
-            // On va mélanger aléatoirement pour la découverte ou laisser tel quel.
-            // L'utilisateur a demandé : "Tri par date de création pour avoir la fraîcheur en haut".
-            // On va devoir se baser sur l'ordre des tableaux reçus (qui sont déjà triés par DB)
-            // et faire un merge sort, mais sans date commune fiable dans l'interface Property, c'est dur.
-            // On va simplement concaténer Interne PUIS Externe pour valoriser nos annonces, 
-            // ou alterner.
-            // User request: "Tri par date de création"
-            // On va laisser le tri par défaut (Internes (belles) d'abord, Externes ensuite) pour l'instant
-            // car les externes n'ont pas de date de création fiable (le created_at est celui de l'upsert).
-            return 0;
-        });
+        // 5. Tri (Interne d'abord, puis Externe, en attendant mieux)
+        return unifiedListings;
 
         return unifiedListings;
 
