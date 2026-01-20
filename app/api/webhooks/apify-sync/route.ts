@@ -45,6 +45,13 @@ const CLEANUP_TTL_DAYS = 7;
 // Header secret pour sécuriser le webhook
 const WEBHOOK_SECRET = process.env.APIFY_WEBHOOK_SECRET;
 
+// Tokens Apify par source (permet plusieurs comptes)
+const APIFY_TOKENS: Record<string, string | undefined> = {
+  CoinAfrique: process.env.APIFY_API_TOKEN,
+  'Expat-Dakar': process.env.APIFY_API_TOKEN_EXPAT || process.env.APIFY_API_TOKEN,
+  Seloger: process.env.APIFY_API_TOKEN,
+};
+
 /**
  * Extrait la première valeur non-nulle parmi plusieurs champs possibles
  */
@@ -117,11 +124,18 @@ export async function POST(req: Request) {
     // 2. Extraction des paramètres (support format Apify + custom)
     const datasetId = body.resource?.defaultDatasetId || body.datasetId;
     const source = body.source || body.source_site || 'CoinAfrique';
-    const apifyToken = process.env.APIFY_API_TOKEN;
 
-    if (!datasetId || !apifyToken) {
-      console.error('Missing datasetId or apifyToken');
-      return NextResponse.json({ error: 'Missing configuration' }, { status: 400 });
+    // Token spécifique à la source ou token par défaut
+    const apifyToken = APIFY_TOKENS[source] || process.env.APIFY_API_TOKEN;
+
+    if (!datasetId) {
+      console.error('Missing datasetId');
+      return NextResponse.json({ error: 'Missing datasetId' }, { status: 400 });
+    }
+
+    if (!apifyToken) {
+      console.error(`Missing Apify token for source: ${source}`);
+      return NextResponse.json({ error: `Missing Apify token for ${source}` }, { status: 400 });
     }
 
     // Validation de la source
