@@ -433,7 +433,7 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
                     zoomControl={false}
                     attributionControl={false}
                 >
-                    <ZoomControl position="bottomright" />
+                    <ZoomControl position="topright" />
                     {/* TileLayer CartoDB Dark Matter */}
                     <TileLayer
                         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -573,7 +573,7 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
         .leaflet-control-zoom {
           border: none;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-          margin-bottom: 200px;
+          margin-top: 80px; /* Eviter la barre de recherche/fermeture */
         }
         .leaflet-control-zoom a {
           background-color: rgba(255, 255, 255, 0.1);
