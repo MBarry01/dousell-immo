@@ -181,13 +181,16 @@ export async function POST(req: Request) {
       const location = extractField(ad, config.locationField) || '';
       const { category, type, city } = classifyAd(title, location);
 
+      // Utiliser source_site des données si présent, sinon celui du payload
+      const adSourceSite = (ad.source_site as string) || source;
+
       processedAds.push({
         source_url: sourceUrl,
         title,
         price: extractField(ad, config.priceField),
         location: location || null,
         image_url: extractField(ad, config.imageField),
-        source_site: source,
+        source_site: adSourceSite,
         category,
         type,
         city,
