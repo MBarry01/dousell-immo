@@ -160,6 +160,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "sn.coinafrique.com",
       },
+      {
+        protocol: "https",
+        hostname: "*.roamcdn.net",
+      },
+      {
+        protocol: "https",
+        hostname: "i.roamcdn.net",
+      },
     ],
   },
 };
