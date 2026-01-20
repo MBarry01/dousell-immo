@@ -47,19 +47,43 @@ export default function FeaturedPropertiesHero() {
   useEffect(() => {
     async function fetchProperties() {
       try {
-        const response = await fetch("/api/properties/featured?limit=3");
+        // Ajouter un timestamp pour éviter le cache navigateur
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/api/properties/featured?limit=3&_t=${timestamp}`, {
+          cache: "no-store", // Désactiver le cache
+          headers: {
+            "Cache-Control": "no-cache"
+          }
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch");
+
         const data = await response.json();
-        if (data.properties && data.properties.length > 0) {
-          setProperties(data.properties);
-          setIsDemo(false);
+
+        // Log deep pour debug
+        console.log("🔥 [FeaturedHero] Raw data received:", data.properties?.length || 0);
+
+        if (data.properties && Array.isArray(data.properties) && data.properties.length > 0) {
+          // Filtrer les propriétés invalides ou vides
+          const validProps = data.properties.filter((p: Property) => p.id && p.title);
+
+          if (validProps.length > 0) {
+            console.log("✅ [FeaturedHero] Setting real properties:", validProps.length);
+            setProperties(validProps.slice(0, 3)); // Toujours limiter à 3
+            setIsDemo(false);
+          } else {
+            console.warn("⚠️ [FeaturedHero] Received properties but none were valid");
+          }
+        } else {
+          console.warn("⚠️ [FeaturedHero] No properties found in API response");
         }
       } catch (error) {
-        console.error("Error fetching featured properties:", error);
-        // Garder les données de démo en cas d'erreur
+        console.error("❌ [FeaturedHero] Error fetching properties:", error);
       } finally {
         setLoading(false);
       }
     }
+
     fetchProperties();
   }, []);
 
