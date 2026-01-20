@@ -352,9 +352,14 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
         }, 100);
     }, []);
 
-    const handleMarkerRedirect = useCallback((propertyId: string) => {
-        // Rediriger vers la page de détail du bien
-        router.push(`/biens/${propertyId}`);
+    const handleMarkerRedirect = useCallback((property: Property) => {
+        // Pour les annonces externes, ouvrir dans un nouvel onglet
+        if (property.isExternal && property.source_url) {
+            window.open(property.source_url, '_blank', 'noopener,noreferrer');
+        } else {
+            // Rediriger vers la page de détail du bien
+            router.push(`/biens/${property.id}`);
+        }
     }, [router]);
 
     if (!mounted) {
@@ -447,7 +452,7 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
                             property={property}
                             isActive={property.id === activeId}
                             onClick={() => handleMarkerClick(property.id)}
-                            onRedirect={() => handleMarkerRedirect(property.id)}
+                            onRedirect={() => handleMarkerRedirect(property)}
                         />
                     ))}
                 </MapContainer>
@@ -505,7 +510,7 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
                                 key={`mini-${property.id}`}
                                 id={`property-${property.id}`}
                                 onClick={() => {
-                                    handleMarkerRedirect(property.id);
+                                    handleMarkerRedirect(property);
                                 }}
                                 className="min-w-[280px] cursor-pointer flex-shrink-0 snap-start"
                             >
