@@ -433,7 +433,7 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
                     zoomControl={false}
                     attributionControl={false}
                 >
-                    <ZoomControl position="topright" />
+                    <ZoomControl position="topleft" />
                     {/* TileLayer CartoDB Dark Matter */}
                     <TileLayer
                         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -572,16 +572,18 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
         }
         .leaflet-control-zoom {
           border: none;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-          margin-top: 80px; /* Eviter la barre de recherche/fermeture */
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          margin-top: calc(80px + env(safe-area-inset-top)); /* Eviter la barre de recherche et status bar PWA */
+          margin-left: calc(16px + env(safe-area-inset-left)); /* Marge gauche safe */
         }
         .leaflet-control-zoom a {
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: rgba(20, 20, 20, 0.9); /* Fond plus sombre pour le contraste */
           color: white;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(8px);
         }
         .leaflet-control-zoom a:hover {
-          background-color: rgba(255, 255, 255, 0.2);
+          background-color: rgba(40, 40, 40, 0.9);
         }
         .leaflet-control-attribution {
           background-color: rgba(0, 0, 0, 0.5);
