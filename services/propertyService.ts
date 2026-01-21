@@ -194,8 +194,20 @@ export const getProperties = async (filters: PropertyFilters = {}) => {
 
     // Recherche textuelle (q) : recherche dans le titre, la description et la ville
     if (filters.q) {
+      // Nettoyage de la recherche
+      let searchTerm = filters.q.trim();
+
+      // Si la recherche contient une virgule (ex: "Mermoz, Dakar"), on prend le premier terme
+      // car c'est généralement le plus spécifique (quartier/ville)
+      if (searchTerm.includes(",")) {
+        const parts = searchTerm.split(",");
+        if (parts.length > 0) {
+          searchTerm = parts[0].trim();
+        }
+      }
+
       query = query.or(
-        `title.ilike.%${filters.q}%,description.ilike.%${filters.q}%,location->>city.ilike.%${filters.q}%`
+        `title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location->>city.ilike.%${searchTerm}%,location->>address.ilike.%${searchTerm}%`
       );
     }
 
@@ -236,19 +248,18 @@ export const getProperties = async (filters: PropertyFilters = {}) => {
     }
     // Support pour un seul type ou plusieurs types (OR)
     // Support pour types multiples
-    // On cherche dans details->>type ET property_type car certains biens (terrains) n'ont que property_type
+    // On cherche uniquement dans details->>type avec des jokers pour la souplesse
     if (filters.types && filters.types.length > 0) {
       const orConditions = filters.types
         .flatMap((type) => [
-          `details->>type.ilike.${type}`,
-          `property_type.ilike.${type}`,
+          `details->>type.ilike.%${type}%`
         ])
         .join(",");
       query = query.or(orConditions);
     } else if (filters.type) {
-      // Chercher dans details.type OU property_type (case-insensitive)
+      // Chercher dans details.type (case-insensitive)
       query = query.or(
-        `details->>type.ilike.${filters.type},property_type.ilike.${filters.type}`
+        `details->>type.ilike.%${filters.type}%`
       );
     }
 
@@ -337,14 +348,13 @@ export const getPropertiesCount = async (filters: PropertyFilters = {}) => {
     if (filters.types && filters.types.length > 0) {
       const orConditions = filters.types
         .flatMap((type) => [
-          `details->>type.ilike.${type}`,
-          `property_type.ilike.${type}`,
+          `details->>type.ilike.%${type}%`
         ])
         .join(",");
       query = query.or(orConditions);
     } else if (filters.type) {
       query = query.or(
-        `details->>type.ilike.${filters.type},property_type.ilike.${filters.type}`
+        `details->>type.ilike.%${filters.type}%`
       );
     }
 
@@ -353,7 +363,12 @@ export const getPropertiesCount = async (filters: PropertyFilters = {}) => {
 
     return count || 0;
   } catch (error) {
-    console.error("getPropertiesCount error:", error);
+    console.error("getPropertiesCount error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      details: (error as any)?.details,
+      hint: (error as any)?.hint,
+      code: (error as any)?.code
+    });
     return 0;
   }
 };
@@ -533,6 +548,76 @@ export const incrementView = async (id: string): Promise<number | null> => {
   } catch (error) {
     console.error("incrementView unexpected error:", error);
     return null;
+  }
+};
+
+/**
+ * Récupère des suggestions de lieux pour l'autocomplétion
+ * @param query - Début du nom de ville ou quartier
+ */
+export const getSearchSuggestions = async (query: string): Promise<string[]> => {
+  if (!query || query.length < 2) return [];
+
+  const searchTerm = query.trim();
+  const suggestions = new Set<string>();
+
+  try {
+    // 1. Chercher dans les propriétés internes (location->>city)
+    const { data: internalData } = await supabase
+      .from("properties")
+      .select("location")
+      .ilike("location->>city", `%${searchTerm}%`)
+      .limit(10);
+
+    if (internalData) {
+      internalData.forEach((row: any) => {
+        if (row.location?.city) {
+          suggestions.add(row.location.city);
+          // Si le quartier est dispo et matche aussi
+          if (row.location.district && row.location.district.toLowerCase().includes(searchTerm.toLowerCase())) {
+            suggestions.add(`${row.location.district}, ${row.location.city}`);
+          }
+        }
+      });
+    }
+
+    // 2. Chercher dans les annonces externes (city)
+    const { data: externalData } = await supabase
+      .from("external_listings")
+      .select("city, location")
+      .or(`city.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`)
+      .limit(10);
+
+    if (externalData) {
+      externalData.forEach((row: any) => {
+        if (row.city) suggestions.add(row.city);
+        // Pour les externes, 'location' est souvent le quartier ou l'adresse complète
+        if (row.location) {
+          // On essaie de nettoyer un peu si c'est très long
+          const cleanLoc = row.location.split(',')[0].trim();
+          if (cleanLoc.length < 40) {
+            suggestions.add(row.location);
+          }
+        }
+      });
+    }
+
+    // Convertir en tableau, trier et limiter
+    return Array.from(suggestions)
+      .filter(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
+      .sort((a, b) => {
+        // Mettre les matches exacts ou qui commencent par le terme en premier
+        const aStarts = a.toLowerCase().startsWith(searchTerm.toLowerCase());
+        const bStarts = b.toLowerCase().startsWith(searchTerm.toLowerCase());
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+        return a.localeCompare(b);
+      })
+      .slice(0, 8);
+
+  } catch (error) {
+    console.error("getSearchSuggestions error:", error);
+    return [];
   }
 };
 

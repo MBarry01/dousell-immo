@@ -137,7 +137,7 @@ const mapCategoryToQuery = (category: string): string => {
         return `category.ilike.%Terrain%,title.ilike.%Terrain%`;
     }
     if (term === 'commercial' || term === 'autre') {
-        return `category.ilike.%Immeuble%,category.ilike.%Bureau%,category.ilike.%Commerce%,category.ilike.%Local%,category.ilike.%Entrepôt%`;
+        return `category.ilike.%Immeuble%,category.ilike.%Bureau%,category.ilike.%Commerce%,category.ilike.%Local%,category.ilike.%Entrepôt%,category.ilike.%Magasin%,category.ilike.%Profess%,category.ilike.%Indus%,title.ilike.%Bureau%,title.ilike.%Commerce%,title.ilike.%Local%,title.ilike.%Magasin%,title.ilike.%Entrepôt%,title.ilike.%Immeuble%`;
     }
     return `category.ilike.%${category}%`;
 };
