@@ -11,7 +11,23 @@ export default function MagicTransformation() {
 
   const fullText = "Saisissez vos données une fois. Sublimez vos biens partout.";
 
+  // Check if we're on mobile to disable performance-heavy animation
+  const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    // On mobile, skip the animation loop entirely for performance
+    if (isMobile) {
+      setDisplayedText(fullText);
+      return;
+    }
+
     const typeSpeed = 50; // Vitesse de saisie (ms)
     const pauseBeforeRestart = 2000; // Pause avant de recommencer (ms)
 
@@ -28,7 +44,7 @@ export default function MagicTransformation() {
     }
 
     return () => clearTimeout(timeout);
-  }, [displayedText, fullText]);
+  }, [displayedText, fullText, isMobile]);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
