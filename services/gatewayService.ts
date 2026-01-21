@@ -123,6 +123,72 @@ export async function getExternalListingsByType(
     }
 }
 
+// Helper pour mapper les catégories internes vers les termes externes
+const mapCategoryToQuery = (category: string): string => {
+    const term = category.toLowerCase();
+
+    if (term === 'maison' || term === 'villa') {
+        return `category.ilike.%Maison%,category.ilike.%Villa%`;
+    }
+    if (term === 'appartement') {
+        return `category.ilike.%Appartement%,category.ilike.%Studio%,category.ilike.%Duplex%`;
+    }
+    if (term === 'terrain') {
+        return `category.ilike.%Terrain%,title.ilike.%Terrain%`;
+    }
+    if (term === 'commercial' || term === 'autre') {
+        return `category.ilike.%Immeuble%,category.ilike.%Bureau%,category.ilike.%Commerce%,category.ilike.%Local%,category.ilike.%Entrepôt%`;
+    }
+    return `category.ilike.%${category}%`;
+};
+
+export async function getExternalListingsCount(
+    transactionType: "location" | "vente" | "any",
+    options: {
+        category?: string;
+        city?: string;
+    } = {}
+): Promise<number> {
+    const { category, city } = options;
+
+    try {
+        const fourDaysAgo = new Date();
+        fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
+
+        let query = supabase
+            .from("external_listings")
+            .select("*", { count: "exact", head: true })
+            .gt("last_seen_at", fourDaysAgo.toISOString());
+
+        if (transactionType !== "any") {
+            query = query.ilike("type", `%${transactionType}%`);
+        }
+
+        if (category) {
+            // Utilisation du mapping intelligent
+            query = query.or(mapCategoryToQuery(category));
+        }
+
+        if (city) {
+            query = query.ilike("city", `%${city}%`);
+        }
+
+
+
+        const { count, error } = await query;
+
+        if (error) {
+            console.error("[gatewayService] Error counting external listings:", error);
+            return 0;
+        }
+
+        return count || 0;
+    } catch (err) {
+        console.error("[gatewayService] getExternalListingsCount error:", err);
+        return 0;
+    }
+}
+
 export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
     try {
         // 1. Récupération des annonces internes (via propertyService existant)
@@ -141,7 +207,18 @@ export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
 
         // -- Application des filtres utilisateur --
         if (filters.q) {
-            externalQuery = externalQuery.or(`title.ilike.%${filters.q}%,location.ilike.%${filters.q}%`);
+            // Nettoyage de la recherche
+            let searchTerm = filters.q.trim();
+
+            // Si la recherche contient une virgule (ex: "Mermoz, Dakar"), on prend le premier terme
+            if (searchTerm.includes(",")) {
+                const parts = searchTerm.split(",");
+                if (parts.length > 0) {
+                    searchTerm = parts[0].trim();
+                }
+            }
+
+            externalQuery = externalQuery.or(`title.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
         }
 
         // Mapping des filtres de catégorie
@@ -166,7 +243,8 @@ export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
 
         if (filters.type) {
             // Filtre type de bien (Appartement, Villa...)
-            externalQuery = externalQuery.ilike('category', `%${filters.type}%`);
+            // Utilise le même mapping intelligent que pour le comptage
+            externalQuery = externalQuery.or(mapCategoryToQuery(filters.type));
         }
 
         // Note : Le prix est stocké en TEXT dans external_listings ("500 000 FCFA")

@@ -27,9 +27,9 @@ const CATEGORY_CONFIG: Record<string, { colSpan: string; fallbackImage: string }
         colSpan: "md:col-span-1",
         fallbackImage: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80",
     },
-    studios: {
+    commercial: {
         colSpan: "md:col-span-2",
-        fallbackImage: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
+        fallbackImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
     },
 };
 
@@ -40,7 +40,9 @@ export default function PropertyCategories() {
     useEffect(() => {
         async function fetchCategories() {
             try {
-                const response = await fetch("/api/properties/categories");
+                const response = await fetch(`/api/properties/categories?t=${new Date().getTime()}`, {
+                    cache: 'no-store'
+                });
                 const data = await response.json();
                 if (data.categories) {
                     setCategories(data.categories);
@@ -76,9 +78,8 @@ export default function PropertyCategories() {
                         [...Array(4)].map((_, index) => (
                             <div
                                 key={index}
-                                className={`relative h-64 rounded-2xl overflow-hidden bg-zinc-800 animate-pulse ${
-                                    index === 0 || index === 3 ? "md:col-span-2" : "md:col-span-1"
-                                }`}
+                                className={`relative h-64 rounded-2xl overflow-hidden bg-zinc-800 animate-pulse ${index === 0 || index === 3 ? "md:col-span-2" : "md:col-span-1"
+                                    }`}
                             />
                         ))
                     ) : (

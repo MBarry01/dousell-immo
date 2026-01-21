@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { getPropertiesCount, getProperties, type PropertyFilters } from "@/services/propertyService";
+import { getExternalListingsCount } from "@/services/gatewayService";
 
 export const dynamic = "force-dynamic";
 
@@ -27,17 +28,17 @@ const CATEGORY_CONFIG: Record<string, {
   appartements: {
     name: "Appartements",
     searchType: "Appartement",
-    filters: { types: ["Appartement", "Immeuble"] }
+    filters: { types: ["Appartement", "Immeuble", "Studio", "Duplex"] }
   },
   terrains: {
     name: "Terrains",
     searchType: "Terrain",
     filters: { type: "Terrain" }
   },
-  studios: {
-    name: "Studios",
-    searchType: "Studio",
-    filters: { type: "Studio" }
+  commercial: {
+    name: "Immeubles & Commerce",
+    searchType: "Commercial",
+    filters: { types: ["Immeuble", "Bureau", "Commerce", "Local", "Entrepôt", "Autre"] }
   },
 };
 
@@ -45,8 +46,13 @@ export async function GET() {
   try {
     const categories: CategoryStats[] = await Promise.all(
       Object.entries(CATEGORY_CONFIG).map(async ([id, config]) => {
-        // 1. Récupérer le compte total
-        const count = await getPropertiesCount(config.filters);
+        // 1. Récupérer le compte total (Interne + Externe)
+        const [internalCount, externalCount] = await Promise.all([
+          getPropertiesCount(config.filters),
+          getExternalListingsCount("any", { category: config.searchType })
+        ]);
+
+        const count = internalCount + externalCount;
 
         // 2. Récupérer une image représentative (le bien le plus récent ayant une image)
         // On demande un peu plus (5) au cas où les premiers n'aient pas d'images valide

@@ -1,7 +1,7 @@
 "use client";
 
 import type { MouseEvent } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Bookmark, Bed, Bath, Square, MapPin } from "lucide-react";
 
 import { toast } from "sonner";
@@ -24,7 +24,6 @@ export const PropertyCard = ({
   className,
   variant = "vertical",
 }: PropertyCardProps) => {
-  const router = useRouter();
   const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
   const favorite = isFavorite(property.id);
 
@@ -42,54 +41,30 @@ export const PropertyCard = ({
     }
   };
 
-  const handleCardClick = (event: MouseEvent) => {
-    // Ne pas naviguer si le clic vient du carousel, du bouton favori, ou d'un lien externe
-    const target = event.target as HTMLElement;
-    if (
-      target.closest('[data-carousel]') ||
-      target.closest('button[aria-label="Enregistrer"]') ||
-      (target.closest('a') && !target.closest('a[href^="/biens/"]'))
-    ) {
-      return;
-    }
-
-    // Pour les annonces partenaires (externes), ouvrir dans un nouvel onglet
-    if (property.isExternal && property.source_url) {
-      window.open(property.source_url, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    // Permettre la navigation même si on clique sur le bouton "Découvrir"
-    router.push(`/biens/${property.id}`);
-  };
+  const isExternal = property.isExternal;
+  const href = isExternal ? (property.source_url || '#') : `/biens/${property.id}`;
+  const CardWrapper = isExternal ? 'a' : Link;
+  const linkProps = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
 
   if (variant === "horizontal") {
     return (
-      <article
+      <CardWrapper
+        href={href}
+        {...linkProps}
         className={cn(
           "group relative flex min-w-[280px] items-center gap-4 rounded-[24px] border border-white/10 bg-background p-3 text-white transition-all duration-200 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30 active:scale-[0.99] isolate",
           className
         )}
       >
-        <div
-          className="absolute inset-0 z-10 cursor-pointer"
-          onClick={handleCardClick}
-          aria-label={`Voir ${property.title}`}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              router.push(`/biens/${property.id}`);
-            }
-          }}
-        />
         <div className="relative h-24 w-24 overflow-hidden rounded-2xl z-20" data-carousel style={{ pointerEvents: 'auto' }}>
-          <ListingImageCarousel
-            images={property.images}
-            alt={property.title}
-            className="h-full w-full"
-          />
+          {/* Prevent link click when clicking carousel */}
+          <div onClick={(e) => e.stopPropagation()} className="h-full w-full">
+            <ListingImageCarousel
+              images={property.images}
+              alt={property.title}
+              className="h-full w-full"
+            />
+          </div>
           <div className="absolute bottom-2 left-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold">
             {formatCurrency(property.price)}
           </div>
@@ -119,20 +94,20 @@ export const PropertyCard = ({
             </span>
           </div>
         </div>
-      </article>
+      </CardWrapper>
     );
   }
 
   return (
-    <article
+    <CardWrapper
+      href={href}
+      {...linkProps}
       className={cn(
         // Mobile: largeur fixe pour scroll horizontal
         "group relative flex w-72 flex-none flex-col overflow-hidden rounded-[28px] bg-background border border-white/10 p-3 text-white transition-all duration-200 hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 active:scale-[0.99] isolate cursor-pointer",
         // Desktop: dans une grille, la largeur est gérée par la grille CSS automatiquement
         className
       )}
-      onClick={handleCardClick}
-      role="article"
     >
       <div
         className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] z-10"
@@ -140,6 +115,7 @@ export const PropertyCard = ({
         style={{ pointerEvents: 'auto' }}
         onClick={(e) => {
           // Empêcher la propagation du clic vers le div cliquable de la carte
+          e.preventDefault(); // Added preventDefault just in case for link
           e.stopPropagation();
         }}
       >
@@ -219,7 +195,7 @@ export const PropertyCard = ({
           )}
         </div>
       </div>
-    </article>
+    </CardWrapper>
   );
 };
 
