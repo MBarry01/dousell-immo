@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 import { calculateFinancials, LeaseInput, TransactionInput } from '@/lib/finance';
+import { saveAs } from 'file-saver';
 
 interface Tenant {
     id: string;
@@ -344,48 +345,47 @@ export function GestionLocativeClient({
         return stringValue;
     };
 
-    // Export to CSV function
+    // Export to Excel function using xlsx
     const handleExportCSV = () => {
-        const headers = ['Locataire', 'Email', 'Téléphone', 'Bien', 'Période', 'Statut', 'Montant (FCFA)'];
-
-        const csvRows = formattedTenants.map(tenant => {
+        // Prepare data for xlsx
+        const data = formattedTenants.map(tenant => {
             const periodStr = selectedMonth && selectedYear
                 ? `${selectedMonth.toString().padStart(2, '0')}/${selectedYear}`
                 : '';
 
-            const statusLabels = {
+            const statusLabels: Record<string, string> = {
                 paid: 'Payé',
                 pending: 'En attente',
                 overdue: 'Retard'
             };
 
-            return [
-                formatCSVValue(tenant.name),
-                formatCSVValue(tenant.email),
-                formatCSVValue(tenant.phone),
-                formatCSVValue(tenant.property),
-                formatCSVValue(periodStr),
-                formatCSVValue(statusLabels[tenant.status]),
-                formatCSVValue(tenant.rentAmount)
-            ].join(',');
+            return {
+                'Locataire': tenant.name || '',
+                'Email': tenant.email || '',
+                'Téléphone': tenant.phone || '',
+                'Bien': tenant.property || '',
+                'Période': periodStr,
+                'Statut': statusLabels[tenant.status] || '',
+                'Montant (FCFA)': tenant.rentAmount || 0
+            };
         });
 
-        const csvContent = [headers.join(','), ...csvRows].join('\n');
+        // Import xlsx dynamically to use writeFile
+        import('xlsx').then((XLSX) => {
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Locataires');
 
-        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
+            // Generate filename
+            const monthNames = ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin',
+                'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre'];
+            const filename = `locataires-${monthNames[selectedMonth - 1]}-${selectedYear}.xlsx`;
 
-        const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-            'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-        const filename = `loyers-${monthNames[selectedMonth - 1]}-${selectedYear}.csv`;
+            // Write file - this properly handles the filename
+            XLSX.writeFile(workbook, filename);
 
-        link.setAttribute('href', url);
-        link.setAttribute('download', filename);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            toast.success(`Export téléchargé : ${filename}`);
+        });
     };
 
     // Format montant avec espaces
@@ -722,10 +722,13 @@ export function GestionLocativeClient({
                             </button>
                         </div>
 
-                        {/* Bouton Export CSV */}
+                        {/* Bouton Export Excel */}
                         <Button
                             id="tour-export-csv"
-                            onClick={handleExportCSV}
+                            onClick={() => {
+                                console.log('Export Excel clicked');
+                                handleExportCSV();
+                            }}
                             variant="outline"
                             size="sm"
                             className={`h-9 px-3 shrink-0 ${isDark
@@ -735,7 +738,7 @@ export function GestionLocativeClient({
                             disabled={formattedTenants.length === 0}
                         >
                             <Download className="w-4 h-4 mr-2" />
-                            CSV
+                            Excel
                         </Button>
                     </div>
                 </div>

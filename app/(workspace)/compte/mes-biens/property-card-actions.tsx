@@ -82,13 +82,12 @@ export function PropertyCardActions({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent"
+        <button
+          type="button"
+          className="relative z-50 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
         >
           <MoreVertical className="h-4 w-4" />
-        </Button>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 bg-popover border-border">
         <DropdownMenuItem

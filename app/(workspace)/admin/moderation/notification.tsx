@@ -3,16 +3,24 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export function ModerationNotification() {
   const router = useRouter();
   const [hasShownNotification, setHasShownNotification] = useState(false);
 
+  const pathname = usePathname();
+
   useEffect(() => {
+    // Ne pas afficher la notification si on est déjà sur la page de modération
+    if (pathname?.startsWith("/admin/moderation")) {
+      return;
+    }
+
     const checkNewProperties = async () => {
       const supabase = createClient();
-      
+
+
       // Vérifier s'il y a de nouvelles annonces en attente
       const { count, error } = await supabase
         .from("properties")
@@ -41,7 +49,7 @@ export function ModerationNotification() {
 
     // Vérifier toutes les 60 secondes
     const interval = setInterval(checkNewProperties, 60000);
-    
+
     return () => {
       clearTimeout(timeout);
       clearInterval(interval);

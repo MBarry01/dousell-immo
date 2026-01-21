@@ -19,6 +19,7 @@ type VerificationUploadFormProps = {
   variant?: "default" | "outline" | "ghost";
   currentStatus?: string;
   proofDocumentUrl?: string | null;
+  onSuccess?: () => void;
 };
 
 export function VerificationUploadForm({
@@ -26,6 +27,7 @@ export function VerificationUploadForm({
   variant = "outline",
   currentStatus,
   proofDocumentUrl,
+  onSuccess,
 }: VerificationUploadFormProps) {
   // Si déjà vérifié, ne rien afficher
   if (currentStatus === 'verified') {
@@ -101,6 +103,7 @@ export function VerificationUploadForm({
         });
         setIsOpen(false);
         setSelectedFile(null);
+        onSuccess?.();
       }
     } catch (error) {
       console.error(error);

@@ -174,6 +174,7 @@ export async function moderateProperty(
 
   revalidatePath("/admin/moderation");
   revalidatePath("/compte/mes-biens");
+  revalidatePath("/"); // Invalider la page d'accueil pour afficher l'annonce immédiatement
 
   return { success: true };
 }

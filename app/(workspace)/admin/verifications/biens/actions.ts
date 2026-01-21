@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { requireAnyRole } from "@/lib/permissions";
+import { notifyUser } from "@/lib/notifications";
 
 /**
  * Check if a string is a valid UUID
@@ -99,6 +100,29 @@ export async function rejectProperty(propertyId: string, docId: string, reason: 
         revalidatePath("/admin/verifications/biens");
 
         console.log(`⚠️ Property document rejected: ${propertyId}. Reason: ${reason}`);
+
+        // Fetch owner_id to notify user
+        const { data: property } = await supabase
+            .from("properties")
+            .select("owner_id, title")
+            .eq("id", propertyId)
+            .single();
+
+        if (property?.owner_id) {
+            try {
+                // Notifier l'utilisateur
+                // Note: notifyUser import needed
+                await notifyUser({
+                    userId: property.owner_id,
+                    type: "warning",
+                    title: "Document rejeté",
+                    message: `Le document pour votre bien "${property.title}" a été rejeté. Motif : ${reason}.`,
+                    resourcePath: `/compte/mes-biens`
+                });
+            } catch (err) {
+                console.error("Error notifying user of rejection:", err);
+            }
+        }
 
         return {
             success: true,
@@ -272,6 +296,16 @@ export async function getPendingPropertyDocuments() {
                     return null;
                 }
 
+                // Generate signed URL
+                const { data: signedUrlData, error: signedUrlError } = await supabase
+                    .storage
+                    .from("verification-docs")
+                    .createSignedUrl(docData.file_path, 60 * 60); // 1 hour validity
+
+                if (signedUrlError) {
+                    console.error(`❌ Error creating signed URL for ${docData.file_path}:`, signedUrlError);
+                }
+
                 return {
                     id: property.id,
                     title: property.title,
@@ -291,7 +325,7 @@ export async function getPendingPropertyDocuments() {
                         id: docData.id,
                         file_name: docData.file_name,
                         file_type: docData.file_type,
-                        file_url: docData.file_path,
+                        file_url: signedUrlData?.signedUrl || "#", // Use signed URL
                         uploaded_at: docData.created_at
                     }
                 };

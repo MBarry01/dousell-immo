@@ -37,6 +37,7 @@ type PropertyWithStatus = Property & {
 interface PropertyCardProps {
     property: PropertyWithStatus;
     viewMode: 'grid' | 'list';
+    onRefresh?: () => void;
 }
 
 const statusConfig = {
@@ -80,7 +81,7 @@ const occupationConfig = {
     },
 };
 
-export function PropertyCard({ property, viewMode }: PropertyCardProps) {
+export function PropertyCard({ property, viewMode, onRefresh }: PropertyCardProps) {
     const status = statusConfig[property.validation_status || 'pending'];
     const StatusIcon = status.icon;
     const occupation = property.occupation_status ? occupationConfig[property.occupation_status] : null;
@@ -203,6 +204,15 @@ export function PropertyCard({ property, viewMode }: PropertyCardProps) {
                         </span>
                     </div>
                 )}
+
+                {/* Actions overlay - Top Right */}
+                <div className="absolute top-3 right-3 z-10">
+                    <PropertyCardActions
+                        propertyId={property.id}
+                        validationStatus={property.validation_status || 'pending'}
+                        status={property.status || 'disponible'}
+                    />
+                </div>
             </div>
 
             {/* Content */}
@@ -223,7 +233,7 @@ export function PropertyCard({ property, viewMode }: PropertyCardProps) {
                         ) : (
                             (!property.verification_status || property.verification_status === 'rejected') &&
                             (property.validation_status === 'approved' || property.validation_status === 'pending') && (
-                                <VerificationUploadForm propertyId={property.id} />
+                                <VerificationUploadForm propertyId={property.id} onSuccess={onRefresh} />
                             )
                         )}
 
@@ -233,11 +243,7 @@ export function PropertyCard({ property, viewMode }: PropertyCardProps) {
                             {status.label}
                         </span>
 
-                        <PropertyCardActions
-                            propertyId={property.id}
-                            validationStatus={property.validation_status || 'pending'}
-                            status={property.status || 'disponible'}
-                        />
+
                     </div>
                 </div>
 

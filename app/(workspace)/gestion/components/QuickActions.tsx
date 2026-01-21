@@ -79,8 +79,8 @@ export function QuickActions({
         },
         {
             id: 'export',
-            label: 'Exporter CSV',
-            shortLabel: 'Export',
+            label: 'Exporter Excel',
+            shortLabel: 'Excel',
             icon: Download,
             onClick: onExportCSV,
             type: 'button' as const,

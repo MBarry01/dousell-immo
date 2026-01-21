@@ -126,6 +126,17 @@ export async function uploadDocument(formData: FormData) {
 
     revalidatePath("/compte/mes-documents");
 
+    // Notifier l'admin si c'est un document d'identité (CNI/Passeport)
+    if (type === 'cni' || type === 'passport') {
+      const { notifyAdmin } = await import("@/lib/notifications");
+      await notifyAdmin({
+        type: "info",
+        title: "Vérification d'identité",
+        message: `Nouveau document d'identité (${type}) téléchargé par ${user.email}`,
+        resourcePath: `/admin/verifications/identites?highlight=${user.id}`
+      });
+    }
+
     console.log("🎉 [uploadDocument] Upload terminé avec succès!");
 
     return {

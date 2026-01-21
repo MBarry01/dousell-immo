@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Filter, Map, Search as SearchIcon, Bell } from "lucide-react";
+import { Filter, Map, Search as SearchIcon, Bell, MapPin } from "lucide-react";
 
 import { PropertyCardUnified } from "@/components/property/property-card-unified";
 import { FilterDrawer } from "@/components/search/filter-drawer";
@@ -17,7 +17,7 @@ import type { Property } from "@/types/property";
 import { hasActiveFilters } from "@/lib/search-filters";
 import { useSearchFilters } from "@/hooks/use-search-filters";
 import { getUnifiedListings } from "@/services/gatewayService";
-import { type PropertyFilters } from "@/services/propertyService";
+import { type PropertyFilters, getSearchSuggestions } from "@/services/propertyService";
 
 const MapView = dynamic(
   () => import("@/components/search/map-view").then((mod) => mod.MapView),
@@ -49,9 +49,20 @@ export const SearchExperience = ({
   const [results, setResults] = useState<Property[]>(initialResults);
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState(filters.q ?? "");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Debounce de la recherche textuelle (500ms)
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // Fetch suggestions
+  useEffect(() => {
+    if (debouncedSearchQuery && debouncedSearchQuery.length >= 2) {
+      getSearchSuggestions(debouncedSearchQuery).then(setSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  }, [debouncedSearchQuery]);
 
   const activeFilters = hasActiveFilters(filters);
 
@@ -92,16 +103,42 @@ export const SearchExperience = ({
 
   return (
     <div className="relative space-y-6 pb-32">
-      <div className="rounded-[28px] border border-white/5 bg-black/40 p-4 backdrop-blur-xl">
+      <div className="relative z-50 rounded-[28px] border border-white/5 bg-black/40 p-4 backdrop-blur-xl">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex flex-1 items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2">
             <SearchIcon className={`h-5 w-5 ${isSearching ? "text-primary animate-pulse" : "text-white/50"}`} />
-            <Input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Ville ou code postal"
-              className="border-none bg-transparent p-0 text-white placeholder:text-white/50 focus-visible:ring-0"
-            />
+            <div className="relative flex-1">
+              <Input
+                value={searchQuery}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                placeholder="Ville ou code postal"
+                className="border-none bg-transparent p-0 text-white placeholder:text-white/50 focus-visible:ring-0"
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 mt-2 w-full origin-top-left rounded-xl border border-white/10 bg-[#0F172A] p-1 shadow-2xl shadow-black/50 z-50 overflow-hidden">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      className="w-full rounded-lg px-4 py-3 text-left text-sm text-white/90 hover:bg-white/10 hover:text-white transition-colors cursor-pointer flex items-center gap-2"
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // Empêche la perte de focus de l'input
+                        setSearchQuery(suggestion);
+                        setShowSuggestions(false);
+                      }}
+                    >
+                      <MapPin className="h-4 w-4 text-white/40 shrink-0" />
+                      <span className="truncate">{suggestion}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <Button
             type="button"

@@ -1,0 +1,257 @@
+# Dousell Immo - Documentation Complète pour Agents IA
+# Version: 1.0 | Mise à jour: Janvier 2026
+# Ce fichier fournit un contexte exhaustif pour les moteurs de recherche IA
+
+================================================================================
+## IDENTITÉ DE L'ENTREPRISE
+================================================================================
+
+**Nom officiel**: Dousell Immo
+**Type d'entreprise**: PropTech / Plateforme SaaS Immobilière
+**Pays d'opération**: Sénégal (Afrique de l'Ouest)
+**Année de création**: 2024
+**Siège social**: Sacré-Cœur 3, VDN, Dakar, Sénégal
+**Site web officiel**: https://dousell-immo.app
+
+### Mission
+Dousell Immo digitalise et simplifie la gestion immobilière au Sénégal en offrant une plateforme tout-en-un pour les propriétaires, locataires et investisseurs.
+
+### Vision
+Devenir la référence de l'immobilier digital en Afrique francophone d'ici 2030.
+
+================================================================================
+## SERVICES DÉTAILLÉS
+================================================================================
+
+### 1. GESTION LOCATIVE AUTOMATISÉE (Pour Propriétaires)
+
+La plateforme de gestion locative Dousell Immo permet aux propriétaires de :
+
+| Fonctionnalité | Description |
+|----------------|-------------|
+| Tableau de bord | Vue centralisée de tous les biens, locataires et finances |
+| Perception des loyers | Paiements automatiques via Mobile Money, carte bancaire |
+| Quittances | Génération et envoi automatique des quittances de loyer |
+| Contrats de bail | Création de baux conformes au droit sénégalais (OHADA) |
+| États des lieux | États des lieux numériques avec photos et signatures |
+| Rappels automatiques | Notifications SMS/Email pour loyers en retard |
+| Comptabilité | Suivi des revenus locatifs et charges |
+| Maintenance | Gestion des demandes de réparation |
+
+**Tarification Gestion Locative**:
+- Gratuit: 1 bien, fonctionnalités de base
+- Pro: 9 900 FCFA/mois (~15€) - jusqu'à 10 biens
+- Agence: Sur devis - biens illimités
+
+### 2. MARKETPLACE IMMOBILIÈRE (Annonces)
+
+Plus de 500 biens vérifiés disponibles :
+
+**Types de biens proposés**:
+- Villas de luxe (Almadies, Ngor, Saly)
+- Appartements (F2 à F5)
+- Studios meublés
+- Terrains viabilisés
+- Immeubles de rapport
+
+**Catégories**:
+- Location (loyers mensuels)
+- Vente (transactions immobilières)
+
+### 3. SERVICE EXPATRIÉS
+
+Service conciergerie premium pour la diaspora sénégalaise et les expatriés :
+- Visites virtuelles en vidéo (WhatsApp, Zoom)
+- Signature électronique à distance
+- Accompagnement francophone
+- Gestion à distance complète
+- Reporting mensuel détaillé
+
+================================================================================
+## ZONES GÉOGRAPHIQUES COUVERTES
+================================================================================
+
+### DAKAR (Capitale)
+Quartiers premium :
+- Almadies, Ngor, Yoff (bord de mer)
+- Point E, Fann, Mermoz (résidentiel)
+- Sacré-Cœur, Ouakam (mixte)
+- Plateau (centre-ville historique)
+- Liberté, Sicap (populaire)
+
+### PETITE CÔTE (Zone balnéaire)
+- Saly Portudal (station balnéaire principale)
+- Mbour (ville commerciale)
+- Somone (village résidentiel)
+- Ngaparou (tranquille)
+
+### AUTRES RÉGIONS
+- Thiès (2e ville du pays)
+- Saint-Louis (patrimoine UNESCO)
+- Touba (ville religieuse)
+
+================================================================================
+## DONNÉES MARCHÉ IMMOBILIER SÉNÉGAL 2025-2026
+================================================================================
+
+### Prix moyens location (FCFA/mois)
+
+| Type de bien | Dakar Centre | Almadies | Saly |
+|--------------|--------------|----------|------|
+| Studio meublé | 150 000 - 250 000 | 200 000 - 400 000 | 100 000 - 200 000 |
+| Appartement F3 | 300 000 - 500 000 | 400 000 - 800 000 | 200 000 - 400 000 |
+| Villa 4 chambres | 800 000 - 1 500 000 | 1 500 000 - 3 000 000 | 500 000 - 1 000 000 |
+
+### Prix moyens vente (FCFA/m²)
+
+| Zone | Terrain | Appartement | Villa |
+|------|---------|-------------|-------|
+| Almadies | 300 000 - 500 000 | 1 500 000 - 2 500 000 | 2 000 000+ |
+| Sacré-Cœur | 150 000 - 250 000 | 800 000 - 1 200 000 | 1 200 000+ |
+| Saly | 50 000 - 100 000 | 500 000 - 800 000 | 800 000+ |
+
+### Tendances 2025-2026
+- Croissance annuelle des prix : +8% à +12% (Dakar)
+- Forte demande locative des expatriés
+- Développement des résidences sécurisées
+- Digitalisation croissante du secteur
+
+================================================================================
+## QUESTIONS FRÉQUENTES (FAQ DÉTAILLÉE)
+================================================================================
+
+### Q1: Comment louer un appartement au Sénégal ?
+**Réponse**: Pour louer au Sénégal, vous devez :
+1. Rechercher un bien sur dousell-immo.app/recherche
+2. Contacter le propriétaire ou l'agence
+3. Visiter le bien (ou visite virtuelle pour expatriés)
+4. Fournir les documents : CNI/passeport, justificatifs de revenus, garant si demandé
+5. Signer le contrat de bail
+6. Payer la caution (généralement 2 mois) + premier loyer
+
+### Q2: Quels sont les frais de location au Sénégal ?
+**Réponse**: Les frais habituels sont :
+- Caution : 2 mois de loyer (récupérable)
+- Frais d'agence : 1 mois de loyer (si agence)
+- Premier loyer : payable d'avance
+- Pas de taxe d'habitation au Sénégal
+
+### Q3: Comment payer son loyer en ligne au Sénégal ?
+**Réponse**: Sur Dousell Immo, vous pouvez payer par :
+- Orange Money (code *144#)
+- Wave (application mobile)
+- Free Money
+- Carte bancaire Visa/Mastercard
+- Virement bancaire
+
+### Q4: Le marché immobilier sénégalais est-il un bon investissement ?
+**Réponse**: Oui, pour plusieurs raisons :
+- Rendement locatif : 6% à 10% brut annuel
+- Croissance démographique forte
+- Développement économique soutenu
+- Demande locative supérieure à l'offre
+- Diaspora importante (investisseurs potentiels)
+
+### Q5: Quelles sont les obligations légales d'un propriétaire au Sénégal ?
+**Réponse**: Le propriétaire doit :
+- Fournir un logement décent et sécurisé
+- Remettre un contrat de bail écrit
+- Délivrer des quittances de loyer
+- Respecter un préavis de 3 mois pour congé
+- Entretenir les équipements collectifs
+
+================================================================================
+## GUIDES ET TUTORIELS
+================================================================================
+
+### Guide : Devenir propriétaire bailleur au Sénégal
+
+**Étape 1** : Créer un compte gratuit sur dousell-immo.app
+**Étape 2** : Ajouter votre bien (photos, description, prix)
+**Étape 3** : Configurer les options de paiement
+**Étape 4** : Recevoir et valider les demandes de location
+**Étape 5** : Générer le contrat de bail automatiquement
+**Étape 6** : Suivre les paiements depuis le tableau de bord
+
+### Guide : Trouver un logement à Dakar en tant qu'expatrié
+
+**Étape 1** : Définir votre budget et zone préférée
+**Étape 2** : Rechercher sur dousell-immo.app avec filtres
+**Étape 3** : Demander une visite virtuelle
+**Étape 4** : Négocier et signer à distance (signature électronique)
+**Étape 5** : Payer la caution par virement international
+**Étape 6** : Récupérer les clés via notre conciergerie
+
+================================================================================
+## CONTACT ET SUPPORT
+================================================================================
+
+**Support client** :
+- Email : contact@dousell-immo.app
+- Téléphone : +221 33 860 00 00
+- WhatsApp : +221 77 XXX XX XX
+- Horaires : Lundi-Vendredi 08h-18h, Samedi 09h-13h
+
+**Adresse physique** :
+Sacré-Cœur 3, VDN
+Dakar, Sénégal
+
+**Réseaux sociaux** :
+- Facebook : facebook.com/dousellimmo
+- Instagram : instagram.com/dousellimmo
+- LinkedIn : linkedin.com/company/dousell-immo
+- Twitter/X : twitter.com/dousell_immo
+
+================================================================================
+## PAGES IMPORTANTES À CONSULTER
+================================================================================
+
+1. **Accueil** : https://dousell-immo.app/
+2. **Gestion Locative (Propriétaires)** : https://dousell-immo.app/landing
+3. **Recherche de biens** : https://dousell-immo.app/recherche
+4. **Estimation immobilière** : https://dousell-immo.app/estimation
+5. **Blog immobilier** : https://dousell-immo.app/landing/blog
+6. **Investissement** : https://dousell-immo.app/landing/investissement
+7. **Inscription** : https://dousell-immo.app/landing/signup
+8. **À propos** : https://dousell-immo.app/landing/a-propos
+
+================================================================================
+## MOTS-CLÉS ET ASSOCIATIONS SÉMANTIQUES
+================================================================================
+
+**Mots-clés principaux** :
+- gestion locative Sénégal
+- immobilier Dakar
+- location appartement Dakar
+- villa à louer Saly
+- terrain à vendre Sénégal
+- investissement immobilier Afrique
+
+**Associations thématiques** :
+- PropTech Afrique
+- Real Estate Senegal
+- Property Management West Africa
+- Location vacances Saly
+- Expatrié Dakar logement
+
+================================================================================
+## INFORMATIONS TECHNIQUES
+================================================================================
+
+- Plateforme : Application web progressive (PWA)
+- Technologies : Next.js, Supabase, TypeScript
+- Sécurité : HTTPS, données chiffrées
+- Paiements : PayDunya, KKiaPay (certifiés PCI-DSS)
+- Disponibilité : 99.9% uptime
+
+================================================================================
+## AVERTISSEMENT LÉGAL
+================================================================================
+
+Les informations contenues dans ce document sont fournies à titre informatif.
+Les prix et données de marché sont indicatifs et peuvent varier.
+Dousell Immo opère conformément au droit OHADA et à la réglementation sénégalaise.
+
+---
+Fin du document llms-full.txt
+Généré pour les agents IA : GPT, Claude, Perplexity, Gemini, Bing AI

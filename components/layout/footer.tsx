@@ -10,8 +10,8 @@ const quickLinks = [
 
 const legalLinks = [
   { label: "Mentions légales", href: "/legal" },
-  { label: "CGU", href: "/cgu" },
-  { label: "Politique de confidentialité", href: "/legal#confidentialite" },
+  { label: "CGU", href: "/legal/cgu" },
+  { label: "Politique de confidentialité", href: "/legal/privacy" },
 ];
 
 const socials = [
@@ -105,7 +105,7 @@ export const Footer = () => {
             <Link href="/legal" className="hover:text-white/70 hover:translate-x-0.5 transition-all duration-200">
               Mentions légales
             </Link>
-            <Link href="/cgu" className="hover:text-white/70 hover:translate-x-0.5 transition-all duration-200">
+            <Link href="/legal/cgu" className="hover:text-white/70 hover:translate-x-0.5 transition-all duration-200">
               CGU
             </Link>
             <Link href="/contact" className="hover:text-white/70 hover:translate-x-0.5 transition-all duration-200">

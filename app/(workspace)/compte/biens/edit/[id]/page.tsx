@@ -329,23 +329,7 @@ export default function EditPropertyPage() {
 
             <div>
               <label className="text-sm text-white/70">Quartier</label>
-              <select
-                {...register("district")}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white appearance-none bg-no-repeat bg-right pr-10"
-                style={{
-                  colorScheme: "dark",
-                  backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
-                  backgroundPosition: "right 0.75rem center",
-                  backgroundSize: "1.5em 1.5em"
-                }}
-              >
-                <option value="" className="bg-[#121212] text-white py-2">Sélectionnez</option>
-                {quartiers.map((q) => (
-                  <option key={q} value={q} className="bg-[#121212] text-white py-2">
-                    {q}
-                  </option>
-                ))}
-              </select>
+              <Input {...register("district")} className="mt-2" placeholder="Ex: Mbour 1, Quartier Som" />
               {errors.district && (
                 <p className="mt-1 text-sm text-amber-300">{errors.district.message}</p>
               )}

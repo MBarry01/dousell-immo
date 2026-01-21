@@ -206,13 +206,14 @@ export default function RegisterPage() {
               }
 
               // Validation du téléphone (format international)
-              if (!phone || phone.trim().length < 8) {
-                errors.phone = "Numéro de téléphone invalide";
+              // On assouplit la vérification pour éviter les faux positifs bloquants
+              if (!phone) {
+                errors.phone = "Numéro de téléphone requis";
               } else {
-                // Vérifier que c'est un numéro valide (au moins 8 caractères après l'indicatif)
-                const phoneWithoutSpaces = phone.replace(/\s/g, "");
-                if (phoneWithoutSpaces.length < 8) {
-                  errors.phone = "Numéro de téléphone invalide";
+                // On vérifie juste qu'il y a assez de chiffres
+                const phoneDigits = phone.replace(/\D/g, "");
+                if (phoneDigits.length < 8) {
+                  errors.phone = "Numéro de téléphone invalide (trop court)";
                 }
               }
 

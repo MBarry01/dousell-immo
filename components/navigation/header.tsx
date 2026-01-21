@@ -83,7 +83,10 @@ export const Header = () => {
               >
                 <Plus className="h-5 w-5 text-white" />
               </Link>
-              <NotificationBell userId={user.id} />
+              <NotificationBell
+                userId={user.id}
+                className="hover:bg-white/10 text-white hover:text-white"
+              />
               {/* Menu utilisateur avec avatar */}
               <div id="tour-home-menu-mobile" className="relative" style={{ zIndex: 2 }}>
                 <UserNav />
@@ -167,7 +170,10 @@ export const Header = () => {
                   <Plus className="h-4 w-4 text-white" />
                 </Link>
                 <div className="relative" style={{ zIndex: 1 }}>
-                  <NotificationBell userId={user.id} />
+                  <NotificationBell
+                    userId={user.id}
+                    className="hover:bg-white/10 text-white hover:text-white"
+                  />
                 </div>
               </>
             )}

@@ -375,11 +375,11 @@ export async function login(formData: FormData) {
 
   revalidatePath("/", "layout");
 
-  // Remplacer la redirection /portal et /compte par / qui est la racine
-  // redirect("/portal"); -> Désactivé
-  // redirect("/compte"); -> Désactivé
-  redirect("/");
-
+  // Retourner un succès au lieu de redirect() pour que le client puisse
+  // gérer le rafraîchissement de l'état d'authentification
+  return {
+    success: true,
+  };
 }
 
 export async function signInWithGoogle() {

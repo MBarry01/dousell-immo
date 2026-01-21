@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Mail, Lock, ArrowLeft } from "lucide-react";
@@ -12,6 +13,7 @@ import { Captcha } from "@/components/ui/captcha";
 import { login } from "@/app/(vitrine)/auth/actions";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -125,6 +127,11 @@ export default function LoginPage() {
                       duration: 5000,
                     });
                   }
+                } else if (result?.success) {
+                  // Connexion réussie: forcer un rechargement complet de la page
+                  // pour que le hook useAuth détecte la nouvelle session
+                  toast.success("Connexion réussie !");
+                  window.location.href = "/"; // Force un rechargement complet
                 }
               });
             }}

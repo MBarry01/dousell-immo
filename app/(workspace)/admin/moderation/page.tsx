@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { AnimatePresence } from "framer-motion";
@@ -46,6 +46,7 @@ type FilterService = "all" | "mandat_confort" | "boost_visibilite";
 export default function ModerationPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { roles: userRoles, loading: loadingRoles } = useUserRoles(user?.id || null);
   const [properties, setProperties] = useState<PropertyToModerate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +56,19 @@ export default function ModerationPage() {
   // Vérifier que l'utilisateur a le droit d'accéder à la modération
   const isMainAdmin = user?.email?.toLowerCase() === "barrymohamadou98@gmail.com".toLowerCase();
   const canModerate = isMainAdmin || userRoles.some((role) => ["admin", "moderateur", "superadmin"].includes(role));
+
+  // Initialize filters from URL params
+  useEffect(() => {
+    if (searchParams) {
+      const search = searchParams.get("search");
+      const status = searchParams.get("status");
+
+      if (search) setSearchQuery(search);
+      if (status && ["all", "pending", "payment_pending"].includes(status)) {
+        setFilterStatus(status as FilterStatus);
+      }
+    }
+  }, [searchParams]);
 
   // Le layout admin vérifie déjà l'accès côté serveur avec requireAnyRole()
   // On ne fait qu'une vérification côté client pour l'UX (afficher un message si pas de droits)
@@ -123,13 +137,36 @@ export default function ModerationPage() {
         return;
       }
 
-      const propertiesWithLocation = (data || []).map((p) => ({
-        ...p,
-        location: p.location as { city: string; district: string },
-        images: (p.images as string[]) || [],
-      }));
+      // Generate signed URLs for documents
+      const propertiesWithSignedUrls = await Promise.all(
+        (data || []).map(async (p) => {
+          let signedDocUrl = p.proof_document_url;
 
-      setProperties(propertiesWithLocation);
+          if (p.proof_document_url) {
+            // Check if it's likely a path in verification-docs (not a full http URL)
+            const isPath = !p.proof_document_url.startsWith("http");
+
+            if (isPath) {
+              const { data: urlData } = await supabase.storage
+                .from("verification-docs")
+                .createSignedUrl(p.proof_document_url, 3600); // 1 hour
+
+              if (urlData?.signedUrl) {
+                signedDocUrl = urlData.signedUrl;
+              }
+            }
+          }
+
+          return {
+            ...p,
+            location: p.location as { city: string; district: string },
+            images: (p.images as string[]) || [],
+            proof_document_url: signedDocUrl
+          };
+        })
+      );
+
+      setProperties(propertiesWithSignedUrls);
       setLoading(false);
     } catch (err) {
       console.error("❌ Unexpected error loading properties:", {

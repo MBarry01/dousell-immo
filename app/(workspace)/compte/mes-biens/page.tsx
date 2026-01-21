@@ -329,6 +329,7 @@ export default function MesBiensPage() {
               key={property.id}
               property={property}
               viewMode="grid"
+              onRefresh={loadProperties}
             />
           ))}
         </div>
@@ -339,6 +340,7 @@ export default function MesBiensPage() {
               key={property.id}
               property={property}
               viewMode="list"
+              onRefresh={loadProperties}
             />
           ))}
         </div>

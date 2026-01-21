@@ -14,7 +14,7 @@ import {
   getOrSetCacheWithMetrics,
 } from "@/lib/cache/advanced-patterns";
 import { getProperties, getPropertiesCount, type PropertyFilters } from "./propertyService";
-import { getExternalListingsByType } from "./gatewayService";
+import { getExternalListingsByType, getExternalListingsCount } from "./gatewayService";
 import type { Property } from "@/types/property";
 
 type SectionResult = {
@@ -59,17 +59,18 @@ export async function getPopularLocations(limit = 8): Promise<SectionResult> {
           limit,
         } as PropertyFilters;
 
-        // Requêtes parallèles: internes + externes
-        const [internalProperties, total, externalProperties] = await Promise.all([
+        // Requêtes parallèles: internes + externes + compteurs
+        const [internalProperties, internalCount, externalProperties, externalCount] = await Promise.all([
           getProperties(filters),
           getPropertiesCount(filters),
           getExternalListingsByType("location", { city: "Dakar", limit }),
+          getExternalListingsCount("location", { city: "Dakar" }),
         ]);
 
         // Fusion avec priorité aux internes
         const properties = mergeWithExternals(internalProperties, externalProperties, limit);
 
-        return { properties, total };
+        return { properties, total: internalCount + externalCount };
       } catch (error) {
         console.error(
           "[homeService.cached] Error fetching popular locations:",
@@ -79,7 +80,7 @@ export async function getPopularLocations(limit = 8): Promise<SectionResult> {
       }
     },
     {
-      ttl: 300, // 5 minutes
+      ttl: 10, // 10 secondes
       namespace: "homepage",
       debug: process.env.NODE_ENV === "development",
     }
@@ -97,17 +98,18 @@ export async function getPropertiesForSale(limit = 8): Promise<SectionResult> {
           limit: limit,
         } as PropertyFilters;
 
-        // Requêtes parallèles: internes + externes (Appartement/Villa/Maison)
-        const [internalProperties, total, externalProperties] = await Promise.all([
+        // Requêtes parallèles: internes + externes + compteurs
+        const [internalProperties, internalCount, externalProperties, externalCount] = await Promise.all([
           getProperties(filters),
           getPropertiesCount(filters),
           getExternalListingsByType("vente", { limit }),
+          getExternalListingsCount("vente"),
         ]);
 
         // Fusion avec priorité aux internes
         const properties = mergeWithExternals(internalProperties, externalProperties, limit);
 
-        return { properties, total };
+        return { properties, total: internalCount + externalCount };
       } catch (error) {
         console.error(
           "[homeService.cached] Error fetching properties for sale:",
@@ -117,7 +119,7 @@ export async function getPropertiesForSale(limit = 8): Promise<SectionResult> {
       }
     },
     {
-      ttl: 300, // 5 minutes
+      ttl: 10, // 10 secondes
       namespace: "homepage",
       debug: process.env.NODE_ENV === "development",
     }
@@ -139,24 +141,25 @@ export async function getLandForSale(limit = 8): Promise<SectionResult> {
           limit: limit,
         } as PropertyFilters;
 
-        // Requêtes parallèles: internes + externes (Terrains)
-        const [internalProperties, total, externalProperties] = await Promise.all([
+        // Requêtes parallèles: internes + externes + compteurs
+        const [internalProperties, internalCount, externalProperties, externalCount] = await Promise.all([
           getProperties(filters),
           getPropertiesCount(filters),
           getExternalListingsByType("vente", { category: "Terrain", limit }),
+          getExternalListingsCount("vente", { category: "Terrain" }),
         ]);
 
         // Fusion avec priorité aux internes
         const properties = mergeWithExternals(internalProperties, externalProperties, limit);
 
-        return { properties, total };
+        return { properties, total: internalCount + externalCount };
       } catch (error) {
         console.error("[homeService.cached] Error fetching land for sale:", error);
         return { properties: [], total: 0 };
       }
     },
     {
-      ttl: 300, // 5 minutes
+      ttl: 10, // 10 secondes
       namespace: "homepage",
       debug: process.env.NODE_ENV === "development",
     }
@@ -204,7 +207,7 @@ export async function getHomePageSections() {
       }
     },
     {
-      ttl: 300, // 5 minutes
+      ttl: 10, // 10 secondes pour tests rapides
       namespace: "homepage",
       debug: process.env.NODE_ENV === "development",
     }

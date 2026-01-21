@@ -8,6 +8,8 @@ type UpdatePropertyData = PropertyFormValues & {
   images: string[];
 };
 
+import { smartGeocode } from "@/lib/geocoding";
+
 export async function updateUserProperty(
   propertyId: string,
   data: UpdatePropertyData
@@ -43,91 +45,77 @@ export async function updateUserProperty(
   // Préparer les specs selon le type
   const specs = isTerrain
     ? {
-        surface: data.surfaceTotale ?? 0,
-        rooms: 0,
-        bedrooms: 0,
-        bathrooms: 0,
-        dpe: "B" as const,
-      }
+      surface: data.surfaceTotale ?? 0,
+      rooms: 0,
+      bedrooms: 0,
+      bathrooms: 0,
+      dpe: "B" as const,
+    }
     : {
-        surface: data.surface ?? 0,
-        rooms: data.rooms ?? 0,
-        bedrooms: data.bedrooms ?? 0,
-        bathrooms: data.bathrooms ?? 0,
-        dpe: "B" as const,
-      };
+      surface: data.surface ?? 0,
+      rooms: data.rooms ?? 0,
+      bedrooms: data.bedrooms ?? 0,
+      bathrooms: data.bathrooms ?? 0,
+      dpe: "B" as const,
+    };
 
   // Mapper le type pour details
-  const typeMap: Record<string, "Appartement" | "Maison" | "Studio"> = {
+  // Note: on essaie d'être cohérent avec les valeurs attendues par le front
+  const typeMap: Record<string, string> = {
     villa: "Maison",
     appartement: "Appartement",
-    immeuble: "Appartement",
-    terrain: "Appartement",
+    immeuble: "Immeuble",
+    terrain: "Terrain",
   };
 
   const features = isTerrain
     ? {}
     : {
-        hasGenerator: data.hasGenerator ?? false,
-        hasWaterTank: data.hasWaterTank ?? false,
-        security: data.security ?? false,
-        pool: data.pool ?? false,
-      };
+      hasGenerator: data.hasGenerator ?? false,
+      hasWaterTank: data.hasWaterTank ?? false,
+      security: data.security ?? false,
+      pool: data.pool ?? false,
+    };
+
+  const detailsType = typeMap[data.type] ?? "Appartement";
 
   const details = isTerrain
     ? {
-        type: "Appartement" as const,
-        year: new Date().getFullYear(),
-        heating: "",
-        juridique: data.juridique,
-      }
+      type: "Terrain",
+      year: new Date().getFullYear(),
+      heating: "",
+      juridique: data.juridique,
+    }
     : {
-        type: typeMap[data.type] ?? "Appartement",
-        year: new Date().getFullYear(),
-        heating: "Climatisation",
-      };
-
-  const updatePayload: {
-    title: string;
-    description: string;
-    price: number;
-    category: string;
-    location: {
-      city: string;
-      district: string;
-      address: string;
-      landmark?: string;
-      coords: { lat: number; lng: number };
+      type: detailsType,
+      year: new Date().getFullYear(),
+      heating: "Climatisation",
     };
-    specs: typeof specs;
-    features: typeof features;
-    details: typeof details;
-    images: string[];
-    validation_status?: string;
-    rejection_reason?: null;
-  } = {
+
+  // Géocodage pour mettre à jour les coordonnées
+  const coords = await smartGeocode(data.address, data.district, data.city);
+
+  const updatePayload = {
     title: data.title,
     description: data.description,
     price: data.price,
     category: data.category,
+    property_type: data.type, // Mise à jour explicite du type (colonne property_type dans la DB)
     location: {
       city: data.city,
       district: data.district,
       address: data.address,
       landmark: data.landmark || "",
-      coords: { lat: 0, lng: 0 },
+      coords: coords,
     },
     specs,
     features,
     details,
     images: data.images,
+    ...(property.validation_status === "rejected"
+      ? { validation_status: "pending", rejection_reason: null }
+      : {}),
   };
-
-  // Si c'était un bien refusé, le repasser en pending pour nouvelle validation
-  if (property.validation_status === "rejected") {
-    updatePayload.validation_status = "pending";
-    updatePayload.rejection_reason = null; // Effacer le motif de refus
-  }
 
   const { error } = await supabase
     .from("properties")
@@ -136,7 +124,7 @@ export async function updateUserProperty(
 
   if (error) {
     console.error("Error updating property:", error);
-    return { error: "Erreur lors de la mise à jour de l'annonce" };
+    return { error: `Erreur DB: ${error.message} (${error.details || ''})` };
   }
 
   revalidatePath("/compte/mes-biens");

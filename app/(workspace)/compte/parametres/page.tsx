@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Mail, Lock, User as UserIcon, ArrowLeft, Camera, Trash2, Upload } from "lucide-react";
+import { Mail, Lock, User as UserIcon, ArrowLeft, Camera, Trash2, Upload, Phone } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/client";

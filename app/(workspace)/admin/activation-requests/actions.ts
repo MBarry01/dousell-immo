@@ -35,7 +35,7 @@ export async function getActivationRequests() {
         .select('id, full_name, email')
         .in('id', userIds);
 
-    // Map requests to include user data
+    // Map requests to include user data and signed URLs
     // Use Promise.all to fetch user data for each request, falling back to auth.admin.getUserById if needed
     const requestsWithUsers = await Promise.all((requests || []).map(async (req) => {
         const profile = profiles?.find(p => p.id === req.user_id);
@@ -57,8 +57,30 @@ export async function getActivationRequests() {
             }
         }
 
+        // Generate signed URLs for documents
+        let identityDocUrl = req.identity_document_url;
+        let propertyProofUrl = req.property_proof_url;
+
+        // Try to sign identity document URL if it looks like a path
+        if (identityDocUrl && !identityDocUrl.startsWith('http')) {
+            const { data } = await supabase.storage
+                .from('verification-docs')
+                .createSignedUrl(identityDocUrl, 3600);
+            if (data?.signedUrl) identityDocUrl = data.signedUrl;
+        }
+
+        // Try to sign property proof URL if it looks like a path
+        if (propertyProofUrl && !propertyProofUrl.startsWith('http')) {
+            const { data } = await supabase.storage
+                .from('verification-docs')
+                .createSignedUrl(propertyProofUrl, 3600);
+            if (data?.signedUrl) propertyProofUrl = data.signedUrl;
+        }
+
         return {
             ...req,
+            identity_document_url: identityDocUrl,
+            property_proof_url: propertyProofUrl,
             user: {
                 full_name: fullName,
                 email: email || 'Email inconnu'

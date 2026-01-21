@@ -28,6 +28,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 type NotificationBellProps = {
   userId: string | null;
+  className?: string;
 };
 
 const notificationIcons: Record<NotificationType, typeof Info> = {
@@ -44,7 +45,7 @@ const notificationStyles: Record<NotificationType, string> = {
   error: "bg-red-500/10 text-red-400",
 };
 
-export function NotificationBell({ userId }: NotificationBellProps) {
+export function NotificationBell({ userId, className }: NotificationBellProps) {
   const router = useRouter();
   const { notifications, unreadCount, loading, error, refetch } = useNotifications(userId);
   const [isOpen, setIsOpen] = useState(false);
@@ -111,7 +112,10 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <button
-          className="relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 text-foreground"
+          className={cn(
+            "relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 text-foreground",
+            className
+          )}
           aria-label="Notifications"
           onClick={() => {
             // Forcer un refetch quand on ouvre le popover

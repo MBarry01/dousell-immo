@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { notifyAdmin } from "@/lib/notifications";
 
 /**
  * Upload un document de vérification pour un bien
@@ -97,6 +98,14 @@ export async function uploadVerificationDoc(formData: FormData) {
   }
 
   revalidatePath("/compte/mes-biens");
+
+  // Notifier l'admin
+  await notifyAdmin({
+    type: "info",
+    title: "Demande de vérification",
+    message: `Une nouvelle demande de vérification a été soumise par ${user.email}.`,
+    resourcePath: `/admin/verifications/biens?highlight=${propertyId}`,
+  });
 
   return {
     success: true,

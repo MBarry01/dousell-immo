@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Loader2 } from "lucide-react";
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Plus, Loader2, ChevronDown, Upload, User, FileSpreadsheet, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,6 +12,13 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import * as XLSX from 'xlsx';
 import { createNewLease } from "../actions";
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -40,6 +47,7 @@ const FIRST_TENANT_KEY = 'dousell_first_tenant_created';
 
 export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddTenantButtonProps) {
     const [open, setOpen] = useState(false);
+    const [bulkImportOpen, setBulkImportOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showProfileAlert, setShowProfileAlert] = useState(false);
@@ -206,9 +214,30 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
         }
 
         return (
-            <Button onClick={handleTriggerClick} className={`${isDark ? 'bg-[#F4C430] text-black hover:bg-[#F4C430]/90' : 'bg-slate-900 text-white hover:bg-slate-800'} rounded-lg h-9 px-2 sm:px-4 font-medium text-sm transition-all`}>
-                <Plus className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">Nouveau</span>
-            </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button className={`${isDark ? 'bg-[#F4C430] text-black hover:bg-[#F4C430]/90' : 'bg-slate-900 text-white hover:bg-slate-800'} rounded-lg h-9 px-2 sm:px-4 font-medium text-sm transition-all`}>
+                        <Plus className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">Ajouter</span>
+                        <ChevronDown className="w-3 h-3 ml-1 sm:ml-2 opacity-70" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className={`${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'} min-w-[200px] p-1`}>
+                    <DropdownMenuItem
+                        onClick={handleTriggerClick}
+                        className={`flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 text-sm ${isDark ? 'text-slate-300 hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white' : 'text-gray-700 hover:bg-slate-100 hover:text-slate-900 focus:bg-slate-100'}`}
+                    >
+                        <User className="w-4 h-4" />
+                        <span>Ajouter un locataire</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        onClick={() => setBulkImportOpen(true)}
+                        className={`flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 text-sm ${isDark ? 'text-slate-300 hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white' : 'text-gray-700 hover:bg-slate-100 hover:text-slate-900 focus:bg-slate-100'}`}
+                    >
+                        <FileSpreadsheet className="w-4 h-4" />
+                        <span>Ajouter en masse</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         );
     };
 
@@ -521,6 +550,17 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                 </DialogContent>
             </Dialog>
 
+            {/* BULK IMPORT DIALOG */}
+            <BulkImportDialog
+                open={bulkImportOpen}
+                onOpenChange={setBulkImportOpen}
+                ownerId={ownerId}
+                onSuccess={() => {
+                    setBulkImportOpen(false);
+                    router.refresh();
+                }}
+            />
+
             {/* ONBOARDING WIZARD */}
             <TenantOnboardingWizard
                 open={showOnboardingWizard}
@@ -761,6 +801,376 @@ function TenantOnboardingWizard({ open, onOpenChange, leaseData, profile, onComp
                             </div>
                         </div>
                     )}
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+// --- BULK IMPORT DIALOG COMPONENT ---
+
+interface BulkImportDialogProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    ownerId: string;
+    onSuccess: () => void;
+}
+
+interface ParsedTenant {
+    nom: string;
+    email: string;
+    telephone?: string;
+    adresse: string;
+    loyer: number;
+    jour_paiement?: number;
+    date_debut: string;
+    date_fin?: string;
+    mois_caution?: number;
+    error?: string;
+}
+
+function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImportDialogProps) {
+    const [isDragging, setIsDragging] = useState(false);
+    const [parsedData, setParsedData] = useState<ParsedTenant[]>([]);
+    const [fileName, setFileName] = useState<string>('');
+    const [loading, setLoading] = useState(false);
+    const [importProgress, setImportProgress] = useState(0);
+    const [errors, setErrors] = useState<string[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const { isDark } = useTheme();
+
+    // Reset state when dialog closes
+    useEffect(() => {
+        if (!open) {
+            setParsedData([]);
+            setFileName('');
+            setErrors([]);
+            setImportProgress(0);
+        }
+    }, [open]);
+
+    const parseFile = async (file: File) => {
+        setErrors([]);
+        setFileName(file.name);
+
+        try {
+            const buffer = await file.arrayBuffer();
+            const workbook = XLSX.read(buffer, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json<Record<string, any>>(firstSheet);
+
+            if (jsonData.length === 0) {
+                setErrors(['Le fichier est vide ou ne contient pas de données valides.']);
+                return;
+            }
+
+            // Map and validate data
+            const mapped: ParsedTenant[] = jsonData.map((row, index) => {
+                const tenant: ParsedTenant = {
+                    nom: String(row.nom || row.Nom || row.name || row.Name || '').trim(),
+                    email: String(row.email || row.Email || row.EMAIL || '').trim(),
+                    telephone: String(row.telephone || row.Telephone || row.phone || row.Phone || row.tel || '').trim() || undefined,
+                    adresse: String(row.adresse || row.Adresse || row.address || row.Address || '').trim(),
+                    loyer: Number(row.loyer || row.Loyer || row.rent || row.Rent || row.montant || 0),
+                    jour_paiement: Number(row.jour_paiement || row.jour || row.day || 5) || 5,
+                    date_debut: formatDate(row.date_debut || row.debut || row.start_date || row.start || ''),
+                    date_fin: formatDate(row.date_fin || row.fin || row.end_date || row.end || ''),
+                    mois_caution: Number(row.mois_caution || row.caution || row.deposit || 2) || 2,
+                };
+
+                // Validate required fields
+                const missingFields: string[] = [];
+                if (!tenant.nom) missingFields.push('nom');
+                if (!tenant.email) missingFields.push('email');
+                if (!tenant.adresse) missingFields.push('adresse');
+                if (!tenant.loyer || tenant.loyer <= 0) missingFields.push('loyer');
+                if (!tenant.date_debut) missingFields.push('date_debut');
+
+                if (missingFields.length > 0) {
+                    tenant.error = `Ligne ${index + 2}: champs manquants (${missingFields.join(', ')})`;
+                }
+
+                return tenant;
+            });
+
+            setParsedData(mapped);
+        } catch (err) {
+            console.error('Error parsing file:', err);
+            setErrors(['Erreur lors de la lecture du fichier. Vérifiez le format.']);
+        }
+    };
+
+    const formatDate = (value: any): string => {
+        if (!value) return '';
+
+        // If it's already a valid date string
+        if (typeof value === 'string') {
+            // Handle DD/MM/YYYY format
+            const dmyMatch = value.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (dmyMatch) {
+                return `${dmyMatch[3]}-${dmyMatch[2].padStart(2, '0')}-${dmyMatch[1].padStart(2, '0')}`;
+            }
+            // Handle YYYY-MM-DD format (already correct)
+            if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                return value;
+            }
+        }
+
+        // If it's an Excel serial date number
+        if (typeof value === 'number') {
+            const date = new Date((value - 25569) * 86400 * 1000);
+            return date.toISOString().split('T')[0];
+        }
+
+        return '';
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            const ext = file.name.split('.').pop()?.toLowerCase();
+            if (['csv', 'xlsx', 'xls'].includes(ext || '')) {
+                parseFile(file);
+            } else {
+                setErrors(['Format non supporté. Utilisez CSV, XLSX ou XLS.']);
+            }
+        }
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) parseFile(file);
+    };
+
+    const handleImport = async () => {
+        const validData = parsedData.filter(t => !t.error);
+        if (validData.length === 0) {
+            toast.error('Aucune donnée valide à importer');
+            return;
+        }
+
+        setLoading(true);
+        setImportProgress(0);
+        let successCount = 0;
+        const importErrors: string[] = [];
+
+        for (let i = 0; i < validData.length; i++) {
+            const tenant = validData[i];
+            try {
+                const result = await createNewLease({
+                    owner_id: ownerId,
+                    tenant_name: tenant.nom,
+                    tenant_phone: tenant.telephone || '',
+                    tenant_email: tenant.email,
+                    property_address: tenant.adresse,
+                    monthly_amount: tenant.loyer,
+                    billing_day: tenant.jour_paiement || 5,
+                    start_date: tenant.date_debut,
+                    end_date: tenant.date_fin || null,
+                    status: 'active' as const,
+                    deposit_months: tenant.mois_caution || 2,
+                });
+
+                if (result.success) {
+                    successCount++;
+                } else {
+                    importErrors.push(`${tenant.nom}: ${result.error}`);
+                }
+            } catch (err) {
+                importErrors.push(`${tenant.nom}: Erreur inattendue`);
+            }
+
+            setImportProgress(Math.round(((i + 1) / validData.length) * 100));
+        }
+
+        setLoading(false);
+
+        if (successCount > 0) {
+            toast.success(`${successCount} locataire(s) importé(s) avec succès !`);
+        }
+        if (importErrors.length > 0) {
+            setErrors(importErrors);
+        } else {
+            onSuccess();
+        }
+    };
+
+    const validCount = parsedData.filter(t => !t.error).length;
+    const errorCount = parsedData.filter(t => t.error).length;
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className={`z-[100] sm:max-w-2xl ${isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'} max-h-[90vh] overflow-y-auto`}>
+                <DialogHeader>
+                    <DialogTitle className={isDark ? 'text-white' : 'text-gray-900'}>
+                        <FileSpreadsheet className="w-5 h-5 inline-block mr-2" />
+                        Importer des locataires en masse
+                    </DialogTitle>
+                    <DialogDescription className={isDark ? 'text-slate-400' : 'text-gray-600'}>
+                        Glissez un fichier CSV ou Excel contenant vos locataires
+                    </DialogDescription>
+                </DialogHeader>
+
+                {!fileName ? (
+                    // Drop zone
+                    <div
+                        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={handleDrop}
+                        onClick={() => fileInputRef.current?.click()}
+                        className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${isDragging
+                            ? 'border-[#F4C430] bg-[#F4C430]/10'
+                            : isDark
+                                ? 'border-slate-700 hover:border-slate-600'
+                                : 'border-gray-300 hover:border-gray-400'
+                            }`}
+                    >
+                        <Upload className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-slate-500' : 'text-gray-400'}`} />
+                        <p className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            Glissez votre fichier ici
+                        </p>
+                        <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                            ou cliquez pour sélectionner
+                        </p>
+                        <p className={`text-xs mt-3 ${isDark ? 'text-slate-500' : 'text-gray-400'}`}>
+                            Formats acceptés : CSV, XLSX, XLS
+                        </p>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".csv,.xlsx,.xls"
+                            onChange={handleFileSelect}
+                            className="hidden"
+                        />
+                    </div>
+                ) : (
+                    // Preview
+                    <div className="space-y-4">
+                        <div className={`flex items-center justify-between p-3 rounded-lg ${isDark ? 'bg-slate-800' : 'bg-gray-100'}`}>
+                            <div className="flex items-center gap-3">
+                                <FileSpreadsheet className="w-5 h-5 text-[#F4C430]" />
+                                <span className="font-medium">{fileName}</span>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => { setParsedData([]); setFileName(''); setErrors([]); }}
+                                className={isDark ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}
+                            >
+                                <X className="w-4 h-4" />
+                            </Button>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className={`p-3 rounded-lg ${isDark ? 'bg-green-900/30 border border-green-800' : 'bg-green-50 border border-green-200'}`}>
+                                <p className={`text-2xl font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>{validCount}</p>
+                                <p className={`text-xs ${isDark ? 'text-green-300' : 'text-green-700'}`}>Lignes valides</p>
+                            </div>
+                            <div className={`p-3 rounded-lg ${isDark ? 'bg-red-900/30 border border-red-800' : 'bg-red-50 border border-red-200'}`}>
+                                <p className={`text-2xl font-bold ${isDark ? 'text-red-400' : 'text-red-600'}`}>{errorCount}</p>
+                                <p className={`text-xs ${isDark ? 'text-red-300' : 'text-red-700'}`}>Erreurs</p>
+                            </div>
+                        </div>
+
+                        {/* Errors */}
+                        {(errors.length > 0 || errorCount > 0) && (
+                            <div className={`p-3 rounded-lg max-h-32 overflow-y-auto ${isDark ? 'bg-red-900/20 border border-red-800' : 'bg-red-50 border border-red-200'}`}>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <AlertCircle className={`w-4 h-4 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
+                                    <span className={`text-sm font-medium ${isDark ? 'text-red-300' : 'text-red-700'}`}>Erreurs détectées</span>
+                                </div>
+                                <ul className={`text-xs space-y-1 ${isDark ? 'text-red-200' : 'text-red-600'}`}>
+                                    {parsedData.filter(t => t.error).map((t, i) => (
+                                        <li key={i}>• {t.error}</li>
+                                    ))}
+                                    {errors.map((e, i) => (
+                                        <li key={`err-${i}`}>• {e}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* Preview Table */}
+                        {validCount > 0 && (
+                            <div className={`border rounded-lg overflow-hidden ${isDark ? 'border-slate-700' : 'border-gray-200'}`}>
+                                <div className={`px-3 py-2 text-xs font-medium ${isDark ? 'bg-slate-800 text-slate-300' : 'bg-gray-50 text-gray-700'}`}>
+                                    Aperçu ({Math.min(validCount, 5)} sur {validCount})
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className={isDark ? 'bg-slate-800/50' : 'bg-gray-50'}>
+                                                <th className="px-3 py-2 text-left font-medium">Nom</th>
+                                                <th className="px-3 py-2 text-left font-medium">Email</th>
+                                                <th className="px-3 py-2 text-right font-medium">Loyer</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {parsedData.filter(t => !t.error).slice(0, 5).map((t, i) => (
+                                                <tr key={i} className={isDark ? 'border-t border-slate-700' : 'border-t border-gray-100'}>
+                                                    <td className="px-3 py-2">{t.nom}</td>
+                                                    <td className={`px-3 py-2 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>{t.email}</td>
+                                                    <td className="px-3 py-2 text-right font-mono">{t.loyer.toLocaleString()}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Progress bar */}
+                        {loading && (
+                            <div className="space-y-2">
+                                <div className={`w-full h-2 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`}>
+                                    <div
+                                        className="h-2 rounded-full bg-[#F4C430] transition-all duration-300"
+                                        style={{ width: `${importProgress}%` }}
+                                    />
+                                </div>
+                                <p className={`text-xs text-center ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                                    Import en cours... {importProgress}%
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="flex justify-end gap-3 pt-2">
+                            <Button
+                                variant="ghost"
+                                onClick={() => onOpenChange(false)}
+                                disabled={loading}
+                                className={isDark ? 'text-slate-400 hover:text-white' : ''}
+                            >
+                                Annuler
+                            </Button>
+                            <Button
+                                onClick={handleImport}
+                                disabled={validCount === 0 || loading}
+                                className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90"
+                            >
+                                {loading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                ) : (
+                                    <Upload className="w-4 h-4 mr-2" />
+                                )}
+                                Importer {validCount} locataire{validCount > 1 ? 's' : ''}
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Help */}
+                <div className={`p-3 rounded-lg mt-2 ${isDark ? 'bg-slate-800/50 border border-slate-700' : 'bg-gray-50 border border-gray-200'}`}>
+                    <p className={`text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>Colonnes attendues :</p>
+                    <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                        <strong>Obligatoires :</strong> nom, email, adresse, loyer, date_debut<br />
+                        <strong>Optionnelles :</strong> telephone, jour_paiement, date_fin, mois_caution
+                    </p>
                 </div>
             </DialogContent>
         </Dialog>

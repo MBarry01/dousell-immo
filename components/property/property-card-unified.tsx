@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Bed, Bath, Square, ArrowUpRight } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { VerifiedBadge } from "@/components/ui/verified-badge";
 import type { Property } from "@/types/property";
 
 interface PropertyCardUnifiedProps {
@@ -76,8 +77,11 @@ export const PropertyCardUnified = ({ property, className }: PropertyCardUnified
                         <MapPin className="h-3.5 w-3.5 text-primary" />
                         {property.location.city}
                     </p>
-                    <h3 className="line-clamp-2 text-lg font-bold tracking-tight leading-tight mb-1">
+                    <h3 className="line-clamp-2 text-lg font-bold tracking-tight leading-tight mb-1 flex items-center gap-2">
                         {property.title}
+                        {property.verification_status === "verified" && (
+                            <VerifiedBadge variant="icon" size="sm" showTooltip={false} />
+                        )}
                     </h3>
                     {property.location.landmark && (
                         <p className="text-xs text-white/50 line-clamp-1">{property.location.landmark}</p>

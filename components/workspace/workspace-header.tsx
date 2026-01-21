@@ -121,7 +121,10 @@ export function WorkspaceHeader({ user }: WorkspaceHeaderProps) {
 
           {/* Notifications */}
           {/* Notifications component - handles dropdown & realtime */}
-          <NotificationBell userId={user?.id || null} />
+          <NotificationBell
+            userId={user?.id || null}
+            className="hover:bg-muted hover:text-foreground"
+          />
 
           {/* User Menu */}
           <DropdownMenu>
