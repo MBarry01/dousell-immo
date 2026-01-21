@@ -7,39 +7,8 @@ import Link from "next/link";
 import { MapPin, Bed, Bath, Move, ArrowRight, Star, Sparkles } from "lucide-react";
 import { Property } from "@/types/property";
 
-// Données de démonstration pour affichage par défaut
-const demoProperties: Partial<Property>[] = [
-  {
-    id: "demo-1",
-    title: "Villa moderne avec piscine",
-    price: 850000,
-    transaction: "location",
-    images: ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"],
-    location: { city: "Dakar", address: "Almadies", landmark: "", coords: { lat: 14.7167, lng: -17.4677 } },
-    specs: { bedrooms: 4, bathrooms: 3, surface: 350, rooms: 5, dpe: "B" },
-  },
-  {
-    id: "demo-2",
-    title: "Appartement vue mer",
-    price: 450000,
-    transaction: "location",
-    images: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80"],
-    location: { city: "Dakar", address: "Ngor", landmark: "", coords: { lat: 14.7500, lng: -17.5167 } },
-    specs: { bedrooms: 3, bathrooms: 2, surface: 180, rooms: 4, dpe: "C" },
-  },
-  {
-    id: "demo-3",
-    title: "Penthouse de luxe",
-    price: 1200000,
-    transaction: "location",
-    images: ["https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80"],
-    location: { city: "Saly", address: "Saly Portudal", landmark: "", coords: { lat: 14.4500, lng: -17.0167 } },
-    specs: { bedrooms: 5, bathrooms: 4, surface: 420, rooms: 7, dpe: "A" },
-  },
-];
-
 export default function FeaturedPropertiesHero() {
-  const [properties, setProperties] = useState<Partial<Property>[]>(demoProperties);
+  const [properties, setProperties] = useState<Partial<Property>[]>([]);
   const [loading, setLoading] = useState(true);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isDemo, setIsDemo] = useState(true);
