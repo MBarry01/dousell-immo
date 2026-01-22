@@ -831,6 +831,10 @@ interface ParsedTenant {
 
 function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImportDialogProps) {
     const [isDragging, setIsDragging] = useState(false);
+    const [step, setStep] = useState<1 | 2 | 3>(1); // 1=Upload, 2=Mapping, 3=Review
+    const [rawData, setRawData] = useState<Record<string, any>[]>([]);
+    const [csvColumns, setCsvColumns] = useState<string[]>([]);
+    const [columnMappings, setColumnMappings] = useState<Record<string, string>>({});
     const [parsedData, setParsedData] = useState<ParsedTenant[]>([]);
     const [fileName, setFileName] = useState<string>('');
     const [loading, setLoading] = useState(false);
@@ -839,9 +843,26 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { isDark } = useTheme();
 
+    // System fields that can be mapped
+    const SYSTEM_FIELDS = [
+        { key: 'nom', label: 'Locataire (Nom)', required: true },
+        { key: 'email', label: 'Email', required: true },
+        { key: 'adresse', label: 'Bien (Adresse)', required: true },
+        { key: 'loyer', label: 'Loyer (Montant)', required: true },
+        { key: 'telephone', label: 'Téléphone', required: false },
+        { key: 'date_debut', label: 'Date de début', required: false },
+        { key: 'date_fin', label: 'Date de fin', required: false },
+        { key: 'jour_paiement', label: 'Jour de paiement', required: false },
+        { key: 'mois_caution', label: 'Mois de caution', required: false },
+    ];
+
     // Reset state when dialog closes
     useEffect(() => {
         if (!open) {
+            setStep(1);
+            setRawData([]);
+            setCsvColumns([]);
+            setColumnMappings({});
             setParsedData([]);
             setFileName('');
             setErrors([]);
@@ -849,6 +870,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
         }
     }, [open]);
 
+    // Step 1: Parse CSV and extract columns
     const parseFile = async (file: File) => {
         setErrors([]);
         setFileName(file.name);
@@ -864,71 +886,135 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                 return;
             }
 
-            // Map and validate data
-            const mapped: ParsedTenant[] = jsonData.map((row, index) => {
-                const tenant: ParsedTenant = {
-                    nom: String(row.nom || row.Nom || row.name || row.Name || '').trim(),
-                    email: String(row.email || row.Email || row.EMAIL || '').trim(),
-                    telephone: String(row.telephone || row.Telephone || row.phone || row.Phone || row.tel || '').trim() || undefined,
-                    adresse: String(row.adresse || row.Adresse || row.address || row.Address || '').trim(),
-                    loyer: Number(row.loyer || row.Loyer || row.rent || row.Rent || row.montant || 0),
-                    jour_paiement: Number(row.jour_paiement || row.jour || row.day || 5) || 5,
-                    date_debut: formatDate(row.date_debut || row.debut || row.start_date || row.start || ''),
-                    date_fin: formatDate(row.date_fin || row.fin || row.end_date || row.end || ''),
-                    mois_caution: Number(row.mois_caution || row.caution || row.deposit || 2) || 2,
-                };
+            // Extract column names from first row
+            const columns = Object.keys(jsonData[0]);
+            setCsvColumns(columns);
+            setRawData(jsonData);
 
-                // Validate required fields
-                const missingFields: string[] = [];
-                if (!tenant.nom) missingFields.push('nom');
-                if (!tenant.email) missingFields.push('email');
-                if (!tenant.adresse) missingFields.push('adresse');
-                if (!tenant.loyer || tenant.loyer <= 0) missingFields.push('loyer');
-                if (!tenant.date_debut) missingFields.push('date_debut');
+            // Auto-suggest mappings based on column names
+            const autoMappings: Record<string, string> = {};
+            const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-                if (missingFields.length > 0) {
-                    tenant.error = `Ligne ${index + 2}: champs manquants (${missingFields.join(', ')})`;
+            columns.forEach(col => {
+                const normCol = normalize(col);
+                // Check for matches
+                if (['locataire', 'nom', 'name', 'tenant'].some(k => normCol.includes(k))) {
+                    autoMappings[col] = 'nom';
+                } else if (['email', 'mail', 'courriel'].some(k => normCol.includes(k))) {
+                    autoMappings[col] = 'email';
+                } else if (['bien', 'adresse', 'address', 'logement', 'appartement'].some(k => normCol.includes(k))) {
+                    autoMappings[col] = 'adresse';
+                } else if (['loyer', 'montant', 'rent', 'prix', 'amount', 'fcfa'].some(k => normCol.includes(k))) {
+                    autoMappings[col] = 'loyer';
+                } else if (['telephone', 'phone', 'tel', 'mobile'].some(k => normCol.includes(k))) {
+                    autoMappings[col] = 'telephone';
+                } else if (['date_debut', 'debut', 'start'].some(k => normCol.includes(k))) {
+                    autoMappings[col] = 'date_debut';
+                } else if (['date_fin', 'fin', 'end'].some(k => normCol.includes(k))) {
+                    autoMappings[col] = 'date_fin';
                 }
-
-                return tenant;
             });
 
-            setParsedData(mapped);
+            setColumnMappings(autoMappings);
+            setStep(2); // Go to mapping step
         } catch (err) {
             console.error('Error parsing file:', err);
             setErrors(['Erreur lors de la lecture du fichier. Vérifiez le format.']);
         }
     };
 
-    const formatDate = (value: any): string => {
-        if (!value) return '';
+    // Step 2: Apply mappings and validate
+    const applyMappings = () => {
+        const today = new Date().toISOString().split('T')[0];
+        const mapped: ParsedTenant[] = rawData.map((row, index) => {
+            // Find which CSV column maps to which system field
+            const getValue = (systemField: string): any => {
+                const csvCol = Object.entries(columnMappings).find(([, v]) => v === systemField)?.[0];
+                return csvCol ? row[csvCol] : undefined;
+            };
 
-        // If it's already a valid date string
-        if (typeof value === 'string') {
-            // Handle DD/MM/YYYY format
-            const dmyMatch = value.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-            if (dmyMatch) {
-                return `${dmyMatch[3]}-${dmyMatch[2].padStart(2, '0')}-${dmyMatch[1].padStart(2, '0')}`;
+            // Format date helper
+            const formatDate = (value: any): string => {
+                if (!value) return '';
+                const strVal = String(value).trim();
+
+                // DD/MM/YYYY
+                const dmyMatch = strVal.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+                if (dmyMatch) {
+                    return `${dmyMatch[3]}-${dmyMatch[2].padStart(2, '0')}-${dmyMatch[1].padStart(2, '0')}`;
+                }
+                // YYYY-MM-DD
+                if (/^\d{4}-\d{2}-\d{2}$/.test(strVal)) return strVal;
+                // French months
+                const months: Record<string, string> = {
+                    'janvier': '01', 'jan': '01', 'février': '02', 'fevrier': '02', 'mars': '03',
+                    'avril': '04', 'mai': '05', 'juin': '06', 'juillet': '07', 'juil': '07',
+                    'août': '08', 'aout': '08', 'septembre': '09', 'sept': '09', 'octobre': '10',
+                    'novembre': '11', 'décembre': '12', 'decembre': '12'
+                };
+                const lowerVal = strVal.toLowerCase();
+                for (const [monthName, monthNum] of Object.entries(months)) {
+                    if (lowerVal.includes(monthName)) {
+                        const yearMatch = lowerVal.match(/\d{4}/);
+                        if (yearMatch) return `${yearMatch[0]}-${monthNum}-01`;
+                    }
+                }
+                return '';
+            };
+
+            const nom = String(getValue('nom') || '').trim();
+            const email = String(getValue('email') || '').trim();
+            const adresse = String(getValue('adresse') || '').trim();
+            const loyerRaw = getValue('loyer');
+            const loyer = Number(String(loyerRaw || 0).replace(/[^0-9.]/g, ''));
+
+            // Collect custom fields (unmapped columns)
+            const customData: Record<string, any> = {};
+            csvColumns.forEach(col => {
+                const mapping = columnMappings[col];
+                if (mapping === 'custom' || (!mapping && row[col] !== undefined && row[col] !== '')) {
+                    customData[col] = row[col];
+                }
+            });
+
+            const tenant: ParsedTenant & { custom_data?: Record<string, any> } = {
+                nom,
+                email,
+                telephone: String(getValue('telephone') || '').trim() || undefined,
+                adresse,
+                loyer,
+                jour_paiement: Number(getValue('jour_paiement')) || 5,
+                date_debut: formatDate(getValue('date_debut')) || today,
+                date_fin: formatDate(getValue('date_fin')),
+                mois_caution: Number(getValue('mois_caution')) || 2,
+            };
+
+            // Only add custom_data if there's something
+            if (Object.keys(customData).length > 0) {
+                (tenant as any).custom_data = customData;
             }
-            // Handle YYYY-MM-DD format (already correct)
-            if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-                return value;
+
+            // Validate
+            const missingFields: string[] = [];
+            if (!nom) missingFields.push('Locataire');
+            if (!email) missingFields.push('Email');
+            if (!adresse) missingFields.push('Bien');
+            if (!loyer || loyer <= 0) missingFields.push('Loyer');
+
+            if (missingFields.length > 0) {
+                tenant.error = `Ligne ${index + 2}: champs manquants (${missingFields.join(', ')})`;
             }
-        }
 
-        // If it's an Excel serial date number
-        if (typeof value === 'number') {
-            const date = new Date((value - 25569) * 86400 * 1000);
-            return date.toISOString().split('T')[0];
-        }
+            return tenant;
+        });
 
-        return '';
+        setParsedData(mapped);
+        setStep(3);
     };
 
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
-
         const file = e.dataTransfer.files[0];
         if (file) {
             const ext = file.name.split('.').pop()?.toLowerCase();
@@ -958,7 +1044,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
         const importErrors: string[] = [];
 
         for (let i = 0; i < validData.length; i++) {
-            const tenant = validData[i];
+            const tenant = validData[i] as ParsedTenant & { custom_data?: Record<string, any> };
             try {
                 const result = await createNewLease({
                     owner_id: ownerId,
@@ -972,6 +1058,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                     end_date: tenant.date_fin || null,
                     status: 'active' as const,
                     deposit_months: tenant.mois_caution || 2,
+                    custom_data: tenant.custom_data || {},
                 });
 
                 if (result.success) {
@@ -1001,6 +1088,12 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
     const validCount = parsedData.filter(t => !t.error).length;
     const errorCount = parsedData.filter(t => t.error).length;
 
+    // Check if required fields are mapped
+    const requiredFields = SYSTEM_FIELDS.filter(f => f.required).map(f => f.key);
+    const mappedFields = Object.values(columnMappings);
+    const missingRequired = requiredFields.filter(f => !mappedFields.includes(f));
+    const canProceed = missingRequired.length === 0;
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className={`z-[100] sm:max-w-2xl ${isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'} max-h-[90vh] overflow-y-auto`}>
@@ -1010,12 +1103,14 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                         Importer des locataires en masse
                     </DialogTitle>
                     <DialogDescription className={isDark ? 'text-slate-400' : 'text-gray-600'}>
-                        Glissez un fichier CSV ou Excel contenant vos locataires
+                        {step === 1 && "Étape 1/3 : Sélectionnez votre fichier CSV ou Excel"}
+                        {step === 2 && "Étape 2/3 : Faites correspondre vos colonnes aux champs système"}
+                        {step === 3 && "Étape 3/3 : Vérifiez et importez"}
                     </DialogDescription>
                 </DialogHeader>
 
-                {!fileName ? (
-                    // Drop zone
+                {/* Step 1: Upload */}
+                {step === 1 && (
                     <div
                         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                         onDragLeave={() => setIsDragging(false)}
@@ -1046,24 +1141,88 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                             className="hidden"
                         />
                     </div>
-                ) : (
-                    // Preview
+                )}
+
+                {/* Step 2: Column Mapping */}
+                {step === 2 && (
                     <div className="space-y-4">
                         <div className={`flex items-center justify-between p-3 rounded-lg ${isDark ? 'bg-slate-800' : 'bg-gray-100'}`}>
                             <div className="flex items-center gap-3">
                                 <FileSpreadsheet className="w-5 h-5 text-[#F4C430]" />
                                 <span className="font-medium">{fileName}</span>
+                                <span className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                                    ({rawData.length} lignes)
+                                </span>
                             </div>
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => { setParsedData([]); setFileName(''); setErrors([]); }}
-                                className={isDark ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}
+                                onClick={() => setStep(1)}
+                                className={isDark ? 'text-slate-400 hover:text-white' : ''}
                             >
                                 <X className="w-4 h-4" />
                             </Button>
                         </div>
 
+                        <div className={`p-4 rounded-lg border ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
+                            <p className={`text-sm font-medium mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                Faites correspondre vos colonnes :
+                            </p>
+                            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                                {csvColumns.map((col) => (
+                                    <div key={col} className="flex items-center gap-3">
+                                        <div className={`flex-1 px-3 py-2 rounded text-sm font-mono truncate ${isDark ? 'bg-slate-700' : 'bg-white border border-gray-200'}`}>
+                                            {col}
+                                        </div>
+                                        <span className={isDark ? 'text-slate-500' : 'text-gray-400'}>→</span>
+                                        <select
+                                            value={columnMappings[col] || ''}
+                                            onChange={(e) => setColumnMappings({ ...columnMappings, [col]: e.target.value })}
+                                            className={`flex-1 px-3 py-2 rounded text-sm ${isDark ? 'bg-slate-700 text-white border-slate-600' : 'bg-white border border-gray-200'}`}
+                                        >
+                                            <option value="">-- Ignorer --</option>
+                                            {SYSTEM_FIELDS.map(f => (
+                                                <option key={f.key} value={f.key}>
+                                                    {f.label} {f.required ? '*' : ''}
+                                                </option>
+                                            ))}
+                                            <option value="custom">📦 Champ personnalisé</option>
+                                        </select>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Missing required fields warning */}
+                        {missingRequired.length > 0 && (
+                            <div className={`p-3 rounded-lg ${isDark ? 'bg-red-900/20 border border-red-800' : 'bg-red-50 border border-red-200'}`}>
+                                <div className="flex items-center gap-2">
+                                    <AlertCircle className={`w-4 h-4 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
+                                    <span className={`text-sm ${isDark ? 'text-red-300' : 'text-red-700'}`}>
+                                        Champs obligatoires non mappés : {missingRequired.map(f => SYSTEM_FIELDS.find(sf => sf.key === f)?.label).join(', ')}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex justify-between pt-2">
+                            <Button variant="ghost" onClick={() => setStep(1)}>
+                                Retour
+                            </Button>
+                            <Button
+                                onClick={applyMappings}
+                                disabled={!canProceed}
+                                className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90"
+                            >
+                                Valider le mapping
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Step 3: Review & Import */}
+                {step === 3 && (
+                    <div className="space-y-4">
                         {/* Stats */}
                         <div className="grid grid-cols-2 gap-3">
                             <div className={`p-3 rounded-lg ${isDark ? 'bg-green-900/30 border border-green-800' : 'bg-green-50 border border-green-200'}`}>
@@ -1084,7 +1243,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                                     <span className={`text-sm font-medium ${isDark ? 'text-red-300' : 'text-red-700'}`}>Erreurs détectées</span>
                                 </div>
                                 <ul className={`text-xs space-y-1 ${isDark ? 'text-red-200' : 'text-red-600'}`}>
-                                    {parsedData.filter(t => t.error).map((t, i) => (
+                                    {parsedData.filter(t => t.error).slice(0, 10).map((t, i) => (
                                         <li key={i}>• {t.error}</li>
                                     ))}
                                     {errors.map((e, i) => (
@@ -1139,14 +1298,9 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                         )}
 
                         {/* Actions */}
-                        <div className="flex justify-end gap-3 pt-2">
-                            <Button
-                                variant="ghost"
-                                onClick={() => onOpenChange(false)}
-                                disabled={loading}
-                                className={isDark ? 'text-slate-400 hover:text-white' : ''}
-                            >
-                                Annuler
+                        <div className="flex justify-between pt-2">
+                            <Button variant="ghost" onClick={() => setStep(2)} disabled={loading}>
+                                Modifier le mapping
                             </Button>
                             <Button
                                 onClick={handleImport}
@@ -1164,15 +1318,16 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                     </div>
                 )}
 
-                {/* Help */}
-                <div className={`p-3 rounded-lg mt-2 ${isDark ? 'bg-slate-800/50 border border-slate-700' : 'bg-gray-50 border border-gray-200'}`}>
-                    <p className={`text-xs font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>Colonnes attendues :</p>
-                    <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-                        <strong>Obligatoires :</strong> nom, email, adresse, loyer, date_debut<br />
-                        <strong>Optionnelles :</strong> telephone, jour_paiement, date_fin, mois_caution
-                    </p>
-                </div>
+                {/* Errors display (for Step 1) */}
+                {step === 1 && errors.length > 0 && (
+                    <div className={`p-3 rounded-lg ${isDark ? 'bg-red-900/20 border border-red-800' : 'bg-red-50 border border-red-200'}`}>
+                        <ul className={`text-sm ${isDark ? 'text-red-300' : 'text-red-600'}`}>
+                            {errors.map((e, i) => <li key={i}>• {e}</li>)}
+                        </ul>
+                    </div>
+                )}
             </DialogContent>
         </Dialog>
     );
 }
+

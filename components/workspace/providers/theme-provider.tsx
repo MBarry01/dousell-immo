@@ -64,11 +64,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme() {
     const context = useContext(ThemeContext);
     if (context === undefined) {
-        // Fallback pour les pages hors du ThemeProvider (ex: vitrine)
-        // On retourne le thème sombre par défaut pour matcher le style vitrine
+        // Fallback pour les pages hors du ThemeProvider
+        // Modification: On retourne le thème 'light' par défaut pour éviter les incohérences (cartes sombres sur fond blanc)
+        // si le contexte est perdu.
         return {
-            theme: "dark",
-            isDark: true,
+            theme: "light",
+            isDark: false,
             toggleTheme: () => { },
         } as ThemeContextType;
     }

@@ -1,16 +1,19 @@
 import { RentalStats } from "./components/RentalStats";
-import { getRentalStats } from "./actions";
+import { getRentalStats, getAdvancedStats, getRevenueHistory } from "./actions";
 import { GestionLocativeClient } from "./components/GestionLocativeClient";
 import { AddTenantButton } from "./components/AddTenantButton";
 
 import { DocumentGeneratorDialog } from "./components/DocumentGeneratorDialog";
 import { ThemedContent, ThemedWidget } from "./components/ThemedContent";
+import { KPICards } from "./components/KPICards";
+import { RevenueChart } from "./components/RevenueChart";
 import { Button } from "@/components/ui/button";
 import { FileText, Plus } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getLeasesByOwner, getRentalTransactions, getOwnerProfileForReceipts } from "@/services/rentalService.cached";
+
 
 
 export default async function GestionLocativePage({
@@ -40,7 +43,9 @@ export default async function GestionLocativePage({
     const [
         profile,
         allLeases,
-        earliestLeaseResult
+        earliestLeaseResult,
+        advancedStats,
+        revenueHistory
     ] = await Promise.all([
         // Profil pour les infos de quittance (AVEC CACHE)
         getOwnerProfileForReceipts(user.id),
@@ -53,7 +58,11 @@ export default async function GestionLocativePage({
             .eq('owner_id', user.id)
             .order('start_date', { ascending: true })
             .limit(1)
-            .single()
+            .single(),
+        // Stats avancées pour les KPIs
+        getAdvancedStats(),
+        // Historique des revenus pour le graphique
+        getRevenueHistory(12)
     ]);
 
     // Extraire les données des résultats
@@ -96,6 +105,11 @@ export default async function GestionLocativePage({
                 )
             }
         >
+            {/* KPI Cards - Seulement en mode actif */}
+            {!isViewingTerminated && (
+                <KPICards stats={advancedStats} />
+            )}
+
             {/* Table des locataires - Pleine largeur */}
             <div className="mb-6">
                 <GestionLocativeClient
@@ -109,6 +123,10 @@ export default async function GestionLocativePage({
                 />
             </div>
 
+            {/* Graphique des revenus - Seulement en mode actif */}
+            {!isViewingTerminated && (
+                <RevenueChart data={revenueHistory} />
+            )}
 
         </ThemedContent>
     );

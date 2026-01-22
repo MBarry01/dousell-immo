@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import {
     UserPlus,
-    Receipt,
     FileText,
     Download,
     Bell,
@@ -11,6 +10,7 @@ import {
     MessageSquare,
     ChevronRight
 } from 'lucide-react';
+
 import Link from 'next/link';
 import { useTheme } from '@/components/workspace/providers/theme-provider';
 import { AddTenantButton } from './AddTenantButton';
@@ -70,6 +70,7 @@ export function QuickActions({
             type: 'link' as const,
         },
         {
+
             id: 'legal',
             label: 'Documents Juridiques',
             shortLabel: 'Juridique',

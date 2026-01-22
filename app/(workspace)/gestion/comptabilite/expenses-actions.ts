@@ -166,3 +166,247 @@ export async function deleteExpense(expenseId: string) {
     return { success: true, message: 'Dépense supprimée' };
 }
 
+// ==========================================
+// UPDATE EXPENSE
+// ==========================================
+export async function updateExpense(
+    expenseId: string,
+    data: Partial<AddExpenseInput>
+) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { success: false, error: 'Non authentifié' };
+    }
+
+    const updateData: Record<string, unknown> = {};
+    if (data.amount !== undefined) updateData.amount = data.amount;
+    if (data.expense_date !== undefined) updateData.expense_date = data.expense_date;
+    if (data.category !== undefined) updateData.category = data.category;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.proof_url !== undefined) updateData.proof_url = data.proof_url;
+    if (data.property_id !== undefined) updateData.property_id = data.property_id || null;
+    if (data.lease_id !== undefined) updateData.lease_id = data.lease_id || null;
+    updateData.updated_at = new Date().toISOString();
+
+    const { data: expense, error } = await supabase
+        .from('expenses')
+        .update(updateData)
+        .eq('id', expenseId)
+        .eq('owner_id', user.id)
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error updating expense:', error);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/gestion/comptabilite');
+    return { success: true, expense };
+}
+
+// ==========================================
+// GET EXPENSES SUMMARY
+// ==========================================
+export interface ExpensesSummary {
+    totalExpenses: number;
+    byCategory: { category: ExpenseCategory; label: string; total: number; count: number }[];
+    byMonth: { month: string; total: number }[];
+}
+
+export async function getExpensesSummary(year: number): Promise<{
+    success: boolean;
+    error?: string;
+    summary?: ExpensesSummary;
+}> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { success: false, error: 'Non authentifié' };
+    }
+
+    const { data: expenses, error } = await supabase
+        .from('expenses')
+        .select('*')
+        .eq('owner_id', user.id)
+        .gte('expense_date', `${year}-01-01`)
+        .lte('expense_date', `${year}-12-31`);
+
+    if (error) {
+        console.error('Error fetching expenses summary:', error);
+        return { success: false, error: error.message };
+    }
+
+    const { EXPENSE_CATEGORY_LABELS } = await import('./expense-types');
+
+    // Calculate totals by category
+    const categoryMap = new Map<ExpenseCategory, { total: number; count: number }>();
+    let totalExpenses = 0;
+
+    for (const expense of expenses || []) {
+        totalExpenses += expense.amount;
+        const cat = expense.category as ExpenseCategory;
+        const existing = categoryMap.get(cat) || { total: 0, count: 0 };
+        categoryMap.set(cat, {
+            total: existing.total + expense.amount,
+            count: existing.count + 1,
+        });
+    }
+
+    const byCategory = Array.from(categoryMap.entries())
+        .map(([category, data]) => ({
+            category,
+            label: EXPENSE_CATEGORY_LABELS[category] || category,
+            total: data.total,
+            count: data.count,
+        }))
+        .sort((a, b) => b.total - a.total);
+
+    // Calculate totals by month
+    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+    const monthTotals = new Array(12).fill(0);
+
+    for (const expense of expenses || []) {
+        const month = new Date(expense.expense_date).getMonth();
+        monthTotals[month] += expense.amount;
+    }
+
+    const byMonth = monthTotals.map((total, index) => ({
+        month: monthNames[index],
+        total,
+    }));
+
+    return {
+        success: true,
+        summary: {
+            totalExpenses,
+            byCategory,
+            byMonth,
+        },
+    };
+}
+
+// ==========================================
+// GET PROFITABILITY BY PROPERTY
+// ==========================================
+export interface PropertyProfitability {
+    propertyAddress: string;
+    totalRevenue: number;
+    totalExpenses: number;
+    netProfit: number;
+    profitMargin: number;
+}
+
+export async function getProfitabilityByProperty(year: number): Promise<{
+    success: boolean;
+    error?: string;
+    data?: PropertyProfitability[];
+    debug?: any;
+}> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { success: false, error: 'Non authentifié' };
+    }
+
+    // Get all leases with their payments
+    const { data: leases, error: leasesError } = await supabase
+        .from('leases')
+        .select('id, property_address, monthly_amount')
+        .eq('owner_id', user.id);
+
+    if (leasesError) {
+        console.error('Error fetching leases for profitability:', leasesError);
+        return { success: false, error: leasesError.message };
+    }
+
+    // Get all expenses for the year
+    const { data: expenses, error: expensesError } = await supabase
+        .from('expenses')
+        .select('*')
+        .eq('owner_id', user.id)
+        .gte('expense_date', `${year}-01-01`)
+        .lte('expense_date', `${year}-12-31`);
+
+    if (expensesError) {
+        console.error('Error fetching expenses for profitability:', expensesError);
+        return { success: false, error: expensesError.message };
+    }
+
+    // Get all payments for the year (rent collected)
+    const { data: payments, error: paymentsError } = await supabase
+        .from('rental_transactions')
+        .select('lease_id, amount_due, status')
+        .eq('status', 'paid')
+        .eq('period_year', year);
+
+    if (paymentsError) {
+        console.error('Error fetching payments for profitability:', paymentsError);
+        return { success: false, error: paymentsError.message };
+    }
+
+    // Build property map
+    const propertyMap = new Map<string, { revenue: number; expenses: number }>();
+
+    // Process leases and payments
+    for (const lease of leases || []) {
+        const address = lease.property_address || 'Adresse inconnue';
+        if (!propertyMap.has(address)) {
+            propertyMap.set(address, { revenue: 0, expenses: 0 });
+        }
+
+        // Sum payments for this lease
+        const leasePayments = (payments || []).filter(p => p.lease_id === lease.id);
+        const totalPayments = leasePayments.reduce((sum, p) => sum + (Number(p.amount_due) || 0), 0);
+
+        const prop = propertyMap.get(address)!;
+        prop.revenue += totalPayments;
+    }
+
+    // Process expenses - either by lease or property_id
+    for (const expense of expenses || []) {
+        let address = 'Non attribué';
+
+        if (expense.lease_id) {
+            const lease = (leases || []).find(l => l.id === expense.lease_id);
+            if (lease) {
+                address = lease.property_address || 'Adresse inconnue';
+            }
+        }
+
+        if (!propertyMap.has(address)) {
+            propertyMap.set(address, { revenue: 0, expenses: 0 });
+        }
+
+        const prop = propertyMap.get(address)!;
+        prop.expenses += expense.amount;
+    }
+
+    // Calculate profitability
+    const data: PropertyProfitability[] = Array.from(propertyMap.entries())
+        .map(([address, { revenue, expenses }]) => ({
+            propertyAddress: address,
+            totalRevenue: revenue,
+            totalExpenses: expenses,
+            netProfit: revenue - expenses,
+            profitMargin: revenue > 0 ? ((revenue - expenses) / revenue) * 100 : 0,
+        }))
+        .sort((a, b) => b.netProfit - a.netProfit);
+
+    return {
+        success: true,
+        data,
+        debug: {
+            leasesCount: leases?.length || 0,
+            expensesCount: expenses?.length || 0,
+            paymentsCount: payments?.length || 0,
+            mapSize: propertyMap.size,
+            ownerId: user.id
+        }
+    };
+}
+

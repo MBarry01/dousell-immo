@@ -37,9 +37,12 @@ import Link from 'next/link';
 import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 import { calculateFinancials, LeaseInput, TransactionInput } from '@/lib/finance';
+import { getExpensesByYear, getExpensesSummary, getProfitabilityByProperty, PropertyProfitability, Expense } from './expenses-actions';
+import { DownloadReportButton } from './components/DownloadReportButton';
 import { AddExpenseDialog } from './components/AddExpenseDialog';
 import { ExpenseList } from './components/ExpenseList';
-import { getExpensesByYear, Expense } from './expenses-actions';
+import { ProfitabilityTable } from './components/ProfitabilityTable';
+
 import { OnboardingTour, useOnboardingTour, TourStep } from '@/components/onboarding/OnboardingTour';
 
 interface MonthlyData {
@@ -74,7 +77,8 @@ export default function ComptabilitePage() {
     const [properties, setProperties] = useState<{ id: string; address: string }[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-    const [activeTab, setActiveTab] = useState<'revenus' | 'depenses'>('revenus');
+    const [activeTab, setActiveTab] = useState<'revenus' | 'depenses' | 'rentabilite'>('revenus');
+    const [profitabilityData, setProfitabilityData] = useState<PropertyProfitability[]>([]);
 
     // Tour Steps
     const tourSteps: TourStep[] = useMemo(() => [
@@ -148,6 +152,12 @@ export default function ComptabilitePage() {
                 const expensesResult = await getExpensesByYear(selectedYear);
                 if (expensesResult.success) {
                     setExpenses(expensesResult.expenses as Expense[]);
+                }
+
+                // Fetch Profitability for PDF
+                const profitResult = await getProfitabilityByProperty(selectedYear);
+                if (profitResult.success && profitResult.data) {
+                    setProfitabilityData(profitResult.data);
                 }
             } catch (expError) {
                 console.warn('Could not fetch expenses:', expError);
@@ -363,24 +373,37 @@ export default function ComptabilitePage() {
                             ))}
                         </select>
                     </div>
-                    <Button variant="outline" size="sm" className={`${isDark ? 'border-slate-800 text-slate-400 hover:text-white' : 'border-gray-300 text-gray-600 hover:text-gray-900'
-                        }`}>
-                        <Download className="w-4 h-4 mr-2" />
-                        Export
-                    </Button>
+
+                    {/* PDF Report Button */}
+                    <DownloadReportButton
+                        year={selectedYear}
+                        globalStats={profitabilityData.reduce((acc, curr) => ({
+                            revenue: acc.revenue + curr.totalRevenue,
+                            expenses: acc.expenses + curr.totalExpenses,
+                            profit: acc.profit + curr.netProfit,
+                            margin: (acc.revenue + curr.totalRevenue) > 0
+                                ? ((acc.profit + curr.netProfit) / (acc.revenue + curr.totalRevenue) * 100)
+                                : 0
+                        }), { revenue: 0, expenses: 0, profit: 0, margin: 0 })}
+                        properties={profitabilityData}
+                    />
+
                     {/* Add Expense Button */}
                     <AddExpenseDialog properties={properties} onExpenseAdded={refreshExpenses} />
                 </div>
             </div>
 
-            {/* Tabs for Revenue vs Expenses */}
-            <Tabs id="tour-compta-tabs" value={activeTab} onValueChange={(v) => setActiveTab(v as 'revenus' | 'depenses')} className="w-full">
+            {/* Tabs for Revenue vs Expenses vs Profitability */}
+            <Tabs id="tour-compta-tabs" value={activeTab} onValueChange={(v) => setActiveTab(v as 'revenus' | 'depenses' | 'rentabilite')} className="w-full">
                 <TabsList className={isDark ? 'bg-slate-900 border border-slate-800' : 'bg-gray-100 border border-gray-200'}>
                     <TabsTrigger value="revenus" className={isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}>
                         Revenus (Loyers)
                     </TabsTrigger>
                     <TabsTrigger value="depenses" className={isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}>
                         Dépenses
+                    </TabsTrigger>
+                    <TabsTrigger value="rentabilite" className={isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}>
+                        Rentabilité
                     </TabsTrigger>
                 </TabsList>
 
@@ -571,22 +594,26 @@ export default function ComptabilitePage() {
                 <TabsContent value="depenses" className="mt-6">
                     <ExpenseList expenses={expenses} onExpenseDeleted={refreshExpenses} />
                 </TabsContent>
+
+                {/* RENTABILITE TAB CONTENT */}
+                <TabsContent value="rentabilite" className="mt-6">
+                    <ProfitabilityTable year={selectedYear} />
+                </TabsContent>
             </Tabs>
 
             {/* Bouton pour relancer le tour */}
             <button
                 onClick={resetTour}
-                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${
-                    isDark
-                        ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
-                        : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
-                }`}
+                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${isDark
+                    ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
+                    : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
+                    }`}
                 title="Relancer le tutoriel"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                    <path d="M12 17h.01"/>
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <path d="M12 17h.01" />
                 </svg>
             </button>
         </div>

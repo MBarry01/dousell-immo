@@ -115,6 +115,180 @@ export async function getRentalStats() {
     };
 }
 
+/**
+ * Calcule les KPIs avancés pour le dashboard
+ * - Taux d'occupation (biens loués / total)
+ * - Délai moyen de paiement
+ * - Taux d'impayés
+ * - Revenu moyen par bien
+ */
+export async function getAdvancedStats() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return {
+        occupancyRate: 0,
+        avgPaymentDelay: 0,
+        unpaidRate: 0,
+        avgRevenuePerProperty: 0,
+        totalProperties: 0,
+        activeLeases: 0
+    };
+
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+
+    // 1. Récupérer tous les biens du propriétaire
+    const { data: properties, count: totalPropertiesCount } = await supabase
+        .from('properties')
+        .select('id', { count: 'exact' })
+        .eq('owner_id', user.id);
+
+    const totalProperties = totalPropertiesCount || 0;
+
+    // 2. Récupérer tous les baux actifs
+    const { data: activeLeases } = await supabase
+        .from('leases')
+        .select('id, monthly_amount, billing_day, property_address')
+        .eq('owner_id', user.id)
+        .eq('status', 'active');
+
+    const activeLeasesCount = activeLeases?.length || 0;
+
+    // 3. Calculer le taux d'occupation
+    // Si pas de propriétés enregistrées, on compte les adresses uniques des baux
+    // Le taux représente "combien de vos biens sont actuellement loués"
+    let occupancyBase = totalProperties;
+
+    if (totalProperties === 0 && activeLeasesCount > 0) {
+        // Fallback : compter les adresses uniques dans les baux comme "nombre de biens"
+        const uniqueAddresses = new Set((activeLeases || []).map(l => l.property_address?.toLowerCase().trim()));
+        occupancyBase = uniqueAddresses.size;
+    }
+
+    // Calculer le taux et le plafonner à 100%
+    const rawOccupancyRate = occupancyBase > 0
+        ? Math.round((activeLeasesCount / occupancyBase) * 100)
+        : (activeLeasesCount > 0 ? 100 : 0);
+
+    const occupancyRate = Math.min(rawOccupancyRate, 100); // Cap at 100%
+
+    // 4. Récupérer les transactions payées pour calculer le délai moyen
+    const leaseIds = (activeLeases || []).map(l => l.id);
+
+    const { data: paidTransactions } = await supabase
+        .from('rental_transactions')
+        .select('lease_id, amount_due, status, paid_at, period_month, period_year')
+        .in('lease_id', leaseIds.length > 0 ? leaseIds : ['00000000-0000-0000-0000-000000000000'])
+        .eq('status', 'paid')
+        .not('paid_at', 'is', null);
+
+    // 5. Calculer le délai moyen de paiement (jours entre le billing_day et paid_at)
+    let totalDelay = 0;
+    let delayCount = 0;
+
+    paidTransactions?.forEach(t => {
+        const lease = activeLeases?.find(l => l.id === t.lease_id);
+        if (lease && t.paid_at && t.period_month && t.period_year) {
+            const billingDay = lease.billing_day || 5;
+            const expectedDate = new Date(t.period_year, t.period_month - 1, billingDay);
+            const paidDate = new Date(t.paid_at);
+            const diffDays = Math.floor((paidDate.getTime() - expectedDate.getTime()) / (1000 * 60 * 60 * 24));
+            if (diffDays >= 0) { // Only count late payments
+                totalDelay += diffDays;
+                delayCount++;
+            }
+        }
+    });
+
+    const avgPaymentDelay = delayCount > 0 ? Math.round(totalDelay / delayCount) : 0;
+
+    // 6. Calculer le taux d'impayés ce mois
+    const { data: currentMonthTrans } = await supabase
+        .from('rental_transactions')
+        .select('lease_id, status')
+        .in('lease_id', leaseIds.length > 0 ? leaseIds : ['00000000-0000-0000-0000-000000000000'])
+        .eq('period_month', currentMonth)
+        .eq('period_year', currentYear);
+
+    const unpaidThisMonth = currentMonthTrans?.filter(t => t.status !== 'paid').length || 0;
+    const totalThisMonth = currentMonthTrans?.length || activeLeasesCount;
+    const unpaidRate = totalThisMonth > 0
+        ? Math.round((unpaidThisMonth / totalThisMonth) * 100)
+        : 0;
+
+    // 7. Calculer le revenu moyen par bien
+    const totalMonthlyRevenue = (activeLeases || []).reduce((sum, l) => sum + Number(l.monthly_amount || 0), 0);
+    const avgRevenuePerProperty = activeLeasesCount > 0
+        ? Math.round(totalMonthlyRevenue / activeLeasesCount)
+        : 0;
+
+    return {
+        occupancyRate,
+        avgPaymentDelay,
+        unpaidRate,
+        avgRevenuePerProperty,
+        totalProperties,
+        activeLeases: activeLeasesCount
+    };
+}
+
+/**
+ * Récupère l'historique des revenus sur les N derniers mois
+ */
+export async function getRevenueHistory(months: number = 12) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return [];
+
+    // Récupérer tous les baux actifs pour avoir les IDs
+    const { data: leases } = await supabase
+        .from('leases')
+        .select('id, monthly_amount')
+        .eq('owner_id', user.id);
+
+    const leaseIds = (leases || []).map(l => l.id);
+
+    if (leaseIds.length === 0) return [];
+
+    // Calculer la plage de dates
+    const today = new Date();
+    const history: { month: string; year: number; monthNum: number; collected: number; expected: number }[] = [];
+
+    for (let i = months - 1; i >= 0; i--) {
+        const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const monthNum = date.getMonth() + 1;
+        const year = date.getFullYear();
+        const monthName = date.toLocaleDateString('fr-FR', { month: 'short' });
+
+        // Récupérer les transactions pour ce mois
+        const { data: transactions } = await supabase
+            .from('rental_transactions')
+            .select('amount_due, status')
+            .in('lease_id', leaseIds)
+            .eq('period_month', monthNum)
+            .eq('period_year', year);
+
+        const collected = (transactions || [])
+            .filter(t => t.status === 'paid')
+            .reduce((sum, t) => sum + Number(t.amount_due || 0), 0);
+
+        const expected = (transactions || [])
+            .reduce((sum, t) => sum + Number(t.amount_due || 0), 0);
+
+        history.push({
+            month: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+            year,
+            monthNum,
+            collected,
+            expected
+        });
+    }
+
+    return history;
+}
 
 /**
  * Fonction utilitaire pour envoyer les données à n8n
@@ -177,6 +351,15 @@ export async function createNewLease(formData: Record<string, unknown>) {
     // Extraire deposit_months pour ne pas l'envoyer à la table leases
     const depositMonths = (finalData as any).deposit_months || 2;
     delete (finalData as any).deposit_months;
+
+    // Extraire custom_data (champs personnalisés de l'import CSV)
+    const customData = (finalData as any).custom_data || {};
+    delete (finalData as any).custom_data;
+
+    // Ajouter custom_data à finalData seulement s'il n'est pas vide
+    if (Object.keys(customData).length > 0) {
+        (finalData as any).custom_data = customData;
+    }
 
     // 1. Vérification STRICTE d'unicité via FinanceGuard (Pilier 2)
     const emailToCheck = (finalData as Record<string, unknown>).tenant_email as string | undefined;

@@ -135,7 +135,7 @@ function SidebarContent({
               item.href !== "/locataire" &&
               item.href !== "/admin" &&
               item.href !== "/compte" &&
-              pathname?.startsWith(item.href));
+              pathname?.startsWith(`${item.href}/`));
 
           return (
             <Link
