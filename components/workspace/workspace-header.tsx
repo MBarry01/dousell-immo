@@ -90,16 +90,33 @@ export function WorkspaceHeader({ user }: WorkspaceHeaderProps) {
           </div>
         </div>
 
-        {/* Center: Search (desktop) */}
+        {/* Center: Search (desktop) - Functional */}
         <div className="hidden lg:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full">
+          <form
+            className="relative w-full"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const query = formData.get("q") as string;
+              if (query?.trim()) {
+                // Context-aware search routing
+                if (pathname?.startsWith("/gestion") || pathname?.startsWith("/admin")) {
+                  // For management/admin pages, search properties
+                  router.push(`/recherche?q=${encodeURIComponent(query.trim())}`);
+                } else {
+                  router.push(`/recherche?q=${encodeURIComponent(query.trim())}`);
+                }
+              }
+            }}
+          >
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Rechercher..."
+              name="q"
+              placeholder="Rechercher un bien, une ville..."
               className="pl-9 bg-muted/50 border-0 focus-visible:ring-1"
             />
-          </div>
+          </form>
         </div>
 
         {/* Right: Actions */}

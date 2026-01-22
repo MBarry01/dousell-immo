@@ -121,7 +121,7 @@ export const Header = () => {
           transform: "translateZ(0)",
         }}
       >
-        <div className="glass-panel mx-auto flex max-w-6xl items-center justify-between rounded-[32px] border border-white/5 px-6 py-3.5 shadow-lg shadow-black/20 lg:px-8 lg:py-4 relative">
+        <div className="glass-panel mx-auto flex max-w-[1360px] items-center justify-between rounded-[32px] border border-white/5 px-6 py-3.5 shadow-lg shadow-black/20 lg:px-8 lg:py-4 relative">
           <Link
             href="/"
             className="flex items-center transition-opacity active:opacity-70 hover:opacity-80"

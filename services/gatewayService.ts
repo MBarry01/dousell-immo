@@ -96,6 +96,8 @@ export async function getExternalListingsByType(
             .from("external_listings")
             .select("*")
             .gt("last_seen_at", fourDaysAgo.toISOString())
+            .not("image_url", "is", null)
+            .neq("image_url", "")
             .ilike("type", `%${transactionType}%`)
             .limit(limit);
 
@@ -158,7 +160,9 @@ export async function getExternalListingsCount(
         let query = supabase
             .from("external_listings")
             .select("*", { count: "exact", head: true })
-            .gt("last_seen_at", fourDaysAgo.toISOString());
+            .gt("last_seen_at", fourDaysAgo.toISOString())
+            .not("image_url", "is", null)
+            .neq("image_url", "");
 
         if (transactionType !== "any") {
             query = query.ilike("type", `%${transactionType}%`);
@@ -203,7 +207,10 @@ export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
         // On ne récupère que les annonces vues récemment (ex: 4 jours max)
         const fourDaysAgo = new Date();
         fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
-        externalQuery = externalQuery.gt("last_seen_at", fourDaysAgo.toISOString());
+        externalQuery = externalQuery
+            .gt("last_seen_at", fourDaysAgo.toISOString())
+            .not("image_url", "is", null)
+            .neq("image_url", "");
 
         // -- Application des filtres utilisateur --
         if (filters.q) {

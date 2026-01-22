@@ -66,11 +66,23 @@ const dousellConfig: NavbarConfig = {
     },
   },
   cta: {
-    text: "Commencer",
-    href: "/landing/signup",
+    text: "Essai Gratuit",
+    href: "/landing/commencer",
   },
 };
 
-export default function DousellNavbar() {
-  return <AceNavbar config={dousellConfig} />;
+interface DousellNavbarProps {
+  ctaOverride?: {
+    text: string;
+    href: string;
+  };
+}
+
+export default function DousellNavbar({ ctaOverride }: DousellNavbarProps) {
+  const config = {
+    ...dousellConfig,
+    cta: ctaOverride || dousellConfig.cta,
+  };
+
+  return <AceNavbar config={config} />;
 }

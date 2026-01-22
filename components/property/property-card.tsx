@@ -83,16 +83,22 @@ export const PropertyCard = ({
           <p className="truncate text-[11px] text-white/50" title={property.location.landmark}>
             {property.location.landmark}
           </p>
-          <div className="flex items-center gap-3 text-[11px] text-white/70">
-            <span className="inline-flex items-center gap-1">
-              <Bed className="h-3.5 w-3.5" />
-              {property.specs.bedrooms} ch
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Square className="h-3.5 w-3.5" />
-              {property.specs.surface} m²
-            </span>
-          </div>
+          {(property.specs.bedrooms > 0 || property.specs.surface > 0) && (
+            <div className="flex items-center gap-3 text-[11px] text-white/70">
+              {property.specs.bedrooms > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <Bed className="h-3.5 w-3.5" />
+                  {property.specs.bedrooms} ch
+                </span>
+              )}
+              {property.specs.surface > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <Square className="h-3.5 w-3.5" />
+                  {property.specs.surface} m²
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </CardWrapper>
     );
@@ -170,20 +176,28 @@ export const PropertyCard = ({
           </h3>
           <p className="text-xs text-white/50 line-clamp-1">{property.location.landmark}</p>
         </div>
-        <div className="flex items-center gap-4 text-xs text-white/70">
-          <span className="inline-flex items-center gap-1.5">
-            <Bed className="h-4 w-4 text-primary/80" />
-            <span className="font-medium">{property.specs.bedrooms}</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Bath className="h-4 w-4 text-primary/80" />
-            <span className="font-medium">{property.specs.bathrooms}</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Square className="h-4 w-4 text-primary/80" />
-            <span className="font-medium">{property.specs.surface}m²</span>
-          </span>
-        </div>
+        {(property.specs.bedrooms > 0 || property.specs.bathrooms > 0 || property.specs.surface > 0) && (
+          <div className="flex items-center gap-4 text-xs text-white/70">
+            {property.specs.bedrooms > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <Bed className="h-4 w-4 text-primary/80" />
+                <span className="font-medium">{property.specs.bedrooms}</span>
+              </span>
+            )}
+            {property.specs.bathrooms > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <Bath className="h-4 w-4 text-primary/80" />
+                <span className="font-medium">{property.specs.bathrooms}</span>
+              </span>
+            )}
+            {property.specs.surface > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <Square className="h-4 w-4 text-primary/80" />
+                <span className="font-medium">{property.specs.surface}m²</span>
+              </span>
+            )}
+          </div>
+        )}
         <div className="flex flex-wrap gap-2 text-[11px] text-white/60">
           <span className="rounded-full border border-white/10 bg-background px-3 py-1">
             {property.details.type}

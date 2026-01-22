@@ -333,7 +333,13 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.12)_0%,_transparent_60%)]" />
 
         {/* Navigation Ace Navbar */}
-        <DousellNavbar />
+        <DousellNavbar
+          ctaOverride={
+            userMode === "tenant"
+              ? { text: "Commencer", href: "/" }
+              : undefined
+          }
+        />
 
         {/* Hero Content - Two column layout on desktop */}
         <div className={cn(

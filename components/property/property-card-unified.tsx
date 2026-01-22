@@ -88,21 +88,27 @@ export const PropertyCardUnified = ({ property, className }: PropertyCardUnified
                     )}
                 </div>
 
-                {/* Specs (pour annonces internes) */}
-                {!isExternal && (
+                {/* Specs (pour annonces internes) - Masquer les valeurs non renseignées */}
+                {!isExternal && (property.specs.bedrooms > 0 || property.specs.bathrooms > 0 || property.specs.surface > 0) && (
                     <div className="flex items-center gap-4 text-xs text-white/70">
-                        <span className="inline-flex items-center gap-1.5">
-                            <Bed className="h-4 w-4 text-primary/80" />
-                            <span className="font-medium">{property.specs.bedrooms} ch.</span>
-                        </span>
-                        <span className="inline-flex items-center gap-1.5">
-                            <Bath className="h-4 w-4 text-primary/80" />
-                            <span className="font-medium">{property.specs.bathrooms} sdb.</span>
-                        </span>
-                        <span className="inline-flex items-center gap-1.5">
-                            <Square className="h-4 w-4 text-primary/80" />
-                            <span className="font-medium">{property.specs.surface}m²</span>
-                        </span>
+                        {property.specs.bedrooms > 0 && (
+                            <span className="inline-flex items-center gap-1.5">
+                                <Bed className="h-4 w-4 text-primary/80" />
+                                <span className="font-medium">{property.specs.bedrooms} ch.</span>
+                            </span>
+                        )}
+                        {property.specs.bathrooms > 0 && (
+                            <span className="inline-flex items-center gap-1.5">
+                                <Bath className="h-4 w-4 text-primary/80" />
+                                <span className="font-medium">{property.specs.bathrooms} sdb.</span>
+                            </span>
+                        )}
+                        {property.specs.surface > 0 && (
+                            <span className="inline-flex items-center gap-1.5">
+                                <Square className="h-4 w-4 text-primary/80" />
+                                <span className="font-medium">{property.specs.surface}m²</span>
+                            </span>
+                        )}
                     </div>
                 )}
 

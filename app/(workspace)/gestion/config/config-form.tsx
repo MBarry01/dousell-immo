@@ -239,7 +239,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
             {/* Upload Sections */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Section Logo */}
-                <section className="space-y-4 p-6 bg-gray-900/40 rounded-3xl border border-gray-800">
+                <section className="space-y-4 p-6 bg-white dark:bg-gray-900/40 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm dark:shadow-none">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-blue-400 font-bold">
                             <Building2 className="w-5 h-5" /> Logo de l&apos;Agence
@@ -253,7 +253,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                     <label className="block">
                         <div className={`h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${logoPreview
                             ? 'border-blue-500/50 bg-blue-500/5'
-                            : 'border-gray-700 bg-gray-900/20 hover:border-blue-500/50'
+                            : 'border-slate-300 dark:border-gray-700 bg-slate-50 dark:bg-gray-900/20 hover:border-blue-500/50'
                             } ${uploadingLogo ? 'opacity-50 pointer-events-none' : ''}`}>
                             {logoPreview ? (
                                 <img src={logoPreview} alt="Logo" className="max-h-32 object-contain" />
@@ -293,7 +293,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                 </section>
 
                 {/* Section Signature - With Tabs */}
-                <section className="space-y-4 p-6 bg-gray-900/40 rounded-3xl border border-gray-800">
+                <section className="space-y-4 p-6 bg-white dark:bg-gray-900/40 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm dark:shadow-none">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-purple-400 font-bold">
                             <PenTool className="w-5 h-5" /> Signature Numérique
@@ -306,12 +306,12 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                     </div>
 
                     {/* Mode Toggle */}
-                    <div className="flex gap-2 p-1 bg-gray-800 rounded-xl">
+                    <div className="flex gap-2 p-1 bg-slate-100 dark:bg-gray-800 rounded-xl">
                         <button
                             onClick={() => setSignatureMode('upload')}
                             className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${signatureMode === 'upload'
                                 ? 'bg-purple-600 text-white'
-                                : 'text-gray-400 hover:text-white'
+                                : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
                                 }`}
                         >
                             <Upload className="w-4 h-4" /> Importer
@@ -320,7 +320,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                             onClick={() => setSignatureMode('draw')}
                             className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${signatureMode === 'draw'
                                 ? 'bg-purple-600 text-white'
-                                : 'text-gray-400 hover:text-white'
+                                : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
                                 }`}
                         >
                             <PenTool className="w-4 h-4" /> Dessiner
@@ -332,7 +332,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                         <label className="block">
                             <div className={`h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${signaturePreview
                                 ? 'border-purple-500/50 bg-purple-500/5'
-                                : 'border-gray-700 bg-gray-900/20 hover:border-purple-500/50'
+                                : 'border-slate-300 dark:border-gray-700 bg-slate-50 dark:bg-gray-900/20 hover:border-purple-500/50'
                                 } ${uploadingSignature ? 'opacity-50 pointer-events-none' : ''}`}>
                                 {signaturePreview ? (
                                     <img src={signaturePreview} alt="Signature" className="max-h-32 object-contain" />
@@ -360,7 +360,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                             <div className="relative">
                                 <canvas
                                     ref={canvasRef}
-                                    className="w-full h-40 bg-white rounded-2xl cursor-crosshair touch-none"
+                                    className="w-full h-40 bg-white border-2 border-slate-200 dark:border-transparent rounded-2xl cursor-crosshair touch-none"
                                     onMouseDown={startDrawing}
                                     onMouseMove={draw}
                                     onMouseUp={stopDrawing}
@@ -380,7 +380,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                                     variant="outline"
                                     size="sm"
                                     onClick={clearCanvas}
-                                    className="flex-1 border-gray-700 text-gray-400"
+                                    className="flex-1 border-slate-300 dark:border-gray-700 text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800"
                                 >
                                     <Trash2 className="w-3 h-3 mr-1" /> Effacer
                                 </Button>
@@ -417,30 +417,30 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                         </div>
                     )}
                 </section>
-            </div>
+            </div >
 
             {/* Informations Commerciales */}
-            <section className="p-6 md:p-8 bg-gray-900/40 rounded-3xl border border-gray-800 space-y-6">
-                <h2 className="text-lg font-bold flex items-center gap-2">
-                    <Building2 className="w-5 h-5 text-gray-400" />
+            < section className="p-6 md:p-8 bg-white dark:bg-gray-900/40 rounded-3xl border border-slate-200 dark:border-gray-800 space-y-6 shadow-sm dark:shadow-none" >
+                <h2 className="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                    <Building2 className="w-5 h-5 text-slate-400 dark:text-gray-400" />
                     Informations de l&apos;émetteur
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="text-sm text-gray-400">Nom commercial / Raison sociale</label>
+                        <label className="text-sm text-slate-500 dark:text-gray-400">Nom commercial / Raison sociale</label>
                         <Input
                             placeholder="ex: SCI Teranga Immo"
-                            className="bg-gray-800/50 border-gray-700 h-12"
+                            className="bg-slate-50 dark:bg-gray-800/50 border-slate-200 dark:border-gray-700 h-12 text-slate-900 dark:text-white"
                             value={formData.company_name}
                             onChange={(e) => handleInputChange('company_name', e.target.value)}
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm text-gray-400">NINEA (optionnel)</label>
+                        <label className="text-sm text-slate-500 dark:text-gray-400">NINEA (optionnel)</label>
                         <Input
                             placeholder="ex: 12345678 A 01"
-                            className="bg-gray-800/50 border-gray-700 h-12"
+                            className="bg-slate-50 dark:bg-gray-800/50 border-slate-200 dark:border-gray-700 h-12 text-slate-900 dark:text-white"
                             value={formData.company_ninea}
                             onChange={(e) => handleInputChange('company_ninea', e.target.value)}
                         />
@@ -448,12 +448,12 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm text-gray-400 flex items-center gap-2">
+                    <label className="text-sm text-slate-500 dark:text-gray-400 flex items-center gap-2">
                         <MapPin className="w-4 h-4" /> Adresse complète
                     </label>
                     <Input
                         placeholder="ex: Rue 10 x Avenue Cheikh Anta Diop, Dakar"
-                        className="bg-gray-800/50 border-gray-700 h-12"
+                        className="bg-slate-50 dark:bg-gray-800/50 border-slate-200 dark:border-gray-700 h-12 text-slate-900 dark:text-white"
                         value={formData.company_address}
                         onChange={(e) => handleInputChange('company_address', e.target.value)}
                     />
@@ -461,34 +461,34 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="text-sm text-gray-400 flex items-center gap-2">
+                        <label className="text-sm text-slate-500 dark:text-gray-400 flex items-center gap-2">
                             <Phone className="w-4 h-4" /> Téléphone
                         </label>
                         <Input
                             placeholder="ex: +221 77 123 45 67"
-                            className="bg-gray-800/50 border-gray-700 h-12"
+                            className="bg-slate-50 dark:bg-gray-800/50 border-slate-200 dark:border-gray-700 h-12 text-slate-900 dark:text-white"
                             value={formData.company_phone}
                             onChange={(e) => handleInputChange('company_phone', e.target.value)}
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm text-gray-400 flex items-center gap-2">
+                        <label className="text-sm text-slate-500 dark:text-gray-400 flex items-center gap-2">
                             <Mail className="w-4 h-4" /> Email professionnel
                         </label>
                         <Input
                             type="email"
                             placeholder="ex: contact@monagence.sn"
-                            className="bg-gray-800/50 border-gray-700 h-12"
+                            className="bg-slate-50 dark:bg-gray-800/50 border-slate-200 dark:border-gray-700 h-12 text-slate-900 dark:text-white"
                             value={formData.company_email}
                             onChange={(e) => handleInputChange('company_email', e.target.value)}
                         />
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Aperçu Document */}
-            <section className="p-6 md:p-8 bg-gradient-to-br from-gray-900/60 to-gray-800/40 rounded-3xl border border-gray-700 space-y-4">
-                <h2 className="text-lg font-bold">Aperçu sur vos documents</h2>
+            < section className="p-6 md:p-8 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-gray-900/60 dark:to-gray-800/40 rounded-3xl border border-slate-200 dark:border-gray-700 space-y-4" >
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Aperçu sur vos documents</h2>
                 <div className="bg-white text-black rounded-2xl p-6 space-y-4">
                     <div className="flex items-center justify-between border-b border-gray-200 pb-4">
                         <div className="flex items-center gap-3">
@@ -524,10 +524,10 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                         )}
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Bouton Save */}
-            <div className="flex justify-end">
+            < div className="flex justify-end" >
                 <Button
                     onClick={handleSave}
                     disabled={saving || uploadingLogo || uploadingSignature}
@@ -544,7 +544,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                         <><Save className="w-5 h-5 mr-2" /> Enregistrer ma configuration</>
                     )}
                 </Button>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
