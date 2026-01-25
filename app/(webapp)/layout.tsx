@@ -116,7 +116,7 @@ function WebAppLayoutContent({
                 ? 'bg-[#121212] border-gray-800'
                 : 'bg-white border-gray-200'
                 }`}
-                style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 20px)" }}>
+                style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 35px)" }}>
                 <div className="h-16 flex items-center justify-between px-6">
                     <div className="flex items-center gap-3">
                         {/* Hamburger Menu - Mobile only */}
@@ -202,8 +202,8 @@ function WebAppLayoutContent({
                     print:hidden
                 `}
                     style={{
-                        top: "calc(4rem + max(env(safe-area-inset-top, 0px), 20px))",
-                        height: "calc(100dvh - (4rem + max(env(safe-area-inset-top, 0px), 20px)))"
+                        top: "calc(4rem + max(env(safe-area-inset-top, 0px), 35px))",
+                        height: "calc(100dvh - (4rem + max(env(safe-area-inset-top, 0px), 35px)))"
                     }}>
 
                     {/* Sidebar Header avec bouton collapse */}

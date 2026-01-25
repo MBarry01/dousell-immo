@@ -59,7 +59,10 @@ export function WorkspaceHeader({ user }: WorkspaceHeaderProps) {
   };
 
   return (
-    <header className="h-14 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+    <header
+      className="min-h-14 h-auto border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 transition-all"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
       <div className="flex h-full items-center justify-between px-4 lg:px-6">
         {/* Left: Logo + Retour site */}
         <div className="flex items-center gap-4">

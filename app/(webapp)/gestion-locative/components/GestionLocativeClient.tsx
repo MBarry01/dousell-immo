@@ -792,7 +792,7 @@ export function GestionLocativeClient({
             {/* Bouton pour relancer le tour */}
             <button
                 onClick={resetTour}
-                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${isDark
+                className={`absolute bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${isDark
                     ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
                     : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
                     }`}

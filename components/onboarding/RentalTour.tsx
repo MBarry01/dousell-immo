@@ -244,7 +244,7 @@ export function RentalTour({ hasProperties = true, page }: RentalTourProps) {
             variant="ghost"
             size="icon"
             onClick={resetTour}
-            className="fixed bottom-4 right-4 z-50 opacity-50 hover:opacity-100 bg-black/20 backdrop-blur-sm text-white border border-white/10"
+            className="absolute bottom-4 right-4 z-50 opacity-50 hover:opacity-100 bg-black/20 backdrop-blur-sm text-white border border-white/10"
             title="Relancer le tutoriel de cette page"
         >
             <HelpCircle className="h-5 w-5" />
