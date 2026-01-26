@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import {
   Building2,
   Home,
@@ -16,7 +16,6 @@ import {
   Shield,
   Heart,
   Settings,
-  MoreHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
@@ -61,6 +60,9 @@ const compteNavItems: NavItem[] = [
 
 export function WorkspaceBottomNav() {
   const pathname = usePathname();
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
 
   // Déterminer le contexte et les items de navigation
   const navItems = useMemo(() => {
@@ -70,9 +72,55 @@ export function WorkspaceBottomNav() {
     return compteNavItems;
   }, [pathname]);
 
+  useEffect(() => {
+    // Trouver le conteneur scrollable (main dans workspace-layout)
+    const scrollContainer = document.querySelector("main.overflow-y-auto");
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = scrollContainer.scrollTop;
+          const scrollDelta = currentScrollY - lastScrollY.current;
+
+          // Seuil de 10px pour éviter les micro-mouvements
+          if (Math.abs(scrollDelta) > 10) {
+            if (scrollDelta > 0 && currentScrollY > 100) {
+              // Scroll vers le bas (après 100px) -> masquer
+              setIsVisible(false);
+            } else if (scrollDelta < 0) {
+              // Scroll vers le haut -> afficher
+              setIsVisible(true);
+            }
+            lastScrollY.current = currentScrollY;
+          }
+
+          ticking.current = false;
+        });
+        ticking.current = true;
+      }
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      scrollContainer.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // Toujours visible au changement de page
+  useEffect(() => {
+    setIsVisible(true);
+    lastScrollY.current = 0;
+  }, [pathname]);
+
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl lg:hidden print:hidden"
+      className={cn(
+        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl lg:hidden print:hidden",
+        "transition-transform duration-300 ease-out",
+        !isVisible && "translate-y-full"
+      )}
       style={{
         paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
       }}
