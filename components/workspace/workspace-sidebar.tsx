@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import {
   Building2,
@@ -26,9 +25,9 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet";
 
 import type { LucideIcon } from "lucide-react";
 
@@ -245,6 +244,24 @@ function SidebarContent({
 export function WorkspaceSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Gestion du hover avec délai pour éviter les bugs de flickering
+  const handleMouseEnter = useCallback(() => {
+    // Annuler tout timer de fermeture en cours
+    if (collapseTimeoutRef.current) {
+      clearTimeout(collapseTimeoutRef.current);
+      collapseTimeoutRef.current = null;
+    }
+    setIsCollapsed(false);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    // Délai avant de replier pour éviter les fermetures accidentelles
+    collapseTimeoutRef.current = setTimeout(() => {
+      setIsCollapsed(true);
+    }, 200); // 200ms de délai
+  }, []);
 
   return (
     <>
@@ -254,7 +271,7 @@ export function WorkspaceSidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden fixed left-3 z-50 h-10 w-10 bg-background/80 backdrop-blur-sm border text-foreground"
+            className="lg:hidden fixed left-3 z-50 h-10 w-10 text-foreground hover:bg-transparent"
             style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
           >
             <Menu className="h-5 w-5" />
@@ -265,6 +282,8 @@ export function WorkspaceSidebar() {
           className="w-64 p-0 rounded-none bg-[#0b0f18] border-r border-white/10"
           hideClose={true}
         >
+          {/* SheetTitle caché pour l'accessibilité (screen readers) */}
+          <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
           <SidebarContent
             isCollapsed={false}
             isMobile={true}
@@ -276,11 +295,11 @@ export function WorkspaceSidebar() {
       {/* Desktop: Sidebar fixe */}
       <aside
         className={cn(
-          "hidden lg:flex flex-col h-full border-r border-border bg-background transition-all duration-300",
+          "hidden lg:flex flex-col h-full border-r border-border bg-background transition-all duration-300 ease-out",
           isCollapsed ? "w-16" : "w-64"
         )}
-        onMouseEnter={() => setIsCollapsed(false)}
-        onMouseLeave={() => setIsCollapsed(true)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <SidebarContent
           isCollapsed={isCollapsed}

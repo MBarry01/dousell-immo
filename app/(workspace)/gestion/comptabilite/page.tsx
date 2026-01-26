@@ -44,6 +44,7 @@ import { ExpenseList } from './components/ExpenseList';
 import { ProfitabilityTable } from './components/ProfitabilityTable';
 
 import { OnboardingTour, useOnboardingTour, TourStep } from '@/components/onboarding/OnboardingTour';
+import { FloatingHelpButton } from '@/components/ui/floating-help-button';
 
 interface MonthlyData {
     month: string;
@@ -351,15 +352,15 @@ export default function ComptabilitePage() {
             />
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col gap-4">
                 <div>
                     <p className={`text-xs uppercase tracking-[0.3em] ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>Gestion Locative</p>
-                    <h1 className={`text-2xl md:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Dashboard Financier</h1>
+                    <h1 className={`text-xl md:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Dashboard Financier</h1>
                 </div>
 
-                {/* Year Selector */}
-                <div id="tour-compta-export" className="flex items-center gap-3">
-                    <div className={`flex items-center gap-2 rounded-lg px-3 py-2 border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'
+                {/* Year Selector + Actions */}
+                <div id="tour-compta-export" className="flex flex-wrap items-center gap-2 md:gap-3">
+                    <div className={`flex items-center gap-2 rounded-lg px-2.5 md:px-3 py-1.5 md:py-2 border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'
                         }`}>
                         <Calendar className={`w-4 h-4 ${isDark ? 'text-slate-500' : 'text-gray-400'}`} />
                         <select
@@ -395,14 +396,15 @@ export default function ComptabilitePage() {
 
             {/* Tabs for Revenue vs Expenses vs Profitability */}
             <Tabs id="tour-compta-tabs" value={activeTab} onValueChange={(v) => setActiveTab(v as 'revenus' | 'depenses' | 'rentabilite')} className="w-full">
-                <TabsList className={isDark ? 'bg-slate-900 border border-slate-800' : 'bg-gray-100 border border-gray-200'}>
-                    <TabsTrigger value="revenus" className={isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}>
-                        Revenus (Loyers)
+                <TabsList className={`w-full md:w-auto ${isDark ? 'bg-slate-900 border border-slate-800' : 'bg-gray-100 border border-gray-200'}`}>
+                    <TabsTrigger value="revenus" className={`text-xs md:text-sm flex-1 md:flex-none ${isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}`}>
+                        <span className="hidden md:inline">Revenus (Loyers)</span>
+                        <span className="md:hidden">Revenus</span>
                     </TabsTrigger>
-                    <TabsTrigger value="depenses" className={isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}>
+                    <TabsTrigger value="depenses" className={`text-xs md:text-sm flex-1 md:flex-none ${isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}`}>
                         Dépenses
                     </TabsTrigger>
-                    <TabsTrigger value="rentabilite" className={isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}>
+                    <TabsTrigger value="rentabilite" className={`text-xs md:text-sm flex-1 md:flex-none ${isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}`}>
                         Rentabilité
                     </TabsTrigger>
                 </TabsList>
@@ -410,69 +412,69 @@ export default function ComptabilitePage() {
                 {/* REVENUS TAB CONTENT */}
                 <TabsContent value="revenus" className="mt-6 space-y-6">
                     {/* KPI Cards */}
-                    <div id="tour-compta-kpi" className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div id="tour-compta-kpi" className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                         {/* Total Expected */}
-                        <div className={`p-5 rounded-lg border shadow-sm ${isDark ? 'bg-black border-gray-800' : 'bg-white border-gray-200'}`}>
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className={`p-2 rounded-md ${isDark ? 'bg-blue-900/20 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
-                                    <Wallet className="w-4 h-4" />
+                        <div className={`p-3 md:p-5 rounded-lg border shadow-sm ${isDark ? 'bg-black border-gray-800' : 'bg-white border-gray-200'}`}>
+                            <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                                <div className={`p-1.5 md:p-2 rounded-md ${isDark ? 'bg-blue-900/20 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
+                                    <Wallet className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 </div>
-                                <span className={`text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Attendu</span>
+                                <span className={`text-[10px] md:text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Attendu</span>
                             </div>
                             <div className="flex items-baseline gap-1">
-                                <span className={`text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.expected)}</span>
-                                <span className={`text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
+                                <span className={`text-xl md:text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.expected)}</span>
+                                <span className={`text-[10px] md:text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
                             </div>
                         </div>
 
                         {/* Collected */}
-                        <div className={`p-5 rounded-lg border shadow-sm ${isDark ? 'bg-black border-gray-800' : 'bg-white border-gray-200'}`}>
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className={`p-2 rounded-md ${isDark ? 'bg-green-900/20 text-green-400' : 'bg-green-100 text-green-600'}`}>
-                                    <TrendingUp className="w-4 h-4" />
+                        <div className={`p-3 md:p-5 rounded-lg border shadow-sm ${isDark ? 'bg-black border-gray-800' : 'bg-white border-gray-200'}`}>
+                            <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                                <div className={`p-1.5 md:p-2 rounded-md ${isDark ? 'bg-green-900/20 text-green-400' : 'bg-green-100 text-green-600'}`}>
+                                    <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 </div>
-                                <span className={`text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Encaissé</span>
+                                <span className={`text-[10px] md:text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Encaissé</span>
                             </div>
                             <div className="flex items-baseline gap-1">
-                                <span className={`text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.collected)}</span>
-                                <span className={`text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
+                                <span className={`text-xl md:text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.collected)}</span>
+                                <span className={`text-[10px] md:text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
                             </div>
-                            <p className="text-xs text-green-500 mt-2 flex items-center gap-1">
+                            <p className="text-[10px] md:text-xs text-green-500 mt-1.5 md:mt-2 flex items-center gap-1">
                                 <ArrowUpRight className="w-3 h-3" />
-                                {totals.collectionRate}% taux de recouvrement
+                                <span className="truncate">{totals.collectionRate}% taux de recouvrement</span>
                             </p>
                         </div>
 
                         {/* Pending */}
-                        <div className={`p-5 rounded-lg border shadow-sm ${isDark ? 'bg-black border-gray-800' : 'bg-white border-gray-200'}`}>
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className={`p-2 rounded-md ${isDark ? 'bg-amber-900/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}>
-                                    <DollarSign className="w-4 h-4" />
+                        <div className={`p-3 md:p-5 rounded-lg border shadow-sm ${isDark ? 'bg-black border-gray-800' : 'bg-white border-gray-200'}`}>
+                            <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                                <div className={`p-1.5 md:p-2 rounded-md ${isDark ? 'bg-amber-900/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}>
+                                    <DollarSign className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 </div>
-                                <span className={`text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>En attente</span>
+                                <span className={`text-[10px] md:text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>En attente</span>
                             </div>
                             <div className="flex items-baseline gap-1">
-                                <span className={`text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.pending)}</span>
-                                <span className={`text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
+                                <span className={`text-xl md:text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.pending)}</span>
+                                <span className={`text-[10px] md:text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
                             </div>
                         </div>
 
                         {/* Overdue */}
-                        <div className={`p-5 rounded-lg border shadow-sm ${isDark ? 'bg-black border-gray-800' : 'bg-white border-gray-200'}`}>
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className={`p-2 rounded-md ${isDark ? 'bg-red-900/20 text-red-400' : 'bg-red-100 text-red-600'}`}>
-                                    <AlertTriangle className="w-4 h-4" />
+                        <div className={`p-3 md:p-5 rounded-lg border shadow-sm ${isDark ? 'bg-black border-gray-800' : 'bg-white border-gray-200'}`}>
+                            <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                                <div className={`p-1.5 md:p-2 rounded-md ${isDark ? 'bg-red-900/20 text-red-400' : 'bg-red-100 text-red-600'}`}>
+                                    <AlertTriangle className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 </div>
-                                <span className={`text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Retards</span>
+                                <span className={`text-[10px] md:text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Retards</span>
                             </div>
                             <div className="flex items-baseline gap-1">
-                                <span className={`text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.overdue)}</span>
-                                <span className={`text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
+                                <span className={`text-xl md:text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.overdue)}</span>
+                                <span className={`text-[10px] md:text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
                             </div>
                             {totals.overdue > 0 && (
                                 <Link
                                     href="/gestion-locative?filter=overdue"
-                                    className="text-xs text-red-500 mt-2 flex items-center gap-1 hover:underline"
+                                    className="text-[10px] md:text-xs text-red-500 mt-1.5 md:mt-2 flex items-center gap-1 hover:underline"
                                 >
                                     Voir les impayés →
                                 </Link>
@@ -601,21 +603,8 @@ export default function ComptabilitePage() {
                 </TabsContent>
             </Tabs>
 
-            {/* Bouton pour relancer le tour */}
-            <button
-                onClick={resetTour}
-                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${isDark
-                    ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
-                    : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
-                    }`}
-                title="Relancer le tutoriel"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                    <path d="M12 17h.01" />
-                </svg>
-            </button>
+            {/* Bouton pour relancer le tour (Portal) */}
+            <FloatingHelpButton onClick={resetTour} />
         </div>
     );
 }

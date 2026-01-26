@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { deleteTransaction, deleteLease, confirmPayment, terminateLease, reactivateLease, sendTenantInvitation } from '../actions';
 import { processLateReminders } from '@/app/(vitrine)/actions/reminders';
 import { OnboardingTour, useOnboardingTour, TourStep } from '@/components/onboarding/OnboardingTour';
+import { FloatingHelpButton } from '@/components/ui/floating-help-button';
 import { ReceiptModal } from './ReceiptModal';
 import { toast } from 'sonner';
 import { useTheme } from '@/components/workspace/providers/theme-provider';
@@ -798,21 +799,8 @@ export function GestionLocativeClient({
                 />
             )}
 
-            {/* Bouton pour relancer le tour */}
-            <button
-                onClick={resetTour}
-                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${isDark
-                    ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
-                    : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
-                    }`}
-                title="Relancer le tutoriel"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                    <path d="M12 17h.01" />
-                </svg>
-            </button>
+            {/* Bouton pour relancer le tour (Portal) */}
+            <FloatingHelpButton onClick={resetTour} />
         </div>
     );
 }

@@ -43,7 +43,7 @@ export function DownloadReportButton({ year, globalStats, properties }: Download
                     disabled={loading}
                 >
                     <Download className="w-4 h-4" />
-                    {loading ? 'Génération...' : 'Rapport PDF'}
+                    <span className="hidden md:inline">{loading ? 'Génération...' : 'Rapport PDF'}</span>
                 </Button>
             )}
         </PDFDownloadLink>

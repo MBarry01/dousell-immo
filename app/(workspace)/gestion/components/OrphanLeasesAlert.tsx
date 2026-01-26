@@ -80,34 +80,36 @@ export function OrphanLeasesAlert({ count, leases }: OrphanLeasesAlertProps) {
     return (
         <>
             {/* Banner Alert */}
-            <div className="mb-4 p-4 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <AlertTriangle className="w-5 h-5 text-orange-400" />
-                    <div>
-                        <p className="font-medium text-orange-300">
-                            {count} bail{count > 1 ? "s" : ""} sans bien associé
-                        </p>
-                        <p className="text-sm text-orange-400/80">
-                            Ces locataires ont été importés sans liaison automatique à un bien existant.
-                        </p>
+            <div className="mb-4 p-4 rounded-lg bg-orange-500/10 border border-orange-500/30 relative">
+                {/* Bouton fermer en haut à droite */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setDismissed(true)}
+                    className="absolute top-2 right-2 h-7 w-7 text-orange-400 hover:text-orange-300 hover:bg-orange-500/20"
+                >
+                    <X className="w-4 h-4" />
+                </Button>
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pr-8">
+                    <div className="flex items-start gap-3">
+                        <AlertTriangle className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="font-medium text-orange-300">
+                                {count} bail{count > 1 ? "s" : ""} sans bien associé
+                            </p>
+                            <p className="text-sm text-orange-400/80">
+                                Ces locataires ont été importés sans liaison automatique à un bien existant.
+                            </p>
+                        </div>
                     </div>
-                </div>
-                <div className="flex items-center gap-2">
                     <Button
                         onClick={handleOpenDialog}
-                        className="bg-orange-500 hover:bg-orange-600 text-white"
+                        className="bg-orange-500 hover:bg-orange-600 text-white w-full sm:w-auto shrink-0"
                         size="sm"
                     >
                         <LinkIcon className="w-4 h-4 mr-2" />
                         Lier maintenant
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDismissed(true)}
-                        className="text-orange-400 hover:text-orange-300"
-                    >
-                        <X className="w-4 h-4" />
                     </Button>
                 </div>
             </div>

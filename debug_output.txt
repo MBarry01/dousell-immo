@@ -1,11 +1,11 @@
-Starting check...
-Checking reminders candidates...
-Total unpaid/pending transactions found: 3
-- Tx c0e45a1c-2798-4b2d-91a5-245cafd12814 (Samba Barry): Status=pending, ReminderSent=true, Due=2025-12-04, Overdue=35 days
-  [SKIPPED] Paid:false Sent:true Overdue:35
-- Tx e618429e-6a72-4dbf-9cee-2a486e9ec89d (Mamour Sidibé): Status=pending, ReminderSent=true, Due=2025-12-04, Overdue=35 days
-  [SKIPPED] Paid:false Sent:true Overdue:35
-- Tx c4698cab-1877-4013-a01e-d88cb8b7c8d2 (Mohamadou Barry): Status=pending, ReminderSent=true, Due=2025-12-26, Overdue=13 days
-  [SKIPPED] Paid:false Sent:true Overdue:13
+--- DEBUGGING SEO SEARCH ---
 
-Found 0 candidates ready for email.
+1. Testing RPC 'get_active_cities_and_types'...
+RPC returned 2 rows.
+All Cities from RPC:
+City: "région de dakar", Slug: "region-de-dakar"
+City: "thiès region", Slug: "thies-region"
+
+2. Checking Raw Properties for 'Thies'...
+Found properties matching %thies%:
+[]

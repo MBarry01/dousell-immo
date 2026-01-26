@@ -59,7 +59,9 @@
       "Bash(dir:*)",
       "Bash(git push:*)",
       "Bash(xxd:*)",
-      "Bash(npx next dev:*)"
+      "Bash(npx next dev:*)",
+      "Bash(git checkout:*)",
+      "Bash(node:*)"
     ]
   }
 }

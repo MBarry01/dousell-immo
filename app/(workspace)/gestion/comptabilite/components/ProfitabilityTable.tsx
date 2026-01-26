@@ -68,11 +68,7 @@ export function ProfitabilityTable({ year }: ProfitabilityTableProps) {
     return (
         <div className="space-y-4">
             {/* Theme Debug - WILL REMOVE LATER */}
-            <div className="flex justify-end">
-                <span className={`text-[10px] px-2 py-0.5 rounded-full border ${isDark ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
-                    Mode: {isDark ? 'Sombre' : 'Clair'}
-                </span>
-            </div>
+            
 
             {/* Summary Card */}
             <div className={`grid grid-cols-2 md:grid-cols-4 gap-2`}>

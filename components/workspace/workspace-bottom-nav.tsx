@@ -154,7 +154,6 @@ export function WorkspaceBottomNav() {
                 <Icon
                   className="h-5 w-5"
                   strokeWidth={isActive ? 2.5 : 1.5}
-                  fill={isActive ? "currentColor" : "none"}
                 />
               </span>
               <span

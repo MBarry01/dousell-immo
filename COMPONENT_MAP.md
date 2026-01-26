@@ -1,4 +1,4 @@
-# 🗺️ MAP DES COMPOSANTS (216)
+# 🗺️ MAP DES COMPOSANTS (217)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -216,5 +216,6 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<workspace-switch />** (Path: `components\ui\workspace-switch.tsx`)
 - **<estimation-wizard />** (Path: `components\wizard\estimation-wizard.tsx`)
 - **<theme-provider />** (Path: `components\workspace\providers\theme-provider.tsx`)
+- **<workspace-bottom-nav />** (Path: `components\workspace\workspace-bottom-nav.tsx`)
 - **<workspace-header />** (Path: `components\workspace\workspace-header.tsx`)
 - **<workspace-sidebar />** (Path: `components\workspace\workspace-sidebar.tsx`)
