@@ -117,7 +117,7 @@ export function WorkspaceBottomNav() {
   return (
     <nav
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl lg:hidden print:hidden",
+        "fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#05080c]/90 backdrop-blur-xl lg:hidden print:hidden",
         "transition-transform duration-300 ease-out",
         !isVisible && "translate-y-full"
       )}
@@ -125,7 +125,7 @@ export function WorkspaceBottomNav() {
         paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
       }}
     >
-      <div className="flex items-center justify-around px-2 py-1.5">
+      <div className="flex items-center justify-between px-2 py-2">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -141,24 +141,28 @@ export function WorkspaceBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors min-w-[60px]",
-                isActive
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
+              className="flex flex-1 flex-col items-center gap-1 px-1 py-1 min-w-0"
             >
-              <Icon
+              <span
                 className={cn(
-                  "h-5 w-5 transition-transform",
-                  isActive && "scale-110"
+                  "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
+                  isActive
+                    ? "text-[#F4C430] bg-[#F4C430]/10"
+                    : "text-white/50"
                 )}
-                strokeWidth={isActive ? 2.5 : 2}
-              />
-              <span className={cn(
-                "text-[10px] leading-tight",
-                isActive && "font-semibold"
-              )}>
+              >
+                <Icon
+                  className="h-5 w-5"
+                  strokeWidth={isActive ? 2.5 : 1.5}
+                  fill={isActive ? "currentColor" : "none"}
+                />
+              </span>
+              <span
+                className={cn(
+                  "truncate w-full text-center text-[10px] font-medium transition-colors duration-200",
+                  isActive ? "text-[#F4C430] font-semibold" : "text-white/50"
+                )}
+              >
                 {item.label}
               </span>
             </Link>
