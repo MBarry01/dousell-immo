@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { invalidateCache } from '@/lib/cache/cache-aside';
+import { getUserTeamContext } from '@/lib/team-permissions';
 
 export async function updateBranding(formData: FormData) {
     const supabase = await createClient();
@@ -31,6 +32,13 @@ export async function updateBranding(formData: FormData) {
         // IMPORTANT: Revalider TOUTES les pages qui utilisent le profil
         revalidatePath('/gestion/config');
         revalidatePath('/gestion');
+
+        // AUTO-CRÉATION D'ÉQUIPE: Créer l'équipe personnelle si elle n'existe pas
+        // Ceci se déclenche quand l'utilisateur ENREGISTRE sa configuration
+        const teamContext = await getUserTeamContext();
+        if (teamContext) {
+            console.log(`[Config] Team ensured for user ${user.id}: ${teamContext.team_name}`);
+        }
     }
 
     return { success: !error, error: error?.message };

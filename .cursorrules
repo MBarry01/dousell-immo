@@ -1,88 +1,57 @@
-# 🏆 RÈGLES SUPRÊMES CURSOR (PROJET: DOUSSEL IMMO)
+# Role
+Tu es un expert Senior Fullstack (Next.js 14+, React, Tailwind CSS, Supabase, TypeScript).
 
-Agis comme un **Senior Lead Developer & Expert UI/UX**.
-Ta priorité est la **stabilité**, la **lisibilité**, la **performance** et le respect strict de l'identité **Luxe/Premium**.
+# Règle d'Or : RÉUTILISATION (DRY)
+AVANT de proposer du nouveau code ou de créer un nouveau composant :
+1. Analyse le fichier `COMPONENT_MAP.md` ou `PROJECT_BRAIN.md`.
+2. Si un composant UI existe (ex: Button, Card, Modal), tu DOIS l'importer depuis `@/components/ui`.
+3. Ne réinvente pas la roue.
 
----
+# Style & UI
+- Utilise Tailwind CSS pour tout le style.
+- Interface : Sobre, "SaaS B2B", Dark mode par défaut (slate-900/950).
+- Utilise `lucide-react` pour les icônes.
 
-## 💎 IDENTITÉ DU PROJET & DESIGN SYSTEM
+# UI & ANIMATION SYSTEM (Strict)
 
-### 1. Ambiance & Style
-- **Vibe :** Luxe, Confiance, Modernité, Hospitalité Sénégalaise (Teranga).
-- **Style Visuel :** "Dark Mode" élégant, contrastes forts, accents Or.
-- **Police :** "Outfit" (Géométrique, Moderne).
+## Philosophie "Pro Smooth"
+Toutes les interactions doivent être fluides, subtiles et imperceptibles.
+- **Durée standard** : 200ms à 300ms.
+- **Courbe** : `ease-out` pour l'entrée, `ease-in` pour la sortie.
+- **Distance** : Déplacements courts (translate-y-1 ou 2), jamais de grands sauts.
 
-### 2. Palette de Couleurs (STRICT)
-- **Primary (Marque) :** `#F4C430` (Jaune Or/Safran). À utiliser pour les boutons d'action (CTA), les icônes actives et les mises en avant.
-- **Backgrounds :** Noirs profonds (`#000000`, `#0a0a0a`) et Gris foncés (`#121212`). Éviter les fonds blancs purs.
-- **Textes :** Blanc (`#FFFFFF`) pour les titres, Gris clair (`#E5E5E5`) pour le corps. Jamais de noir pur sur fond sombre.
+## Règles d'Animation par Composant
+Utilise les classes utilitaires `tailwindcss-animate` (`animate-in`, `fade-in`, etc.).
 
-### 3. UX Mobile-First (Critique)
-- **Hero Sections :** "Bottom-Aligned". Image plein écran, texte en bas sur un dégradé noir (`bg-gradient-to-t from-black via-black/90 to-transparent`).
-- **Cartes :** Scroll horizontal avec `snap-x snap-mandatory`. Cacher les scrollbars (`scrollbar-hide`).
-- **Hauteur :** Utiliser `dvh` (Dynamic Viewport Height) au lieu de `vh` sur mobile.
+1. **Dropdowns & Popovers & Menus (Context Aware)**
+   - Le menu doit "glisser" depuis son point d'origine (le bouton).
+   - **Base commune** : `data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95`
+   - **Directionnel (Le secret du "Drop")** :
+     - Si le menu est en DESSOUS (`side=bottom`) : `data-[side=bottom]:slide-in-from-top-2` (Il descend de 8px).
+     - Si le menu est au DESSUS (`side=top`) : `data-[side=top]:slide-in-from-bottom-2` (Il monte de 8px).
+     - Si le menu est à DROITE (`side=right`) : `data-[side=right]:slide-in-from-left-2`.
+     - Si le menu est à GAUCHE (`side=left`) : `data-[side=left]:slide-in-from-right-2`.
 
----
+2. **Modales (Dialogues)**
+   - Overlay (Fond noir) : `data-[state=open]:animate-in data-[state=open]:fade-in-0`
+   - Contenu (La boîte) : `data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]`
+   - *Note : Le contenu doit apparaître avec un léger zoom avant (95% -> 100%).*
 
-## 🚨 ZONE DE TOLÉRANCE ZÉRO : DUPLICATIONS & MODIFICATIONS
+3. **Apparition de Contenu (Listes, Cartes)**
+   - Utilise une classe custom : `animate-fade-in-up` (définie dans tailwind config).
+   - Pour les listes, ajoute un délai progressif : `style={{ animationDelay: index * 50 + 'ms' }}`.
 
-### 1. Protocole de Modification Chirurgicale
-- **INTERDICTION** de réécrire un fichier entier si une modification partielle suffit.
-- Avant d'utiliser `search_replace` :
-    1. **LIRE** le fichier (`read_file`).
-    2. **S'ASSURER** que le bloc `search` est **UNIQUE**.
-    3. **COPIER** exactement le code existant (espaces compris).
-    4. **NE JAMAIS** utiliser de commentaires `// ... code` dans le bloc de remplacement.
+4. **Boutons & Hover**
+   - Ne change jamais la taille (`w/h`) au hover (ça décale tout).
+   - Utilise : `transition-all duration-200 hover:bg-accent hover:text-accent-foreground`.
+   - Clic actif : `active:scale-95` (effet tactile).
 
-### 2. Vérification Post-Opératoire
-- Après chaque edit, vérifier :
-    - Pas de code après la dernière accolade `}`.
-    - Pas d'imports en double.
-    - Pas de fonctions orphelines.
+# Supabase & Data
+- Source de vérité : `types/supabase.ts`. Ne devine pas les colonnes.
+- Utilise le SDK `@supabase/supabase-js` avec le typage générique `<Database>`.
+- Sécurité : N'oublie jamais que le RLS (Row Level Security) est actif.
 
----
-
-## 🏗️ ARCHITECTURE NEXT.JS & REACT
-
-### Server vs Client Components
-- **Par défaut :** Tout est Server Component.
-- **`"use client"` :** Uniquement si `useState`, `useEffect`, `onClick` sont nécessaires.
-- **Pattern :** Isoler la partie interactive dans un petit composant client importé dans le composant serveur.
-
-### Data Fetching & Server Actions
-- **JAMAIS** de `useEffect` pour fetcher de la donnée (utiliser Server Components).
-- **Server Actions :**
-    - Placer dans `_actions` ou `actions.ts`.
-    - Toujours utiliser `try/catch`.
-    - Retour standard : `{ success: boolean, data?: T, error?: string }`.
-    - **VALIDATION ZOD OBLIGATOIRE** pour tous les arguments.
-
----
-
-## 🛡️ SÉCURITÉ & ROBUSTESSE
-
-- **Validation :** Toute entrée utilisateur doit être validée par un schéma **Zod**.
-- **Guard Clauses :** Préférer `if (!data) return null;` au début plutôt que d'imbriquer.
-- **Types :** Interdiction d'utiliser `any`. Utiliser des interfaces strictes.
-
----
-
-## 🎨 TAILWIND CSS & UI
-
-- **Pas de valeurs arbitraires :** Utiliser les classes du thème (`bg-primary` au lieu de `bg-[#F4C430]`).
-- **Composants :** Utiliser les composants `shadcn/ui` existants (`@/components/ui/button`) avant de créer du nouveau.
-- **Mobile First :** Écrire les classes pour mobile d'abord, puis `md:` pour desktop (ex: `flex-col md:flex-row`).
-
----
-
-## 🧠 PROCÉDURE DE RÉFLEXION (COT)
-
-Avant de générer du code, pose-toi ces questions :
-1. "Ai-je lu le fichier en entier ?"
-2. "Est-ce que je respecte le Design System (Noir/Or) ?"
-3. "Y a-t-il un risque de duplication ?"
-4. "Est-ce que j'ai validé les données avec Zod ?"
-
----
-
-Si tu rencontres une erreur, analyse-la, lis le fichier contextuel, et applique le correctif minimal sans tout casser.
+# Architecture
+- `components/ui` : Composants atomiques (Boutons, Inputs).
+- `features/*` : Composants métiers complexes.
+- `app/*` : Pages et layouts (Next.js App Router).

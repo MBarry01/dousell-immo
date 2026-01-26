@@ -34,12 +34,18 @@ interface AddTenantButtonProps {
         startDate?: string;
         endDate?: string;
     };
+    propertyId?: string;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
 const FIRST_TENANT_KEY = 'dousell_first_tenant_created';
 
-export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddTenantButtonProps) {
-    const [open, setOpen] = useState(false);
+export function AddTenantButton({ ownerId, trigger, initialData, profile, propertyId, open: controlledOpen, onOpenChange: controlledOnOpenChange }: AddTenantButtonProps) {
+    const [internalOpen, setInternalOpen] = useState(false);
+    const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+    const setOpen = controlledOnOpenChange || setInternalOpen;
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showProfileAlert, setShowProfileAlert] = useState(false);
@@ -192,6 +198,8 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
     };
 
     const renderTrigger = () => {
+        if (trigger === null) return null;
+
         if (trigger) {
             if (React.isValidElement(trigger)) {
                 return React.cloneElement(trigger as React.ReactElement<any>, {
@@ -233,6 +241,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
             end_date: formData.get('end_date') as string || null,
             status: 'active' as const,
             deposit_months: depositMonths, // Pass this to action
+            property_id: formData.get('property_id') as string || null,
         };
 
         const result = await createNewLease(data);
@@ -338,6 +347,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                         </div>
 
                         <div className="space-y-2">
+                            <input type="hidden" name="property_id" value={propertyId || ""} />
                             <label className="text-sm font-medium text-slate-300">
                                 Adresse du bien <span className="text-red-400">*</span>
                             </label>
@@ -346,7 +356,8 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                                 placeholder="ex: Appartement F3, Almadies, Dakar"
                                 defaultValue={initialData?.address}
                                 required
-                                className="bg-slate-800 border-slate-700 text-white"
+                                readOnly={!!propertyId}
+                                className={`bg-slate-800 border-slate-700 text-white ${propertyId ? 'opacity-70 cursor-not-allowed' : ''}`}
                                 whileFocus={{ scale: 1 }}
                             />
                         </div>

@@ -8,7 +8,8 @@ import { ThemedContent, ThemedWidget } from "./components/ThemedContent";
 import { KPICards } from "./components/KPICards";
 import { RevenueChart } from "./components/RevenueChart";
 import { Button } from "@/components/ui/button";
-import { FileText, Plus } from "lucide-react";
+import { FileText, Plus, AlertTriangle, Link as LinkIcon } from "lucide-react";
+import { OrphanLeasesAlert } from "./components/OrphanLeasesAlert";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -74,6 +75,10 @@ export default async function GestionLocativePage({
         ? allLeases.filter(l => l.status === 'terminated')
         : allLeases.filter(l => !l.status || l.status === 'active' || l.status === 'pending');
 
+    // Compter les baux orphelins (sans property_id)
+    const orphanLeases = filteredLeases.filter(l => !l.property_id);
+    const orphanCount = orphanLeases.length;
+
     // On limite la navigation à la date du premier bail
     const minDateStr = earliestLease?.start_date || new Date().toISOString();
 
@@ -105,6 +110,11 @@ export default async function GestionLocativePage({
                 )
             }
         >
+            {/* Alerte baux orphelins */}
+            {!isViewingTerminated && orphanCount > 0 && (
+                <OrphanLeasesAlert count={orphanCount} leases={orphanLeases} />
+            )}
+
             {/* KPI Cards - Seulement en mode actif */}
             {!isViewingTerminated && (
                 <KPICards stats={advancedStats} />

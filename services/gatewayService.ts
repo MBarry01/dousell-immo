@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import type { Property } from "@/types/property";
-import { getProperties, type PropertyFilters } from "./propertyService";
+import { getProperties, getSimilarProperties, type PropertyFilters } from "./propertyService";
 
 // Type pour les résultats bruts de la table external_listings
 type ExternalListingRow = {
@@ -25,6 +25,36 @@ const mapExternalListing = (row: ExternalListingRow): Property => {
     // Parsing du prix (ex: "500 000 FCFA")
     const numericPrice = parseInt(row.price.replace(/\D/g, ""), 10) || 0;
 
+    // Parsing intelligent des pièces/chambres
+    let rooms = 0;
+    let bedrooms = 0;
+    const textToScan = (row.title + " " + (row.category || "")).toLowerCase();
+
+    // 1. "X pièces", "X pieces", "X pcs"
+    const roomsMatch = textToScan.match(/(\d+)\s*(?:pi[èe]ces?|pcs?)\b/);
+    if (roomsMatch) {
+        rooms = parseInt(roomsMatch[1], 10);
+    }
+
+    // 2. "F4", "T3" (Format standard immobilier)
+    if (rooms === 0) {
+        const typeMatch = textToScan.match(/\b[ft]([1-9])\b/);
+        if (typeMatch) {
+            rooms = parseInt(typeMatch[1], 10);
+        }
+    }
+
+    // 3. Bedrooms (Chambres)
+    const bedMatch = textToScan.match(/(\d+)\s*(?:chambres?)/);
+    if (bedMatch) {
+        bedrooms = parseInt(bedMatch[1], 10);
+    }
+
+    // Fallback: Si on a les chambres mais pas les pièces, on ajoute 1 (le salon)
+    if (rooms === 0 && bedrooms > 0) {
+        rooms = bedrooms + 1;
+    }
+
     return {
         id: row.id,
         title: row.title,
@@ -43,8 +73,8 @@ const mapExternalListing = (row: ExternalListingRow): Property => {
         },
         specs: {
             surface: 0,
-            rooms: 0,
-            bedrooms: 0,
+            rooms: rooms,
+            bedrooms: bedrooms,
             bathrooms: 0,
             dpe: "C",
         },
@@ -193,6 +223,102 @@ export async function getExternalListingsCount(
     }
 }
 
+/**
+ * Récupère des annonces similaires (internes + externes)
+ * Stratégie: Priorité aux annonces internes, puis remplissage avec externes
+ * 
+ * @param transactionType - "location" ou "vente"
+ * @param city - Ville pour filtrer (format display, ex: "Region de Dakar")
+ * @param propertyType - Type de bien optionnel (ex: "Appartement")
+ * @param excludeIds - IDs des propriétés à exclure (celles déjà affichées)
+ * @param limit - Nombre max d'annonces (défaut: 6)
+ */
+export async function getSimilarListings(options: {
+    transactionType: "location" | "vente";
+    city: string;
+    propertyType?: string;
+    excludeIds?: string[];
+    limit?: number;
+}): Promise<Property[]> {
+    const { transactionType, city, propertyType, excludeIds = [], limit = 6 } = options;
+    console.log(`[getSimilarListings] Start for ${city} (${transactionType}) - Type: ${propertyType}`);
+
+    try {
+        // 1. Récupérer les annonces internes similaires
+        const internalListings = await getSimilarProperties(
+            transactionType,
+            city,
+            limit,
+            excludeIds[0] // La fonction existante ne prend qu'un ID
+        );
+        console.log(`[getSimilarListings] Internal found: ${internalListings.length}`);
+
+        // Filtrer les autres IDs exclus
+        const filteredInternal = internalListings.filter(
+            (p) => !excludeIds.includes(p.id)
+        );
+
+        // Filtrer par type si spécifié
+        const typedInternal = propertyType
+            ? filteredInternal.filter(
+                (p) => p.details?.type?.toLowerCase() === propertyType.toLowerCase()
+            )
+            : filteredInternal;
+
+        console.log(`[getSimilarListings] Internal kept after filter: ${typedInternal.length}`);
+
+        // 2. Si on a assez d'annonces internes, on les retourne
+        if (typedInternal.length >= limit) {
+            return typedInternal.slice(0, limit);
+        }
+
+        // 3. Sinon, compléter avec des annonces externes
+        const neededExternal = limit - typedInternal.length;
+
+        // Nettoyage du nom de ville pour la recherche externe (ex: "Region de Dakar" -> "Dakar")
+        let searchCity = city;
+        // Handle accents explicitly just in case (e.g. Région vs Region)
+        if (searchCity.toLowerCase().match(/r[ée]gion de /)) {
+            searchCity = searchCity.replace(/r[ée]gion de /i, "").trim();
+        } else if (searchCity.toLowerCase().match(/d[ée]partement de /)) {
+            searchCity = searchCity.replace(/d[ée]partement de /i, "").trim();
+        }
+        console.log(`[getSimilarListings] External search city: "${searchCity}"`);
+
+        const externalListings = await getExternalListingsByType(
+            transactionType,
+            {
+                city: searchCity,
+                category: propertyType,
+                limit: neededExternal + 5, // Récupérer un peu plus pour filtrer
+            }
+        );
+        console.log(`[getSimilarListings] External found: ${externalListings.length}`);
+
+        // Filtrer les externes qui seraient déjà dans les exclusions
+        const filteredExternal = externalListings.filter(
+            (p) => !excludeIds.includes(p.id)
+        );
+
+        // 4. Fusionner: internes d'abord, puis externes
+        const combined = [...typedInternal, ...filteredExternal.slice(0, neededExternal)];
+
+        // 5. Si toujours pas assez, on élargit aux autres types dans la même ville (internes seulement)
+        if (combined.length < limit && propertyType) {
+            const moreInternal = filteredInternal
+                .filter((p) => p.details?.type?.toLowerCase() !== propertyType.toLowerCase())
+                .filter((p) => !combined.some((c) => c.id === p.id));
+
+            combined.push(...moreInternal.slice(0, limit - combined.length));
+        }
+
+        return combined.slice(0, limit);
+    } catch (error) {
+        console.error("[gatewayService] getSimilarListings error:", error);
+        return [];
+    }
+}
+
 export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
     try {
         // 1. Récupération des annonces internes (via propertyService existant)
@@ -305,7 +431,7 @@ export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
         // 5. Tri (Interne d'abord, puis Externe, en attendant mieux)
         return unifiedListings;
 
-        return unifiedListings;
+
 
     } catch (err) {
         console.error("Gateway Error", err);

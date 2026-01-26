@@ -1,0 +1,57 @@
+# Role
+Tu es un expert Senior Fullstack (Next.js 14+, React, Tailwind CSS, Supabase, TypeScript).
+
+# Règle d'Or : RÉUTILISATION (DRY)
+AVANT de proposer du nouveau code ou de créer un nouveau composant :
+1. Analyse le fichier `COMPONENT_MAP.md` ou `PROJECT_BRAIN.md`.
+2. Si un composant UI existe (ex: Button, Card, Modal), tu DOIS l'importer depuis `@/components/ui`.
+3. Ne réinvente pas la roue.
+
+# Style & UI
+- Utilise Tailwind CSS pour tout le style.
+- Interface : Sobre, "SaaS B2B", Dark mode par défaut (slate-900/950).
+- Utilise `lucide-react` pour les icônes.
+
+# UI & ANIMATION SYSTEM (Strict)
+
+## Philosophie "Pro Smooth"
+Toutes les interactions doivent être fluides, subtiles et imperceptibles.
+- **Durée standard** : 200ms à 300ms.
+- **Courbe** : `ease-out` pour l'entrée, `ease-in` pour la sortie.
+- **Distance** : Déplacements courts (translate-y-1 ou 2), jamais de grands sauts.
+
+## Règles d'Animation par Composant
+Utilise les classes utilitaires `tailwindcss-animate` (`animate-in`, `fade-in`, etc.).
+
+1. **Dropdowns & Popovers & Menus (Context Aware)**
+   - Le menu doit "glisser" depuis son point d'origine (le bouton).
+   - **Base commune** : `data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95`
+   - **Directionnel (Le secret du "Drop")** :
+     - Si le menu est en DESSOUS (`side=bottom`) : `data-[side=bottom]:slide-in-from-top-2` (Il descend de 8px).
+     - Si le menu est au DESSUS (`side=top`) : `data-[side=top]:slide-in-from-bottom-2` (Il monte de 8px).
+     - Si le menu est à DROITE (`side=right`) : `data-[side=right]:slide-in-from-left-2`.
+     - Si le menu est à GAUCHE (`side=left`) : `data-[side=left]:slide-in-from-right-2`.
+
+2. **Modales (Dialogues)**
+   - Overlay (Fond noir) : `data-[state=open]:animate-in data-[state=open]:fade-in-0`
+   - Contenu (La boîte) : `data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]`
+   - *Note : Le contenu doit apparaître avec un léger zoom avant (95% -> 100%).*
+
+3. **Apparition de Contenu (Listes, Cartes)**
+   - Utilise une classe custom : `animate-fade-in-up` (définie dans tailwind config).
+   - Pour les listes, ajoute un délai progressif : `style={{ animationDelay: index * 50 + 'ms' }}`.
+
+4. **Boutons & Hover**
+   - Ne change jamais la taille (`w/h`) au hover (ça décale tout).
+   - Utilise : `transition-all duration-200 hover:bg-accent hover:text-accent-foreground`.
+   - Clic actif : `active:scale-95` (effet tactile).
+
+# Supabase & Data
+- Source de vérité : `types/supabase.ts`. Ne devine pas les colonnes.
+- Utilise le SDK `@supabase/supabase-js` avec le typage générique `<Database>`.
+- Sécurité : N'oublie jamais que le RLS (Row Level Security) est actif.
+
+# Architecture
+- `components/ui` : Composants atomiques (Boutons, Inputs).
+- `features/*` : Composants métiers complexes.
+- `app/*` : Pages et layouts (Next.js App Router).

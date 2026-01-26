@@ -9,6 +9,7 @@ import { validateTenantCreation } from '@/lib/finance';
 import { sendEmail } from '@/lib/mail';
 import { getPropertiesByOwner } from "@/services/propertyService.cached";
 import { getLeasesByOwner as getLeasesByOwnerService } from "@/services/rentalService.cached";
+import { getUserTeamContext } from "@/lib/team-permissions";
 
 /**
  * Récupérer les propriétés de l'utilisateur connecté (pour les listes déroulantes)
@@ -329,7 +330,10 @@ async function triggerN8N(webhookPath: string, payload: Record<string, unknown>)
 
 /**
  * Enregistre un nouveau locataire et son bail
- * Déclenche la génération automatique du contrat PDF via n8n
+ * Supporte :
+ * - Sélection d'un bien existant (property_id)
+ * - Création de bien on-the-fly (create_new_property)
+ * - Liaison automatique bien-bail avec mise à jour du statut
  */
 export async function createNewLease(formData: Record<string, unknown>) {
     const supabase = await createClient();
@@ -342,10 +346,94 @@ export async function createNewLease(formData: Record<string, unknown>) {
         return { success: false, error: "Non autorisé" };
     }
 
-    // IMPORTANT: On force l'owner_id de l'utilisateur connecté (sécurité)
+    // Récupérer le team_id de l'utilisateur
+    const { data: teamMember } = await supabase
+        .from('team_members')
+        .select('team_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+    const teamId = teamMember?.team_id;
+
+    // ==============================================
+    // GESTION DU BIEN IMMOBILIER
+    // ==============================================
+    let propertyId = formData.property_id as string | undefined;
+    let propertyAddress = formData.property_address as string;
+
+    // Cas 1: Création de bien on-the-fly
+    if (formData.create_new_property === 'true' || formData.create_new_property === true) {
+        const newPropertyTitle = formData.new_property_title as string;
+        const newPropertyAddress = formData.new_property_address as string;
+        const newPropertyPrice = Number(formData.new_property_price) || Number(formData.monthly_amount) || 0;
+
+        if (!newPropertyTitle || !newPropertyAddress) {
+            return { success: false, error: "Nom et adresse du bien requis pour la création" };
+        }
+
+        // Créer le bien en mode brouillon (sans photos = draft pour vitrine)
+        const { data: newProperty, error: propError } = await supabase
+            .from('properties')
+            .insert([{
+                title: newPropertyTitle,
+                price: newPropertyPrice,
+                currency: 'FCFA',
+                category: 'location',
+                status: 'loué', // Directement loué car associé au locataire
+                location: {
+                    address: newPropertyAddress,
+                    city: 'Dakar', // Valeur par défaut
+                },
+                owner_id: user.id,
+                team_id: teamId,
+                validation_status: 'pending', // Pas sur la vitrine (pas de photos)
+                images: [],
+            }])
+            .select('id')
+            .single();
+
+        if (propError || !newProperty) {
+            console.error("Erreur création bien on-the-fly:", propError);
+            return { success: false, error: `Erreur création bien: ${propError?.message}` };
+        }
+
+        propertyId = newProperty.id;
+        propertyAddress = newPropertyAddress;
+        console.log("✅ Bien créé on-the-fly:", propertyId);
+    }
+
+    // Cas 2: Bien existant sélectionné - mettre à jour son statut
+    if (propertyId) {
+        const { error: updateError } = await supabase
+            .from('properties')
+            .update({
+                status: 'loué',
+                validation_status: 'pending' // Retirer de la vitrine
+            })
+            .eq('id', propertyId);
+
+        if (updateError) {
+            console.warn("Erreur mise à jour statut bien:", updateError);
+        }
+    }
+
+    // ==============================================
+    // PRÉPARATION DES DONNÉES DU BAIL
+    // ==============================================
+    // Nettoyer les champs de création de bien
+    const cleanedFormData = { ...formData };
+    delete (cleanedFormData as any).create_new_property;
+    delete (cleanedFormData as any).new_property_title;
+    delete (cleanedFormData as any).new_property_address;
+    delete (cleanedFormData as any).new_property_price;
+    delete (cleanedFormData as any).monthly_amount_prefilled;
+
     const finalData = {
-        ...formData,
-        owner_id: user.id  // Toujours forcer l'ID du propriétaire connecté
+        ...cleanedFormData,
+        owner_id: user.id,  // Toujours forcer l'ID du propriétaire connecté
+        team_id: teamId,    // Associer à l'équipe
+        property_id: propertyId || null, // Liaison avec le bien
+        property_address: propertyAddress,
     };
 
     // Extraire deposit_months pour ne pas l'envoyer à la table leases
@@ -1110,6 +1198,96 @@ export async function updateLease(leaseId: string, data: {
     ], 'rentals');
 
     revalidatePath('/gestion-locative');
+    return { success: true };
+}
+
+/**
+ * Lier un bail orphelin à un bien existant
+ * Utilisé après import en masse pour la réconciliation
+ */
+export async function linkLeaseToProperty(leaseId: string, propertyId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { success: false, error: "Non autorisé" };
+    }
+
+    // Récupérer le contexte équipe de l'utilisateur
+    const teamContext = await getUserTeamContext();
+    const userTeamId = teamContext?.team_id;
+
+    // Vérifier que le bail appartient à l'utilisateur ou à son équipe
+    const { data: lease } = await supabase
+        .from('leases')
+        .select('owner_id, team_id, tenant_name, property_id')
+        .eq('id', leaseId)
+        .single();
+
+    const leaseAuthorized = lease && (
+        lease.owner_id === user.id ||
+        (userTeamId && lease.team_id === userTeamId)
+    );
+
+    if (!leaseAuthorized) {
+        return { success: false, error: "Bail non trouvé ou non autorisé" };
+    }
+
+    if (lease.property_id) {
+        return { success: false, error: "Ce bail est déjà lié à un bien" };
+    }
+
+    // Vérifier que le bien existe et appartient à l'utilisateur ou à son équipe
+    const { data: property } = await supabase
+        .from('properties')
+        .select('id, title, owner_id, team_id, location')
+        .eq('id', propertyId)
+        .single();
+
+    const propertyAuthorized = property && (
+        property.owner_id === user.id ||
+        (userTeamId && property.team_id === userTeamId)
+    );
+
+    if (!propertyAuthorized) {
+        return { success: false, error: "Bien non trouvé ou non autorisé" };
+    }
+
+    // Mettre à jour le bail avec le property_id et l'adresse du bien
+    const propertyAddress = property.location?.address ||
+        `${property.location?.district || ''}, ${property.location?.city || ''}`.trim() ||
+        property.title;
+
+    const { error: updateError } = await supabase
+        .from('leases')
+        .update({
+            property_id: propertyId,
+            property_address: propertyAddress
+        })
+        .eq('id', leaseId);
+
+    if (updateError) {
+        console.error("Erreur liaison bail-bien:", updateError);
+        return { success: false, error: "Erreur lors de la liaison" };
+    }
+
+    // Mettre à jour le statut du bien en "loué"
+    await supabase
+        .from('properties')
+        .update({ status: 'loué' })
+        .eq('id', propertyId);
+
+    // Invalider les caches
+    try {
+        await invalidateCacheBatch([
+            `leases:${user.id}:all`,
+            `leases:${user.id}:active`,
+        ]);
+    } catch (e) {
+        console.warn("Cache invalidation failed:", e);
+    }
+
+    revalidatePath('/gestion');
     return { success: true };
 }
 

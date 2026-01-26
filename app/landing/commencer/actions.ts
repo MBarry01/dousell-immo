@@ -2,25 +2,66 @@
 
 import { createClient } from "@/utils/supabase/server";
 
-export async function submitOnboarding(formData: any) {
+interface OnboardingData {
+    // User
+    fullName: string;
+    email: string;
+    phone?: string;
+    password: string;
+
+    // Agency
+    companyName?: string;
+    companyAddress?: string;
+    companyPhone?: string;
+    companyNinea?: string;
+    companyEmail?: string;
+    logoUrl?: string;
+    signatureUrl?: string;
+
+    // Goals
+    teamSize?: string;
+}
+
+export async function submitOnboarding(formData: OnboardingData) {
     const supabase = await createClient();
 
-    // 1. Create User
+    // 1. Validation basique
+    if (!formData.email || !formData.password || !formData.fullName) {
+        return { error: "Veuillez remplir tous les champs obligatoires." };
+    }
+
+    if (formData.password.length < 6) {
+        return { error: "Le mot de passe doit contenir au moins 6 caractères." };
+    }
+
+    // 2. Créer le compte utilisateur
     const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
             data: {
                 full_name: formData.fullName,
-                phone: formData.phone,
+                phone: formData.phone || null,
+                team_size: formData.teamSize || null,
             },
-            // IMPORTANT: Redirect to /commencer/success or similar if verification is needed
-            // preventing auto-confirmation if email verification is enabled.
+            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/gestion`,
         },
     });
 
     if (authError) {
         console.error("Auth Error:", authError);
+
+        // Messages d'erreur en français
+        if (authError.message.includes("already registered")) {
+            return { error: "Cet email est déjà utilisé. Connectez-vous ou utilisez un autre email." };
+        }
+        if (authError.message.includes("Password")) {
+            return { error: "Le mot de passe doit contenir au moins 6 caractères." };
+        }
+        if (authError.message.includes("Invalid email")) {
+            return { error: "Adresse email invalide." };
+        }
+
         return { error: authError.message };
     }
 
@@ -29,46 +70,47 @@ export async function submitOnboarding(formData: any) {
     }
 
     const userId = authData.user.id;
+    const isAutoConfirmed = !!authData.session;
 
-    // 2. Prepare Profile Updates (Agency Info)
-    // We mirror the updateBranding logic from config/actions.ts
-    const profileUpdates = {
+    // 3. Mettre à jour le profil avec TOUTES les infos
+    // Le trigger Supabase crée le profil automatiquement, on l'update
+    const profileUpdates: Record<string, unknown> = {
+        // Infos agence/branding
         company_name: formData.companyName || null,
         company_address: formData.companyAddress || null,
         company_phone: formData.companyPhone || null,
         company_email: formData.companyEmail || null,
-        // Store features in metadata or a specific column if available. 
-        // Since we don't know if 'features' column exists, we'll try to update it 
-        // but relies on Supabase to ignore unknown columns or we check schema.
-        // Safest is to not break the query. We'll stick to known columns from config-form.tsx.
-        updated_at: new Date().toISOString()
+        company_ninea: formData.companyNinea || null,
+
+        // Logo et signature
+        logo_url: formData.logoUrl || null,
+        signature_url: formData.signatureUrl || null,
+
+        // IMPORTANT: Activer la gestion locative pour les inscrits via /commencer
+        gestion_locative_enabled: true,
+        gestion_locative_status: 'active', // Activation directe (pas de vérification requise pour l'essai)
+
+        updated_at: new Date().toISOString(),
     };
 
-    // We need to wait a tiny bit for the trigger to create the profile usually, 
-    // OR we can simple try to update it.
-    // If the trigger hasn't run yet, this update might fail or return 0 rows.
-    // A safer bet in Supabase is usually to INSERT on conflict do update, or wait a second.
-    // But since we are creating the user via signUp, the trigger should fire immediately.
+    // Attendre un peu que le trigger crée le profil
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Let's attempt update.
     const { error: profileError } = await supabase
         .from('profiles')
         .update(profileUpdates)
         .eq('id', userId);
 
     if (profileError) {
-        console.error("Profile Update Error (Agency Info might be missing):", profileError);
-        // We don't fail the whole request, but we log it.
+        console.error("Profile Update Error:", profileError);
+        // On ne fail pas la requête, le compte est créé
+        // L'utilisateur pourra configurer plus tard dans /gestion/config
     }
 
-    // 3. Store Interest / Team Size (Metadata)
-    if (formData.teamSize) {
-        await supabase.auth.updateUser({
-            data: {
-                team_size: formData.teamSize
-            }
-        });
-    }
-
-    return { success: true, userId };
+    return {
+        success: true,
+        userId,
+        isAutoConfirmed,
+        email: formData.email,
+    };
 }

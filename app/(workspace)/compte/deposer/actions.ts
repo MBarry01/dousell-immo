@@ -11,12 +11,12 @@ import { invalidatePropertyCaches } from "@/lib/cache/invalidation";
 type SubmitListingData = {
   type: string;
   title: string;
-  description: string;
+  description?: string;
   price: number;
   category: "vente" | "location";
   city: string;
   district: string;
-  address: string;
+  address?: string;
   landmark?: string;
   surface?: number;
   surfaceTotale?: number;
@@ -24,8 +24,6 @@ type SubmitListingData = {
   rooms?: number;
   bedrooms?: number;
   bathrooms?: number;
-  service_type: "mandat_confort" | "boost_visibilite";
-  payment_ref?: string;
   contact_phone?: string;
   images: string[];
   location?: {
@@ -129,18 +127,8 @@ export async function submitUserListing(data: SubmitListingData) {
     }
 
 
-    // Déterminer le statut selon le service et le paiement
-    let validationStatus: "pending" | "payment_pending" | "approved" | "rejected" =
-      "pending";
-
-    if (data.service_type === "boost_visibilite") {
-      if (data.payment_ref) {
-        validationStatus = "payment_pending";
-      } else {
-        console.error("❌ Pas de référence de paiement pour boost_visibilite");
-        return { error: "La référence de paiement est requise pour cette offre" };
-      }
-    }
+    // 100% GRATUIT - Toutes les annonces en attente de validation
+    const validationStatus = "pending";
 
     // Déterminer si c'est un terrain
     const isTerrain = data.type === "terrain";
@@ -172,20 +160,19 @@ export async function submitUserListing(data: SubmitListingData) {
 
     const payload = {
       title: data.title,
-      description: data.description,
+      description: data.description || "",
       price: data.price,
       category: data.category,
       status: "disponible",
       owner_id: user.id,
       is_agency_listing: false,
       validation_status: validationStatus,
-      service_type: data.service_type,
-      payment_ref: data.payment_ref || null,
-      contact_phone: data.contact_phone || null, // Numéro de contact spécifique à l'annonce
+      service_type: "mandat_confort", // 100% gratuit
+      contact_phone: data.contact_phone || null,
       location: data.location || {
         city: data.city,
         district: data.district,
-        address: data.address,
+        address: data.address || "",
         landmark: data.landmark || "",
         coords: { lat: 0, lng: 0 },
       },
@@ -193,7 +180,7 @@ export async function submitUserListing(data: SubmitListingData) {
       features: {},
       details: isTerrain
         ? {
-          type: "Appartement" as const, // Non utilisé pour terrain
+          type: "Appartement" as const,
           year: new Date().getFullYear(),
           heating: "",
           juridique: data.juridique,
@@ -207,7 +194,7 @@ export async function submitUserListing(data: SubmitListingData) {
       views_count: 0,
       proof_document_url: data.proof_document_url || null,
       virtual_tour_url: cleanVirtualTourUrl(data.virtual_tour_url),
-      verification_status: data.proof_document_url ? "pending" : null, // Si document, demande auto, sinon null (affichage bouton certifier)
+      verification_status: data.proof_document_url ? "pending" : null,
     };
 
     const { data: insertedProperty, error } = await supabase
@@ -243,10 +230,7 @@ export async function submitUserListing(data: SubmitListingData) {
     }
 
     // Créer une notification pour tous les admins et modérateurs
-    const serviceLabel =
-      data.service_type === "mandat_confort"
-        ? "Mandat Agence (Gratuit)"
-        : "Diffusion Simple (Payant)";
+    const serviceLabel = "Publication Gratuite";
 
     // Notifier tous les modérateurs et admins
     const { notifyModeratorsAndAdmins } = await import("@/lib/notifications-helpers");

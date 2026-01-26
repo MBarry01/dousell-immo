@@ -24,10 +24,11 @@ import {
   ChevronLeft,
   Menu,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 import type { LucideIcon } from "lucide-react";
 
@@ -40,12 +41,14 @@ interface NavItem {
 // Navigation pour propriétaires (/gestion)
 const gestionNavItems: NavItem[] = [
   { href: "/gestion", icon: Building2, label: "Dashboard" },
+  { href: "/gestion/biens", icon: Home, label: "Biens" },
   { href: "/gestion/etats-lieux", icon: ClipboardList, label: "États des Lieux" },
   { href: "/gestion/interventions", icon: Wrench, label: "Interventions" },
   { href: "/gestion/documents", icon: FolderOpen, label: "Documents" },
   { href: "/gestion/messages", icon: MessageSquare, label: "Messagerie" },
   { href: "/gestion/documents-legaux", icon: Scale, label: "Juridique" },
   { href: "/gestion/comptabilite", icon: Wallet, label: "Comptabilité" },
+
 ];
 
 // Navigation pour locataires (/locataire)
@@ -75,15 +78,19 @@ const compteNavItems: NavItem[] = [
   { href: "/compte/parametres", icon: Settings, label: "Paramètres" },
 ];
 
-function SidebarContent({
-  isCollapsed,
-  onCollapse,
-  isMobile = false
-}: {
+interface SidebarContentProps {
   isCollapsed: boolean;
   onCollapse?: () => void;
   isMobile?: boolean;
-}) {
+  onMobileNavigate?: () => void;
+}
+
+function SidebarContent({
+  isCollapsed,
+  onCollapse,
+  isMobile = false,
+  onMobileNavigate
+}: SidebarContentProps) {
   const pathname = usePathname();
 
   // Déterminer le contexte et les items de navigation
@@ -112,6 +119,15 @@ function SidebarContent({
             {title}
           </span>
         )}
+
+        {isMobile && (
+          <SheetClose asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-foreground">
+              <X className="h-4 w-4" />
+            </Button>
+          </SheetClose>
+        )}
+
         {!isMobile && (
           <Button
             variant="ghost"
@@ -141,6 +157,7 @@ function SidebarContent({
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => isMobile && onMobileNavigate?.()}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group hover:translate-x-1",
                 isCollapsed && !isMobile ? "justify-center" : "",
@@ -167,9 +184,25 @@ function SidebarContent({
 
       {/* Footer - Config/Settings (Uniquement pour le SaaS / Gestion) */}
       {pathname?.startsWith("/gestion") && (
-        <div className="p-2 border-t border-border shrink-0">
+        <div className="p-2 border-t border-border shrink-0 space-y-1">
+          <Link
+            href="/gestion/equipe"
+            onClick={() => isMobile && onMobileNavigate?.()}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+              isCollapsed && !isMobile ? "justify-center" : "",
+              "text-slate-700 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
+            )}
+            title={isCollapsed && !isMobile ? "Équipe" : undefined}
+          >
+            <Users className="h-5 w-5 shrink-0" />
+            {(!isCollapsed || isMobile) && (
+              <span className="text-sm">Équipe</span>
+            )}
+          </Link>
           <Link
             href="/gestion/config"
+            onClick={() => isMobile && onMobileNavigate?.()}
             className={cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
               isCollapsed && !isMobile ? "justify-center" : "",
@@ -184,12 +217,33 @@ function SidebarContent({
           </Link>
         </div>
       )}
+
+      {/* Footer - Accès Gestion Locative (pour pages /compte) */}
+      {pathname?.startsWith("/compte") && (
+        <div className="p-2 border-t border-border shrink-0">
+          <Link
+            href="/gestion"
+            onClick={() => isMobile && onMobileNavigate?.()}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+              isCollapsed && !isMobile ? "justify-center" : "",
+              "bg-primary/10 text-primary hover:bg-primary/20"
+            )}
+            title={isCollapsed && !isMobile ? "Gestion Locative" : undefined}
+          >
+            <Building2 className="h-5 w-5 shrink-0" />
+            {(!isCollapsed || isMobile) && (
+              <span className="text-sm font-medium">Gestion Locative</span>
+            )}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
 
 export function WorkspaceSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
@@ -200,15 +254,21 @@ export function WorkspaceSidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden fixed top-3 left-3 z-50 h-10 w-10 bg-background/80 backdrop-blur-sm border text-foreground"
+            className="lg:hidden fixed left-3 z-50 h-10 w-10 bg-background/80 backdrop-blur-sm border text-foreground"
+            style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
           >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent className="w-64 p-0 fixed left-0 top-0 h-full rounded-none slide-in-from-left">
+        <SheetContent
+          side="left"
+          className="w-64 p-0 rounded-none bg-[#0b0f18] border-r border-white/10"
+          hideClose={true}
+        >
           <SidebarContent
             isCollapsed={false}
             isMobile={true}
+            onMobileNavigate={() => setIsMobileOpen(false)}
           />
         </SheetContent>
       </Sheet>
@@ -219,6 +279,8 @@ export function WorkspaceSidebar() {
           "hidden lg:flex flex-col h-full border-r border-border bg-background transition-all duration-300",
           isCollapsed ? "w-16" : "w-64"
         )}
+        onMouseEnter={() => setIsCollapsed(false)}
+        onMouseLeave={() => setIsCollapsed(true)}
       >
         <SidebarContent
           isCollapsed={isCollapsed}

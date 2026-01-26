@@ -1,3 +1,4 @@
+npm run brain
 npm run lint
 npx tsx scripts/scan-ui.ts
 npx tsx scripts/check-actions.ts

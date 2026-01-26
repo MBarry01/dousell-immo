@@ -64,6 +64,12 @@ interface Lease {
     end_date?: string;
     status?: 'active' | 'terminated' | 'pending';
     created_at?: string;
+    property_id?: string;
+    properties?: {
+        id: string;
+        title: string;
+        images?: string[];
+    } | null;
 }
 
 interface Profile {
@@ -302,7 +308,7 @@ export function GestionLocativeClient({
             result.push({
                 id: lease.id,
                 name: lease.tenant_name,
-                property: lease.property_address || 'Adresse non renseignée',
+                property: lease.properties?.title || lease.property_address || 'Bien non renseigné',
                 phone: lease.tenant_phone,
                 email: lease.tenant_email,
                 rentAmount: lease.monthly_amount,

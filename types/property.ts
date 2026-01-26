@@ -61,6 +61,12 @@ export type Property = {
   virtual_tour_url?: string; // Lien d'intégration (Embed SRC) Google Maps ou YouTube 360
   view_count?: number; // Compteur incrémental des vues (optimisé)
 
+  // Champs pour la gestion par équipe
+  team_id?: string; // Équipe propriétaire du bien (null = propriétaire individuel)
+  created_by?: string; // Utilisateur ayant créé le bien
+  validation_status?: "pending" | "payment_pending" | "approved" | "rejected" | "scheduled";
+  scheduled_publish_at?: string; // Date/heure de publication programmée (ISO 8601)
+
   // Champs pour les annonces externes (Scraping)
   isExternal?: boolean;
   source_site?: string;

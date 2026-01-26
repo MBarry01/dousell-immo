@@ -550,7 +550,7 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     // Supabase : .or(`user_id.eq.${user.id},leases.owner_id.eq.${user.id}`) ne marche pas direct avec des joins imbriqués facilement.
     // On va faire 2 appels manuels si besoin, mais essayons la jointure.
 
-    let manualsQuery = supabase
+    const manualsQuery = supabase
       .from("user_documents")
       .select(`
         *,

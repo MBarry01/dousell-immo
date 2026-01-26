@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Loader2, ChevronDown, Upload, User, FileSpreadsheet, X, AlertCircle } from "lucide-react";
+import { Plus, Loader2, ChevronDown, Upload, User, FileSpreadsheet, X, AlertCircle, ShieldCheck, Mail, Wallet, FileText, Check, ArrowRight, MapPin, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,13 +19,17 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import * as XLSX from 'xlsx';
-import { createNewLease } from "../actions";
+import { createNewLease, confirmPayment, sendWelcomePack } from "../actions";
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { GenerateContractModal } from '@/components/contracts/GenerateContractModal';
+import { generateLeaseContract } from '@/lib/actions/contract-actions';
 import { useTheme } from '@/components/workspace/providers/theme-provider';
 import { getPremiumBranding } from '../config/actions';
 import confetti from 'canvas-confetti';
+import { PropertySelector } from './PropertySelector';
+import { type VacantProperty, getAllTeamProperties } from '../actions/property-selector';
+import { fuzzyMatchProperty } from '../utils/property-matching';
 
 interface AddTenantButtonProps {
     ownerId: string;
@@ -62,6 +66,14 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
     const [createdLease, setCreatedLease] = useState<{ id: string, name: string, amount: number, depositMonths: number } | null>(null);
 
     const router = useRouter();
+
+    // Controlled state for rent amount to allow auto-fill
+    const [rentAmount, setRentAmount] = useState<string | number>(initialData?.amount || '');
+
+    // Reset rent amount when opening/closing
+    useEffect(() => {
+        if (open && initialData?.amount) setRentAmount(initialData.amount);
+    }, [open, initialData]);
 
     // Confetti celebration for first tenant creation - Golden luxury effect (Desktop optimized)
     const triggerConfetti = useCallback(() => {
@@ -200,6 +212,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
     };
 
     const renderTrigger = () => {
+        // ... existing renderTrigger 
         if (trigger) {
             if (React.isValidElement(trigger)) {
                 return React.cloneElement(trigger as React.ReactElement<any>, {
@@ -242,6 +255,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        // ... existing handleSubmit
         e.preventDefault();
         setLoading(true);
         setError(null);
@@ -250,21 +264,30 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
         const monthlyAmount = Number(formData.get('monthly_amount'));
         const depositMonths = Number(formData.get('deposit_months')) || 2;
 
+        // Note: property_id and other hidden fields from PropertySelector are automatically in formData
+
+        // ... rest of logic
         const data = {
             owner_id: ownerId,
             tenant_name: tenantNameVal,
             tenant_phone: formData.get('tenant_phone') as string,
             tenant_email: formData.get('tenant_email') as string,
-            property_address: formData.get('property_address') as string,
+            property_address: formData.get('property_address') as string, // Will be filled by hidden input from PropertySelector
+            property_id: formData.get('property_id') as string, // Will be filled by hidden input from PropertySelector
             monthly_amount: monthlyAmount,
             billing_day: Number(formData.get('billing_day')) || 5,
             start_date: formData.get('start_date') as string,
             end_date: formData.get('end_date') as string || null,
             status: 'active' as const,
-            deposit_months: depositMonths, // Pass this to action
+            deposit_months: depositMonths,
+            create_new_property: formData.get('create_new_property'),
+            new_property_title: formData.get('new_property_title'),
+            new_property_address: formData.get('new_property_address'),
+            new_property_price: formData.get('new_property_price'),
         };
 
         const result = await createNewLease(data);
+        // ... rest of function
         setLoading(false);
 
         if (result.success && result.id) {
@@ -366,19 +389,18 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">
-                                Adresse du bien <span className="text-red-400">*</span>
-                            </label>
-                            <Input
-                                name="property_address"
-                                placeholder="ex: Appartement F3, Almadies, Dakar"
-                                defaultValue={initialData?.address}
-                                required
-                                className="bg-slate-800 border-slate-700 text-white"
-                                whileFocus={{ scale: 1 }}
-                            />
-                        </div>
+                        {/* REPLACED ADDRESS INPUT WITH PROPERTY SELECTOR */}
+                        <PropertySelector
+                            onPropertySelect={(property) => {
+                                if (property) {
+                                    setRentAmount(property.price);
+                                }
+                            }}
+                            onCreateNew={(newProp) => {
+                                setRentAmount(newProp.price);
+                            }}
+                            defaultAddress={initialData?.address}
+                        />
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-2">
@@ -389,7 +411,8 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                                     name="monthly_amount"
                                     type="number"
                                     placeholder="500000"
-                                    defaultValue={initialData?.amount}
+                                    value={rentAmount}
+                                    onChange={(e) => setRentAmount(e.target.value)}
                                     required
                                     className="bg-slate-800 border-slate-700 text-white font-mono"
                                     whileFocus={{ scale: 1 }}
@@ -578,12 +601,8 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
     );
 }
 
+
 // --- ONBOARDING WIZARD COMPONENT ---
-
-import { Check, Mail, Wallet, FileText, ArrowRight, ShieldCheck } from "lucide-react";
-import { confirmPayment, sendWelcomePack } from "../actions";
-
-import { generateLeaseContract } from '@/lib/actions/contract-actions';
 
 function TenantOnboardingWizard({ open, onOpenChange, leaseData, profile, onComplete }: any) {
     const [step, setStep] = useState(1);
@@ -827,6 +846,12 @@ interface ParsedTenant {
     date_fin?: string;
     mois_caution?: number;
     error?: string;
+    // Auto-matching
+    property_name?: string;
+    matched_property_id?: string;
+    matched_property_title?: string;
+    // Auto-création de bien
+    will_create_property?: boolean; // true = bien sera créé automatiquement
 }
 
 function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImportDialogProps) {
@@ -843,11 +868,16 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { isDark } = useTheme();
 
+    // Auto-matching: tous les biens de l'équipe
+    const [teamProperties, setTeamProperties] = useState<VacantProperty[]>([]);
+    const [orphanCount, setOrphanCount] = useState(0);
+
     // System fields that can be mapped
     const SYSTEM_FIELDS = [
         { key: 'nom', label: 'Locataire (Nom)', required: true },
         { key: 'email', label: 'Email', required: true },
-        { key: 'adresse', label: 'Bien (Adresse)', required: true },
+        { key: 'property_name', label: 'Nom du Bien (auto-matching)', required: false, hint: 'Si trouvé → lié automatiquement' },
+        { key: 'adresse', label: 'Adresse (fallback)', required: false, hint: 'Utilisé si bien non trouvé' },
         { key: 'loyer', label: 'Loyer (Montant)', required: true },
         { key: 'telephone', label: 'Téléphone', required: false },
         { key: 'date_debut', label: 'Date de début', required: false },
@@ -856,7 +886,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
         { key: 'mois_caution', label: 'Mois de caution', required: false },
     ];
 
-    // Reset state when dialog closes
+    // Reset state when dialog closes, load properties when opens
     useEffect(() => {
         if (!open) {
             setStep(1);
@@ -867,6 +897,14 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
             setFileName('');
             setErrors([]);
             setImportProgress(0);
+            setOrphanCount(0);
+        } else {
+            // Charger tous les biens de l'équipe pour l'auto-matching
+            getAllTeamProperties().then((result) => {
+                if (result.success && result.data) {
+                    setTeamProperties(result.data);
+                }
+            });
         }
     }, [open]);
 
@@ -923,9 +961,11 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
         }
     };
 
-    // Step 2: Apply mappings and validate
+    // Step 2: Apply mappings and validate with AUTO-MATCHING
     const applyMappings = () => {
         const today = new Date().toISOString().split('T')[0];
+        let orphans = 0;
+
         const mapped: ParsedTenant[] = rawData.map((row, index) => {
             // Find which CSV column maps to which system field
             const getValue = (systemField: string): any => {
@@ -964,9 +1004,44 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
 
             const nom = String(getValue('nom') || '').trim();
             const email = String(getValue('email') || '').trim();
+            const propertyName = String(getValue('property_name') || '').trim();
             const adresse = String(getValue('adresse') || '').trim();
             const loyerRaw = getValue('loyer');
             const loyer = Number(String(loyerRaw || 0).replace(/[^0-9.]/g, ''));
+
+            // 🔍 AUTO-MATCHING : Chercher le bien correspondant
+            let matchedPropertyId: string | undefined;
+            let matchedPropertyTitle: string | undefined;
+            let willCreateProperty = false;
+
+            if (propertyName && teamProperties.length > 0) {
+                const matched = fuzzyMatchProperty(propertyName, teamProperties);
+                if (matched) {
+                    matchedPropertyId = matched.id;
+                    matchedPropertyTitle = matched.title;
+                }
+            }
+
+            // Si pas de match par nom, essayer avec l'adresse
+            if (!matchedPropertyId && adresse && teamProperties.length > 0) {
+                const matchedByAddress = fuzzyMatchProperty(adresse, teamProperties);
+                if (matchedByAddress) {
+                    matchedPropertyId = matchedByAddress.id;
+                    matchedPropertyTitle = matchedByAddress.title;
+                }
+            }
+
+            // 🏠 AUTO-CRÉATION : Si pas de match mais nom de bien OU adresse fourni → on le créera
+            if (!matchedPropertyId && (propertyName || adresse)) {
+                willCreateProperty = true;
+                // Utiliser le nom du bien ou l'adresse comme titre du futur bien
+                matchedPropertyTitle = propertyName || adresse;
+            }
+
+            // Compter les orphelins (vraiment sans bien : rien à créer)
+            if (!matchedPropertyId && !willCreateProperty) {
+                orphans++;
+            }
 
             // Collect custom fields (unmapped columns)
             const customData: Record<string, any> = {};
@@ -981,12 +1056,18 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                 nom,
                 email,
                 telephone: String(getValue('telephone') || '').trim() || undefined,
-                adresse,
+                adresse: adresse || propertyName, // Fallback: utiliser property_name comme adresse
                 loyer,
                 jour_paiement: Number(getValue('jour_paiement')) || 5,
                 date_debut: formatDate(getValue('date_debut')) || today,
                 date_fin: formatDate(getValue('date_fin')),
                 mois_caution: Number(getValue('mois_caution')) || 2,
+                // Auto-matching results
+                property_name: propertyName,
+                matched_property_id: matchedPropertyId,
+                matched_property_title: matchedPropertyTitle,
+                // Auto-création
+                will_create_property: willCreateProperty,
             };
 
             // Only add custom_data if there's something
@@ -994,11 +1075,11 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                 (tenant as any).custom_data = customData;
             }
 
-            // Validate
+            // Validate - adresse non requise si bien matché ou sera créé
             const missingFields: string[] = [];
             if (!nom) missingFields.push('Locataire');
             if (!email) missingFields.push('Email');
-            if (!adresse) missingFields.push('Bien');
+            if (!matchedPropertyId && !willCreateProperty && !adresse) missingFields.push('Bien ou Adresse');
             if (!loyer || loyer <= 0) missingFields.push('Loyer');
 
             if (missingFields.length > 0) {
@@ -1008,6 +1089,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
             return tenant;
         });
 
+        setOrphanCount(orphans);
         setParsedData(mapped);
         setStep(3);
     };
@@ -1041,17 +1123,25 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
         setLoading(true);
         setImportProgress(0);
         let successCount = 0;
+        let linkedCount = 0;
+        let createdCount = 0; // Biens créés automatiquement
+        let orphanImportCount = 0;
         const importErrors: string[] = [];
 
         for (let i = 0; i < validData.length; i++) {
             const tenant = validData[i] as ParsedTenant & { custom_data?: Record<string, any> };
             try {
+                // 🏠 Si will_create_property → on crée le bien on-the-fly
+                const shouldCreateProperty = tenant.will_create_property && (tenant.property_name || tenant.adresse);
+
                 const result = await createNewLease({
                     owner_id: ownerId,
                     tenant_name: tenant.nom,
                     tenant_phone: tenant.telephone || '',
                     tenant_email: tenant.email,
-                    property_address: tenant.adresse,
+                    // Si bien existant matché → vide, sinon adresse
+                    property_address: tenant.matched_property_id ? '' : (shouldCreateProperty ? '' : tenant.adresse),
+                    property_id: tenant.matched_property_id || undefined,
                     monthly_amount: tenant.loyer,
                     billing_day: tenant.jour_paiement || 5,
                     start_date: tenant.date_debut,
@@ -1059,10 +1149,24 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                     status: 'active' as const,
                     deposit_months: tenant.mois_caution || 2,
                     custom_data: tenant.custom_data || {},
+                    // 🆕 Auto-création de bien
+                    ...(shouldCreateProperty && {
+                        create_new_property: true,
+                        new_property_title: tenant.property_name || tenant.adresse, // Nom ou adresse comme titre
+                        new_property_address: tenant.adresse || tenant.property_name,
+                        new_property_price: tenant.loyer,
+                    }),
                 });
 
                 if (result.success) {
                     successCount++;
+                    if (tenant.matched_property_id) {
+                        linkedCount++;
+                    } else if (shouldCreateProperty) {
+                        createdCount++;
+                    } else {
+                        orphanImportCount++;
+                    }
                 } else {
                     importErrors.push(`${tenant.nom}: ${result.error}`);
                 }
@@ -1076,7 +1180,11 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
         setLoading(false);
 
         if (successCount > 0) {
-            toast.success(`${successCount} locataire(s) importé(s) avec succès !`);
+            const linkedMsg = linkedCount > 0 ? `${linkedCount} liés` : '';
+            const createdMsg = createdCount > 0 ? `${createdCount} biens créés` : '';
+            const orphanMsg = orphanImportCount > 0 ? `${orphanImportCount} à lier` : '';
+            const details = [linkedMsg, createdMsg, orphanMsg].filter(Boolean).join(' • ');
+            toast.success(`${successCount} locataire(s) importé(s)${details ? ` (${details})` : ''}`);
         }
         if (importErrors.length > 0) {
             setErrors(importErrors);
@@ -1223,17 +1331,53 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                 {/* Step 3: Review & Import */}
                 {step === 3 && (
                     <div className="space-y-4">
-                        {/* Stats */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className={`p-3 rounded-lg ${isDark ? 'bg-green-900/30 border border-green-800' : 'bg-green-50 border border-green-200'}`}>
-                                <p className={`text-2xl font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>{validCount}</p>
-                                <p className={`text-xs ${isDark ? 'text-green-300' : 'text-green-700'}`}>Lignes valides</p>
+                        {/* Stats avec auto-matching et auto-création */}
+                        <div className="grid grid-cols-4 gap-2">
+                            <div className={`p-3 rounded-lg ${isDark ? 'bg-slate-800/50 border border-slate-700' : 'bg-gray-50 border border-gray-200'}`}>
+                                <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{validCount}</p>
+                                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>Valides</p>
                             </div>
-                            <div className={`p-3 rounded-lg ${isDark ? 'bg-red-900/30 border border-red-800' : 'bg-red-50 border border-red-200'}`}>
-                                <p className={`text-2xl font-bold ${isDark ? 'text-red-400' : 'text-red-600'}`}>{errorCount}</p>
-                                <p className={`text-xs ${isDark ? 'text-red-300' : 'text-red-700'}`}>Erreurs</p>
+                            <div className={`p-3 rounded-lg ${isDark ? 'bg-green-900/30 border border-green-800' : 'bg-green-50 border border-green-200'}`}>
+                                <p className={`text-2xl font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                                    {parsedData.filter(t => !t.error && t.matched_property_id).length}
+                                </p>
+                                <p className={`text-xs ${isDark ? 'text-green-300' : 'text-green-700'}`}>Liés</p>
+                            </div>
+                            <div className={`p-3 rounded-lg ${isDark ? 'bg-blue-900/30 border border-blue-800' : 'bg-blue-50 border border-blue-200'}`}>
+                                <p className={`text-2xl font-bold ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+                                    {parsedData.filter(t => !t.error && t.will_create_property).length}
+                                </p>
+                                <p className={`text-xs ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>À créer</p>
+                            </div>
+                            <div className={`p-3 rounded-lg ${isDark ? 'bg-orange-900/30 border border-orange-800' : 'bg-orange-50 border border-orange-200'}`}>
+                                <p className={`text-2xl font-bold ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>{orphanCount}</p>
+                                <p className={`text-xs ${isDark ? 'text-orange-300' : 'text-orange-700'}`}>Orphelins</p>
                             </div>
                         </div>
+
+                        {/* Info biens à créer */}
+                        {parsedData.filter(t => !t.error && t.will_create_property).length > 0 && (
+                            <div className={`p-3 rounded-lg ${isDark ? 'bg-blue-900/20 border border-blue-800' : 'bg-blue-50 border border-blue-200'}`}>
+                                <div className="flex items-center gap-2">
+                                    <Plus className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                                    <span className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+                                        {parsedData.filter(t => !t.error && t.will_create_property).length} bien(s) seront créés automatiquement et liés aux locataires.
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Info orphelins */}
+                        {orphanCount > 0 && (
+                            <div className={`p-3 rounded-lg ${isDark ? 'bg-orange-900/20 border border-orange-800' : 'bg-orange-50 border border-orange-200'}`}>
+                                <div className="flex items-center gap-2">
+                                    <AlertCircle className={`w-4 h-4 ${isDark ? 'text-orange-400' : 'text-orange-600'}`} />
+                                    <span className={`text-sm ${isDark ? 'text-orange-300' : 'text-orange-700'}`}>
+                                        {orphanCount} bail(s) sans bien. Vous pourrez les lier manuellement après.
+                                    </span>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Errors */}
                         {(errors.length > 0 || errorCount > 0) && (
@@ -1253,7 +1397,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                             </div>
                         )}
 
-                        {/* Preview Table */}
+                        {/* Preview Table avec statut de liaison */}
                         {validCount > 0 && (
                             <div className={`border rounded-lg overflow-hidden ${isDark ? 'border-slate-700' : 'border-gray-200'}`}>
                                 <div className={`px-3 py-2 text-xs font-medium ${isDark ? 'bg-slate-800 text-slate-300' : 'bg-gray-50 text-gray-700'}`}>
@@ -1263,16 +1407,39 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                                     <table className="w-full text-sm">
                                         <thead>
                                             <tr className={isDark ? 'bg-slate-800/50' : 'bg-gray-50'}>
-                                                <th className="px-3 py-2 text-left font-medium">Nom</th>
-                                                <th className="px-3 py-2 text-left font-medium">Email</th>
+                                                <th className="px-3 py-2 text-left font-medium">Locataire</th>
+                                                <th className="px-3 py-2 text-left font-medium">Bien</th>
                                                 <th className="px-3 py-2 text-right font-medium">Loyer</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {parsedData.filter(t => !t.error).slice(0, 5).map((t, i) => (
                                                 <tr key={i} className={isDark ? 'border-t border-slate-700' : 'border-t border-gray-100'}>
-                                                    <td className="px-3 py-2">{t.nom}</td>
-                                                    <td className={`px-3 py-2 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>{t.email}</td>
+                                                    <td className="px-3 py-2">
+                                                        <div className="font-medium">{t.nom}</div>
+                                                        <div className={`text-xs ${isDark ? 'text-slate-500' : 'text-gray-400'}`}>{t.email}</div>
+                                                    </td>
+                                                    <td className="px-3 py-2">
+                                                        {t.matched_property_id ? (
+                                                            // Bien existant trouvé
+                                                            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">
+                                                                <Check className="w-3 h-3" />
+                                                                {t.matched_property_title}
+                                                            </span>
+                                                        ) : t.will_create_property ? (
+                                                            // Bien sera créé automatiquement
+                                                            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">
+                                                                <Plus className="w-3 h-3" />
+                                                                {t.property_name}
+                                                                <span className="text-[10px] opacity-70">(nouveau)</span>
+                                                            </span>
+                                                        ) : (
+                                                            // Orphelin - pas de bien
+                                                            <span className={`text-xs ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>
+                                                                ⚠ {t.adresse || 'Sans bien'}
+                                                            </span>
+                                                        )}
+                                                    </td>
                                                     <td className="px-3 py-2 text-right font-mono">{t.loyer.toLocaleString()}</td>
                                                 </tr>
                                             ))}

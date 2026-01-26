@@ -1,10 +1,12 @@
 import { supabase } from "@/lib/supabase";
 import type { Property } from "@/types/property";
+import { slugify } from "@/lib/slugs";
 
 export type PropertyFilters = {
   q?: string; // Recherche textuelle
   category?: Property["transaction"];
-  city?: string;
+  city?: string; // Exact match (DB value)
+  citySlug?: string; // Slugified match (e.g. "thies-region")
   location?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -217,6 +219,18 @@ export const getProperties = async (filters: PropertyFilters = {}) => {
     if (filters.city) {
       query = query.eq("location->>city", filters.city);
     }
+    // Gestion du citySlug : on résout le slug en vrai nom de ville
+    if (filters.citySlug) {
+      const resolvedCity = await getCityNameFromSlug(filters.citySlug);
+      if (resolvedCity) {
+        // Use wildcards for maximum safety against whitespace/hidden chars
+        query = query.ilike("location->>city", `%${resolvedCity}%`);
+      } else {
+        // Fallback approx
+        const fallback = filters.citySlug.replace(/-/g, ' ');
+        query = query.ilike("location->>city", `%${fallback}%`);
+      }
+    }
     if (filters.minPrice) {
       query = query.gte("price", filters.minPrice);
     }
@@ -313,6 +327,15 @@ export const getPropertiesCount = async (filters: PropertyFilters = {}) => {
     }
     if (filters.city) {
       query = query.eq("location->>city", filters.city);
+    }
+    if (filters.citySlug) {
+      const resolvedCity = await getCityNameFromSlug(filters.citySlug);
+      if (resolvedCity) {
+        query = query.ilike("location->>city", `%${resolvedCity}%`);
+      } else {
+        const fallback = filters.citySlug.replace(/-/g, ' ');
+        query = query.ilike("location->>city", `%${fallback}%`);
+      }
     }
     if (filters.minPrice) {
       query = query.gte("price", filters.minPrice);
@@ -497,20 +520,26 @@ export const getSimilarProperties = async (
   excludeId?: string
 ) => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("properties")
       .select("id, title, description, price, category, status, location, specs, details, features, images, agent, created_at, validation_status, view_count")
       .eq("validation_status", "approved")
       .eq("status", "disponible")
       .eq("location->>city", city)
       .eq("category", category)
-      .neq("id", excludeId ?? "")
       .order("created_at", { ascending: false })
       .limit(limit);
+
+    if (excludeId) {
+      query = query.neq("id", excludeId);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
     return (data ?? []).map(mapProperty);
   } catch (error) {
-    console.error("getSimilarProperties error", error);
+    console.error("getSimilarProperties error:", error); // Improved logging
     return [];
   }
 };
@@ -621,3 +650,50 @@ export const getSearchSuggestions = async (query: string): Promise<string[]> => 
   }
 };
 
+/**
+ * Résout un slug de ville (ex: "thies-region") en son vrai nom (ex: "Thiès Region")
+ * Utilise le cache des villes actives via RPC
+ */
+export const getCityNameFromSlug = async (slug: string): Promise<string | null> => {
+  try {
+    // On récupère toutes les villes actives
+    // TODO: Mettre en cache cette réponse si possible pour éviter trop d'appels
+    const { data, error } = await supabase
+      .rpc('get_active_cities_and_types');
+
+    if (error || !data) return null;
+
+    // On cherche la première ville dont le slug correspond
+    const match = (data as { city: string }[]).find(item => slugify(item.city) === slug);
+
+    return match ? match.city : null;
+  } catch (err) {
+    console.error("getCityNameFromSlug error:", err);
+    return null;
+  }
+};
+
+
+/**
+ * Récupère la liste des villes actives (ayant au moins une annonce approuvée)
+ * Utilisé pour le maillage interne (Villes à proximité)
+ */
+export const getActiveCities = async (): Promise<string[]> => {
+  try {
+    // Utilise la RPC existante qui retourne { city, type }
+    const { data, error } = await supabase.rpc('get_active_cities_and_types');
+
+    if (error || !data) return [];
+
+    // Extraction et déduplication des villes
+    const citiesSet = new Set<string>();
+    (data as { city: string }[]).forEach(item => {
+      if (item.city) citiesSet.add(item.city);
+    });
+
+    return Array.from(citiesSet).sort();
+  } catch (error) {
+    console.error("getActiveCities error:", error);
+    return [];
+  }
+};

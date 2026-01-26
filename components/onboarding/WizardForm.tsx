@@ -75,7 +75,7 @@ export function WizardForm() {
 
             if (result.success) {
                 toast.success("Compte créé avec succès !");
-                router.push("/login?onboarding=success");
+                router.push("/gestion");
             }
         } catch (error) {
             toast.error("Une erreur inattendue est survenue.");
@@ -97,6 +97,11 @@ export function WizardForm() {
             setDirection(-1);
             setCurrentStep(prev => prev - 1);
         }
+    };
+
+    const skipToConfirmation = () => {
+        setDirection(1);
+        setCurrentStep(STEPS.length - 1); // Aller directement à la confirmation
     };
 
     const updateData = (field: keyof WizardData, value: any) => {
@@ -197,24 +202,37 @@ export function WizardForm() {
                         <ArrowLeft className="w-4 h-4 mr-2" /> Retour
                     </Button>
 
-                    {currentStep === STEPS.length - 1 ? (
-                        <Button
-                            size="lg"
-                            className="bg-primary hover:bg-primary/90 text-black rounded-xl px-8"
-                            onClick={handleSubmit}
-                            disabled={isPending}
-                        >
-                            {isPending ? "Création..." : "Commencer l'essai"} <Check className="w-5 h-5 ml-2" />
-                        </Button>
-                    ) : (
-                        <Button
-                            size="lg"
-                            className="bg-primary hover:bg-primary/90 text-black rounded-xl px-8"
-                            onClick={nextStep}
-                        >
-                            Suivant <ArrowRight className="w-5 h-5 ml-2" />
-                        </Button>
-                    )}
+                    <div className="flex items-center gap-3">
+                        {/* Bouton Passer - visible sur étapes Agency (1) et Goals (2) */}
+                        {(currentStep === 1 || currentStep === 2) && (
+                            <Button
+                                variant="ghost"
+                                onClick={skipToConfirmation}
+                                className="text-slate-400 hover:text-slate-600 dark:text-gray-500 dark:hover:text-gray-300"
+                            >
+                                Passer
+                            </Button>
+                        )}
+
+                        {currentStep === STEPS.length - 1 ? (
+                            <Button
+                                size="lg"
+                                className="bg-primary hover:bg-primary/90 text-black rounded-xl px-8"
+                                onClick={handleSubmit}
+                                disabled={isPending}
+                            >
+                                {isPending ? "Création..." : "Commencer l'essai"} <Check className="w-5 h-5 ml-2" />
+                            </Button>
+                        ) : (
+                            <Button
+                                size="lg"
+                                className="bg-primary hover:bg-primary/90 text-black rounded-xl px-8"
+                                onClick={nextStep}
+                            >
+                                Suivant <ArrowRight className="w-5 h-5 ml-2" />
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

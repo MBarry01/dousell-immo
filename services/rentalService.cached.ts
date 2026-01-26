@@ -17,6 +17,8 @@ import { createClient } from "@/utils/supabase/server";
  *
  * TTL : 5 minutes
  * Cache key : `leases:{ownerId}:{status}`
+ * 
+ * Note: Récupère les baux où owner_id = ownerId OU team_id correspond à une équipe de l'utilisateur
  */
 export async function getLeasesByOwner(
   ownerId: string,
@@ -27,13 +29,31 @@ export async function getLeasesByOwner(
     async () => {
       const supabase = await createClient();
 
+      // Récupérer les team_ids de l'utilisateur
+      const { data: teamMemberships } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", ownerId);
+
+      const userTeamIds = teamMemberships?.map(tm => tm.team_id) || [];
+
+      // Construire la requête avec OR: owner_id OU team_id
+      // Jointure avec properties pour avoir le titre du bien
       let query = supabase
         .from("leases")
-        .select(
-          "id, tenant_name, tenant_phone, tenant_email, property_address, monthly_amount, billing_day, start_date, end_date, status, created_at, lease_pdf_url"
-        )
-        .eq("owner_id", ownerId)
+        .select(`
+          id, tenant_name, tenant_phone, tenant_email, property_address, monthly_amount, 
+          billing_day, start_date, end_date, status, created_at, lease_pdf_url, team_id, owner_id, property_id,
+          properties:property_id(id, title, images)
+        `)
         .order("created_at", { ascending: false });
+
+      // Filtre: owner_id = ownerId OU team_id dans les équipes de l'utilisateur
+      if (userTeamIds.length > 0) {
+        query = query.or(`owner_id.eq.${ownerId},team_id.in.(${userTeamIds.join(',')})`);
+      } else {
+        query = query.eq("owner_id", ownerId);
+      }
 
       if (status !== "all") {
         query = query.eq("status", status);
@@ -42,7 +62,13 @@ export async function getLeasesByOwner(
       const { data, error } = await query;
       if (error) throw error;
 
-      return data || [];
+      // Transformer properties de array à objet simple (Supabase retourne un array)
+      return (data || []).map(lease => ({
+        ...lease,
+        properties: Array.isArray(lease.properties)
+          ? lease.properties[0] || null
+          : lease.properties
+      }));
     },
     {
       ttl: 300, // 5 minutes

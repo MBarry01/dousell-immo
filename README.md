@@ -65,4 +65,26 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-HCQXTE7LS1
 ```
 
+
 **Note** : Pour plus de détails sur la configuration Google Analytics avec consentement cookies, voir [docs/GOOGLE-ANALYTICS-SETUP.md](docs/GOOGLE-ANALYTICS-SETUP.md).
+
+## 🤖 Configuration IA (Cursor, Claude, Antigravity)
+
+Ce projet est configuré pour travailler efficacement avec des assistants IA.
+
+### Fichiers de Contexte
+- **`.cursorrules`** / **`.clauderules`** : Règles système pour l'IA (Stack, Réutilisation, Style).
+- **`COMPONENT_MAP.md`** : Carte complète des composants existants. Si ce fichier n'existe pas, générez-le :
+  ```bash
+  npm run map
+  ```
+
+### Comment utiliser avec une IA externe (Claude Web, ChatGPT) ?
+1. Lancez `npm run map` pour mettre à jour la carte.
+2. Copiez le contenu de `COMPONENT_MAP.md`.
+3. Collez-le au début de votre session de chat : "Voici la liste de mes composants, utilise-les pour la suite : ..."
+
+### Bonnes Pratiques
+- **Réutilisation** : Toujours vérifier `@/components/ui` avant de créer un nouveau composant.
+- **Imports** : Utilisez le barrel file pour les composants UI : `import { Button } from "@/components/ui"`.
+

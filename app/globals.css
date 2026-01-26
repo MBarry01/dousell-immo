@@ -33,7 +33,8 @@
 }
 
 /* Mode Light pour le Workspace */
-.light, [data-theme="light"] {
+.light,
+[data-theme="light"] {
   color-scheme: light;
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -55,7 +56,8 @@
 }
 
 /* Assurer que le dark mode (default vitrine) fonctionne */
-.dark, [data-theme="dark"] {
+.dark,
+[data-theme="dark"] {
   color-scheme: dark;
   --background: #05080c;
   --foreground: #f7f8fb;
@@ -145,6 +147,34 @@
       transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1)) rotate(var(--tw-exit-rotate, 0));
     }
   }
+
+  /* Pro Smooth Animations Definition */
+  --animate-fade-in-up: fade-in-up 0.3s ease-out forwards;
+  --animate-fade-out-down: fade-out-down 0.2s ease-in forwards;
+
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-out-down {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
 }
 
 @layer base {
@@ -220,6 +250,7 @@
 }
 
 @layer utilities {
+
   /* Couleurs sémantiques qui s'adaptent au thème */
   .text-foreground {
     color: var(--foreground) !important;
@@ -276,6 +307,11 @@
 
   .pb-safe {
     padding-bottom: calc(var(--safe-area-bottom) + 1rem);
+  }
+
+  /* Padding pour le contenu au-dessus de la bottom nav mobile */
+  .pb-safe-nav {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem);
   }
 
   .glass-panel {
@@ -447,6 +483,17 @@
   /* Header mobile en mode PWA - padding extra pour la barre d'état */
   .pwa-header-safe {
     padding-top: max(env(safe-area-inset-top, 0px), 20px) !important;
+  }
+
+  /* Workspace layout PWA - hauteur totale avec safe areas */
+  .h-dvh {
+    height: calc(100dvh) !important;
+    /* Le conteneur prend toute la hauteur, les safe areas sont gérés par les enfants */
+  }
+
+  /* Renforcer le padding bottom de la bottom nav en PWA */
+  .pb-safe-nav {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem) !important;
   }
 }
 
@@ -634,15 +681,20 @@
 }
 
 @keyframes float-gentle {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   25% {
     transform: translateY(-8px) rotate(0.5deg);
   }
+
   50% {
     transform: translateY(-14px) rotate(0deg);
   }
+
   75% {
     transform: translateY(-6px) rotate(-0.5deg);
   }
@@ -752,6 +804,7 @@
 }
 
 @keyframes twinkle {
+
   0%,
   100% {
     opacity: 0.5;
