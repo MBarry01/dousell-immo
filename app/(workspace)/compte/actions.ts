@@ -58,7 +58,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
             .in('status', ['open', 'pending']);
 
         // 4. Calculate Financials using the Guard
-        const kpis = calculateFinancials(allActiveLeases, transactions, today);
+        const kpis = calculateFinancials(allActiveLeases, transactions, [], today);
 
         return {
             activeLeases: allActiveLeases.length,

@@ -117,7 +117,7 @@ export function WorkspaceBottomNav() {
   return (
     <nav
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#05080c]/90 backdrop-blur-xl lg:hidden print:hidden",
+        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl lg:hidden print:hidden",
         "transition-transform duration-300 ease-out",
         !isVisible && "translate-y-full"
       )}
@@ -141,6 +141,7 @@ export function WorkspaceBottomNav() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false} // Disable prefetch to prevent stale RSC cache
               className="flex flex-1 flex-col items-center gap-1 px-1 py-1 min-w-0"
             >
               <span
@@ -148,7 +149,7 @@ export function WorkspaceBottomNav() {
                   "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
                   isActive
                     ? "text-[#F4C430] bg-[#F4C430]/10"
-                    : "text-white/50"
+                    : "text-muted-foreground"
                 )}
               >
                 <Icon
@@ -159,7 +160,7 @@ export function WorkspaceBottomNav() {
               <span
                 className={cn(
                   "truncate w-full text-center text-[10px] font-medium transition-colors duration-200",
-                  isActive ? "text-[#F4C430] font-semibold" : "text-white/50"
+                  isActive ? "text-[#F4C430] font-semibold" : "text-muted-foreground"
                 )}
               >
                 {item.label}

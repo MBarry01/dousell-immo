@@ -51,14 +51,21 @@ export async function generateLeaseContract(
       return { success: false, error: 'Non authentifié' };
     }
 
-    // 3. Récupérer les données du bail et profil propriétaire
-    // const supabase = await createServerClient(); // Déjà créé plus haut
+    // 3. Récupérer les team_ids de l'utilisateur
+    const { data: teamMemberships } = await supabase
+      .from("team_members")
+      .select("team_id")
+      .eq("user_id", user.id);
 
+    const userTeamIds = teamMemberships?.map(tm => tm.team_id) || [];
+
+    // 4. Récupérer les données du bail et profil propriétaire
     const { data: lease, error: leaseError } = await supabase
       .from('leases')
       .select(`
         id,
         owner_id,
+        team_id,
         property_id,
         tenant_name,
         tenant_email,
@@ -87,28 +94,54 @@ export async function generateLeaseContract(
       };
     }
 
-    // 4. Vérifier que l'utilisateur est bien le propriétaire
-    if (lease.owner_id !== user.id) {
+    // 5. Vérifier que l'utilisateur est autorisé (Propriétaire ou Membre de l'équipe)
+    const isOwner = lease.owner_id === user.id;
+    const isTeamMember = lease.team_id && userTeamIds.includes(lease.team_id);
+
+    if (!isOwner && !isTeamMember) {
       return { success: false, error: 'Non autorisé: vous n\'êtes pas le propriétaire de ce bail' };
     }
 
-    // 5. Récupérer les informations du propriétaire
-    const { data: profile, error: profileError } = await supabase
+    // 6. Récupérer les informations du propriétaire (TEAM > PROFILE)
+    // 6a. Team / Agence (Priorité au team_id du bail)
+    let teamData = null;
+    const teamIdToUse = lease.team_id || (userTeamIds.length > 0 ? userTeamIds[0] : null);
+
+    if (teamIdToUse) {
+      const { data: t } = await supabase.from('teams').select('*').eq('id', teamIdToUse).single();
+      teamData = t;
+    } else {
+      // Fallback: équipe créée par l'utilisateur
+      const { data: t } = await supabase.from('teams').select('*').eq('created_by', user.id).limit(1).single();
+      teamData = t;
+    }
+
+    // 6b. Profil Perso
+    const { data: profile } = await supabase
       .from('profiles')
       .select('full_name, phone, company_name, company_address, company_phone, company_email, company_ninea, logo_url, signature_url')
-      .eq('id', user.id)
+      .eq('id', lease.owner_id) // Utiliser l'owner_id du bail (peut être différent de user.id si membre d'équipe)
       .single();
 
-    if (profileError || !profile) {
-      console.error("Erreur récupération profil:", profileError);
-      return {
-        success: false,
-        error: profileError ? `Erreur technique profil: ${profileError.message}` : 'Profil propriétaire introuvable'
-      };
+    // 6c. Merge data (Team overrides Profile for branding)
+    const branding = {
+      full_name: profile?.full_name,
+      phone: profile?.phone,
+      company_name: teamData?.name || profile?.company_name,
+      address: teamData?.company_address || profile?.company_address,
+      company_phone: teamData?.company_phone || profile?.company_phone,
+      email: teamData?.company_email || profile?.company_email,
+      ninea: teamData?.company_ninea || profile?.company_ninea,
+      logo_url: teamData?.logo_url || profile?.logo_url,
+      signature_url: teamData?.signature_url || profile?.signature_url
+    };
+
+    if (!profile && !teamData) {
+      return { success: false, error: 'Profil ou Équipe introuvable' };
     }
 
     // Extraction nom/prénom depuis full_name
-    const fullName = profile.full_name || '';
+    const fullName = branding.full_name || '';
     const firstName = fullName.split(' ')[0] || '';
     const lastName = fullName.split(' ').slice(1).join(' ') || '';
 
@@ -117,11 +150,11 @@ export async function generateLeaseContract(
       landlord: {
         firstName: firstName,
         lastName: lastName,
-        address: profile.company_address || 'Adresse non spécifiée',
-        phone: profile.company_phone || profile.phone || '', // Priorité tel pro
-        email: profile.company_email || user.email || '', // Priorité email pro
-        companyName: profile.company_name || undefined,
-        ninea: profile.company_ninea || undefined,
+        address: branding.address || 'Adresse non spécifiée',
+        phone: branding.company_phone || branding.phone || '', // Priorité tel pro
+        email: branding.email || user.email || '', // Priorité email pro
+        companyName: branding.company_name || undefined,
+        ninea: branding.ninea || undefined,
       },
       tenant: {
         firstName: lease.tenant_name?.split(' ')[0] || 'Prénom',
@@ -145,7 +178,7 @@ export async function generateLeaseContract(
         billingDay: lease.billing_day || 5,
       },
       signatures: {
-        landlordSignatureUrl: profile.signature_url || undefined,
+        landlordSignatureUrl: branding.signature_url || undefined,
         signatureDate: new Date(),
         signatureCity: 'Dakar', // À rendre configurable
       },
@@ -155,7 +188,7 @@ export async function generateLeaseContract(
     const pdfResult = await generateLeasePDF(contractData, customTexts, {
       includeWatermark,
       watermarkText: includeWatermark ? watermarkText : undefined,
-      logoUrl: profile.logo_url || undefined,
+      logoUrl: branding.logo_url || undefined,
     });
 
     if (!pdfResult.success || !pdfResult.pdfBytes) {
@@ -301,11 +334,18 @@ export async function downloadLeaseContract(leaseId: string): Promise<{
       return { success: false, error: 'Non authentifié' };
     }
 
-    // 2. Récupérer le bail
-    // const supabase = await createServerClient(); // Déjà créé
+    // 2. Récupérer les team_ids de l'utilisateur
+    const { data: teamMemberships } = await supabase
+      .from("team_members")
+      .select("team_id")
+      .eq("user_id", user.id);
+
+    const userTeamIds = teamMemberships?.map(tm => tm.team_id) || [];
+
+    // 3. Récupérer le bail
     const { data: lease, error } = await supabase
       .from('leases')
-      .select('id, owner_id, lease_pdf_url')
+      .select('id, owner_id, team_id, lease_pdf_url')
       .eq('id', leaseId)
       .single();
 
@@ -313,8 +353,11 @@ export async function downloadLeaseContract(leaseId: string): Promise<{
       return { success: false, error: 'Bail introuvable' };
     }
 
-    // 3. Vérifier les permissions
-    if (lease.owner_id !== user.id) {
+    // 4. Vérifier les permissions (Propriétaire ou Membre de l'équipe)
+    const isOwner = lease.owner_id === user.id;
+    const isTeamMember = lease.team_id && userTeamIds.includes(lease.team_id);
+
+    if (!isOwner && !isTeamMember) {
       return { success: false, error: 'Non autorisé' };
     }
 
@@ -369,11 +412,20 @@ export async function getLeaseDataForContract(leaseId: string): Promise<{
 
     // const supabase = await createServerClient(); // Déjà créé
 
+    // 2. Récupérer les team_ids de l'utilisateur
+    const { data: teamMemberships } = await supabase
+      .from("team_members")
+      .select("team_id")
+      .eq("user_id", user.id);
+
+    const userTeamIds = teamMemberships?.map(tm => tm.team_id) || [];
+
     const { data: lease, error: leaseError } = await supabase
       .from('leases')
       .select(`
         id,
         owner_id,
+        team_id,
         tenant_name,
         tenant_email,
         tenant_phone,
@@ -392,23 +444,58 @@ export async function getLeaseDataForContract(leaseId: string): Promise<{
       .eq('id', leaseId)
       .single();
 
-    if (leaseError || !lease || lease.owner_id !== user.id) {
-      return { success: false, error: 'Bail introuvable ou non autorisé' };
+    if (leaseError || !lease) {
+      return { success: false, error: 'Bail introuvable' };
     }
 
-    const { data: profile, error: profileError } = await supabase
+    // 3. Vérifier les permissions (Propriétaire ou Membre de l'équipe)
+    const isOwner = lease.owner_id === user.id;
+    const isTeamMember = lease.team_id && userTeamIds.includes(lease.team_id);
+
+    if (!isOwner && !isTeamMember) {
+      return { success: false, error: 'Accès non autorisé' };
+    }
+
+    // 5. Récupérer les informations du propriétaire (TEAM > PROFILE)
+    // 5a. Team / Agence (Priorité au team_id du bail)
+    let teamData = null;
+    const teamIdToUse = lease.team_id || (userTeamIds.length > 0 ? userTeamIds[0] : null);
+
+    if (teamIdToUse) {
+      const { data: t } = await supabase.from('teams').select('*').eq('id', teamIdToUse).single();
+      teamData = t;
+    } else {
+      // Fallback
+      const { data: t } = await supabase.from('teams').select('*').eq('created_by', user.id).limit(1).single();
+      teamData = t;
+    }
+
+    // 5b. Profil Perso (Propriétaire du bail)
+    const { data: profile } = await supabase
       .from('profiles')
       .select('full_name, phone, company_name, company_address, company_phone, company_email, company_ninea, logo_url, signature_url')
-      .eq('id', user.id)
+      .eq('id', lease.owner_id)
       .single();
 
+    const branding = {
+      full_name: profile?.full_name,
+      phone: profile?.phone,
+      company_name: teamData?.name || profile?.company_name,
+      address: teamData?.company_address || profile?.company_address,
+      company_phone: teamData?.company_phone || profile?.company_phone,
+      email: teamData?.company_email || profile?.company_email,
+      ninea: teamData?.company_ninea || profile?.company_ninea,
+      logo_url: teamData?.logo_url || profile?.logo_url,
+      signature_url: teamData?.signature_url || profile?.signature_url
+    };
+
     // Note: si erreur profil, on continue peut-être avec defaults? Pour l'instant on garde la logique stricte mais avec message clair.
-    if (profileError || !profile) {
+    if (!profile && !teamData) {
       // On peut retourner success:false ou juste des données vides pour le landlord
-      console.error("Erreur warning profil:", profileError);
+      console.error("Erreur warning: Profil et Équipe introuvables");
     }
 
-    const fullName = profile?.full_name || '';
+    const fullName = branding.full_name || '';
     const firstName = fullName.split(' ')[0] || '';
     const lastName = fullName.split(' ').slice(1).join(' ') || '';
 
@@ -416,11 +503,11 @@ export async function getLeaseDataForContract(leaseId: string): Promise<{
       landlord: {
         firstName: firstName,
         lastName: lastName,
-        address: profile?.company_address || 'Adresse non spécifiée',
-        phone: profile?.company_phone || profile?.phone || '',
-        email: profile?.company_email || user.email || '',
-        companyName: profile?.company_name || undefined,
-        ninea: profile?.company_ninea || undefined,
+        address: branding.address || 'Adresse non spécifiée',
+        phone: branding.company_phone || branding.phone || '',
+        email: branding.email || user.email || '',
+        companyName: branding.company_name || undefined,
+        ninea: branding.ninea || undefined,
       },
       tenant: {
         firstName: lease.tenant_name?.split(' ')[0] || '',

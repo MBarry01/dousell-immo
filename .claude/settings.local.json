@@ -61,7 +61,10 @@
       "Bash(xxd:*)",
       "Bash(npx next dev:*)",
       "Bash(git checkout:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(xcopy:*)",
+      "Bash(robocopy:*)",
+      "Bash(xargs -I {} sh -c 'echo \"\"=== File: {} ===\"\" && grep -A 15 \"\"CREATE TABLE.*team_members\"\" {} | head -20')"
     ]
   }
 }

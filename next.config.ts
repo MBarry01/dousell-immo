@@ -17,52 +17,13 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb',
     },
   },
-  // Redirections legacy → nouveaux chemins workspace
+  // Redirections legacy (désactivées pour restauration des chemins)
   async redirects() {
     return [
       // Route dupliquée CGU
       {
         source: '/cgu',
         destination: '/legal/cgu',
-        permanent: true,
-      },
-      // Gestion locative → /gestion
-      {
-        source: '/gestion-locative',
-        destination: '/gestion',
-        permanent: true,
-      },
-      {
-        source: '/gestion-locative/:path*',
-        destination: '/gestion/:path*',
-        permanent: true,
-      },
-      // États des lieux → /gestion/etats-lieux
-      {
-        source: '/etats-lieux',
-        destination: '/gestion/etats-lieux',
-        permanent: true,
-      },
-      {
-        source: '/etats-lieux/:path*',
-        destination: '/gestion/etats-lieux/:path*',
-        permanent: true,
-      },
-      // Interventions → /gestion/interventions
-      {
-        source: '/interventions',
-        destination: '/gestion/interventions',
-        permanent: true,
-      },
-      {
-        source: '/interventions/:path*',
-        destination: '/gestion/interventions/:path*',
-        permanent: true,
-      },
-      // Documents légaux → /gestion/documents-legaux
-      {
-        source: '/documents-legaux',
-        destination: '/gestion/documents-legaux',
         permanent: true,
       },
     ];

@@ -1,18 +1,17 @@
-"use server"
+"use server";
 
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { invalidateCache } from '@/lib/cache/cache-aside';
-import { getUserTeamContext } from '@/lib/team-permissions';
+import { getUserTeamContext } from '@/lib/team-context';
+import { requireTeamPermission } from '@/lib/permissions';
 
 export async function updateBranding(formData: FormData) {
+    const { teamId } = await requireTeamPermission("team.settings.edit");
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) return { success: false, error: "Non autorisé" };
 
     const updates = {
-        company_name: formData.get('company_name'),
+        name: formData.get('company_name'), // Map company_name -> name
         company_address: formData.get('company_address'),
         company_phone: formData.get('company_phone'),
         company_email: formData.get('company_email'),
@@ -21,24 +20,14 @@ export async function updateBranding(formData: FormData) {
     };
 
     const { error } = await supabase
-        .from('profiles')
+        .from('teams')
         .update(updates)
-        .eq('id', user.id);
+        .eq('id', teamId);
 
     if (!error) {
-        // IMPORTANT: Invalider le cache du profil
-        await invalidateCache(`owner_profile:${user.id}`, 'rentals');
-
-        // IMPORTANT: Revalider TOUTES les pages qui utilisent le profil
+        // IMPORTANT: Revalider TOUTES les pages qui utilisent le profil/team
         revalidatePath('/gestion/config');
         revalidatePath('/gestion');
-
-        // AUTO-CRÉATION D'ÉQUIPE: Créer l'équipe personnelle si elle n'existe pas
-        // Ceci se déclenche quand l'utilisateur ENREGISTRE sa configuration
-        const teamContext = await getUserTeamContext();
-        if (teamContext) {
-            console.log(`[Config] Team ensured for user ${user.id}: ${teamContext.team_name}`);
-        }
     }
 
     return { success: !error, error: error?.message };
@@ -54,15 +43,11 @@ export async function updatePremiumBranding(formData: {
     company_email?: string;
     company_ninea?: string;
 }) {
+    const { teamId } = await requireTeamPermission("team.settings.edit");
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return { success: false, error: "Non autorisé" };
-    }
 
     const updates = {
-        company_name: formData.company_name || null,
+        name: formData.company_name,
         company_address: formData.company_address || null,
         company_phone: formData.company_phone || null,
         company_email: formData.company_email || null,
@@ -71,9 +56,9 @@ export async function updatePremiumBranding(formData: {
     };
 
     const { error } = await supabase
-        .from('profiles')
+        .from('teams')
         .update(updates)
-        .eq('id', user.id);
+        .eq('id', teamId);
 
     if (error) {
         console.error("Erreur mise à jour branding:", error.message);
@@ -88,16 +73,12 @@ export async function updatePremiumBranding(formData: {
  * Upload du logo vers Supabase Storage et mise à jour du profil
  */
 export async function uploadLogo(file: File) {
+    const { teamId } = await requireTeamPermission("team.settings.edit");
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        return { success: false, error: "Non autorisé" };
-    }
-
-    // Générer un nom de fichier unique
+    // Générer un nom de fichier unique avec teamId
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/logo.${fileExt}`;
+    const fileName = `teams/${teamId}/logo_${Date.now()}.${fileExt}`;
 
     // Upload vers le bucket 'branding'
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -114,11 +95,11 @@ export async function uploadLogo(file: File) {
         .from('branding')
         .getPublicUrl(fileName);
 
-    // Mettre à jour le profil avec l'URL du logo
+    // Mettre à jour l'équipe
     const { error } = await supabase
-        .from('profiles')
+        .from('teams')
         .update({ logo_url: publicUrl })
-        .eq('id', user.id);
+        .eq('id', teamId);
 
     if (error) {
         return { success: false, error: error.message };
@@ -132,15 +113,11 @@ export async function uploadLogo(file: File) {
  * Upload de la signature vers Supabase Storage et mise à jour du profil
  */
 export async function uploadSignature(file: File) {
+    const { teamId } = await requireTeamPermission("team.settings.edit");
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return { success: false, error: "Non autorisé" };
-    }
 
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/signature.${fileExt}`;
+    const fileName = `teams/${teamId}/signature_${Date.now()}.${fileExt}`;
 
     const { data: uploadData, error: uploadError } = await supabase.storage
         .from('branding')
@@ -156,9 +133,9 @@ export async function uploadSignature(file: File) {
         .getPublicUrl(fileName);
 
     const { error } = await supabase
-        .from('profiles')
+        .from('teams')
         .update({ signature_url: publicUrl })
-        .eq('id', user.id);
+        .eq('id', teamId);
 
     if (error) {
         return { success: false, error: error.message };
@@ -172,35 +149,34 @@ export async function uploadSignature(file: File) {
  * Récupérer les données de branding de l'utilisateur
  */
 export async function getPremiumBranding() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    try {
+        const { user, team } = await getUserTeamContext();
 
-    if (!user) {
+        // Mapper team -> Expected format (fallback to profile if needed)
+        const data = {
+            full_name: user?.user_metadata?.full_name,
+            company_name: team?.name,
+            company_address: team?.company_address,
+            company_phone: team?.company_phone,
+            company_email: team?.company_email,
+            company_ninea: team?.company_ninea,
+            logo_url: team?.logo_url,
+            signature_url: team?.signature_url
+        };
+
+        return { success: true, data };
+    } catch (err) {
         return { success: false, data: null };
     }
-
-    const { data, error } = await supabase
-        .from('profiles')
-        .select('company_name, company_address, company_phone, company_email, company_ninea, logo_url, signature_url, full_name')
-        .eq('id', user.id)
-        .single();
-
-    if (error) {
-        return { success: false, data: null };
-    }
-
-    return { success: true, data };
 }
 
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
 
 export async function sendTestEmail(profileData: any) {
+    // ✅ CORRECTION SÉCURITÉ: Vérification de permission renforcée
+    // Seuls les membres avec permission team.settings.edit peuvent envoyer des emails de test
+    const { teamId, user } = await requireTeamPermission("team.settings.edit");
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return { success: false, error: "Non autorisé" };
-    }
 
     if (!N8N_WEBHOOK_URL) {
         console.warn('N8N_WEBHOOK_URL non configuré');

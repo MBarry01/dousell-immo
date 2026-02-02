@@ -154,7 +154,7 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 print:p-0 print:bg-white print:block print:relative"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 print:p-0 print:bg-white print:block print:relative"
             onClick={onClose}
         >
             {/* Header Actions (Masqué à l'impression) */}
@@ -164,7 +164,7 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
                 <PDFDownloadLink
                     document={createQuittanceDocument(receiptDetails)}
                     fileName={filename}
-                    className="inline-flex items-center gap-1 md:gap-2 bg-white text-black hover:bg-gray-100 border-none shadow-lg rounded-full text-xs md:text-sm px-3 md:px-4 h-9 md:h-10 font-medium transition-colors"
+                    className="inline-flex items-center gap-1 md:gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 border-none shadow-md rounded-full text-xs md:text-sm px-3 md:px-4 h-9 md:h-10 font-medium transition-colors"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {({ loading }) => (
@@ -193,11 +193,11 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
                         handleSendEmail();
                     }}
                     disabled={isSending}
-                    className="bg-[#F4C430] hover:bg-[#E5B020] text-black border-none shadow-lg gap-1 md:gap-2 rounded-full text-xs md:text-sm px-3 md:px-4 h-9 md:h-10 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:hover:bg-primary/90 dark:text-primary-foreground border-none shadow-md gap-1 md:gap-2 rounded-full text-xs md:text-sm px-3 md:px-4 h-9 md:h-10 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSending ? (
                         <>
-                            <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                            <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                             <span className="hidden sm:inline">Envoi...</span>
                         </>
                     ) : (
@@ -214,16 +214,16 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
             <Button
                 onClick={onClose}
                 variant="outline"
-                className="absolute top-4 right-4 z-50 bg-red-600 hover:bg-red-700 text-white border-none shadow-lg rounded-full h-9 md:h-10 w-9 md:w-10 p-0 print:hidden"
+                className="absolute top-4 right-4 z-50 bg-destructive hover:bg-destructive/90 text-destructive-foreground border-none shadow-md rounded-full h-9 md:h-10 w-9 md:w-10 p-0 print:hidden"
             >
                 <X className="w-4 h-4" />
             </Button>
 
             <div
-                className="relative w-full max-w-4xl bg-gray-900 rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 print:shadow-none print:border-none print:w-full print:max-w-none print:rounded-none print:bg-white"
+                className="relative w-full max-w-4xl bg-card rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-2xl border border-border print:shadow-none print:border-none print:w-full print:max-w-none print:rounded-none print:bg-white"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="p-4 md:p-8 max-h-[85vh] md:max-h-[90vh] overflow-y-auto bg-gray-100 flex justify-center print:max-h-none print:overflow-visible print:p-0 print:bg-white">
+                <div className="p-4 md:p-8 max-h-[85vh] md:max-h-[90vh] overflow-y-auto bg-muted/30 flex justify-center print:max-h-none print:overflow-visible print:p-0 print:bg-white">
                     <ReceiptPreview
                         tenant={{
                             tenant_name: data.tenant?.tenant_name || data.tenant?.name || 'Locataire',

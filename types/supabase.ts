@@ -76,6 +76,86 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          id: string
+          user_id: string
+          property_id: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          property_id: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          property_id?: string
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      favorites_sync_logs: {
+        Row: {
+          id: string
+          user_id: string
+          attempted_count: number
+          synced_count: number
+          trimmed_to: number | null
+          is_suspicious: boolean
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          attempted_count: number
+          synced_count: number
+          trimmed_to?: number | null
+          is_suspicious?: boolean
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          attempted_count?: number
+          synced_count?: number
+          trimmed_to?: number | null
+          is_suspicious?: boolean
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_sync_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       expenses: {
         Row: {
           amount: number
@@ -407,6 +487,11 @@ export type Database = {
           tenant_name: string
           tenant_phone: string | null
           updated_at: string | null
+          // Added by migration 20260201100001 - Tenant Magic Link fields
+          tenant_access_token: string | null
+          tenant_token_expires_at: string | null
+          tenant_token_verified: boolean | null
+          tenant_last_access_at: string | null
         }
         Insert: {
           billing_day?: number | null
@@ -427,6 +512,11 @@ export type Database = {
           tenant_name: string
           tenant_phone?: string | null
           updated_at?: string | null
+          // Added by migration 20260201100001 - Tenant Magic Link fields
+          tenant_access_token?: string | null
+          tenant_token_expires_at?: string | null
+          tenant_token_verified?: boolean | null
+          tenant_last_access_at?: string | null
         }
         Update: {
           billing_day?: number | null
@@ -447,6 +537,11 @@ export type Database = {
           tenant_name?: string
           tenant_phone?: string | null
           updated_at?: string | null
+          // Added by migration 20260201100001 - Tenant Magic Link fields
+          tenant_access_token?: string | null
+          tenant_token_expires_at?: string | null
+          tenant_token_verified?: boolean | null
+          tenant_last_access_at?: string | null
         }
         Relationships: [
           {
@@ -660,6 +755,10 @@ export type Database = {
           signature_url: string | null
           updated_at: string | null
           website: string | null
+          // Added by migration 20260201100000 - Pro status fields
+          pro_status: string | null
+          pro_trial_ends_at: string | null
+          first_login: boolean | null
         }
         Insert: {
           address_document_url?: string | null
@@ -688,6 +787,10 @@ export type Database = {
           signature_url?: string | null
           updated_at?: string | null
           website?: string | null
+          // Added by migration 20260201100000 - Pro status fields
+          pro_status?: string | null
+          pro_trial_ends_at?: string | null
+          first_login?: boolean | null
         }
         Update: {
           address_document_url?: string | null
@@ -716,6 +819,10 @@ export type Database = {
           signature_url?: string | null
           updated_at?: string | null
           website?: string | null
+          // Added by migration 20260201100000 - Pro status fields
+          pro_status?: string | null
+          pro_trial_ends_at?: string | null
+          first_login?: boolean | null
         }
         Relationships: []
       }
@@ -1291,6 +1398,47 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      tenant_access_logs: {
+        Row: {
+          id: string
+          lease_id: string | null
+          action: string
+          ip_address: string | null
+          user_agent: string | null
+          failure_reason: string | null
+          attempt_count: number
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          lease_id?: string | null
+          action: string
+          ip_address?: string | null
+          user_agent?: string | null
+          failure_reason?: string | null
+          attempt_count?: number
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          lease_id?: string | null
+          action?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          failure_reason?: string | null
+          attempt_count?: number
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_access_logs_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id"]
+          }
         ]
       }
       teams: {

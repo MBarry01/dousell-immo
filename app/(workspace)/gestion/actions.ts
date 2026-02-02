@@ -1,4 +1,4 @@
-"use server"
+"use server";
 
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
@@ -7,21 +7,24 @@ import { invalidateRentalCaches } from '@/lib/cache/invalidation';
 import { revalidatePath } from 'next/cache';
 import { validateTenantCreation } from '@/lib/finance';
 import { sendEmail } from '@/lib/mail';
-import { getPropertiesByOwner } from "@/services/propertyService.cached";
-import { getLeasesByOwner as getLeasesByOwnerService } from "@/services/rentalService.cached";
-import { getUserTeamContext } from "@/lib/team-permissions";
+import { getUserTeamContext } from "@/lib/team-context";
+import { requireTeamPermission } from "@/lib/permissions";
 
 /**
- * Récupérer les propriétés de l'utilisateur connecté (pour les listes déroulantes)
+ * Récupérer les propriétés de l'équipe (pour les listes déroulantes)
  */
 export async function getProperties() {
+    const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) return { success: false, error: "Non connecté" };
 
     try {
-        const properties = await getPropertiesByOwner(user.id);
+        const { data: properties, error } = await supabase
+            .from('properties')
+            .select('*')
+            .eq('team_id', teamId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
         return { success: true, data: properties };
     } catch (error) {
         console.error("Erreur getProperties:", error);
@@ -30,17 +33,20 @@ export async function getProperties() {
 }
 
 /**
- * Récupérer tous les baux de l'utilisateur (pour les listes déroulantes)
+ * Récupérer tous les baux de l'équipe (pour les listes déroulantes)
  */
 export async function getLeasesByOwner() {
+    const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) return { success: false, error: "Non connecté" };
 
     try {
-        // On récupère tous les baux (actifs et terminés) pour l'historique
-        const leases = await getLeasesByOwnerService(user.id, "all");
+        const { data: leases, error } = await supabase
+            .from('leases')
+            .select('*')
+            .eq('team_id', teamId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
         return { success: true, data: leases };
     } catch (error) {
         console.error("Erreur getLeasesByOwner:", error);
@@ -49,36 +55,31 @@ export async function getLeasesByOwner() {
 }
 
 /**
- * Calcule les statistiques financières en temps réel
+ * Calcule les statistiques financières en temps réel pour l'équipe
  */
 export async function getRentalStats() {
+    const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) return { collected: "0", pending: "0", overdue: "0" };
 
     const today = new Date();
     const currentDay = today.getDate();
     const currentMonth = today.getMonth() + 1;
     const currentYear = today.getFullYear();
 
-    // 1. Récupérer tous les baux actifs (revenus attendus)
+    // 1. Récupérer tous les baux actifs de l'équipe
     const { data: activeLeases } = await supabase
         .from('leases')
         .select('id, monthly_amount, billing_day')
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .eq('status', 'active');
 
-    // 2. Récupérer les transactions de ce mois
-    const { data: paidTrans } = await supabase
+    // 2. Récupérer les transactions de ce mois pour l'équipe
+    const { data: monthlyTrans } = await supabase
         .from('rental_transactions')
         .select('lease_id, amount_due, status')
+        .eq('team_id', teamId)
         .eq('period_month', currentMonth)
-        .eq('period_year', currentYear)
-        // On filtre sur les leases du user via le join implicite ou une requête séparée.
-        // Ici on suppose que rental_transactions est fiable, mais pour sécu on peut join.
-        // Cependant pour perf on va filtrer en JS avec la liste des activeLeases
-        .in('lease_id', (activeLeases || []).map(l => l.id));
+        .eq('period_year', currentYear);
 
     let collected = 0;
     let pending = 0;
@@ -87,7 +88,7 @@ export async function getRentalStats() {
     const paidLeaseIds = new Set();
 
     // Traiter les paiements existants
-    paidTrans?.forEach(t => {
+    monthlyTrans?.forEach(t => {
         if (t.status === 'paid') {
             collected += Number(t.amount_due);
             paidLeaseIds.add(t.lease_id);
@@ -96,12 +97,10 @@ export async function getRentalStats() {
 
     // 3. Pour chaque bail actif, vérifier le statut
     activeLeases?.forEach(lease => {
-        // Si le bail a déjà été payé (transaction 'paid' trouvée), on ne compte plus en pending/overdue
         if (paidLeaseIds.has(lease.id)) return;
 
         const amount = Number(lease.monthly_amount);
 
-        // Si pas payé, c'est soit pending, soit overdue selon la date
         if (currentDay > (lease.billing_day || 5)) {
             overdue += amount;
         } else {
@@ -117,75 +116,55 @@ export async function getRentalStats() {
 }
 
 /**
- * Calcule les KPIs avancés pour le dashboard
- * - Taux d'occupation (biens loués / total)
- * - Délai moyen de paiement
- * - Taux d'impayés
- * - Revenu moyen par bien
+ * Calcule les KPIs avancés pour le dashboard de l'équipe
  */
 export async function getAdvancedStats() {
+    const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) return {
-        occupancyRate: 0,
-        avgPaymentDelay: 0,
-        unpaidRate: 0,
-        avgRevenuePerProperty: 0,
-        totalProperties: 0,
-        activeLeases: 0
-    };
 
     const today = new Date();
     const currentMonth = today.getMonth() + 1;
     const currentYear = today.getFullYear();
 
-    // 1. Récupérer tous les biens du propriétaire
+    // 1. Récupérer tous les biens de l'équipe
     const { data: properties, count: totalPropertiesCount } = await supabase
         .from('properties')
         .select('id', { count: 'exact' })
-        .eq('owner_id', user.id);
+        .eq('team_id', teamId);
 
     const totalProperties = totalPropertiesCount || 0;
 
-    // 2. Récupérer tous les baux actifs
+    // 2. Récupérer tous les baux actifs de l'équipe
     const { data: activeLeases } = await supabase
         .from('leases')
         .select('id, monthly_amount, billing_day, property_address')
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .eq('status', 'active');
 
     const activeLeasesCount = activeLeases?.length || 0;
 
     // 3. Calculer le taux d'occupation
-    // Si pas de propriétés enregistrées, on compte les adresses uniques des baux
-    // Le taux représente "combien de vos biens sont actuellement loués"
     let occupancyBase = totalProperties;
-
     if (totalProperties === 0 && activeLeasesCount > 0) {
-        // Fallback : compter les adresses uniques dans les baux comme "nombre de biens"
         const uniqueAddresses = new Set((activeLeases || []).map(l => l.property_address?.toLowerCase().trim()));
         occupancyBase = uniqueAddresses.size;
     }
 
-    // Calculer le taux et le plafonner à 100%
     const rawOccupancyRate = occupancyBase > 0
         ? Math.round((activeLeasesCount / occupancyBase) * 100)
         : (activeLeasesCount > 0 ? 100 : 0);
 
-    const occupancyRate = Math.min(rawOccupancyRate, 100); // Cap at 100%
+    const occupancyRate = Math.min(rawOccupancyRate, 100);
 
-    // 4. Récupérer les transactions payées pour calculer le délai moyen
-    const leaseIds = (activeLeases || []).map(l => l.id);
-
+    // 4. Récupérer les transactions payées de l'équipe
     const { data: paidTransactions } = await supabase
         .from('rental_transactions')
         .select('lease_id, amount_due, status, paid_at, period_month, period_year')
-        .in('lease_id', leaseIds.length > 0 ? leaseIds : ['00000000-0000-0000-0000-000000000000'])
+        .eq('team_id', teamId)
         .eq('status', 'paid')
         .not('paid_at', 'is', null);
 
-    // 5. Calculer le délai moyen de paiement (jours entre le billing_day et paid_at)
+    // 5. Calculer le délai moyen de paiement
     let totalDelay = 0;
     let delayCount = 0;
 
@@ -196,7 +175,7 @@ export async function getAdvancedStats() {
             const expectedDate = new Date(t.period_year, t.period_month - 1, billingDay);
             const paidDate = new Date(t.paid_at);
             const diffDays = Math.floor((paidDate.getTime() - expectedDate.getTime()) / (1000 * 60 * 60 * 24));
-            if (diffDays >= 0) { // Only count late payments
+            if (diffDays >= 0) {
                 totalDelay += diffDays;
                 delayCount++;
             }
@@ -205,22 +184,19 @@ export async function getAdvancedStats() {
 
     const avgPaymentDelay = delayCount > 0 ? Math.round(totalDelay / delayCount) : 0;
 
-    // 6. Calculer le taux d'impayés ce mois
-    const { data: currentMonthTrans } = await supabase
+    // 6. Taux d'impayés (transactions échec vs total attendu)
+    const { data: allTransactions } = await supabase
         .from('rental_transactions')
-        .select('lease_id, status')
-        .in('lease_id', leaseIds.length > 0 ? leaseIds : ['00000000-0000-0000-0000-000000000000'])
-        .eq('period_month', currentMonth)
-        .eq('period_year', currentYear);
+        .select('status')
+        .eq('team_id', teamId);
 
-    const unpaidThisMonth = currentMonthTrans?.filter(t => t.status !== 'paid').length || 0;
-    const totalThisMonth = currentMonthTrans?.length || activeLeasesCount;
-    const unpaidRate = totalThisMonth > 0
-        ? Math.round((unpaidThisMonth / totalThisMonth) * 100)
+    const failedCount = allTransactions?.filter(t => t.status === 'failed' || t.status === 'rejected').length || 0;
+    const unpaidRate = allTransactions && allTransactions.length > 0
+        ? Math.round((failedCount / allTransactions.length) * 100)
         : 0;
 
-    // 7. Calculer le revenu moyen par bien
-    const totalMonthlyRevenue = (activeLeases || []).reduce((sum, l) => sum + Number(l.monthly_amount || 0), 0);
+    // 7. Revenu moyen par bien loué
+    const totalMonthlyRevenue = activeLeases?.reduce((acc, l) => acc + Number(l.monthly_amount), 0) || 0;
     const avgRevenuePerProperty = activeLeasesCount > 0
         ? Math.round(totalMonthlyRevenue / activeLeasesCount)
         : 0;
@@ -236,47 +212,48 @@ export async function getAdvancedStats() {
 }
 
 /**
- * Récupère l'historique des revenus sur les N derniers mois
+ * Récupère l'historique des revenus de l'équipe sur les N derniers mois
+ */
+/**
+ * Récupère l'historique des revenus de l'équipe sur les N derniers mois
+ * OPTIMISÉ : 1 seule requête DB au lieu de N requêtes (boucle)
  */
 export async function getRevenueHistory(months: number = 12) {
+    const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) return [];
-
-    // Récupérer tous les baux actifs pour avoir les IDs
-    const { data: leases } = await supabase
-        .from('leases')
-        .select('id, monthly_amount')
-        .eq('owner_id', user.id);
-
-    const leaseIds = (leases || []).map(l => l.id);
-
-    if (leaseIds.length === 0) return [];
-
-    // Calculer la plage de dates
     const today = new Date();
     const history: { month: string; year: number; monthNum: number; collected: number; expected: number }[] = [];
 
+    // Calculer la fenêtre de temps (ex: il y a 12 mois)
+    // On prend une marge de sécurité sur l'année précédente
+    const pastDate = new Date(today.getFullYear(), today.getMonth() - months, 1);
+    const minYear = pastDate.getFullYear();
+
+    // 1. Récupérer TOUTES les transactions pertinentes en UNE SEULE requête
+    const { data: transactions } = await supabase
+        .from('rental_transactions')
+        .select('amount_due, status, period_month, period_year')
+        .eq('team_id', teamId)
+        .gte('period_year', minYear);
+
+    // 2. Agréger les données en mémoire (beaucoup plus rapide que N requêtes DB)
     for (let i = months - 1; i >= 0; i--) {
         const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
         const monthNum = date.getMonth() + 1;
         const year = date.getFullYear();
         const monthName = date.toLocaleDateString('fr-FR', { month: 'short' });
 
-        // Récupérer les transactions pour ce mois
-        const { data: transactions } = await supabase
-            .from('rental_transactions')
-            .select('amount_due, status')
-            .in('lease_id', leaseIds)
-            .eq('period_month', monthNum)
-            .eq('period_year', year);
+        // Filtrer les transactions pour ce mois spécifique
+        const monthTransactions = (transactions || []).filter(t =>
+            t.period_month === monthNum && t.period_year === year
+        );
 
-        const collected = (transactions || [])
+        const collected = monthTransactions
             .filter(t => t.status === 'paid')
             .reduce((sum, t) => sum + Number(t.amount_due || 0), 0);
 
-        const expected = (transactions || [])
+        const expected = monthTransactions
             .reduce((sum, t) => sum + Number(t.amount_due || 0), 0);
 
         history.push({
@@ -336,24 +313,10 @@ async function triggerN8N(webhookPath: string, payload: Record<string, unknown>)
  * - Liaison automatique bien-bail avec mise à jour du statut
  */
 export async function createNewLease(formData: Record<string, unknown>) {
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('leases.create');
+
     const supabase = await createClient();
-
-    // Récupérer l'utilisateur courant
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        console.error("Création bail: utilisateur non authentifié");
-        return { success: false, error: "Non autorisé" };
-    }
-
-    // Récupérer le team_id de l'utilisateur
-    const { data: teamMember } = await supabase
-        .from('team_members')
-        .select('team_id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-    const teamId = teamMember?.team_id;
 
     // ==============================================
     // GESTION DU BIEN IMMOBILIER
@@ -399,7 +362,7 @@ export async function createNewLease(formData: Record<string, unknown>) {
 
         propertyId = newProperty.id;
         propertyAddress = newPropertyAddress;
-        console.log("✅ Bien créé on-the-fly:", propertyId);
+        console.log("✅ Bien créé on-the-fly avec team_id:", teamId);
     }
 
     // Cas 2: Bien existant sélectionné - mettre à jour son statut
@@ -410,7 +373,8 @@ export async function createNewLease(formData: Record<string, unknown>) {
                 status: 'loué',
                 validation_status: 'pending' // Retirer de la vitrine
             })
-            .eq('id', propertyId);
+            .eq('id', propertyId)
+            .eq('team_id', teamId); // Sécurité supplémentaire
 
         if (updateError) {
             console.warn("Erreur mise à jour statut bien:", updateError);
@@ -420,7 +384,6 @@ export async function createNewLease(formData: Record<string, unknown>) {
     // ==============================================
     // PRÉPARATION DES DONNÉES DU BAIL
     // ==============================================
-    // Nettoyer les champs de création de bien
     const cleanedFormData = { ...formData };
     delete (cleanedFormData as any).create_new_property;
     delete (cleanedFormData as any).new_property_title;
@@ -428,30 +391,30 @@ export async function createNewLease(formData: Record<string, unknown>) {
     delete (cleanedFormData as any).new_property_price;
     delete (cleanedFormData as any).monthly_amount_prefilled;
 
-    const finalData = {
-        ...cleanedFormData,
-        owner_id: user.id,  // Toujours forcer l'ID du propriétaire connecté
-        team_id: teamId,    // Associer à l'équipe
-        property_id: propertyId || null, // Liaison avec le bien
-        property_address: propertyAddress,
-    };
-
     // Extraire deposit_months pour ne pas l'envoyer à la table leases
-    const depositMonths = (finalData as any).deposit_months || 2;
-    delete (finalData as any).deposit_months;
+    const depositMonths = Number(formData.deposit_months) || 2;
+    delete (cleanedFormData as any).deposit_months;
 
     // Extraire custom_data (champs personnalisés de l'import CSV)
-    const customData = (finalData as any).custom_data || {};
-    delete (finalData as any).custom_data;
+    const customData = (cleanedFormData as any).custom_data || {};
+    delete (cleanedFormData as any).custom_data;
+
+    const finalData = {
+        ...cleanedFormData,
+        owner_id: user.id,
+        team_id: teamId,
+        property_id: propertyId || null,
+        property_address: propertyAddress,
+    };
 
     // Ajouter custom_data à finalData seulement s'il n'est pas vide
     if (Object.keys(customData).length > 0) {
         (finalData as any).custom_data = customData;
     }
 
-    // 1. Vérification STRICTE d'unicité via FinanceGuard (Pilier 2)
     const emailToCheck = (finalData as Record<string, unknown>).tenant_email as string | undefined;
     if (emailToCheck) {
+        // validateTenantCreation devrait idéalement aussi être mis à jour mais on continue pour l'instant
         const validation = await validateTenantCreation(emailToCheck, supabase, user.id);
 
         if (!validation.valid) {
@@ -490,17 +453,21 @@ export async function createNewLease(formData: Record<string, unknown>) {
         await invalidateCacheBatch([`owner_profile:${user.id}`], 'rentals');
     }
 
-    const { data: lease, error } = await supabase
+    // 2. Insérer le bail
+    const { data: lease, error: leaseError } = await supabase
         .from('leases')
         .insert([finalData])
-        .select()
+        .select('*')
         .single();
 
-    if (error) {
-        console.error("Erreur création bail:", error.message);
-        return { success: false, error: error.message };
+    if (leaseError || !lease) {
+        console.error("Erreur création bail:", leaseError);
+        return { success: false, error: `Erreur création bail: ${leaseError?.message}` };
     }
 
+    // ==============================================
+    // CRÉATION DES TRANSACTIONS INITIALES
+    // ==============================================
     const today = new Date();
     const currentMonth = today.getMonth() + 1;
     const currentYear = today.getFullYear();
@@ -520,7 +487,8 @@ export async function createNewLease(formData: Record<string, unknown>) {
                 status: 'pending',
                 period_start: today.toISOString().split('T')[0],
                 period_end: today.toISOString().split('T')[0],
-                reminder_sent: false
+                reminder_sent: false,
+                team_id: teamId
             }]);
 
         if (depositError) console.error("Erreur création caution:", depositError);
@@ -537,7 +505,8 @@ export async function createNewLease(formData: Record<string, unknown>) {
             status: 'pending',
             period_start: new Date(currentYear, currentMonth - 1, 1).toISOString().split('T')[0],
             period_end: new Date(currentYear, currentMonth, 0).toISOString().split('T')[0],
-            reminder_sent: false
+            reminder_sent: false,
+            team_id: teamId
         }]);
 
     if (transError) {
@@ -562,17 +531,40 @@ export async function createNewLease(formData: Record<string, unknown>) {
     });
 
     // Invalidation complète du cache pour mise à jour UI immédiate
-    await invalidateRentalCaches(user.id, lease.id, {
+    await invalidateRentalCaches(teamId, lease.id, {
         invalidateLeases: true,
         invalidateTransactions: true,
         invalidateStats: true
     });
 
-    // Invalider aussi le cache du profil propriétaire (pour s'assurer qu'il s'affiche)
-    await invalidateCacheBatch([`owner_profile:${user.id}`], 'rentals');
+    // Invalider aussi le cache du profil propriétaire et le CACHE VITRINE (Homepage)
+    // pour que le bien disparaisse de la liste "disponible"
+    const keysToInvalidate = [
+        `owner_profile:${user.id}`,
+        // Clés Homepage (V3)
+        'all_sections_v3',
+        'popular_locations_v3_8',
+        'properties_for_sale_v3_8',
+        'land_for_sale_v3_8'
+    ];
+
+    // Si on a l'adresse/ville, on invalide aussi le cache par ville
+    if (finalData.property_address && typeof finalData.property_address === 'string') {
+        // Extraction naïve de la ville si possible, sinon on invalide Dakar par défaut
+        // TODO: Idéalement il faudrait la ville précise
+        keysToInvalidate.push('city:Dakar:limit:20', 'city:Saly:limit:20');
+        // Invalidation générique des recherches
+        keysToInvalidate.push('search:*');
+    }
+
+    await invalidateCacheBatch(keysToInvalidate, 'rentals'); // Rentals namespace for owner profile
+    await invalidateCacheBatch(keysToInvalidate, 'homepage'); // Homepage namespace for showcase
+    await invalidateCacheBatch(keysToInvalidate, 'properties'); // Properties namespace for search
 
     revalidatePath('/gestion');
     revalidatePath('/gestion/locataires');
+    revalidatePath('/'); // Revalidate root (Vitrine)
+    revalidatePath('/recherche');
     return { success: true, id: lease.id };
 }
 
@@ -583,19 +575,20 @@ export async function createNewLease(formData: Record<string, unknown>) {
  */
 export async function sendWelcomePack(leaseId: string) {
     console.log("[sendWelcomePack] Start for lease:", leaseId);
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('documents.generate');
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        console.error("[sendWelcomePack] User not found");
-        return { success: false, error: "Non autorisé" };
-    }
-
-    // 1. Récupérer les infos du bail
-    const { data: lease } = await supabase
+    // 1. Récupérer les détails du bail et du bien (filtré par teamId pour sécu)
+    const { data: lease, error: fetchError } = await supabase
         .from('leases')
-        .select('*, lease_pdf_url')
+        .select(`
+            *,
+            property:properties(*)
+        `)
         .eq('id', leaseId)
+        .eq('team_id', teamId)
         .single();
 
     if (!lease) {
@@ -957,10 +950,10 @@ export async function sendWelcomePack(leaseId: string) {
  * Si pas d'ID de transaction, en crée une pour le mois courant
  */
 export async function confirmPayment(leaseId: string, transactionId?: string, month?: number, year?: number, silent: boolean = false) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('payments.confirm');
 
-    if (!user) return { success: false, error: "Non autorisé" };
+    const supabase = await createClient();
 
     let targetId = transactionId;
 
@@ -978,6 +971,7 @@ export async function confirmPayment(leaseId: string, transactionId?: string, mo
         let query = supabase
             .from('rental_transactions')
             .select('id, status')
+            .eq('team_id', teamId)
             .eq('lease_id', leaseId)
             .eq('period_month', targetMonth);
 
@@ -997,11 +991,23 @@ export async function confirmPayment(leaseId: string, transactionId?: string, mo
             // B) Sinon, on en crée une nouvelle
             const { data: lease } = await supabase
                 .from('leases')
-                .select('monthly_amount')
+                .select('monthly_amount, team_id')
                 .eq('id', leaseId)
                 .single();
 
             if (!lease) return { success: false, error: "Bail introuvable" };
+
+            // Fallback: si le bail n'a pas de team_id (anciens baux), on utilise celui de l'utilisateur
+            let effectiveTeamId = lease.team_id;
+            if (!effectiveTeamId) {
+                const { data: teamMember } = await supabase
+                    .from('team_members')
+                    .select('team_id')
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+                effectiveTeamId = teamMember?.team_id || null;
+                console.log(`[confirmPayment] Lease has no team_id, using user's team: ${effectiveTeamId}`);
+            }
 
             const { data: newTrans, error: insertError } = await supabase
                 .from('rental_transactions')
@@ -1010,33 +1016,37 @@ export async function confirmPayment(leaseId: string, transactionId?: string, mo
                     period_month: targetMonth,
                     period_year: targetYear,
                     amount_due: lease.monthly_amount,
-                    status: 'pending'
+                    status: 'pending',
+                    team_id: teamId
                 }])
                 .select()
                 .single();
 
-            if (insertError) {
-                console.error("Erreur création transaction:", insertError.message);
-                return { success: false, error: insertError.message };
+            if (insertError || !newTrans) {
+                console.error("Erreur création transaction auto:", insertError);
+                return { success: false, error: "Impossible de créer la transaction de paiement" };
             }
             targetId = newTrans.id;
         }
     }
 
-    // 2. Mise à jour de la transaction en 'paid' avec récupération des données pour email
-    const { data: trans, error } = await supabase
+    // 2. Mettre à jour la transaction comme payée
+    const { data: trans, error: updateError } = await supabase
         .from('rental_transactions')
         .update({
             status: 'paid',
-            paid_at: new Date().toISOString()
+            paid_at: new Date().toISOString(),
+            payment_method: 'manual', // Par défaut pour confirmation manuelle
+            team_id: teamId // Sécurité
         })
         .eq('id', targetId)
+        .eq('team_id', teamId)
         .select('*, leases(tenant_name, tenant_email, monthly_amount, owner_id, property_address)')
         .single();
 
-    if (error) {
-        console.error("Erreur confirmation paiement:", error.message);
-        return { success: false, error: error.message };
+    if (updateError || !trans) {
+        console.error("Erreur confirmation paiement:", updateError?.message);
+        return { success: false, error: updateError?.message || "Transaction introuvable" };
     }
 
     // 4. Récupérer le profil du propriétaire pour les infos de l'agence
@@ -1117,7 +1127,7 @@ export async function confirmPayment(leaseId: string, transactionId?: string, mo
         await invalidateCacheBatch([`rental_transactions:${leaseId}`], 'rentals');
 
         // Puis invalidation globale
-        await invalidateRentalCaches(user.id, leaseId, {
+        await invalidateRentalCaches(teamId, leaseId, {
             invalidateLeases: true,
             invalidateTransactions: true,
             invalidateStats: true
@@ -1151,25 +1161,24 @@ export async function updateLease(leaseId: string, data: {
     start_date?: string;
     end_date?: string;
 }) {
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('leases.edit');
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        return { success: false, error: "Non autorisé" };
-    }
-
-    // Vérifier que le bail appartient à l'utilisateur
-    const { data: lease } = await supabase
+    // 1. Vérifier que le bail appartient à l'équipe
+    const { data: lease, error: fetchError } = await supabase
         .from('leases')
-        .select('owner_id')
+        .select('owner_id, team_id, property_id')
         .eq('id', leaseId)
+        .eq('team_id', teamId)
         .single();
 
-    if (!lease || lease.owner_id !== user.id) {
+    if (fetchError || !lease) {
         return { success: false, error: "Bail non trouvé ou non autorisé" };
     }
 
-    // Ne mettre à jour que les colonnes qui existent
+    // 2. Préparer les données de mise à jour
     const updateData: Record<string, string | number | undefined> = {};
     if (data.tenant_name !== undefined) updateData.tenant_name = data.tenant_name;
     if (data.tenant_phone !== undefined) updateData.tenant_phone = data.tenant_phone;
@@ -1180,24 +1189,40 @@ export async function updateLease(leaseId: string, data: {
     if (data.start_date !== undefined) updateData.start_date = data.start_date;
     if (data.end_date !== undefined) updateData.end_date = data.end_date;
 
-    const { error } = await supabase
+    const { error: updateError } = await supabase
         .from('leases')
         .update(updateData)
-        .eq('id', leaseId);
+        .eq('id', leaseId)
+        .eq('team_id', teamId);
 
-    if (error) {
-        console.error("Erreur mise à jour bail:", error.message);
-        return { success: false, error: error.message };
+    if (updateError) {
+        console.error("Erreur mise à jour bail:", updateError.message);
+        return { success: false, error: updateError.message };
     }
 
-    // Invalidation du cache pour forcer la mise à jour immédiate
-    await invalidateCacheBatch([
-        `leases:${user.id}:active`,
-        `leases:${user.id}:all`, // Au cas où
-        `lease_detail:${leaseId}`
-    ], 'rentals');
+    // 3. Si le bail est lié à une propriété, mettre à jour la propriété aussi
+    if (lease.property_id && updateData.property_address) {
+        const { error: propError } = await supabase
+            .from('properties')
+            .update({
+                title: updateData.property_address as string
+            })
+            .eq('id', lease.property_id)
+            .eq('team_id', teamId);
 
-    revalidatePath('/gestion-locative');
+        if (propError) {
+            console.warn("Erreur mise à jour propriété liée:", propError.message);
+        }
+    }
+
+    // 4. Invalidation du cache
+    await invalidateRentalCaches(teamId, leaseId, {
+        invalidateLeases: true,
+        invalidateTransactions: false,
+        invalidateStats: true
+    });
+
+    revalidatePath('/gestion');
     return { success: true };
 }
 
@@ -1206,86 +1231,62 @@ export async function updateLease(leaseId: string, data: {
  * Utilisé après import en masse pour la réconciliation
  */
 export async function linkLeaseToProperty(leaseId: string, propertyId: string) {
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('leases.edit');
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        return { success: false, error: "Non autorisé" };
-    }
-
-    // Récupérer le contexte équipe de l'utilisateur
-    const teamContext = await getUserTeamContext();
-    const userTeamId = teamContext?.team_id;
-
-    // Vérifier que le bail appartient à l'utilisateur ou à son équipe
-    const { data: lease } = await supabase
+    // 1. Vérifier que le bail et le bien appartiennent à l'équipe
+    const { data: lease, error: leaseErr } = await supabase
         .from('leases')
-        .select('owner_id, team_id, tenant_name, property_id')
+        .select('id')
         .eq('id', leaseId)
+        .eq('team_id', teamId)
         .single();
 
-    const leaseAuthorized = lease && (
-        lease.owner_id === user.id ||
-        (userTeamId && lease.team_id === userTeamId)
-    );
-
-    if (!leaseAuthorized) {
-        return { success: false, error: "Bail non trouvé ou non autorisé" };
-    }
-
-    if (lease.property_id) {
-        return { success: false, error: "Ce bail est déjà lié à un bien" };
-    }
-
-    // Vérifier que le bien existe et appartient à l'utilisateur ou à son équipe
-    const { data: property } = await supabase
+    const { data: property, error: propErr } = await supabase
         .from('properties')
-        .select('id, title, owner_id, team_id, location')
+        .select('id, title, location')
         .eq('id', propertyId)
+        .eq('team_id', teamId)
         .single();
 
-    const propertyAuthorized = property && (
-        property.owner_id === user.id ||
-        (userTeamId && property.team_id === userTeamId)
-    );
-
-    if (!propertyAuthorized) {
-        return { success: false, error: "Bien non trouvé ou non autorisé" };
+    if (leaseErr || !lease || propErr || !property) {
+        return { success: false, error: "Bail ou bien non trouvé ou non autorisé" };
     }
 
-    // Mettre à jour le bail avec le property_id et l'adresse du bien
-    const propertyAddress = property.location?.address ||
-        `${property.location?.district || ''}, ${property.location?.city || ''}`.trim() ||
+    // 2. Préparer l'adresse du bien
+    const propertyAddress = (property as any).location?.address ||
+        `${(property as any).location?.district || ''}, ${(property as any).location?.city || ''}`.trim() ||
         property.title;
 
-    const { error: updateError } = await supabase
+    // 3. Faire la liaison
+    const { error: linkError } = await supabase
         .from('leases')
         .update({
             property_id: propertyId,
             property_address: propertyAddress
         })
-        .eq('id', leaseId);
+        .eq('id', leaseId)
+        .eq('team_id', teamId);
 
-    if (updateError) {
-        console.error("Erreur liaison bail-bien:", updateError);
-        return { success: false, error: "Erreur lors de la liaison" };
+    if (linkError) {
+        console.error("Erreur liaison bail-bien:", linkError.message);
+        return { success: false, error: linkError.message };
     }
 
-    // Mettre à jour le statut du bien en "loué"
+    // 4. Mettre à jour le statut du bien en "loué"
     await supabase
         .from('properties')
         .update({ status: 'loué' })
-        .eq('id', propertyId);
+        .eq('id', propertyId)
+        .eq('team_id', teamId);
 
-    // Invalider les caches
-    try {
-        await invalidateCacheBatch([
-            `leases:${user.id}:all`,
-            `leases:${user.id}:active`,
-        ]);
-    } catch (e) {
-        console.warn("Cache invalidation failed:", e);
-    }
+    // 5. Invalider cache
+    await invalidateRentalCaches(teamId, leaseId, {
+        invalidateLeases: true,
+        invalidateStats: true
+    });
 
     revalidatePath('/gestion');
     return { success: true };
@@ -1296,55 +1297,49 @@ export async function linkLeaseToProperty(leaseId: string, propertyId: string) {
  * Change le statut à 'terminated' et enregistre la date de fin
  */
 export async function terminateLease(leaseId: string) {
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('leases.terminate');
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        return { success: false, error: "Non autorisé" };
-    }
-
-    // Vérifier que le bail appartient à l'utilisateur
-    const { data: lease } = await supabase
+    // 1. Récupérer le bail pour confirmation (sécurisé par teamId)
+    const { data: lease, error: fetchError } = await supabase
         .from('leases')
-        .select('owner_id, tenant_name')
+        .select('*')
         .eq('id', leaseId)
+        .eq('team_id', teamId)
         .single();
 
-    if (!lease) {
-        return { success: false, error: "Bail introuvable" };
+    if (fetchError || !lease) {
+        return { success: false, error: "Bail introuvable ou non autorisé" };
     }
 
-    if (lease.owner_id !== user.id) {
-        return { success: false, error: "Action non autorisée" };
-    }
-
-    // Marquer le bail comme résilié
-    const { error } = await supabase
+    // 2. Résilier le bail
+    const { error: updateError } = await supabase
         .from('leases')
         .update({
-            status: 'terminated'
-            // Note: end_date sera ajouté plus tard via migration
+            status: 'terminated',
+            end_date: new Date().toISOString()
         })
-        .eq('id', leaseId);
+        .eq('id', leaseId)
+        .eq('team_id', teamId);
 
-    if (error) {
-        console.error("Erreur résiliation bail:", error.message);
-        return { success: false, error: error.message };
+    if (updateError) {
+        console.error("Erreur résiliation bail:", updateError.message);
+        return { success: false, error: updateError.message };
     }
 
-    // Invalider caches
-    await invalidateCacheBatch([
-        `leases:${user.id}:active`,
-        `leases:${user.id}:terminated`,
-        `leases:${user.id}:all`,
-        `lease_detail:${leaseId}`,
-        `rental_stats:${user.id}`
-    ], 'rentals');
+    // 3. Invalider caches
+    await invalidateRentalCaches(teamId, leaseId, {
+        invalidateLeases: true,
+        invalidateTransactions: false,
+        invalidateStats: true
+    });
 
-    revalidatePath('/gestion-locative');
+    revalidatePath('/gestion');
     return {
         success: true,
-        message: `Le bail de ${lease.tenant_name} a été résilié. L'historique reste accessible.`
+        message: `Le bail de ${lease.tenant_name} a été résilié.`
     };
 }
 
@@ -1353,59 +1348,38 @@ export async function terminateLease(leaseId: string) {
  * Change le statut de 'terminated' à 'active'
  */
 export async function reactivateLease(leaseId: string) {
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('leases.edit');
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return { success: false, error: "Non autorisé" };
-    }
-
-    // Vérifier que le bail appartient à l'utilisateur
-    const { data: lease } = await supabase
-        .from('leases')
-        .select('owner_id, tenant_name, status')
-        .eq('id', leaseId)
-        .single();
-
-    if (!lease) {
-        return { success: false, error: "Bail introuvable" };
-    }
-
-    if (lease.owner_id !== user.id) {
-        return { success: false, error: "Action non autorisée" };
-    }
-
-    if (lease.status !== 'terminated') {
-        return { success: false, error: "Ce bail n'est pas résilié" };
-    }
 
     // Réactiver le bail
     const { error } = await supabase
         .from('leases')
         .update({
             status: 'active'
-            // Note: end_date sera supprimé plus tard via migration
         })
-        .eq('id', leaseId);
+        .eq('id', leaseId)
+        .eq('team_id', teamId);
 
     if (error) {
         console.error("Erreur réactivation bail:", error.message);
         return { success: false, error: error.message };
     }
 
-    // Invalider caches
+    // 3. Invalider caches
     await invalidateCacheBatch([
-        `leases:${user.id}:active`,
-        `leases:${user.id}:terminated`,
-        `leases:${user.id}:all`,
+        `leases:${teamId}:active`,
+        `leases:${teamId}:terminated`,
+        `leases:${teamId}:all`,
         `lease_detail:${leaseId}`,
-        `rental_stats:${user.id}`
+        `rental_stats:${teamId}`
     ], 'rentals');
 
-    revalidatePath('/gestion-locative');
+    revalidatePath('/gestion');
     return {
         success: true,
-        message: `Le bail de ${lease.tenant_name} a été réactivé.`
+        message: "L'opération a été effectuée avec succès."
     };
 }
 
@@ -1418,12 +1392,10 @@ export async function createMaintenanceRequest(data: {
     description: string;
     category?: string;
 }) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('maintenance.create');
 
-    if (!user) {
-        return { success: false, error: "Non autorisé" };
-    }
+    const supabase = await createClient();
 
     // Si pas de leaseId fourni, prendre le premier bail actif du propriétaire
     let targetLeaseId = data.leaseId;
@@ -1432,13 +1404,13 @@ export async function createMaintenanceRequest(data: {
         const { data: firstLease } = await supabase
             .from('leases')
             .select('id')
-            .eq('owner_id', user.id)
+            .eq('team_id', teamId)
             .eq('status', 'active')
             .limit(1)
             .single();
 
         if (!firstLease) {
-            return { success: false, error: "Aucun bail actif trouvé" };
+            return { success: false, error: "Aucun bail actif trouvé pour cette équipe" };
         }
         targetLeaseId = firstLease.id;
     }
@@ -1446,8 +1418,9 @@ export async function createMaintenanceRequest(data: {
     // 1. Récupérer les infos du bail pour le contexte (Adresse pour Google Maps)
     const { data: leaseContext } = await supabase
         .from('leases')
-        .select('property_address, tenant_name, tenant_phone, tenant_email')
+        .select('property_address, tenant_name, tenant_phone, tenant_email, property_id')
         .eq('id', targetLeaseId)
+        .eq('team_id', teamId)
         .single();
 
     // Variables pour stocker les infos artisan
@@ -1495,28 +1468,28 @@ export async function createMaintenanceRequest(data: {
         }
     }
 
-    // 3. Enregistrer la demande en base avec colonnes dédiées
-    const { data: request, error } = await supabase
+    // 3. ENREGISTRER EN BASE
+    const { data: request, error: insertError } = await supabase
         .from('maintenance_requests')
         .insert([{
             lease_id: targetLeaseId,
+            property_id: leaseContext?.property_id,
+            team_id: teamId,
             description: data.description,
+            category: data.category || 'General',
             status: status,
-            // Colonnes dédiées pour l'artisan (après migration)
-            artisan_name: artisanData.name || null,
-            artisan_phone: artisanData.phone || null,
-            artisan_rating: artisanData.rating || null,
-            artisan_address: artisanData.address || null
+            artisan_data: artisanData,
+            created_at: new Date().toISOString()
         }])
-        .select('id, description, status, created_at, artisan_name, artisan_phone')
+        .select()
         .single();
 
-    if (error) {
-        console.error("Erreur création demande maintenance:", error.message);
-        return { success: false, error: error.message };
+    if (insertError) {
+        console.error("Erreur création demande maintenance:", insertError.message);
+        return { success: false, error: insertError.message };
     }
 
-    revalidatePath('/gestion-locative');
+    revalidatePath('/gestion');
 
     return {
         success: true,
@@ -1554,7 +1527,7 @@ export async function submitQuote(requestId: string, data: {
         return { success: false, error: error.message };
     }
 
-    revalidatePath('/gestion-locative');
+    revalidatePath('/gestion');
     return { success: true, message: "Devis enregistré, en attente de validation." };
 }
 
@@ -1674,7 +1647,7 @@ export async function approveQuoteByOwner(requestId: string) {
         }
     }
 
-    revalidatePath('/gestion-locative');
+    revalidatePath('/gestion');
     return { success: true, message: "Devis approuvé ! Le locataire et l'artisan ont été notifiés." };
 }
 
@@ -1742,7 +1715,7 @@ export async function completeIntervention(requestId: string) {
         }
     }
 
-    revalidatePath('/gestion-locative');
+    revalidatePath('/gestion');
     return {
         success: true,
         message: `Intervention terminée ! Dépense de ${request.quoted_price?.toLocaleString('fr-FR')} FCFA enregistrée.`
@@ -1754,20 +1727,20 @@ export async function completeIntervention(requestId: string) {
  * Génère un lien magique (Magic Link) et l'envoie par email
  */
 export async function sendTenantInvitation(leaseId: string) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
+    const { teamId, user } = await getUserTeamContext();
     if (!user) return { success: false, error: "Non autorisé" };
 
+    const supabase = await createClient();
     // 1. Récupérer les infos du locataire
     const { data: lease } = await supabase
         .from('leases')
-        .select('tenant_name, tenant_email, property_address, owner_id')
+        .select('tenant_name, tenant_email, property_address, team_id')
         .eq('id', leaseId)
+        .eq('team_id', teamId)
         .single();
 
     if (!lease) return { success: false, error: "Bail introuvable" };
-    if (lease.owner_id !== user.id) return { success: false, error: "Non autorisé" };
+    if (lease.team_id !== teamId) return { success: false, error: "Non autorisé" };
     if (!lease.tenant_email) return { success: false, error: "Email du locataire manquant" };
 
     // 2. Générer le lien magique via Supabase Admin
@@ -1868,18 +1841,18 @@ export async function sendTenantInvitation(leaseId: string) {
  * Récupérer les baux actifs (pour le select du formulaire de signalement)
  */
 export async function getActiveLeases() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { teamId, user } = await getUserTeamContext();
 
     if (!user) {
         return { success: false, data: [] };
     }
 
+    const supabase = await createClient();
     const { data: leases, error } = await supabase
         .from('leases')
         .select('id, tenant_name, property_address')
-        .eq('owner_id', user.id)
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .eq('team_id', teamId);
 
     if (error) {
         return { success: false, data: [] };
@@ -2007,39 +1980,38 @@ export async function sendReceiptToN8N(data: Record<string, unknown>) {
  * Supprime une transaction (pour nettoyer les doublons générés par erreur)
  */
 export async function deleteTransaction(transactionId: string) {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { success: false, error: "Non autorisé" };
     }
 
-    // Sécurité: Vérifier que la transaction appartient bien à un bail de l'utilisateur
-    // On fait un join car rental_transactions n'a pas owner_id directement
+    // Sécurité: Vérifier que la transaction appartient bien à un bail de l'équipe
     const { data: transaction } = await supabase
         .from('rental_transactions')
-        .select('lease_id, leases!inner(owner_id)')
+        .select('lease_id, leases!inner(team_id)')
         .eq('id', transactionId)
         .single();
 
-    // Cast sécurisé ou accès flexible car Join Supabase peut être un objet ou tableau selon la version
-    const leaseData = transaction?.leases as { owner_id: string } | undefined;
+    const leaseData = transaction?.leases as { team_id: string } | undefined;
 
-    if (!transaction || !leaseData || leaseData.owner_id !== user.id) {
+    if (!transaction || !leaseData || leaseData.team_id !== teamId) {
         return { success: false, error: "Transaction introuvable ou non autorisée" };
     }
 
     const { error } = await supabase
         .from('rental_transactions')
         .delete()
-        .eq('id', transactionId);
+        .eq('id', transactionId)
+        .eq('team_id', teamId);
 
     if (error) {
         console.error("Erreur suppression transaction:", error.message);
         return { success: false, error: error.message };
     }
 
-    revalidatePath('/gestion-locative');
+    revalidatePath('/gestion');
     return { success: true };
 }
 
@@ -2047,25 +2019,27 @@ export async function deleteTransaction(transactionId: string) {
  * Supprime DÉFINITIVEMENT un bail (Fonction de nettoyage)
  */
 export async function deleteLease(leaseId: string) {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return { success: false, error: "Non autorisé" };
 
     const { data: lease } = await supabase
         .from('leases')
-        .select('owner_id')
+        .select('team_id')
         .eq('id', leaseId)
+        .eq('team_id', teamId)
         .single();
 
-    if (!lease || lease.owner_id !== user.id) {
+    if (!lease) {
         return { success: false, error: "Bail introuvable ou non autorisé" };
     }
 
     const { error } = await supabase
         .from('leases')
         .delete()
-        .eq('id', leaseId);
+        .eq('id', leaseId)
+        .eq('team_id', teamId);
 
     if (error) {
         console.error("Erreur suppression bail:", error.message);
@@ -2073,16 +2047,141 @@ export async function deleteLease(leaseId: string) {
     }
 
     // Invalider caches
-    await invalidateCacheBatch([
-        `leases:${user.id}:active`,
-        `leases:${user.id}:terminated`,
-        `leases:${user.id}:all`,
-        `lease_detail:${leaseId}`,
-        `rental_stats:${user.id}`
-    ], 'rentals');
+    await invalidateRentalCaches(teamId, leaseId);
 
-    revalidatePath('/gestion-locative');
+    revalidatePath('/gestion');
     return { success: true };
 }
 
+/**
+ * Vérifie si l'owner connecté est aussi locataire dans un autre bien
+ *
+ * Recherche les baux actifs où l'email de l'owner correspond à tenant_email.
+ * Utilisé pour afficher le switch "Espace Locataire" dans le dropdown.
+ *
+ * Per WORKFLOW_PROPOSAL.md section 2.5 - Switch role Owners
+ */
+export async function checkOwnerHasTenantAccess(): Promise<{
+    hasTenantAccess: boolean;
+    tenantLease?: {
+        id: string;
+        property_title: string;
+        owner_name: string;
+        has_valid_token: boolean;
+    };
+}> {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user?.email) {
+        return { hasTenantAccess: false };
+    }
+
+    // Chercher un bail actif où cet email est le locataire
+    const { data: lease, error } = await supabase
+        .from('leases')
+        .select(`
+            id,
+            tenant_access_token,
+            tenant_token_expires_at,
+            property:properties(title),
+            owner:profiles!leases_owner_id_fkey(full_name, company_name)
+        `)
+        .eq('tenant_email', user.email.toLowerCase())
+        .eq('status', 'active')
+        .limit(1)
+        .maybeSingle();
+
+    if (error || !lease) {
+        return { hasTenantAccess: false };
+    }
+
+    // Vérifier si le token est valide
+    const hasValidToken = !!(
+        lease.tenant_access_token &&
+        lease.tenant_token_expires_at &&
+        new Date(lease.tenant_token_expires_at) > new Date()
+    );
+
+    const property = lease.property as { title?: string } | null;
+    const owner = lease.owner as { full_name?: string; company_name?: string } | null;
+
+    return {
+        hasTenantAccess: true,
+        tenantLease: {
+            id: lease.id,
+            property_title: property?.title || "Bien immobilier",
+            owner_name: owner?.company_name || owner?.full_name || "Propriétaire",
+            has_valid_token: hasValidToken,
+        },
+    };
+}
+
+/**
+ * Génère ou récupère le Magic Link pour l'accès locataire de l'owner
+ *
+ * Si un token valide existe, retourne l'URL.
+ * Sinon, génère un nouveau token.
+ */
+export async function getOwnerTenantAccessLink(leaseId: string): Promise<{
+    success: boolean;
+    url?: string;
+    error?: string;
+}> {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user?.email) {
+        return { success: false, error: "Non authentifié" };
+    }
+
+    // Vérifier que le bail appartient bien à cet email
+    const { data: lease } = await supabase
+        .from('leases')
+        .select('id, tenant_access_token, tenant_token_expires_at')
+        .eq('id', leaseId)
+        .eq('tenant_email', user.email.toLowerCase())
+        .eq('status', 'active')
+        .single();
+
+    if (!lease) {
+        return { success: false, error: "Bail introuvable ou non autorisé" };
+    }
+
+    // Vérifier si le token existant est valide
+    const hasValidToken = !!(
+        lease.tenant_access_token &&
+        lease.tenant_token_expires_at &&
+        new Date(lease.tenant_token_expires_at) > new Date()
+    );
+
+    if (hasValidToken) {
+        // Note: On ne peut pas récupérer le token raw car on stocke le hash
+        // Il faut en générer un nouveau
+    }
+
+    // Générer un nouveau token
+    const { generateTenantAccessToken, getTenantMagicLinkUrl } = await import('@/lib/tenant-magic-link');
+    const { trackServerEvent, EVENTS } = await import('@/lib/analytics');
+
+    try {
+        const rawToken = await generateTenantAccessToken(leaseId);
+        const url = getTenantMagicLinkUrl(rawToken);
+
+        // Track role switch analytics
+        trackServerEvent(EVENTS.ROLE_SWITCHED, {
+            from: "gestion",
+            to: "locataire",
+            user_id: user.id,
+            is_owner_dual_role: true,
+        });
+
+        return { success: true, url };
+    } catch (error) {
+        console.error("[getOwnerTenantAccessLink] Error:", error);
+        return { success: false, error: "Erreur lors de la génération du lien" };
+    }
+}
 

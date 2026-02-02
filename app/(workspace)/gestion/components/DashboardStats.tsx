@@ -1,7 +1,7 @@
 'use client';
 
 import { Wallet, Clock, AlertCircle, Users, TrendingUp, TrendingDown } from 'lucide-react';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/workspace/providers/theme-provider";
 
 interface DashboardStatsProps {
     stats: {

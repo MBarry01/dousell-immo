@@ -3,19 +3,21 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { sendEmail } from '@/lib/mail';
+import { getUserTeamContext } from "@/lib/team-context";
+import { requireTeamPermission } from "@/lib/permissions";
 
 export async function getOwnerMessages(leaseId: string) {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return { error: "Non authentifié" };
 
-    // Vérifier que le bail appartient bien au owner
+    // Vérifier que le bail appartient bien à l'équipe
     const { data: lease } = await supabase
         .from('leases')
-        .select('id, tenant_name, owner_id')
+        .select('id, tenant_name, team_id')
         .eq('id', leaseId)
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .single();
 
     if (!lease) return { error: "Bail introuvable ou accès refusé" };
@@ -30,8 +32,9 @@ export async function getOwnerMessages(leaseId: string) {
 }
 
 export async function sendOwnerMessage(leaseId: string, content: string) {
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('leases.view'); // Base permission for messaging
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return { error: "Non authentifié" };
 
@@ -40,6 +43,7 @@ export async function sendOwnerMessage(leaseId: string, content: string) {
         .insert({
             lease_id: leaseId,
             sender_id: user.id,
+            team_id: teamId,
             content: content
         });
 

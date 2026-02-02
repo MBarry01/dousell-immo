@@ -3,16 +3,36 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { DEFAULT_ROOMS, getRoomsForPropertyType, type Room, type MeterReadings, type PropertyType } from './types';
+import { getUserTeamContext } from "@/lib/team-context";
+import { requireTeamPermission } from "@/lib/permissions";
 
 /**
- * Get all inventory reports for the current owner
+ * Get all inventory reports for the current team
+ * Filters via the lease relationship since inventory_reports doesn't have team_id
  */
 export async function getInventoryReports() {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { error: 'Non autorisé', data: [] };
+    }
+
+    // Get all lease IDs for this team first
+    const { data: teamLeases, error: leasesError } = await supabase
+        .from('leases')
+        .select('id')
+        .eq('team_id', teamId);
+
+    if (leasesError) {
+        console.error('Error fetching team leases:', leasesError);
+        return { error: leasesError.message, data: [] };
+    }
+
+    const leaseIds = (teamLeases || []).map(l => l.id);
+
+    if (leaseIds.length === 0) {
+        return { data: [] };
     }
 
     const { data, error } = await supabase
@@ -24,7 +44,7 @@ export async function getInventoryReports() {
                 property_address
             )
         `)
-        .eq('owner_id', user.id)
+        .in('lease_id', leaseIds)
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -42,21 +62,24 @@ export async function getInventoryReports() {
 }
 
 /**
- * Get a single inventory report by ID
+ * Get a single inventory report by ID (only if lease belongs to team)
  */
 export async function getInventoryReportById(id: string) {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { error: 'Non autorisé' };
     }
 
+    // First get the report with its lease info
     const { data, error } = await supabase
         .from('inventory_reports')
         .select(`
             *,
             leases (
+                id,
+                team_id,
                 tenant_name,
                 tenant_email,
                 property_address,
@@ -65,7 +88,6 @@ export async function getInventoryReportById(id: string) {
             )
         `)
         .eq('id', id)
-        .eq('owner_id', user.id)
         .single();
 
     if (error) {
@@ -73,10 +95,16 @@ export async function getInventoryReportById(id: string) {
         return { error: error.message };
     }
 
+    // Verify the lease belongs to the team
+    const lease = Array.isArray(data.leases) ? data.leases[0] : data.leases;
+    if (!lease || lease.team_id !== teamId) {
+        return { error: 'Rapport non trouvé ou accès non autorisé' };
+    }
+
     return {
         data: {
             ...data,
-            lease: Array.isArray(data.leases) ? data.leases[0] : data.leases
+            lease
         }
     };
 }
@@ -89,19 +117,20 @@ export async function createInventoryReport(data: {
     type: 'entry' | 'exit';
     propertyType?: PropertyType;
 }) {
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('leases.edit'); // Permission for inventory reports linked to leases
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { error: 'Non autorisé' };
     }
 
-    // Verify lease belongs to user
+    // Verify lease belongs to team
     const { data: lease, error: leaseError } = await supabase
         .from('leases')
         .select('id')
         .eq('id', data.leaseId)
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .single();
 
     if (leaseError || !lease) {
@@ -113,6 +142,8 @@ export async function createInventoryReport(data: {
         ? getRoomsForPropertyType(data.propertyType)
         : DEFAULT_ROOMS;
 
+    // Note: We don't insert team_id as the column doesn't exist
+    // The lease_id provides the team relationship
     const { data: report, error } = await supabase
         .from('inventory_reports')
         .insert({
@@ -131,39 +162,70 @@ export async function createInventoryReport(data: {
         return { error: error.message };
     }
 
-    revalidatePath('/etats-lieux');
+    revalidatePath('/gestion/etats-lieux');
     return { data: report };
 }
 
 /**
- * Update an inventory report (rooms, meters, comments)
+ * Helper: Verify report belongs to team via lease
  */
+async function verifyReportOwnership(supabase: Awaited<ReturnType<typeof createClient>>, reportId: string, teamId: string) {
+    const { data: report, error } = await supabase
+        .from('inventory_reports')
+        .select(`
+            id,
+            status,
+            lease_id,
+            leases!inner (
+                team_id
+            )
+        `)
+        .eq('id', reportId)
+        .single();
+
+    if (error || !report) {
+        return { valid: false, error: 'Rapport non trouvé' };
+    }
+
+    const lease = Array.isArray(report.leases) ? report.leases[0] : report.leases;
+    if (!lease || (lease as { team_id: string }).team_id !== teamId) {
+        return { valid: false, error: 'Accès non autorisé' };
+    }
+
+    return { valid: true, report };
+}
+
 export async function updateInventoryReport(id: string, updates: {
     rooms?: Room[];
     meter_readings?: MeterReadings;
     general_comments?: string;
     status?: 'draft' | 'completed';
 }) {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { error: 'Non autorisé' };
     }
 
+    // Verify ownership via lease
+    const ownership = await verifyReportOwnership(supabase, id, teamId);
+    if (!ownership.valid) {
+        return { error: ownership.error };
+    }
+
     const { error } = await supabase
         .from('inventory_reports')
         .update(updates)
-        .eq('id', id)
-        .eq('owner_id', user.id);
+        .eq('id', id);
 
     if (error) {
         console.error('Error updating inventory report:', error);
         return { error: error.message };
     }
 
-    revalidatePath('/etats-lieux');
-    revalidatePath(`/etats-lieux/${id}`);
+    revalidatePath('/gestion/etats-lieux');
+    revalidatePath(`/gestion/etats-lieux/${id}`);
     return { success: true };
 }
 
@@ -174,11 +236,17 @@ export async function signInventoryReport(id: string, signatures: {
     owner_signature?: string;
     tenant_signature?: string;
 }) {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { error: 'Non autorisé' };
+    }
+
+    // Verify ownership via lease
+    const ownership = await verifyReportOwnership(supabase, id, teamId);
+    if (!ownership.valid) {
+        return { error: ownership.error };
     }
 
     const updateData: Record<string, unknown> = { ...signatures };
@@ -192,16 +260,15 @@ export async function signInventoryReport(id: string, signatures: {
     const { error } = await supabase
         .from('inventory_reports')
         .update(updateData)
-        .eq('id', id)
-        .eq('owner_id', user.id);
+        .eq('id', id);
 
     if (error) {
         console.error('Error signing inventory report:', error);
         return { error: error.message };
     }
 
-    revalidatePath('/etats-lieux');
-    revalidatePath(`/etats-lieux/${id}`);
+    revalidatePath('/gestion/etats-lieux');
+    revalidatePath(`/gestion/etats-lieux/${id}`);
     return { success: true };
 }
 
@@ -209,41 +276,34 @@ export async function signInventoryReport(id: string, signatures: {
  * Delete an inventory report (only drafts)
  */
 export async function deleteInventoryReport(id: string) {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { error: 'Non autorisé' };
     }
 
-    // Only allow deleting drafts
-    const { data: report } = await supabase
-        .from('inventory_reports')
-        .select('status')
-        .eq('id', id)
-        .eq('owner_id', user.id)
-        .single();
-
-    if (!report) {
-        return { error: 'Rapport non trouvé' };
+    // Verify ownership via lease
+    const ownership = await verifyReportOwnership(supabase, id, teamId);
+    if (!ownership.valid) {
+        return { error: ownership.error };
     }
 
-    if (report.status === 'signed') {
+    if (ownership.report?.status === 'signed') {
         return { error: 'Impossible de supprimer un rapport signé' };
     }
 
     const { error } = await supabase
         .from('inventory_reports')
         .delete()
-        .eq('id', id)
-        .eq('owner_id', user.id);
+        .eq('id', id);
 
     if (error) {
         console.error('Error deleting inventory report:', error);
         return { error: error.message };
     }
 
-    revalidatePath('/etats-lieux');
+    revalidatePath('/gestion/etats-lieux');
     return { success: true };
 }
 
@@ -251,8 +311,8 @@ export async function deleteInventoryReport(id: string) {
  * Get leases for dropdown selection
  */
 export async function getLeasesForInventory() {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { error: 'Non autorisé', data: [] };
@@ -261,7 +321,7 @@ export async function getLeasesForInventory() {
     const { data, error } = await supabase
         .from('leases')
         .select('id, tenant_name, property_address, status')
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -301,13 +361,14 @@ export async function getOwnerSignature() {
  * Get owner's agency branding
  */
 export async function getAgencyBranding() {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { error: 'Non autorisé' };
     }
 
+    // TODO: Use team branding instead of owner profile branding
     const { data, error } = await supabase
         .from('profiles')
         .select('company_name, logo_url')
@@ -329,15 +390,15 @@ export async function getAgencyBranding() {
  * Upload a photo for an inventory item
  */
 export async function uploadInventoryPhoto(file: File, reportId: string) {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { error: 'Non autorisé' };
     }
 
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${reportId}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+    const fileName = `teams/${teamId}/inventory/${reportId}/${Date.now()}_${Math.random().toString(36).substring(2, 11)}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
         .from('inventory')
@@ -354,8 +415,8 @@ export async function uploadInventoryPhoto(file: File, reportId: string) {
         .from('inventory')
         .createSignedUrl(fileName, 3600 * 24 * 365 * 10); // 10 years (effectively permanent for the PDF)
 
-    // Note: For a real production app with high security requirements, 
-    // we would generate short-lived URLs on demand. 
+    // Note: For a real production app with high security requirements,
+    // we would generate short-lived URLs on demand.
     // Here we generate a long-lived one for simplicity of the PDF generation.
 
     if (!data?.signedUrl) {

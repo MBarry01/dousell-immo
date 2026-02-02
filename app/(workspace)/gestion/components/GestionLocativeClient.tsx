@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { TenantTable } from './TenantTable';
 import { MonthSelector } from './MonthSelector';
 import { EditTenantDialog } from './EditTenantDialog';
@@ -13,11 +13,8 @@ import { Search, Download, LayoutGrid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { deleteTransaction, deleteLease, confirmPayment, terminateLease, reactivateLease, sendTenantInvitation } from '../actions';
 import { processLateReminders } from '@/app/(vitrine)/actions/reminders';
-import { OnboardingTour, useOnboardingTour, TourStep } from '@/components/onboarding/OnboardingTour';
-import { FloatingHelpButton } from '@/components/ui/floating-help-button';
 import { ReceiptModal } from './ReceiptModal';
 import { toast } from 'sonner';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 import { calculateFinancials, LeaseInput, TransactionInput } from '@/lib/finance';
 import { saveAs } from 'file-saver';
@@ -51,6 +48,15 @@ interface Transaction {
     paid_at?: string | null;
     period_start?: string | null;
     period_end?: string | null;
+}
+
+interface Expense {
+    id: string;
+    amount: number;
+    expense_date: string;
+    description?: string | null;
+    category?: string | null;
+    lease_id?: string | null;
 }
 
 interface Lease {
@@ -117,6 +123,7 @@ interface ReceiptData {
 interface GestionLocativeClientProps {
     leases: Lease[];
     transactions: Transaction[];
+    expenses: Expense[];
     profile: Profile | null;
     userEmail?: string;
     ownerId: string;
@@ -127,6 +134,7 @@ interface GestionLocativeClientProps {
 export function GestionLocativeClient({
     leases,
     transactions,
+    expenses,
     profile,
     userEmail,
     ownerId,
@@ -134,7 +142,6 @@ export function GestionLocativeClient({
     minDate
 }: GestionLocativeClientProps) {
     const router = useRouter();
-    const { isDark } = useTheme();
     // État pour le mois/année sélectionné - Initialisé à aujourd'hui
     const today = useMemo(() => new Date(), []);
     const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1); // 1-12
@@ -147,68 +154,38 @@ export function GestionLocativeClient({
         setLocalTransactions(transactions);
     }, [transactions]);
 
-    const [searchQuery, setSearchQuery] = useState('');
+    const searchParams = useSearchParams();
+    const pathname = usePathname(); // Add this
+    const urlQuery = searchParams?.get('q') || '';
+    const [searchQuery, setSearchQuery] = useState(urlQuery);
+
+    // Sync state with URL when it changes
+    useEffect(() => {
+        setSearchQuery(urlQuery);
+    }, [urlQuery]);
+
+    // Update URL when local search changes (Debounced)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchQuery !== urlQuery) {
+                const params = new URLSearchParams(searchParams?.toString());
+                if (searchQuery) {
+                    params.set('q', searchQuery);
+                } else {
+                    params.delete('q');
+                }
+                router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+            }
+        }, 300); // 300ms debounce
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, urlQuery, pathname, router, searchParams]);
     const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
     const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards'); // Default to cards (Noflaye style)
     const [isReceiptOpen, setIsReceiptOpen] = useState(false);
     const [currentReceipt, setCurrentReceipt] = useState<ReceiptData | null>(null);
     const [saving, setSaving] = useState(false);
     const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'pending' | 'overdue'>('all');
-
-    // ========================================
-    // PREMIUM ONBOARDING TOUR (Style HP OMEN)
-    // ========================================
-    const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_gestion_premium_tour', 1500);
-
-    // Étapes du tour (affichées tout le temps)
-    const premiumTourSteps: TourStep[] = useMemo(() => {
-
-        const baseSteps: TourStep[] = [
-            {
-                targetId: 'tour-add-tenant',
-                title: 'Créez votre premier bail',
-                description: 'Cliquez ici pour ajouter un locataire. Le système générera automatiquement les contrats et quittances.',
-                imageSrc: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600',
-                imageAlt: 'Ajouter un locataire'
-            },
-            {
-                targetId: 'tour-stats',
-                title: 'Suivez vos finances',
-                description: 'Un coup d\'œil suffit. Visualisez les loyers encaissés, en attente et les retards en temps réel. Cliquez sur une carte pour filtrer.',
-                imageSrc: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600',
-                imageAlt: 'Tableau de bord financier'
-            }
-        ];
-
-
-        // Ajouter toutes les étapes du tour
-        baseSteps.push(
-            {
-                targetId: 'tour-tenants-list',
-                title: 'Gérez vos locataires',
-                description: 'C\'est ici que vos locataires apparaîtront. Vous pourrez suivre les paiements, envoyer des quittances et gérer les baux en un clic.',
-                imageSrc: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&q=80&w=600',
-                imageAlt: 'Gestion des locataires'
-            },
-            {
-                targetId: 'tour-quick-actions',
-                title: 'Actions Rapides',
-                description: 'Accédez en un clic aux fonctions essentielles : relances, interventions, messagerie et documents juridiques.',
-                imageSrc: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600',
-                imageAlt: 'Actions rapides'
-            },
-            {
-                targetId: 'tour-export-csv',
-                title: 'Export Comptable',
-                description: 'Téléchargez toutes vos données en CSV pour votre comptable ou vos archives personnelles en un seul clic.',
-                imageSrc: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600',
-                imageAlt: 'Export comptable'
-            }
-        );
-
-
-        return baseSteps;
-    }, [leases]);
 
     const handleMonthChange = (month: number, year: number) => {
         setSelectedMonth(month);
@@ -253,17 +230,27 @@ export function GestionLocativeClient({
             status: t.status
         }));
 
-        const kpis = calculateFinancials(safeLeases, safeTransactions, targetDate);
+        // Filtrer les dépenses pour le mois/année sélectionné
+        const monthlyExpenses = (expenses || []).filter(e => {
+            const d = new Date(e.expense_date);
+            return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
+        });
+
+        const kpis = calculateFinancials(safeLeases, safeTransactions, monthlyExpenses, targetDate);
 
         return {
             totalExpected: kpis.totalExpected,
             totalCollected: kpis.totalCollected,
-            totalPending: kpis.totalExpected - kpis.totalCollected, // Reste = Attendu - Encaissé
+            totalExpenses: kpis.totalExpenses,
+            actualNetProfit: kpis.actualNetProfit,
+            projectedNetProfit: kpis.projectedNetProfit,
+            hasTemporaryDebt: kpis.hasTemporaryDebt,
+            totalPending: kpis.pendingAmount, // En attente stricte (hors retards)
             paidCount: kpis.paidCount,
             pendingCount: kpis.pendingCount,
             overdueCount: kpis.overdueCount,
             collectedPercent: kpis.collectionRate,
-            transactionCount: currentTransactions.length // Juste pour info debug si besoin
+            transactionCount: currentTransactions.length
         };
     }, [leases, currentTransactions, selectedMonth, selectedYear]);
 
@@ -620,15 +607,6 @@ export function GestionLocativeClient({
                 data={currentReceipt}
             />
 
-            {/* Premium Onboarding Tour (Style HP OMEN) */}
-            <OnboardingTour
-                steps={premiumTourSteps}
-                isOpen={showTour}
-                onClose={closeTour}
-                onComplete={closeTour}
-                storageKey="dousell_gestion_premium_tour"
-            />
-
             {/* ========================================
                 DASHBOARD STATS - Style Noflaye
                 ======================================== */}
@@ -661,93 +639,57 @@ export function GestionLocativeClient({
                 profile={profile}
             />
 
-            {/* ========================================
-                BARRE DE CONTRÔLES
-                ======================================== */}
-            <div className="flex flex-col gap-3 mb-4">
-                {/* Ligne 1: Recherche + Relances */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-                    {/* Recherche */}
-                    <div className={`flex-1 flex items-center gap-2 rounded-md px-3 h-9 border min-w-0 transition-colors ${isDark
-                        ? 'bg-black border-slate-800 focus-within:border-slate-700'
-                        : 'bg-white border-gray-200 focus-within:border-gray-400'
-                        }`}>
-                        <Search className={`h-4 w-4 shrink-0 ${isDark ? 'text-slate-500' : 'text-gray-500'}`} />
-                        <input
-                            type="text"
-                            placeholder="Rechercher..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className={`flex-1 bg-transparent text-sm outline-none min-w-0 ${isDark
-                                ? 'text-white placeholder:text-slate-600'
-                                : 'text-gray-900 placeholder:text-gray-400'
+            {/* Ligne 1: Controls (Month Selector aligned left) */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
+                {/* Sélecteur de mois - Aligné à gauche */}
+                <MonthSelector
+                    selectedMonth={selectedMonth}
+                    selectedYear={selectedYear}
+                    onMonthChange={handleMonthChange}
+                    minDate={minDate}
+                />
+
+                {/* View Toggle + Export CSV */}
+                <div className="flex items-center gap-2">
+                    {/* View Mode Toggle */}
+                    <div className="flex items-center rounded-lg p-0.5 border border-border bg-muted">
+                        <button
+                            onClick={() => setViewMode('cards')}
+                            className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards'
+                                ? 'bg-background text-primary shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground'
                                 }`}
-                        />
-                    </div>
-
-
-                </div>
-
-                {/* Ligne 2: Sélecteur de mois (gauche) + CSV (droite) */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
-                    {/* Sélecteur de mois - Aligné à gauche */}
-                    <MonthSelector
-                        selectedMonth={selectedMonth}
-                        selectedYear={selectedYear}
-                        onMonthChange={handleMonthChange}
-                        minDate={minDate}
-                    />
-
-                    {/* View Toggle + Export CSV */}
-                    <div className="flex items-center gap-2">
-                        {/* View Mode Toggle */}
-                        <div className={`flex items-center rounded-lg p-0.5 border ${isDark ? 'bg-black border-slate-800' : 'bg-gray-100 border-gray-200'
-                            }`}>
-                            <button
-                                onClick={() => setViewMode('cards')}
-                                className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards'
-                                    ? 'bg-blue-500/10 text-blue-400'
-                                    : isDark
-                                        ? 'text-slate-500 hover:text-slate-300'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                    }`}
-                                title="Vue cartes"
-                            >
-                                <LayoutGrid className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => setViewMode('table')}
-                                className={`p-1.5 rounded-md transition-colors ${viewMode === 'table'
-                                    ? 'bg-blue-500/10 text-blue-400'
-                                    : isDark
-                                        ? 'text-slate-500 hover:text-slate-300'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                    }`}
-                                title="Vue tableau"
-                            >
-                                <List className="w-4 h-4" />
-                            </button>
-                        </div>
-
-                        {/* Bouton Export Excel */}
-                        <Button
-                            id="tour-export-csv"
-                            onClick={() => {
-                                console.log('Export Excel clicked');
-                                handleExportCSV();
-                            }}
-                            variant="outline"
-                            size="sm"
-                            className={`h-9 px-3 shrink-0 ${isDark
-                                ? 'bg-black border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-white'
-                                : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-                                }`}
-                            disabled={formattedTenants.length === 0}
+                            title="Vue cartes"
                         >
-                            <Download className="w-4 h-4 mr-2" />
-                            Excel
-                        </Button>
+                            <LayoutGrid className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('table')}
+                            className={`p-1.5 rounded-md transition-colors ${viewMode === 'table'
+                                ? 'bg-background text-primary shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground'
+                                }`}
+                            title="Vue tableau"
+                        >
+                            <List className="w-4 h-4" />
+                        </button>
                     </div>
+
+                    {/* Bouton Export Excel */}
+                    <Button
+                        id="tour-export-csv"
+                        onClick={() => {
+                            console.log('Export Excel clicked');
+                            handleExportCSV();
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-3 shrink-0 bg-background border-border text-foreground hover:bg-muted"
+                        disabled={formattedTenants.length === 0}
+                    >
+                        <Download className="w-4 h-4 mr-2" />
+                        Excel
+                    </Button>
                 </div>
             </div>
 
@@ -791,16 +733,15 @@ export function GestionLocativeClient({
             </div>
 
             {/* Modale d'édition */}
-            {editingTenant && (
-                <EditTenantDialog
-                    isOpen={!!editingTenant}
-                    onClose={() => setEditingTenant(null)}
-                    tenant={editingTenant}
-                />
-            )}
-
-            {/* Bouton pour relancer le tour (Portal) */}
-            <FloatingHelpButton onClick={resetTour} />
-        </div>
+            {
+                editingTenant && (
+                    <EditTenantDialog
+                        isOpen={!!editingTenant}
+                        onClose={() => setEditingTenant(null)}
+                        tenant={editingTenant}
+                    />
+                )
+            }
+        </div >
     );
 }

@@ -31,20 +31,16 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { createClient } from '@/utils/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 import { useTheme } from '@/components/workspace/providers/theme-provider';
 
-import { calculateFinancials, LeaseInput, TransactionInput } from '@/lib/finance';
-import { getExpensesByYear, getExpensesSummary, getProfitabilityByProperty, PropertyProfitability, Expense } from './expenses-actions';
+import { calculateYearlyFinancials, LeaseInput, TransactionInput } from '@/lib/finance';
+import { getExpensesByYear, getExpensesSummary, getProfitabilityByProperty, getComptabiliteData, PropertyProfitability, Expense } from './expenses-actions';
 import { DownloadReportButton } from './components/DownloadReportButton';
 import { AddExpenseDialog } from './components/AddExpenseDialog';
 import { ExpenseList } from './components/ExpenseList';
 import { ProfitabilityTable } from './components/ProfitabilityTable';
-
-import { OnboardingTour, useOnboardingTour, TourStep } from '@/components/onboarding/OnboardingTour';
-import { FloatingHelpButton } from '@/components/ui/floating-help-button';
 
 interface MonthlyData {
     month: string;
@@ -71,7 +67,6 @@ const fullMonthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', '
 export default function ComptabilitePage() {
     const { isDark } = useTheme();
     const { user, loading: authLoading } = useAuth();
-    const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_comptabilite_tour', 1500);
     const [leases, setLeases] = useState<LeaseInput[]>([]);
     const [transactions, setTransactions] = useState<TransactionInput[]>([]);
     const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -81,117 +76,37 @@ export default function ComptabilitePage() {
     const [activeTab, setActiveTab] = useState<'revenus' | 'depenses' | 'rentabilite'>('revenus');
     const [profitabilityData, setProfitabilityData] = useState<PropertyProfitability[]>([]);
 
-    // Tour Steps
-    const tourSteps: TourStep[] = useMemo(() => [
-        {
-            targetId: 'tour-compta-kpi',
-            title: 'Indicateurs financiers',
-            description: 'Visualisez vos revenus attendus, encaissés, en attente et les retards de paiement en un coup d\'œil.',
-            imageSrc: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'KPIs financiers'
-        },
-        {
-            targetId: 'tour-compta-chart',
-            title: 'Graphiques de revenus',
-            description: 'Analysez vos revenus mensuels et la répartition des paiements avec des graphiques interactifs.',
-            imageSrc: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Graphiques financiers'
-        },
-        {
-            targetId: 'tour-compta-tabs',
-            title: 'Revenus & Dépenses',
-            description: 'Basculez entre la vue des revenus (loyers) et celle des dépenses pour une comptabilité complète.',
-            imageSrc: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Tabs comptabilité'
-        },
-        {
-            targetId: 'tour-compta-export',
-            title: 'Export & Actions',
-            description: 'Exportez vos données financières et ajoutez des dépenses directement depuis cette page.',
-            imageSrc: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Export financier'
-        }
-    ], []);
-
     useEffect(() => {
         if (!user) return;
 
         const loadData = async () => {
             setLoading(true);
-            const supabase = createClient();
 
-            // 1. Fetch Leases
-            const { data: leasesData } = await supabase
-                .from('leases')
-                .select('id, monthly_amount, status, start_date, billing_day')
-                .eq('owner_id', user.id);
-
-            setLeases((leasesData || []) as LeaseInput[]);
-
-            // 2. Fetch Leases with tenant names for expense form
-            const leasesForExpenses = (leasesData || []).map(l => ({
-                id: l.id,
-                tenant_name: (l as any).tenant_name || 'Locataire'
-            }));
-
-            // Re-fetch with tenant_name if not already available
             try {
-                const { data: leasesWithTenants } = await supabase
-                    .from('leases')
-                    .select('id, tenant_name')
-                    .eq('owner_id', user.id)
-                    .eq('status', 'active');
+                // 1. Fetch all comptabilité data via Server Action (team_id based)
+                const comptaResult = await getComptabiliteData(selectedYear);
 
-                setProperties((leasesWithTenants || []).map(l => ({ id: l.id, address: l.tenant_name || 'Locataire' })));
-            } catch (leaseError) {
-                console.warn('Could not fetch leases for expenses:', leaseError);
-                setProperties(leasesForExpenses.map(l => ({ id: l.id, address: l.tenant_name })));
-            }
+                if (comptaResult.success && comptaResult.data) {
+                    setLeases(comptaResult.data.leases as LeaseInput[]);
+                    setTransactions(comptaResult.data.transactions);
+                    setProperties(comptaResult.data.properties);
+                }
 
-            // 3. Fetch Expenses for the year
-            try {
+                // 2. Fetch Expenses for the year (already team_id based)
                 const expensesResult = await getExpensesByYear(selectedYear);
                 if (expensesResult.success) {
                     setExpenses(expensesResult.expenses as Expense[]);
                 }
 
-                // Fetch Profitability for PDF
+                // 3. Fetch Profitability for PDF (already team_id based)
                 const profitResult = await getProfitabilityByProperty(selectedYear);
                 if (profitResult.success && profitResult.data) {
                     setProfitabilityData(profitResult.data);
                 }
-            } catch (expError) {
-                console.warn('Could not fetch expenses:', expError);
-                setExpenses([]);
+            } catch (error) {
+                console.error('Error loading comptabilité data:', error);
             }
 
-            if (!leasesData || leasesData.length === 0) {
-                setLoading(false);
-                return;
-            }
-
-            const leaseIds = leasesData.map(l => l.id);
-
-            // 4. Fetch Transactions for Selected Year
-            const { data: txsData } = await supabase
-                .from('rental_transactions')
-                .select('id, lease_id, amount_due, status, period_month, period_year, created_at')
-                .in('lease_id', leaseIds)
-                .eq('period_year', selectedYear);
-
-            // Polyfill amount_paid
-            const formattedTxs: any[] = (txsData || []).map(t => ({
-                id: t.id,
-                lease_id: t.lease_id,
-                amount_due: t.amount_due,
-                status: t.status,
-                period_date: `${t.period_year}-${String(t.period_month).padStart(2, '0')}-01`,
-                created_at: t.created_at,
-                period_month: t.period_month, // Keep for filtering
-                amount_paid: (t.status?.toLowerCase() === 'paid') ? t.amount_due : 0
-            }));
-
-            setTransactions(formattedTxs);
             setLoading(false);
         };
 
@@ -214,72 +129,30 @@ export default function ComptabilitePage() {
         future: isDark ? '#334155' : '#cbd5e1', // Slate 700 (dark) vs Slate 300 (light)
     };
 
-    // Calculate monthly data with Logic
+    // Calculate monthly data with Unified Logic
     const monthlyData = useMemo(() => {
-        const data: MonthlyData[] = [];
-        const today = new Date();
-        const currentMonth = today.getMonth() + 1;
-        const currentYearValue = today.getFullYear();
-        const isPastYear = selectedYear < currentYearValue;
-        const isFutureYear = selectedYear > currentYearValue;
+        if (!leases.length) return [];
 
-        for (let month = 1; month <= 12; month++) {
-            let expected = 0;
-            let collected = 0;
-            let pending = 0;
-            let future = 0;
-            let overdue = 0;
+        // Transform transactions to match the unified input
+        const txInputs: TransactionInput[] = transactions.map(t => ({
+            ...t,
+            period_month: (t as any).period_month,
+            period_year: (t as any).period_year
+        }));
 
-            const isPastMonth = isPastYear || (selectedYear === currentYearValue && month < currentMonth);
-            const isFutureMonth = isFutureYear || (selectedYear === currentYearValue && month > currentMonth);
-            // const isCurrentMonth = selectedYear === currentYearValue && month === currentMonth;
+        const results = calculateYearlyFinancials(leases, txInputs, expenses, selectedYear);
 
-            leases.forEach(lease => {
-                // Simplified active check: if status is active. 
-                // Ideally check start_date vs current month but 'active' status is good enough proxy for now
-                if (lease.status === 'active') {
-                    const amount = Number(lease.monthly_amount) || 0;
-                    expected += amount;
-
-                    const tx = (transactions as any[]).find(t => t.lease_id === lease.id && t.period_month === month);
-
-                    if (tx && tx.status?.toLowerCase() === 'paid') {
-                        collected += (Number(tx.amount_due) || amount);
-                    } else {
-                        // Unpaid logic
-                        const unpaidAmount = amount;
-                        if (isPastMonth) {
-                            overdue += unpaidAmount;
-                        } else if (isFutureMonth) {
-                            future += unpaidAmount; // Future expectations are 'future' (gray)
-                        } else {
-                            // Current Month Logic
-                            const billingDay = lease.billing_day || 5;
-                            if (today.getDate() > billingDay) {
-                                overdue += unpaidAmount;
-                            } else {
-                                pending += unpaidAmount;
-                            }
-                        }
-                    }
-                }
-            });
-
-            const collectionRate = expected > 0 ? Math.round((collected / expected) * 100) : 0;
-
-            data.push({
-                month: fullMonthNames[month - 1],
-                shortMonth: monthNames[month - 1],
-                expected,
-                collected,
-                pending,
-                future,
-                overdue,
-                collectionRate,
-            });
-        }
-
-        return data;
+        // Adapt unified results to UI format
+        return results.map(res => ({
+            month: fullMonthNames[res.month - 1],
+            shortMonth: monthNames[res.month - 1],
+            expected: res.totalExpected,
+            collected: res.totalCollected,
+            pending: res.pendingAmount, // Use explicit Amount
+            future: res.future,
+            overdue: res.overdueAmount, // Use explicit Amount
+            collectionRate: res.collectionRate
+        }));
     }, [leases, transactions, selectedYear]);
 
     // Calculate totals from monthly data
@@ -287,10 +160,11 @@ export default function ComptabilitePage() {
         return monthlyData.reduce((acc, curr) => ({
             expected: acc.expected + curr.expected,
             collected: acc.collected + curr.collected,
-            pending: acc.pending + curr.pending + curr.future, // Include future in pending totals
+            pending: acc.pending + curr.pending, // Removed + curr.future to avoid mixing Future with Arrears
             overdue: acc.overdue + curr.overdue,
+            future: acc.future + curr.future, // Track future separately if needed
             collectionRate: 0
-        }), { expected: 0, collected: 0, pending: 0, overdue: 0, collectionRate: 0 });
+        }), { expected: 0, collected: 0, pending: 0, overdue: 0, future: 0, collectionRate: 0 });
     }, [monthlyData]);
 
     const totals = useMemo(() => {
@@ -342,15 +216,6 @@ export default function ComptabilitePage() {
 
     return (
         <div className={`p-4 md:p-6 space-y-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {/* Premium Onboarding Tour */}
-            <OnboardingTour
-                steps={tourSteps}
-                isOpen={showTour}
-                onClose={closeTour}
-                onComplete={closeTour}
-                storageKey="dousell_comptabilite_tour"
-            />
-
             {/* Header */}
             <div className="flex flex-col gap-4">
                 <div>
@@ -473,7 +338,7 @@ export default function ComptabilitePage() {
                             </div>
                             {totals.overdue > 0 && (
                                 <Link
-                                    href="/gestion-locative?filter=overdue"
+                                    href="/gestion?filter=overdue"
                                     className="text-[10px] md:text-xs text-red-500 mt-1.5 md:mt-2 flex items-center gap-1 hover:underline"
                                 >
                                     Voir les impayés →
@@ -602,9 +467,6 @@ export default function ComptabilitePage() {
                     <ProfitabilityTable year={selectedYear} />
                 </TabsContent>
             </Tabs>
-
-            {/* Bouton pour relancer le tour (Portal) */}
-            <FloatingHelpButton onClick={resetTour} />
         </div>
     );
 }

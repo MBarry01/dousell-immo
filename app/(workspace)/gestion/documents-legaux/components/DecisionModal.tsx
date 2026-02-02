@@ -79,7 +79,7 @@ export function DecisionModal({ alert }: DecisionModalProps) {
             <DialogTrigger asChild>
                 <Button
                     variant="outline"
-                    className="border-[#F4C430] text-[#F4C430] hover:bg-[#F4C430]/10"
+                    className="border-primary text-primary hover:bg-primary/10"
                     size="sm"
                 >
                     ⚠️ Action Requise

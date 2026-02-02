@@ -1,0 +1,35 @@
+﻿[dotenv@17.2.3] injecting env (37) from .env.local -- tip: ÔÜÖ´©Å  enable debug logging with { debug: true }
+­ƒöì D├®marrage de l'audit financier... (Toutes les ├®quipes)
+
+­ƒôè RAPPORT D'AUDIT FINANCIER
+===========================
+{
+  "timestamp": "2026-01-30T16:01:12.356Z",
+  "team_id": "all",
+  "readyForMigration": true,
+  "recommendations": [
+    "ÔÜá´©Å 1 d├®penses orphelines d├®tect├®es (├á lier ou envoyer en Caisse G├®n├®rale)."
+  ],
+  "propertiesCount": 57,
+  "leasesCount": 35,
+  "expensesCount": 2,
+  "transactionsCount": 46,
+  "orphanExpenses": {
+    "count": 1,
+    "details": [
+      {
+        "id": "2bd12aed-4c6e-4c51-a566-dca073094235",
+        "amount": 25,
+        "description": "Intervention: Probl├®me de peinture (SENAC PEINTURES)",
+        "created_at": "2025-12-30T22:10:43.654092+00:00",
+        "owner_id": "663e7240-67fc-470a-b780-13ca27df48f5"
+      }
+    ]
+  },
+  "currencyMix": {
+    "FCFA": 35
+  },
+  "deficitMonths": []
+}
+===========================
+

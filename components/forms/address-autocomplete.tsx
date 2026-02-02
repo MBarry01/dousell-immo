@@ -58,7 +58,14 @@ const getPlaceName = (address: any) => {
     );
 };
 
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+
 export function AddressAutocomplete({
+
     onAddressSelect,
     defaultValue = "",
     className,
@@ -67,8 +74,14 @@ export function AddressAutocomplete({
     const [query, setQuery] = React.useState(defaultValue);
     const [results, setResults] = React.useState<NominatimResult[]>([]);
     const [loading, setLoading] = React.useState(false);
+    const ignoreNextQueryChange = React.useRef(false);
 
     React.useEffect(() => {
+        if (ignoreNextQueryChange.current) {
+            ignoreNextQueryChange.current = false;
+            return;
+        }
+
         const timer = setTimeout(() => {
             if (query && query.length >= 3) {
                 fetchSuggestions(query);
@@ -93,7 +106,12 @@ export function AddressAutocomplete({
             });
 
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?${params.toString()}`
+                `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+                {
+                    headers: {
+                        'User-Agent': 'DousellImmo/1.0 (https://dousell.com)',
+                    },
+                }
             );
 
             if (!response.ok) throw new Error("Network response was not ok");
@@ -110,88 +128,107 @@ export function AddressAutocomplete({
     };
 
     const handleSelect = (item: NominatimResult) => {
+        // 1. Extraire les composants de base
         const city = item.address.city || item.address.town || item.address.village || item.address.municipality;
         const mainName = getPlaceName(item.address);
+        const region = item.address.state; // Région au Sénégal
 
-        // Construct a clean display string based on the user's preferred format logic
-        const displayName = mainName ? `${mainName}, ${item.address.state || 'Sénégal'}` : item.display_name;
+        // 2. Construire le label d'affichage : Région, Ville/Quartier
+        let labelParts = [];
+        if (region) labelParts.push(region);
+        if (mainName && mainName !== region) labelParts.push(mainName);
 
-        setQuery(displayName);
+        // Si on n'a rien trouvé de précis, on garde le display_name de Nominatim
+        const displayLabel = labelParts.length > 0 ? labelParts.join(", ") : item.display_name;
+
+        // 3. Construire l'adresse complète (pour le stockage et la recherche)
+        // On s'assure que "Sénégal" est à la fin pour la cohérence
+        let fullAddress = displayLabel;
+        if (!fullAddress.toLowerCase().includes("sénégal")) {
+            fullAddress += ", Sénégal";
+        }
+
+        ignoreNextQueryChange.current = true;
+        setQuery(fullAddress);
         setOpen(false);
+        setResults([]);
 
         onAddressSelect({
-            display_name: displayName,
+            display_name: fullAddress,
             road: item.address.road,
             suburb: item.address.suburb,
-            city: city, // Keep original city logic for form data if needed, or update if user wants
-            state: item.address.state,
+            city: mainName || city,
+            state: region,
             lat: item.lat,
             lon: item.lon
         });
     };
 
     return (
-        <div className={cn("relative z-50", className)}>
-            <div className="relative">
-                <Input
-                    value={query}
-                    onChange={(e) => {
-                        setQuery(e.target.value);
-                        setOpen(true);
-                    }}
-                    onFocus={() => {
-                        if (results.length > 0) setOpen(true);
-                    }}
-                    placeholder="Ex: 15 Avenue Lamine Gueye..."
-                    className="pr-10"
-                />
-                {loading && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                    </div>
-                )}
-            </div>
+        <Popover open={open && results.length > 0} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <div className={cn("relative", className)}>
+                    <Input
+                        value={query}
+                        onChange={(e) => {
+                            setQuery(e.target.value);
+                            setOpen(true);
+                        }}
+                        onFocus={() => {
+                            if (results.length > 0) setOpen(true);
+                        }}
+                        placeholder="Ex: 15 Avenue Lamine Gueye..."
+                        className="pr-10"
+                    />
+                    {loading && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        </div>
+                    )}
+                </div>
+            </PopoverTrigger>
+            <PopoverContent
+                className="p-0 w-[350px]"
+                align="start"
+                onOpenAutoFocus={(e: Event) => e.preventDefault()}
+            >
+                <div className="max-h-[300px] overflow-y-auto p-1">
+                    {results.map((item) => {
+                        const mainName = getPlaceName(item.address);
+                        const region = item.address.state; // Région au Sénégal
 
-            {open && results.length > 0 && (
-                <div className="absolute top-full mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 overflow-hidden z-50">
-                    <div className="max-h-[300px] overflow-y-auto p-1">
-                        {results.map((item) => {
-                            const mainName = getPlaceName(item.address);
-                            // Fallback : Si on ne trouve rien, on utilise le début du display_name complet
-                            const displayName = mainName ? `${mainName}, ${item.address.state || ''}` : item.display_name;
+                        let labelParts = [];
+                        if (region) labelParts.push(region);
+                        if (mainName && mainName !== region) labelParts.push(mainName);
 
-                            return (
-                                <div
-                                    key={item.place_id}
-                                    onMouseDown={(e) => {
-                                        // Prevent input blur so the dropdown doesn't close before selection
-                                        e.preventDefault();
-                                        handleSelect(item);
-                                    }}
-                                    className="flex flex-col items-start gap-1 py-3 px-4 cursor-pointer rounded-sm hover:bg-muted/50 text-sm"
-                                >
-                                    <div className="flex items-start gap-2 w-full">
-                                        <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
-                                        <div className="flex flex-col">
-                                            <span className="font-medium text-foreground">
-                                                {displayName}
-                                            </span>
-                                            <span className="text-xs text-muted-foreground line-clamp-1">
-                                                {item.display_name}
-                                            </span>
-                                        </div>
+                        // Si on n'a rien trouvé de précis, on garde le display_name de Nominatim
+                        const displayLabel = labelParts.length > 0 ? labelParts.join(", ") : item.display_name;
+
+                        return (
+                            <div
+                                key={item.place_id}
+                                onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    handleSelect(item);
+                                }}
+                                className="flex flex-col items-start gap-1 py-3 px-4 cursor-pointer rounded-sm hover:bg-muted/50 text-sm"
+                            >
+                                <div className="flex items-start gap-2 w-full">
+                                    <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-foreground">
+                                            {displayLabel}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground line-clamp-1">
+                                            {item.display_name}
+                                        </span>
                                     </div>
                                 </div>
-                            );
-                        })}
-                    </div>
+                            </div>
+                        );
+                    })}
                 </div>
-            )}
-
-            {open && results.length === 0 && query.length >= 3 && !loading && (
-                // Optional: Show empty state
-                null
-            )}
-        </div>
+            </PopoverContent>
+        </Popover>
     );
 }

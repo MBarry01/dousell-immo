@@ -75,7 +75,11 @@ export const PropertyCardUnified = ({ property, className }: PropertyCardUnified
                 <div>
                     <p className="flex items-center gap-1.5 text-xs text-white/60 mb-1">
                         <MapPin className="h-3.5 w-3.5 text-primary" />
-                        {property.location.city}
+                        {property.location.district ||
+                            (property.location.city && property.location.city.toLowerCase() !== "sénégal" && property.location.city.toLowerCase() !== "senegal" ? property.location.city : null) ||
+                            property.location.region ||
+                            property.location.city ||
+                            "Sénégal"}
                     </p>
                     <h3 className="line-clamp-2 text-lg font-bold tracking-tight leading-tight mb-1 flex items-center gap-2">
                         {property.title}

@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from 'react';
 import Link from 'next/link';
 import { Plus, FileText, CheckCircle, Clock, Edit, ArrowLeft, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,6 @@ import {
     ThemedAlert
 } from '../../components/ThemedComponents';
 import { useTheme } from '../../theme-provider';
-import { OnboardingTour, useOnboardingTour, TourStep } from '@/components/onboarding/OnboardingTour';
 
 const statusConfig: Record<string, { label: string; variant: "default" | "warning" | "success"; icon: any }> = {
     'draft': { label: 'Brouillon', variant: 'default', icon: Edit },
@@ -31,43 +29,9 @@ const typeLabels: Record<string, string> = {
 
 export function EtatsLieuxContent({ reports, error }: { reports: any[]; error: string | null }) {
     const { isDark } = useTheme();
-    const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_etats_lieux_tour', 1500);
-
-    const tourSteps: TourStep[] = useMemo(() => [
-        {
-            targetId: 'tour-edl-new',
-            title: 'Créer un état des lieux',
-            description: 'Documentez l\'état du bien à l\'entrée ou à la sortie d\'un locataire. Le rapport sera généré automatiquement.',
-            imageSrc: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Nouvel état des lieux'
-        },
-        {
-            targetId: 'tour-edl-pdf',
-            title: 'PDF Vierge',
-            description: 'Téléchargez un formulaire vierge à imprimer pour réaliser l\'état des lieux sur papier.',
-            imageSrc: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'PDF vierge'
-        },
-        {
-            targetId: 'tour-edl-list',
-            title: 'Vos rapports',
-            description: 'Retrouvez tous vos états des lieux ici. Cliquez sur un rapport pour le consulter, le modifier ou le faire signer.',
-            imageSrc: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Liste des rapports'
-        }
-    ], []);
 
     return (
         <ThemedPage>
-            {/* Premium Onboarding Tour */}
-            <OnboardingTour
-                steps={tourSteps}
-                isOpen={showTour}
-                onClose={closeTour}
-                onComplete={closeTour}
-                storageKey="dousell_etats_lieux_tour"
-            />
-
             {/* Header */}
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -202,22 +166,6 @@ export function EtatsLieuxContent({ reports, error }: { reports: any[]; error: s
                     </div>
                 )}
             </div>
-
-            {/* Bouton pour relancer le tour */}
-            <button
-                onClick={resetTour}
-                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${isDark
-                        ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
-                        : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
-                    }`}
-                title="Relancer le tutoriel"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                    <path d="M12 17h.01" />
-                </svg>
-            </button>
         </ThemedPage>
     );
 }

@@ -112,6 +112,11 @@ export async function notifyAdmin({
     const adminEmail = getAdminEmail();
     console.log("🔍 Recherche de l'admin avec l'email:", adminEmail);
 
+    if (!adminEmail) {
+      console.warn("⚠️ Admin email non configuré, notification ignorée");
+      return;
+    }
+
     // Utiliser NEXT_PUBLIC_ADMIN_ID si disponible, sinon chercher par email
     let adminUserId: string | null = process.env.NEXT_PUBLIC_ADMIN_ID || null;
 
@@ -128,7 +133,7 @@ export async function notifyAdmin({
           );
 
           const { data: adminUsers, error: userError } = await serviceClient.auth.admin.listUsers();
-          
+
           if (userError) {
             console.error("❌ Erreur lors de la récupération des users:", userError);
           } else if (adminUsers) {
@@ -242,6 +247,11 @@ export async function createAdminNotification(
   const supabase = await createClient();
   const adminEmail = getAdminEmail();
 
+  if (!adminEmail) {
+    console.warn("⚠️ Admin email non configuré, notification admin ignorée");
+    return { success: false, error: "Admin email not configured" };
+  }
+
   // Trouver l'ID de l'utilisateur admin en utilisant la fonction SQL ou le service role
   let adminUserId: string | null = null;
 
@@ -254,7 +264,7 @@ export async function createAdminNotification(
       );
 
       const { data: adminUsers, error: userError } = await serviceClient.auth.admin.listUsers();
-      
+
       if (!userError && adminUsers) {
         const admin = adminUsers.users.find(
           (user) => user.email?.toLowerCase() === adminEmail.toLowerCase()

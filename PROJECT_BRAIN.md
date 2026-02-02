@@ -83,6 +83,86 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          id: string
+          user_id: string
+          property_id: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          property_id: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          property_id?: string
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      favorites_sync_logs: {
+        Row: {
+          id: string
+          user_id: string
+          attempted_count: number
+          synced_count: number
+          trimmed_to: number | null
+          is_suspicious: boolean
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          attempted_count: number
+          synced_count: number
+          trimmed_to?: number | null
+          is_suspicious?: boolean
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          attempted_count?: number
+          synced_count?: number
+          trimmed_to?: number | null
+          is_suspicious?: boolean
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_sync_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       expenses: {
         Row: {
           amount: number
@@ -414,6 +494,11 @@ export type Database = {
           tenant_name: string
           tenant_phone: string | null
           updated_at: string | null
+          // Added by migration 20260201100001 - Tenant Magic Link fields
+          tenant_access_token: string | null
+          tenant_token_expires_at: string | null
+          tenant_token_verified: boolean | null
+          tenant_last_access_at: string | null
         }
         Insert: {
           billing_day?: number | null
@@ -434,6 +519,11 @@ export type Database = {
           tenant_name: string
           tenant_phone?: string | null
           updated_at?: string | null
+          // Added by migration 20260201100001 - Tenant Magic Link fields
+          tenant_access_token?: string | null
+          tenant_token_expires_at?: string | null
+          tenant_token_verified?: boolean | null
+          tenant_last_access_at?: string | null
         }
         Update: {
           billing_day?: number | null
@@ -454,6 +544,11 @@ export type Database = {
           tenant_name?: string
           tenant_phone?: string | null
           updated_at?: string | null
+          // Added by migration 20260201100001 - Tenant Magic Link fields
+          tenant_access_token?: string | null
+          tenant_token_expires_at?: string | null
+          tenant_token_verified?: boolean | null
+          tenant_last_access_at?: string | null
         }
         Relationships: [
           {
@@ -667,6 +762,10 @@ export type Database = {
           signature_url: string | null
           updated_at: string | null
           website: string | null
+          // Added by migration 20260201100000 - Pro status fields
+          pro_status: string | null
+          pro_trial_ends_at: string | null
+          first_login: boolean | null
         }
         Insert: {
           address_document_url?: string | null
@@ -695,6 +794,10 @@ export type Database = {
           signature_url?: string | null
           updated_at?: string | null
           website?: string | null
+          // Added by migration 20260201100000 - Pro status fields
+          pro_status?: string | null
+          pro_trial_ends_at?: string | null
+          first_login?: boolean | null
         }
         Update: {
           address_document_url?: string | null
@@ -723,6 +826,10 @@ export type Database = {
           signature_url?: string | null
           updated_at?: string | null
           website?: string | null
+          // Added by migration 20260201100000 - Pro status fields
+          pro_status?: string | null
+          pro_trial_ends_at?: string | null
+          first_login?: boolean | null
         }
         Relationships: []
       }
@@ -1300,6 +1407,47 @@ export type Database = {
           },
         ]
       }
+      tenant_access_logs: {
+        Row: {
+          id: string
+          lease_id: string | null
+          action: string
+          ip_address: string | null
+          user_agent: string | null
+          failure_reason: string | null
+          attempt_count: number
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          lease_id?: string | null
+          action: string
+          ip_address?: string | null
+          user_agent?: string | null
+          failure_reason?: string | null
+          attempt_count?: number
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          lease_id?: string | null
+          action?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          failure_reason?: string | null
+          attempt_count?: number
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_access_logs_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       teams: {
         Row: {
           billing_email: string | null
@@ -1819,7 +1967,7 @@ export const Constants = {
 ---
 ## 2. UI COMPONENTS (Existing)
 Utilise ces composants pour construire l'interface.
-# 🗺️ MAP DES COMPOSANTS (217)
+# 🗺️ MAP DES COMPOSANTS (232)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -1850,18 +1998,25 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<verification-status-badge />** (Path: `components\dashboard\verification-status-badge.tsx`)
 - **<verification-upload-form />** (Path: `components\dashboard\verification-upload-form.tsx`)
 - **<document-selector />** (Path: `components\document\document-selector.tsx`)
+- **<ErrorBoundary />** (Path: `components\ErrorBoundary.tsx`)
 - **<address-autocomplete />** (Path: `components\forms\address-autocomplete.tsx`)
 - **<address-input-with-map />** (Path: `components\forms\address-input-with-map.tsx`)
 - **<AssociateTenantDialog />** (Path: `components\gestion\AssociateTenantDialog.tsx`)
 - **<OwnerSelector />** (Path: `components\gestion\OwnerSelector.tsx`)
 - **<TeamPropertyCard />** (Path: `components\gestion\TeamPropertyCard.tsx`)
 - **<TenantSelector />** (Path: `components\gestion\TenantSelector.tsx`)
+- **<UpgradeCTA />** (Path: `components\gestion\UpgradeCTA.tsx`)
+- **<UpgradeModal />** (Path: `components\gestion\UpgradeModal.tsx`)
 - **<FeaturesStack />** (Path: `components\home\FeaturesStack.tsx`)
 - **<HomeTour />** (Path: `components\home\HomeTour.tsx`)
 - **<SocialProof />** (Path: `components\home\SocialProof.tsx`)
+- **<InfoBox />** (Path: `components\InfoBox.tsx`)
+- **<KPICard />** (Path: `components\KPICard.tsx`)
 - **<CompareSection />** (Path: `components\landing\CompareSection.tsx`)
 - **<ComparisonTable />** (Path: `components\landing\ComparisonTable.tsx`)
 - **<DousellNavbar />** (Path: `components\landing\DousellNavbar.tsx`)
+- **<DousellNavbarClient />** (Path: `components\landing\DousellNavbarClient.tsx`)
+- **<FeaturesBento />** (Path: `components\landing\FeaturesBento.tsx`)
 - **<HeroIllustration />** (Path: `components\landing\HeroIllustration.tsx`)
 - **<HeroOwnerIllustration />** (Path: `components\landing\HeroOwnerIllustration.tsx`)
 - **<Landing3DOverlay />** (Path: `components\landing\Landing3DOverlay.tsx`)
@@ -1884,20 +2039,17 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<TenantSteps />** (Path: `components\landing\tenant\TenantSteps.tsx`)
 - **<TenantTestimonials />** (Path: `components\landing\tenant\TenantTestimonials.tsx`)
 - **<TrustSection />** (Path: `components\landing\tenant\TrustSection.tsx`)
+- **<VideoTestimonials />** (Path: `components\landing\VideoTestimonials.tsx`)
 - **<app-shell />** (Path: `components\layout\app-shell.tsx`)
 - **<footer />** (Path: `components\layout\footer.tsx`)
 - **<notification-bell />** (Path: `components\layout\notification-bell.tsx`)
 - **<scroll-to-top />** (Path: `components\layout\scroll-to-top.tsx`)
 - **<user-nav />** (Path: `components\layout\user-nav.tsx`)
+- **<LoadingSkeleton />** (Path: `components\LoadingSkeleton.tsx`)
 - **<location-picker-dialog />** (Path: `components\maps\location-picker-dialog.tsx`)
+- **<AccessRequestModal />** (Path: `components\modals\AccessRequestModal.tsx`)
 - **<bottom-nav />** (Path: `components\navigation\bottom-nav.tsx`)
 - **<header />** (Path: `components\navigation\header.tsx`)
-- **<OnboardingTour />** (Path: `components\onboarding\OnboardingTour.tsx`)
-- **<RentalTour />** (Path: `components\onboarding\RentalTour.tsx`)
-- **<step-property-hook />** (Path: `components\onboarding\step-property-hook.tsx`)
-- **<step-qualification />** (Path: `components\onboarding\step-qualification.tsx`)
-- **<step-signup-conversion />** (Path: `components\onboarding\step-signup-conversion.tsx`)
-- **<step-sizing />** (Path: `components\onboarding\step-sizing.tsx`)
 - **<WizardForm />** (Path: `components\onboarding\WizardForm.tsx`)
 - **<KKiaPayWidget />** (Path: `components\payment\KKiaPayWidget.tsx`)
 - **<paydunya-iframe-payment />** (Path: `components\payment\paydunya-iframe-payment.tsx`)
@@ -1958,11 +2110,13 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<SvgIcon />** (Path: `components\saasable\ui\SvgIcon.tsx`)
 - **<create-alert-dialog />** (Path: `components\search\create-alert-dialog.tsx`)
 - **<filter-drawer />** (Path: `components\search\filter-drawer.tsx`)
+- **<GlobalSearch />** (Path: `components\search\GlobalSearch.tsx`)
 - **<map-view />** (Path: `components\search\map-view.tsx`)
 - **<quick-search />** (Path: `components\search\quick-search.tsx`)
 - **<search-experience />** (Path: `components\search\search-experience.tsx`)
 - **<hero-premium />** (Path: `components\sections\hero-premium.tsx`)
 - **<hero />** (Path: `components\sections\hero.tsx`)
+- **<home-seo-content />** (Path: `components\sections\home-seo-content.tsx`)
 - **<landing-sections />** (Path: `components\sections\landing-sections.tsx`)
 - **<metrics-section />** (Path: `components\sections\metrics-section.tsx`)
 - **<new-properties />** (Path: `components\sections\new-properties.tsx`)
@@ -1972,6 +2126,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<ProgrammaticPageTemplate />** (Path: `components\seo\ProgrammaticPageTemplate.tsx`)
 - **<ProgrammaticSectionFAQ />** (Path: `components\seo\ProgrammaticSectionFAQ.tsx`)
 - **<SimilarListingsSection />** (Path: `components\seo\SimilarListingsSection.tsx`)
+- **<MemberQuotaProgress />** (Path: `components\team\MemberQuotaProgress.tsx`)
 - **<theme-provider />** (Path: `components\theme-provider.tsx`)
 - **<accordion />** (Path: `components\ui\accordion.tsx`)
 - **<ace-compare />** (Path: `components\ui\ace-compare.tsx`)
@@ -1997,6 +2152,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<fade-in />** (Path: `components\ui\fade-in.tsx`)
 - **<faq-accordion />** (Path: `components\ui\faq-accordion.tsx`)
 - **<feature-grid />** (Path: `components\ui\feature-grid.tsx`)
+- **<floating-help-button />** (Path: `components\ui\floating-help-button.tsx`)
 - **<glow-effect />** (Path: `components\ui\glow-effect.tsx`)
 - **<gold-particles />** (Path: `components\ui\gold-particles.tsx`)
 - **<hero-1 />** (Path: `components\ui\hero-1.tsx`)
@@ -2008,9 +2164,11 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<motion-wrapper />** (Path: `components\ui\motion-wrapper.tsx`)
 - **<optimized-image />** (Path: `components\ui\optimized-image.tsx`)
 - **<otp-input />** (Path: `components\ui\otp-input.tsx`)
+- **<pagination />** (Path: `components\ui\pagination.tsx`)
 - **<parallax-video />** (Path: `components\ui\parallax-video.tsx`)
 - **<phone-input />** (Path: `components\ui\phone-input.tsx`)
 - **<popover />** (Path: `components\ui\popover.tsx`)
+- **<progress />** (Path: `components\ui\progress.tsx`)
 - **<radio-group />** (Path: `components\ui\radio-group.tsx`)
 - **<scroll-area />** (Path: `components\ui\scroll-area.tsx`)
 - **<select />** (Path: `components\ui\select.tsx`)
@@ -2036,7 +2194,12 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<verified-badge />** (Path: `components\ui\verified-badge.tsx`)
 - **<workspace-switch />** (Path: `components\ui\workspace-switch.tsx`)
 - **<estimation-wizard />** (Path: `components\wizard\estimation-wizard.tsx`)
+- **<LockedSidebarItem />** (Path: `components\workspace\LockedSidebarItem.tsx`)
+- **<OwnerRoleSwitcher />** (Path: `components\workspace\OwnerRoleSwitcher.tsx`)
 - **<theme-provider />** (Path: `components\workspace\providers\theme-provider.tsx`)
+- **<TeamSwitcher />** (Path: `components\workspace\TeamSwitcher.tsx`)
+- **<TemporaryAccessWidget />** (Path: `components\workspace\TemporaryAccessWidget.tsx`)
+- **<TemporaryPermissionsWidget />** (Path: `components\workspace\TemporaryPermissionsWidget.tsx`)
 - **<workspace-bottom-nav />** (Path: `components\workspace\workspace-bottom-nav.tsx`)
 - **<workspace-header />** (Path: `components\workspace\workspace-header.tsx`)
 - **<workspace-sidebar />** (Path: `components\workspace\workspace-sidebar.tsx`)

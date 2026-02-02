@@ -503,6 +503,7 @@ export const getApprovedPropertyIds = async (limit = 20) => {
       .from("properties")
       .select("id")
       .eq("validation_status", "approved")
+      .neq("status", "loué")
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) throw error;

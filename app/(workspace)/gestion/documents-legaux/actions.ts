@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { addMonths } from "date-fns";
 import { sendEmail } from "@/lib/mail-gmail";
+import { getUserTeamContext } from "@/lib/team-context";
+import { requireTeamPermission } from "@/lib/permissions";
 
 // Schema de validation pour générer un préavis
 const generateNoticeSchema = z.object({
@@ -31,22 +33,15 @@ export interface LegalStats {
     complianceScore: number;
 }
 
-/**
- * Récupère les statistiques légales pour l'utilisateur connecté
- */
 export async function getLegalStats(): Promise<LegalStats> {
+    const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        throw new Error("Non authentifié");
-    }
-
-    // Récupérer les baux actifs
+    // Récupérer les baux actifs de l'équipe
     const { data: leases, error: leasesError } = await supabase
         .from('leases')
         .select('id, end_date')
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .eq('status', 'active');
 
     // Si la colonne end_date n'existe pas encore, retourner des stats vides
@@ -85,22 +80,15 @@ export async function getLegalStats(): Promise<LegalStats> {
     };
 }
 
-/**
- * Récupère les alertes d'expiration de bail pour l'utilisateur connecté
- */
 export async function getLeaseAlerts(): Promise<LeaseAlert[]> {
+    const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        throw new Error("Non authentifié");
-    }
-
-    // Récupérer les baux actifs avec date de fin
+    // Récupérer les baux actifs avec date de fin pour l'équipe
     const { data: leases, error: leasesError } = await supabase
         .from('leases')
         .select('id, tenant_name, tenant_email, property_address, end_date, monthly_amount, property_id')
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .eq('status', 'active')
         .not('end_date', 'is', null);
 
@@ -158,12 +146,9 @@ export async function getLeaseAlerts(): Promise<LeaseAlert[]> {
  * Génère un préavis pour un bail donné
  */
 export async function generateNotice(formData: FormData) {
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('leases.terminate');
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return { success: false, error: "Non authentifié" };
-    }
 
     // Validation
     const parsed = generateNoticeSchema.safeParse({
@@ -177,12 +162,12 @@ export async function generateNotice(formData: FormData) {
 
     const { leaseId, noticeType } = parsed.data;
 
-    // Vérifier que le bail appartient à l'utilisateur
+    // Vérifier que le bail appartient à l'équipe
     const { data: lease, error: leaseError } = await supabase
         .from('leases')
         .select('*')
         .eq('id', leaseId)
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .single();
 
     if (leaseError || !lease) {
@@ -284,19 +269,19 @@ export async function generateNotice(formData: FormData) {
  * Récupère les transactions de loyer pour un bail donné
  */
 export async function getLeaseTransactions(leaseId: string) {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         throw new Error("Non authentifié");
     }
 
-    // Vérifier que le bail appartient à l'utilisateur
+    // Vérifier que le bail appartient à l'équipe
     const { data: lease } = await supabase
         .from('leases')
         .select('id')
         .eq('id', leaseId)
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .single();
 
     if (!lease) {
@@ -317,8 +302,9 @@ export async function getLeaseTransactions(leaseId: string) {
  * Renouveler un bail (Décision manuelle du propriétaire)
  */
 export async function renewLease(formData: FormData) {
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('leases.edit');
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { success: false, error: "Non authentifié" };
@@ -335,12 +321,12 @@ export async function renewLease(formData: FormData) {
     }
 
     try {
-        // Vérifier que le bail appartient à l'utilisateur
+        // Vérifier que le bail appartient à l'équipe
         const { data: lease, error: leaseError } = await supabase
             .from('leases')
             .select('*')
             .eq('id', leaseId)
-            .eq('owner_id', user.id)
+            .eq('team_id', teamId)
             .single();
 
         if (leaseError || !lease) {
@@ -485,8 +471,9 @@ export async function renewLease(formData: FormData) {
  * Résilier un bail (Génère et envoie le préavis)
  */
 export async function terminateLease(formData: FormData) {
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('leases.terminate');
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return { success: false, error: "Non authentifié" };
@@ -503,12 +490,12 @@ export async function terminateLease(formData: FormData) {
     }
 
     try {
-        // Vérifier que le bail appartient à l'utilisateur
+        // Vérifier que le bail appartient à l'équipe
         const { data: lease, error: leaseError } = await supabase
             .from('leases')
             .select('*')
             .eq('id', leaseId)
-            .eq('owner_id', user.id)
+            .eq('team_id', teamId)
             .single();
 
         if (leaseError || !lease) {
@@ -623,17 +610,13 @@ export async function terminateLease(formData: FormData) {
  * Récupère tous les baux actifs pour le générateur de documents
  */
 export async function getAllActiveLeases() {
+    const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        throw new Error("Non authentifié");
-    }
 
     const { data: leases, error } = await supabase
         .from('leases')
         .select('id, tenant_name, property_address, lease_pdf_url, monthly_amount, tenant_email, tenant_phone')
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .eq('status', 'active');
 
     if (error) {

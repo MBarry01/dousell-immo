@@ -16,7 +16,7 @@ import { UserNav } from "@/components/layout/user-nav";
 const navLinks = [
   { href: "/", label: "Accueil" },
   { href: "/recherche", label: "Annonce" },
-  { href: "/landing", label: "À propos" },
+  { href: "/pro", label: "À propos" },
   { href: "/planifier-visite", label: "Contact" },
 ];
 

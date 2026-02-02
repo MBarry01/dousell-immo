@@ -19,7 +19,7 @@ export const HeroSection = () => {
         Breakpoint sm:640px pour tablettes petites
       */}
       <section
-        className="relative md:hidden min-h-[85dvh] overflow-visible rounded-none md:m-4 md:rounded-3xl mb-0 pt-0 pb-[5px]"
+        className="relative md:hidden min-h-[100svh] overflow-visible rounded-none mb-0 pt-0 pb-0"
         suppressHydrationWarning
       >
         {/* Image de fond - pleine immersion */}
@@ -54,8 +54,7 @@ export const HeroSection = () => {
         {/* Responsive: w-screen pour couvrir toute la largeur de l'écran, débordant du padding parent */}
         {/* Positionnement absolu avec inset-y-0 et w-screen pour garantir la couverture complète des bords */}
         <div
-          className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-screen z-10 bg-gradient-to-t from-black via-black/95 via-black/60 to-transparent"
-          style={{ height: '630px' }}
+          className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/95 via-black/60 to-transparent"
         />
 
         {/* Contenu aligné en bas - au-dessus du gradient */}
@@ -67,16 +66,17 @@ export const HeroSection = () => {
           - Padding horizontal: px-4 sur petits écrans, px-6 sur écrans ≥640px
           - Padding bottom avec safe area: 101px + safe-area-inset-bottom
         */}
-        <div className="relative z-20 flex min-h-[600px] min-[375px]:min-h-[650px] min-[390px]:min-h-[703px] h-full flex-col justify-end px-4 sm:px-6 pb-[calc(env(safe-area-inset-bottom,0px)+106px)] pwa-hero-pb">
+        <div className="relative z-20 flex min-h-[100svh] h-full flex-col justify-end px-4 sm:px-6 pb-2 mr-0 pb-safe-nav pt-20">
           <div className="space-y-4">
             <FadeIn delay={0.2}>
               <h1 className="text-4xl font-semibold leading-tight text-white">
-                Immobilier au Sénégal : Achète ou investis en toute confiance
+                Immobilier au Sénégal
+                <span className="sr-only"> : Achat, location et gestion locative</span>
               </h1>
             </FadeIn>
             <FadeIn delay={0.3}>
               <p className="text-lg text-white/90 max-w-xl">
-                Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte, Dousell Immo s&apos;impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l&apos;achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.
+                Plus de 500 biens vérifiés à Dakar et sur la Petite Côte.
               </p>
             </FadeIn>
           </div>
@@ -108,12 +108,14 @@ export const HeroSection = () => {
           <div className="space-y-4">
             <FadeIn delay={0.2}>
               <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
-                Immobilier au Sénégal : Achète ou investis en toute confiance
+                Immobilier au Sénégal
+                <span className="sr-only sm:not-sr-only"> : Achète ou investis en toute confiance</span>
               </h1>
             </FadeIn>
             <FadeIn delay={0.3}>
               <p className="text-lg text-white/70 sm:text-xl">
-                Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte, Dousell Immo s&apos;impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l&apos;achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.
+                <span className="md:hidden">Plus de 500 biens vérifiés à Dakar et sur la Petite Côte.</span>
+                <span className="hidden md:inline">Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte, Dousell Immo s&apos;impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l&apos;achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.</span>
               </p>
             </FadeIn>
           </div>

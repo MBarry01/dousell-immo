@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
     Folder,
     FileText,
@@ -21,8 +21,6 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button";
-import { OnboardingTour, useOnboardingTour, TourStep } from "@/components/onboarding/OnboardingTour";
-import { FloatingHelpButton } from '@/components/ui/floating-help-button';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -86,7 +84,6 @@ const DOCUMENT_CATEGORIES = [
 
 export default function RentalDocumentsPage() {
     const { isDark } = useTheme();
-    const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_ged_documents_tour', 1500);
     const [documents, setDocuments] = useState<RentalDocument[]>([]);
     const [properties, setProperties] = useState<Property[]>([]);
     const [leases, setLeases] = useState<Lease[]>([]);
@@ -95,31 +92,6 @@ export default function RentalDocumentsPage() {
     // Filters
     const [selectedLeaseFilter, setSelectedLeaseFilter] = useState<string>("all");
     const [searchQuery, setSearchQuery] = useState("");
-
-    // Tour Steps
-    const tourSteps: TourStep[] = useMemo(() => [
-        {
-            targetId: 'tour-ged-upload',
-            title: 'Ajouter un document',
-            description: 'Uploadez vos contrats de bail, quittances, factures et autres documents importants liés à vos biens.',
-            imageSrc: 'https://images.unsplash.com/photo-1568234928966-359c35dd8327?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Upload de document'
-        },
-        {
-            targetId: 'tour-ged-search',
-            title: 'Recherche & Filtres',
-            description: 'Retrouvez rapidement vos documents grâce à la recherche par nom ou filtrez par locataire.',
-            imageSrc: 'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Recherche de documents'
-        },
-        {
-            targetId: 'tour-ged-list',
-            title: 'Vos documents',
-            description: 'Tous vos documents sont organisés ici. Prévisualisez, téléchargez ou supprimez en un clic.',
-            imageSrc: 'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Liste des documents'
-        }
-    ], []);
 
     // Upload State
     const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -222,15 +194,6 @@ export default function RentalDocumentsPage() {
 
     return (
         <div className={`min-h-screen p-6 md:p-8 ${isDark ? 'bg-slate-950' : 'bg-gray-50'}`}>
-            {/* Premium Onboarding Tour */}
-            <OnboardingTour
-                steps={tourSteps}
-                isOpen={showTour}
-                onClose={closeTour}
-                onComplete={closeTour}
-                storageKey="dousell_ged_documents_tour"
-            />
-
             <div className="max-w-7xl mx-auto space-y-8">
 
                 {/* Header */}
@@ -451,9 +414,6 @@ export default function RentalDocumentsPage() {
                     )}
                 </div>
             </div>
-
-            {/* Bouton pour relancer le tour (Portal) */}
-            <FloatingHelpButton onClick={resetTour} />
         </div>
     );
 }

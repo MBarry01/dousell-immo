@@ -25,7 +25,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/workspace/providers/theme-provider";
 
 interface Tenant {
     id: string;
@@ -85,6 +85,8 @@ const statusConfig = {
 const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
     'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
 
+
+
 export function TenantCard({
     tenant,
     onConfirmPayment,
@@ -140,24 +142,19 @@ export function TenantCard({
                         <Button
                             variant="ghost"
                             size="sm"
-                            className={`h-7 w-7 p-0 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 transition-opacity ${isDark ? 'hover:bg-slate-800' : 'hover:bg-gray-200'
-                                }`}
+                            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 transition-opacity hover:bg-muted"
                         >
-                            <MoreVertical className={`h-4 w-4 ${isDark ? 'text-slate-400' : 'text-gray-500'}`} />
+                            <MoreVertical className="h-4 w-4 text-muted-foreground" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className={`w-56 p-1 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'
-                        }`}>
+                    <DropdownMenuContent align="end" className="w-56 p-1">
                         {/* VIEW RECEIPT - Only if Paid */}
                         {tenant.status === 'paid' && onViewReceipt && (
                             <DropdownMenuItem
                                 onClick={() => onViewReceipt(tenant)}
-                                className={`cursor-pointer mb-1 ${isDark
-                                        ? 'text-slate-300 focus:text-white hover:bg-slate-800 focus:bg-slate-800'
-                                        : 'text-gray-700 focus:text-gray-900 hover:bg-gray-100 focus:bg-gray-100'
-                                    }`}
+                                className="cursor-pointer mb-1"
                             >
-                                <Eye className={`mr-2 h-4 w-4 ${isDark ? 'text-slate-500' : 'text-gray-500'}`} />
+                                <Eye className="mr-2 h-4 w-4 text-muted-foreground" />
                                 Voir quittance
                             </DropdownMenuItem>
                         )}
@@ -167,16 +164,9 @@ export function TenantCard({
                             <DropdownMenuItem
                                 onClick={() => tenant.status !== 'paid' && onConfirmPayment(tenant.id, tenant.last_transaction_id)}
                                 disabled={tenant.status === 'paid'}
-                                className={`cursor-pointer mb-1 ${tenant.status === 'paid'
-                                        ? isDark
-                                            ? 'opacity-50 cursor-not-allowed text-slate-500'
-                                            : 'opacity-50 cursor-not-allowed text-gray-400'
-                                        : isDark
-                                            ? 'text-slate-300 hover:bg-slate-800 focus:bg-slate-800 focus:text-white'
-                                            : 'text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:text-gray-900'
-                                    }`}
+                                className="cursor-pointer mb-1"
                             >
-                                <CheckCircle className={`mr-2 h-4 w-4 ${isDark ? 'text-slate-500' : 'text-gray-500'}`} />
+                                <CheckCircle className="mr-2 h-4 w-4 text-muted-foreground" />
                                 Marquer payé
                             </DropdownMenuItem>
                         )}
@@ -184,12 +174,9 @@ export function TenantCard({
                         {onInvite && tenant.email && (
                             <DropdownMenuItem
                                 onClick={() => onInvite(tenant.id)}
-                                className={`cursor-pointer mb-1 ${isDark
-                                        ? 'text-slate-300 focus:text-white hover:bg-slate-800 focus:bg-slate-800'
-                                        : 'text-gray-700 focus:text-gray-900 hover:bg-gray-100 focus:bg-gray-100'
-                                    }`}
+                                className="cursor-pointer mb-1"
                             >
-                                <Send className={`mr-2 h-4 w-4 ${isDark ? 'text-slate-500' : 'text-gray-500'}`} />
+                                <Send className="mr-2 h-4 w-4 text-muted-foreground" />
                                 Inviter au portail
                             </DropdownMenuItem>
                         )}
@@ -197,27 +184,21 @@ export function TenantCard({
                         {onEdit && (
                             <DropdownMenuItem
                                 onClick={() => onEdit(tenant)}
-                                className={`cursor-pointer mb-1 ${isDark
-                                        ? 'text-slate-300 focus:text-white hover:bg-slate-800 focus:bg-slate-800'
-                                        : 'text-gray-700 focus:text-gray-900 hover:bg-gray-100 focus:bg-gray-100'
-                                    }`}
+                                className="cursor-pointer mb-1"
                             >
-                                <Edit2 className={`mr-2 h-4 w-4 ${isDark ? 'text-slate-500' : 'text-gray-500'}`} />
+                                <Edit2 className="mr-2 h-4 w-4 text-muted-foreground" />
                                 Modifier
                             </DropdownMenuItem>
                         )}
 
-                        <DropdownMenuSeparator className={`my-1 ${isDark ? 'bg-slate-800' : 'bg-gray-200'}`} />
+                        <DropdownMenuSeparator className="my-1" />
 
                         {isViewingTerminated && onReactivate ? (
                             <DropdownMenuItem
                                 onClick={() => onReactivate(tenant.id, tenant.name)}
-                                className={`cursor-pointer ${isDark
-                                        ? 'text-slate-300 hover:bg-slate-800 focus:bg-slate-800'
-                                        : 'text-gray-700 hover:bg-gray-100 focus:bg-gray-100'
-                                    }`}
+                                className="cursor-pointer"
                             >
-                                <RotateCcw className={`mr-2 h-4 w-4 ${isDark ? 'text-slate-500' : 'text-gray-500'}`} />
+                                <RotateCcw className="mr-2 h-4 w-4 text-muted-foreground" />
                                 Réactiver
                             </DropdownMenuItem>
                         ) : onTerminate && (
@@ -246,8 +227,7 @@ export function TenantCard({
                             {tenant.status === 'pending' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>}
                             {tenant.status === 'overdue' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>}
                             <span className={`
-                                relative inline-flex rounded-full h-3 w-3 border-2
-                                ${isDark ? 'border-slate-900' : 'border-white'}
+                                relative inline-flex rounded-full h-3 w-3 border-2 border-card
                                 ${tenant.status === 'paid' ? 'bg-green-500' : ''}
                                 ${tenant.status === 'pending' ? 'bg-yellow-500' : ''}
                                 ${tenant.status === 'overdue' ? 'bg-red-500' : ''}
@@ -259,9 +239,7 @@ export function TenantCard({
                 {/* Info */}
                 <div className="flex-1 min-w-0 pr-8">
                     <div className="block group/link">
-                        <h3
-                            className={`font-semibold text-base truncate mb-1 group-hover/link:text-blue-400 transition-colors ${isDark ? 'text-white' : 'text-gray-900'
-                                }`}
+                        <h3 className="font-semibold text-base truncate mb-1 group-hover/link:text-primary transition-colors text-foreground"
                             title={tenant.name}
                         >
                             {tenant.name}
@@ -270,21 +248,21 @@ export function TenantCard({
 
                     <div className="space-y-1.5">
                         {/* Property */}
-                        <div className={`flex items-center gap-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                            <MapPin className={`w-3.5 h-3.5 shrink-0 ${isDark ? 'text-slate-500' : 'text-gray-400'}`} />
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <MapPin className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
                             <span className="truncate">{tenant.property}</span>
                         </div>
 
                         {/* Contact info - show on hover or always on mobile */}
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                             {tenant.phone && (
-                                <div className={`flex items-center gap-1.5 text-xs ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground/80">
                                     <Phone className="w-3 h-3" />
                                     <span>{tenant.phone}</span>
                                 </div>
                             )}
                             {tenant.email && (
-                                <div className={`flex items-center gap-1.5 text-xs min-w-0 ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
+                                <div className="flex items-center gap-1.5 text-xs min-w-0 text-muted-foreground/80">
                                     <Mail className="w-3 h-3 shrink-0" />
                                     <span className="truncate">{tenant.email}</span>
                                 </div>
@@ -295,19 +273,17 @@ export function TenantCard({
             </div>
 
             {/* Footer - Amount and Period */}
-            <div className={`flex items-center justify-between mt-4 pt-4 border-t ${isDark ? 'border-slate-800' : 'border-gray-200'
-                }`}>
-                <div className={`flex items-center gap-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                    <Calendar className={`w-4 h-4 ${isDark ? 'text-slate-500' : 'text-gray-400'}`} />
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4 text-muted-foreground/60" />
                     <span>{periodLabel}</span>
                 </div>
 
                 <div className="text-right">
-                    <span className={`text-lg font-bold font-mono ${isDark ? 'text-white' : 'text-gray-900'
-                        }`}>
+                    <span className="text-lg font-bold font-mono text-foreground">
                         {formatAmount(tenant.rentAmount)}
                     </span>
-                    <span className={`text-xs ml-1 ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>FCFA</span>
+                    <span className="text-xs ml-1 text-muted-foreground">FCFA</span>
                 </div>
             </div>
 

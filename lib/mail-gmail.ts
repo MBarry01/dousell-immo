@@ -317,7 +317,7 @@ export async function sendInvoiceEmail({
  * Email de l'admin (pour les notifications)
  */
 export function getAdminEmail() {
-  return process.env.ADMIN_EMAIL || process.env.GMAIL_USER || "barrymohamadou98@gmail.com";
+  return process.env.ADMIN_EMAIL || process.env.GMAIL_USER;
 }
 
 /**

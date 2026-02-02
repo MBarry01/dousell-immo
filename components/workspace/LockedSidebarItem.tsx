@@ -1,0 +1,221 @@
+"use client";
+
+/**
+ * LockedSidebarItem - Élément de navigation verrouillable
+ *
+ * Affiche un élément de menu qui peut être :
+ * - Normal (lien cliquable) si l'utilisateur a la permission
+ * - Verrouillé (grisé avec cadenas) si non autorisé, avec clic qui ouvre la modale
+ */
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Lock } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { createClient } from "@/utils/supabase/client";
+import { TEAM_PERMISSIONS, type TeamPermissionKey } from "@/lib/team-permissions";
+import type { LucideIcon } from "lucide-react";
+
+interface LockedSidebarItemProps {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  isActive: boolean;
+  isCollapsed: boolean;
+  isMobile: boolean;
+  requiredPermission?: TeamPermissionKey;
+  currentTeamId?: string; // ID de l'équipe actuellement sélectionnée
+  onNavigate?: () => void;
+  onRequestAccess?: (permission: TeamPermissionKey, label: string) => void;
+}
+
+/**
+ * Vérifie si un rôle a une permission donnée dans la matrice
+ */
+function roleHasPermission(role: string, permission: TeamPermissionKey): boolean {
+  const allowedRoles = TEAM_PERMISSIONS[permission];
+  if (!allowedRoles) return false;
+
+  // Normaliser le rôle en minuscules pour la comparaison
+  const normalizedRole = role.toLowerCase();
+  return allowedRoles.some(r => r.toLowerCase() === normalizedRole);
+}
+
+export function LockedSidebarItem({
+  href,
+  icon: Icon,
+  label,
+  isActive,
+  isCollapsed,
+  isMobile,
+  requiredPermission,
+  currentTeamId,
+  onNavigate,
+  onRequestAccess,
+}: LockedSidebarItemProps) {
+  const [hasAccess, setHasAccess] = useState(true); // Par défaut autorisé
+  const [isLoading, setIsLoading] = useState(!!requiredPermission);
+
+  useEffect(() => {
+    // Si pas de permission requise, accès autorisé
+    if (!requiredPermission) {
+      setHasAccess(true);
+      setIsLoading(false);
+      return;
+    }
+
+    const checkPermission = async () => {
+      try {
+        const supabase = createClient();
+
+        // Récupérer l'utilisateur
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setHasAccess(false);
+          setIsLoading(false);
+          return;
+        }
+
+        // Récupérer le rôle de l'utilisateur dans l'équipe SÉLECTIONNÉE
+        let query = supabase
+          .from("team_members")
+          .select("team_id, role")
+          .eq("user_id", user.id)
+          .eq("status", "active");
+
+        // Si on a un currentTeamId, filtrer par cette équipe
+        if (currentTeamId) {
+          query = query.eq("team_id", currentTeamId);
+        }
+
+        const { data: teamMember } = await query.maybeSingle();
+
+        if (!teamMember) {
+          setHasAccess(false);
+          setIsLoading(false);
+          return;
+        }
+
+        const userRole = teamMember.role as string;
+
+        // Debug log
+        console.log(`[LockedSidebarItem] User role: "${userRole}", Permission: "${requiredPermission}"`);
+
+        // 1. Vérifier si le rôle a la permission dans la matrice
+        const hasRolePermission = roleHasPermission(userRole, requiredPermission);
+        console.log(`[LockedSidebarItem] Role has permission: ${hasRolePermission}`);
+
+        if (hasRolePermission) {
+          setHasAccess(true);
+          setIsLoading(false);
+          return;
+        }
+
+        // 2. Sinon, vérifier les permissions temporaires
+        const { data: tempPermission } = await supabase.rpc(
+          "has_temporary_permission",
+          {
+            p_team_id: teamMember.team_id,
+            p_user_id: user.id,
+            p_permission: requiredPermission,
+          }
+        );
+
+        setHasAccess(!!tempPermission);
+      } catch (error) {
+        console.error("[LockedSidebarItem] Permission check error:", error);
+        setHasAccess(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkPermission();
+  }, [requiredPermission, currentTeamId]);
+
+  // Pendant le chargement, afficher comme normal
+  if (isLoading) {
+    return (
+      <div
+        className={cn(
+          "flex items-center rounded-lg transition-all duration-200 h-11",
+          "px-[14px]",
+          "text-slate-700 dark:text-muted-foreground animate-pulse"
+        )}
+      >
+        <Icon className="h-5 w-5 shrink-0" />
+        {(!isCollapsed || isMobile) && (
+          <span className="text-sm truncate ml-3">{label}</span>
+        )}
+      </div>
+    );
+  }
+
+  // Si l'utilisateur a l'accès → lien normal
+  if (hasAccess) {
+    return (
+      <Link
+        href={href}
+        prefetch={false} // Disable prefetch to prevent stale RSC cache
+        onClick={onNavigate}
+        className={cn(
+          "flex items-center rounded-lg transition-all duration-200 group h-11",
+          "px-[14px]",
+          isActive
+            ? "bg-[#0F172A] text-white shadow-md font-medium dark:bg-primary/10 dark:text-primary"
+            : "text-slate-700 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
+        )}
+        title={isCollapsed && !isMobile ? label : undefined}
+      >
+        <Icon
+          className={cn(
+            "h-5 w-5 shrink-0 transition-all",
+            isActive
+              ? "text-white dark:text-primary"
+              : "text-muted-foreground group-hover:text-foreground"
+          )}
+        />
+        {(!isCollapsed || isMobile) && (
+          <span className="text-sm truncate ml-3">{label}</span>
+        )}
+      </Link>
+    );
+  }
+
+  // Si verrouillé → bouton avec cadenas
+  return (
+    <button
+      onClick={() => {
+        if (requiredPermission && onRequestAccess) {
+          onRequestAccess(requiredPermission, label);
+        }
+      }}
+      className={cn(
+        "w-full flex items-center justify-between rounded-lg transition-all duration-200 group h-11 relative",
+        "px-[14px]",
+        "text-slate-400 dark:text-zinc-500 hover:bg-slate-50 dark:hover:bg-zinc-800/50 cursor-pointer"
+      )}
+      title={isCollapsed && !isMobile ? `${label} (Verrouillé)` : undefined}
+    >
+      <div className="flex items-center">
+        <Icon className="h-5 w-5 shrink-0 opacity-50" />
+        {(!isCollapsed || isMobile) && (
+          <span className="text-sm truncate ml-3 opacity-50">{label}</span>
+        )}
+      </div>
+      {/* Cadenas en mode étendu */}
+      {(!isCollapsed || isMobile) && (
+        <Lock
+          className={cn(
+            "h-4 w-4 shrink-0 transition-colors",
+            "text-slate-900 dark:text-zinc-500 group-hover:text-slate-900 dark:group-hover:text-zinc-300"
+          )}
+        />
+      )}
+      {/* Petit cadenas en mode collapsed - positionné en bas à droite de l'icône */}
+      {isCollapsed && !isMobile && (
+        <Lock className="h-3 w-3 absolute bottom-1 right-2 text-slate-900 dark:text-zinc-500" />
+      )}
+    </button>
+  );
+}

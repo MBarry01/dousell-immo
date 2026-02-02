@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { submitOnboarding } from "@/app/landing/commencer/actions";
+import { submitOnboarding } from "@/app/pro/start/actions";
 
 type Step = "user" | "agency" | "goals" | "confirmation";
 

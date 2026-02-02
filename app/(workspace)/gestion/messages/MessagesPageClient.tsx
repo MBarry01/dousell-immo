@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { MessageSquare, ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import {
@@ -11,8 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useTheme } from '@/components/workspace/providers/theme-provider';
-import { OnboardingTour, useOnboardingTour, TourStep } from "@/components/onboarding/OnboardingTour";
-import { FloatingHelpButton } from '@/components/ui/floating-help-button';
 
 interface Lease {
     id: string;
@@ -30,36 +27,9 @@ export function MessagesPageClient({
     tenantsWithoutConversation
 }: MessagesPageClientProps) {
     const { isDark } = useTheme();
-    const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_messagerie_tour', 1500);
-
-    const tourSteps: TourStep[] = useMemo(() => [
-        {
-            targetId: 'tour-msg-new',
-            title: 'Nouveau message',
-            description: 'Démarrez une conversation avec un locataire. Sélectionnez-le dans la liste pour lui envoyer un message.',
-            imageSrc: 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Nouveau message'
-        },
-        {
-            targetId: 'tour-msg-list',
-            title: 'Vos conversations',
-            description: 'Retrouvez ici toutes vos conversations avec vos locataires. Cliquez sur une conversation pour l\'ouvrir.',
-            imageSrc: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Liste des conversations'
-        }
-    ], []);
 
     return (
         <div className="space-y-6 p-4 md:p-6">
-            {/* Premium Onboarding Tour */}
-            <OnboardingTour
-                steps={tourSteps}
-                isOpen={showTour}
-                onClose={closeTour}
-                onComplete={closeTour}
-                storageKey="dousell_messagerie_tour"
-            />
-
             <div className="flex items-center justify-between">
                 <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     Messagerie
@@ -153,9 +123,6 @@ export function MessagesPageClient({
                     </div>
                 )}
             </div>
-
-            {/* Bouton pour relancer le tour (Portal) */}
-            <FloatingHelpButton onClick={resetTour} />
         </div>
     );
 }

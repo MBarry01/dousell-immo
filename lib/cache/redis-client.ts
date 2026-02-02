@@ -16,6 +16,11 @@ type RedisClient = any; // On typage plus tard
  * Factory qui retourne le bon client selon l'environnement
  */
 function createRedisClient(): RedisClient {
+  // 🛡️ Browser safety check - prevent Node.js modules from being resolved/called in browser
+  if (typeof window !== 'undefined') {
+    return null;
+  }
+
   // Emergency kill switch - set DISABLE_REDIS=true to bypass Redis entirely
   if (process.env.DISABLE_REDIS === 'true') {
     console.warn('⚠️ Redis disabled via DISABLE_REDIS env var. Running without cache.');

@@ -24,9 +24,21 @@ export async function POST(request: Request) {
     // KKiaPay peut envoyer soit x-kkiapay-signature soit x-kkiapay-secret
     const receivedSecret = signature || secret;
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     // Vérifier le secret
     const config = getKKiaPayConfig();
-    if (receivedSecret && receivedSecret !== config.secret) {
+    const secretFromEnv = config.secret;
+
+    if (isProduction && !receivedSecret) {
+      console.error("Webhook KKiaPay: Authentification manquante en production");
+      return Response.json(
+        { error: "Authentification requise" },
+        { status: 401 }
+      );
+    }
+
+    if (receivedSecret && receivedSecret !== secretFromEnv) {
       console.error("Webhook KKiaPay: Secret invalide");
       return Response.json(
         { error: "Secret invalide" },
@@ -34,7 +46,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!receivedSecret) {
+    if (!receivedSecret && !isProduction) {
       console.warn("⚠️ Webhook KKiaPay reçu sans authentification (mode test)");
     }
 

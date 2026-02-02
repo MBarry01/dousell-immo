@@ -116,13 +116,13 @@ export function OrphanLeasesAlert({ count, leases }: OrphanLeasesAlertProps) {
 
             {/* Reconciliation Dialog */}
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="sm:max-w-2xl bg-slate-900 border-slate-800 text-white max-h-[80vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-2xl bg-card border-border text-foreground max-h-[80vh] overflow-y-auto shadow-2xl">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <LinkIcon className="w-5 h-5 text-[#F4C430]" />
+                            <LinkIcon className="w-5 h-5 text-primary" />
                             Associer les baux aux biens
                         </DialogTitle>
-                        <DialogDescription className="text-slate-400">
+                        <DialogDescription className="text-muted-foreground">
                             Sélectionnez le bien correspondant à chaque locataire.
                         </DialogDescription>
                     </DialogHeader>
@@ -131,12 +131,12 @@ export function OrphanLeasesAlert({ count, leases }: OrphanLeasesAlertProps) {
                         {leases.map((lease) => (
                             <div
                                 key={lease.id}
-                                className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3"
+                                className="p-4 rounded-lg bg-muted/30 border border-border space-y-3"
                             >
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="font-semibold text-white">{lease.tenant_name}</p>
-                                        <p className="text-sm text-slate-400">
+                                        <p className="font-semibold text-foreground">{lease.tenant_name}</p>
+                                        <p className="text-sm text-muted-foreground">
                                             {lease.property_address || "Adresse non renseignée"} • {lease.monthly_amount.toLocaleString()} FCFA/mois
                                         </p>
                                     </div>
@@ -149,12 +149,12 @@ export function OrphanLeasesAlert({ count, leases }: OrphanLeasesAlertProps) {
                                             setSelections({ ...selections, [lease.id]: val })
                                         }
                                     >
-                                        <SelectTrigger className="flex-1 bg-slate-700 border-slate-600 text-white">
+                                        <SelectTrigger className="flex-1 bg-background border-border text-foreground">
                                             <SelectValue placeholder="Sélectionner un bien..." />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-slate-800 border-slate-700">
+                                        <SelectContent className="bg-popover border-border">
                                             {properties.length === 0 ? (
-                                                <SelectItem value="_empty" disabled className="text-slate-500">
+                                                <SelectItem value="_empty" disabled className="text-muted-foreground">
                                                     Aucun bien disponible
                                                 </SelectItem>
                                             ) : (
@@ -162,12 +162,12 @@ export function OrphanLeasesAlert({ count, leases }: OrphanLeasesAlertProps) {
                                                     <SelectItem
                                                         key={prop.id}
                                                         value={prop.id}
-                                                        className="text-white hover:bg-slate-700"
+                                                        className="text-foreground focus:bg-accent focus:text-accent-foreground"
                                                     >
                                                         <div className="flex items-center gap-2">
-                                                            <Home className="w-4 h-4 text-[#F4C430]" />
+                                                            <Home className="w-4 h-4 text-primary" />
                                                             <span>{prop.title}</span>
-                                                            <span className="text-slate-400 text-xs">
+                                                            <span className="text-muted-foreground text-xs">
                                                                 ({prop.price.toLocaleString()} FCFA)
                                                             </span>
                                                         </div>
@@ -180,7 +180,7 @@ export function OrphanLeasesAlert({ count, leases }: OrphanLeasesAlertProps) {
                                     <Button
                                         onClick={() => handleLink(lease.id)}
                                         disabled={!selections[lease.id] || loading}
-                                        className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90"
+                                        className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md"
                                         size="sm"
                                     >
                                         <Check className="w-4 h-4" />
@@ -190,8 +190,8 @@ export function OrphanLeasesAlert({ count, leases }: OrphanLeasesAlertProps) {
                         ))}
 
                         {leases.length === 0 && (
-                            <div className="text-center py-8 text-slate-400">
-                                <Check className="w-12 h-12 mx-auto mb-3 text-green-400" />
+                            <div className="text-center py-8 text-muted-foreground">
+                                <Check className="w-12 h-12 mx-auto mb-3 text-green-500" />
                                 <p>Tous les baux sont liés !</p>
                             </div>
                         )}

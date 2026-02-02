@@ -11,6 +11,8 @@ export type Property = {
   exclusive?: boolean;
   location: {
     city: string;
+    district?: string;
+    region?: string;
     address: string;
     landmark: string;
     coords: { lat: number; lng: number };

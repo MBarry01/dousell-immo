@@ -18,7 +18,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { confirmPayment, terminateLease, reactivateLease } from '../actions';
 import { toast } from 'sonner';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 interface Tenant {
     id: string;
@@ -87,7 +86,6 @@ export function TenantTable({
     onReactivate,
     onInvite
 }: TenantTableProps) {
-    const { isDark } = useTheme();
     const router = useRouter();
     const [sortField, setSortField] = useState<SortField>('name');
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
@@ -95,20 +93,20 @@ export function TenantTable({
     const statusConfig = {
         paid: {
             label: 'Payé',
-            bg: isDark ? 'bg-slate-800' : 'bg-gray-100',
-            text: isDark ? 'text-slate-300' : 'text-gray-700',
+            bg: 'bg-muted',
+            text: 'text-muted-foreground',
             dot: 'bg-green-500'
         },
         pending: {
             label: 'Attente',
-            bg: isDark ? 'bg-slate-800' : 'bg-gray-100',
-            text: isDark ? 'text-slate-300' : 'text-gray-700',
+            bg: 'bg-muted',
+            text: 'text-muted-foreground',
             dot: 'bg-yellow-500'
         },
         overdue: {
             label: 'Retard',
-            bg: isDark ? 'bg-slate-800' : 'bg-gray-100',
-            text: isDark ? 'text-slate-300' : 'text-gray-700',
+            bg: 'bg-muted',
+            text: 'text-muted-foreground',
             dot: 'bg-red-500'
         }
     };
@@ -132,11 +130,11 @@ export function TenantTable({
 
     const SortIcon = ({ field }: { field: SortField }) => {
         if (sortField !== field) {
-            return <ArrowUpDown className={`w-3 h-3 ${isDark ? 'text-slate-600' : 'text-gray-400'}`} />;
+            return <ArrowUpDown className="w-3 h-3 text-muted-foreground/50" />;
         }
         return sortOrder === 'asc'
-            ? <ArrowUp className={`w-3 h-3 ${isDark ? 'text-slate-400' : 'text-gray-600'}`} />
-            : <ArrowDown className={`w-3 h-3 ${isDark ? 'text-slate-400' : 'text-gray-600'}`} />;
+            ? <ArrowUp className="w-3 h-3 text-muted-foreground" />
+            : <ArrowDown className="w-3 h-3 text-muted-foreground" />;
     };
 
     const filteredTenants = tenants
@@ -185,15 +183,15 @@ export function TenantTable({
     return (
         <>
 
-            <div className={`border rounded-lg overflow-x-auto max-w-[100vw] w-full transition-colors ${isDark ? 'bg-black border-slate-800' : 'bg-white border-gray-200'}`}>
+            <div className="border border-border rounded-lg overflow-x-auto max-w-[100vw] w-full transition-colors bg-card">
                 <table className="w-full text-left text-sm">
-                    <thead className={`border-b ${isDark ? 'border-slate-800' : 'border-gray-200'}`}>
+                    <thead className="border-b border-border bg-muted/30">
                         <tr>
                             {/* Locataire - Always visible */}
                             <th className="py-3 px-2 sm:px-4">
                                 <button
                                     onClick={() => handleSort('name')}
-                                    className={`flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-gray-500 hover:text-gray-700'}`}
+                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
                                 >
                                     Locataire
                                     <SortIcon field="name" />
@@ -204,7 +202,7 @@ export function TenantTable({
                             <th className="py-3 px-4 hidden lg:table-cell">
                                 <button
                                     onClick={() => handleSort('property')}
-                                    className={`flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-gray-500 hover:text-gray-700'}`}
+                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
                                 >
                                     Bien
                                     <SortIcon field="property" />
@@ -215,7 +213,7 @@ export function TenantTable({
                             <th className="py-3 px-4 hidden md:table-cell">
                                 <button
                                     onClick={() => handleSort('period')}
-                                    className={`flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-gray-500 hover:text-gray-700'}`}
+                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
                                 >
                                     Période
                                     <SortIcon field="period" />
@@ -226,7 +224,7 @@ export function TenantTable({
                             <th className="py-3 px-4">
                                 <button
                                     onClick={() => handleSort('status')}
-                                    className={`flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-gray-500 hover:text-gray-700'}`}
+                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
                                 >
                                     Statut
                                     <SortIcon field="status" />
@@ -237,7 +235,7 @@ export function TenantTable({
                             <th className="py-3 px-4 text-right">
                                 <button
                                     onClick={() => handleSort('rentAmount')}
-                                    className={`flex items-center gap-1.5 ml-auto text-xs font-medium uppercase tracking-wider transition-colors ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-gray-500 hover:text-gray-700'}`}
+                                    className="flex items-center gap-1.5 ml-auto text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
                                 >
                                     Montant
                                     <SortIcon field="rentAmount" />
@@ -250,39 +248,39 @@ export function TenantTable({
                             </th>
                         </tr>
                     </thead>
-                    <tbody className={`divide-y ${isDark ? 'divide-slate-800/50' : 'divide-gray-100'}`}>
+                    <tbody className="divide-y divide-border/50">
                         {filteredTenants.map((tenant) => {
                             const periodLabel = tenant.period_month && tenant.period_year
                                 ? `${monthNames[tenant.period_month - 1]} ${tenant.period_year}`
                                 : '-';
 
                             return (
-                                <tr key={tenant.last_transaction_id || tenant.id} className={`transition-colors ${isDark ? 'hover:bg-slate-900/50' : 'hover:bg-gray-50'}`}>
+                                <tr key={tenant.last_transaction_id || tenant.id} className="transition-colors hover:bg-muted/50">
                                     {/* Locataire */}
                                     <td className="py-3 px-2 sm:px-4">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${isDark ? 'bg-gradient-to-br from-slate-700 to-slate-800 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 bg-muted text-muted-foreground border border-border">
                                                 {getInitials(tenant.name)}
                                             </div>
                                             <div className="min-w-0">
                                                 <Link href={`/gestion/locataires/${tenant.id}`} className="block group/link">
-                                                    <div className={`font-medium text-sm truncate transition-colors ${isDark ? 'text-white group-hover/link:text-blue-400' : 'text-gray-900 group-hover/link:text-blue-600'}`}>
+                                                    <div className="font-medium text-sm truncate transition-colors text-foreground group-hover/link:text-primary">
                                                         {tenant.name}
                                                     </div>
                                                 </Link>
-                                                <div className={`text-xs truncate ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>{tenant.email || 'Email manquant'}</div>
+                                                <div className="text-xs truncate text-muted-foreground">{tenant.email || 'Email manquant'}</div>
                                             </div>
                                         </div>
                                     </td>
 
                                     {/* Bien - Hidden on mobile */}
                                     <td className="py-3 px-4 hidden lg:table-cell">
-                                        <div className={`text-sm truncate max-w-[200px] ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>{tenant.property}</div>
+                                        <div className="text-sm truncate max-w-[200px] text-muted-foreground">{tenant.property}</div>
                                     </td>
 
                                     {/* Période - Hidden on mobile */}
                                     <td className="py-3 px-4 hidden md:table-cell">
-                                        <div className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>{periodLabel}</div>
+                                        <div className="text-sm text-muted-foreground">{periodLabel}</div>
                                     </td>
 
                                     {/* Statut */}
@@ -295,34 +293,33 @@ export function TenantTable({
 
                                     {/* Montant */}
                                     <td className="py-3 px-4 text-right">
-                                        <div className={`font-mono font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(tenant.rentAmount)}</div>
-                                        <div className={`text-xs ${isDark ? 'text-slate-600' : 'text-gray-400'}`}>FCFA</div>
+                                        <div className="font-mono font-medium text-sm text-foreground">{formatAmount(tenant.rentAmount)}</div>
+                                        <div className="text-xs text-muted-foreground/60">FCFA</div>
                                     </td>
 
                                     {/* Actions */}
                                     <td className="py-3 px-4 text-right">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="sm" className={`h-8 w-8 p-0 ${isDark ? 'hover:bg-slate-800' : 'hover:bg-gray-100'}`}>
-                                                    <MoreHorizontal className={`h-4 w-4 ${isDark ? 'text-slate-500' : 'text-gray-400'}`} />
+                                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-muted">
+                                                    <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className={`w-44 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200 shadow-lg'}`}>
+                                            <DropdownMenuContent align="end" className="w-44">
                                                 {tenant.status === 'paid' && onViewReceipt && (
-                                                    <DropdownMenuItem onClick={() => onViewReceipt(tenant)} className={`${isDark ? 'text-slate-300 hover:bg-slate-800 focus:bg-slate-800' : 'text-gray-700 hover:bg-gray-50'}`}>
+                                                    <DropdownMenuItem onClick={() => onViewReceipt(tenant)}>
                                                         <Eye className="mr-2 h-4 w-4" />
                                                         Voir quittance
                                                     </DropdownMenuItem>
                                                 )}
                                                 {(tenant.status === 'pending' || tenant.status === 'overdue') && onConfirmPayment && (
-                                                    <DropdownMenuItem onClick={() => onConfirmPayment(tenant.id, tenant.last_transaction_id)} className={`${isDark ? 'text-slate-300 hover:bg-slate-800 focus:bg-slate-800' : 'text-gray-700 hover:bg-gray-50'}`}>
+                                                    <DropdownMenuItem onClick={() => onConfirmPayment(tenant.id, tenant.last_transaction_id)}>
                                                         <CheckCircle className="mr-2 h-4 w-4" />
                                                         Marquer payé
                                                     </DropdownMenuItem>
                                                 )}
                                                 <DropdownMenuItem
                                                     onClick={() => onEdit?.(tenant)}
-                                                    className={`${isDark ? 'text-slate-300 hover:bg-slate-800 focus:bg-slate-800' : 'text-gray-700 hover:bg-gray-50'}`}
                                                 >
                                                     <Edit2 className="mr-2 h-4 w-4" />
                                                     Modifier
@@ -331,22 +328,21 @@ export function TenantTable({
                                                 {onInvite && tenant.email && (
                                                     <DropdownMenuItem
                                                         onClick={() => onInvite(tenant.id)}
-                                                        className={`${isDark ? 'text-slate-300 hover:bg-slate-800 focus:bg-slate-800' : 'text-gray-700 hover:bg-gray-50'}`}
                                                     >
-                                                        <Send className="mr-2 h-4 w-4 text-slate-500" />
+                                                        <Send className="mr-2 h-4 w-4 text-muted-foreground" />
                                                         Inviter au portail
                                                     </DropdownMenuItem>
                                                 )}
 
-                                                <DropdownMenuSeparator className={isDark ? 'bg-slate-800' : 'bg-gray-100'} />
+                                                <DropdownMenuSeparator />
                                                 {isViewingTerminated && onReactivate ? (
-                                                    <DropdownMenuItem onClick={() => onReactivate(tenant.id, tenant.name)} className={`${isDark ? 'text-slate-300 hover:bg-slate-800 focus:bg-slate-800' : 'text-gray-700 hover:bg-gray-50'}`}>
-                                                        <RotateCcw className="mr-2 h-4 w-4 text-slate-500" />
+                                                    <DropdownMenuItem onClick={() => onReactivate(tenant.id, tenant.name)}>
+                                                        <RotateCcw className="mr-2 h-4 w-4 text-muted-foreground" />
                                                         Réactiver
                                                     </DropdownMenuItem>
                                                 ) : onTerminate && (
-                                                    <DropdownMenuItem onClick={() => onTerminate(tenant.id, tenant.name)} className={`hover:bg-red-500/10 focus:bg-red-500/10 hover:text-red-600 focus:text-red-600 transition-colors ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>
-                                                        <Trash2 className="mr-2 h-4 w-4 text-slate-500 group-hover:text-red-500" />
+                                                    <DropdownMenuItem onClick={() => onTerminate(tenant.id, tenant.name)} className="text-destructive focus:text-destructive focus:bg-destructive/10 transition-colors">
+                                                        <Trash2 className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-destructive" />
                                                         Résilier
                                                     </DropdownMenuItem>
                                                 )}
@@ -370,7 +366,7 @@ export function TenantTable({
                                         <AddTenantButton
                                             ownerId={ownerId}
                                             trigger={
-                                                <Button size="lg" className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90 font-semibold w-full sm:w-auto">
+                                                <Button size="lg" className="bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 font-semibold w-full sm:w-auto transition-all shadow-md">
                                                     Créer un Bail
                                                 </Button>
                                             }
@@ -402,7 +398,7 @@ export function TenantTable({
                             />
                         ) : (
                             <div className="text-center py-16">
-                                <div className="text-slate-500 text-sm">
+                                <div className="text-muted-foreground text-sm">
                                     Aucun résultat pour cette recherche
                                 </div>
                             </div>

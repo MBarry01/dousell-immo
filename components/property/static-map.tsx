@@ -17,19 +17,20 @@ type StaticMapProps = {
 export const StaticMap = ({ coords, city, address, landmark }: StaticMapProps) => {
   const [mapUrl, setMapUrl] = useState<string | null>(null);
   const [mapError, setMapError] = useState(false);
-  
+
   // Vérifier si les coordonnées sont valides
   const hasValidCoords = useMemo(() => {
-    return coords.lat !== 0 && coords.lng !== 0 && 
-           !isNaN(coords.lat) && !isNaN(coords.lng) &&
-           coords.lat >= -90 && coords.lat <= 90 &&
-           coords.lng >= -180 && coords.lng <= 180;
-  }, [coords.lat, coords.lng]);
+    if (!coords) return false;
+    return coords.lat !== 0 && coords.lng !== 0 &&
+      !isNaN(coords.lat) && !isNaN(coords.lng) &&
+      coords.lat >= -90 && coords.lat <= 90 &&
+      coords.lng >= -180 && coords.lng <= 180;
+  }, [coords]);
 
-  const mapsLink = hasValidCoords 
+  const mapsLink = hasValidCoords && coords
     ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
     : `https://www.google.com/maps/search/${encodeURIComponent(city + (address ? `, ${address}` : ""))}`;
-  
+
   // Construire l'URL de la carte avec CartoDB Dark Matter (comme la carte principale)
   useEffect(() => {
     if (!hasValidCoords) {
@@ -39,12 +40,12 @@ export const StaticMap = ({ coords, city, address, landmark }: StaticMapProps) =
 
     const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
     const googleApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
-    
-    if (mapboxToken) {
+
+    if (mapboxToken && coords) {
       // Utiliser Mapbox avec style dark (comme la carte principale)
       const mapboxMapUrl = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+3B82F6(${coords.lng},${coords.lat})/${coords.lng},${coords.lat},15/800x400@2x?access_token=${mapboxToken}`;
       setMapUrl(mapboxMapUrl);
-    } else if (googleApiKey) {
+    } else if (googleApiKey && coords) {
       // Utiliser Google Maps Static API avec un style sombre
       const googleMapUrl = new URL("https://maps.googleapis.com/maps/api/staticmap");
       googleMapUrl.searchParams.set("center", `${coords.lat},${coords.lng}`);
@@ -53,23 +54,23 @@ export const StaticMap = ({ coords, city, address, landmark }: StaticMapProps) =
       googleMapUrl.searchParams.set("scale", "2");
       googleMapUrl.searchParams.set("format", "jpg");
       googleMapUrl.searchParams.set("maptype", "roadmap");
-      
+
       // Style sombre pour correspondre au thème
       googleMapUrl.searchParams.set(
         "style",
         "feature:all|element:labels|visibility:simplified|feature:poi|visibility:off|feature:road|element:labels|visibility:off|feature:water|color:0x1a1a2e|feature:landscape|color:0x16213e"
       );
-      
+
       // Marqueur personnalisé
       googleMapUrl.searchParams.set(
         "markers",
         `color:0x3B82F6|size:mid|${coords.lat},${coords.lng}`
       );
-      
+
       googleMapUrl.searchParams.set("key", googleApiKey);
       setMapUrl(googleMapUrl.toString());
     }
-  }, [coords.lat, coords.lng, hasValidCoords]);
+  }, [hasValidCoords, coords]);
 
   return (
     <motion.div
@@ -109,7 +110,7 @@ export const StaticMap = ({ coords, city, address, landmark }: StaticMapProps) =
           </a>
         </Button>
       </div>
-      
+
       <div className="relative h-64 w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-900">
         {hasValidCoords && mapUrl && !mapError ? (
           <>
@@ -146,7 +147,7 @@ export const StaticMap = ({ coords, city, address, landmark }: StaticMapProps) =
                 {hasValidCoords ? "Carte non disponible" : "Coordonnées non disponibles"}
               </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-white/40">
-                {hasValidCoords 
+                {hasValidCoords
                   ? 'Cliquez sur "Ouvrir Maps" pour voir la localisation'
                   : 'Les coordonnées GPS ne sont pas configurées pour ce bien'}
               </p>

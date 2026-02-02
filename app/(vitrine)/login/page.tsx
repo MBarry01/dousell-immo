@@ -1,26 +1,44 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useTransition, Suspense, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
-import { Mail, Lock, ArrowLeft } from "lucide-react";
+import { Mail, Lock, ArrowLeft, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Captcha } from "@/components/ui/captcha";
 import { login } from "@/app/(vitrine)/auth/actions";
+import { determinePostLoginRedirect } from "@/lib/auth-redirect";
 
-export default function LoginPage() {
+function LoginPageContent() {
+  const { user, loading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
+  // Redirection automatique si déjà connecté
+  useEffect(() => {
+    if (!loading && user) {
+      toast.success("Vous êtes déjà connecté");
+      router.push("/gestion");
+    }
+  }, [user, loading, router]);
+
+  // Lire le paramètre redirect explicite de l'URL
+  const explicitRedirect = searchParams.get("redirect");
+
   const handleGoogleSignIn = () => {
-    // Utiliser une route API pour Google OAuth (meilleure gestion des cookies PKCE)
-    window.location.href = "/auth/google";
+    // Utiliser une route API pour Google OAuth avec le redirect explicite si présent
+    const googleUrl = explicitRedirect
+      ? `/auth/google?next=${encodeURIComponent(explicitRedirect)}`
+      : "/auth/google";
+    window.location.href = googleUrl;
   };
 
   return (
@@ -128,10 +146,17 @@ export default function LoginPage() {
                     });
                   }
                 } else if (result?.success) {
-                  // Connexion réussie: forcer un rechargement complet de la page
-                  // pour que le hook useAuth détecte la nouvelle session
+                  // Connexion réussie
                   toast.success("Connexion réussie !");
-                  window.location.href = "/"; // Force un rechargement complet
+
+                  // Priorité : utiliser le redirect explicite de l'URL si présent
+                  if (explicitRedirect) {
+                    window.location.href = explicitRedirect;
+                  } else {
+                    // Sinon, utiliser la redirection intelligente selon le type d'utilisateur
+                    const { redirectPath } = await determinePostLoginRedirect();
+                    window.location.href = redirectPath;
+                  }
                 }
               });
             }}
@@ -219,5 +244,21 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function LoginPageFallback() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-background via-background to-black">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginPageFallback />}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

@@ -11,7 +11,6 @@ import {
     ResponsiveContainer,
     Legend,
 } from "recharts";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
 import { TrendingUp } from "lucide-react";
 
 interface RevenueHistoryItem {
@@ -27,7 +26,6 @@ interface RevenueChartProps {
 }
 
 export function RevenueChart({ data }: RevenueChartProps) {
-    const { isDark } = useTheme();
     const [showExpected, setShowExpected] = useState(true);
 
     // Format data for display
@@ -48,10 +46,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className={`p-3 rounded-lg shadow-lg border ${isDark
-                    ? "bg-slate-800 border-slate-700 text-white"
-                    : "bg-white border-gray-200 text-gray-900"
-                    }`}>
+                <div className="p-3 rounded-lg shadow-lg border border-border bg-card text-card-foreground">
                     <p className="font-semibold mb-2">{label}</p>
                     {payload.map((entry: any, index: number) => (
                         <p key={index} className="text-sm flex items-center gap-2">
@@ -59,7 +54,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                                 className="w-3 h-3 rounded-full"
                                 style={{ backgroundColor: entry.color }}
                             />
-                            <span className={isDark ? "text-slate-300" : "text-gray-600"}>
+                            <span className="text-muted-foreground">
                                 {entry.name === "collected" ? "Encaissé" : "Attendu"}:
                             </span>
                             <span className="font-mono font-medium">
@@ -75,15 +70,14 @@ export function RevenueChart({ data }: RevenueChartProps) {
 
     if (data.length === 0) {
         return (
-            <div className={`p-6 rounded-xl border ${isDark ? "bg-slate-800/50 border-slate-700" : "bg-gray-50 border-gray-200"
-                }`}>
+            <div className="p-6 rounded-xl border border-border bg-muted/20">
                 <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-5 h-5 text-[#F4C430]" />
-                    <h3 className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold text-foreground">
                         Évolution des Revenus
                     </h3>
                 </div>
-                <p className={`text-center py-8 ${isDark ? "text-slate-400" : "text-gray-500"}`}>
+                <p className="text-center py-8 text-muted-foreground">
                     Pas encore de données. Les revenus apparaîtront ici après les premiers encaissements.
                 </p>
             </div>
@@ -91,22 +85,21 @@ export function RevenueChart({ data }: RevenueChartProps) {
     }
 
     return (
-        <div className={`p-6 rounded-xl border ${isDark ? "bg-slate-800/50 border-slate-700" : "bg-white border-gray-200"
-            }`}>
+        <div className="p-6 rounded-xl border border-border bg-card">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-[#F4C430]" />
-                    <h3 className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold text-foreground">
                         Évolution des Revenus
                     </h3>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                     <div className="text-center">
-                        <p className={`font-mono font-bold ${isDark ? "text-green-400" : "text-green-600"}`}>
+                        <p className="font-mono font-bold text-green-600 dark:text-green-500">
                             {totalCollected.toLocaleString('fr-FR')}
                         </p>
-                        <p className={`text-xs ${isDark ? "text-slate-400" : "text-gray-500"}`}>
+                        <p className="text-xs text-muted-foreground">
                             Encaissé
                         </p>
                     </div>
@@ -114,7 +107,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                         <p className={`font-bold ${collectionRate >= 90 ? "text-green-500" : collectionRate >= 70 ? "text-yellow-500" : "text-red-500"}`}>
                             {collectionRate}%
                         </p>
-                        <p className={`text-xs ${isDark ? "text-slate-400" : "text-gray-500"}`}>
+                        <p className="text-xs text-muted-foreground">
                             Taux
                         </p>
                     </div>
@@ -128,9 +121,9 @@ export function RevenueChart({ data }: RevenueChartProps) {
                         type="checkbox"
                         checked={showExpected}
                         onChange={(e) => setShowExpected(e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 text-[#F4C430] focus:ring-[#F4C430]"
+                        className="w-4 h-4 rounded border-border bg-background text-primary focus:ring-primary"
                     />
-                    <span className={`text-xs ${isDark ? "text-slate-400" : "text-gray-600"}`}>
+                    <span className="text-xs text-muted-foreground">
                         Afficher attendu
                     </span>
                 </label>
@@ -152,19 +145,22 @@ export function RevenueChart({ data }: RevenueChartProps) {
                         </defs>
                         <CartesianGrid
                             strokeDasharray="3 3"
-                            stroke={isDark ? "#334155" : "#e5e7eb"}
+                            stroke="currentColor"
+                            className="text-border"
                         />
                         <XAxis
                             dataKey="name"
-                            tick={{ fill: isDark ? "#94a3b8" : "#6b7280", fontSize: 11 }}
+                            tick={{ fill: "currentColor", fontSize: 11 }}
+                            className="text-muted-foreground"
                             tickLine={false}
-                            axisLine={{ stroke: isDark ? "#475569" : "#d1d5db" }}
+                            axisLine={{ stroke: "currentColor", className: "text-border" }}
                         />
                         <YAxis
-                            tick={{ fill: isDark ? "#94a3b8" : "#6b7280", fontSize: 11 }}
+                            tick={{ fill: "currentColor", fontSize: 11 }}
+                            className="text-muted-foreground"
                             tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
                             tickLine={false}
-                            axisLine={{ stroke: isDark ? "#475569" : "#d1d5db" }}
+                            axisLine={{ stroke: "currentColor", className: "text-border" }}
                         />
                         <Tooltip content={<CustomTooltip />} />
                         {showExpected && (
@@ -194,13 +190,13 @@ export function RevenueChart({ data }: RevenueChartProps) {
             {/* Legend */}
             <div className="flex items-center justify-center gap-6 mt-4 text-xs">
                 <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-[#F4C430]" />
-                    <span className={isDark ? "text-slate-400" : "text-gray-600"}>Encaissé</span>
+                    <span className="w-3 h-3 rounded-full bg-primary" />
+                    <span className="text-muted-foreground">Encaissé</span>
                 </div>
                 {showExpected && (
                     <div className="flex items-center gap-2">
                         <span className="w-3 h-3 rounded-full bg-indigo-500" />
-                        <span className={isDark ? "text-slate-400" : "text-gray-600"}>Attendu</span>
+                        <span className="text-muted-foreground">Attendu</span>
                     </div>
                 )}
             </div>

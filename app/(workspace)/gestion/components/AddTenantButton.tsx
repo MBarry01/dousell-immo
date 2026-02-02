@@ -24,7 +24,6 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { GenerateContractModal } from '@/components/contracts/GenerateContractModal';
 import { generateLeaseContract } from '@/lib/actions/contract-actions';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
 import { getPremiumBranding } from '../config/actions';
 import confetti from 'canvas-confetti';
 import { PropertySelector } from './PropertySelector';
@@ -55,7 +54,6 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showProfileAlert, setShowProfileAlert] = useState(false);
-    const { isDark } = useTheme();
 
     const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
 
@@ -229,22 +227,22 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
         return (
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button className={`${isDark ? 'bg-[#F4C430] text-black hover:bg-[#F4C430]/90' : 'bg-slate-900 text-white hover:bg-slate-800'} rounded-lg h-9 px-2 sm:px-4 font-medium text-sm transition-all`}>
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg h-9 px-2 sm:px-4 font-medium text-sm transition-all shadow-sm">
                         <Plus className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">Ajouter</span>
                         <ChevronDown className="w-3 h-3 ml-1 sm:ml-2 opacity-70" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className={`${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'} min-w-[200px] p-1`}>
+                <DropdownMenuContent align="end" className="bg-popover border-border min-w-[200px] p-1 shadow-lg">
                     <DropdownMenuItem
                         onClick={handleTriggerClick}
-                        className={`flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 text-sm ${isDark ? 'text-slate-300 hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white' : 'text-gray-700 hover:bg-slate-100 hover:text-slate-900 focus:bg-slate-100'}`}
+                        className="flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-accent focus:bg-accent focus:text-accent-foreground"
                     >
                         <User className="w-4 h-4" />
                         <span>Ajouter un locataire</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => setBulkImportOpen(true)}
-                        className={`flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 text-sm ${isDark ? 'text-slate-300 hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white' : 'text-gray-700 hover:bg-slate-100 hover:text-slate-900 focus:bg-slate-100'}`}
+                        className="flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-accent focus:bg-accent focus:text-accent-foreground"
                     >
                         <FileSpreadsheet className="w-4 h-4" />
                         <span>Ajouter en masse</span>
@@ -325,12 +323,12 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
         <>
             {renderTrigger()}
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="z-[100] fixed top-[4%] left-[50%] translate-x-[-50%] translate-y-0 sm:top-[50%] sm:translate-y-[-50%] w-[90vw] sm:w-full max-w-lg max-h-[92vh] overflow-y-auto overflow-x-hidden bg-slate-900 border-slate-800 text-white px-4 pt-4 pb-24 sm:p-6 outline-none">
+                <DialogContent className="z-[100] fixed top-[4%] left-[50%] translate-x-[-50%] translate-y-0 sm:top-[50%] sm:translate-y-[-50%] w-[90vw] sm:w-full max-w-lg max-h-[92vh] overflow-y-auto overflow-x-hidden bg-card border-border text-foreground px-4 pt-4 pb-24 sm:p-6 outline-none shadow-2xl">
                     <DialogHeader>
-                        <DialogTitle className="text-xl font-semibold text-white">
-                            {initialData ? "Exemple de Bail (Démo)" : "Nouveau Locataire"}
+                        <DialogTitle className="text-xl font-semibold text-foreground">
+                            {initialData ? "Nouveau Bail (Démo)" : "Nouveau Bail"}
                         </DialogTitle>
-                        <DialogDescription className="text-slate-400">
+                        <DialogDescription className="text-muted-foreground">
                             {initialData ? "Ces données sont pré-remplies pour tester la création." : "Remplissez les informations pour créer un nouveau bail"}
                         </DialogDescription>
                     </DialogHeader>
@@ -341,42 +339,40 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                             <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 flex items-start gap-3">
                                 <span className="text-red-500 mt-0.5">⚠️</span>
                                 <div className="space-y-1">
-                                    <h4 className="text-sm font-semibold text-red-500">Erreur Bloquante</h4>
-                                    <p className="text-sm text-red-200/90">{error}</p>
+                                    <h4 className="text-sm font-semibold text-destructive">Erreur Bloquante</h4>
+                                    <p className="text-sm text-destructive/90">{error}</p>
                                 </div>
                             </div>
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-300">
-                                    Nom complet <span className="text-red-400">*</span>
+                                <label className="text-sm font-medium text-foreground/80">
+                                    Nom complet <span className="text-destructive">*</span>
                                 </label>
                                 <Input
                                     name="tenant_name"
-                                    placeholder="ex: Mamadou Diop"
+                                    placeholder="ex: Amadou Ndiaye"
                                     defaultValue={initialData?.name}
                                     required
-                                    className="bg-slate-800 border-slate-700 text-white"
-                                    whileFocus={{ scale: 1 }}
+                                    className="bg-transparent border-border text-foreground focus-visible:ring-primary"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-300">Téléphone</label>
+                                <label className="text-sm font-medium text-foreground/80">Téléphone</label>
                                 <Input
                                     name="tenant_phone"
                                     placeholder="ex: +221 77..."
                                     defaultValue={initialData?.phone}
-                                    className="bg-slate-800 border-slate-700 text-white"
-                                    whileFocus={{ scale: 1 }}
+                                    className="bg-transparent border-border text-foreground focus-visible:ring-primary"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">
-                                Email <span className="text-red-400">*</span>
-                                <span className="text-xs text-slate-500 ml-2">(pour l&apos;envoi des quittances)</span>
+                            <label className="text-sm font-medium text-foreground/80">
+                                Email <span className="text-destructive">*</span>
+                                <span className="text-xs text-muted-foreground ml-2">(pour l&apos;envoi des quittances)</span>
                             </label>
                             <Input
                                 name="tenant_email"
@@ -384,8 +380,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                                 placeholder="ex: locataire@email.com"
                                 defaultValue={initialData?.email}
                                 required
-                                className="bg-slate-800 border-slate-700 text-white"
-                                whileFocus={{ scale: 1 }}
+                                className="bg-transparent border-border text-foreground focus-visible:ring-primary"
                             />
                         </div>
 
@@ -404,8 +399,8 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-300">
-                                    Loyer (FCFA) <span className="text-red-400">*</span>
+                                <label className="text-sm font-medium text-foreground/80">
+                                    Loyer (FCFA) <span className="text-destructive">*</span>
                                 </label>
                                 <Input
                                     name="monthly_amount"
@@ -414,63 +409,59 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                                     value={rentAmount}
                                     onChange={(e) => setRentAmount(e.target.value)}
                                     required
-                                    className="bg-slate-800 border-slate-700 text-white font-mono"
-                                    whileFocus={{ scale: 1 }}
+                                    className="bg-transparent border-border text-foreground font-mono focus-visible:ring-primary"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-300">Jour de paiement</label>
+                                <label className="text-sm font-medium text-foreground/80">Jour de paiement</label>
                                 <Input
                                     name="billing_day"
                                     type="number"
                                     min="1"
                                     max="31"
                                     defaultValue={initialData?.day || 5}
-                                    className="bg-slate-800 border-slate-700 text-white"
-                                    whileFocus={{ scale: 1 }}
+                                    className="bg-transparent border-border text-foreground focus-visible:ring-primary"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-300">
-                                    Début bail <span className="text-red-400">*</span>
+                                <label className="text-sm font-medium text-foreground/80">
+                                    Début bail <span className="text-destructive">*</span>
                                 </label>
                                 <Input
                                     name="start_date"
                                     type="date"
                                     defaultValue={initialData?.startDate}
                                     required
-                                    className="bg-slate-800 border-slate-700 text-white h-10 w-full px-3 block [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:p-1"
-                                    whileFocus={{ scale: 1 }}
+                                    className="bg-transparent border-border text-foreground h-10 w-full px-3 block focus-visible:ring-primary [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:p-1 dark:[&::-webkit-calendar-picker-indicator]:invert"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">
-                                Fin bail <span className="text-red-400">*</span>
-                                <span className="text-xs text-slate-500 ml-2">(pour les alertes juridiques J-180 et J-90)</span>
+                            <label className="text-sm font-medium text-foreground/80">
+                                Fin bail <span className="text-destructive">*</span>
+                                <span className="text-xs text-muted-foreground ml-2">(pour les alertes juridiques J-180 et J-90)</span>
                             </label>
                             <Input
                                 name="end_date"
                                 type="date"
                                 defaultValue={initialData?.endDate}
                                 required
-                                className="bg-slate-800 border-slate-700 text-white h-10 w-full px-3 block [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:p-1"
-                                whileFocus={{ scale: 1 }}
+                                className="bg-transparent border-border text-foreground h-10 w-full px-3 block focus-visible:ring-primary [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:p-1 dark:[&::-webkit-calendar-picker-indicator]:invert"
                             />
                         </div>
 
                         {/* Caution Field */}
-                        <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
-                            <label className="text-sm font-medium text-slate-300 flex justify-between">
+                        <div className="bg-muted/30 p-3 rounded-lg border border-border">
+                            <label className="text-sm font-medium text-foreground/80 flex justify-between">
                                 <span>Mois de caution</span>
-                                <span className="text-xs text-[#F4C430]">Recommandé: 2 mois</span>
+                                <span className="text-xs text-primary">Recommandé: 2 mois</span>
                             </label>
                             <div className="flex gap-2 mt-2">
                                 {[1, 2, 3].map((m) => (
                                     <label key={m} className="flex-1 cursor-pointer">
                                         <input type="radio" name="deposit_months" value={m} className="peer hidden" defaultChecked={m === 2} />
-                                        <div className="h-9 flex items-center justify-center rounded-md border border-slate-600 bg-slate-800 text-slate-300 peer-checked:bg-[#F4C430] peer-checked:text-black peer-checked:border-[#F4C430] peer-checked:font-bold transition-all text-sm">
+                                        <div className="h-9 flex items-center justify-center rounded-md border border-border bg-card text-muted-foreground peer-checked:bg-primary peer-checked:text-primary-foreground peer-checked:border-primary peer-checked:font-bold transition-all text-sm">
                                             {m} Mois
                                         </div>
                                     </label>
@@ -482,7 +473,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-slate-900 text-white hover:bg-slate-800 dark:bg-[#F4C430] dark:text-black dark:hover:bg-[#F4C430]/90 h-11 text-base font-semibold rounded-lg disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+                                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 text-base font-semibold rounded-lg disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-md"
                             >
                                 {loading ? (
                                     <div className="flex items-center gap-2">
@@ -500,10 +491,10 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
 
             {/* PROMPT: Generate Contract? */}
             <Dialog open={showContractPrompt} onOpenChange={setShowContractPrompt}>
-                <DialogContent className="sm:max-w-md bg-slate-900 border-slate-800 text-white">
+                <DialogContent className="sm:max-w-md bg-card border-border text-foreground shadow-2xl">
                     <DialogHeader>
-                        <DialogTitle>Générer le contrat de bail ?</DialogTitle>
-                        <DialogDescription className="text-slate-400">
+                        <DialogTitle className="text-foreground">Générer le contrat de bail ?</DialogTitle>
+                        <DialogDescription className="text-muted-foreground">
                             Le locataire a été créé avec succès. Souhaitez-vous générer et personnaliser le contrat de bail maintenant ?
                         </DialogDescription>
                     </DialogHeader>
@@ -511,7 +502,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                         <Button
                             variant="ghost"
                             onClick={() => setShowContractPrompt(false)}
-                            className="text-slate-400 hover:text-white"
+                            className="text-muted-foreground hover:text-foreground"
                         >
                             Non, plus tard
                         </Button>
@@ -521,7 +512,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                                 // Small delay to prevent body scroll locking issues between modals
                                 setTimeout(() => setShowContractModal(true), 150);
                             }}
-                            className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-[#F4C430] dark:text-black dark:hover:bg-[#F4C430]/90 transition-colors"
+                            className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
                         >
                             Oui, générer le contrat
                         </Button>
@@ -546,12 +537,12 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
             }
             {/* ALERT: Profile Incomplete */}
             <Dialog open={showProfileAlert} onOpenChange={setShowProfileAlert}>
-                <DialogContent className="sm:max-w-md bg-slate-900 border-red-900/50 text-white">
+                <DialogContent className="sm:max-w-md bg-card border-destructive/50 text-foreground shadow-2xl">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-red-500">
+                        <DialogTitle className="flex items-center gap-2 text-destructive">
                             <span>⚠️ Profil Incomplet</span>
                         </DialogTitle>
-                        <DialogDescription className="text-slate-300 pt-2">
+                        <DialogDescription className="text-muted-foreground pt-2">
                             Pour créer des baux valides, vous devez d&apos;abord renseigner votre nom ou raison sociale dans la configuration.
                         </DialogDescription>
                     </DialogHeader>
@@ -559,13 +550,14 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                         <Button
                             variant="ghost"
                             onClick={() => setShowProfileAlert(false)}
-                            className="text-slate-400 hover:text-white"
+                            className="text-muted-foreground hover:text-foreground"
                         >
                             Annuler
                         </Button>
+
                         <Button
                             onClick={() => router.push('/gestion/config')}
-                            className="bg-red-600 hover:bg-red-700 text-white"
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                             Compléter mon profil
                         </Button>
@@ -722,12 +714,12 @@ function TenantOnboardingWizard({ open, onOpenChange, leaseData, profile, onComp
 
     return (
         <Dialog open={open} onOpenChange={(val) => !val && onComplete()}>
-            <DialogContent className="sm:max-w-xl bg-slate-900 border-slate-800 text-white p-0 overflow-hidden mb-safe">
+            <DialogContent className="sm:max-w-xl bg-card border-border text-foreground p-0 overflow-hidden mb-safe shadow-2xl">
                 <DialogTitle className="sr-only">Assistant de Démarrage Locataire</DialogTitle>
                 <DialogDescription className="sr-only">
                     Finalisez l&apos;entrée de votre nouveau locataire en confirmant les paiements et en envoyant le pack de bienvenue.
                 </DialogDescription>
-                <div className="bg-[#F4C430] p-6 text-black">
+                <div className="bg-primary p-6 text-primary-foreground">
                     <h2 className="text-xl font-bold flex items-center gap-2">
                         <ShieldCheck className="w-6 h-6" />
                         Assistant de Démarrage
@@ -738,49 +730,48 @@ function TenantOnboardingWizard({ open, onOpenChange, leaseData, profile, onComp
                 <div className="p-6">
                     {step === 1 && (
                         <div className="space-y-6">
-                            <div className="bg-slate-800/50 p-4 rounded-lg flex items-center justify-between border border-slate-700">
+                            <div className="bg-muted/50 p-4 rounded-lg flex items-center justify-between border border-border">
                                 <div>
-                                    <p className="text-slate-400 text-sm uppercase tracking-wider font-semibold">Total à encaisser</p>
-                                    <p className="text-3xl font-bold text-[#F4C430]">{grandTotal.toLocaleString()} FCFA</p>
+                                    <p className="text-muted-foreground text-sm uppercase tracking-wider font-semibold">Total à encaisser</p>
+                                    <p className="text-3xl font-bold text-primary">{grandTotal.toLocaleString()} FCFA</p>
                                 </div>
-                                <Wallet className="w-10 h-10 text-slate-600" />
+                                <Wallet className="w-10 h-10 text-muted-foreground/30" />
                             </div>
-
                             <div className="space-y-3">
-                                <label className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${stats.depositPaid ? 'border-[#F4C430] bg-[#F4C430]/10' : 'border-slate-700 hover:border-slate-600'}`}>
-                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${stats.depositPaid ? 'border-[#F4C430] bg-[#F4C430]' : 'border-slate-500'}`}>
-                                        {stats.depositPaid && <Check className="w-4 h-4 text-black" />}
+                                <label className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${stats.depositPaid ? 'border-primary bg-primary/10' : 'border-border hover:border-accent'}`}>
+                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${stats.depositPaid ? 'border-primary bg-primary' : 'border-muted-foreground/50'}`}>
+                                        {stats.depositPaid && <Check className="w-4 h-4 text-primary-foreground" />}
                                     </div>
                                     <input type="checkbox" className="hidden" checked={stats.depositPaid} onChange={(e) => setStats({ ...stats, depositPaid: e.target.checked })} />
                                     <div className="flex-1">
-                                        <div className="font-semibold text-white">Caution ({leaseData.depositMonths} mois)</div>
-                                        <div className="text-sm text-slate-400">Garantie locative</div>
+                                        <div className="font-semibold text-foreground">Caution ({leaseData.depositMonths} mois)</div>
+                                        <div className="text-sm text-muted-foreground">Garantie locative</div>
                                     </div>
                                     <div className="font-mono font-bold text-lg">{totalDeposit.toLocaleString()}</div>
                                 </label>
 
-                                <label className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${stats.rentPaid ? 'border-[#F4C430] bg-[#F4C430]/10' : 'border-slate-700 hover:border-slate-600'}`}>
-                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${stats.rentPaid ? 'border-[#F4C430] bg-[#F4C430]' : 'border-slate-500'}`}>
-                                        {stats.rentPaid && <Check className="w-4 h-4 text-black" />}
+                                <label className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${stats.rentPaid ? 'border-primary bg-primary/10' : 'border-border hover:border-accent'}`}>
+                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${stats.rentPaid ? 'border-primary bg-primary' : 'border-muted-foreground/50'}`}>
+                                        {stats.rentPaid && <Check className="w-4 h-4 text-primary-foreground" />}
                                     </div>
                                     <input type="checkbox" className="hidden" checked={stats.rentPaid} onChange={(e) => setStats({ ...stats, rentPaid: e.target.checked })} />
                                     <div className="flex-1">
-                                        <div className="font-semibold text-white">Premier Loyer</div>
-                                        <div className="text-sm text-slate-400">Mois en cours</div>
+                                        <div className="font-semibold text-foreground">Premier Loyer</div>
+                                        <div className="text-sm text-muted-foreground">Mois en cours</div>
                                     </div>
                                     <div className="font-mono font-bold text-lg">{totalRent.toLocaleString()}</div>
                                 </label>
                             </div>
 
                             <div className="space-y-3 pt-2">
-                                <Button onClick={handleConfirmPayments} disabled={loading} className="w-full bg-[#F4C430] text-black hover:bg-[#F4C430]/90 font-bold h-12 text-lg">
+                                <Button onClick={handleConfirmPayments} disabled={loading} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold h-12 text-lg shadow-md">
                                     {loading ? <Loader2 className="animate-spin" /> : "Valider les Encaissements"}
                                 </Button>
                                 <Button
                                     variant="ghost"
                                     onClick={onComplete}
                                     disabled={loading}
-                                    className="w-full text-slate-400 hover:text-white hover:bg-slate-800"
+                                    className="w-full text-muted-foreground hover:text-foreground hover:bg-muted"
                                 >
                                     Passer (encaisser plus tard)
                                 </Button>
@@ -794,27 +785,27 @@ function TenantOnboardingWizard({ open, onOpenChange, leaseData, profile, onComp
                                 <Check className="w-10 h-10" />
                             </div>
 
-                            <h3 className="text-2xl font-bold text-white">Paiements enregistrés !</h3>
-                            <p className="text-slate-400 text-lg">Un seul email sera envoyé avec tous les documents.</p>
+                            <h3 className="text-2xl font-bold text-foreground">Paiements enregistrés !</h3>
+                            <p className="text-muted-foreground text-lg">Un seul email sera envoyé avec tous les documents.</p>
 
-                            <div className="bg-slate-800 p-6 rounded-xl text-left space-y-4">
-                                <h4 className="font-semibold text-white border-b border-slate-700 pb-2 mb-2">Le Pack de Bienvenue inclura :</h4>
-                                <div className="flex items-center gap-3 text-slate-300">
-                                    <FileText className="w-5 h-5 text-[#F4C430]" /> Contrat de Bail (PDF)
+                            <div className="bg-muted p-6 rounded-xl text-left space-y-4 border border-border">
+                                <h4 className="font-semibold text-foreground border-b border-border pb-2 mb-2">Le Pack de Bienvenue inclura :</h4>
+                                <div className="flex items-center gap-3 text-muted-foreground">
+                                    <FileText className="w-5 h-5 text-primary" /> Contrat de Bail (PDF)
                                 </div>
-                                <div className="flex items-center gap-3 text-slate-300">
-                                    <Mail className="w-5 h-5 text-[#F4C430]" /> Lien d&apos;accès à l&apos;Espace Locataire
+                                <div className="flex items-center gap-3 text-muted-foreground">
+                                    <Mail className="w-5 h-5 text-primary" /> Lien d&apos;accès à l&apos;Espace Locataire
                                 </div>
-                                <div className="flex items-center gap-3 text-slate-300">
-                                    <FileText className="w-5 h-5 text-[#F4C430]" /> Récapitulatif du bail et des paiements
+                                <div className="flex items-center gap-3 text-muted-foreground">
+                                    <FileText className="w-5 h-5 text-primary" /> Récapitulatif du bail et des paiements
                                 </div>
                             </div>
 
                             <div className="pt-2 space-y-3">
-                                <Button onClick={handleGenerateAndSendPack} disabled={loading} className="w-full bg-[#F4C430] text-black hover:bg-[#F4C430]/90 font-bold h-12 text-lg">
+                                <Button onClick={handleGenerateAndSendPack} disabled={loading} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold h-12 text-lg shadow-md">
                                     {loading ? <Loader2 className="animate-spin" /> : "Générer & Envoyer le Pack 🚀"}
                                 </Button>
-                                <Button variant="ghost" onClick={onComplete} className="w-full text-slate-500">
+                                <Button variant="ghost" onClick={onComplete} className="w-full text-muted-foreground hover:text-foreground">
                                     Passer (envoyer manuellement plus tard)
                                 </Button>
                             </div>
@@ -866,7 +857,6 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
     const [importProgress, setImportProgress] = useState(0);
     const [errors, setErrors] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { isDark } = useTheme();
 
     // Auto-matching: tous les biens de l'équipe
     const [teamProperties, setTeamProperties] = useState<VacantProperty[]>([]);
@@ -1204,13 +1194,13 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className={`z-[100] sm:max-w-2xl ${isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'} max-h-[90vh] overflow-y-auto`}>
+            <DialogContent className="z-[100] sm:max-w-2xl bg-card border-border text-foreground max-h-[90vh] overflow-y-auto shadow-2xl">
                 <DialogHeader>
-                    <DialogTitle className={isDark ? 'text-white' : 'text-gray-900'}>
+                    <DialogTitle className="text-foreground">
                         <FileSpreadsheet className="w-5 h-5 inline-block mr-2" />
                         Importer des locataires en masse
                     </DialogTitle>
-                    <DialogDescription className={isDark ? 'text-slate-400' : 'text-gray-600'}>
+                    <DialogDescription className="text-muted-foreground">
                         {step === 1 && "Étape 1/3 : Sélectionnez votre fichier CSV ou Excel"}
                         {step === 2 && "Étape 2/3 : Faites correspondre vos colonnes aux champs système"}
                         {step === 3 && "Étape 3/3 : Vérifiez et importez"}
@@ -1225,20 +1215,18 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                         onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
                         className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${isDragging
-                            ? 'border-[#F4C430] bg-[#F4C430]/10'
-                            : isDark
-                                ? 'border-slate-700 hover:border-slate-600'
-                                : 'border-gray-300 hover:border-gray-400'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-accent bg-muted/20'
                             }`}
                     >
-                        <Upload className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-slate-500' : 'text-gray-400'}`} />
-                        <p className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                        <p className="text-lg font-medium text-foreground">
                             Glissez votre fichier ici
                         </p>
-                        <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                        <p className="text-sm mt-1 text-muted-foreground">
                             ou cliquez pour sélectionner
                         </p>
-                        <p className={`text-xs mt-3 ${isDark ? 'text-slate-500' : 'text-gray-400'}`}>
+                        <p className="text-xs mt-3 text-muted-foreground">
                             Formats acceptés : CSV, XLSX, XLS
                         </p>
                         <input
@@ -1254,11 +1242,11 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                 {/* Step 2: Column Mapping */}
                 {step === 2 && (
                     <div className="space-y-4">
-                        <div className={`flex items-center justify-between p-3 rounded-lg ${isDark ? 'bg-slate-800' : 'bg-gray-100'}`}>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                             <div className="flex items-center gap-3">
-                                <FileSpreadsheet className="w-5 h-5 text-[#F4C430]" />
+                                <FileSpreadsheet className="w-5 h-5 text-primary" />
                                 <span className="font-medium">{fileName}</span>
-                                <span className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                                <span className="text-sm text-muted-foreground">
                                     ({rawData.length} lignes)
                                 </span>
                             </div>
@@ -1266,27 +1254,27 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => setStep(1)}
-                                className={isDark ? 'text-slate-400 hover:text-white' : ''}
+                                className="text-muted-foreground hover:text-foreground"
                             >
                                 <X className="w-4 h-4" />
                             </Button>
                         </div>
 
-                        <div className={`p-4 rounded-lg border ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
-                            <p className={`text-sm font-medium mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        <div className="p-4 rounded-lg border bg-muted/50 border-border">
+                            <p className="text-sm font-medium mb-3 text-foreground">
                                 Faites correspondre vos colonnes :
                             </p>
                             <div className="space-y-2 max-h-[300px] overflow-y-auto">
                                 {csvColumns.map((col) => (
                                     <div key={col} className="flex items-center gap-3">
-                                        <div className={`flex-1 px-3 py-2 rounded text-sm font-mono truncate ${isDark ? 'bg-slate-700' : 'bg-white border border-gray-200'}`}>
+                                        <div className="flex-1 px-3 py-2 rounded text-sm font-mono truncate bg-card border border-border">
                                             {col}
                                         </div>
-                                        <span className={isDark ? 'text-slate-500' : 'text-gray-400'}>→</span>
+                                        <span className="text-muted-foreground">→</span>
                                         <select
                                             value={columnMappings[col] || ''}
                                             onChange={(e) => setColumnMappings({ ...columnMappings, [col]: e.target.value })}
-                                            className={`flex-1 px-3 py-2 rounded text-sm ${isDark ? 'bg-slate-700 text-white border-slate-600' : 'bg-white border border-gray-200'}`}
+                                            className="flex-1 px-3 py-2 rounded text-sm bg-card text-foreground border-border"
                                         >
                                             <option value="">-- Ignorer --</option>
                                             {SYSTEM_FIELDS.map(f => (
@@ -1303,10 +1291,10 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
 
                         {/* Missing required fields warning */}
                         {missingRequired.length > 0 && (
-                            <div className={`p-3 rounded-lg ${isDark ? 'bg-red-900/20 border border-red-800' : 'bg-red-50 border border-red-200'}`}>
+                            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30">
                                 <div className="flex items-center gap-2">
-                                    <AlertCircle className={`w-4 h-4 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
-                                    <span className={`text-sm ${isDark ? 'text-red-300' : 'text-red-700'}`}>
+                                    <AlertCircle className="w-4 h-4 text-destructive" />
+                                    <span className="text-sm text-destructive">
                                         Champs obligatoires non mappés : {missingRequired.map(f => SYSTEM_FIELDS.find(sf => sf.key === f)?.label).join(', ')}
                                     </span>
                                 </div>
@@ -1320,7 +1308,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                             <Button
                                 onClick={applyMappings}
                                 disabled={!canProceed}
-                                className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                             >
                                 Valider le mapping
                             </Button>
@@ -1333,34 +1321,34 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                     <div className="space-y-4">
                         {/* Stats avec auto-matching et auto-création */}
                         <div className="grid grid-cols-4 gap-2">
-                            <div className={`p-3 rounded-lg ${isDark ? 'bg-slate-800/50 border border-slate-700' : 'bg-gray-50 border border-gray-200'}`}>
-                                <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{validCount}</p>
-                                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>Valides</p>
+                            <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                                <p className="text-2xl font-bold text-foreground">{validCount}</p>
+                                <p className="text-xs text-muted-foreground">Valides</p>
                             </div>
-                            <div className={`p-3 rounded-lg ${isDark ? 'bg-green-900/30 border border-green-800' : 'bg-green-50 border border-green-200'}`}>
-                                <p className={`text-2xl font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                            <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+                                <p className="text-2xl font-bold text-green-600">
                                     {parsedData.filter(t => !t.error && t.matched_property_id).length}
                                 </p>
-                                <p className={`text-xs ${isDark ? 'text-green-300' : 'text-green-700'}`}>Liés</p>
+                                <p className="text-xs text-green-700">Liés</p>
                             </div>
-                            <div className={`p-3 rounded-lg ${isDark ? 'bg-blue-900/30 border border-blue-800' : 'bg-blue-50 border border-blue-200'}`}>
-                                <p className={`text-2xl font-bold ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+                            <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
+                                <p className="text-2xl font-bold text-primary">
                                     {parsedData.filter(t => !t.error && t.will_create_property).length}
                                 </p>
-                                <p className={`text-xs ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>À créer</p>
+                                <p className="text-xs text-primary">À créer</p>
                             </div>
-                            <div className={`p-3 rounded-lg ${isDark ? 'bg-orange-900/30 border border-orange-800' : 'bg-orange-50 border border-orange-200'}`}>
-                                <p className={`text-2xl font-bold ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>{orphanCount}</p>
-                                <p className={`text-xs ${isDark ? 'text-orange-300' : 'text-orange-700'}`}>Orphelins</p>
+                            <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
+                                <p className="text-2xl font-bold text-orange-600">{orphanCount}</p>
+                                <p className="text-xs text-orange-700">Orphelins</p>
                             </div>
                         </div>
 
                         {/* Info biens à créer */}
                         {parsedData.filter(t => !t.error && t.will_create_property).length > 0 && (
-                            <div className={`p-3 rounded-lg ${isDark ? 'bg-blue-900/20 border border-blue-800' : 'bg-blue-50 border border-blue-200'}`}>
+                            <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
                                 <div className="flex items-center gap-2">
-                                    <Plus className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
-                                    <span className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+                                    <Plus className="w-4 h-4 text-primary" />
+                                    <span className="text-sm text-primary">
                                         {parsedData.filter(t => !t.error && t.will_create_property).length} bien(s) seront créés automatiquement et liés aux locataires.
                                     </span>
                                 </div>
@@ -1369,10 +1357,10 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
 
                         {/* Info orphelins */}
                         {orphanCount > 0 && (
-                            <div className={`p-3 rounded-lg ${isDark ? 'bg-orange-900/20 border border-orange-800' : 'bg-orange-50 border border-orange-200'}`}>
+                            <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
                                 <div className="flex items-center gap-2">
-                                    <AlertCircle className={`w-4 h-4 ${isDark ? 'text-orange-400' : 'text-orange-600'}`} />
-                                    <span className={`text-sm ${isDark ? 'text-orange-300' : 'text-orange-700'}`}>
+                                    <AlertCircle className="w-4 h-4 text-orange-600" />
+                                    <span className="text-sm text-orange-700">
                                         {orphanCount} bail(s) sans bien. Vous pourrez les lier manuellement après.
                                     </span>
                                 </div>
@@ -1381,12 +1369,12 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
 
                         {/* Errors */}
                         {(errors.length > 0 || errorCount > 0) && (
-                            <div className={`p-3 rounded-lg max-h-32 overflow-y-auto ${isDark ? 'bg-red-900/20 border border-red-800' : 'bg-red-50 border border-red-200'}`}>
+                            <div className="p-3 rounded-lg max-h-32 overflow-y-auto bg-destructive/10 border border-destructive/30">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <AlertCircle className={`w-4 h-4 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
-                                    <span className={`text-sm font-medium ${isDark ? 'text-red-300' : 'text-red-700'}`}>Erreurs détectées</span>
+                                    <AlertCircle className="w-4 h-4 text-destructive" />
+                                    <span className="text-sm font-medium text-destructive">Erreurs détectées</span>
                                 </div>
-                                <ul className={`text-xs space-y-1 ${isDark ? 'text-red-200' : 'text-red-600'}`}>
+                                <ul className="text-xs space-y-1 text-destructive">
                                     {parsedData.filter(t => t.error).slice(0, 10).map((t, i) => (
                                         <li key={i}>• {t.error}</li>
                                     ))}
@@ -1399,14 +1387,14 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
 
                         {/* Preview Table avec statut de liaison */}
                         {validCount > 0 && (
-                            <div className={`border rounded-lg overflow-hidden ${isDark ? 'border-slate-700' : 'border-gray-200'}`}>
-                                <div className={`px-3 py-2 text-xs font-medium ${isDark ? 'bg-slate-800 text-slate-300' : 'bg-gray-50 text-gray-700'}`}>
+                            <div className="border rounded-lg overflow-hidden border-border">
+                                <div className="px-3 py-2 text-xs font-medium bg-muted text-muted-foreground">
                                     Aperçu ({Math.min(validCount, 5)} sur {validCount})
                                 </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-sm">
                                         <thead>
-                                            <tr className={isDark ? 'bg-slate-800/50' : 'bg-gray-50'}>
+                                            <tr className="bg-muted/50">
                                                 <th className="px-3 py-2 text-left font-medium">Locataire</th>
                                                 <th className="px-3 py-2 text-left font-medium">Bien</th>
                                                 <th className="px-3 py-2 text-right font-medium">Loyer</th>
@@ -1414,33 +1402,33 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                                         </thead>
                                         <tbody>
                                             {parsedData.filter(t => !t.error).slice(0, 5).map((t, i) => (
-                                                <tr key={i} className={isDark ? 'border-t border-slate-700' : 'border-t border-gray-100'}>
+                                                <tr key={i} className="border-t border-border">
                                                     <td className="px-3 py-2">
-                                                        <div className="font-medium">{t.nom}</div>
-                                                        <div className={`text-xs ${isDark ? 'text-slate-500' : 'text-gray-400'}`}>{t.email}</div>
+                                                        <div className="font-medium text-foreground">{t.nom}</div>
+                                                        <div className="text-xs text-muted-foreground">{t.email}</div>
                                                     </td>
                                                     <td className="px-3 py-2">
                                                         {t.matched_property_id ? (
                                                             // Bien existant trouvé
-                                                            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">
+                                                            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 font-medium">
                                                                 <Check className="w-3 h-3" />
                                                                 {t.matched_property_title}
                                                             </span>
                                                         ) : t.will_create_property ? (
                                                             // Bien sera créé automatiquement
-                                                            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">
+                                                            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
                                                                 <Plus className="w-3 h-3" />
                                                                 {t.property_name}
                                                                 <span className="text-[10px] opacity-70">(nouveau)</span>
                                                             </span>
                                                         ) : (
                                                             // Orphelin - pas de bien
-                                                            <span className={`text-xs ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>
+                                                            <span className="text-xs text-orange-600 dark:text-orange-400 font-medium">
                                                                 ⚠ {t.adresse || 'Sans bien'}
                                                             </span>
                                                         )}
                                                     </td>
-                                                    <td className="px-3 py-2 text-right font-mono">{t.loyer.toLocaleString()}</td>
+                                                    <td className="px-3 py-2 text-right font-mono text-foreground">{t.loyer.toLocaleString()}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -1452,13 +1440,13 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                         {/* Progress bar */}
                         {loading && (
                             <div className="space-y-2">
-                                <div className={`w-full h-2 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`}>
+                                <div className="w-full h-2 rounded-full bg-muted">
                                     <div
-                                        className="h-2 rounded-full bg-[#F4C430] transition-all duration-300"
+                                        className="h-2 rounded-full bg-primary transition-all duration-300"
                                         style={{ width: `${importProgress}%` }}
                                     />
                                 </div>
-                                <p className={`text-xs text-center ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                                <p className="text-xs text-center text-muted-foreground">
                                     Import en cours... {importProgress}%
                                 </p>
                             </div>
@@ -1472,7 +1460,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                             <Button
                                 onClick={handleImport}
                                 disabled={validCount === 0 || loading}
-                                className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                             >
                                 {loading ? (
                                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -1487,11 +1475,9 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
 
                 {/* Errors display (for Step 1) */}
                 {step === 1 && errors.length > 0 && (
-                    <div className={`p-3 rounded-lg ${isDark ? 'bg-red-900/20 border border-red-800' : 'bg-red-50 border border-red-200'}`}>
-                        <ul className={`text-sm ${isDark ? 'text-red-300' : 'text-red-600'}`}>
-                            {errors.map((e, i) => <li key={i}>• {e}</li>)}
-                        </ul>
-                    </div>
+                    <ul className="text-sm text-destructive p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                        {errors.map((e, i) => <li key={i}>• {e}</li>)}
+                    </ul>
                 )}
             </DialogContent>
         </Dialog>

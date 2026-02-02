@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
+  LayoutDashboard,
   Building2,
   ClipboardList,
   Wrench,
@@ -28,26 +29,38 @@ import {
 import { useState, useMemo, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet";
+import { TeamSwitcher } from "./TeamSwitcher";
+import { TemporaryAccessWidget } from "./TemporaryAccessWidget";
+import { LockedSidebarItem } from "./LockedSidebarItem";
+import { AccessRequestModal, useAccessRequestModal } from "@/components/modals/AccessRequestModal";
+import type { TeamPermissionKey } from "@/lib/team-permissions";
 
 import type { LucideIcon } from "lucide-react";
+
+interface TeamData {
+  id: string;
+  name: string;
+  slug: string;
+  role: string;
+}
 
 interface NavItem {
   href: string;
   icon: LucideIcon;
   label: string;
+  requiredPermission?: TeamPermissionKey; // Permission requise pour accéder
 }
 
-// Navigation pour propriétaires (/gestion)
+// Navigation pour propriétaires (/gestion) avec permissions
 const gestionNavItems: NavItem[] = [
-  { href: "/gestion", icon: Building2, label: "Dashboard" },
-  { href: "/gestion/biens", icon: Home, label: "Biens" },
-  { href: "/gestion/etats-lieux", icon: ClipboardList, label: "États des Lieux" },
-  { href: "/gestion/interventions", icon: Wrench, label: "Interventions" },
-  { href: "/gestion/documents", icon: FolderOpen, label: "Documents" },
-  { href: "/gestion/messages", icon: MessageSquare, label: "Messagerie" },
-  { href: "/gestion/documents-legaux", icon: Scale, label: "Juridique" },
-  { href: "/gestion/comptabilite", icon: Wallet, label: "Comptabilité" },
-
+  { href: "/gestion", icon: LayoutDashboard, label: "Dashboard" }, // Accessible à tous
+  { href: "/gestion/biens", icon: Home, label: "Biens", requiredPermission: "properties.view" },
+  { href: "/gestion/etats-lieux", icon: ClipboardList, label: "États des Lieux", requiredPermission: "inventory.view" },
+  { href: "/gestion/interventions", icon: Wrench, label: "Interventions", requiredPermission: "maintenance.view" },
+  { href: "/gestion/documents", icon: FolderOpen, label: "Documents", requiredPermission: "documents.view" },
+  { href: "/gestion/messages", icon: MessageSquare, label: "Messagerie" }, // Accessible à tous
+  { href: "/gestion/documents-legaux", icon: Scale, label: "Juridique", requiredPermission: "documents.generate" },
+  { href: "/gestion/comptabilite", icon: Wallet, label: "Comptabilité", requiredPermission: "payments.view" },
 ];
 
 // Navigation pour locataires (/locataire)
@@ -82,20 +95,34 @@ interface SidebarContentProps {
   onCollapse?: () => void;
   isMobile?: boolean;
   onMobileNavigate?: () => void;
+  teams?: TeamData[];
+  currentTeamId?: string;
+  onSwitchTeam?: (teamId: string) => Promise<void>;
+  onRequestAccess?: (permission: TeamPermissionKey, label: string) => void;
 }
 
 function SidebarContent({
   isCollapsed,
   onCollapse,
   isMobile = false,
-  onMobileNavigate
+  onMobileNavigate,
+  teams = [],
+  currentTeamId,
+  onSwitchTeam,
+  onRequestAccess,
 }: SidebarContentProps) {
   const pathname = usePathname();
+  const isGestionRoute = pathname?.startsWith("/gestion");
+
+  // Trouver l'équipe courante pour afficher son nom
+  const currentTeam = teams.find((t) => t.id === currentTeamId);
 
   // Déterminer le contexte et les items de navigation
   const { navItems, title } = useMemo(() => {
     if (pathname?.startsWith("/gestion")) {
-      return { navItems: gestionNavItems, title: "Gestion Locative" };
+      // Utiliser le nom de l'équipe/agence si disponible, sinon fallback
+      const teamName = currentTeam?.name || "Gestion Locative";
+      return { navItems: gestionNavItems, title: teamName };
     }
     if (pathname?.startsWith("/locataire")) {
       return { navItems: locataireNavItems, title: "Espace Locataire" };
@@ -104,14 +131,15 @@ function SidebarContent({
       return { navItems: adminNavItems, title: "Administration" };
     }
     return { navItems: compteNavItems, title: "Mon Compte" };
-  }, [pathname]);
+  }, [pathname, currentTeam]);
 
   return (
     <div className="flex flex-col h-full">
       {/* Header Sidebar */}
       <div className={cn(
-        "h-14 flex items-center border-b border-border shrink-0",
-        isCollapsed && !isMobile ? "justify-center px-2" : "justify-between px-4"
+        "h-14 flex items-center justify-between border-b border-border shrink-0",
+        // Consistent left padding for title or back button
+        "pl-4 pr-2"
       )}>
         {(!isCollapsed || isMobile) && (
           <span className="text-sm font-semibold text-foreground truncate">
@@ -142,6 +170,21 @@ function SidebarContent({
         )}
       </div>
 
+      {/* Team Switcher (only for /gestion routes) */}
+      {isGestionRoute && teams.length > 0 && (
+        <div className={cn(
+          "p-2 border-b border-border shrink-0",
+          isCollapsed && !isMobile && "flex items-center justify-center"
+        )}>
+          <TeamSwitcher
+            teams={teams}
+            currentTeamId={currentTeamId || teams[0]?.id}
+            isCollapsed={isCollapsed && !isMobile}
+            onSwitchTeam={onSwitchTeam}
+          />
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-2 space-y-1">
         {navItems.map((item) => {
@@ -152,14 +195,35 @@ function SidebarContent({
               item.href !== "/compte" &&
               pathname?.startsWith(`${item.href}/`));
 
+          // Utiliser LockedSidebarItem pour les items avec permission requise
+          if (item.requiredPermission && isGestionRoute) {
+            return (
+              <LockedSidebarItem
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                isActive={isActive}
+                isCollapsed={isCollapsed}
+                isMobile={isMobile}
+                requiredPermission={item.requiredPermission}
+                currentTeamId={currentTeamId}
+                onNavigate={() => isMobile && onMobileNavigate?.()}
+                onRequestAccess={onRequestAccess}
+              />
+            );
+          }
+
+          // Item normal sans restriction
           return (
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false} // Disable prefetch to prevent stale RSC cache
               onClick={() => isMobile && onMobileNavigate?.()}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group hover:translate-x-1",
-                isCollapsed && !isMobile ? "justify-center" : "",
+                "flex items-center rounded-lg transition-all duration-200 group h-11",
+                "px-[14px]",
                 isActive
                   ? "bg-[#0F172A] text-white shadow-md font-medium dark:bg-primary/10 dark:text-primary"
                   : "text-slate-700 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -169,51 +233,52 @@ function SidebarContent({
               {(() => {
                 const Icon = item.icon;
                 return <Icon className={cn(
-                  "h-5 w-5 shrink-0",
+                  "h-5 w-5 shrink-0 transition-all",
                   isActive ? "text-white dark:text-primary" : "text-muted-foreground group-hover:text-foreground"
                 )} />;
               })()}
               {(!isCollapsed || isMobile) && (
-                <span className="text-sm truncate">{item.label}</span>
+                <span className="text-sm truncate ml-3">{item.label}</span>
               )}
             </Link>
           );
         })}
       </nav>
 
+      {/* Widget Permissions Temporaires (Uniquement pour /gestion) */}
+      {pathname?.startsWith("/gestion") && (
+        <div className="shrink-0">
+          <TemporaryAccessWidget collapsed={isCollapsed && !isMobile} />
+        </div>
+      )}
+
       {/* Footer - Config/Settings (Uniquement pour le SaaS / Gestion) */}
       {pathname?.startsWith("/gestion") && (
         <div className="p-2 border-t border-border shrink-0 space-y-1">
-          <Link
+          <LockedSidebarItem
             href="/gestion/equipe"
-            onClick={() => isMobile && onMobileNavigate?.()}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
-              isCollapsed && !isMobile ? "justify-center" : "",
-              "text-slate-700 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
-            )}
-            title={isCollapsed && !isMobile ? "Équipe" : undefined}
-          >
-            <Users className="h-5 w-5 shrink-0" />
-            {(!isCollapsed || isMobile) && (
-              <span className="text-sm">Équipe</span>
-            )}
-          </Link>
-          <Link
+            icon={Users}
+            label="Équipe"
+            isActive={pathname === "/gestion/equipe" || pathname?.startsWith("/gestion/equipe/")}
+            isCollapsed={isCollapsed}
+            isMobile={isMobile}
+            requiredPermission="team.members.view"
+            currentTeamId={currentTeamId}
+            onNavigate={() => isMobile && onMobileNavigate?.()}
+            onRequestAccess={onRequestAccess}
+          />
+          <LockedSidebarItem
             href="/gestion/config"
-            onClick={() => isMobile && onMobileNavigate?.()}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
-              isCollapsed && !isMobile ? "justify-center" : "",
-              "text-slate-700 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
-            )}
-            title={isCollapsed && !isMobile ? "Configuration" : undefined}
-          >
-            <SlidersHorizontal className="h-5 w-5 shrink-0" />
-            {(!isCollapsed || isMobile) && (
-              <span className="text-sm">Configuration</span>
-            )}
-          </Link>
+            icon={SlidersHorizontal}
+            label="Configuration"
+            isActive={pathname === "/gestion/config" || pathname?.startsWith("/gestion/config/")}
+            isCollapsed={isCollapsed}
+            isMobile={isMobile}
+            requiredPermission="team.settings.view"
+            currentTeamId={currentTeamId}
+            onNavigate={() => isMobile && onMobileNavigate?.()}
+            onRequestAccess={onRequestAccess}
+          />
         </div>
       )}
 
@@ -224,15 +289,14 @@ function SidebarContent({
             href="/gestion"
             onClick={() => isMobile && onMobileNavigate?.()}
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
-              isCollapsed && !isMobile ? "justify-center" : "",
+              "flex items-center rounded-lg transition-all px-[14px] h-11",
               "bg-primary/10 text-primary hover:bg-primary/20"
             )}
             title={isCollapsed && !isMobile ? "Gestion Locative" : undefined}
           >
             <Building2 className="h-5 w-5 shrink-0" />
             {(!isCollapsed || isMobile) && (
-              <span className="text-sm font-medium">Gestion Locative</span>
+              <span className="text-sm font-medium ml-3">Gestion Locative</span>
             )}
           </Link>
         </div>
@@ -241,10 +305,37 @@ function SidebarContent({
   );
 }
 
-export function WorkspaceSidebar() {
+interface WorkspaceSidebarProps {
+  teams?: TeamData[];
+  currentTeamId?: string;
+  onSwitchTeam?: (teamId: string) => Promise<void>;
+  isMobileOpen?: boolean;
+  onMobileOpenChange?: (open: boolean) => void;
+}
+
+export function WorkspaceSidebar({
+  teams = [],
+  currentTeamId,
+  onSwitchTeam,
+  isMobileOpen = false,
+  onMobileOpenChange,
+}: WorkspaceSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Hook pour gérer la modale de demande d'accès
+  const { open: openAccessModal, Modal: AccessModal, isOpen: isAccessModalOpen } = useAccessRequestModal();
+
+  // Callback pour demander un accès temporaire
+  const handleRequestAccess = useCallback((permission: TeamPermissionKey, label: string) => {
+    if (!currentTeamId) return;
+    openAccessModal({
+      teamId: currentTeamId,
+      permission,
+      permissionLabel: label,
+      permissionDescription: `Accès requis pour la section "${label}"`,
+    });
+  }, [currentTeamId, openAccessModal]);
 
   // Gestion du hover avec délai pour éviter les bugs de flickering
   const handleMouseEnter = useCallback(() => {
@@ -265,21 +356,11 @@ export function WorkspaceSidebar() {
 
   return (
     <>
-      {/* Mobile: Sheet/Drawer */}
-      <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden fixed left-3 z-50 h-10 w-10 text-foreground hover:bg-transparent"
-            style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
+      {/* Mobile: Sheet/Drawer - Controlled from Layout/Header */}
+      <Sheet open={isMobileOpen} onOpenChange={onMobileOpenChange}>
         <SheetContent
           side="left"
-          className="w-64 p-0 rounded-none bg-[#0b0f18] border-r border-white/10"
+          className="w-64 p-0 rounded-none bg-background border-r border-border"
           hideClose={true}
         >
           {/* SheetTitle caché pour l'accessibilité (screen readers) */}
@@ -287,25 +368,40 @@ export function WorkspaceSidebar() {
           <SidebarContent
             isCollapsed={false}
             isMobile={true}
-            onMobileNavigate={() => setIsMobileOpen(false)}
+            onMobileNavigate={() => onMobileOpenChange?.(false)}
+            teams={teams}
+            currentTeamId={currentTeamId}
+            onSwitchTeam={onSwitchTeam}
+            onRequestAccess={handleRequestAccess}
           />
         </SheetContent>
       </Sheet>
 
+      {/* Modale de demande d'accès */}
+      <AccessModal />
+
       {/* Desktop: Sidebar fixe */}
-      <aside
-        className={cn(
-          "hidden lg:flex flex-col h-full border-r border-border bg-background transition-all duration-300 ease-out",
-          isCollapsed ? "w-16" : "w-64"
-        )}
+      <div
+        className="hidden lg:block relative h-full w-16 shrink-0 z-50"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <SidebarContent
-          isCollapsed={isCollapsed}
-          onCollapse={() => setIsCollapsed(!isCollapsed)}
-        />
-      </aside>
+        <aside
+          className={cn(
+            "absolute top-0 left-0 h-full flex flex-col border-r border-border bg-background transition-all duration-300 ease-out",
+            isCollapsed ? "w-16" : "w-64 shadow-2xl"
+          )}
+        >
+          <SidebarContent
+            isCollapsed={isCollapsed}
+            onCollapse={() => setIsCollapsed(!isCollapsed)}
+            teams={teams}
+            currentTeamId={currentTeamId}
+            onSwitchTeam={onSwitchTeam}
+            onRequestAccess={handleRequestAccess}
+          />
+        </aside>
+      </div>
     </>
   );
 }

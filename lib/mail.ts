@@ -9,7 +9,7 @@ import { render } from "@react-email/render";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import React from "react";
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "barrymohamadou98@gmail.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const ADMIN_ROLES = ["admin", "moderateur", "superadmin"];
@@ -98,7 +98,7 @@ export function getAdminEmail() {
  * Fallback sur l'email admin principal si la configuration service role n'est pas disponible.
  */
 export async function getAdminNotificationEmails(): Promise<string[]> {
-  const fallback = [getAdminEmail()].filter(Boolean);
+  const fallback = [getAdminEmail()].filter((email): email is string => Boolean(email));
 
   if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
     console.warn("⚠️ Impossible de récupérer les emails des admins/modérateurs sans SUPABASE_SERVICE_ROLE_KEY");
@@ -131,7 +131,7 @@ export async function getAdminNotificationEmails(): Promise<string[]> {
       return fallback;
     }
 
-    const uniqueEmails = new Set<string>(fallback);
+    const uniqueEmails = new Set<string>(fallback as string[]);
     const perPage = 200;
     let page = 1;
     let fetchedAll = false;

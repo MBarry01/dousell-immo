@@ -10,10 +10,20 @@ export default async function TenantProfilePage({ params }: { params: Promise<{ 
 
     const { id } = await params;
 
-    const { data: lease } = await supabase
+    // Récupérer les team_ids de l'utilisateur
+    const { data: teamMemberships } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id);
+
+    const userTeamIds = teamMemberships?.map(tm => tm.team_id) || [];
+
+    // Construire la requête avec OR: owner_id OU team_id
+    let leaseQuery = supabase
         .from("leases")
         .select(`
             *,
+            properties:property_id(id, title, images),
             rental_transactions (
                 id,
                 period_month,
@@ -30,9 +40,16 @@ export default async function TenantProfilePage({ params }: { params: Promise<{ 
                 created_at
             )
         `)
-        .eq("id", id)
-        .eq("owner_id", user.id)
-        .single();
+        .eq("id", id);
+
+    // Filtre: owner_id = user.id OU team_id dans les équipes de l'utilisateur
+    if (userTeamIds.length > 0) {
+        leaseQuery = leaseQuery.or(`owner_id.eq.${user.id},team_id.in.(${userTeamIds.join(',')})`);
+    } else {
+        leaseQuery = leaseQuery.eq("owner_id", user.id);
+    }
+
+    const { data: lease } = await leaseQuery.single();
 
     const { data: profile } = await supabase
         .from('profiles')

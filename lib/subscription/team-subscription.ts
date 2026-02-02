@@ -1,0 +1,249 @@
+/**
+ * Team Subscription Logic
+ * 
+ * Helpers centralisés pour gérer les abonnements au niveau équipe
+ * avec fallback vers profiles pour backward compatibility (3 mois)
+ */
+
+import { createClient } from '@/utils/supabase/server';
+
+export type SubscriptionStatus = 'none' | 'trial' | 'active' | 'expired' | 'canceled';
+export type SubscriptionTier = 'pro' | 'premium' | 'enterprise';
+
+export interface TeamSubscription {
+    status: SubscriptionStatus;
+    tier: SubscriptionTier;
+    trialEndsAt: Date | null;
+    startedAt: Date | null;
+    isActive: boolean;
+    daysRemaining: number;
+    billingCycle: 'monthly' | 'annual';
+}
+
+/**
+ * Récupère le statut d'abonnement de l'équipe
+ * 
+ * Performance: Récupère directement depuis teams.subscription_*
+ * Fallback: Si subscription_status null, regarde profiles.pro_status (legacy)
+ * 
+ * @param teamId - ID de l'équipe
+ * @returns TeamSubscription avec toutes les infos d'abonnement
+ */
+export async function getTeamSubscriptionStatus(teamId: string): Promise<TeamSubscription> {
+    const supabase = await createClient();
+
+    // Récupérer depuis teams (nouvelle architecture)
+    const { data: team } = await supabase
+        .from('teams')
+        .select('subscription_status, subscription_tier, subscription_trial_ends_at, subscription_started_at, billing_cycle')
+        .eq('id', teamId)
+        .single();
+
+    if (team?.subscription_status) {
+        // Nouvelle architecture: données dans teams
+        const trialEndsAt = team.subscription_trial_ends_at ? new Date(team.subscription_trial_ends_at) : null;
+        const startedAt = team.subscription_started_at ? new Date(team.subscription_started_at) : null;
+        const daysRemaining = trialEndsAt ? Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
+
+        const isActive = team.subscription_status === 'active' ||
+            (team.subscription_status === 'trial' && daysRemaining > 0);
+
+        return {
+            status: team.subscription_status as SubscriptionStatus,
+            tier: (team.subscription_tier || 'pro') as SubscriptionTier,
+            trialEndsAt,
+            startedAt,
+            isActive,
+            daysRemaining: Math.max(0, daysRemaining),
+            billingCycle: (team.billing_cycle || 'monthly') as 'monthly' | 'annual',
+        };
+    }
+
+    // Fallback vers profiles (backward compatibility - 3 mois)
+    console.warn('⚠️ Team subscription not found, falling back to profiles.pro_status (legacy)');
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return createDefaultSubscription();
+    }
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('pro_status, pro_trial_ends_at')
+        .eq('id', user.id)
+        .single();
+
+    if (!profile) {
+        return createDefaultSubscription();
+    }
+
+    const trialEndsAt = profile.pro_trial_ends_at ? new Date(profile.pro_trial_ends_at) : null;
+    const daysRemaining = trialEndsAt ? Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
+    const status = (profile.pro_status || 'none') as SubscriptionStatus;
+    const isActive = status === 'active' || (status === 'trial' && daysRemaining > 0);
+
+    return {
+        status,
+        tier: 'pro',
+        trialEndsAt,
+        startedAt: null,
+        isActive,
+        daysRemaining: Math.max(0, daysRemaining),
+        billingCycle: 'monthly',
+    };
+}
+
+/**
+ * Vérifie si l'équipe a un abonnement actif
+ * 
+ * Utilisé comme guard pour les routes protégées
+ * 
+ * @param teamId - ID de l'équipe
+ * @returns { success: boolean, error?: string }
+ */
+export async function requireActiveSubscription(teamId: string): Promise<{
+    success: boolean;
+    subscription?: TeamSubscription;
+    error?: string;
+}> {
+    const subscription = await getTeamSubscriptionStatus(teamId);
+
+    if (!subscription.isActive) {
+        let errorMessage = 'Abonnement requis pour accéder à cette fonctionnalité.';
+
+        if (subscription.status === 'expired') {
+            errorMessage = subscription.daysRemaining < 0
+                ? `Votre essai a expiré il y a ${Math.abs(subscription.daysRemaining)} jours. Activez votre abonnement pour continuer.`
+                : 'Abonnement expiré. Veuillez renouveler pour continuer.';
+        } else if (subscription.status === 'canceled') {
+            errorMessage = 'Abonnement annulé. Veuillez réactiver pour continuer.';
+        }
+
+        return {
+            success: false,
+            subscription,
+            error: errorMessage,
+        };
+    }
+
+    return {
+        success: true,
+        subscription
+    };
+}
+
+/**
+ * Active l'abonnement trial pour une équipe
+ * 
+ * Utilisé lors de l'onboarding ou de la réactivation
+ * 
+ * @param teamId - ID de l'équipe
+ * @param trialDays - Nombre de jours d'essai (défaut: 14)
+ */
+export async function activateTeamTrial(
+    teamId: string,
+    trialDays: number = 14
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + trialDays);
+
+    const { error } = await supabase
+        .from('teams')
+        .update({
+            subscription_status: 'trial',
+            subscription_trial_ends_at: trialEndsAt.toISOString(),
+            subscription_started_at: new Date().toISOString(),
+            subscription_tier: 'pro',
+        })
+        .eq('id', teamId);
+
+    if (error) {
+        console.error('❌ Error activating team trial:', error);
+        return { success: false, error: 'Erreur lors de l\'activation de l\'essai' };
+    }
+
+    console.log(`✅ Team trial activated: ${teamId} (${trialDays} days)`);
+    return { success: true };
+}
+
+/**
+ * Passe l'abonnement en mode "active" (payé)
+ * 
+ * Appelé après confirmation de paiement
+ * 
+ * @param teamId - ID de l'équipe
+ * @param tier - Tier choisi
+ * @param billingCycle - Cycle de facturation
+ */
+export async function activateTeamSubscription(
+    teamId: string,
+    tier: SubscriptionTier = 'pro',
+    billingCycle: 'monthly' | 'annual' = 'monthly'
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from('teams')
+        .update({
+            subscription_status: 'active',
+            subscription_tier: tier,
+            subscription_trial_ends_at: null, // Plus de limite de temps
+            billing_cycle: billingCycle,
+        })
+        .eq('id', teamId);
+
+    if (error) {
+        console.error('❌ Error activating team subscription:', error);
+        return { success: false, error: 'Erreur lors de l\'activation de l\'abonnement' };
+    }
+
+    console.log(`✅ Team subscription activated: ${teamId} (${tier}, ${billingCycle})`);
+    return { success: true };
+}
+
+/**
+ * Expire/Annule l'abonnement d'une équipe
+ * 
+ * Utilisé pour end of trial ou annulation
+ * 
+ * @param teamId - ID de l'équipe
+ * @param reason - 'expired' (fin essai) ou 'canceled' (user action)
+ */
+export async function expireTeamSubscription(
+    teamId: string,
+    reason: 'expired' | 'canceled' = 'expired'
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from('teams')
+        .update({
+            subscription_status: reason,
+        })
+        .eq('id', teamId);
+
+    if (error) {
+        console.error('❌ Error expiring team subscription:', error);
+        return { success: false, error: 'Erreur lors de la mise à jour du statut' };
+    }
+
+    console.log(`⚠️ Team subscription ${reason}: ${teamId}`);
+    return { success: true };
+}
+
+/**
+ * Fonction helper pour créer un abonnement par défaut
+ */
+function createDefaultSubscription(): TeamSubscription {
+    return {
+        status: 'none',
+        tier: 'pro',
+        trialEndsAt: null,
+        startedAt: null,
+        isActive: false,
+        daysRemaining: 0,
+        billingCycle: 'monthly',
+    };
+}

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { Bell, Search, LogOut, ArrowLeft, Sun, Moon } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Bell, Search, LogOut, ArrowLeft, Sun, Moon, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GlobalSearch } from "@/components/search/GlobalSearch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,10 +15,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import { useTheme } from "@/components/workspace/providers/theme-provider";
 import { useMemo } from "react";
 import { NotificationBell } from "@/components/layout/notification-bell";
+import { OwnerRoleSwitcher } from "@/components/workspace/OwnerRoleSwitcher";
 
 interface WorkspaceHeaderProps {
   user?: {
@@ -28,12 +29,17 @@ interface WorkspaceHeaderProps {
       avatar_url?: string;
     };
   } | null;
+  onMenuClick?: () => void;
 }
 
-export function WorkspaceHeader({ user }: WorkspaceHeaderProps) {
+export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { isDark, toggleTheme } = useTheme();
+
+  // Search params for syncing input
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams?.get("q") || "";
 
   // Déterminer le titre selon le contexte
   const contextTitle = useMemo(() => {
@@ -63,9 +69,19 @@ export function WorkspaceHeader({ user }: WorkspaceHeaderProps) {
       className="shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40 transition-all"
       style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
-      <div className="flex h-14 items-center justify-between pl-14 pr-4 lg:px-6">
-        {/* Left: Logo + Retour site */}
-        <div className="flex items-center gap-4">
+      <div className="flex h-14 items-center justify-between px-4 lg:px-6">
+        {/* Left: Menu (mobile) + Logo + Retour site */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Mobile Menu Trigger */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden h-9 w-9 -ml-1 text-foreground"
+            onClick={onMenuClick}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Menu</span>
+          </Button>
           {/* Logo avec lien retour vitrine */}
           <Link
             href="/"
@@ -95,31 +111,7 @@ export function WorkspaceHeader({ user }: WorkspaceHeaderProps) {
 
         {/* Center: Search (desktop) - Functional */}
         <div className="hidden lg:flex flex-1 max-w-md mx-8">
-          <form
-            className="relative w-full"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              const query = formData.get("q") as string;
-              if (query?.trim()) {
-                // Context-aware search routing
-                if (pathname?.startsWith("/gestion") || pathname?.startsWith("/admin")) {
-                  // For management/admin pages, search properties
-                  router.push(`/recherche?q=${encodeURIComponent(query.trim())}`);
-                } else {
-                  router.push(`/recherche?q=${encodeURIComponent(query.trim())}`);
-                }
-              }
-            }}
-          >
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              name="q"
-              placeholder="Rechercher un bien, une ville..."
-              className="pl-9 bg-muted/50 border-0 focus-visible:ring-1"
-            />
-          </form>
+          <GlobalSearch />
         </div>
 
         {/* Right: Actions */}
@@ -180,6 +172,8 @@ export function WorkspaceHeader({ user }: WorkspaceHeaderProps) {
                 <Link href="/compte/parametres">Paramètres</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              {/* Switch to tenant space if owner is also a tenant */}
+              <OwnerRoleSwitcher />
               <DropdownMenuItem asChild>
                 <Link href="/">Retour au site</Link>
               </DropdownMenuItem>

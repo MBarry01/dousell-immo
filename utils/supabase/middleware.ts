@@ -2,6 +2,52 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // ============================================
+  // 301 Redirects for deprecated routes
+  // Added by WORKFLOW_PROPOSAL.md implementation
+  // ============================================
+
+  // Redirect /gestion-locative/* → /gestion/* (permanent 301)
+  // /gestion-locative is a legacy duplicate that should be removed
+  if (pathname.startsWith("/gestion-locative")) {
+    const newPath = pathname.replace("/gestion-locative", "/gestion");
+    const url = request.nextUrl.clone();
+    url.pathname = newPath;
+    return NextResponse.redirect(url, 301);
+  }
+
+  // Redirect /landing/* → /pro/* (permanent 301)
+  // /landing is being renamed to /pro for better branding
+  if (pathname.startsWith("/landing")) {
+    let newPath = pathname.replace("/landing", "/pro");
+    // Also handle /landing/commencer → /pro/start
+    if (newPath === "/pro/commencer") {
+      newPath = "/pro/start";
+    }
+    const url = request.nextUrl.clone();
+    url.pathname = newPath;
+    return NextResponse.redirect(url, 301);
+  }
+
+  // Redirect legacy paths
+  if (pathname.startsWith("/etats-lieux") && !pathname.startsWith("/gestion/etats-lieux")) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace("/etats-lieux", "/gestion/etats-lieux");
+    return NextResponse.redirect(url, 301);
+  }
+
+  if (pathname.startsWith("/interventions") && !pathname.startsWith("/gestion/interventions")) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace("/interventions", "/gestion/interventions");
+    return NextResponse.redirect(url, 301);
+  }
+
+  // ============================================
+  // End of 301 Redirects
+  // ============================================
+
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -57,12 +103,73 @@ export async function updateSession(request: NextRequest) {
     console.warn("Middleware: Error getting user (this is OK if Supabase is not configured):", error);
   }
 
-  // Routes protégées (workspace)
+  // ============================================
+  // Tenant Routes Protection (Magic Link based)
+  // Handled SEPARATELY from auth.users routes
+  // Per WORKFLOW_PROPOSAL.md section 5.4
+  // ============================================
+
+  if (pathname.startsWith("/locataire")) {
+    // Allow access to expired and verify pages without token
+    if (pathname === "/locataire/expired" || pathname.startsWith("/locataire/verify")) {
+      return supabaseResponse;
+    }
+
+    // Check for tenant session cookie or URL token
+    const tenantSessionCookie = request.cookies.get("tenant_session")?.value;
+    const urlToken = request.nextUrl.searchParams.get("token");
+
+    // If URL has token, let the page handle verification
+    // The verify page will create the session cookie after identity check
+    if (urlToken) {
+      // Don't validate here - let the page handle it
+      // This allows the verify page to work
+      return supabaseResponse;
+    }
+
+    // If no token and no session cookie, redirect to expired
+    if (!tenantSessionCookie) {
+      return NextResponse.redirect(new URL("/locataire/expired", request.url));
+    }
+
+    // Session cookie exists - continue (token validation is done in pages)
+    // We trust the HttpOnly cookie here, full validation happens server-side
+    return supabaseResponse;
+  }
+
+  // ============================================
+  // Owner Routes Protection (auth.users ONLY)
+  // Per WORKFLOW_PROPOSAL.md section 3.5.5:
+  // - Tenants (with only tenant_session) → redirect to /locataire
+  // - Users with auth.users → allowed (handled by standard protection)
+  // Routes: /compte, /gestion
+  // ============================================
+
+  const ownerOnlyPaths = ["/compte", "/gestion"];
+  const isOwnerOnlyRoute = ownerOnlyPaths.some(path => pathname.startsWith(path));
+
+  if (isOwnerOnlyRoute) {
+    const tenantSessionCookie = request.cookies.get("tenant_session")?.value;
+
+    // If someone has a tenant session but NO auth.users session,
+    // they're a pure tenant trying to access owner routes → redirect to /locataire
+    if (tenantSessionCookie && !user) {
+      return NextResponse.redirect(new URL("/locataire", request.url));
+    }
+
+    // If no user at all (no tenant session, no auth.users),
+    // they'll be caught by the standard protected routes check below
+  }
+
+  // ============================================
+  // Standard Protected Routes (auth.users based)
+  // ============================================
+
+  // Routes protégées (workspace) - EXCLUDING /locataire which is handled above
   const protectedPaths = [
     "/compte",
     "/admin",
     "/gestion",        // Nouveau chemin workspace
-    "/locataire",      // Nouveau chemin workspace
     "/gestion-locative", // Legacy (sera redirigé)
     "/etats-lieux",      // Legacy (sera redirigé)
     "/interventions",    // Legacy (sera redirigé)
@@ -82,7 +189,7 @@ export async function updateSession(request: NextRequest) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("redirect", request.nextUrl.pathname);
+    url.searchParams.set("redirect", request.nextUrl.pathname + request.nextUrl.search);
     return NextResponse.redirect(url);
   }
 
@@ -104,7 +211,7 @@ export async function updateSession(request: NextRequest) {
       // Already handled above, but double check
       const url = request.nextUrl.clone();
       url.pathname = "/login";
-      url.searchParams.set("redirect", request.nextUrl.pathname);
+      url.searchParams.set("redirect", request.nextUrl.pathname + request.nextUrl.search);
       return NextResponse.redirect(url);
     }
 

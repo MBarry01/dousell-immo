@@ -1,7 +1,4 @@
-"use client";
-
 import { Building2, Clock, AlertTriangle, TrendingUp } from "lucide-react";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
 
 interface KPICardsProps {
     stats: {
@@ -15,7 +12,6 @@ interface KPICardsProps {
 }
 
 export function KPICards({ stats }: KPICardsProps) {
-    const { isDark } = useTheme();
 
     const kpis = [
         {
@@ -50,10 +46,10 @@ export function KPICards({ stats }: KPICardsProps) {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case "good": return isDark ? "bg-emerald-500" : "bg-emerald-500";
-            case "warning": return isDark ? "bg-amber-500" : "bg-amber-500";
-            case "bad": return isDark ? "bg-red-500" : "bg-red-500";
-            default: return isDark ? "bg-slate-500" : "bg-gray-400";
+            case "good": return "bg-emerald-500";
+            case "warning": return "bg-amber-500";
+            case "bad": return "bg-red-500";
+            default: return "bg-muted-foreground/30";
         }
     };
 
@@ -65,23 +61,20 @@ export function KPICards({ stats }: KPICardsProps) {
                 return (
                     <div
                         key={index}
-                        className={`px-3 py-2 rounded-lg border ${isDark
-                            ? "bg-slate-900/50 border-slate-800"
-                            : "bg-white border-gray-200"
-                            }`}
+                        className="px-3 py-2 rounded-lg border border-border bg-card shadow-sm transition-colors"
                     >
                         <div className="flex items-center gap-2 mb-0.5">
-                            <Icon className={`w-3 h-3 ${isDark ? "text-slate-500" : "text-gray-400"}`} />
-                            <span className={`text-[10px] uppercase tracking-wider ${isDark ? "text-slate-500" : "text-gray-500"}`}>
+                            <Icon className="w-3 h-3 text-muted-foreground/60" />
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground/80">
                                 {kpi.label}
                             </span>
                             <span className={`w-1.5 h-1.5 rounded-full ml-auto ${getStatusColor(kpi.status)}`} />
                         </div>
                         <div className="flex items-baseline gap-1.5">
-                            <span className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                            <span className="text-lg font-semibold text-foreground">
                                 {kpi.value}
                             </span>
-                            <span className={`text-[10px] ${isDark ? "text-slate-600" : "text-gray-400"}`}>
+                            <span className="text-[10px] text-muted-foreground/60">
                                 {kpi.subtext}
                             </span>
                         </div>

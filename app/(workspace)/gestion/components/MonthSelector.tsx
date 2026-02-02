@@ -17,7 +17,6 @@ const MONTHS_FR = [
 ];
 
 export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minDate }: MonthSelectorProps) {
-    const { isDark } = useTheme();
 
     const handlePrevious = () => {
         if (selectedMonth === 1) {
@@ -58,36 +57,28 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minD
     };
 
     return (
-        <div className={`flex items-center justify-between sm:justify-start gap-2 px-3 py-2 rounded-lg border w-full sm:w-auto ${
-            isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'
-        }`}>
+        <div className="flex items-center justify-between sm:justify-start gap-2 px-3 py-2 rounded-lg border w-full sm:w-auto bg-card border-border">
             {/* Bouton Mois précédent */}
             <Button
                 variant="ghost"
                 size="sm"
                 onClick={handlePrevious}
                 disabled={isPastLimit()}
-                className={`h-8 w-8 p-0 ${
-                    isDark ? 'hover:bg-slate-800' : 'hover:bg-gray-100'
-                } ${isPastLimit() ? 'opacity-30 cursor-not-allowed' : ''}`}
+                className={`h-8 w-8 p-0 hover:bg-accent ${isPastLimit() ? 'opacity-30 cursor-not-allowed' : ''}`}
                 title="Mois précédent"
             >
-                <ChevronLeft className={`w-4 h-4 ${isDark ? 'text-slate-400' : 'text-gray-500'}`} />
+                <ChevronLeft className="w-4 h-4 text-muted-foreground" />
             </Button>
 
             {/* Affichage du mois et année */}
             <div className="flex items-center justify-center gap-2 px-2 flex-1 sm:flex-none">
-                <span className={`text-sm font-medium whitespace-nowrap ${
-                    isDark ? 'text-white' : 'text-gray-900'
-                }`}>
+                <span className="text-sm font-medium whitespace-nowrap text-foreground">
                     {MONTHS_FR[selectedMonth - 1]} {selectedYear}
                 </span>
                 {!isCurrentMonth() && (
                     <button
                         onClick={handleToday}
-                        className={`text-xs transition-colors hover:text-[#F4C430] ${
-                            isDark ? 'text-slate-500' : 'text-gray-600'
-                        }`}
+                        className="text-xs transition-colors hover:text-primary text-muted-foreground"
                     >
                         Aujourd'hui
                     </button>
@@ -100,12 +91,10 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minD
                 size="sm"
                 onClick={handleNext}
                 disabled={isCurrentMonth()}
-                className={`h-8 w-8 p-0 ${
-                    isDark ? 'hover:bg-slate-800' : 'hover:bg-gray-100'
-                } ${isCurrentMonth() ? 'opacity-30 cursor-not-allowed' : ''}`}
+                className={`h-8 w-8 p-0 hover:bg-accent ${isCurrentMonth() ? 'opacity-30 cursor-not-allowed' : ''}`}
                 title="Mois suivant"
             >
-                <ChevronRight className={`w-4 h-4 ${isDark ? 'text-slate-400' : 'text-gray-500'}`} />
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </Button>
         </div>
     );

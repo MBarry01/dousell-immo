@@ -18,7 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { ReceiptModal } from '../../gestion-locative/components/ReceiptModal';
+import { ReceiptModal } from '@/app/(workspace)/gestion/components/ReceiptModal';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/client';
 import { useTheme } from '../../theme-provider';

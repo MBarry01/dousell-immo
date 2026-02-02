@@ -4,7 +4,6 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { getUserRoles } from "@/lib/permissions";
 import { notifyUser } from "./notifications";
 import { getAdminEmail } from "@/lib/mail";
 import type { NotificationType } from "@/hooks/use-notifications";
@@ -57,7 +56,7 @@ export async function getUsersWithRoles(roles: string[]): Promise<string[]> {
 
     // Ajouter l'admin principal même s'il n'a pas de rôle dans user_roles (fallback)
     const adminEmail = getAdminEmail();
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (adminEmail && process.env.SUPABASE_SERVICE_ROLE_KEY) {
       try {
         const adminClient = createSupabaseClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -74,6 +73,8 @@ export async function getUsersWithRoles(roles: string[]): Promise<string[]> {
       } catch (adminError) {
         console.warn("⚠️ Impossible de récupérer l'admin principal:", adminError);
       }
+    } else if (!adminEmail) {
+      console.warn("⚠️ Admin email non configuré, impossible d'ajouter l'admin principal");
     } else {
       console.warn("⚠️ SUPABASE_SERVICE_ROLE_KEY non défini, impossible d'ajouter l'admin principal");
     }

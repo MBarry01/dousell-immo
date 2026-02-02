@@ -47,7 +47,7 @@ export function GestionLocativeWidget({
             <div className="grid grid-cols-3 divide-x divide-border">
 
                 {/* KPI 1 : Baux Actifs */}
-                <Link href="/gestion-locative" className="p-2 flex flex-col items-center justify-center text-center gap-2 hover:bg-accent/50 transition-colors cursor-pointer">
+                <Link href="/gestion" className="p-2 flex flex-col items-center justify-center text-center gap-2 hover:bg-accent/50 transition-colors cursor-pointer">
                     <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
                         <Building2 className="w-4 h-4" />
                     </div>
@@ -58,7 +58,7 @@ export function GestionLocativeWidget({
                 </Link>
 
                 {/* KPI 2 : En Attente (Dynamic Color) */}
-                <Link href="/gestion-locative" className="p-2 flex flex-col items-center justify-center text-center gap-2 hover:bg-accent/50 transition-colors cursor-pointer">
+                <Link href="/gestion" className="p-2 flex flex-col items-center justify-center text-center gap-2 hover:bg-accent/50 transition-colors cursor-pointer">
                     <div className={`p-2 rounded-lg ${pendingPayments > 0 ? 'bg-orange-500/10 text-orange-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
                         {pendingPayments > 0 ? <Clock className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                     </div>
@@ -73,7 +73,7 @@ export function GestionLocativeWidget({
                 </Link>
 
                 {/* KPI 3 : Pannes (Rouge) */}
-                <Link href="/gestion-locative" className="p-2 flex flex-col items-center justify-center text-center gap-2 hover:bg-accent/50 transition-colors cursor-pointer">
+                <Link href="/gestion" className="p-2 flex flex-col items-center justify-center text-center gap-2 hover:bg-accent/50 transition-colors cursor-pointer">
                     <div className="p-2 rounded-lg bg-red-500/10 text-red-500">
                         <AlertCircle className="w-4 h-4" />
                     </div>
@@ -86,7 +86,7 @@ export function GestionLocativeWidget({
             </div>
 
             {/* 3. FOOTER : Section Financière (Remplacement du simple lien) */}
-            <Link href="/gestion-locative" className="block border-t border-border bg-muted/30 p-4 hover:bg-muted/50 transition-colors">
+            <Link href="/gestion" className="block border-t border-border bg-muted/30 p-4 hover:bg-muted/50 transition-colors">
                 <div className="flex items-center justify-between text-sm mb-2">
                     <span className="text-muted-foreground text-xs">Revenus de {monthLabel}</span>
                     <span className="text-foreground font-mono font-medium text-xs">

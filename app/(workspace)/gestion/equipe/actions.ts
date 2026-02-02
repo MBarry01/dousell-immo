@@ -1,14 +1,14 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
-  requireTeamPermission,
-  requireTeamRole,
   TEAM_ROLE_CONFIG,
-  getUserTeamContext,
 } from "@/lib/team-permissions";
+import { getUserTeamContext } from "@/lib/team-context";
+import { requireTeamPermission, requireTeamRole } from "@/lib/permissions";
 import { sendEmail } from "@/lib/mail";
 import type {
   Team,
@@ -106,7 +106,7 @@ async function logTeamAudit(
 // =====================================================
 
 /**
- * Récupère l'équipe de l'utilisateur connecté
+ * Récupère l'équipe de l'utilisateur connecté (SSOT)
  */
 export async function getCurrentUserTeam(): Promise<{
   success: boolean;
@@ -114,41 +114,17 @@ export async function getCurrentUserTeam(): Promise<{
   role?: TeamRole;
   error?: string;
 }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { success: false, error: "Non connecté" };
-  }
-
-  const { data: membership, error } = await supabase
-    .from("team_members")
-    .select(
-      `
-      role,
-      team:teams(*)
-    `
-    )
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (error) {
+  try {
+    const { team, role } = await getUserTeamContext();
+    return {
+      success: true,
+      team: team as unknown as Team,
+      role: role as TeamRole,
+    };
+  } catch (error) {
     console.error("Erreur récupération équipe:", error);
     return { success: false, error: "Erreur lors de la récupération de l'équipe" };
   }
-
-  if (!membership?.team) {
-    return { success: true, team: undefined, role: undefined };
-  }
-
-  return {
-    success: true,
-    team: membership.team as unknown as Team,
-    role: membership.role as TeamRole,
-  };
 }
 
 /**
@@ -157,32 +133,38 @@ export async function getCurrentUserTeam(): Promise<{
 export async function getTeamMembers(
   teamId: string
 ): Promise<{ success: boolean; members?: TeamMember[]; error?: string }> {
-  const permCheck = await requireTeamPermission(teamId, "team.members.view");
-  if (!permCheck.success) {
-    return permCheck;
-  }
+  try {
+    const { teamId: activeTeamId } = await requireTeamPermission("team.members.view");
 
-  const supabase = await createClient();
+    // Sécurité additionnelle
+    if (activeTeamId !== teamId) {
+      return { success: false, error: "Accès non autorisé à cette équipe" };
+    }
 
-  const { data, error } = await supabase
-    .from("team_members")
-    .select(
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("team_members")
+      .select(
+        `
+        *,
+        user:profiles(id, email, full_name, phone)
       `
-      *,
-      user:profiles(id, email, full_name, phone)
-    `
-    )
-    .eq("team_id", teamId)
-    .eq("status", "active")
-    .order("role", { ascending: true })
-    .order("joined_at", { ascending: true });
+      )
+      .eq("team_id", teamId)
+      .eq("status", "active")
+      .order("role", { ascending: true })
+      .order("joined_at", { ascending: true });
 
-  if (error) {
-    console.error("Erreur récupération membres:", error);
-    return { success: false, error: "Erreur lors de la récupération des membres" };
+    if (error) {
+      console.error("Erreur récupération membres:", error);
+      return { success: false, error: "Erreur lors de la récupération des membres" };
+    }
+
+    return { success: true, members: data as TeamMember[] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  return { success: true, members: data as TeamMember[] };
 }
 
 /**
@@ -191,31 +173,36 @@ export async function getTeamMembers(
 export async function getTeamInvitations(
   teamId: string
 ): Promise<{ success: boolean; invitations?: TeamInvitation[]; error?: string }> {
-  const permCheck = await requireTeamPermission(teamId, "team.members.view");
-  if (!permCheck.success) {
-    return permCheck;
-  }
+  try {
+    const { teamId: activeTeamId } = await requireTeamPermission("team.members.view");
 
-  const supabase = await createClient();
+    if (activeTeamId !== teamId) {
+      return { success: false, error: "Accès non autorisé" };
+    }
 
-  const { data, error } = await supabase
-    .from("team_invitations")
-    .select(
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("team_invitations")
+      .select(
+        `
+        *,
+        inviter:profiles!invited_by(full_name, email)
       `
-      *,
-      inviter:profiles!invited_by(full_name, email)
-    `
-    )
-    .eq("team_id", teamId)
-    .eq("status", "pending")
-    .order("created_at", { ascending: false });
+      )
+      .eq("team_id", teamId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Erreur récupération invitations:", error);
-    return { success: false, error: "Erreur lors de la récupération des invitations" };
+    if (error) {
+      console.error("Erreur récupération invitations:", error);
+      return { success: false, error: "Erreur lors de la récupération des invitations" };
+    }
+
+    return { success: true, invitations: data as TeamInvitation[] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  return { success: true, invitations: data as TeamInvitation[] };
 }
 
 /**
@@ -225,31 +212,36 @@ export async function getTeamAuditLogs(
   teamId: string,
   limit = 50
 ): Promise<{ success: boolean; logs?: TeamAuditLog[]; error?: string }> {
-  const permCheck = await requireTeamPermission(teamId, "team.audit.view");
-  if (!permCheck.success) {
-    return permCheck;
-  }
+  try {
+    const { teamId: activeTeamId } = await requireTeamPermission("team.audit.view");
 
-  const supabase = await createClient();
+    if (activeTeamId !== teamId) {
+      return { success: false, error: "Accès non autorisé" };
+    }
 
-  const { data, error } = await supabase
-    .from("team_audit_logs")
-    .select(
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("team_audit_logs")
+      .select(
+        `
+        *,
+        user:profiles(full_name, email)
       `
-      *,
-      user:profiles(full_name, email)
-    `
-    )
-    .eq("team_id", teamId)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+      )
+      .eq("team_id", teamId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
-  if (error) {
-    console.error("Erreur récupération audit:", error);
-    return { success: false, error: "Erreur lors de la récupération de l'historique" };
+    if (error) {
+      console.error("Erreur récupération audit:", error);
+      return { success: false, error: "Erreur lors de la récupération de l'historique" };
+    }
+
+    return { success: true, logs: data as TeamAuditLog[] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  return { success: true, logs: data as TeamAuditLog[] };
 }
 
 /**
@@ -258,55 +250,60 @@ export async function getTeamAuditLogs(
 export async function getTeamStats(
   teamId: string
 ): Promise<{ success: boolean; stats?: TeamStats; error?: string }> {
-  const permCheck = await requireTeamPermission(teamId, "team.members.view");
-  if (!permCheck.success) {
-    return permCheck;
+  try {
+    const { teamId: activeTeamId } = await requireTeamPermission("team.members.view");
+
+    if (activeTeamId !== teamId) {
+      return { success: false, error: "Accès non autorisé" };
+    }
+
+    const supabase = await createClient();
+
+    // Récupérer les membres
+    const { data: members } = await supabase
+      .from("team_members")
+      .select("role")
+      .eq("team_id", teamId)
+      .eq("status", "active");
+
+    // Récupérer les invitations pending
+    const { count: pendingInvitations } = await supabase
+      .from("team_invitations")
+      .select("id", { count: "exact", head: true })
+      .eq("team_id", teamId)
+      .eq("status", "pending");
+
+    // Récupérer les baux
+    const { data: leases } = await supabase
+      .from("leases")
+      .select("status")
+      .eq("team_id", teamId);
+
+    const membersByRole: Record<TeamRole, number> = {
+      owner: 0,
+      manager: 0,
+      accountant: 0,
+      agent: 0,
+    };
+
+    members?.forEach((m) => {
+      const role = m.role as TeamRole;
+      membersByRole[role] = (membersByRole[role] || 0) + 1;
+    });
+
+    return {
+      success: true,
+      stats: {
+        total_members: members?.length || 0,
+        members_by_role: membersByRole,
+        pending_invitations: pendingInvitations || 0,
+        total_leases: leases?.length || 0,
+        active_leases: leases?.filter((l) => l.status === "active").length || 0,
+      },
+    };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  const supabase = await createClient();
-
-  // Récupérer les membres
-  const { data: members } = await supabase
-    .from("team_members")
-    .select("role")
-    .eq("team_id", teamId)
-    .eq("status", "active");
-
-  // Récupérer les invitations pending
-  const { count: pendingInvitations } = await supabase
-    .from("team_invitations")
-    .select("id", { count: "exact", head: true })
-    .eq("team_id", teamId)
-    .eq("status", "pending");
-
-  // Récupérer les baux
-  const { data: leases } = await supabase
-    .from("leases")
-    .select("status")
-    .eq("team_id", teamId);
-
-  const membersByRole: Record<TeamRole, number> = {
-    owner: 0,
-    manager: 0,
-    accountant: 0,
-    agent: 0,
-  };
-
-  members?.forEach((m) => {
-    const role = m.role as TeamRole;
-    membersByRole[role] = (membersByRole[role] || 0) + 1;
-  });
-
-  return {
-    success: true,
-    stats: {
-      total_members: members?.length || 0,
-      members_by_role: membersByRole,
-      pending_invitations: pendingInvitations || 0,
-      total_leases: leases?.length || 0,
-      active_leases: leases?.filter((l) => l.status === "active").length || 0,
-    },
-  };
 }
 
 // =====================================================
@@ -373,13 +370,6 @@ export async function createTeam(
 
   if (teamError) {
     console.error("Erreur création équipe:", teamError);
-    // Vérifier si c'est une erreur de table manquante
-    if (teamError.code === "42P01") {
-      return {
-        success: false,
-        error: "La migration SQL n'a pas été exécutée. Veuillez exécuter le fichier docs/create-teams-system.sql dans Supabase."
-      };
-    }
     return { success: false, error: `Erreur: ${teamError.message}` };
   }
 
@@ -416,64 +406,69 @@ export async function updateTeam(
   teamId: string,
   formData: z.infer<typeof updateTeamSchema>
 ): Promise<TeamActionResult> {
-  const permCheck = await requireTeamPermission(teamId, "team.settings.edit");
-  if (!permCheck.success) {
-    return permCheck;
+  try {
+    const { user, teamId: activeTeamId } = await requireTeamPermission("team.settings.edit");
+
+    if (activeTeamId !== teamId) {
+      return { success: false, error: "Accès non autorisé" };
+    }
+
+    const validation = updateTeamSchema.safeParse(formData);
+    if (!validation.success) {
+      return { success: false, error: validation.error.issues[0].message };
+    }
+
+    const supabase = await createClient();
+
+    // Récupérer l'ancienne valeur pour l'audit
+    const { data: oldTeam } = await supabase
+      .from("teams")
+      .select("*")
+      .eq("id", teamId)
+      .single();
+
+    // Construire l'objet de mise à jour (uniquement champs non-undefined)
+    const updates: Record<string, unknown> = {};
+    const data = validation.data;
+
+    if (data.name !== undefined) updates.name = data.name;
+    if (data.description !== undefined) updates.description = data.description || null;
+    if (data.company_address !== undefined) updates.company_address = data.company_address || null;
+    if (data.company_phone !== undefined) updates.company_phone = data.company_phone || null;
+    if (data.company_email !== undefined) updates.company_email = data.company_email || null;
+    if (data.company_ninea !== undefined) updates.company_ninea = data.company_ninea || null;
+    if (data.billing_email !== undefined) updates.billing_email = data.billing_email || null;
+    if (data.default_billing_day !== undefined) updates.default_billing_day = data.default_billing_day;
+
+    if (Object.keys(updates).length === 0) {
+      return { success: true, message: "Aucune modification" };
+    }
+
+    const { error } = await supabase.from("teams").update(updates).eq("id", teamId);
+
+    if (error) {
+      console.error("Erreur mise à jour équipe:", error);
+      return { success: false, error: "Erreur lors de la mise à jour" };
+    }
+
+    // Audit log
+    await logTeamAudit(
+      teamId,
+      user.id,
+      "team.updated",
+      "team",
+      teamId,
+      oldTeam,
+      updates
+    );
+
+    revalidatePath("/gestion/equipe");
+    revalidatePath("/gestion/equipe/parametres");
+
+    return { success: true, message: "Équipe mise à jour" };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  const validation = updateTeamSchema.safeParse(formData);
-  if (!validation.success) {
-    return { success: false, error: validation.error.issues[0].message };
-  }
-
-  const supabase = await createClient();
-
-  // Récupérer l'ancienne valeur pour l'audit
-  const { data: oldTeam } = await supabase
-    .from("teams")
-    .select("*")
-    .eq("id", teamId)
-    .single();
-
-  // Construire l'objet de mise à jour (uniquement champs non-undefined)
-  const updates: Record<string, unknown> = {};
-  const data = validation.data;
-
-  if (data.name !== undefined) updates.name = data.name;
-  if (data.description !== undefined) updates.description = data.description || null;
-  if (data.company_address !== undefined) updates.company_address = data.company_address || null;
-  if (data.company_phone !== undefined) updates.company_phone = data.company_phone || null;
-  if (data.company_email !== undefined) updates.company_email = data.company_email || null;
-  if (data.company_ninea !== undefined) updates.company_ninea = data.company_ninea || null;
-  if (data.billing_email !== undefined) updates.billing_email = data.billing_email || null;
-  if (data.default_billing_day !== undefined) updates.default_billing_day = data.default_billing_day;
-
-  if (Object.keys(updates).length === 0) {
-    return { success: true, message: "Aucune modification" };
-  }
-
-  const { error } = await supabase.from("teams").update(updates).eq("id", teamId);
-
-  if (error) {
-    console.error("Erreur mise à jour équipe:", error);
-    return { success: false, error: "Erreur lors de la mise à jour" };
-  }
-
-  // Audit log
-  await logTeamAudit(
-    teamId,
-    permCheck.userId,
-    "team.updated",
-    "team",
-    teamId,
-    oldTeam,
-    updates
-  );
-
-  revalidatePath("/gestion/equipe");
-  revalidatePath("/gestion/equipe/parametres");
-
-  return { success: true, message: "Équipe mise à jour" };
 }
 
 // =====================================================
@@ -483,154 +478,410 @@ export async function updateTeam(
 export async function inviteTeamMember(
   formData: z.infer<typeof inviteMemberSchema>
 ): Promise<InviteMemberResult> {
-  const validation = inviteMemberSchema.safeParse(formData);
-  if (!validation.success) {
-    return { success: false, error: validation.error.issues[0].message };
-  }
+  try {
+    const validation = inviteMemberSchema.safeParse(formData);
+    if (!validation.success) {
+      return { success: false, error: validation.error.issues[0].message };
+    }
 
-  const data = validation.data;
+    const data = validation.data;
 
-  // Vérifier permission
-  const permCheck = await requireTeamPermission(data.teamId, "team.members.invite");
-  if (!permCheck.success) {
-    return permCheck;
-  }
+    // Vérifier permission
+    const { user, teamId: activeTeamId } = await requireTeamPermission("team.members.invite");
 
-  const supabase = await createClient();
+    if (activeTeamId !== data.teamId) {
+      return { success: false, error: "Accès non autorisé" };
+    }
 
-  // Vérifier si l'email est déjà membre
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("email", data.email.toLowerCase())
-    .maybeSingle();
+    const supabase = await createClient();
 
-  if (profiles) {
-    const { data: existingMember } = await supabase
-      .from("team_members")
+    // ✅ QUOTA: Vérifier la limite de membres pour les équipes Trial
+    const supabaseAdmin = createAdminClient();
+
+    const { data: team, error: teamError } = await supabaseAdmin
+      .from("teams")
+      .select("subscription_status")
+      .eq("id", data.teamId)
+      .single();
+
+    if (teamError) {
+      console.error("[Team Quota] Error fetching team:", teamError);
+      return { success: false, error: "Erreur lors de la récupération des informations de l'équipe" };
+    }
+
+    // Si équipe en trial, vérifier la limite de 3 membres
+    if (team.subscription_status === 'trial') {
+      // 1. Emails des membres actifs (pour ne pas compter les invitations redondantes)
+      const { data: members } = await supabaseAdmin
+        .from("team_members")
+        .select("user:profiles(email)")
+        .eq("team_id", data.teamId)
+        .eq("status", "active");
+
+      const memberEmails = new Set(
+        members?.map(m => (m.user as any)?.email?.toLowerCase()).filter(Boolean) || []
+      );
+
+      // 2. Invitations en attente valides (non expirées et pas déjà membres)
+      const { data: pendingInvites } = await supabaseAdmin
+        .from("team_invitations")
+        .select("email, expires_at")
+        .eq("team_id", data.teamId)
+        .eq("status", "pending");
+
+      const now = new Date();
+      const validPendingInvites = (pendingInvites || []).filter(
+        inv => {
+          const isExpired = new Date(inv.expires_at) <= now;
+          const isAlreadyMember = memberEmails.has(inv.email.toLowerCase());
+          return !isExpired && !isAlreadyMember;
+        }
+      );
+
+      // 3. Calcul du total
+      const activeMembersCount = memberEmails.size;
+      const totalCount = activeMembersCount + validPendingInvites.length;
+
+      // Limite de 3 membres pour les équipes Trial
+      if (totalCount >= 3) {
+        return {
+          success: false,
+          error: "Limite atteinte : Les équipes en période d'essai sont limitées à 3 membres. Passez à un abonnement Pro pour inviter plus de membres.",
+        };
+      }
+    }
+
+    // Vérifier si l'email est déjà membre
+    const { data: profiles } = await supabase
+      .from("profiles")
       .select("id")
-      .eq("team_id", data.teamId)
-      .eq("user_id", profiles.id)
+      .eq("email", data.email.toLowerCase())
       .maybeSingle();
 
-    if (existingMember) {
-      return { success: false, error: "Cet utilisateur est déjà membre de l'équipe" };
+    if (profiles) {
+      const { data: existingMember } = await supabase
+        .from("team_members")
+        .select("id")
+        .eq("team_id", data.teamId)
+        .eq("user_id", profiles.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (existingMember) {
+        return { success: false, error: "Cet utilisateur est déjà membre de l'équipe" };
+      }
     }
-  }
 
-  // Vérifier si invitation déjà en cours
-  const { data: existingInvite } = await supabase
-    .from("team_invitations")
-    .select("id")
-    .eq("team_id", data.teamId)
-    .eq("email", data.email.toLowerCase())
-    .eq("status", "pending")
-    .maybeSingle();
+    // Vérifier si invitation déjà en cours (avec admin client pour bypass RLS)
+    const { data: existingInvite } = await supabaseAdmin
+      .from("team_invitations")
+      .select("id")
+      .eq("team_id", data.teamId)
+      .eq("email", data.email.toLowerCase())
+      .eq("status", "pending")
+      .maybeSingle();
 
-  if (existingInvite) {
-    return { success: false, error: "Une invitation est déjà en cours pour cet email" };
-  }
+    if (existingInvite) {
+      return { success: false, error: "Une invitation est déjà en cours pour cet email" };
+    }
 
-  // Récupérer les infos de l'équipe
-  const { data: team } = await supabase
-    .from("teams")
-    .select("name")
-    .eq("id", data.teamId)
-    .single();
+    // Récupérer les infos de l'équipe
+    const { data: teamInfo } = await supabase
+      .from("teams")
+      .select("name")
+      .eq("id", data.teamId)
+      .single();
 
-  // Récupérer le nom de l'inviteur
-  const { data: inviterProfile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", permCheck.userId)
-    .single();
+    // Récupérer le nom de l'inviteur
+    const { data: inviterProfile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
 
-  // Créer l'invitation
-  const { data: invitation, error } = await supabase
-    .from("team_invitations")
-    .insert({
-      team_id: data.teamId,
-      email: data.email.toLowerCase(),
-      role: data.role,
-      invited_by: permCheck.userId,
-      message: data.message || null,
-    })
-    .select()
-    .single();
+    // ✅ CORRECT
+    // Générer le token et l'expiration explicitement 
+    const inviteToken = crypto.randomUUID();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 jours
+    // Créer l'invitation avec le client admin (bypass RLS)
+    const { data: invitation, error } = await supabaseAdmin
+      .from("team_invitations")
+      .insert({
+        team_id: data.teamId,
+        email: data.email.toLowerCase(),
+        role: data.role,
+        token: inviteToken,           // 🆕 Token explicite
+        expires_at: expiresAt.toISOString(), // 🆕 Expiration explicite
+        invited_by: user.id,
+        message: data.message || null,
+      })
+      .select()
+      .single();
 
-  if (error) {
-    console.error("Erreur création invitation:", error);
-    return { success: false, error: "Erreur lors de l'envoi de l'invitation" };
-  }
+    if (error) {
+      console.error("Erreur création invitation:", error);
+      return { success: false, error: "Erreur lors de l'envoi de l'invitation" };
+    }
 
-  // Envoyer l'email
-  const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/accept-invitation?token=${invitation.token}`;
-  const roleLabel = TEAM_ROLE_CONFIG[data.role as TeamRole].label;
-  const inviterName = inviterProfile?.full_name || "Un membre";
+    // Envoyer l'email d'invitation
+    try {
+      const roleConfig = TEAM_ROLE_CONFIG[data.role];
+      const inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/gestion/equipe/invitations/accept?token=${inviteToken}`;
+      console.log("🔗 LIEN D'INVITATION GÉNÉRÉ:", inviteUrl); // DEBUG LOG
 
-  try {
-    await sendEmail({
-      to: data.email,
-      subject: `Invitation à rejoindre l'équipe ${team?.name} sur Dousell Immo`,
-      html: `
+      const emailHtml = `
         <!DOCTYPE html>
         <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body style="font-family: 'Outfit', Arial, sans-serif; margin: 0; padding: 0; background-color: #000000;">
-          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #F4C430 0%, #B8860B 100%); padding: 40px 30px; text-align: center; border-radius: 16px 16px 0 0;">
-              <h1 style="color: #000000; margin: 0; font-size: 28px; font-weight: 700;">Invitation Équipe</h1>
-              <p style="color: #000000; margin: 10px 0 0; opacity: 0.8;">Dousell Immo - Gestion Locative</p>
-            </div>
-            <div style="padding: 40px 30px; background: #121212; border-radius: 0 0 16px 16px;">
-              <p style="color: #ffffff; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
-                ${inviterName} vous invite à rejoindre l'équipe <strong style="color: #F4C430;">${team?.name}</strong> en tant que <strong style="color: #F4C430;">${roleLabel}</strong>.
-              </p>
-              ${data.message
-          ? `
-              <div style="background: #1a1a1a; padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #F4C430;">
-                <p style="color: #a0a0a0; margin: 0; font-style: italic;">"${data.message}"</p>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+              .content { background: #f8fafc; padding: 30px; border-radius: 0 0 10px 10px; }
+              .button { display: inline-block; padding: 12px 30px; background: #F4C430; color: #000; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
+              .info-box { background: white; padding: 15px; border-left: 4px solid #F4C430; margin: 20px 0; border-radius: 4px; }
+              .footer { text-align: center; margin-top: 30px; color: #64748b; font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1 style="margin: 0;">🏢 Invitation à rejoindre ${teamInfo?.name || "l'équipe"}</h1>
               </div>
-              `
-          : ""
-        }
-              <div style="text-align: center; margin: 35px 0;">
-                <a href="${inviteLink}" style="background: #F4C430; color: #000000; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; display: inline-block;">
-                  Accepter l'invitation
-                </a>
+              <div class="content">
+                <p>Bonjour,</p>
+                <p><strong>${inviterProfile?.full_name || "Un membre"}</strong> vous invite à rejoindre l'équipe <strong>${teamInfo?.name || "l'équipe"}</strong> sur <strong>Dousell Immo</strong>.</p>
+
+                <div class="info-box">
+                  <p style="margin: 5px 0;"><strong>Rôle proposé:</strong> ${roleConfig.label}</p>
+                  <p style="margin: 5px 0; color: #64748b;">${roleConfig.description}</p>
+                </div>
+
+                ${data.message ? `<p style="font-style: italic; color: #64748b;">"${data.message}"</p>` : ""}
+
+                <div style="text-align: center;">
+                  <a href="${inviteUrl}" class="button">Accepter l'invitation</a>
+                </div>
+
+                <p style="font-size: 14px; color: #64748b; margin-top: 20px;">
+                  Cette invitation expire dans 7 jours. Si vous n'avez pas demandé cette invitation, vous pouvez ignorer cet email.
+                </p>
+
+                <p style="font-size: 14px; color: #64748b;">
+                  Ou copiez ce lien dans votre navigateur:<br>
+                  <a href="${inviteUrl}" style="color: #3b82f6; word-break: break-all;">${inviteUrl}</a>
+                </p>
               </div>
-              <p style="color: #666666; font-size: 13px; text-align: center; margin: 30px 0 0;">
-                Ce lien expire dans 7 jours.
-              </p>
+              <div class="footer">
+                <p>© ${new Date().getFullYear()} Dousell Immo - Gestion Locative Intelligente</p>
+              </div>
             </div>
-            <div style="text-align: center; padding: 20px;">
-              <p style="color: #444444; font-size: 12px; margin: 0;">
-                © ${new Date().getFullYear()} Dousell Immo. Tous droits réservés.
-              </p>
-            </div>
-          </div>
-        </body>
+          </body>
         </html>
-      `,
+      `;
+
+      await sendEmail({
+        to: data.email,
+        subject: `Invitation à rejoindre ${teamInfo?.name || "l'équipe"} sur Dousell Immo`,
+        html: emailHtml,
+        fromName: "Dousell Immo",
+      });
+    } catch (emailError) {
+      console.error("Erreur envoi email invitation:", emailError);
+      // On ne bloque pas si l'email échoue, l'invitation est créée
+    }
+
+    // Audit log
+    await logTeamAudit(data.teamId, user.id, "member.invited", "invitation", invitation.id, null, {
+      email: data.email,
+      role: data.role,
     });
-  } catch (emailError) {
-    console.error("Erreur envoi email invitation:", emailError);
-    // Ne pas bloquer si l'email échoue
+
+    revalidatePath("/gestion/equipe");
+    revalidatePath("/gestion/equipe/invitations");
+
+    return { success: true, invitationId: invitation.id };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
+}
 
-  // Audit log
-  await logTeamAudit(data.teamId, permCheck.userId, "member.invited", "invitation", invitation.id, null, {
-    email: data.email,
-    role: data.role,
-  });
+/**
+ * Renvoie une invitation (réinitialise l'expiration)
+ */
+export async function resendInvitation(
+  teamId: string,
+  invitationId: string
+): Promise<TeamActionResult> {
+  try {
+    const { user, teamId: activeTeamId } = await requireTeamPermission("team.members.invite");
 
-  revalidatePath("/gestion/equipe");
-  revalidatePath("/gestion/equipe/invitations");
+    if (activeTeamId !== teamId) {
+      return { success: false, error: "Accès non autorisé" };
+    }
 
-  return { success: true, invitationId: invitation.id };
+    const supabaseAdmin = createAdminClient();
+
+    // Récupérer l'invitation
+    const { data: invitation, error: fetchError } = await supabaseAdmin
+      .from("team_invitations")
+      .select("*")
+      .eq("id", invitationId)
+      .eq("team_id", teamId)
+      .single();
+
+    if (fetchError || !invitation) {
+      return { success: false, error: "Invitation introuvable" };
+    }
+
+    // Mettre à jour l'expiration (7 jours à partir de maintenant)
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    const { error: updateError } = await supabaseAdmin
+      .from("team_invitations")
+      .update({
+        expires_at: expiresAt.toISOString(),
+        status: "pending", // Au cas où elle était expirée
+        created_at: new Date().toISOString(), // On reset le timer visuel
+      })
+      .eq("id", invitationId);
+
+    if (updateError) {
+      return { success: false, error: "Erreur lors du renvoi de l'invitation" };
+    }
+
+    // Envoyer l'email d'invitation
+    try {
+      const supabase = await createClient();
+
+      // Récupérer les infos de l'équipe et de l'inviteur
+      const { data: team } = await supabase
+        .from("teams")
+        .select("name")
+        .eq("id", teamId)
+        .single();
+
+      const { data: inviterProfile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
+      const roleConfig = TEAM_ROLE_CONFIG[invitation.role as TeamRole];
+      const inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/gestion/equipe/invitations/accept?token=${invitation.token}`;
+
+      const emailHtml = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+              .content { background: #f8fafc; padding: 30px; border-radius: 0 0 10px 10px; }
+              .button { display: inline-block; padding: 12px 30px; background: #F4C430; color: #000; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
+              .info-box { background: white; padding: 15px; border-left: 4px solid #F4C430; margin: 20px 0; border-radius: 4px; }
+              .footer { text-align: center; margin-top: 30px; color: #64748b; font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1 style="margin: 0;">🔄 Rappel - Invitation à rejoindre ${team?.name || "l'équipe"}</h1>
+              </div>
+              <div class="content">
+                <p>Bonjour,</p>
+                <p><strong>${inviterProfile?.full_name || "Un membre"}</strong> vous renvoie l'invitation à rejoindre l'équipe <strong>${team?.name || "l'équipe"}</strong> sur <strong>Dousell Immo</strong>.</p>
+
+                <div class="info-box">
+                  <p style="margin: 5px 0;"><strong>Rôle proposé:</strong> ${roleConfig.label}</p>
+                  <p style="margin: 5px 0; color: #64748b;">${roleConfig.description}</p>
+                </div>
+
+                ${invitation.message ? `<p style="font-style: italic; color: #64748b;">"${invitation.message}"</p>` : ""}
+
+                <div style="text-align: center;">
+                  <a href="${inviteUrl}" class="button">Accepter l'invitation</a>
+                </div>
+
+                <p style="font-size: 14px; color: #64748b; margin-top: 20px;">
+                  Cette invitation a été renvoyée et expire dans 7 jours. Si vous n'avez pas demandé cette invitation, vous pouvez ignorer cet email.
+                </p>
+
+                <p style="font-size: 14px; color: #64748b;">
+                  Ou copiez ce lien dans votre navigateur:<br>
+                  <a href="${inviteUrl}" style="color: #3b82f6; word-break: break-all;">${inviteUrl}</a>
+                </p>
+              </div>
+              <div class="footer">
+                <p>© ${new Date().getFullYear()} Dousell Immo - Gestion Locative Intelligente</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+
+      await sendEmail({
+        to: invitation.email,
+        subject: `Rappel - Invitation à rejoindre ${team?.name || "l'équipe"} sur Dousell Immo`,
+        html: emailHtml,
+        fromName: "Dousell Immo",
+      });
+    } catch (emailError) {
+      console.error("Erreur envoi email rappel invitation:", emailError);
+      // On ne bloque pas si l'email échoue
+    }
+
+    // Audit log
+    await logTeamAudit(teamId, user.id, "member.invitation_resent", "invitation", invitationId, null, {
+      email: invitation.email,
+    });
+
+    revalidatePath("/gestion/equipe");
+    return { success: true, message: "Invitation renvoyée" };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Annule une invitation
+ */
+export async function cancelInvitation(
+  teamId: string,
+  invitationId: string
+): Promise<TeamActionResult> {
+  try {
+    const { user, teamId: activeTeamId } = await requireTeamPermission("team.members.invite");
+
+    if (activeTeamId !== teamId) {
+      return { success: false, error: "Accès non autorisé" };
+    }
+
+    const supabaseAdmin = createAdminClient();
+
+    const { error } = await supabaseAdmin
+      .from("team_invitations")
+      .update({ status: "cancelled" })
+      .eq("id", invitationId)
+      .eq("team_id", teamId);
+
+    if (error) {
+      return { success: false, error: "Erreur lors de l'annulation" };
+    }
+
+    // Audit log
+    await logTeamAudit(teamId, user.id, "member.invitation_cancelled", "invitation", invitationId, null, null);
+
+    revalidatePath("/gestion/equipe");
+    return { success: true, message: "Invitation annulée" };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
 }
 
 // =====================================================
@@ -663,8 +914,10 @@ export async function acceptInvitation(token: string): Promise<AcceptInvitationR
     };
   }
 
-  // Fallback: logique manuelle
-  const { data: invitation, error: invError } = await supabase
+  // Fallback: logique manuelle avec client Admin (bypass RLS)
+  const supabaseAdmin = createAdminClient();
+
+  const { data: invitation, error: invError } = await supabaseAdmin
     .from("team_invitations")
     .select("*, team:teams(id, name)")
     .eq("token", token)
@@ -682,30 +935,98 @@ export async function acceptInvitation(token: string): Promise<AcceptInvitationR
 
   // Vérifier expiration
   if (new Date(invitation.expires_at) < new Date()) {
-    await supabase.from("team_invitations").update({ status: "expired" }).eq("id", invitation.id);
+    await supabaseAdmin.from("team_invitations").update({ status: "expired" }).eq("id", invitation.id);
     return { success: false, error: "Cette invitation a expiré" };
   }
 
-  // Ajouter comme membre
-  const { error: memberError } = await supabase.from("team_members").insert({
-    team_id: invitation.team_id,
-    user_id: user.id,
-    role: invitation.role,
-    status: "active",
-    invited_by: invitation.invited_by,
-    joined_at: new Date().toISOString(),
-  });
+  // Vérifier si déjà membre (et son statut)
+  // Ensure profile exists (fix for missing trigger or race condition)
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("id")
+    .eq("id", user.id)
+    .maybeSingle();
 
-  if (memberError) {
-    if (memberError.code === "23505") {
-      return { success: false, error: "Vous êtes déjà membre de cette équipe" };
+  if (!profile) {
+    // Attempt to create profile if missing
+    const { error: createProfileError } = await supabaseAdmin
+      .from("profiles")
+      .insert({
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0],
+        avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (createProfileError) {
+      console.error("Error creating missing profile:", createProfileError);
     }
-    console.error("Erreur ajout membre:", memberError);
-    return { success: false, error: "Erreur lors de l'adhésion à l'équipe" };
   }
 
-  // Marquer invitation comme acceptée
-  await supabase
+  // Vérifier si déjà membre (et son statut)
+  const { data: existingMember } = await supabaseAdmin
+    .from("team_members")
+    .select("status")
+    .eq("team_id", invitation.team_id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existingMember) {
+    if (existingMember.status === 'active') {
+      // Déjà actif -> Succès (Idempotence)
+      await supabaseAdmin.from("team_invitations").update({ status: "accepted", accepted_at: new Date().toISOString() }).eq("id", invitation.id);
+
+      // Activer l'équipe automatiquement
+      const { setActiveTeam } = await import("@/lib/team-switching");
+      await setActiveTeam(invitation.team_id);
+
+      revalidatePath("/gestion/equipe");
+
+      const team = invitation.team as unknown as { id: string; name: string };
+      return {
+        success: true,
+        teamId: team.id,
+        teamName: team.name,
+        role: invitation.role as TeamRole,
+      };
+    } else {
+      // Existe mais pas actif -> Réactiver
+      const { error: updateError } = await supabaseAdmin
+        .from("team_members")
+        .update({
+          status: 'active',
+          role: invitation.role,
+          joined_at: new Date().toISOString(),
+          invited_by: invitation.invited_by
+        })
+        .eq("team_id", invitation.team_id)
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        console.error("Erreur réactivation membre:", updateError);
+        return { success: false, error: "Erreur lors de l'activation du membre" };
+      }
+    }
+  } else {
+    // Nouveau membre -> Insérer
+    const { error: memberError } = await supabaseAdmin.from("team_members").insert({
+      team_id: invitation.team_id,
+      user_id: user.id,
+      role: invitation.role,
+      status: "active",
+      invited_by: invitation.invited_by,
+      joined_at: new Date().toISOString(),
+    });
+
+    if (memberError) {
+      console.error("Erreur ajout membre:", memberError);
+      return { success: false, error: "Erreur lors de l'adhésion à l'équipe" };
+    }
+  }
+
+  // Marquer invitation comme acceptée avec admin client
+  await supabaseAdmin
     .from("team_invitations")
     .update({ status: "accepted", accepted_at: new Date().toISOString() })
     .eq("id", invitation.id);
@@ -716,10 +1037,14 @@ export async function acceptInvitation(token: string): Promise<AcceptInvitationR
     via: "invitation",
   });
 
+  // Activer l'équipe automatiquement
+  const { setActiveTeam } = await import("@/lib/team-switching");
+  await setActiveTeam(invitation.team_id);
+
   revalidatePath("/gestion/equipe");
   revalidatePath("/gestion");
 
-  const team = invitation.team as { id: string; name: string };
+  const team = invitation.team as unknown as { id: string; name: string };
   return {
     success: true,
     teamId: team.id,
@@ -735,212 +1060,268 @@ export async function acceptInvitation(token: string): Promise<AcceptInvitationR
 export async function changeMemberRole(
   formData: z.infer<typeof changeRoleSchema>
 ): Promise<TeamActionResult> {
-  const validation = changeRoleSchema.safeParse(formData);
-  if (!validation.success) {
-    return { success: false, error: validation.error.issues[0].message };
+  try {
+    const validation = changeRoleSchema.safeParse(formData);
+    if (!validation.success) {
+      return { success: false, error: validation.error.issues[0].message };
+    }
+
+    const data = validation.data;
+
+    // Seul owner ou manager avec permission spécifique peut changer les rôles
+    const { user, teamId: activeTeamId } = await requireTeamPermission("team.members.edit_role");
+
+    if (activeTeamId !== data.teamId) {
+      return { success: false, error: "Accès non autorisé" };
+    }
+
+    const supabaseAdmin = createAdminClient();
+
+    // Récupérer l'ancien rôle
+    const { data: member, error: fetchError } = await supabaseAdmin
+      .from("team_members")
+      .select("role, user_id")
+      .eq("id", data.memberId)
+      .eq("team_id", data.teamId)
+      .single();
+
+    if (fetchError || !member) {
+      return { success: false, error: "Membre introuvable" };
+    }
+
+    // Empêcher la modification d'un owner (sauf par lui-même si on veut autoriser le transfert, mais ici restons simple)
+    if (member.role === "owner") {
+      return { success: false, error: "Impossible de modifier le rôle du propriétaire" };
+    }
+
+    // Mettre à jour
+    const { error } = await supabaseAdmin
+      .from("team_members")
+      .update({ role: data.newRole, updated_at: new Date().toISOString() })
+      .eq("id", data.memberId);
+
+    if (error) {
+      return { success: false, error: "Erreur lors du changement de rôle" };
+    }
+
+    // Audit log
+    await logTeamAudit(
+      data.teamId,
+      user.id,
+      "member.role_changed",
+      "member",
+      data.memberId,
+      { role: member.role },
+      { role: data.newRole }
+    );
+
+    revalidatePath("/gestion/equipe");
+    return { success: true, message: "Rôle mis à jour" };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  const data = validation.data;
-
-  // Seul owner peut changer les rôles
-  const permCheck = await requireTeamPermission(data.teamId, "team.members.edit_role");
-  if (!permCheck.success) {
-    return permCheck;
-  }
-
-  const supabase = await createClient();
-
-  // Récupérer l'ancien rôle
-  const { data: member, error: fetchError } = await supabase
-    .from("team_members")
-    .select("role, user_id, user:profiles(full_name)")
-    .eq("id", data.memberId)
-    .eq("team_id", data.teamId)
-    .single();
-
-  if (fetchError || !member) {
-    return { success: false, error: "Membre introuvable" };
-  }
-
-  // Empêcher la modification d'un owner
-  if (member.role === "owner") {
-    return { success: false, error: "Impossible de modifier le rôle du propriétaire" };
-  }
-
-  // Mettre à jour
-  const { error } = await supabase
-    .from("team_members")
-    .update({ role: data.newRole, updated_at: new Date().toISOString() })
-    .eq("id", data.memberId);
-
-  if (error) {
-    console.error("Erreur changement rôle:", error);
-    return { success: false, error: "Erreur lors du changement de rôle" };
-  }
-
-  // Audit log
-  await logTeamAudit(
-    data.teamId,
-    permCheck.userId,
-    "member.role_changed",
-    "member",
-    data.memberId,
-    { role: member.role },
-    { role: data.newRole }
-  );
-
-  revalidatePath("/gestion/equipe");
-
-  const memberUser = member.user as unknown as { full_name: string | null } | null;
-  return {
-    success: true,
-    message: `Rôle de ${memberUser?.full_name || "membre"} modifié`,
-  };
 }
 
-// =====================================================
-// SUPPRESSION DE MEMBRE
-// =====================================================
-
+/**
+ * Supprime un membre de l'équipe
+ */
 export async function removeTeamMember(
   teamId: string,
   memberId: string
 ): Promise<TeamActionResult> {
-  const permCheck = await requireTeamPermission(teamId, "team.members.remove");
-  if (!permCheck.success) {
-    return permCheck;
+  try {
+    const { user, teamId: activeTeamId } = await requireTeamPermission("team.members.remove");
+
+    if (activeTeamId !== teamId) {
+      return { success: false, error: "Accès non autorisé" };
+    }
+
+    const supabaseAdmin = createAdminClient();
+
+    // Récupérer le membre pour vérifier son rôle
+    const { data: member, error: fetchError } = await supabaseAdmin
+      .from("team_members")
+      .select("role, user_id")
+      .eq("id", memberId)
+      .eq("team_id", teamId)
+      .single();
+
+    if (fetchError || !member) {
+      return { success: false, error: "Membre introuvable" };
+    }
+
+    if (member.role === "owner") {
+      return { success: false, error: "Impossible de supprimer le propriétaire" };
+    }
+
+    // Suppression (logique)
+    const { error } = await supabaseAdmin
+      .from("team_members")
+      .update({ status: "removed", removed_at: new Date().toISOString() })
+      .eq("id", memberId);
+
+    if (error) {
+      return { success: false, error: "Erreur lors de la suppression" };
+    }
+
+    // Audit log
+    await logTeamAudit(teamId, user.id, "member.removed", "member", memberId, { role: member.role }, null);
+
+    revalidatePath("/gestion/equipe");
+    return { success: true, message: "Membre supprimé" };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  const supabase = await createClient();
-
-  // Récupérer le membre
-  const { data: member } = await supabase
-    .from("team_members")
-    .select("role, user_id, user:profiles(email, full_name)")
-    .eq("id", memberId)
-    .eq("team_id", teamId)
-    .single();
-
-  if (!member) {
-    return { success: false, error: "Membre introuvable" };
-  }
-
-  // Empêcher la suppression d'un owner
-  if (member.role === "owner") {
-    return { success: false, error: "Impossible de supprimer le propriétaire de l'équipe" };
-  }
-
-  // Supprimer
-  const { error } = await supabase.from("team_members").delete().eq("id", memberId);
-
-  if (error) {
-    console.error("Erreur suppression membre:", error);
-    return { success: false, error: "Erreur lors de la suppression" };
-  }
-
-  // Audit log
-  await logTeamAudit(teamId, permCheck.userId, "member.removed", "member", memberId, member, null);
-
-  revalidatePath("/gestion/equipe");
-
-  return { success: true, message: "Membre retiré de l'équipe" };
 }
 
-// =====================================================
-// ANNULATION D'INVITATION
-// =====================================================
+/**
+ * Récupère toutes les équipes dont l'utilisateur est membre
+ */
+export async function getUserTeams(): Promise<{
+  success: boolean;
+  teams?: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    role: string;
+    is_active: boolean;
+  }>;
+  error?: string;
+}> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-export async function cancelInvitation(
-  teamId: string,
-  invitationId: string
-): Promise<TeamActionResult> {
-  const permCheck = await requireTeamPermission(teamId, "team.members.invite");
-  if (!permCheck.success) {
-    return permCheck;
+    if (!user) {
+      return { success: false, error: "Non connecté" };
+    }
+
+    // Utiliser le client admin pour éviter les problèmes de RLS
+    const supabaseAdmin = createAdminClient();
+
+    // Récupérer tous les memberships actifs
+    const { data: memberships, error } = await supabaseAdmin
+      .from("team_members")
+      .select(`
+        team_id,
+        role,
+        team:teams(id, name, slug)
+      `)
+      .eq("user_id", user.id)
+      .eq("status", "active");
+
+    if (error) {
+      console.error("Erreur récupération équipes:", error);
+      return { success: false, error: "Erreur lors de la récupération des équipes" };
+    }
+
+    if (!memberships || memberships.length === 0) {
+      return { success: true, teams: [] };
+    }
+
+    // Récupérer l'équipe active depuis le contexte
+    const { teamId: activeTeamId } = await getUserTeamContext();
+
+    const teams = memberships.map((m) => {
+      const team = m.team as unknown as { id: string; name: string; slug: string };
+      return {
+        id: team.id,
+        name: team.name,
+        slug: team.slug,
+        role: m.role,
+        is_active: team.id === activeTeamId,
+      };
+    });
+
+    return { success: true, teams };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  const supabase = await createClient();
-
-  const { data: invitation } = await supabase
-    .from("team_invitations")
-    .select("email, status")
-    .eq("id", invitationId)
-    .eq("team_id", teamId)
-    .single();
-
-  if (!invitation) {
-    return { success: false, error: "Invitation introuvable" };
-  }
-
-  if (invitation.status !== "pending") {
-    return { success: false, error: "Cette invitation n'est plus active" };
-  }
-
-  const { error } = await supabase
-    .from("team_invitations")
-    .update({ status: "cancelled" })
-    .eq("id", invitationId);
-
-  if (error) {
-    console.error("Erreur annulation invitation:", error);
-    return { success: false, error: "Erreur lors de l'annulation" };
-  }
-
-  // Audit log
-  await logTeamAudit(teamId, permCheck.userId, "invitation.cancelled", "invitation", invitationId, invitation, null);
-
-  revalidatePath("/gestion/equipe/invitations");
-
-  return { success: true, message: "Invitation annulée" };
 }
 
-// =====================================================
-// QUITTER L'ÉQUIPE
-// =====================================================
+/**
+ * Change l'équipe active pour l'utilisateur (stocké en cookie/session)
+ */
+export async function switchActiveTeam(teamId: string): Promise<TeamActionResult> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
+    if (!user) {
+      return { success: false, error: "Non connecté" };
+    }
+
+    // Vérifier que l'utilisateur est bien membre de cette équipe
+    const supabaseAdmin = createAdminClient();
+    const { data: membership, error } = await supabaseAdmin
+      .from("team_members")
+      .select("id, role")
+      .eq("user_id", user.id)
+      .eq("team_id", teamId)
+      .eq("status", "active")
+      .single();
+
+    if (error || !membership) {
+      return { success: false, error: "Vous n'êtes pas membre de cette équipe" };
+    }
+
+    // ✅ CORRECTION SÉCURITÉ: Persister l'équipe active dans un cookie sécurisé
+    // Cela permet au système de savoir quelle équipe afficher lors des prochaines requêtes
+    const { setActiveTeam } = await import("@/lib/team-switching");
+    await setActiveTeam(teamId);
+
+    // Audit log
+    await logTeamAudit(teamId, user.id, "team.switched", "team", teamId, null, {
+      from: "previous_team",
+      to: teamId,
+    });
+
+    // Revalider les chemins pour forcer le refresh des données
+    revalidatePath("/gestion");
+    revalidatePath("/gestion/equipe");
+    revalidatePath("/gestion/biens");
+
+    return { success: true, message: "Équipe changée avec succès" };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Permet à un utilisateur de quitter l'équipe
+ */
 export async function leaveTeam(teamId: string): Promise<TeamActionResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const { user, role } = await getUserTeamContext();
 
-  if (!user) {
-    return { success: false, error: "Non connecté" };
+    if (role === "owner") {
+      return { success: false, error: "Le propriétaire ne peut pas quitter l'équipe directement. Vous devez d'abord transférer la propriété ou supprimer l'équipe." };
+    }
+
+    const supabaseAdmin = createAdminClient();
+
+    const { error } = await supabaseAdmin
+      .from("team_members")
+      .update({ status: "left", left_at: new Date().toISOString() })
+      .eq("team_id", teamId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      return { success: false, error: "Erreur lors du départ de l'équipe" };
+    }
+
+    // Audit log
+    await logTeamAudit(teamId, user.id, "member.left", "member", user.id, null, null);
+
+    revalidatePath("/gestion/equipe");
+    revalidatePath("/gestion");
+
+    return { success: true, message: "Vous avez quitté l'équipe" };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  // Récupérer le membership
-  const { data: membership } = await supabase
-    .from("team_members")
-    .select("id, role")
-    .eq("team_id", teamId)
-    .eq("user_id", user.id)
-    .single();
-
-  if (!membership) {
-    return { success: false, error: "Vous n'êtes pas membre de cette équipe" };
-  }
-
-  // Un owner ne peut pas quitter (doit transférer d'abord)
-  if (membership.role === "owner") {
-    return {
-      success: false,
-      error: "En tant que propriétaire, vous devez transférer la propriété avant de quitter",
-    };
-  }
-
-  // Supprimer le membership
-  const { error } = await supabase.from("team_members").delete().eq("id", membership.id);
-
-  if (error) {
-    console.error("Erreur quitter équipe:", error);
-    return { success: false, error: "Erreur lors du départ de l'équipe" };
-  }
-
-  // Audit log
-  await logTeamAudit(teamId, user.id, "member.removed", "member", user.id, { self: true }, null);
-
-  revalidatePath("/gestion/equipe");
-  revalidatePath("/gestion");
-
-  return { success: true, message: "Vous avez quitté l'équipe" };
 }

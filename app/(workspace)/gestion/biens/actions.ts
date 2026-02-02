@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireTeamPermission, getUserTeamContext } from "@/lib/team-permissions";
+import { requireTeamPermission, getUserTeamContext } from "@/lib/team-permissions.server";
 import { invalidatePropertyCaches, invalidateRentalCaches } from "@/lib/cache/invalidation";
 
 // =====================================================
@@ -29,6 +29,13 @@ export type TeamPropertyData = {
   owner_name?: string;
   owner_phone?: string;
   owner_email?: string;
+  location?: {
+    lat: number;
+    lon: number;
+    city?: string;
+    district?: string;
+    region?: string;
+  };
 };
 
 // =====================================================
@@ -54,6 +61,13 @@ const propertySchema = z.object({
   owner_name: z.string().optional(),
   owner_phone: z.string().optional(),
   owner_email: z.string().email().optional().or(z.literal("")),
+  location: z.object({
+    lat: z.number(),
+    lon: z.number(),
+    city: z.string().optional(),
+    district: z.string().optional(),
+    region: z.string().optional()
+  }).optional(),
 });
 
 // =====================================================
@@ -223,10 +237,35 @@ export async function createTeamProperty(
     validationStatus = "pending"; // Brouillon
   }
 
-  // Extraire les infos de l'adresse au format "Quartier, Ville, Région"
+  // Extraire les infos de l'adresse au format "Région, Ville/Quartier, Sénégal" 
+  // ou format libre via Autocomplete
   const addressParts = data.address.split(",").map((s) => s.trim());
-  const extractedDistrict = addressParts[0] || "";
-  const extractedCity = addressParts[1] || addressParts[0] || "";
+
+  // Logique d'extraction intelligente
+  let extractedCity = "";
+  let extractedDistrict = "";
+
+  // Priorité aux données structurées si disponibles
+  if (data.location?.city) {
+    extractedCity = data.location.city;
+    extractedDistrict = data.location.district || "";
+  } else if (addressParts.length >= 2) {
+    // Si l'adresse finit par "Sénégal", on l'ignore pour trouver la ville
+    const lastPart = addressParts[addressParts.length - 1];
+    const isSenegal = lastPart?.toLowerCase() === "sénégal" || lastPart?.toLowerCase() === "senegal";
+
+    if (isSenegal && addressParts.length >= 2) {
+      // Format: "Région, Ville, Sénégal" -> Ville
+      extractedCity = addressParts[addressParts.length - 2] || "";
+      extractedDistrict = addressParts[0] || "";
+    } else {
+      // Format: "Région, Ville" (sans Sénégal)
+      extractedCity = addressParts[addressParts.length - 1] || "";
+      extractedDistrict = addressParts[0] || "";
+    }
+  } else {
+    extractedCity = addressParts[0] || "";
+  }
 
   const payload: Record<string, unknown> = {
     title: data.title,
@@ -245,7 +284,7 @@ export async function createTeamProperty(
       district: extractedDistrict,
       address: data.address,
       landmark: "",
-      coords: { lat: 0, lng: 0 },
+      coords: data.location ? { lat: data.location.lat, lng: data.location.lon } : { lat: 0, lng: 0 },
     },
     specs,
     features: {},
@@ -352,11 +391,11 @@ export async function updateTeamProperty(
     const extractedDistrict = addressParts[0] || "";
     const extractedCity = addressParts[1] || addressParts[0] || "";
     updatePayload.location = {
-      city: extractedCity,
-      district: extractedDistrict,
+      city: data.location?.city || extractedCity,
+      district: data.location?.district || extractedDistrict,
       address: data.address,
       landmark: "",
-      coords: { lat: 0, lng: 0 },
+      coords: data.location ? { lat: data.location.lat, lng: data.location.lon } : { lat: 0, lng: 0 },
     };
   }
   if (data.owner_id) updatePayload.owner_id = data.owner_id;
@@ -371,6 +410,9 @@ export async function updateTeamProperty(
       dpe: "B",
     };
   }
+
+  // Si on modifie depuis le SaaS, le bien est considéré comme certifié
+  updatePayload.verification_status = "verified";
 
   const { error } = await supabase
     .from("properties")
@@ -412,7 +454,7 @@ export async function togglePropertyPublication(teamId: string, propertyId: stri
   // Récupérer l'état actuel
   const { data: property } = await supabase
     .from("properties")
-    .select("id, team_id, validation_status, location")
+    .select("id, team_id, validation_status, verification_status, status, location")
     .eq("id", propertyId)
     .single();
 
@@ -420,12 +462,20 @@ export async function togglePropertyPublication(teamId: string, propertyId: stri
     return { success: false, error: "Bien non trouvé ou non autorisé" };
   }
 
+  if (property.status === "loué") {
+    return { success: false, error: "Impossible de publier un bien actuellement loué." };
+  }
+
   // Toggle le statut
   const newStatus = property.validation_status === "approved" ? "pending" : "approved";
 
   const { error } = await supabase
     .from("properties")
-    .update({ validation_status: newStatus })
+    .update({
+      validation_status: newStatus,
+      // Si on publie depuis le SaaS, on certifie automatiquement
+      verification_status: newStatus === "approved" ? "verified" : property.verification_status
+    })
     .eq("id", propertyId);
 
   if (error) {
@@ -533,9 +583,25 @@ export async function searchOwners(query: string) {
 
   const supabase = await createClient();
 
+  // Filtrer les propriétaires qui ont au moins une propriété ou un bail dans cette équipe
+  // OU qui sont membres de l'équipe (si nécessaire)
+
+  // Pour l'instant, on limite aux profils ayant une propriété dans l'équipe
+  const { data: teamProperties } = await supabase
+    .from("properties")
+    .select("owner_id")
+    .eq("team_id", teamContext.team_id);
+
+  const ownerIds = Array.from(new Set(teamProperties?.map(p => p.owner_id).filter(Boolean)));
+
+  if (ownerIds.length === 0) {
+    return { owners: [] };
+  }
+
   let queryBuilder = supabase
     .from("profiles")
-    .select("id, full_name, phone, email, avatar_url");
+    .select("id, full_name, phone, email, avatar_url")
+    .in("id", ownerIds);
 
   if (query && query.trim().length > 0) {
     queryBuilder = queryBuilder.or(`full_name.ilike.%${query}%,phone.ilike.%${query}%,email.ilike.%${query}%`);
@@ -548,15 +614,25 @@ export async function searchOwners(query: string) {
 
 /**
  * Créer un nouveau propriétaire (client)
+ *
+ * SÉCURITÉ: Requiert la permission properties.create
+ * Justification: Créer un propriétaire est lié à la création de biens,
+ * donc nous utilisons la même permission pour cohérence.
  */
 export async function createOwner(data: {
   full_name: string;
   phone: string;
   email?: string;
 }) {
+  // ✅ CORRECTION SÉCURITÉ: Vérification explicite de permission
   const teamContext = await getUserTeamContext();
   if (!teamContext) {
     return { success: false, error: "Non autorisé" };
+  }
+
+  const permCheck = await requireTeamPermission(teamContext.team_id, "properties.create");
+  if (!permCheck.success) {
+    return { success: false, error: permCheck.error };
   }
 
   const supabase = await createClient();
@@ -585,12 +661,61 @@ export async function createOwner(data: {
 
 
 /**
- * Rechercher des locataires (pour le sélecteur)
+ * Rechercher des locataires (pour le sélecteur d'association)
+ * Filtre strictement par les locataires ayant déjà un bail ou un lien avec l'équipe
+ * pour garantir la confidentialité des données entre propriétaires.
  */
 export async function searchTenants(query: string) {
-  // C'est exactement la même logique que searchOwners pour l'instant
-  // car les locataires sont aussi des profils
-  return searchOwners(query);
+  const teamContext = await getUserTeamContext();
+  if (!teamContext) {
+    return { owners: [] };
+  }
+
+  const supabase = await createClient();
+
+  // 1. Récupérer les identifiants uniques des locataires existants pour cette équipe via les baux
+  // On utilise email et téléphone comme clés de réconciliation car tenant_id n'est pas stocké dans leases
+  const { data: linkedLeases } = await supabase
+    .from("leases")
+    .select("tenant_email, tenant_phone")
+    .eq("team_id", teamContext.team_id);
+
+  const emails = Array.from(new Set(linkedLeases?.map(l => l.tenant_email).filter(Boolean)));
+  const phones = Array.from(new Set(linkedLeases?.map(l => l.tenant_phone).filter(Boolean)));
+
+  // 2. Si aucun locataire existant, on ne retourne rien (sécurité maximale)
+  // L'utilisateur devra utiliser "Créer un nouveau locataire" pour ajouter son premier client
+  if (emails.length === 0 && phones.length === 0) {
+    return { owners: [] };
+  }
+
+  // 3. Rechercher dans les profils qui correspondent à ces identifiants
+  let queryBuilder = supabase
+    .from("profiles")
+    .select("id, full_name, phone, email, avatar_url");
+
+  // Filtre d'identité (OR entre email/phone de l'équipe)
+  const identityFilters = [];
+  if (emails.length > 0) {
+    identityFilters.push(`email.in.(${emails.map(e => `"${e}"`).join(",")})`);
+  }
+  if (phones.length > 0) {
+    identityFilters.push(`phone.in.(${phones.map(p => `"${p}"`).join(",")})`);
+  }
+
+  if (identityFilters.length > 0) {
+    queryBuilder = queryBuilder.or(identityFilters.join(","));
+  }
+
+  // Filtre de recherche textuelle (AND sur le résultat précédent)
+  if (query && query.trim().length > 0) {
+    // PostREST combine plusieurs paramètres 'or' avec un AND
+    queryBuilder = queryBuilder.or(`full_name.ilike.%${query}%,phone.ilike.%${query}%,email.ilike.%${query}%`);
+  }
+
+  const { data } = await queryBuilder.limit(10);
+
+  return { owners: data || [] };
 }
 
 /**
@@ -717,6 +842,37 @@ export async function generateSEODescription(params: AIDescriptionParams): Promi
   title?: string;
   error?: string;
 }> {
+  // ✅ CORRECTION SÉCURITÉ: Vérifier les permissions avant tout appel IA
+  const teamContext = await getUserTeamContext();
+  if (!teamContext) {
+    return { success: false, error: "Non autorisé" };
+  }
+
+  const permCheck = await requireTeamPermission(teamContext.team_id, "properties.create");
+  if (!permCheck.success) {
+    return { success: false, error: permCheck.error };
+  }
+
+  // ✅ CORRECTION SÉCURITÉ: Rate limiting Redis (20 appels/heure par équipe)
+  const { checkAIRateLimit } = await import('@/lib/rate-limit');
+  const rateLimit = await checkAIRateLimit(teamContext.team_id);
+
+  if (!rateLimit.allowed) {
+    // Calculer le temps restant en minutes
+    const resetIn = Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 60000);
+    const minutes = resetIn > 1 ? `${resetIn} minutes` : `${resetIn} minute`;
+
+    console.warn(`🚫 AI Rate limit blocked for team ${teamContext.team_id}`);
+
+    return {
+      success: false,
+      error: `Limite d'appels IA atteinte (20/heure). Réessayez dans ${minutes}.`,
+    };
+  }
+
+  // Log l'appel autorisé avec compteur
+  console.log(`🤖 AI Request ${20 - rateLimit.remaining}/20 - Team: ${teamContext.team_id}, User: ${permCheck.userId}`);
+
   try {
     const openaiApiKey = process.env.OPENAI_API_KEY;
 

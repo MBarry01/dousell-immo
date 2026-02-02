@@ -251,8 +251,15 @@ export async function submitUserListing(data: SubmitListingData) {
     const adminEmails = await getAdminNotificationEmails();
     const adminEmail = getAdminEmail(); // utilisé pour fallback logs/notifications
 
+    // Vérifier qu'on a au moins un destinataire
+    const recipients = adminEmails.length > 0 ? adminEmails : (adminEmail ? [adminEmail] : []);
+    if (recipients.length === 0) {
+      console.warn("⚠️ Aucun email admin configuré pour la notification");
+      return { success: true, id: insertedProperty?.id };
+    }
+
     const emailResult = await sendEmail({
-      to: adminEmails.length > 0 ? adminEmails : adminEmail,
+      to: recipients,
       subject: `Nouvelle annonce en attente : ${data.title}`,
       user_id: user.id,
       react: ListingSubmittedEmail({

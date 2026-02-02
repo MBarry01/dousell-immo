@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { AlertTriangle, CheckCircle, FileText, Clock, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
@@ -8,7 +7,6 @@ import { fr } from "date-fns/locale";
 import { DecisionModal } from "./components/DecisionModal";
 import { CreateContractDialog } from "./components/CreateContractDialog";
 import { CreateReceiptDialog } from "./components/CreateReceiptDialog";
-import { OnboardingTour, useOnboardingTour, TourStep } from "@/components/onboarding/OnboardingTour";
 import { useTheme } from "../theme-provider";
 
 interface LegalPageClientProps {
@@ -25,49 +23,9 @@ interface LegalPageClientProps {
 
 export function LegalPageClient({ stats, alerts, leases, userEmail, profile }: LegalPageClientProps) {
     const { isDark } = useTheme();
-    const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_juridique_tour', 1500);
-
-    const tourSteps: TourStep[] = useMemo(() => [
-        {
-            targetId: 'tour-legal-kpi',
-            title: 'Tableau de bord juridique',
-            description: 'Visualisez en un coup d\'œil vos baux actifs, les renouvellements à venir et les risques juridiques.',
-            imageSrc: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'KPIs juridiques'
-        },
-        {
-            targetId: 'tour-legal-alerts',
-            title: 'Radar des échéances',
-            description: 'Suivez les dates clés de vos baux : congés, renouvellements, tacites reconductions. Ne manquez aucune échéance.',
-            imageSrc: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Alertes juridiques'
-        },
-        {
-            targetId: 'tour-legal-tools',
-            title: 'Générateur de documents',
-            description: 'Créez des quittances et contrats de bail conformes au droit sénégalais (COCC, OHADA) en quelques clics.',
-            imageSrc: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Outils juridiques'
-        },
-        {
-            targetId: 'tour-legal-reference',
-            title: 'Cadre juridique',
-            description: 'Consultez les textes de référence et les délais légaux applicables au Sénégal (Loi 2014, COCC).',
-            imageSrc: 'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Références juridiques'
-        }
-    ], []);
 
     return (
         <div className={`min-h-screen ${isDark ? 'bg-slate-950' : 'bg-gray-50'}`}>
-            {/* Premium Onboarding Tour */}
-            <OnboardingTour
-                steps={tourSteps}
-                isOpen={showTour}
-                onClose={closeTour}
-                onComplete={closeTour}
-                storageKey="dousell_juridique_tour"
-            />
             <div className="w-full mx-auto px-4 md:px-6 py-8 space-y-8 animate-in fade-in duration-500">
 
                 {/* SECTION 1 : EN-TÊTE */}
@@ -263,23 +221,6 @@ export function LegalPageClient({ stats, alerts, leases, userEmail, profile }: L
                     </div>
                 </div>
             </div>
-
-            {/* Bouton pour relancer le tour */}
-            <button
-                onClick={resetTour}
-                className={`fixed bottom-4 right-4 z-50 p-2.5 rounded-full transition-all duration-200 shadow-lg ${
-                    isDark
-                        ? 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
-                        : 'bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'
-                }`}
-                title="Relancer le tutoriel"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                    <path d="M12 17h.01"/>
-                </svg>
-            </button>
         </div>
     );
 }

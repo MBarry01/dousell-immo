@@ -98,6 +98,11 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
     virtual_tour_url: "",
     images: [] as string[],
     owner_id: undefined as string | undefined,
+    lat: null as number | null,
+    lon: null as number | null,
+    city: "",
+    district: "",
+    region: "",
   });
 
   // Image upload state
@@ -300,6 +305,13 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
       virtual_tour_url: formData.virtual_tour_url,
       images: formData.images,
       owner_id: formData.owner_id,
+      location: formData.lat && formData.lon ? {
+        lat: formData.lat,
+        lon: formData.lon,
+        city: formData.city,
+        district: formData.district,
+        region: formData.region
+      } : undefined,
     };
 
     const result = await createTeamProperty(
@@ -328,25 +340,25 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
   const isTerrain = formData.type === "terrain";
 
   return (
-    <div className="min-h-screen bg-[#121212]">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-50 bg-[#121212]/95 backdrop-blur-sm border-b border-zinc-800/50">
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/gestion/biens" className="p-2 hover:bg-zinc-800/50 rounded-lg transition-colors">
-                <ArrowLeft className="w-5 h-5 text-zinc-400" />
+              <Link href="/gestion/biens" className="p-2 hover:bg-muted rounded-lg transition-colors">
+                <ArrowLeft className="w-5 h-5 text-muted-foreground" />
               </Link>
               <div>
-                <h1 className="text-lg font-semibold text-white">Nouveau bien</h1>
-                <p className="text-sm text-zinc-500">{teamName}</p>
+                <h1 className="text-lg font-semibold">Nouveau bien</h1>
+                <p className="text-sm text-muted-foreground">{teamName}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleSubmit()}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-sm text-zinc-400 hover:text-white transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               </button>
@@ -371,20 +383,20 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                     }`}
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isActive
-                    ? "bg-[#F4C430] text-black"
+                    ? "bg-primary text-primary-foreground shadow-lg"
                     : isCompleted
-                      ? "bg-[#F4C430]/20 text-[#F4C430]"
-                      : "bg-zinc-800 text-zinc-500"
+                      ? "bg-primary/20 text-primary"
+                      : "bg-muted text-muted-foreground"
                     }`}>
                     {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                   </div>
-                  <span className={`text-xs font-medium hidden sm:block ${isActive ? "text-white" : isCompleted ? "text-[#F4C430]" : "text-zinc-500"
+                  <span className={`text-xs font-medium hidden sm:block ${isActive ? "text-foreground" : isCompleted ? "text-primary" : "text-muted-foreground"
                     }`}>
                     {step.title}
                   </span>
                 </button>
                 {index < STEPS.length - 1 && (
-                  <div className={`w-12 sm:w-20 h-0.5 mx-2 ${currentStep > step.id ? "bg-[#F4C430]/30" : "bg-zinc-800"
+                  <div className={`w-12 sm:w-20 h-0.5 mx-2 ${currentStep > step.id ? "bg-primary/30" : "bg-muted"
                     }`} />
                 )}
               </div>
@@ -406,14 +418,14 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
             <div className="space-y-8 animate-in fade-in duration-300">
               {/* Transaction Toggle */}
               <div>
-                <label className="text-sm text-zinc-400 mb-3 block">Type de transaction</label>
-                <div className="flex bg-zinc-800/50 rounded-lg p-1 w-fit">
+                <label className="text-sm text-muted-foreground mb-3 block">Type de transaction</label>
+                <div className="flex bg-muted rounded-lg p-1 w-fit">
                   <button
                     type="button"
                     onClick={() => updateField("category", "location")}
                     className={`px-6 py-2.5 rounded-md text-sm font-medium transition-all ${formData.category === "location"
-                      ? "bg-[#F4C430] text-black"
-                      : "text-zinc-400 hover:text-white"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
                       }`}
                   >
                     Location
@@ -422,8 +434,8 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                     type="button"
                     onClick={() => updateField("category", "vente")}
                     className={`px-6 py-2.5 rounded-md text-sm font-medium transition-all ${formData.category === "vente"
-                      ? "bg-[#F4C430] text-black"
-                      : "text-zinc-400 hover:text-white"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
                       }`}
                   >
                     Vente
@@ -433,7 +445,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
 
               {/* Property Type Cards */}
               <div>
-                <label className="text-sm text-zinc-400 mb-3 block">Type de bien</label>
+                <label className="text-sm text-muted-foreground mb-3 block">Type de bien</label>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
                   {PROPERTY_TYPES.map((type) => {
                     const Icon = type.icon;
@@ -443,11 +455,11 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                         type="button"
                         onClick={() => updateField("type", type.value)}
                         className={`p-4 rounded-xl border transition-all text-center ${formData.type === type.value
-                          ? "bg-[#F4C430]/10 border-[#F4C430]/50 text-[#F4C430]"
-                          : "bg-zinc-800/30 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300"
+                          ? "bg-primary/10 border-primary/50 text-primary"
+                          : "bg-card border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
                           }`}
                       >
-                        <Icon className={`w-6 h-6 mx-auto mb-2 ${formData.type === type.value ? "text-[#F4C430]" : "text-zinc-500"
+                        <Icon className={`w-6 h-6 mx-auto mb-2 ${formData.type === type.value ? "text-primary" : "text-muted-foreground"
                           }`} />
                         <span className="text-xs font-medium">{type.label}</span>
                       </button>
@@ -458,19 +470,19 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
 
               {/* Title */}
               <div>
-                <label className="text-sm text-zinc-400 mb-2 block">Titre de l'annonce</label>
+                <label className="text-sm text-muted-foreground mb-2 block">Titre de l'annonce</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => updateField("title", e.target.value)}
                   placeholder="Ex: Belle villa avec piscine"
-                  className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                  className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                 />
               </div>
 
               {/* Price */}
               <div>
-                <label className="text-sm text-zinc-400 mb-2 block">
+                <label className="text-sm text-muted-foreground mb-2 block">
                   Prix {formData.category === "location" ? "mensuel" : "de vente"}
                 </label>
                 <div className="relative">
@@ -479,9 +491,9 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                     value={formData.price}
                     onChange={(e) => updateField("price", e.target.value)}
                     placeholder="0"
-                    className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 pr-20 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                    className="w-full bg-card border border-border rounded-lg px-4 py-3 pr-20 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                     FCFA{formData.category === "location" && "/mois"}
                   </span>
                 </div>
@@ -493,12 +505,20 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
           {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div>
-                <label className="text-sm text-zinc-400 mb-3 block">Adresse complète du bien</label>
+                <label className="text-sm text-muted-foreground mb-3 block">Adresse complète du bien</label>
 
                 <AddressAutocomplete
                   defaultValue={formData.address}
                   onAddressSelect={(details) => {
-                    updateField("address", details.display_name);
+                    setFormData(prev => ({
+                      ...prev,
+                      address: details.display_name,
+                      lat: details.lat ? parseFloat(details.lat) : null,
+                      lon: details.lon ? parseFloat(details.lon) : null,
+                      city: details.city || "",
+                      district: details.suburb || "",
+                      region: details.state || ""
+                    }));
                   }}
                   className="w-full"
                 />
@@ -511,49 +531,49 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
-                  <label className="text-sm text-zinc-400 mb-2 block">Surface</label>
+                  <label className="text-sm text-muted-foreground mb-2 block">Surface</label>
                   <div className="relative">
                     <input
                       type="number"
                       value={formData.surface}
                       onChange={(e) => updateField("surface", e.target.value)}
                       placeholder="0"
-                      className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                      className="w-full bg-card border border-border rounded-lg px-4 py-3 pr-12 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">m²</span>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">m²</span>
                   </div>
                 </div>
 
                 {!isTerrain && (
                   <>
                     <div>
-                      <label className="text-sm text-zinc-400 mb-2 block">Pièces</label>
+                      <label className="text-sm text-muted-foreground mb-2 block">Pièces</label>
                       <input
                         type="number"
                         value={formData.rooms}
                         onChange={(e) => updateField("rooms", e.target.value)}
                         placeholder="0"
-                        className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                        className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="text-sm text-zinc-400 mb-2 block">Chambres</label>
+                      <label className="text-sm text-muted-foreground mb-2 block">Chambres</label>
                       <input
                         type="number"
                         value={formData.bedrooms}
                         onChange={(e) => updateField("bedrooms", e.target.value)}
                         placeholder="0"
-                        className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                        className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="text-sm text-zinc-400 mb-2 block">Salles de bain</label>
+                      <label className="text-sm text-muted-foreground mb-2 block">Salles de bain</label>
                       <input
                         type="number"
                         value={formData.bathrooms}
                         onChange={(e) => updateField("bathrooms", e.target.value)}
                         placeholder="0"
-                        className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                        className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                       />
                     </div>
                   </>
@@ -561,7 +581,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
               </div>
 
               {isTerrain && (
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm text-muted-foreground">
                   Pour un terrain, seule la surface est requise.
                 </p>
               )}
@@ -573,7 +593,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
             <div className="space-y-6 animate-in fade-in duration-300">
               {/* Photos Drag & Drop */}
               <div>
-                <label className="text-sm text-zinc-400 mb-3 block">
+                <label className="text-sm text-muted-foreground mb-3 block">
                   Photos ({formData.images.length}/10)
                 </label>
                 <div
@@ -582,23 +602,23 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                   onDragOver={handleDrag}
                   onDrop={handleDrop}
                   className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${dragActive
-                    ? "border-[#F4C430] bg-[#F4C430]/5"
-                    : "border-zinc-700 hover:border-zinc-600"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-muted-foreground/50"
                     }`}
                 >
                   {uploadingImages ? (
                     <div className="flex flex-col items-center gap-3">
-                      <Loader2 className="w-8 h-8 text-[#F4C430] animate-spin" />
-                      <p className="text-zinc-400">Upload en cours...</p>
+                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                      <p className="text-muted-foreground">Upload en cours...</p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-3">
-                      <Upload className="w-10 h-10 text-zinc-500" />
+                      <Upload className="w-10 h-10 text-muted-foreground/50" />
                       <div>
-                        <p className="text-zinc-300">Glissez vos photos ici</p>
-                        <p className="text-sm text-zinc-500 mt-1">ou</p>
+                        <p className="text-foreground">Glissez vos photos ici</p>
+                        <p className="text-sm text-muted-foreground mt-1">ou</p>
                       </div>
-                      <label className="cursor-pointer px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded-lg transition-colors">
+                      <label className="cursor-pointer px-4 py-2 bg-muted hover:bg-muted/80 text-foreground text-sm rounded-lg transition-colors border border-border">
                         Parcourir
                         <input
                           type="file"
@@ -608,7 +628,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                           className="hidden"
                         />
                       </label>
-                      <p className="text-xs text-zinc-600">JPG, PNG, WebP • Max 5MB par photo</p>
+                      <p className="text-xs text-muted-foreground/60">JPG, PNG, WebP • Max 5MB par photo</p>
                     </div>
                   )}
                 </div>
@@ -617,7 +637,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                 {formData.images.length > 0 && (
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mt-4">
                     {formData.images.map((url, index) => (
-                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
+                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden group border border-border">
                         <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
                         <button
                           type="button"
@@ -627,7 +647,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                           <X className="w-4 h-4 text-white" />
                         </button>
                         {index === 0 && (
-                          <span className="absolute bottom-1 left-1 px-2 py-0.5 bg-[#F4C430] text-black text-xs font-medium rounded">
+                          <span className="absolute bottom-1 left-1 px-2 py-0.5 bg-primary text-primary-foreground text-xs font-medium rounded shadow-sm">
                             Principale
                           </span>
                         )}
@@ -640,12 +660,12 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
               {/* Description */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm text-zinc-400">Description</label>
+                  <label className="text-sm text-muted-foreground">Description</label>
                   <button
                     type="button"
                     onClick={handleGenerateAI}
                     disabled={isGeneratingAI}
-                    className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-[#F4C430] transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
                   >
                     {isGeneratingAI ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -660,21 +680,21 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                   onChange={(e) => updateField("description", e.target.value)}
                   placeholder="Décrivez le bien, ses atouts, son environnement..."
                   rows={5}
-                  className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 resize-none transition-colors"
+                  className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 resize-none transition-all"
                 />
               </div>
 
               {/* Virtual Tour */}
               <div>
-                <label className="text-sm text-zinc-400 mb-2 block">
-                  Visite virtuelle <span className="text-zinc-600">(optionnel)</span>
+                <label className="text-sm text-muted-foreground mb-2 block">
+                  Visite virtuelle <span className="text-muted-foreground/60">(optionnel)</span>
                 </label>
                 <input
                   type="text"
                   value={formData.virtual_tour_url}
                   onChange={(e) => updateField("virtual_tour_url", e.target.value)}
                   placeholder="Lien YouTube ou Google Maps 360"
-                  className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                  className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                 />
               </div>
             </div>
@@ -685,8 +705,8 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
             <div className="space-y-8 animate-in fade-in duration-300">
               {/* Owner */}
               <div>
-                <label className="text-sm text-zinc-400 mb-3 block">
-                  Propriétaire <span className="text-zinc-600">(optionnel)</span>
+                <label className="text-sm text-muted-foreground mb-3 block">
+                  Propriétaire <span className="text-muted-foreground/60">(optionnel)</span>
                 </label>
                 <OwnerSelector
                   value={formData.owner_id}
@@ -700,12 +720,12 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex items-center justify-between mt-12 pt-6 border-t border-zinc-800/50">
+        <div className="flex items-center justify-between mt-12 pt-6 border-t border-border">
           <button
             type="button"
             onClick={prevStep}
             disabled={currentStep === 1}
-            className="flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Retour
@@ -715,7 +735,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
             <button
               type="button"
               onClick={nextStep}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#F4C430] text-black font-medium rounded-lg hover:bg-[#F4C430]/90 transition-colors"
+              className="flex items-center gap-2 px-6 py-2.5 bg-[#0F172A] text-white rounded-lg font-medium hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
             >
               Continuer
               <ArrowRight className="w-4 h-4" />
@@ -726,7 +746,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                 type="button"
                 onClick={() => handleSubmit("draft")}
                 disabled={isSubmitting}
-                className="px-4 py-2.5 text-zinc-400 hover:text-white text-sm font-medium transition-colors"
+                className="px-4 py-2.5 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
               >
                 Enregistrer en brouillon
               </button>
@@ -739,11 +759,12 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                   className="
                     flex items-center gap-2 
                     px-4 py-2 
-                    bg-[#F4C430] hover:bg-[#F4C430]/90 
-                    text-black font-medium 
+                    bg-[#0F172A] text-white hover:bg-[#1E293B]
+                    dark:bg-primary dark:hover:bg-primary/90 
+                    dark:text-primary-foreground font-medium 
                     rounded-l-lg rounded-r-none 
                     transition-all duration-200 ease-in-out
-                    focus:z-10 focus:ring-2 focus:ring-[#F4C430]/50
+                    focus:z-10 focus:ring-2 focus:ring-primary/50
                   "
                 >
                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
@@ -755,24 +776,25 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                       disabled={isSubmitting}
                       className="
                         px-2 py-2 
-                        bg-[#F4C430] hover:bg-[#F4C430]/90 
-                        text-black 
+                        bg-[#0F172A] text-white hover:bg-[#1E293B]
+                        dark:bg-primary dark:hover:bg-primary/90 
+                        dark:text-primary-foreground 
                         rounded-r-lg rounded-l-none 
-                        border-l border-yellow-600/30 
+                        border-l border-white/10 
                         transition-all duration-200 ease-in-out
-                        focus:z-10 focus:ring-2 focus:ring-[#F4C430]/50
+                        focus:z-10 focus:ring-2 focus:ring-primary/50
                       "
                     >
                       <ChevronDown className="w-4 h-4" />
                       <span className="sr-only">Options de publication</span>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[200px] bg-zinc-900 border-zinc-800 text-white">
+                  <DropdownMenuContent align="end" className="w-[200px]">
                     <DropdownMenuItem
                       onClick={() => setIsScheduleDialogOpen(true)}
-                      className="cursor-pointer hover:bg-zinc-800 flex items-center gap-2 py-2.5"
+                      className="cursor-pointer flex items-center gap-2 py-2.5"
                     >
-                      <Clock className="w-4 h-4 text-zinc-400" />
+                      <Clock className="w-4 h-4 text-muted-foreground" />
                       <span>Programmer</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -784,30 +806,30 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
 
         {/* Schedule Dialog */}
         <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
-          <DialogContent className="bg-zinc-900 border-zinc-800 text-white sm:max-w-md">
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Programmer la publication</DialogTitle>
-              <DialogDescription className="text-zinc-400">
+              <DialogDescription>
                 Choisissez la date et l'heure à laquelle le bien sera visible publiquement.
               </DialogDescription>
             </DialogHeader>
             <div className="py-6">
               <div className="flex flex-col space-y-4">
-                <label className="text-sm font-medium text-zinc-300">Date et heure</label>
+                <label className="text-sm font-medium">Date et heure</label>
                 <input
                   type="datetime-local"
                   value={scheduledDate}
                   onChange={(e) => setScheduledDate(e.target.value)}
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50"
                   min={new Date().toISOString().slice(0, 16)}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F4C430]/50 transition-colors [color-scheme:dark]"
                 />
               </div>
             </div>
-            <DialogFooter className="sm:justify-end gap-2">
+            <DialogFooter className="sm:justify-between">
               <button
                 type="button"
                 onClick={() => setIsScheduleDialogOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Annuler
               </button>
@@ -815,9 +837,9 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                 type="button"
                 onClick={handleScheduleSubmit}
                 disabled={!scheduledDate || isSubmitting}
-                className="px-4 py-2 text-sm font-medium bg-[#F4C430] text-black rounded-lg hover:bg-[#F4C430]/90 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-[#0F172A] text-white rounded-lg text-sm font-medium hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md disabled:opacity-50"
               >
-                Programmer
+                Confirmer la programmation
               </button>
             </DialogFooter>
           </DialogContent>

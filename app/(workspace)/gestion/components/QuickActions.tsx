@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 
 import Link from 'next/link';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
 import { AddTenantButton } from './AddTenantButton';
 
 interface QuickActionsProps {
@@ -34,7 +33,6 @@ export function QuickActions({
     ownerId,
     profile
 }: QuickActionsProps) {
-    const { isDark } = useTheme();
 
     const actions = [
         {
@@ -92,32 +90,27 @@ export function QuickActions({
         const Icon = action.icon;
         return (
             <>
-                <div className={`
-                    p-2 rounded-lg
+                <div className="
+                    p-2 rounded-lg bg-muted
                     transition-transform duration-200
                     group-hover:scale-110
-                    ${isDark ? 'bg-slate-800' : 'bg-gray-100'}
-                `}>
-                    <Icon className={`w-4 h-4 ${isDark ? 'text-white' : 'text-gray-700'}`} />
+                ">
+                    <Icon className="w-4 h-4 text-foreground" />
                 </div>
-                <span className={`
-                    text-xs font-medium
+                <span className="
+                    text-xs font-medium text-muted-foreground
                     hidden sm:inline
                     transition-colors duration-200
-                    ${isDark
-                        ? 'text-slate-300 group-hover:text-white'
-                        : 'text-gray-600 group-hover:text-gray-900'}
-                `}>
+                    group-hover:text-foreground
+                ">
                     {action.label}
                 </span>
-                <span className={`
-                    text-xs font-medium
+                <span className="
+                    text-xs font-medium text-muted-foreground
                     sm:hidden
                     transition-colors duration-200
-                    ${isDark
-                        ? 'text-slate-300 group-hover:text-white'
-                        : 'text-gray-600 group-hover:text-gray-900'}
-                `}>
+                    group-hover:text-foreground
+                ">
                     {action.shortLabel}
                 </span>
                 {action.badge && (
@@ -136,10 +129,10 @@ export function QuickActions({
         <div id="tour-quick-actions" className="mb-6">
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
-                <span className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Actions Rapides
                 </span>
-                <div className={`flex-1 h-px ${isDark ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
+                <div className="flex-1 h-px bg-border"></div>
             </div>
 
             {/* Actions Grid */}
@@ -147,14 +140,11 @@ export function QuickActions({
                 {actions.map((action) => {
                     const baseClasses = `
                         relative flex items-center gap-2 px-3 py-2
-                        rounded-lg border
+                        rounded-lg border border-border bg-card
                         transition-all duration-200
                         cursor-pointer
                         group
-                        ${isDark
-                            ? 'bg-slate-900 border-slate-800 hover:bg-slate-800'
-                            : 'bg-white border-gray-200 hover:bg-gray-50'
-                        }
+                        hover:bg-muted
                     `;
 
                     if (action.type === 'link') {
@@ -165,13 +155,12 @@ export function QuickActions({
                                 className={baseClasses}
                             >
                                 <ActionContent action={action} />
-                                <ChevronRight className={`
-                                    w-3 h-3
+                                <ChevronRight className="
+                                    w-3 h-3 text-muted-foreground/50
                                     transition-all duration-200
                                     opacity-0 group-hover:opacity-100
                                     -translate-x-1 group-hover:translate-x-0
-                                    ${isDark ? 'text-slate-600' : 'text-gray-400'}
-                                `} />
+                                " />
                             </Link>
                         );
                     }

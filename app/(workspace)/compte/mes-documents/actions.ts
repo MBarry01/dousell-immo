@@ -529,12 +529,17 @@ export async function deleteDocument(documentId: string) {
  * 3. États des lieux (inventory_reports)
  * 4. Contrats de bail (leases)
  * 5. Devis/Factures d'intervention (maintenance_requests)
+ *
+ * NOTE: Utilise team_id pour le mode équipe (SaaS)
  */
 export async function getRentalDocuments(filters?: { propertyId?: string; leaseId?: string }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) return { success: false, error: "Non autorisé" };
+  // Utiliser le contexte d'équipe pour supporter le mode SaaS
+  const { getUserTeamContext } = await import("@/lib/team-context");
+  const { teamId, user } = await getUserTeamContext();
+
+  if (!user || !teamId) return { success: false, error: "Non autorisé" };
 
   try {
     // 1. Documents manuels (Uploadés par owner OU locataire sur un bail du owner)
@@ -587,30 +592,65 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     // Utilisons user_id = user.id (owner uploads)
     // Et une 2eme query pour les docs liées aux baux du owner mais PAS uploadés par lui (tenant uploads).
 
-    // SIMPLIFIED QUERY: Remove joins to avoid silent failures
-    // Step 1: Get all user_documents for this user
-    let manualsQueryOwner = supabase
+    // APPROCHE ROBUSTE EN 2 ÉTAPES:
+    // 1. Récupérer les lease_ids de l'équipe
+    // 2. Récupérer les documents liés à ces leases OU uploadés par l'utilisateur
+
+    // Étape 1: Récupérer tous les lease_ids de l'équipe
+    const { data: teamLeases } = await supabase
+      .from("leases")
+      .select("id")
+      .eq("team_id", teamId);
+
+    const teamLeaseIds = (teamLeases || []).map(l => l.id);
+    console.log("[GED] Team lease IDs:", teamLeaseIds.length, "for team:", teamId);
+
+    // Étape 2: Récupérer les documents - 2 queries parallèles
+    // A. Documents uploadés par l'utilisateur actuel
+    let queryUserDocs = supabase
       .from("user_documents")
-      .select(`*`)  // No joins - get raw data first
+      .select(`*`)
       .eq("user_id", user.id);
 
-    if (filters?.propertyId) manualsQueryOwner = manualsQueryOwner.eq("property_id", filters.propertyId);
-    if (filters?.leaseId) manualsQueryOwner = manualsQueryOwner.eq("lease_id", filters.leaseId);
+    // B. Documents liés aux baux de l'équipe (peu importe qui les a uploadés)
+    let queryTeamDocs = teamLeaseIds.length > 0
+      ? supabase
+          .from("user_documents")
+          .select(`*`)
+          .in("lease_id", teamLeaseIds)
+      : Promise.resolve({ data: [], error: null });
 
-    // TEMPORARILY DISABLED: This query requires FK relationships that may not exist
-    // let manualsQueryTenant = supabase
-    //   .from("user_documents")
-    //   .select(`*, properties (title), leases!inner (tenant_name, owner_id)`)
-    //   .neq("user_id", user.id)
-    //   .eq("leases.owner_id", user.id);
-    // if (filters?.leaseId) manualsQueryTenant = manualsQueryTenant.eq("lease_id", filters.leaseId);
+    if (filters?.propertyId) {
+      queryUserDocs = queryUserDocs.eq("property_id", filters.propertyId);
+    }
+    if (filters?.leaseId) {
+      queryUserDocs = queryUserDocs.eq("lease_id", filters.leaseId);
+      // Pour queryTeamDocs, on filtre aussi par leaseId si spécifié
+      if (teamLeaseIds.length > 0) {
+        queryTeamDocs = supabase
+          .from("user_documents")
+          .select(`*`)
+          .eq("lease_id", filters.leaseId);
+      }
+    }
 
-    // Use a simple placeholder that returns empty to avoid crashes
+    const [userDocsRes, teamDocsRes] = await Promise.all([
+      queryUserDocs.order("created_at", { ascending: false }),
+      queryTeamDocs
+    ]);
+
+    // Fusionner et dédupliquer les résultats
+    const allUserDocs = [...(userDocsRes.data || []), ...((teamDocsRes as any).data || [])];
+    const manualsOwnerRes = {
+      data: Array.from(new Map(allUserDocs.map(d => [d.id, d])).values()),
+      error: userDocsRes.error || (teamDocsRes as any).error
+    };
+    console.log("[GED] Total documents found:", manualsOwnerRes.data?.length || 0);
+
+    // Placeholder pour compatibilité
     const manualsTenantRes = { data: [], error: null };
 
-    // On lancera les 2 en parallèle.
-
-    // 2. Quittances (Transactions payées)
+    // 2. Quittances (Transactions payées) - filtrées par team_id
     let receiptsQuery = supabase
       .from("rental_transactions")
       .select(`
@@ -623,15 +663,15 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
           id,
           tenant_name,
           property_address,
-          owner_id
+          team_id
         )
       `)
       .eq("status", "paid")
-      .eq("leases.owner_id", user.id);
+      .eq("leases.team_id", teamId);
 
     if (filters?.leaseId) receiptsQuery = receiptsQuery.eq("lease_id", filters.leaseId);
 
-    // 3. États des lieux
+    // 3. États des lieux - filtrés par team_id
     let inventoryQuery = supabase
       .from("inventory_reports")
       .select(`
@@ -644,14 +684,14 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
           id,
           tenant_name,
           property_address,
-          owner_id
+          team_id
         )
       `)
-      .eq("leases.owner_id", user.id);
+      .eq("leases.team_id", teamId);
 
     if (filters?.leaseId) inventoryQuery = inventoryQuery.eq("lease_id", filters.leaseId);
 
-    // 4. Contrats (Baux)
+    // 4. Contrats (Baux) - filtrés par team_id
     let leasesQuery = supabase
       .from("leases")
       .select(`
@@ -662,13 +702,13 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
         created_at,
         tenant_name,
         property_address,
-        owner_id
+        team_id
       `)
-      .eq("owner_id", user.id);
+      .eq("team_id", teamId);
 
     if (filters?.leaseId) leasesQuery = leasesQuery.eq("id", filters.leaseId);
 
-    // 5. Interventions (Maintenance)
+    // 5. Interventions (Maintenance) - filtrées par team_id
     let maintenanceQuery = supabase
       .from("maintenance_requests")
       .select(`
@@ -681,17 +721,16 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
           id,
           tenant_name,
           property_address,
-          owner_id
+          team_id
         )
       `)
-      .eq("leases.owner_id", user.id);
+      .eq("leases.team_id", teamId);
 
     if (filters?.leaseId) maintenanceQuery = maintenanceQuery.eq("lease_id", filters.leaseId);
 
 
-    // Exécuter les requêtes en parallèle (manualsQueryTenant is now a placeholder above)
-    const [manualsOwnerRes, receiptsRes, inventoryRes, leasesRes, maintenanceRes] = await Promise.all([
-      manualsQueryOwner.order("created_at", { ascending: false }),
+    // Exécuter les requêtes restantes en parallèle
+    const [receiptsRes, inventoryRes, leasesRes, maintenanceRes] = await Promise.all([
       receiptsQuery.order("paid_at", { ascending: false }),
       inventoryQuery.order("date", { ascending: false }),
       leasesQuery.order("created_at", { ascending: false }),

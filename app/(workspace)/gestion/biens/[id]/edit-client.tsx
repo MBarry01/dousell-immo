@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { AddressAutocomplete } from "@/components/forms/address-autocomplete";
 import { OwnerSelector } from "@/components/gestion/OwnerSelector";
+import { createClient } from "@/utils/supabase/client";
 import { updateTeamProperty, togglePropertyPublication, generateSEODescription } from "../actions";
 
 type Property = {
@@ -36,8 +37,10 @@ type Property = {
   location: {
     city: string;
     district?: string;
+    region?: string;
     address?: string;
     landmark?: string;
+    coords?: { lat: number; lng: number };
   };
   specs: {
     surface: number;
@@ -93,10 +96,68 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
     virtual_tour_url: property.virtual_tour_url || "",
     images: property.images,
     owner_id: property.owner?.id,
+    lat: property.location.coords?.lat ?? null,
+    lon: property.location.coords?.lng ?? null,
+    city: property.location.city || "",
+    district: property.location.district || "",
+    region: property.location.region || "",
   });
 
   const [isPublished, setIsPublished] = useState(property.validation_status === "approved");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+
+  const processImageFiles = async (fileArray: File[]) => {
+    if (formData.images.length + fileArray.length > 20) {
+      setError("Maximum 20 photos autorisées");
+      return;
+    }
+
+    setUploadingImages(true);
+    setError(null);
+
+    try {
+      const supabase = createClient();
+      const uploadedUrls: string[] = [];
+
+      for (const file of fileArray) {
+        if (file.size > 5 * 1024 * 1024) {
+          setError(`Le fichier ${file.name} dépasse 5MB`);
+          continue;
+        }
+
+        const fileExt = file.name.split(".").pop()?.toLowerCase();
+        if (!["jpg", "jpeg", "png", "webp"].includes(fileExt || "")) {
+          setError(`Format non supporté: ${fileExt}`);
+          continue;
+        }
+
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `team-properties/${teamId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("properties")
+          .upload(filePath, file, { cacheControl: "3600", upsert: false });
+
+        if (uploadError) throw new Error(`Erreur upload: ${uploadError.message}`);
+
+        const { data: { publicUrl } } = supabase.storage.from("properties").getPublicUrl(filePath);
+        uploadedUrls.push(publicUrl);
+      }
+
+      setFormData((prev) => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors de l'upload");
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    await processImageFiles(Array.from(files));
+  };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -124,6 +185,13 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
       virtual_tour_url: formData.virtual_tour_url,
       images: formData.images,
       owner_id: formData.owner_id,
+      location: formData.lat && formData.lon ? {
+        lat: formData.lat,
+        lon: formData.lon,
+        city: formData.city,
+        district: formData.district,
+        region: formData.region,
+      } : undefined,
     });
 
     setIsSubmitting(false);
@@ -166,7 +234,7 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
     setError(null);
 
     const result = await generateSEODescription({
-      type: property.details.type.toLowerCase(),
+      type: (property.details?.type || "bien").toLowerCase(),
       category: property.category,
       city: formData.address,
       price: parseInt(formData.price),
@@ -193,52 +261,62 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <Link
               href="/gestion/biens"
-              className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-zinc-400" />
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">Modifier le bien</h1>
-              <p className="text-zinc-400">{teamName}</p>
+              <h1 className="text-2xl font-bold">Modifier le bien</h1>
+              <p className="text-muted-foreground">{teamName}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             {/* Statut publication */}
-            <button
-              onClick={handleTogglePublication}
-              disabled={isTogglingPublication}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${isPublished
-                  ? "bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30"
-                  : "bg-zinc-800 text-zinc-300 border border-zinc-700 hover:bg-zinc-700"
-                }`}
-            >
-              {isTogglingPublication ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : isPublished ? (
-                <>
-                  <Eye className="w-4 h-4" /> En ligne
-                </>
+            {/* Statut publication */}
+            <div className="flex items-center gap-2">
+              {property.status === "loué" ? (
+                <div className="px-3 py-1.5 bg-blue-500/10 text-blue-600 border border-blue-500/20 rounded-lg text-sm font-medium flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  Loué
+                </div>
               ) : (
-                <>
-                  <EyeOff className="w-4 h-4" /> Hors ligne
-                </>
+                <button
+                  onClick={handleTogglePublication}
+                  disabled={isTogglingPublication}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${isPublished
+                    ? "bg-green-500/10 text-green-600 border border-green-500/20 hover:bg-green-500/20 dark:text-green-400 dark:border-green-500/30"
+                    : "bg-muted text-muted-foreground border border-border hover:bg-muted/80"
+                    }`}
+                >
+                  {isTogglingPublication ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isPublished ? (
+                    <>
+                      <Eye className="w-4 h-4" /> En ligne
+                    </>
+                  ) : (
+                    <>
+                      <EyeOff className="w-4 h-4" /> Hors ligne
+                    </>
+                  )}
+                </button>
               )}
-            </button>
+            </div>
 
             {/* Voir sur la vitrine */}
             {isPublished && (
               <Link
                 href={`/biens/${property.id}`}
                 target="_blank"
-                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-muted border border-border rounded-lg text-muted-foreground hover:bg-muted/80 transition-colors"
               >
                 <ExternalLink className="w-4 h-4" />
                 Voir
@@ -249,92 +327,100 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
 
         {/* Messages */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6 text-red-400">
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-6 text-destructive">
             {error}
           </div>
         )}
         {success && (
-          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6 text-green-400">
+          <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 mb-6 text-green-600 dark:text-green-400">
             {success}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section: Informations générales */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection("general")}
-              className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors"
+              className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <Building2 className="w-5 h-5 text-[#F4C430]" />
-                <span className="font-medium text-white">Informations générales</span>
+                <Building2 className="w-5 h-5 text-primary" />
+                <span className="font-medium">Informations générales</span>
               </div>
               {expandedSections.general ? (
-                <ChevronUp className="w-5 h-5 text-zinc-400" />
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-zinc-400" />
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
               )}
             </button>
 
             {expandedSections.general && (
               <div className="p-4 pt-0 space-y-4">
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-2">Titre</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Titre</label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => updateField("title", e.target.value)}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F4C430]"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-2">
+                  <label className="block text-sm text-muted-foreground mb-2">
                     Prix (FCFA) {property.category === "location" && "/ mois"}
                   </label>
                   <input
                     type="number"
                     value={formData.price}
                     onChange={(e) => updateField("price", e.target.value)}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F4C430]"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                   />
                 </div>
-                <div className="flex items-center gap-4 text-sm text-zinc-400">
-                  <span>Type: <strong className="text-white">{property.details.type}</strong></span>
-                  <span>Catégorie: <strong className="text-white">{property.category === "vente" ? "Vente" : "Location"}</strong></span>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span>Type: <strong className="text-foreground">{property.details.type}</strong></span>
+                  <span>Catégorie: <strong className="text-foreground">{property.category === "vente" ? "Vente" : "Location"}</strong></span>
                 </div>
               </div>
             )}
           </div>
 
           {/* Section: Localisation */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection("location")}
-              className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors"
+              className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-[#F4C430]" />
-                <span className="font-medium text-white">Localisation</span>
+                <MapPin className="w-5 h-5 text-primary" />
+                <span className="font-medium">Localisation</span>
               </div>
               {expandedSections.location ? (
-                <ChevronUp className="w-5 h-5 text-zinc-400" />
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-zinc-400" />
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
               )}
             </button>
 
             {expandedSections.location && (
               <div className="p-4 pt-0">
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-3">Adresse complète du bien</label>
+                  <label className="block text-sm text-muted-foreground mb-3">Adresse complète du bien</label>
 
                   <AddressAutocomplete
                     defaultValue={formData.address}
                     onAddressSelect={(details) => {
-                      updateField("address", details.display_name);
+                      setFormData(prev => ({
+                        ...prev,
+                        address: details.display_name,
+                        lat: details.lat ? parseFloat(details.lat) : null,
+                        lon: details.lon ? parseFloat(details.lon) : null,
+                        city: details.city || "",
+                        district: details.suburb || "",
+                        region: details.state || ""
+                      }));
                     }}
                     className="w-full"
                   />
@@ -344,20 +430,20 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
           </div>
 
           {/* Section: Caractéristiques */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection("specs")}
-              className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors"
+              className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <Ruler className="w-5 h-5 text-[#F4C430]" />
-                <span className="font-medium text-white">Caractéristiques</span>
+                <Ruler className="w-5 h-5 text-primary" />
+                <span className="font-medium">Caractéristiques</span>
               </div>
               {expandedSections.specs ? (
-                <ChevronUp className="w-5 h-5 text-zinc-400" />
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-zinc-400" />
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
               )}
             </button>
 
@@ -365,39 +451,39 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
               <div className="p-4 pt-0">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm text-zinc-400 mb-2">Surface (m²)</label>
+                    <label className="block text-sm text-muted-foreground mb-2">Surface (m²)</label>
                     <input
                       type="number"
                       value={formData.surface}
                       onChange={(e) => updateField("surface", e.target.value)}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F4C430]"
+                      className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-zinc-400 mb-2">Pièces</label>
+                    <label className="block text-sm text-muted-foreground mb-2">Pièces</label>
                     <input
                       type="number"
                       value={formData.rooms}
                       onChange={(e) => updateField("rooms", e.target.value)}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F4C430]"
+                      className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-zinc-400 mb-2">Chambres</label>
+                    <label className="block text-sm text-muted-foreground mb-2">Chambres</label>
                     <input
                       type="number"
                       value={formData.bedrooms}
                       onChange={(e) => updateField("bedrooms", e.target.value)}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F4C430]"
+                      className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-zinc-400 mb-2">Salles de bain</label>
+                    <label className="block text-sm text-muted-foreground mb-2">Salles de bain</label>
                     <input
                       type="number"
                       value={formData.bathrooms}
                       onChange={(e) => updateField("bathrooms", e.target.value)}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F4C430]"
+                      className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                     />
                   </div>
                 </div>
@@ -406,20 +492,20 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
           </div>
 
           {/* Section: Description */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection("description")}
-              className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors"
+              className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <FileText className="w-5 h-5 text-[#F4C430]" />
-                <span className="font-medium text-white">Description</span>
+                <FileText className="w-5 h-5 text-primary" />
+                <span className="font-medium">Description</span>
               </div>
               {expandedSections.description ? (
-                <ChevronUp className="w-5 h-5 text-zinc-400" />
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-zinc-400" />
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
               )}
             </button>
 
@@ -427,12 +513,12 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
               <div className="p-4 pt-0 space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm text-zinc-400">Description du bien</label>
+                    <label className="block text-sm text-muted-foreground">Description du bien</label>
                     <button
                       type="button"
                       onClick={handleGenerateAI}
                       disabled={isGeneratingAI}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[#F4C430]/20 to-purple-500/20 border border-[#F4C430]/30 rounded-lg text-sm font-medium text-[#F4C430] hover:from-[#F4C430]/30 hover:to-purple-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-3 py-1.5 bg-[#0F172A] text-white rounded-lg text-sm font-medium hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isGeneratingAI ? (
                         <>
@@ -451,20 +537,20 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
                     value={formData.description}
                     onChange={(e) => updateField("description", e.target.value)}
                     rows={6}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F4C430] resize-none"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none"
                   />
-                  <p className="text-xs text-zinc-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     L'IA génère une description optimisée SEO basée sur les caractéristiques du bien.
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-2">Visite virtuelle</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Visite virtuelle</label>
                   <input
                     type="text"
                     value={formData.virtual_tour_url}
                     onChange={(e) => updateField("virtual_tour_url", e.target.value)}
                     placeholder="https://..."
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F4C430]"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                   />
                 </div>
               </div>
@@ -472,22 +558,22 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
           </div>
 
           {/* Section: Images */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection("images")}
-              className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors"
+              className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <ImageIcon className="w-5 h-5 text-[#F4C430]" />
-                <span className="font-medium text-white">
+                <ImageIcon className="w-5 h-5 text-primary" />
+                <span className="font-medium">
                   Photos ({formData.images.length})
                 </span>
               </div>
               {expandedSections.images ? (
-                <ChevronUp className="w-5 h-5 text-zinc-400" />
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-zinc-400" />
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
               )}
             </button>
 
@@ -495,7 +581,7 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
               <div className="p-4 pt-0">
                 <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
                   {formData.images.map((image, index) => (
-                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
+                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-border">
                       <img
                         src={image}
                         alt={`Photo ${index + 1}`}
@@ -510,10 +596,21 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
                       </button>
                     </div>
                   ))}
-                  <label className="aspect-square border-2 border-dashed border-zinc-700 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-[#F4C430] transition-colors">
-                    <Plus className="w-6 h-6 text-zinc-400" />
-                    <span className="text-xs text-zinc-500 mt-1">Ajouter</span>
-                    <input type="file" accept="image/*" multiple className="hidden" />
+                  <label className={`aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors ${uploadingImages ? "opacity-50 pointer-events-none" : ""}`}>
+                    {uploadingImages ? (
+                      <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                    ) : (
+                      <Plus className="w-6 h-6 text-muted-foreground" />
+                    )}
+                    <span className="text-xs text-muted-foreground mt-1">{uploadingImages ? "Upload..." : "Ajouter"}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImages}
+                    />
                   </label>
                 </div>
               </div>
@@ -521,7 +618,7 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
           </div>
 
           {/* Propriétaire */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+          <div className="bg-card border border-border rounded-xl p-4">
             <OwnerSelector
               value={formData.owner_id}
               onChange={(ownerId) => updateField("owner_id", ownerId || "")}
@@ -532,14 +629,14 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
           <div className="flex gap-4">
             <Link
               href="/gestion/biens"
-              className="flex-1 px-6 py-3 border border-zinc-700 rounded-lg text-white text-center hover:bg-zinc-800 transition-colors"
+              className="flex-1 px-6 py-3 border border-border rounded-lg text-foreground text-center hover:bg-muted transition-colors"
             >
               Annuler
             </Link>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 px-6 py-3 bg-[#F4C430] text-black rounded-lg font-medium hover:bg-[#F4C430]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-[#0F172A] text-white rounded-lg font-medium hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>

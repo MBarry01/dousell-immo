@@ -1,7 +1,8 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { getUserTeamContext } from "@/lib/team-permissions";
+import { getUserTeamContext } from "@/lib/team-context";
+import { requireTeamPermission } from "@/lib/permissions";
 
 export type VacantProperty = {
     id: string;
@@ -23,19 +24,10 @@ export async function getVacantTeamProperties(): Promise<{
 }> {
     try {
         const supabase = await createClient();
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
 
-        if (!user) {
-            return { success: false, error: "Non authentifié" };
-        }
-
-        // Récupérer le contexte équipe
-        const teamContext = await getUserTeamContext();
-        if (!teamContext?.team_id) {
-            return { success: false, error: "Aucune équipe trouvée" };
-        }
+        // Récupérer le contexte équipe standardisé
+        const { teamId } = await getUserTeamContext();
+        await requireTeamPermission('properties.view');
 
         // Récupérer les biens de l'équipe qui sont disponibles (pas loués)
         const { data: properties, error } = await supabase
@@ -48,7 +40,7 @@ export async function getVacantTeamProperties(): Promise<{
         images,
         status
       `)
-            .eq("team_id", teamContext.team_id)
+            .eq("team_id", teamId)
             .in("status", ["disponible", "preavis"]) // Vacants ou en préavis
             .order("title", { ascending: true });
 
@@ -88,23 +80,15 @@ export async function getAllTeamProperties(): Promise<{
 }> {
     try {
         const supabase = await createClient();
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
 
-        if (!user) {
-            return { success: false, error: "Non authentifié" };
-        }
-
-        const teamContext = await getUserTeamContext();
-        if (!teamContext?.team_id) {
-            return { success: false, error: "Aucune équipe trouvée" };
-        }
+        // Récupérer le contexte équipe standardisé
+        const { teamId } = await getUserTeamContext();
+        await requireTeamPermission('properties.view');
 
         const { data: properties, error } = await supabase
             .from("properties")
             .select(`id, title, price, location, images`)
-            .eq("team_id", teamContext.team_id)
+            .eq("team_id", teamId)
             .order("title", { ascending: true });
 
         if (error) {

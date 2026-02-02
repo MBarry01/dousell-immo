@@ -11,7 +11,7 @@ export type TeamRole = "owner" | "manager" | "accountant" | "agent";
 
 export type TeamStatus = "active" | "suspended" | "archived";
 
-export type MemberStatus = "active" | "suspended" | "invited";
+export type MemberStatus = "active" | "suspended" | "invited" | "removed" | "left";
 
 export type InvitationStatus = "pending" | "accepted" | "expired" | "cancelled";
 
@@ -51,6 +51,8 @@ export interface TeamMember {
   status: MemberStatus;
   invited_by: string | null;
   joined_at: string | null;
+  removed_at: string | null;
+  left_at: string | null;
   created_at: string;
   updated_at: string;
   // Données jointes
@@ -119,7 +121,10 @@ export type TeamAuditAction =
   | "member.joined"
   | "member.role_changed"
   | "member.removed"
+  | "member.left"
   | "member.suspended"
+  | "member.invitation_resent"
+  | "member.invitation_cancelled"
   | "invitation.cancelled"
   | "invitation.expired"
   | "settings.updated"
@@ -145,6 +150,10 @@ export interface UserTeamContext {
   team_name: string;
   team_slug: string;
   user_role: TeamRole;
+  // 🆕 Subscription fields (optimisation: évite un appel DB séparé)
+  subscription_status?: 'none' | 'trial' | 'active' | 'expired' | 'canceled';
+  subscription_trial_ends_at?: string | null;
+  subscription_tier?: 'pro' | 'premium' | 'enterprise';
 }
 
 // =====================================================

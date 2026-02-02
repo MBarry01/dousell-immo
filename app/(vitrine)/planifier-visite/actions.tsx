@@ -79,9 +79,15 @@ export async function createVisitRequest(values: VisitRequestFormValues, turnsti
   }
 
   // Envoyer l'email à l'admin
+  const adminEmail = getAdminEmail();
+  if (!adminEmail) {
+    console.warn("⚠️ Admin email non configuré, notification ignorée");
+    return { success: true };
+  }
+
   try {
     await sendEmail({
-      to: getAdminEmail(),
+      to: adminEmail,
       subject: "Nouvelle demande de visite · Dousell Immo",
       react: (
         <VisitRequestEmail
@@ -301,11 +307,14 @@ export async function createAppointment(values: AppointmentFormValues) {
       </html>
     `;
 
-    await sendEmail({
-      to: getAdminEmail(),
-      subject: `📅 Nouveau RDV${isOnline ? " (Visio)" : ""}: ${userName} - ${formattedDate} à ${payload.time}`,
-      html: adminEmailHtml,
-    });
+    const adminEmailAddr = getAdminEmail();
+    if (adminEmailAddr) {
+      await sendEmail({
+        to: adminEmailAddr,
+        subject: `📅 Nouveau RDV${isOnline ? " (Visio)" : ""}: ${userName} - ${formattedDate} à ${payload.time}`,
+        html: adminEmailHtml,
+      });
+    }
   } catch (emailError) {
     console.error("⚠️ Erreur lors de l'envoi de l'email admin:", emailError);
   }

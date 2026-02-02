@@ -19,9 +19,9 @@ const recordToFilters = (
 ) => {
   const filters: PropertyFilters = {};
 
-  // Recherche textuelle (q ou location)
+  // Recherche textuelle (q) -> Map vers filters.q (Recherche large : Titre, Desc, Ville)
   if (params.q && typeof params.q === "string") {
-    filters.location = params.q;
+    filters.q = params.q;
   }
 
   // Catégorie (category) : location ou vente

@@ -213,7 +213,7 @@ export function UserNav() {
           >
             <DropdownMenuItem
               className="cursor-pointer"
-              onClick={() => router.push("/a-propos")}
+              onClick={() => router.push("/pro")}
             >
               <Info className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
               À propos

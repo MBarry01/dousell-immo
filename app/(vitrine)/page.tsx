@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { HeroSection } from "@/components/sections/hero";
 import { PropertySection } from "@/components/sections/property-section";
 import { QuickSearch } from "@/components/search/quick-search";
+import { HomeSEOContent } from "@/components/sections/home-seo-content";
 import { getHomePageSections } from "@/services/homeService.cached";
 import { VerificationSuccessToast } from "@/components/auth/verification-success-toast";
 
@@ -99,6 +100,9 @@ export default async function Home() {
             </div>
           )}
       </div>
+
+      {/* Section SEO Optimisée (Bas de page) */}
+      <HomeSEOContent />
     </div>
   );
 }

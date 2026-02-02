@@ -67,7 +67,7 @@ export const PropertyDetailView = ({
   const breadcrumbItems = useMemo(() => {
     const transaction = property.transaction ?? "vente";
     const categoryLabel = transaction === "location" ? "Louer" : "Acheter";
-    const city = property.location.city || "Dakar";
+    const city = property.location.city || property.location.district || property.location.region || "Sénégal";
 
     return [
       { label: "Accueil", href: "/" },
@@ -227,18 +227,34 @@ export const PropertyDetailView = ({
               {property.title}
             </h1>
             <div className="mt-3 space-y-1">
-              <div className="flex items-center gap-2 text-gray-600 dark:text-white/60">
-                <MapPin className="h-4 w-4" />
-                <span>
-                  {property.location.address || property.location.city}
-                  {property.location.landmark && `, ${property.location.landmark}`}
-                </span>
-              </div>
-              {property.location.address && (
-                <p className="text-sm text-gray-500 dark:text-white/50">
-                  {property.location.city}
-                </p>
-              )}
+              {(() => {
+                const parts = [
+                  property.location.district,
+                  property.location.city,
+                  property.location.region
+                ].filter(Boolean);
+                const formattedLocation = parts.join(", ");
+
+                // On n'affiche l'adresse spécifique en dessous QUE si elle apporte une info supplémentaire
+                // c'est-à-dire si elle est différente de la ville/quartier affiché juste au-dessus
+                const shouldShowAddress = property.location.address &&
+                  property.location.address !== formattedLocation &&
+                  !property.location.address.includes(property.location.city);
+
+                return (
+                  <>
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-white/60">
+                      <MapPin className="h-4 w-4" />
+                      <span>{formattedLocation}</span>
+                    </div>
+                    {shouldShowAddress && (
+                      <p className="text-sm text-gray-500 dark:text-white/50">
+                        {property.location.address}
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
 
@@ -652,6 +668,6 @@ export const PropertyDetailView = ({
 
       {/* Contact Bar Mobile */}
       <ContactBar property={property} />
-    </div>
+    </div >
   );
 };

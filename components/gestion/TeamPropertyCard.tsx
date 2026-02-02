@@ -6,8 +6,11 @@ import { Building2, MapPin, Bed, Bath, Square, Eye, EyeOff, Pencil, Trash2, More
 import { useState } from "react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { AddTenantButton } from "@/app/(webapp)/gestion-locative/components/AddTenantButton";
-import { toast } from "sonner"; // Assuming sonner is used, or alerts if not. Using window.alert/console for now if uncertain.
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type TeamPropertyCardProps = {
   property: {
@@ -60,7 +63,6 @@ export function TeamPropertyCard({
   isLoading,
 }: TeamPropertyCardProps) {
   const [showMenu, setShowMenu] = useState(false);
-  const [showAddTenant, setShowAddTenant] = useState(false);
   const isPublished = property.validation_status === "approved";
   const isScheduled = property.validation_status === "scheduled";
   const isVerified = property.verification_status === "verified";
@@ -70,16 +72,14 @@ export function TeamPropertyCard({
     e.stopPropagation();
     const url = `${window.location.origin}/biens/${property.id}`;
     navigator.clipboard.writeText(url);
-    // You might want a toast here
-    alert("Lien copié !");
+    toast.success("Lien copié !");
     setShowMenu(false);
   };
 
   const handleDuplicate = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Placeholder for duplication logic
-    alert("Fonctionnalité de duplication à venir");
+    toast.info("Fonctionnalité de duplication à venir");
     setShowMenu(false);
   };
 
@@ -98,289 +98,228 @@ export function TeamPropertyCard({
   };
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 transition-colors">
+    <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-all hover:border-primary/50 group">
       {/* Image */}
-      <div className="relative h-48">
+      <div className="relative aspect-video bg-muted group-hover:scale-[1.01] transition-transform duration-500">
         {property.images?.[0] ? (
           <Image
             src={property.images[0]}
             alt={property.title}
             fill
             className="object-cover"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              e.currentTarget.parentElement?.classList.add("bg-zinc-800");
-              const icon = document.createElement("div");
-              icon.className = "absolute inset-0 flex items-center justify-center text-zinc-700";
-              icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-building-2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>';
-              e.currentTarget.parentElement?.appendChild(icon);
-            }}
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-zinc-800 text-zinc-700">
+          <div className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground">
             <Building2 className="w-12 h-12" />
           </div>
         )}
-        {/* Badges */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+        {/* Badges sur l'image */}
         <div className="absolute top-3 left-3 flex gap-2">
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-zinc-900/80 text-white">
+          <Badge
+            variant="secondary"
+            className={cn(
+              "backdrop-blur-md border-0 text-white",
+              property.category === "vente"
+                ? "bg-purple-500/90"
+                : "bg-blue-500/90"
+            )}
+          >
             {property.category === "vente" ? "Vente" : "Location"}
-          </span>
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-zinc-900/80 text-white">
-            {property.details.type}
-          </span>
+          </Badge>
+          {property.details.type && (
+            <Badge variant="outline" className="bg-black/30 text-white border-white/20 backdrop-blur-md">
+              {property.details.type}
+            </Badge>
+          )}
         </div>
 
-        {/* Statut principal (Un seul badge prioritaire) */}
         <div className="absolute top-3 right-3">
-          {/* Priorité 1: Statut d'occupation ou publication spéciale */}
           {property.status === "loué" ? (
-            <span className="px-2 py-1 text-xs font-medium rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md flex items-center gap-1">
+            <Badge className="bg-emerald-500/90 text-white hover:bg-emerald-600 border-0 backdrop-blur-md">
               ✓ Loué
-            </span>
+            </Badge>
           ) : property.status === "preavis" ? (
-            <span className="px-2 py-1 text-xs font-medium rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 backdrop-blur-md">
+            <Badge className="bg-orange-500/90 text-white hover:bg-orange-600 border-0 backdrop-blur-md">
               Préavis
-            </span>
+            </Badge>
           ) : isScheduled ? (
-            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500/20 text-blue-400 flex items-center gap-1 backdrop-blur-md">
+            <Badge className="bg-blue-500/90 text-white hover:bg-blue-600 border-0 backdrop-blur-md flex gap-1">
               <Clock className="w-3 h-3" />
               {property.scheduled_publish_at
                 ? formatScheduledDate(property.scheduled_publish_at)
                 : "Programmé"}
-            </span>
+            </Badge>
           ) : !isPublished ? (
-            <span className="px-2 py-1 text-xs font-medium rounded-full bg-zinc-700/80 text-zinc-400 flex items-center gap-1 backdrop-blur-md">
+            <Badge className="bg-zinc-700/90 text-white hover:bg-zinc-600 border-0 backdrop-blur-md flex gap-1">
               <EyeOff className="w-3 h-3" /> Brouillon
-            </span>
+            </Badge>
           ) : (
-            /* Bien vacant ET en ligne = afficher "Vacant" (plus important) */
-            <span className="px-2 py-1 text-xs font-medium rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 backdrop-blur-md">
+            <Badge className="bg-amber-500/90 text-white hover:bg-amber-600 border-0 backdrop-blur-md">
               À louer
-            </span>
+            </Badge>
           )}
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4">
-        {/* Title & Price */}
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex items-center gap-1.5 min-w-0 pr-2">
-            <h3 className="font-semibold text-white line-clamp-1">{property.title}</h3>
-            {isVerified && <VerifiedBadge size="sm" />}
+      {/* Contenu */}
+      <div className="p-4 space-y-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-bold text-lg text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+              {property.title}
+            </h3>
+            {isVerified && <VerifiedBadge size="sm" className="mt-1" />}
+            <div className="flex items-center gap-2 text-primary font-bold text-lg mt-1">
+              {formatPrice(property.price)} FCFA
+              {property.category === "location" && (
+                <span className="text-sm font-normal text-muted-foreground">/mois</span>
+              )}
+            </div>
           </div>
-          <div className="relative">
-            <DropdownMenu open={showMenu} onOpenChange={setShowMenu}>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="p-1 hover:bg-zinc-800 rounded-lg transition-colors outline-none"
-                >
-                  <MoreVertical className="w-5 h-5 text-zinc-400" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-[180px] bg-zinc-900 border-zinc-800 z-50">
-                <Link
-                  href={`/gestion/biens/${property.id}`}
-                  className="relative flex cursor-default select-none items-center gap-2 px-2 py-1.5 text-sm outline-none transition-colors hover:bg-zinc-800 focus:bg-zinc-800 text-white rounded-sm w-full"
-                >
-                  <Pencil className="w-4 h-4" /> Modifier
-                </Link>
 
-                {/* MENU CONTEXTUEL : Bien Loué */}
-                {property.tenant ? (
-                  <>
-                    <DropdownMenuSeparator className="bg-zinc-800" />
-                    <Link
-                      href={`/gestion/baux?property=${property.id}`}
-                      className="relative flex cursor-default select-none items-center gap-2 px-2 py-1.5 text-sm outline-none transition-colors hover:bg-zinc-800 focus:bg-zinc-800 text-white rounded-sm w-full"
-                    >
+          <DropdownMenu open={showMenu} onOpenChange={setShowMenu}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href={`/gestion/biens/${property.id}`}>
+                  <Eye className="w-4 h-4 mr-2" />
+                  Voir détails
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/gestion/biens/${property.id}/edit`}>
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Modifier
+                </Link>
+              </DropdownMenuItem>
+
+              {property.tenant ? (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href={`/gestion/baux?property=${property.id}`}>
                       📄 Voir le Bail
                     </Link>
-                    <Link
-                      href={`/gestion/quittances/nouveau?property=${property.id}`}
-                      className="relative flex cursor-default select-none items-center gap-2 px-2 py-1.5 text-sm outline-none transition-colors hover:bg-zinc-800 focus:bg-zinc-800 text-white rounded-sm w-full"
-                    >
-                      📤 Envoyer une quittance
-                    </Link>
-                    <Link
-                      href={`/gestion/maintenance/nouveau?property=${property.id}`}
-                      className="relative flex cursor-default select-none items-center gap-2 px-2 py-1.5 text-sm outline-none transition-colors hover:bg-zinc-800 focus:bg-zinc-800 text-white rounded-sm w-full"
-                    >
-                      🔧 Signaler une intervention
-                    </Link>
-                    <DropdownMenuSeparator className="bg-zinc-800" />
-                    <DropdownMenuItem
-                      onClick={() => toast.info("Fonctionnalité bientôt disponible")}
-                      className="cursor-pointer focus:bg-zinc-800 focus:text-orange-400 text-orange-400 transition-colors gap-2"
-                    >
-                      🛑 Signaler un départ
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  /* MENU CONTEXTUEL : Bien Vacant */
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        onTogglePublication(property.id);
-                      }}
-                      disabled={isLoading}
-                      className="cursor-pointer focus:bg-zinc-800 focus:text-white text-zinc-300 transition-colors gap-2"
-                    >
-                      {isPublished ? (
-                        <>
-                          <EyeOff className="w-4 h-4" /> Retirer
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="w-4 h-4" /> Publier
-                        </>
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-zinc-800" />
-                    <DropdownMenuItem
-                      onClick={handleDuplicate}
-                      className="cursor-pointer focus:bg-zinc-800 focus:text-white text-zinc-300 transition-colors gap-2"
-                    >
-                      <Copy className="w-4 h-4" /> Dupliquer
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-zinc-800" />
-                    <DropdownMenuItem
-                      onClick={() => {
-                        if (confirm("Êtes-vous sûr de vouloir supprimer ce bien ?")) {
-                          onDelete(property.id);
-                        }
-                      }}
-                      disabled={isLoading}
-                      className="cursor-pointer focus:bg-zinc-800 focus:text-red-400 text-red-400 transition-colors gap-2 hover:text-red-400 hover:bg-zinc-800"
-                    >
-                      <Trash2 className="w-4 h-4" /> Supprimer
-                    </DropdownMenuItem>
-                  </>
-                )}
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem onClick={() => onTogglePublication(property.id)}>
+                    {isPublished ? (
+                      <>
+                        <EyeOff className="w-4 h-4 mr-2" /> Dépublier
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="w-4 h-4 mr-2" /> Publier
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleDuplicate}>
+                    <Copy className="w-4 h-4 mr-2" /> Dupliquer
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                    onClick={() => {
+                      if (confirm("Êtes-vous sûr de vouloir supprimer ce bien ?")) {
+                        onDelete(property.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Supprimer
+                  </DropdownMenuItem>
+                </>
+              )}
 
-                {/* Option Partager (toujours visible) */}
-                <DropdownMenuSeparator className="bg-zinc-800" />
-                <DropdownMenuItem
-                  onClick={handleShare}
-                  className="cursor-pointer focus:bg-zinc-800 focus:text-white text-zinc-300 transition-colors gap-2"
-                >
-                  <Share2 className="w-4 h-4" /> Partager
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleShare}>
+                <Share2 className="w-4 h-4 mr-2" /> Partager
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Location & Specs */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <MapPin className="w-4 h-4 shrink-0" />
+            <span className="truncate">
+              {property.location.address || property.location.city}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4 text-sm text-muted-foreground border-t border-border pt-3">
+            {property.specs.surface > 0 && (
+              <div className="flex items-center gap-1.5">
+                <Square className="w-4 h-4" />
+                {property.specs.surface} m²
+              </div>
+            )}
+            {property.specs.bedrooms > 0 && (
+              <div className="flex items-center gap-1.5">
+                <Bed className="w-4 h-4" />
+                {property.specs.bedrooms}
+              </div>
+            )}
+            {property.specs.bathrooms > 0 && (
+              <div className="flex items-center gap-1.5">
+                <Bath className="w-4 h-4" />
+                {property.specs.bathrooms}
+              </div>
+            )}
           </div>
         </div>
 
-        <p className="text-[#F4C430] font-bold text-lg mb-3">
-          {formatPrice(property.price)} FCFA
-          {property.category === "location" && (
-            <span className="text-sm font-normal text-zinc-500"> /mois</span>
-          )}
-        </p>
-
-        {/* Location */}
-        <div className="flex items-center gap-1 text-zinc-400 text-sm mb-3">
-          <MapPin className="w-4 h-4 flex-shrink-0" />
-          <span className="line-clamp-1">
-            {property.location.district
-              ? `${property.location.district}, ${property.location.city}`
-              : property.location.city}
-          </span>
-        </div>
-
-        {/* Specs */}
-        <div className="flex items-center gap-4 text-zinc-500 text-sm mb-3">
-          {property.specs.surface > 0 && (
-            <div className="flex items-center gap-1">
-              <Square className="w-4 h-4" />
-              <span>{property.specs.surface} m²</span>
-            </div>
-          )}
-          {property.specs.bedrooms > 0 && (
-            <div className="flex items-center gap-1">
-              <Bed className="w-4 h-4" />
-              <span>{property.specs.bedrooms}</span>
-            </div>
-          )}
-          {property.specs.bathrooms > 0 && (
-            <div className="flex items-center gap-1">
-              <Bath className="w-4 h-4" />
-              <span>{property.specs.bathrooms}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Owner & Tenant Section */}
-        <div className="pt-3 border-t border-zinc-800 flex flex-col gap-3">
-          {/* Owner (Small) */}
-          {property.owner?.full_name && (
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-zinc-700 flex items-center justify-center">
-                <Building2 className="w-2.5 h-2.5 text-zinc-400" />
-              </div>
-              <span className="text-xs text-zinc-500">{property.owner.full_name}</span>
-            </div>
-          )}
-
-          {/* Tenant or Associate Action */}
+        {/* Tenant Section */}
+        <div className="pt-3 border-t border-border">
           {property.tenant ? (
             <Link
               href={`/gestion/locataires/${property.tenant.id}`}
-              className="flex items-center justify-between p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 transition-colors group"
+              className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
             >
-              <div className="flex items-center gap-2">
-                {property.tenant.avatar_url ? (
-                  <Image
-                    src={property.tenant.avatar_url}
-                    alt={property.tenant.full_name}
-                    width={32}
-                    height={32}
-                    className="rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-[#F4C430]/10 flex items-center justify-center text-[#F4C430] font-medium text-xs">
-                    {property.tenant.full_name.substring(0, 2).toUpperCase()}
-                  </div>
-                )}
-                <div>
-                  <p className="text-sm text-white font-medium group-hover:text-[#F4C430] transition-colors">{property.tenant.full_name}</p>
-                  <p className="text-xs text-zinc-500">Locataire actuel</p>
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={property.tenant.avatar_url} />
+                <AvatarFallback>{property.tenant.full_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                  {property.tenant.full_name}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    "w-2 h-2 rounded-full",
+                    property.tenant.payment_status === "up_to_date" ? "bg-green-500" : "bg-red-500"
+                  )} />
+                  <span className="text-xs text-muted-foreground">
+                    {property.tenant.payment_status === "up_to_date" ? "À jour" : "Retard"}
+                  </span>
                 </div>
               </div>
-              {property.tenant.payment_status === "up_to_date" ? (
-                <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" title="Paiements à jour" />
-              ) : (
-                <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" title="Retard de paiement" />
-              )}
             </Link>
           ) : (
             <button
               onClick={() => onAssociate(property.id)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-[#F4C430] font-medium transition-all group"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-dashed border-border hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-all group"
             >
               <UserPlus className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              Associer un locataire
+              <span className="text-sm">Associer un locataire</span>
             </button>
           )}
 
-          {/* Controlled Wizard Modal */}
-          <AddTenantButton
-            ownerId={property.owner?.id || ""}
-            propertyId={property.id}
-            open={showAddTenant}
-            onOpenChange={setShowAddTenant}
-            initialData={{
-              address: property.location.address || `${property.location.district ? property.location.district + ', ' : ''}${property.location.city}`,
-              amount: property.price
-            }}
-            trigger={null}
-          />
         </div>
 
         {/* Views */}
         {property.view_count !== undefined && property.view_count > 0 && (
-          <div className="flex items-center gap-1 text-xs text-zinc-600 mt-2">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
             <Eye className="w-3 h-3" />
             <span>{property.view_count} vues</span>
           </div>

@@ -86,10 +86,10 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="z-[100] fixed top-[4%] left-[50%] translate-x-[-50%] translate-y-0 sm:top-[50%] sm:translate-y-[-50%] w-[90vw] sm:w-full sm:max-w-[550px] max-h-[92vh] overflow-y-auto overflow-x-hidden bg-slate-900 border-slate-800 text-white px-4 pt-4 pb-24 sm:p-6 outline-none">
+            <DialogContent className="z-[100] fixed top-[4%] left-[50%] translate-x-[-50%] translate-y-0 sm:top-[50%] sm:translate-y-[-50%] w-[90vw] sm:w-full sm:max-w-[550px] max-h-[92vh] overflow-y-auto overflow-x-hidden bg-card border-border text-foreground px-4 pt-4 pb-24 sm:p-6 outline-none shadow-2xl">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold text-white">Modifier le bail</DialogTitle>
-                    <DialogDescription className="text-slate-400">
+                    <DialogTitle className="text-xl font-semibold text-foreground">Modifier le bail</DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
                         Modifications pour {tenant.name}
                     </DialogDescription>
                 </DialogHeader>
@@ -97,36 +97,34 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                 <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">
-                                Nom complet <span className="text-red-400">*</span>
+                            <label className="text-sm font-medium text-foreground/80">
+                                Nom complet <span className="text-destructive">*</span>
                             </label>
                             <Input
                                 name="tenant_name"
                                 required
                                 defaultValue={tenant.name}
-                                placeholder="ex: Mamadou Diop"
-                                className="bg-slate-800 border-slate-700 text-white"
-                                whileFocus={{ scale: 1 }}
+                                placeholder="ex: Amadou Ndiaye"
+                                className="bg-background border-border text-foreground"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">
-                                Téléphone <span className="text-red-400">*</span>
+                            <label className="text-sm font-medium text-foreground/80">
+                                Téléphone <span className="text-destructive">*</span>
                             </label>
                             <Input
                                 name="tenant_phone"
                                 required
                                 defaultValue={tenant.phone}
                                 placeholder="ex: +221 77..."
-                                className="bg-slate-800 border-slate-700 text-white"
-                                whileFocus={{ scale: 1 }}
+                                className="bg-background border-border text-foreground"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-300">
-                            Email <span className="text-red-400">*</span>
+                        <label className="text-sm font-medium text-foreground/80">
+                            Email <span className="text-destructive">*</span>
                         </label>
                         <Input
                             name="tenant_email"
@@ -134,29 +132,27 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                             required
                             defaultValue={tenant.email}
                             placeholder="ex: locataire@email.com"
-                            className="bg-slate-800 border-slate-700 text-white"
-                            whileFocus={{ scale: 1 }}
+                            className="bg-background border-border text-foreground"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-300">
-                            Adresse du bien <span className="text-red-400">*</span>
+                        <label className="text-sm font-medium text-foreground/80">
+                            Adresse du bien <span className="text-destructive">*</span>
                         </label>
                         <Input
                             name="property_address"
                             required
                             defaultValue={tenant.property}
                             placeholder="ex: Appartement F3, Almadies, Dakar"
-                            className="bg-slate-800 border-slate-700 text-white"
-                            whileFocus={{ scale: 1 }}
+                            className="bg-background border-border text-foreground"
                         />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">
-                                Loyer (FCFA) <span className="text-red-400">*</span>
+                            <label className="text-sm font-medium text-foreground/80">
+                                Loyer (FCFA) <span className="text-destructive">*</span>
                             </label>
                             <Input
                                 name="monthly_amount"
@@ -164,13 +160,12 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                                 required
                                 defaultValue={tenant.rentAmount}
                                 placeholder="500000"
-                                className="bg-slate-800 border-slate-700 text-white font-mono"
-                                whileFocus={{ scale: 1 }}
+                                className="bg-background border-border text-foreground font-mono"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">
-                                Jour paiement <span className="text-red-400">*</span>
+                            <label className="text-sm font-medium text-foreground/80">
+                                Jour paiement <span className="text-destructive">*</span>
                             </label>
                             <Input
                                 name="billing_day"
@@ -179,37 +174,34 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                                 max="31"
                                 required
                                 defaultValue={tenant.dueDate || 5}
-                                className="bg-slate-800 border-slate-700 text-white"
-                                whileFocus={{ scale: 1 }}
+                                className="bg-background border-border text-foreground"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">
-                                Début bail <span className="text-red-400">*</span>
+                            <label className="text-sm font-medium text-foreground/80">
+                                Début bail <span className="text-destructive">*</span>
                             </label>
                             <Input
                                 name="start_date"
                                 type="date"
                                 required
                                 defaultValue={tenant.startDate}
-                                className="bg-slate-800 border-slate-700 text-white h-10 w-full px-3 block [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:p-1"
-                                whileFocus={{ scale: 1 }}
+                                className="bg-background border-border text-foreground h-10 w-full px-3 block"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-300">
-                            Fin bail <span className="text-red-400">*</span>
-                            <span className="text-xs text-slate-500 ml-2">(pour les alertes juridiques J-180 et J-90)</span>
+                        <label className="text-sm font-medium text-foreground/80">
+                            Fin bail <span className="text-destructive">*</span>
+                            <span className="text-xs text-muted-foreground ml-2">(pour les alertes juridiques J-180 et J-90)</span>
                         </label>
                         <Input
                             name="end_date"
                             type="date"
                             required
                             defaultValue={tenant.endDate}
-                            className="bg-slate-800 border-slate-700 text-white h-10 w-full px-3 block [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:p-1"
-                            whileFocus={{ scale: 1 }}
+                            className="bg-background border-border text-foreground h-10 w-full px-3 block"
                         />
                     </div>
 
@@ -218,14 +210,14 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                             type="button"
                             variant="ghost"
                             onClick={onClose}
-                            className="hover:bg-slate-800 text-slate-300"
+                            className="hover:bg-accent text-accent-foreground"
                         >
                             Annuler
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90"
+                            className="bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
                         >
                             {loading ? "Enregistrement..." : "Enregistrer"}
                         </Button>

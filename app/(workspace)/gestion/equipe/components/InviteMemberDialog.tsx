@@ -30,9 +30,10 @@ import { RoleBadge } from "./RoleBadge";
 interface InviteMemberDialogProps {
   teamId: string;
   onSuccess?: () => void;
+  trigger?: React.ReactNode;
 }
 
-export function InviteMemberDialog({ teamId, onSuccess }: InviteMemberDialogProps) {
+export function InviteMemberDialog({ teamId, onSuccess, trigger }: InviteMemberDialogProps) {
   const router = useRouter();
   const { isDark } = useTheme();
   const [open, setOpen] = useState(false);
@@ -72,10 +73,12 @@ export function InviteMemberDialog({ teamId, onSuccess }: InviteMemberDialogProp
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-[#F4C430] hover:bg-[#B8860B] text-black">
-          <UserPlus className="w-4 h-4 mr-2" />
-          Inviter
-        </Button>
+        {trigger || (
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <UserPlus className="w-4 h-4 mr-2" />
+            Inviter
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent
         className={cn(
@@ -222,7 +225,7 @@ export function InviteMemberDialog({ teamId, onSuccess }: InviteMemberDialogProp
             <Button
               type="submit"
               disabled={loading || !email.trim()}
-              className="bg-[#F4C430] hover:bg-[#B8860B] text-black"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {loading ? (
                 <>

@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
-const buttonVariants = cva(
+export const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ring-offset-transparent",
   {
     variants: {
@@ -17,11 +17,11 @@ const buttonVariants = cva(
         primary:
           "bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-primary",
         secondary:
-          "bg-white/10 text-white hover:bg-white/20 focus-visible:ring-white/40",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         outline:
-          "border border-white/30 text-white hover:bg-white/10 focus-visible:ring-white/30",
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         ghost:
-          "text-white/80 hover:text-white focus-visible:ring-white/40 hover:bg-white/10",
+          "hover:bg-accent hover:text-accent-foreground",
       },
       size: {
         default: "h-11 px-5",

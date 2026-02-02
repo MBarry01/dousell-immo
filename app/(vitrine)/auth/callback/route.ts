@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
+import { getSmartRedirectPath } from "@/lib/auth-redirect";
 
 export async function GET(request: Request) {
   // 1. On récupère l'URL actuelle (que ce soit localhost ou vercel)
@@ -9,7 +10,7 @@ export async function GET(request: Request) {
   const type = searchParams.get("type"); // email, signup, recovery, etc.
   const error = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
-  const next = searchParams.get("next") ?? "/";
+  const next = searchParams.get("next"); // Peut être null, on utilisera la redirection intelligente
 
   // Log pour débugger
   console.log("🔍 Auth Callback Debug:", {
@@ -57,7 +58,9 @@ export async function GET(request: Request) {
 
       if (data.session) {
         console.log("✅ Email verified, session created");
-        return NextResponse.redirect(`${origin}/?verified=true`);
+        // Utiliser la redirection intelligente
+        const smartRedirect = await getSmartRedirectPath();
+        return NextResponse.redirect(`${origin}${smartRedirect}?verified=true`);
       }
 
       console.error("❌ No session after OTP verification");
@@ -95,17 +98,22 @@ export async function GET(request: Request) {
         searchParams.get("type") === "email";
 
       if (isEmailVerification) {
-        console.log("✅ Email vérifié - redirection vers la home");
-        return NextResponse.redirect(`${origin}/?verified=true`);
+        console.log("✅ Email vérifié - redirection intelligente");
+        const smartRedirect = await getSmartRedirectPath();
+        return NextResponse.redirect(`${origin}${smartRedirect}?verified=true`);
       }
 
-      // Sinon, rediriger vers la page demandée
-      // MAIS : Vérifier si c'est un locataire pour le rediriger vers le portail
-      // Rediriger vers la page demandée (ou / par défaut)
-      const redirectUrl = `${origin}${next}`;
+      // Sinon, utiliser la redirection intelligente
+      // Si un next est spécifié explicitement (pas /), l'utiliser
+      if (next && next !== "/") {
+        const redirectUrl = `${origin}${next}`;
+        return NextResponse.redirect(redirectUrl);
+      }
 
-
-      return NextResponse.redirect(redirectUrl);
+      // Sinon, déterminer la bonne route selon le type d'utilisateur
+      const smartRedirect = await getSmartRedirectPath();
+      console.log("🔀 Smart redirect to:", smartRedirect);
+      return NextResponse.redirect(`${origin}${smartRedirect}`);
     }
 
     // Si pas de session après échange réussi, erreur
@@ -116,4 +124,3 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/auth/auth-code-error`);
   }
 }
-

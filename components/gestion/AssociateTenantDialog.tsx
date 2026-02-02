@@ -3,8 +3,16 @@
 import { useState } from "react";
 import { TenantSelector } from "./TenantSelector";
 import { associateTenant } from "@/app/(workspace)/gestion/biens/actions";
+import { Button } from "@/components/ui/button";
 import { Calendar, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 type AssociateTenantDialogProps = {
     isOpen: boolean;
@@ -30,8 +38,6 @@ export function AssociateTenantDialog({
     const [selectedTenantId, setSelectedTenantId] = useState<string | undefined>();
     const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -81,18 +87,16 @@ export function AssociateTenantDialog({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
-                <div className="p-6 border-b border-zinc-800">
-                    <h2 className="text-xl font-bold text-white mb-1">
-                        Associer un locataire
-                    </h2>
-                    <p className="text-sm text-zinc-400">
-                        Pour le bien : <span className="text-[#F4C430]">{propertyTitle}</span>
-                    </p>
-                </div>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="sm:max-w-md bg-card border-border text-foreground shadow-2xl">
+                <DialogHeader>
+                    <DialogTitle className="text-xl font-bold">Associer un locataire</DialogTitle>
+                    <DialogDescription className="text-sm text-muted-foreground">
+                        Pour le bien : <span className="text-primary font-medium">{propertyTitle}</span>
+                    </DialogDescription>
+                </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6 pt-2">
                     {/* SÉLECTEUR DE LOCATAIRE */}
                     <div className="space-y-2">
                         <TenantSelector
@@ -107,48 +111,49 @@ export function AssociateTenantDialog({
 
                     {/* DATE D'ENTRÉE */}
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-zinc-300">
+                        <label className="block text-sm font-medium text-foreground">
                             Date d'entrée (Début du bail)
                         </label>
                         <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                             <input
                                 type="date"
                                 required
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
-                                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-[#F4C430] shadow-sm appearance-none"
+                                className="w-full bg-background border border-input rounded-lg pl-10 pr-4 py-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary shadow-sm appearance-none h-11 dark:[&::-webkit-calendar-picker-indicator]:invert"
                             />
                         </div>
                     </div>
 
                     {/* ACTIONS */}
-                    <div className="flex gap-3 pt-2">
-                        <button
+                    <div className="flex justify-end gap-3 pt-4">
+                        <Button
                             type="button"
+                            variant="outline"
                             onClick={onClose}
                             disabled={isSubmitting}
-                            className="flex-1 px-4 py-2.5 border border-zinc-700 rounded-lg text-white font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50"
+                            className="h-11 px-6"
                         >
                             Annuler
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
                             disabled={!selectedTenantId || !startDate || isSubmitting}
-                            className="flex-1 px-4 py-2.5 bg-[#F4C430] text-black rounded-lg font-medium hover:bg-[#F4C430]/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="h-11 px-8 font-medium bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
                         >
                             {isSubmitting ? (
                                 <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
                                     Traitement...
                                 </>
                             ) : (
                                 "Valider le bail"
                             )}
-                        </button>
+                        </Button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }

@@ -25,7 +25,7 @@
   /* Couleur primaire - Jaune Or de marque #F4C430 */
   --primary: 45 91% 57%;
   --primary-foreground: 0 0% 0%;
-  --ring: 45 91% 57%;
+  --ring: transparent;
   --border: rgba(255, 255, 255, 0.08);
   --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
@@ -46,10 +46,11 @@
   --popover-foreground: #0f172a;
   --accent: #f2c94c;
   --accent-foreground: #0f172a;
-  /* Couleur primaire conservée */
-  --primary: 45 91% 47%;
-  --primary-foreground: 0 0% 100%;
-  --ring: 45 91% 47%;
+  /* Bleu Nuité (Slate 900) pour remplacer le Jaune Or en mode clair */
+  --primary: 222 47% 11%;
+  --primary-foreground: 210 40% 98%;
+  --ring: 215 25% 27%;
+  /* Ton plus doux pour le ring en mode clair */
   --border: rgba(0, 0, 0, 0.1);
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
@@ -71,7 +72,8 @@
   --accent-foreground: #05080c;
   --primary: 45 91% 57%;
   --primary-foreground: 0 0% 0%;
-  --ring: 45 91% 57%;
+  --ring: transparent;
+  /* Bleu-gris sobre */
   --border: rgba(255, 255, 255, 0.08);
 }
 
@@ -79,11 +81,10 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Couleurs primaires - Jaune Or de marque #F4C430 */
-  /* Format HSL pour Tailwind v4 - utilise hsl() automatiquement */
-  --color-primary: 45 91% 57%;
-  --color-primary-foreground: 0 0% 0%;
-  --color-ring: 45 91% 57%;
+  /* Couleurs primaires - Dynamiques selon le thème */
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-ring: hsl(var(--ring));
 
   /* Alias pour compatibilité Shadcn UI */
   --color-brand: #F4C430;
@@ -247,6 +248,107 @@
     background-color: var(--muted);
     color: var(--foreground);
   }
+
+  /* Cursor pointer pour tous les éléments cliquables */
+  a,
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="option"],
+  [role="row"][data-state],
+  [data-state="open"],
+  [data-state="closed"],
+  .cursor-pointer,
+  label[for],
+  input[type="checkbox"],
+  input[type="radio"],
+  select,
+  [onclick],
+  [tabindex]:not([tabindex="-1"]),
+  tr[onclick],
+  td[onclick],
+  .badge,
+  [data-radix-collection-item] {
+    cursor: pointer !important;
+  }
+
+  /* Hover explicite pour les éléments interactifs */
+  a:hover,
+  button:hover,
+  [role="button"]:hover,
+  [role="tab"]:hover,
+  [role="menuitem"]:hover,
+  tr:hover,
+  .group:hover {
+    cursor: pointer !important;
+  }
+
+  /* Standardisation des hovers "bleu grisé" */
+  .hover\:bg-accent:hover,
+  .hover\:bg-slate-100:hover,
+  .ghost:hover {
+    background-color: #f1f5f9 !important;
+    /* Slate 100 */
+  }
+
+  /* Mode sombre pour les hovers */
+  .dark .hover\:bg-accent:hover,
+  .dark .hover\:bg-slate-100:hover,
+  .dark .ghost:hover {
+    background-color: #1e293b !important;
+    /* Slate 800 */
+  }
+
+  /* Custom Scrollbar - Modern, Slim & Theme-aware */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  .dark * {
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  }
+
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+    background-clip: content-box;
+  }
+
+  /* Dark mode webkit scrollbar */
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    background-clip: content-box;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+    background-clip: content-box;
+  }
+
+  /* Hide scrollbar arrows (buttons) on all browsers */
+  ::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 @layer utilities {
@@ -311,7 +413,7 @@
 
   /* Padding pour le contenu au-dessus de la bottom nav mobile */
   .pb-safe-nav {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 7rem);
   }
 
   .glass-panel {
@@ -493,7 +595,7 @@
 
   /* Renforcer le padding bottom de la bottom nav en PWA */
   .pb-safe-nav {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem) !important;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 7rem) !important;
   }
 }
 

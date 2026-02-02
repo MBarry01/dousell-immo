@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -18,6 +19,17 @@ import { hasActiveFilters } from "@/lib/search-filters";
 import { useSearchFilters } from "@/hooks/use-search-filters";
 import { getUnifiedListings } from "@/services/gatewayService";
 import { type PropertyFilters, getSearchSuggestions } from "@/services/propertyService";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+const ITEMS_PER_PAGE = 12;
 
 const MapView = dynamic(
   () => import("@/components/search/map-view").then((mod) => mod.MapView),
@@ -51,6 +63,7 @@ export const SearchExperience = ({
   const [searchQuery, setSearchQuery] = useState(filters.q ?? "");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Debounce de la recherche textuelle (500ms)
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -84,6 +97,7 @@ export const SearchExperience = ({
         setFilters(nextFilters);
         const data = await getUnifiedListings(nextFilters);
         setResults(data);
+        setCurrentPage(1); // Reset page on search change
         setIsSearching(false);
       };
       searchFilters();
@@ -95,11 +109,29 @@ export const SearchExperience = ({
     setFilters(nextFilters);
     const data = await getUnifiedListings(nextFilters);
     setResults(data);
+    setCurrentPage(1); // Reset page on filter apply
     setIsSearching(false);
   }, [setFilters]);
 
-  // Mémoiser le nombre de résultats
+  // Mémoiser le nombre de résultats et les résultats paginés
   const resultCount = useMemo(() => results.length, [results.length]);
+
+  const paginatedResults = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return results.slice(start, start + ITEMS_PER_PAGE);
+  }, [results, currentPage]);
+
+  const totalPages = Math.ceil(resultCount / ITEMS_PER_PAGE);
+
+  // Effet pour défiler vers le haut des résultats lors d'un changement de page
+  useEffect(() => {
+    if (currentPage > 1) {
+      const resultsElement = document.getElementById("search-results-top");
+      if (resultsElement) {
+        resultsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }, [currentPage]);
 
   return (
     <div className="relative space-y-6 pb-32">
@@ -196,10 +228,71 @@ export const SearchExperience = ({
             }
           />
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&>*]:w-full">
-            {results.map((property) => (
-              <PropertyCardUnified key={property.id} property={property} />
-            ))}
+          <div id="search-results-top" className="scroll-mt-24">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&>*]:w-full">
+              {paginatedResults.map((property) => (
+                <PropertyCardUnified key={property.id} property={property} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="mt-12 flex justify-center">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      {currentPage > 1 ? (
+                        <PaginationPrevious
+                          onClick={() => setCurrentPage(prev => prev - 1)}
+                        />
+                      ) : (
+                        <div className="pointer-events-none opacity-30">
+                          <PaginationPrevious />
+                        </div>
+                      )}
+                    </PaginationItem>
+
+                    {/* Logic to show page numbers with ellipsis */}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(page => {
+                        // Alléger la pagination sur mobile
+                        if (totalPages <= 5) return true;
+                        if (page === 1 || page === totalPages) return true;
+                        if (Math.abs(page - currentPage) <= 1) return true;
+                        return false;
+                      })
+                      .map((page, index, array) => (
+                        <React.Fragment key={page}>
+                          {index > 0 && array[index - 1] !== page - 1 && (
+                            <PaginationItem>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )}
+                          <PaginationItem>
+                            <PaginationLink
+                              isActive={currentPage === page}
+                              onClick={() => setCurrentPage(page)}
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        </React.Fragment>
+                      ))}
+
+                    <PaginationItem>
+                      {currentPage < totalPages ? (
+                        <PaginationNext
+                          onClick={() => setCurrentPage(prev => prev + 1)}
+                        />
+                      ) : (
+                        <div className="pointer-events-none opacity-30">
+                          <PaginationNext />
+                        </div>
+                      )}
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </div>
         )
       ) : (

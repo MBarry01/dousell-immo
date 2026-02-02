@@ -5,7 +5,6 @@ import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { createPaymentHistoryDocument } from '@/components/pdf/PaymentHistoryPDF';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 interface PaymentHistoryProps {
     transactions: any[];
@@ -16,7 +15,6 @@ interface PaymentHistoryProps {
 }
 
 export function PaymentHistory({ transactions, lease, tenant, user, profile }: PaymentHistoryProps) {
-    const { isDark } = useTheme();
 
     // Helper for currency
     const formatMoney = (amount: number) =>
@@ -48,9 +46,9 @@ export function PaymentHistory({ transactions, lease, tenant, user, profile }: P
     return (
         <div className="space-y-6">
             {/* Header / Actions */}
-            <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'}`}>
+            <div className="p-4 rounded-xl border bg-card border-border">
                 <div className="flex justify-between items-center">
-                    <h3 className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Historique complet</h3>
+                    <h3 className="font-semibold text-lg text-foreground">Historique complet</h3>
 
                     <PDFDownloadLink
                         document={createPaymentHistoryDocument(pdfData)}
@@ -61,9 +59,7 @@ export function PaymentHistory({ transactions, lease, tenant, user, profile }: P
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className={isDark
-                                    ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white'
-                                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 shadow-sm'}
+                                className="bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground shadow-sm"
                                 disabled={loading}
                             >
                                 {loading ? (
@@ -81,9 +77,9 @@ export function PaymentHistory({ transactions, lease, tenant, user, profile }: P
             </div>
 
             {/* Table */}
-            <div className={`border rounded-xl overflow-hidden ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'}`}>
+            <div className="border rounded-xl overflow-hidden bg-card border-border">
                 <table className="w-full text-sm text-left">
-                    <thead className={`font-medium border-b ${isDark ? 'bg-slate-900 text-slate-400 border-slate-800' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                    <thead className="font-medium border-b bg-muted text-muted-foreground border-border">
                         <tr>
                             <th className="p-4">Période</th>
                             <th className="p-4">Date limite</th>
@@ -92,35 +88,35 @@ export function PaymentHistory({ transactions, lease, tenant, user, profile }: P
                             <th className="p-4 text-right">Action</th>
                         </tr>
                     </thead>
-                    <tbody className={`divide-y ${isDark ? 'divide-slate-800' : 'divide-gray-200'}`}>
+                    <tbody className="divide-y divide-border">
                         {transactions.map((t: any) => (
-                            <tr key={t.id} className={`transition-colors ${isDark ? 'hover:bg-slate-800/30' : 'hover:bg-gray-50'}`}>
-                                <td className={`p-4 font-medium capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            <tr key={t.id} className="transition-colors hover:bg-accent/50">
+                                <td className="p-4 font-medium capitalize text-foreground">
                                     {t.period_month === 0
                                         ? <span className="text-[#F4C430] flex items-center gap-2">Caution (Dépôt de garantie)</span>
                                         : new Date(t.period_year, t.period_month - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
                                     }
                                 </td>
-                                <td className={`p-4 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                                <td className="p-4 text-muted-foreground">
                                     {t.period_month === 0
                                         ? "-"
                                         : `05/${String(t.period_month).padStart(2, '0')}`
                                     }
                                 </td>
-                                <td className={`p-4 font-mono ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                <td className="p-4 font-mono text-foreground">
                                     {formatMoney(t.amount_due)}
                                 </td>
                                 <td className="p-4">
-                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${t.status === 'paid' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                        t.status === 'overdue' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                            'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${t.status === 'paid' ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20' :
+                                        t.status === 'overdue' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20' :
+                                            'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                                         }`}>
                                         {t.status === 'paid' ? 'Payé' : t.status === 'overdue' ? 'En retard' : 'En attente'}
                                     </span>
                                 </td>
                                 <td className="p-4 text-right">
                                     {t.status === 'paid' && (
-                                        <Button variant="ghost" size="sm" className="h-8 text-blue-400 hover:text-blue-300">
+                                        <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary/80">
                                             <Download className="w-3 h-3 mr-1" /> Quittance
                                         </Button>
                                     )}

@@ -1,3 +1,5 @@
+'use server';
+
 /**
  * Version cachée de rentalService pour Gestion Locative
  *
@@ -12,33 +14,16 @@
 import { getOrSetCache } from "@/lib/cache/cache-aside";
 import { createClient } from "@/utils/supabase/server";
 
-/**
- * 📋 Récupérer les baux d'un propriétaire (avec cache)
- *
- * TTL : 5 minutes
- * Cache key : `leases:{ownerId}:{status}`
- * 
- * Note: Récupère les baux où owner_id = ownerId OU team_id correspond à une équipe de l'utilisateur
- */
-export async function getLeasesByOwner(
-  ownerId: string,
+export async function getLeasesByTeam(
+  teamId: string,
   status: "active" | "terminated" | "all" = "active"
 ) {
   return getOrSetCache(
-    `leases:${ownerId}:${status}`,
+    `leases:${teamId}:${status}`,
     async () => {
       const supabase = await createClient();
 
-      // Récupérer les team_ids de l'utilisateur
-      const { data: teamMemberships } = await supabase
-        .from("team_members")
-        .select("team_id")
-        .eq("user_id", ownerId);
-
-      const userTeamIds = teamMemberships?.map(tm => tm.team_id) || [];
-
-      // Construire la requête avec OR: owner_id OU team_id
-      // Jointure avec properties pour avoir le titre du bien
+      // Requête simple filtrée par team_id
       let query = supabase
         .from("leases")
         .select(`
@@ -46,14 +31,8 @@ export async function getLeasesByOwner(
           billing_day, start_date, end_date, status, created_at, lease_pdf_url, team_id, owner_id, property_id,
           properties:property_id(id, title, images)
         `)
+        .eq("team_id", teamId)
         .order("created_at", { ascending: false });
-
-      // Filtre: owner_id = ownerId OU team_id dans les équipes de l'utilisateur
-      if (userTeamIds.length > 0) {
-        query = query.or(`owner_id.eq.${ownerId},team_id.in.(${userTeamIds.join(',')})`);
-      } else {
-        query = query.eq("owner_id", ownerId);
-      }
 
       if (status !== "all") {
         query = query.eq("status", status);
@@ -89,39 +68,33 @@ export async function getRentalTransactions(leaseIds: string[]) {
     return [];
   }
 
-  // Stratégie : Cache par Bail (Granulaire)
-  // Cela permet d'invalider facilement le cache d'un seul bail lors d'un paiement
-  // Clé : rental_transactions:lease:{leaseId}
+  // OPTIMISATION : Requête unique à la DB pour éviter "thundering herd"
+  // Au lieu de faire N requêtes de cache parallèles, on fait une seule requête DB
+  // pour récupérer toutes les transactions des baux concernés.
+  // Cela soulage le pool de connexion et évite les blocages sur de gros volumes.
 
-  const transactionsPromises = leaseIds.map(async (leaseId) => {
-    return getOrSetCache(
-      `rental_transactions:${leaseId}`, // Clé simple prédicible !
-      async () => {
-        const supabase = await createClient();
-        const { data, error } = await supabase
-          .from("rental_transactions")
-          .select(
-            "id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end"
-          )
-          .eq("lease_id", leaseId)
-          .order("period_year", { ascending: false })
-          .order("period_month", { ascending: false });
+  return getOrSetCache(
+    `rental_transactions:bulk:${leaseIds.sort().join('_')}`, // Clé basée sur la liste d'IDs
+    async () => {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("rental_transactions")
+        .select(
+          "id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end"
+        )
+        .in("lease_id", leaseIds)
+        .order("period_year", { ascending: false })
+        .order("period_month", { ascending: false });
 
-        if (error) throw error;
-        return data || [];
-      },
-      {
-        ttl: 300, // 5 minutes
-        namespace: "rentals",
-        debug: true,
-      }
-    );
-  });
-
-  const results = await Promise.all(transactionsPromises);
-
-  // Aplatir les résultats (tableau de tableaux -> tableau plat)
-  return results.flat();
+      if (error) throw error;
+      return data || [];
+    },
+    {
+      ttl: 300, // 5 minutes
+      namespace: "rentals",
+      debug: true,
+    }
+  );
 }
 
 /**
@@ -130,17 +103,17 @@ export async function getRentalTransactions(leaseIds: string[]) {
  * TTL : 10 minutes (calculs coûteux, acceptable avec lag)
  * Cache key : `rental_stats:{ownerId}`
  */
-export async function getRentalStatsByOwner(ownerId: string) {
+export async function getRentalStatsByTeam(teamId: string) {
   return getOrSetCache(
-    `rental_stats:${ownerId}`,
+    `rental_stats:${teamId}`,
     async () => {
       const supabase = await createClient();
 
-      // Récupérer tous les baux actifs
+      // Récupérer tous les baux actifs de l'équipe
       const { data: leases } = await supabase
         .from("leases")
         .select("id, monthly_amount")
-        .eq("owner_id", ownerId)
+        .eq("team_id", teamId)
         .eq("status", "active");
 
       if (!leases || leases.length === 0) {
@@ -233,17 +206,17 @@ export async function getLeaseById(leaseId: string) {
  * TTL : 5 minutes
  * Cache key : `late_payments:{ownerId}`
  */
-export async function getLatePaymentsByOwner(ownerId: string) {
+export async function getLatePaymentsByTeam(teamId: string) {
   return getOrSetCache(
-    `late_payments:${ownerId}`,
+    `late_payments:${teamId}`,
     async () => {
       const supabase = await createClient();
 
-      // 1. Récupérer les baux actifs
+      // 1. Récupérer les baux actifs de l'équipe
       const { data: leases } = await supabase
         .from("leases")
         .select("id, tenant_name, property_address")
-        .eq("owner_id", ownerId)
+        .eq("team_id", teamId)
         .eq("status", "active");
 
       if (!leases || leases.length === 0) {
@@ -298,7 +271,8 @@ export async function getOwnerProfileForReceipts(ownerId: string) {
     async () => {
       const supabase = await createClient();
 
-      const { data, error } = await supabase
+      // 1. Récupérer le profil utilisateur (base)
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select(
           "company_name, company_address, company_email, company_ninea, signature_url, logo_url, full_name"
@@ -306,8 +280,49 @@ export async function getOwnerProfileForReceipts(ownerId: string) {
         .eq("id", ownerId)
         .maybeSingle();
 
-      if (error) throw error;
-      return data;
+      if (profileError) throw profileError;
+
+      // 2. Chercher l'équipe (Agence)
+      // Priorité à l'équipe où l'utilisateur est membre
+      const { data: member } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", ownerId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      let teamData = null;
+      if (member) {
+        const { data: team } = await supabase
+          .from("teams")
+          .select("*")
+          .eq("id", member.team_id)
+          .single();
+        teamData = team;
+      } else {
+        // Fallback: Chercher via ownership direct
+        const { data: team } = await supabase
+          .from("teams")
+          .select("*")
+          .eq("created_by", ownerId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        teamData = team;
+      }
+
+      // 3. Fusionner les données (Priorité Team > Profil)
+      return {
+        ...(profile || {}),
+        company_name: teamData?.name || profile?.company_name,
+        company_address: teamData?.company_address || profile?.company_address,
+        company_email: teamData?.company_email || profile?.company_email,
+        company_ninea: teamData?.company_ninea || profile?.company_ninea,
+        company_phone: teamData?.company_phone || null, // Ajout si dispo dans teams
+        logo_url: teamData?.logo_url || profile?.logo_url,
+        signature_url: teamData?.signature_url || profile?.signature_url,
+      };
     },
     {
       ttl: 3600, // 1 heure
@@ -395,6 +410,24 @@ export async function getUserDashboardInfo(userId: string, email: string) {
       namespace: "rentals",
       debug: true,
     }
+  );
+}
+
+export async function getExpensesByTeam(teamId: string) {
+  return getOrSetCache(
+    `expenses:${teamId}`,
+    async () => {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("expenses")
+        .select("id, amount, expense_date, category, description, lease_id, team_id, owner_id")
+        .eq("team_id", teamId)
+        .order("expense_date", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    { ttl: 300, namespace: "rentals" }
   );
 }
 

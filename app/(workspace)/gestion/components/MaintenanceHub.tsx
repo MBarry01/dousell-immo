@@ -1,12 +1,11 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Wrench, Clock, CheckCircle2, AlertTriangle, Send, Loader2, X, ChevronDown, Phone, Star, MapPin, Calendar, CircleDollarSign } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from 'react';
-import { createMaintenanceRequest, getActiveLeases, submitQuote, approveQuoteByOwner, completeIntervention } from '../actions';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/ui/empty-state';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { createMaintenanceRequest, getActiveLeases, submitQuote, approveQuoteByOwner, completeIntervention } from '../actions';
 
 interface MaintenanceRequest {
     id: string;
@@ -46,7 +45,6 @@ const CATEGORIES = [
 ];
 
 export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
-    const { isDark } = useTheme();
     const [showForm, setShowForm] = useState(false);
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('Plomberie');
@@ -78,11 +76,11 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
         switch (status) {
             case 'open': return "bg-blue-500/10 text-blue-400";
             case 'artisan_found': return "bg-emerald-500/10 text-emerald-400";
-            case 'awaiting_approval': return "bg-brand/10 text-brand";
+            case 'awaiting_approval': return "bg-primary/10 text-primary";
             case 'approved': return "bg-purple-500/10 text-purple-400";
             case 'in_progress': return "bg-yellow-500/10 text-yellow-400";
             case 'completed': return "bg-green-500/10 text-green-400";
-            default: return "bg-gray-500/10 text-gray-400";
+            default: return "bg-muted text-muted-foreground";
         }
     };
 
@@ -173,31 +171,24 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
     };
 
     return (
-        <div className={`relative overflow-hidden rounded-xl p-5 border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'
-            }`}>
+        <div className="relative overflow-hidden rounded-xl p-5 border border-border bg-card">
             <div className="relative space-y-4">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-xl border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-gray-100 border-gray-200'
-                            }`}>
-                            <Wrench className={`w-5 h-5 ${isDark ? 'text-white' : 'text-gray-700'}`} />
+                        <div className="p-2.5 rounded-xl border border-border bg-muted">
+                            <Wrench className="w-5 h-5 text-foreground" />
                         </div>
                         <div>
-                            <h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>Interventions</h3>
-                            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>Maintenance & travaux</p>
+                            <h3 className="font-semibold text-sm text-foreground">Interventions</h3>
+                            <p className="text-xs text-muted-foreground">Maintenance & travaux</p>
                         </div>
                     </div>
                     <div id="tour-intervention-signaler">
                         <Button
                             size="sm"
                             variant={showForm ? "ghost" : "outline"}
-                            className={`text-xs h-8 ${showForm
-                                    ? isDark ? 'text-white hover:bg-slate-800' : 'text-gray-900 hover:bg-gray-100'
-                                    : isDark
-                                        ? 'border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
-                                        : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                                }`}
+                            className="text-xs h-8"
                             onClick={() => setShowForm(!showForm)}
                         >
                             {showForm ? <><X className="w-3 h-3 mr-1" /> Annuler</> : '+ Signaler'}
@@ -207,19 +198,15 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
 
                 {/* Formulaire */}
                 {showForm && (
-                    <div className={`p-4 rounded-xl space-y-3 border ${isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'
-                        }`}>
-                        <p className={`text-xs font-medium ${isDark ? 'text-brand' : 'text-slate-900'}`}>Nouvelle intervention</p>
+                    <div className="p-4 rounded-xl space-y-3 border border-border bg-muted/30">
+                        <p className="text-xs font-medium text-primary">Nouvelle intervention</p>
 
                         {leases.length > 0 && (
                             <div className="relative">
                                 <select
                                     value={selectedLease}
                                     onChange={(e) => setSelectedLease(e.target.value)}
-                                    className={`w-full rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-pointer border ${isDark
-                                            ? 'bg-gray-900 border-gray-700 text-white'
-                                            : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className="w-full rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-pointer border border-border bg-background text-foreground"
                                 >
                                     {leases.map(lease => (
                                         <option key={lease.id} value={lease.id}>
@@ -227,8 +214,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                         </option>
                                     ))}
                                 </select>
-                                <ChevronDown className={`absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${isDark ? 'text-gray-400' : 'text-gray-500'
-                                    }`} />
+                                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-muted-foreground" />
                             </div>
                         )}
 
@@ -236,10 +222,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                             placeholder="Décrivez le problème..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className={`w-full rounded-lg px-3 py-2 text-sm resize-none h-16 focus:border-brand/50 focus:outline-none border ${isDark
-                                    ? 'bg-gray-900 border-gray-700 text-white placeholder:text-gray-500'
-                                    : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'
-                                }`}
+                            className="w-full rounded-lg px-3 py-2 text-sm resize-none h-16 border border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none"
                         />
 
                         <div className="flex gap-2">
@@ -247,10 +230,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                 <select
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
-                                    className={`w-full rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-pointer border ${isDark
-                                            ? 'bg-gray-900 border-gray-700 text-white'
-                                            : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className="w-full rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-pointer border border-border bg-background text-foreground"
                                 >
                                     {CATEGORIES.map(cat => (
                                         <option key={cat.value} value={cat.value}>
@@ -258,14 +238,13 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                         </option>
                                     ))}
                                 </select>
-                                <ChevronDown className={`absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${isDark ? 'text-gray-400' : 'text-gray-500'
-                                    }`} />
+                                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-muted-foreground" />
                             </div>
                             <Button
                                 onClick={handleSubmit}
                                 disabled={!description.trim() || submitting}
                                 size="sm"
-                                className={`${isDark ? 'bg-brand hover:bg-brand/90 text-black' : 'bg-slate-900 hover:bg-slate-800 text-white'} h-9 px-4`}
+                                className="h-9 px-4 bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
                             >
                                 {submitting ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -280,13 +259,12 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                 {/* Liste des demandes */}
                 <div className="space-y-3">
                     {requests.length > 0 ? requests.map((req) => (
-                        <div key={req.id} className={`p-4 rounded-2xl space-y-3 border ${isDark ? 'bg-gray-900/40 border-gray-800' : 'bg-gray-50 border-gray-200'
-                            }`}>
+                        <div key={req.id} className="p-4 rounded-2xl space-y-3 border border-border bg-muted/20">
                             {/* En-tête */}
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h4 className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{req.description}</h4>
-                                    <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>{req.category}</p>
+                                    <h4 className="font-bold text-sm text-foreground">{req.description}</h4>
+                                    <p className="text-xs text-muted-foreground">{req.category}</p>
                                 </div>
                                 <span className={`text-[10px] px-2 py-1 rounded-full font-medium ${getStatusStyle(req.status)}`}>
                                     {getStatusLabel(req.status)}
@@ -295,13 +273,11 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
 
                             {/* Bloc Artisan (si trouvé) */}
                             {req.artisan_name && (
-                                <div className={`p-3 rounded-lg border ${isDark ? 'bg-gray-800/50 border-gray-700/50' : 'bg-white border-gray-200'
-                                    }`}>
-                                    <p className={`text-[10px] uppercase font-bold mb-2 ${isDark ? 'text-gray-500' : 'text-gray-600'
-                                        }`}>Artisan suggéré</p>
+                                <div className="p-3 rounded-lg border border-border bg-background">
+                                    <p className="text-[10px] uppercase font-bold mb-2 text-muted-foreground">Artisan suggéré</p>
                                     <div className="flex items-center justify-between flex-wrap gap-2">
                                         <div>
-                                            <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{req.artisan_name}</p>
+                                            <p className="font-bold text-sm text-foreground">{req.artisan_name}</p>
                                             {req.artisan_rating && (
                                                 <span className="text-yellow-500 text-xs flex items-center gap-1">
                                                     <Star className="w-3 h-3 fill-current" /> {req.artisan_rating}/5
@@ -318,8 +294,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                         )}
                                     </div>
                                     {req.artisan_address && (
-                                        <p className={`text-xs mt-1 flex items-center gap-1 ${isDark ? 'text-gray-400' : 'text-gray-600'
-                                            }`}>
+                                        <p className="text-xs mt-1 flex items-center gap-1 text-muted-foreground">
                                             <MapPin className="w-3 h-3" /> {req.artisan_address}
                                         </p>
                                     )}
@@ -328,8 +303,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
 
                             {/* Infos devis (si saisi) */}
                             {req.quoted_price && (
-                                <div className={`flex items-center gap-4 text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'
-                                    }`}>
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
                                     <span className="flex items-center gap-1">
                                         <CircleDollarSign className="w-3 h-3" /> {req.quoted_price.toLocaleString('fr-FR')} FCFA
                                     </span>
@@ -360,7 +334,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                         onClick={() => handleApproveQuote(req.id)}
                                         disabled={processingId === req.id}
                                         size="sm"
-                                        className="bg-brand hover:bg-brand/90 text-xs h-8 text-black"
+                                        className="bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md text-xs h-8"
                                     >
                                         {processingId === req.id ? (
                                             <Loader2 className="w-3 h-3 animate-spin" />
@@ -414,15 +388,13 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
 
                 {/* Modal Saisie Devis */}
                 {showQuoteModal && (
-                    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                        <div className={`rounded-xl p-5 w-full max-w-sm space-y-4 border ${isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
-                            }`}>
+                    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowQuoteModal(false)}>
+                        <div className="rounded-xl p-5 w-full max-w-sm space-y-4 border border-border bg-card shadow-2xl" onClick={e => e.stopPropagation()}>
                             <div className="flex justify-between items-center">
-                                <h4 className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Saisir le devis</h4>
+                                <h4 className="font-bold text-foreground">Saisir le devis</h4>
                                 <button
                                     onClick={() => setShowQuoteModal(false)}
-                                    className={`transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'
-                                        }`}
+                                    className="transition-colors text-muted-foreground hover:text-foreground"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -430,30 +402,22 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
 
                             <div className="space-y-3">
                                 <div>
-                                    <label className={`text-xs mb-1 block ${isDark ? 'text-gray-400' : 'text-gray-600'
-                                        }`}>Montant (FCFA)</label>
+                                    <label className="text-xs mb-1 block text-muted-foreground">Montant (FCFA)</label>
                                     <input
                                         type="number"
                                         value={quotePrice}
                                         onChange={(e) => setQuotePrice(e.target.value)}
                                         placeholder="Ex: 25000"
-                                        className={`w-full rounded-lg px-3 py-2 text-sm focus:border-brand/50 focus:outline-none border ${isDark
-                                                ? 'bg-gray-800 border-gray-700 text-white placeholder:text-gray-500'
-                                                : 'bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-400'
-                                            }`}
+                                        className="w-full rounded-lg px-3 py-2 text-sm border border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none"
                                     />
                                 </div>
                                 <div>
-                                    <label className={`text-xs mb-1 block ${isDark ? 'text-gray-400' : 'text-gray-600'
-                                        }`}>Date d&apos;intervention</label>
+                                    <label className="text-xs mb-1 block text-muted-foreground">Date d&apos;intervention</label>
                                     <input
                                         type="date"
                                         value={quoteDate}
                                         onChange={(e) => setQuoteDate(e.target.value)}
-                                        className={`w-full rounded-lg px-3 py-2 text-sm focus:border-brand/50 focus:outline-none border ${isDark
-                                                ? 'bg-gray-800 border-gray-700 text-white'
-                                                : 'bg-gray-50 border-gray-300 text-gray-900'
-                                            }`}
+                                        className="w-full rounded-lg px-3 py-2 text-sm border border-border bg-background text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
                                     />
                                 </div>
                             </div>
@@ -463,8 +427,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                     onClick={() => setShowQuoteModal(false)}
                                     variant="outline"
                                     size="sm"
-                                    className={`flex-1 ${isDark ? 'border-gray-700' : 'border-gray-300'
-                                        }`}
+                                    className="flex-1 border-border"
                                 >
                                     Annuler
                                 </Button>
@@ -472,7 +435,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                     onClick={handleSubmitQuote}
                                     disabled={!quotePrice || !quoteDate || processingId === quoteRequestId}
                                     size="sm"
-                                    className="flex-1 bg-brand hover:bg-brand/90 text-black"
+                                    className="flex-1 bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
                                 >
                                     {processingId === quoteRequestId ? (
                                         <Loader2 className="w-4 h-4 animate-spin" />

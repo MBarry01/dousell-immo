@@ -104,7 +104,7 @@ export default function VitrineLayout({ children }: VitrineLayoutProps) {
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
+    <div className="dark min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
       <ScrollToTop />
       <div className="px-4 md:px-6 print:hidden">
         <Header />

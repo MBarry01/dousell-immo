@@ -351,7 +351,7 @@ export function TeamSettingsForm({ team }: TeamSettingsFormProps) {
         <Button
           type="submit"
           disabled={loading || !hasChanges}
-          className="bg-[#F4C430] hover:bg-[#B8860B] text-black"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           {loading ? (
             <>

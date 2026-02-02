@@ -5,12 +5,18 @@
   "description": "L'immobilier de confiance à Dakar et au Sénégal.",
   "start_url": "/?source=pwa",
   "scope": "/",
-  "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display": "minimal-ui",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#05080c",
   "theme_color": "#F4C430",
   "orientation": "portrait",
-  "categories": ["real estate", "business"],
+  "categories": [
+    "real estate",
+    "business"
+  ],
   "prefer_related_applications": false,
   "icons": [
     {

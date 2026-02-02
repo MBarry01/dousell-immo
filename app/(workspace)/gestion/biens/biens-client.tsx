@@ -98,7 +98,10 @@ export function BiensClient({
     if (categoryFilter !== "all" && property.category !== categoryFilter) return false;
 
     // Filtre statut publication
-    if (statusFilter === "published" && property.validation_status !== "approved") return false;
+    if (statusFilter === "published") {
+      // Un bien n'est réellement "en ligne" que s'il est approuvé ET non loué
+      if (property.validation_status !== "approved" || property.status === "loué") return false;
+    }
     if (statusFilter === "draft" && property.validation_status !== "pending") return false;
     if (statusFilter === "scheduled" && property.validation_status !== "scheduled") return false;
 
@@ -108,7 +111,7 @@ export function BiensClient({
   // Stats
   const stats = {
     total: properties.length,
-    published: properties.filter((p) => p.validation_status === "approved").length,
+    published: properties.filter((p) => p.validation_status === "approved" && p.status !== "loué").length,
     draft: properties.filter((p) => p.validation_status === "pending").length,
     scheduled: properties.filter((p) => p.validation_status === "scheduled").length,
     vente: properties.filter((p) => p.category === "vente").length,
@@ -145,16 +148,16 @@ export function BiensClient({
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-              <Building2 className="w-7 h-7 text-[#F4C430]" />
+            <h1 className="text-2xl font-bold flex items-center gap-3">
+              <Building2 className="w-7 h-7 text-primary" />
               Biens de {teamName}
             </h1>
-            <p className="text-zinc-400 mt-1">
+            <p className="text-muted-foreground mt-1">
               {stats.total} bien{stats.total > 1 ? "s" : ""} • {stats.published} en ligne
             </p>
           </div>
@@ -162,7 +165,7 @@ export function BiensClient({
           {canCreate && (
             <Link
               href="/gestion/biens/nouveau"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F4C430] text-black rounded-lg font-medium hover:bg-[#F4C430]/90 transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0F172A] text-white rounded-lg font-medium hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
             >
               <Plus className="w-5 h-5" />
               Ajouter un bien
@@ -172,24 +175,24 @@ export function BiensClient({
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-            <div className="text-3xl font-bold text-white">{stats.total}</div>
-            <div className="text-sm text-zinc-400">Total biens</div>
+          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+            <div className="text-3xl font-bold">{stats.total}</div>
+            <div className="text-sm text-muted-foreground">Total biens</div>
           </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-green-400" />
-              <span className="text-3xl font-bold text-white">{stats.published}</span>
+              <Eye className="w-5 h-5 text-green-500" />
+              <span className="text-3xl font-bold">{stats.published}</span>
             </div>
-            <div className="text-sm text-zinc-400">En ligne</div>
+            <div className="text-sm text-muted-foreground">En ligne</div>
           </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-            <div className="text-3xl font-bold text-white">{stats.vente}</div>
-            <div className="text-sm text-zinc-400">Ventes</div>
+          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+            <div className="text-3xl font-bold">{stats.vente}</div>
+            <div className="text-sm text-muted-foreground">Ventes</div>
           </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-            <div className="text-3xl font-bold text-white">{stats.location}</div>
-            <div className="text-sm text-zinc-400">Locations</div>
+          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+            <div className="text-3xl font-bold">{stats.location}</div>
+            <div className="text-sm text-muted-foreground">Locations</div>
           </div>
         </div>
 
@@ -197,23 +200,23 @@ export function BiensClient({
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher un bien..."
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#F4C430]"
+              className="w-full bg-card border border-border rounded-lg pl-10 pr-4 py-2.5 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
             />
           </div>
 
           {/* GROUPE 1 : Segmented Control pour le Type */}
-          <div className="bg-zinc-800 p-1 rounded-lg inline-flex">
+          <div className="bg-muted p-1 rounded-lg inline-flex">
             <button
               onClick={() => setCategoryFilter("all")}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${categoryFilter === "all"
-                ? "bg-[#F4C430] text-black shadow-sm"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               Tous
@@ -221,8 +224,8 @@ export function BiensClient({
             <button
               onClick={() => setCategoryFilter("vente")}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${categoryFilter === "vente"
-                ? "bg-[#F4C430] text-black shadow-sm"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               Vente
@@ -230,8 +233,8 @@ export function BiensClient({
             <button
               onClick={() => setCategoryFilter("location")}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${categoryFilter === "location"
-                ? "bg-[#F4C430] text-black shadow-sm"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               Location
@@ -239,15 +242,15 @@ export function BiensClient({
           </div>
 
           {/* SÉPARATEUR */}
-          <div className="hidden md:block h-6 w-px bg-zinc-700 mx-2"></div>
+          <div className="hidden md:block h-6 w-px bg-border mx-2"></div>
 
           {/* GROUPE 2 : Statuts (Style Badges cliquables) */}
           <div className="flex gap-2">
             <button
               onClick={() => setStatusFilter("published")}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${statusFilter === "published"
-                ? "bg-green-500/20 text-green-400 border border-green-500/50"
-                : "border border-zinc-700 hover:border-zinc-500 text-zinc-300"
+                ? "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/50"
+                : "border border-border hover:border-muted-foreground text-muted-foreground"
                 }`}
             >
               <Eye className="w-3.5 h-3.5" /> En ligne
@@ -255,8 +258,8 @@ export function BiensClient({
             <button
               onClick={() => setStatusFilter("draft")}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${statusFilter === "draft"
-                ? "bg-zinc-600 text-white border border-zinc-500"
-                : "border border-zinc-700 hover:border-zinc-500 text-zinc-300"
+                ? "bg-muted text-foreground border border-muted-foreground/50"
+                : "border border-border hover:border-muted-foreground text-muted-foreground"
                 }`}
             >
               <EyeOff className="w-3.5 h-3.5" /> Brouillon
@@ -264,8 +267,8 @@ export function BiensClient({
             <button
               onClick={() => setStatusFilter("scheduled")}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${statusFilter === "scheduled"
-                ? "bg-blue-500/20 text-blue-400 border border-blue-500/50"
-                : "border border-zinc-700 hover:border-zinc-500 text-zinc-300"
+                ? "bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/50"
+                : "border border-border hover:border-muted-foreground text-muted-foreground"
                 }`}
             >
               <Clock className="w-3.5 h-3.5" /> Programmé
@@ -273,17 +276,17 @@ export function BiensClient({
           </div>
 
           {/* View Toggle */}
-          <div className="flex gap-1 bg-zinc-900 border border-zinc-800 rounded-lg p-1">
+          <div className="flex gap-1 bg-muted border border-border rounded-lg p-1">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-md transition-colors ${viewMode === "grid" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-white"
+              className={`p-2 rounded-md transition-colors ${viewMode === "grid" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               <Grid className="w-5 h-5" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 rounded-md transition-colors ${viewMode === "list" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-white"
+              className={`p-2 rounded-md transition-colors ${viewMode === "list" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               <List className="w-5 h-5" />
@@ -293,7 +296,7 @@ export function BiensClient({
 
         {/* Error */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6 text-red-400">
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6 text-red-600 dark:text-red-400">
             {error}
           </div>
         )}
@@ -301,11 +304,11 @@ export function BiensClient({
         {/* Properties Grid */}
         {filteredProperties.length === 0 ? (
           <div className="text-center py-16">
-            <Building2 className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <Building2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">
               {properties.length === 0 ? "Aucun bien" : "Aucun résultat"}
             </h3>
-            <p className="text-zinc-400 mb-6">
+            <p className="text-muted-foreground mb-6">
               {properties.length === 0
                 ? "Commencez par ajouter votre premier bien immobilier"
                 : "Aucun bien ne correspond à vos critères de recherche"}
@@ -313,7 +316,7 @@ export function BiensClient({
             {canCreate && properties.length === 0 && (
               <Link
                 href="/gestion/biens/nouveau"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F4C430] text-black rounded-lg font-medium hover:bg-[#F4C430]/90 transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0F172A] text-white rounded-lg font-medium hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
               >
                 <Plus className="w-5 h-5" />
                 Ajouter un bien

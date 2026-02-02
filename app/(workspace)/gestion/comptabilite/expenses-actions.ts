@@ -1,8 +1,10 @@
-'use server';
+"use server";
 
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { ExpenseCategory } from './expense-types';
+import { getUserTeamContext } from "@/lib/team-context";
+import { requireTeamPermission } from "@/lib/permissions";
 
 // Re-export the type for convenience
 export type { ExpenseCategory } from './expense-types';
@@ -38,17 +40,16 @@ export interface AddExpenseInput {
 // ADD EXPENSE
 // ==========================================
 export async function addExpense(data: AddExpenseInput) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { teamId, user } = await getUserTeamContext();
+    await requireTeamPermission('expenses.create');
 
-    if (!user) {
-        return { success: false, error: 'Non authentifié' };
-    }
+    const supabase = await createClient();
 
     const { data: expense, error } = await supabase
         .from('expenses')
         .insert({
             owner_id: user.id,
+            team_id: teamId,
             property_id: data.property_id || null,
             lease_id: data.lease_id || null,
             amount: data.amount,
@@ -73,12 +74,8 @@ export async function addExpense(data: AddExpenseInput) {
 // GET EXPENSES BY MONTH
 // ==========================================
 export async function getExpensesByMonth(month: number, year: number) {
+    const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return { success: false, error: 'Non authentifié', expenses: [] };
-    }
 
     const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
     const endDate = new Date(year, month, 0).toISOString().split('T')[0];
@@ -90,7 +87,7 @@ export async function getExpensesByMonth(month: number, year: number) {
             properties:property_id (address),
             leases:lease_id (tenant_name)
         `)
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .gte('expense_date', startDate)
         .lte('expense_date', endDate)
         .order('expense_date', { ascending: false });
@@ -114,12 +111,8 @@ export async function getExpensesByMonth(month: number, year: number) {
 // GET TOTAL EXPENSES BY YEAR
 // ==========================================
 export async function getExpensesByYear(year: number) {
+    const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return { success: false, error: 'Non authentifié', expenses: [] };
-    }
 
     const startDate = `${year}-01-01`;
     const endDate = `${year}-12-31`;
@@ -127,7 +120,7 @@ export async function getExpensesByYear(year: number) {
     const { data: expenses, error } = await supabase
         .from('expenses')
         .select('*')
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .gte('expense_date', startDate)
         .lte('expense_date', endDate)
         .order('expense_date', { ascending: false });
@@ -144,18 +137,16 @@ export async function getExpensesByYear(year: number) {
 // DELETE EXPENSE
 // ==========================================
 export async function deleteExpense(expenseId: string) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { teamId } = await getUserTeamContext();
+    await requireTeamPermission('expenses.delete');
 
-    if (!user) {
-        return { success: false, error: 'Non authentifié' };
-    }
+    const supabase = await createClient();
 
     const { error } = await supabase
         .from('expenses')
         .delete()
         .eq('id', expenseId)
-        .eq('owner_id', user.id);
+        .eq('team_id', teamId);
 
     if (error) {
         console.error('Error deleting expense:', error);
@@ -173,12 +164,10 @@ export async function updateExpense(
     expenseId: string,
     data: Partial<AddExpenseInput>
 ) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { teamId } = await getUserTeamContext();
+    await requireTeamPermission('expenses.edit');
 
-    if (!user) {
-        return { success: false, error: 'Non authentifié' };
-    }
+    const supabase = await createClient();
 
     const updateData: Record<string, unknown> = {};
     if (data.amount !== undefined) updateData.amount = data.amount;
@@ -194,7 +183,7 @@ export async function updateExpense(
         .from('expenses')
         .update(updateData)
         .eq('id', expenseId)
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .select()
         .single();
 
@@ -221,17 +210,13 @@ export async function getExpensesSummary(year: number): Promise<{
     error?: string;
     summary?: ExpensesSummary;
 }> {
+    const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return { success: false, error: 'Non authentifié' };
-    }
 
     const { data: expenses, error } = await supabase
         .from('expenses')
         .select('*')
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .gte('expense_date', `${year}-01-01`)
         .lte('expense_date', `${year}-12-31`);
 
@@ -300,24 +285,113 @@ export interface PropertyProfitability {
     profitMargin: number;
 }
 
+// ==========================================
+// GET COMPTABILITE DATA (Team-Centric)
+// ==========================================
+export interface ComptabiliteData {
+    leases: {
+        id: string;
+        monthly_amount: number;
+        status: string;
+        start_date: string;
+        billing_day: number;
+        tenant_name?: string;
+    }[];
+    transactions: {
+        id: string;
+        lease_id: string;
+        amount_due: number;
+        status: string;
+        period_month: number;
+        period_year: number;
+        created_at: string;
+        amount_paid: number;
+    }[];
+    properties: { id: string; address: string }[];
+}
+
+export async function getComptabiliteData(year: number): Promise<{
+    success: boolean;
+    error?: string;
+    data?: ComptabiliteData;
+}> {
+    const { teamId } = await getUserTeamContext();
+    const supabase = await createClient();
+
+    // 1. Fetch all leases for the team
+    const { data: leasesData, error: leasesError } = await supabase
+        .from('leases')
+        .select('id, monthly_amount, status, start_date, billing_day, tenant_name, property_address')
+        .eq('team_id', teamId);
+
+    if (leasesError) {
+        console.error('Error fetching leases for comptabilite:', leasesError);
+        return { success: false, error: leasesError.message };
+    }
+
+    const leases = (leasesData || []).map(l => ({
+        id: l.id,
+        monthly_amount: l.monthly_amount,
+        status: l.status || 'active',
+        start_date: l.start_date,
+        billing_day: l.billing_day || 5,
+        tenant_name: l.tenant_name
+    }));
+
+    // 2. Build properties list from leases (for expense form)
+    const properties = (leasesData || [])
+        .filter(l => l.status === 'active')
+        .map(l => ({
+            id: l.id,
+            address: l.tenant_name || l.property_address || 'Locataire'
+        }));
+
+    // 3. Fetch transactions for the year
+    const leaseIds = leases.map(l => l.id);
+
+    if (leaseIds.length === 0) {
+        return {
+            success: true,
+            data: { leases, transactions: [], properties }
+        };
+    }
+
+    const { data: txsData, error: txsError } = await supabase
+        .from('rental_transactions')
+        .select('id, lease_id, amount_due, status, period_month, period_year, created_at')
+        .eq('team_id', teamId)
+        .eq('period_year', year);
+
+    if (txsError) {
+        console.error('Error fetching transactions for comptabilite:', txsError);
+        return { success: false, error: txsError.message };
+    }
+
+    const transactions = (txsData || []).map(t => ({
+        ...t,
+        amount_paid: (t.status?.toLowerCase() === 'paid') ? t.amount_due : 0
+    }));
+
+    return {
+        success: true,
+        data: { leases, transactions, properties }
+    };
+}
+
 export async function getProfitabilityByProperty(year: number): Promise<{
     success: boolean;
     error?: string;
     data?: PropertyProfitability[];
     debug?: any;
 }> {
+    const { teamId, user } = await getUserTeamContext();
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return { success: false, error: 'Non authentifié' };
-    }
 
     // Get all leases with their payments
     const { data: leases, error: leasesError } = await supabase
         .from('leases')
         .select('id, property_address, monthly_amount')
-        .eq('owner_id', user.id);
+        .eq('team_id', teamId);
 
     if (leasesError) {
         console.error('Error fetching leases for profitability:', leasesError);
@@ -328,7 +402,7 @@ export async function getProfitabilityByProperty(year: number): Promise<{
     const { data: expenses, error: expensesError } = await supabase
         .from('expenses')
         .select('*')
-        .eq('owner_id', user.id)
+        .eq('team_id', teamId)
         .gte('expense_date', `${year}-01-01`)
         .lte('expense_date', `${year}-12-31`);
 
@@ -342,7 +416,8 @@ export async function getProfitabilityByProperty(year: number): Promise<{
         .from('rental_transactions')
         .select('lease_id, amount_due, status')
         .eq('status', 'paid')
-        .eq('period_year', year);
+        .eq('period_year', year)
+        .eq('team_id', teamId);
 
     if (paymentsError) {
         console.error('Error fetching payments for profitability:', paymentsError);

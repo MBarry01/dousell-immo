@@ -5,7 +5,7 @@ import { requireAnyRole, type UserRole } from "@/lib/permissions";
 /**
  * Authorized admin email (fallback pour compatibilité)
  */
-const AUTHORIZED_ADMIN_EMAIL = "barrymohamadou98@gmail.com";
+const AUTHORIZED_ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 /**
  * Vérifie si un utilisateur a un rôle spécifique
@@ -56,9 +56,9 @@ export async function isAdmin(): Promise<boolean> {
 
   // Vérifier d'abord via les rôles
   const isAdminViaRole = await hasRole(user.id, "admin");
-  
+
   // Fallback sur l'email pour compatibilité
-  const isAdminViaEmail = user.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase();
+  const isAdminViaEmail = !!(AUTHORIZED_ADMIN_EMAIL && user.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase());
 
   return isAdminViaRole || isAdminViaEmail;
 }

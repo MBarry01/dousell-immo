@@ -27,6 +27,14 @@ const PROPERTY_ICONS: Record<PropertyType, string> = {
     'custom': '⚙️',
 };
 
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
 export default function NewInventoryReportPage() {
     const { isDark } = useTheme();
     const router = useRouter();
@@ -70,7 +78,7 @@ export default function NewInventoryReportPage() {
             setCreating(false);
         } else if (result.data) {
             toast.success('État des lieux créé !');
-            router.push(`/compte/etats-lieux/${result.data.id}`);
+            router.push(`/gestion/etats-lieux/${result.data.id}`);
         }
     };
 
@@ -88,7 +96,7 @@ export default function NewInventoryReportPage() {
         <div className="max-w-xl mx-auto space-y-6">
             {/* Header */}
             <div className="flex items-center gap-4">
-                <Link href="/etats-lieux" className={`transition-colors ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
+                <Link href="/gestion/etats-lieux" className={`transition-colors ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
                 <div>
@@ -107,28 +115,24 @@ export default function NewInventoryReportPage() {
                 {leases.length === 0 ? (
                     <div className={`rounded-lg p-4 text-center ${isDark ? 'bg-slate-800/50' : 'bg-gray-100'}`}>
                         <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>Aucun bail trouvé</p>
-                        <Link href="/gestion-locative" className="text-[#F4C430] text-sm hover:underline mt-2 block">
+                        <Link href="/gestion" className="text-[#F4C430] text-sm hover:underline mt-2 block">
                             Créer un bail
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid gap-2">
-                        {leases.map((lease) => (
-                            <button
-                                key={lease.id}
-                                onClick={() => setSelectedLeaseId(lease.id)}
-                                className={`w-full text-left p-3 rounded-lg border transition-all ${selectedLeaseId === lease.id
-                                    ? 'bg-[#F4C430]/10 border-[#F4C430] text-white'
-                                    : isDark
-                                        ? 'bg-slate-800/50 border-slate-700 text-slate-300 hover:border-slate-600'
-                                        : 'bg-gray-50 border-gray-300 text-gray-700 hover:border-gray-400'
-                                    }`}
-                            >
-                                <p className="font-medium">{lease.property_address || 'Adresse non renseignée'}</p>
-                                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>{lease.tenant_name}</p>
-                            </button>
-                        ))}
-                    </div>
+                    <Select value={selectedLeaseId} onValueChange={setSelectedLeaseId}>
+                        <SelectTrigger className={`w-full ${isDark ? 'bg-slate-800 border-slate-700' : ''}`}>
+                            <SelectValue placeholder="Choisir un bail..." />
+                        </SelectTrigger>
+                        <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-white' : ''}>
+                            {leases.map((lease) => (
+                                <SelectItem key={lease.id} value={lease.id}>
+                                    <span className="font-medium">{lease.property_address || 'Adresse inconnue'}</span>
+                                    <span className="text-muted-foreground ml-2">({lease.tenant_name})</span>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 )}
             </div>
 

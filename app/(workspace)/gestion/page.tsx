@@ -1,33 +1,66 @@
-import { RentalStats } from "./components/RentalStats";
 import { getRentalStats, getAdvancedStats, getRevenueHistory } from "./actions";
 import { GestionLocativeClient } from "./components/GestionLocativeClient";
 import { AddTenantButton } from "./components/AddTenantButton";
 
 import { DocumentGeneratorDialog } from "./components/DocumentGeneratorDialog";
-import { ThemedContent, ThemedWidget } from "./components/ThemedContent";
+import { ThemedContent } from "./components/ThemedContent";
 import { KPICards } from "./components/KPICards";
 import { RevenueChart } from "./components/RevenueChart";
-import { Button } from "@/components/ui/button";
-import { FileText, Plus, AlertTriangle, Link as LinkIcon } from "lucide-react";
 import { OrphanLeasesAlert } from "./components/OrphanLeasesAlert";
+import { ExpiredBanner } from "./components/ExpiredBanner";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { getLeasesByOwner, getRentalTransactions, getOwnerProfileForReceipts } from "@/services/rentalService.cached";
+import {
+    getLeasesByTeam as getLeasesByOwner,
+    getRentalTransactions,
+    getOwnerProfileForReceipts,
+    getExpensesByTeam as getExpensesByOwner
+} from "@/services/rentalService.cached";
+import { getUserTeamContext } from "@/lib/team-context";
+
+// Force dynamic rendering to prevent stale RSC cache on navigation
+export const dynamic = "force-dynamic";
 
 
 
 export default async function GestionLocativePage({
     searchParams,
 }: {
-    searchParams?: Promise<{ view?: string }>;
+    searchParams?: Promise<{ view?: string; upgrade?: string }>;
 }) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        redirect('/auth');
+    // Helper pour timeout avec fallback gracieux (ne bloque jamais)
+    async function withTimeoutSafe<T>(
+        promise: Promise<T>,
+        name: string,
+        fallback: T,
+        ms: number = 8000 // Augmenté pour mobile stable
+    ): Promise<T> {
+        return Promise.race([
+            promise,
+            new Promise<T>((resolve) =>
+                setTimeout(() => {
+                    console.warn(`[DASHBOARD] TIMEOUT: ${name} (${ms}ms) - using fallback`);
+                    resolve(fallback);
+                }, ms)
+            )
+        ]).catch(error => {
+            console.error(`[DASHBOARD] Error in ${name}:`, error);
+            return fallback;
+        });
     }
+
+    // 1. Initialisation - Essayer de récupérer le contexte rapidement
+    const context = await withTimeoutSafe(getUserTeamContext(), 'getUserTeamContext', null, 5000);
+
+    if (!context) {
+        // Fallback critique si le contexte hang totalement
+        console.error("[DASHBOARD] Critical failure: getUserTeamContext hang/error");
+        // On redirige vers un état stable
+        redirect("/auth/login?reason=timeout");
+    }
+
+    const { teamId, user, team, role } = context!;
+    const supabase = await createClient();
 
     // Unwrap searchParams (Next.js 15+)
     const params = await searchParams;
@@ -40,34 +73,60 @@ export default async function GestionLocativePage({
     // RÉCUPÉRATION OPTIMISÉE - PARALLÉLISATION
     // ========================================
 
-    // Étape 1 : Lancer toutes les requêtes indépendantes EN PARALLÈLE
+    // Étape 1 : Lancer toutes les requêtes EN PARALLÈLE avec fallbacks
     const [
+        userProfileResult,
         profile,
         allLeases,
         earliestLeaseResult,
         advancedStats,
-        revenueHistory
+        revenueHistory,
+        expenses
     ] = await Promise.all([
-        // Profil pour les infos de quittance (AVEC CACHE)
-        getOwnerProfileForReceipts(user.id),
-        // Tous les baux du propriétaire (AVEC CACHE)
-        getLeasesByOwner(user.id, "all"),
+        // Statut pro
+        withTimeoutSafe(
+            Promise.resolve(supabase.from("profiles").select("pro_status").eq("id", user.id).single()),
+            'getProStatus',
+            { data: { pro_status: 'none' } } as any
+        ),
+        // Profil pour les infos de quittance
+        withTimeoutSafe(getOwnerProfileForReceipts(user.id), 'getOwnerProfileForReceipts', null),
+        // Tous les baux du propriétaire
+        withTimeoutSafe(getLeasesByOwner(teamId, "all"), 'getLeasesByOwner', []),
         // Date du premier bail
-        supabase
-            .from('leases')
-            .select('start_date')
-            .eq('owner_id', user.id)
-            .order('start_date', { ascending: true })
-            .limit(1)
-            .single(),
+        withTimeoutSafe<{ start_date: string } | null>(
+            (async () => {
+                const { data } = await supabase
+                    .from('leases')
+                    .select('start_date')
+                    .eq('team_id', teamId)
+                    .order('start_date', { ascending: true })
+                    .limit(1)
+                    .single();
+                return data;
+            })(),
+            'getEarliestLease',
+            null
+        ),
         // Stats avancées pour les KPIs
-        getAdvancedStats(),
+        withTimeoutSafe(getAdvancedStats(), 'getAdvancedStats', {
+            totalProperties: 0,
+            activeLeases: 0,
+            occupancyRate: 0,
+            avgPaymentDelay: 0,
+            unpaidRate: 0,
+            avgRevenuePerProperty: 0
+        }),
         // Historique des revenus pour le graphique
-        getRevenueHistory(12)
+        withTimeoutSafe(getRevenueHistory(12), 'getRevenueHistory', []),
+        // Dépenses
+        withTimeoutSafe(getExpensesByOwner(teamId), 'getExpensesByOwner', [])
     ]);
 
-    // Extraire les données des résultats
-    const earliestLease = earliestLeaseResult.data;
+    // Extraire les données des résultats (avec fallbacks)
+    const proStatus = (userProfileResult as any)?.data?.pro_status || "none";
+    const earliestLease = earliestLeaseResult; // Déjà extrait dans la Promise
+    const expensesList = expenses || [];
 
 
     // Filtrer les baux côté client selon le statut
@@ -84,7 +143,12 @@ export default async function GestionLocativePage({
 
     // Étape 2 : Récupérer les transactions (dépend des leases filtrés)
     const leaseIds = filteredLeases.map(l => l.id);
-    const rawTransactions = await getRentalTransactions(leaseIds);
+    const rawTransactions = await withTimeoutSafe(
+        getRentalTransactions(leaseIds),
+        'getRentalTransactions',
+        [],
+        4000
+    );
 
     // Polyfill pour amount_paid
     const transactions = rawTransactions.map(t => ({
@@ -110,6 +174,15 @@ export default async function GestionLocativePage({
                 )
             }
         >
+            {/* Banner for expired subscription */}
+            {proStatus === "expired" && (
+                <ExpiredBanner
+                    proStatus={proStatus}
+                    propertiesCount={allLeases.length}
+                    leasesCount={filteredLeases.length}
+                />
+            )}
+
             {/* Alerte baux orphelins */}
             {!isViewingTerminated && orphanCount > 0 && (
                 <OrphanLeasesAlert count={orphanCount} leases={orphanLeases} />
@@ -125,6 +198,7 @@ export default async function GestionLocativePage({
                 <GestionLocativeClient
                     leases={filteredLeases || []}
                     transactions={transactions || []}
+                    expenses={expensesList || []}
                     profile={profile}
                     userEmail={user.email}
                     ownerId={user.id}
