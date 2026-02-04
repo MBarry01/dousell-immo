@@ -518,7 +518,7 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
                       type="button"
                       onClick={handleGenerateAI}
                       disabled={isGeneratingAI}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-[#0F172A] text-white rounded-lg text-sm font-medium hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isGeneratingAI ? (
                         <>
@@ -636,7 +636,7 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 px-6 py-3 bg-[#0F172A] text-white rounded-lg font-medium hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>

@@ -340,7 +340,7 @@ export function GestionLocativeClient({
     };
 
     // Export to Excel function using xlsx
-    const handleExportCSV = () => {
+    const handleExportExcel = () => {
         // Prepare data for xlsx
         const data = formattedTenants.map(tenant => {
             const periodStr = selectedMonth && selectedYear
@@ -378,7 +378,7 @@ export function GestionLocativeClient({
             // Write file - this properly handles the filename
             XLSX.writeFile(workbook, filename);
 
-            toast.success(`Export téléchargé : ${filename}`);
+            toast.success(`Export Excel téléchargé : ${filename}`);
         });
     };
 
@@ -631,7 +631,7 @@ export function GestionLocativeClient({
                 QUICK ACTIONS - Style Noflaye
                 ======================================== */}
             <QuickActions
-                onExportCSV={handleExportCSV}
+                onExportExcel={handleExportExcel}
                 pendingCount={kpiStats.pendingCount}
                 overdueCount={kpiStats.overdueCount}
                 onSendReminders={handleSendReminders}
@@ -677,17 +677,16 @@ export function GestionLocativeClient({
 
                     {/* Bouton Export Excel */}
                     <Button
-                        id="tour-export-csv"
+                        id="tour-export-excel"
                         onClick={() => {
-                            console.log('Export Excel clicked');
-                            handleExportCSV();
+                            handleExportExcel();
                         }}
                         variant="outline"
                         size="sm"
                         className="h-9 px-3 shrink-0 bg-background border-border text-foreground hover:bg-muted"
                         disabled={formattedTenants.length === 0}
                     >
-                        <Download className="w-4 h-4 mr-2" />
+                        <Download className="w-4 h-4 mr-1.5" />
                         Excel
                     </Button>
                 </div>

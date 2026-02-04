@@ -241,19 +241,19 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                 {/* Section Logo */}
                 <section className="space-y-4 p-6 bg-white dark:bg-gray-900/40 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm dark:shadow-none">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-[#F4C430] font-bold">
+                        <div className="flex items-center gap-2 text-primary font-bold">
                             <Building2 className="w-5 h-5" /> Logo de l&apos;Agence
                         </div>
                         {uploadingLogo && (
-                            <div className="flex items-center gap-2 text-xs text-[#F4C430]">
+                            <div className="flex items-center gap-2 text-xs text-primary">
                                 <Loader2 className="w-3 h-3 animate-spin" /> Upload...
                             </div>
                         )}
                     </div>
                     <label className="block">
                         <div className={`h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${logoPreview
-                            ? 'border-[#F4C430]/50 bg-[#F4C430]/5'
-                            : 'border-slate-300 dark:border-gray-700 bg-slate-50 dark:bg-gray-900/20 hover:border-[#F4C430]/50'
+                            ? 'border-primary/50 bg-primary/5'
+                            : 'border-slate-300 dark:border-gray-700 bg-slate-50 dark:bg-gray-900/20 hover:border-primary/50'
                             } ${uploadingLogo ? 'opacity-50 pointer-events-none' : ''}`}>
                             {logoPreview ? (
                                 <img src={logoPreview} alt="Logo" className="max-h-32 object-contain" />
@@ -295,11 +295,11 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                 {/* Section Signature - With Tabs */}
                 <section className="space-y-4 p-6 bg-white dark:bg-gray-900/40 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm dark:shadow-none">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-[#F4C430] font-bold">
+                        <div className="flex items-center gap-2 text-primary font-bold">
                             <PenTool className="w-5 h-5" /> Signature Numérique
                         </div>
                         {uploadingSignature && (
-                            <div className="flex items-center gap-2 text-xs text-[#F4C430]">
+                            <div className="flex items-center gap-2 text-xs text-primary">
                                 <Loader2 className="w-3 h-3 animate-spin" /> Upload...
                             </div>
                         )}
@@ -310,7 +310,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                         <button
                             onClick={() => setSignatureMode('upload')}
                             className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${signatureMode === 'upload'
-                                ? 'bg-[#F4C430] text-black shadow-md'
+                                ? 'bg-primary text-primary-foreground shadow-md'
                                 : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
                                 }`}
                         >
@@ -319,7 +319,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                         <button
                             onClick={() => setSignatureMode('draw')}
                             className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${signatureMode === 'draw'
-                                ? 'bg-[#F4C430] text-black shadow-md'
+                                ? 'bg-primary text-primary-foreground shadow-md'
                                 : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
                                 }`}
                         >
@@ -331,8 +331,8 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                         /* Upload Mode */
                         <label className="block">
                             <div className={`h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${signaturePreview
-                                ? 'border-[#F4C430]/50 bg-[#F4C430]/5'
-                                : 'border-slate-300 dark:border-gray-700 bg-slate-50 dark:bg-gray-900/20 hover:border-[#F4C430]/50'
+                                ? 'border-primary/50 bg-primary/5'
+                                : 'border-slate-300 dark:border-gray-700 bg-slate-50 dark:bg-gray-900/20 hover:border-primary/50'
                                 } ${uploadingSignature ? 'opacity-50 pointer-events-none' : ''}`}>
                                 {signaturePreview ? (
                                     <img src={signaturePreview} alt="Signature" className="max-h-32 object-contain" />
@@ -387,7 +387,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                                     size="sm"
                                     onClick={saveDrawnSignature}
                                     disabled={!hasDrawn || uploadingSignature}
-                                    className="flex-1 bg-[#F4C430] text-black hover:bg-[#F4C430]/90 font-bold shadow-lg shadow-[#F4C430]/10"
+                                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-lg shadow-primary/10"
                                 >
                                     {uploadingSignature ? (
                                         <Loader2 className="w-3 h-3 mr-1 animate-spin" />
@@ -532,7 +532,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                     disabled={saving || uploadingLogo || uploadingSignature}
                     className={`px-10 h-14 text-lg font-bold rounded-2xl transition-all ${saved
                         ? 'bg-green-600 hover:bg-green-600'
-                        : 'bg-[#F4C430] text-black hover:bg-[#F4C430]/90 shadow-xl shadow-[#F4C430]/10'
+                        : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/10'
                         }`}
                 >
                     {saving ? (

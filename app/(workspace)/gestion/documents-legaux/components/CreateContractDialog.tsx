@@ -45,9 +45,9 @@ export function CreateContractDialog({ leases, trigger }: CreateContractDialogPr
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 {trigger ? trigger : (
-                    <button id="tour-generate-contract" className={`w-full text-left p-6 rounded-xl border transition-all group outline-none focus:ring-2 focus:ring-blue-500/50 ${isDark
-                            ? 'border-slate-800 bg-gradient-to-br from-slate-900 to-black hover:border-slate-700'
-                            : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                    <button id="tour-generate-contract" className={`w-full text-left p-6 rounded-xl border transition-all group outline-none focus:ring-2 focus:ring-primary/50 ${isDark
+                        ? 'border-slate-800 bg-gradient-to-br from-slate-900 to-black hover:border-slate-700'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                         }`}>
                         <div className={`h-10 w-10 rounded-lg flex items-center justify-center mb-4 transition-colors ${isDark ? 'bg-slate-800 group-hover:bg-slate-700' : 'bg-gray-100 group-hover:bg-gray-200'
                             }`}>
@@ -61,7 +61,7 @@ export function CreateContractDialog({ leases, trigger }: CreateContractDialogPr
             <DialogContent className={`sm:max-w-md ${isDark ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}`}>
                 <DialogHeader>
                     <DialogTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        <FileText className="h-5 w-5 text-blue-500" />
+                        <FileText className="h-5 w-5 text-primary" />
                         Générateur de Contrat
                     </DialogTitle>
                     <DialogDescription className={isDark ? 'text-slate-400' : 'text-gray-600'}>
@@ -73,7 +73,7 @@ export function CreateContractDialog({ leases, trigger }: CreateContractDialogPr
                     <div className="space-y-2">
                         <label className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>Locataire & Bien</label>
                         <Select value={selectedLeaseId} onValueChange={setSelectedLeaseId}>
-                            <SelectTrigger className={`focus:ring-blue-500 ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100 focus:ring-offset-slate-900' : 'bg-gray-50 border-gray-300 text-gray-900'
+                            <SelectTrigger className={`focus:ring-primary ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100 focus:ring-offset-slate-900' : 'bg-gray-50 border-gray-300 text-gray-900'
                                 }`}>
                                 <SelectValue placeholder="Sélectionner un bail..." />
                             </SelectTrigger>
@@ -105,7 +105,10 @@ export function CreateContractDialog({ leases, trigger }: CreateContractDialogPr
                                     <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>{selectedLease.property_address}</p>
                                 </div>
                                 {selectedLease.lease_pdf_url && (
-                                    <div className="px-2 py-1 rounded-full bg-green-500/10 text-green-400 text-[10px] font-medium border border-green-500/20 flex items-center gap-1">
+                                    <div className={`px-2 py-1 rounded-full text-[10px] font-medium border flex items-center gap-1 ${isDark
+                                            ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                                            : 'bg-green-50 text-green-700 border-green-200'
+                                        }`}>
                                         <CheckCircle className="h-3 w-3" />
                                         Contrat existant
                                     </div>
@@ -117,8 +120,7 @@ export function CreateContractDialog({ leases, trigger }: CreateContractDialogPr
                                     leaseId={selectedLease.id}
                                     tenantName={selectedLease.tenant_name}
                                     existingContractUrl={selectedLease.lease_pdf_url || undefined}
-                                    variant="default"
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                                 />
                             </div>
                         </div>

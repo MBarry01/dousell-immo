@@ -71,9 +71,9 @@ export default async function ConfigPremiumPage() {
                     href="/gestion"
                     className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors group"
                 >
-                    <ArrowLeft className="w-5 h-5 text-gray-400 group-hover:text-[#F4C430] transition-colors" />
+                    <ArrowLeft className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
                 </Link>
-                <div className="p-3 bg-gradient-to-br from-[#F4C430] to-[#E5B520] rounded-2xl shadow-lg shadow-[#F4C430]/20 text-black">
+                <div className="p-3 bg-primary rounded-2xl shadow-lg shadow-primary/10 text-primary-foreground">
                     <Settings className="w-6 h-6 animate-pulse-slow" />
                 </div>
                 <div>

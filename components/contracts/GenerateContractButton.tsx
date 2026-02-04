@@ -66,7 +66,7 @@ export function GenerateContractButton({
         <Button
           variant={variant}
           size={size}
-          className={className || "bg-[#F4C430] text-black hover:bg-[#F4C430]/90"}
+          className={className || "bg-primary text-primary-foreground hover:bg-primary/90"}
         >
           <FileText className="mr-2 h-4 w-4" />
           {hasExistingContract ? 'Regénérer le Contrat' : 'Générer le Contrat'}
@@ -78,7 +78,7 @@ export function GenerateContractButton({
           onClick={handleDownload}
           variant="outline"
           size={size}
-          className="border-[#F4C430]/30 text-[#F4C430] hover:bg-[#F4C430]/10"
+          className="border-primary/30 text-primary hover:bg-primary/10 hover:text-primary"
         >
           <Download className="mr-2 h-4 w-4" />
           Télécharger

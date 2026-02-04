@@ -16,7 +16,7 @@ import { AddTenantButton } from './AddTenantButton';
 
 interface QuickActionsProps {
     onAddTenant?: () => void;
-    onExportCSV?: () => void;
+    onExportExcel?: () => void;
     onSendReminders?: () => void;
     pendingCount?: number;
     overdueCount?: number;
@@ -26,7 +26,7 @@ interface QuickActionsProps {
 
 export function QuickActions({
     onAddTenant,
-    onExportCSV,
+    onExportExcel,
     onSendReminders,
     pendingCount = 0,
     overdueCount = 0,
@@ -77,11 +77,11 @@ export function QuickActions({
             type: 'link' as const,
         },
         {
-            id: 'export',
+            id: 'export-excel',
             label: 'Exporter Excel',
             shortLabel: 'Excel',
             icon: Download,
-            onClick: onExportCSV,
+            onClick: onExportExcel,
             type: 'button' as const,
         },
     ];

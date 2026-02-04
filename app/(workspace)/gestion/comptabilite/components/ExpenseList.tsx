@@ -71,8 +71,58 @@ export function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
                 <span className="text-red-400 font-bold text-xl">{formatAmount(totalExpenses)} FCFA</span>
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto">
+            {/* Mobile View: Cards */}
+            <div className="md:hidden space-y-3">
+                {expenses.map((expense) => (
+                    <div key={expense.id} className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-100'} shadow-sm`}>
+                        <div className="flex justify-between items-start mb-3">
+                            <span className={`text-xs px-2 py-1 rounded-full border whitespace-nowrap ${getCategoryColor(expense.category)}`}>
+                                {EXPENSE_CATEGORY_LABELS[expense.category]}
+                            </span>
+                            <span className="text-red-400 font-bold">{formatAmount(expense.amount)} FCFA</span>
+                        </div>
+
+                        <div className="space-y-2">
+                            <p className={`text-sm font-medium ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>
+                                {expense.description || 'Sans description'}
+                            </p>
+
+                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                                <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    {formatDate(expense.expense_date)}
+                                </div>
+                                {expense.property_address && (
+                                    <div className="flex items-center gap-1">
+                                        <Building2 className="w-3 h-3" />
+                                        <span className="truncate max-w-[150px]">{expense.property_address}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="mt-3 pt-3 border-t border-slate-800/50 flex justify-end">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(expense.id)}
+                                disabled={deletingId === expense.id}
+                                className="text-slate-500 hover:text-red-400 hover:bg-red-500/10 h-8 px-2"
+                            >
+                                {deletingId === expense.id ? (
+                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                ) : (
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                )}
+                                Supprimer
+                            </Button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Desktop View: Table */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                     <thead>
                         <tr className={`text-left text-xs border-b ${isDark ? 'text-slate-500 border-slate-800' : 'text-gray-500 border-gray-200'}`}>
@@ -87,34 +137,34 @@ export function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
                     <tbody className={`divide-y ${isDark ? 'divide-slate-800' : 'divide-gray-200'}`}>
                         {expenses.map((expense) => (
                             <tr key={expense.id} className={`group transition-colors ${isDark ? 'hover:bg-slate-800/30' : 'hover:bg-gray-50'}`}>
-                                <td className={`py-3 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                                <td className={`py-4 text-sm whitespace-nowrap ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
                                     <div className="flex items-center gap-2">
                                         <Calendar className={`w-4 h-4 ${isDark ? 'text-slate-600' : 'text-gray-400'}`} />
                                         {formatDate(expense.expense_date)}
                                     </div>
                                 </td>
-                                <td className="py-3">
-                                    <span className={`text-xs px-2 py-1 rounded-full border ${getCategoryColor(expense.category)}`}>
+                                <td className="py-4">
+                                    <span className={`text-xs px-2 py-1 rounded-full border whitespace-nowrap ${getCategoryColor(expense.category)}`}>
                                         {EXPENSE_CATEGORY_LABELS[expense.category]}
                                     </span>
                                 </td>
-                                <td className={`py-3 text-sm max-w-[200px] truncate ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>
+                                <td className={`py-4 text-sm max-w-[250px] truncate ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>
                                     {expense.description || '-'}
                                 </td>
-                                <td className={`py-3 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                                <td className={`py-4 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
                                     {expense.property_address ? (
                                         <div className="flex items-center gap-1">
                                             <Building2 className="w-3 h-3" />
-                                            <span className="truncate max-w-[120px]">{expense.property_address}</span>
+                                            <span className="truncate max-w-[150px]">{expense.property_address}</span>
                                         </div>
                                     ) : (
                                         <span className={isDark ? 'text-slate-600' : 'text-gray-400'}>Général</span>
                                     )}
                                 </td>
-                                <td className="py-3 text-right">
+                                <td className="py-4 text-right whitespace-nowrap">
                                     <span className="text-red-400 font-medium">{formatAmount(expense.amount)} FCFA</span>
                                 </td>
-                                <td className="py-3 text-right">
+                                <td className="py-4 text-right">
                                     <Button
                                         variant="ghost"
                                         size="sm"

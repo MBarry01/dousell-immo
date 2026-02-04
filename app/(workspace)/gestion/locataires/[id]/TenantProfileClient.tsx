@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
     ChevronLeft,
@@ -12,7 +13,8 @@ import {
     AlertTriangle,
     Download,
     History,
-    FileCheck
+    FileCheck,
+    Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,6 +40,13 @@ export function TenantProfileClient({
     user,
     profile
 }: TenantProfileClientProps) {
+    const [activeTab, setActiveTab] = useState("overview");
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.location.hash === '#documents') {
+            setActiveTab("documents");
+        }
+    }, []);
 
     const formatMoney = (amount: number) =>
         new Intl.NumberFormat("fr-SN", { style: "currency", currency: "XOF", maximumFractionDigits: 0 }).format(amount);
@@ -102,12 +111,12 @@ export function TenantProfileClient({
                         </div>
 
                         <div className="grid grid-cols-2 gap-3 pt-4">
-                            <Button className="w-full bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md" size="sm" asChild>
+                            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md" size="sm" asChild>
                                 <Link href={`/gestion/messages/${lease.id}`}>
                                     <Mail className="w-4 h-4 mr-2" /> Message
                                 </Link>
                             </Button>
-                            <Button variant="outline" className="w-full border-border hover:bg-accent text-accent-foreground shadow-sm" size="sm" asChild>
+                            <Button variant="outline" className="w-full border-border hover:bg-accent text-foreground shadow-sm" size="sm" asChild>
                                 <a href={`tel:${lease.tenant_phone}`}>
                                     <Phone className="w-4 h-4 mr-2" /> Appeler
                                 </a>
@@ -130,7 +139,7 @@ export function TenantProfileClient({
 
                 {/* Right Column: Tabs & Content */}
                 <div className="lg:col-span-2 space-y-6">
-                    <Tabs defaultValue="overview" className="w-full">
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                         <TabsList className="w-full justify-start p-1 h-auto bg-muted border border-border">
                             <TabsTrigger value="overview" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Vue d'ensemble</TabsTrigger>
                             <TabsTrigger value="payments" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Paiements</TabsTrigger>
@@ -234,26 +243,40 @@ export function TenantProfileClient({
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Contract */}
                                 {lease.lease_pdf_url ? (
-                                    <a
-                                        href={lease.lease_pdf_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="border rounded-xl p-5 transition-colors cursor-pointer group block bg-card border-border hover:border-primary/50"
-                                    >
+                                    <div className="border rounded-xl p-5 transition-colors bg-card border-border hover:border-primary/50 group relative">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="p-2 bg-green-500/10 rounded-lg">
                                                 <FileCheck className="w-6 h-6 text-green-600 dark:text-green-400" />
                                             </div>
-                                            <Button variant="ghost" size="icon" className="text-muted-foreground group-hover:text-foreground">
-                                                <Download className="w-4 h-4" />
-                                            </Button>
+                                            <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                    asChild
+                                                >
+                                                    <a href={lease.lease_pdf_url} target="_blank" rel="noopener noreferrer">
+                                                        <Eye className="w-4 h-4" />
+                                                    </a>
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                    asChild
+                                                >
+                                                    <a href={lease.lease_pdf_url} download>
+                                                        <Download className="w-4 h-4" />
+                                                    </a>
+                                                </Button>
+                                            </div>
                                         </div>
                                         <h3 className="font-semibold mb-1 text-foreground">Contrat de Bail</h3>
                                         <p className="text-sm mb-2 text-muted-foreground">Signé le {new Date(lease.start_date).toLocaleDateString('fr-FR')}</p>
                                         <div className="flex gap-2">
                                             <span className="text-xs px-2 py-1 bg-green-500/10 rounded text-green-600 dark:text-green-400">PDF Disponible</span>
                                         </div>
-                                    </a>
+                                    </div>
                                 ) : (
                                     <div className="border border-dashed rounded-xl p-5 flex flex-col items-center justify-center text-center min-h-[160px] bg-muted/30 border-border">
                                         <div className="p-3 rounded-full mb-3 bg-primary/10">
@@ -266,7 +289,7 @@ export function TenantProfileClient({
                                                 leases={[lease]}
                                                 profile={profile}
                                                 trigger={
-                                                    <Button className="w-full bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all gap-2 shadow-md">
+                                                    <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all gap-2 shadow-md">
                                                         <FileCheck className="w-4 h-4" />
                                                         Générer le contrat
                                                     </Button>

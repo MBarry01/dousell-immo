@@ -35,17 +35,17 @@ export function ApiSettings({ profile }: ApiSettingsProps) {
 
     return (
         <div className="space-y-8 mt-10">
-            <div className="flex items-center gap-2 text-[#F4C430] font-bold">
+            <div className="flex items-center gap-2 text-primary font-bold">
                 <ShieldCheck className="w-5 h-5" />
                 <h2 className="text-lg">Configuration des Envois Premium</h2>
             </div>
 
             <div className="grid grid-cols-1 gap-6">
                 {/* Focus Principal : Gmail */}
-                <div className="p-6 md:p-8 bg-[#F4C430]/5 border border-[#F4C430]/20 rounded-[2rem]">
+                <div className="p-6 md:p-8 bg-primary/5 border border-primary/20 rounded-[2rem]">
                     <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                        <div className="p-4 bg-[#F4C430]/20 rounded-2xl shrink-0">
-                            <Mail className="w-8 h-8 text-[#F4C430]" />
+                        <div className="p-4 bg-primary/20 rounded-2xl shrink-0">
+                            <Mail className="w-8 h-8 text-primary" />
                         </div>
 
                         <div className="flex-1 space-y-3">
@@ -58,12 +58,12 @@ export function ApiSettings({ profile }: ApiSettingsProps) {
 
                             <p className="text-sm text-gray-400">
                                 Votre compte Gmail est utilisé pour envoyer automatiquement les{' '}
-                                <span className="text-[#F4C430] font-medium">Baux</span>,{' '}
-                                <span className="text-[#F4C430] font-medium">Avis d&apos;échéance</span> et{' '}
-                                <span className="text-[#F4C430] font-medium">Quittances</span> à vos locataires.
+                                <span className="text-primary font-medium">Baux</span>,{' '}
+                                <span className="text-primary font-medium">Avis d&apos;échéance</span> et{' '}
+                                <span className="text-primary font-medium">Quittances</span> à vos locataires.
                             </p>
 
-                            <div className="flex items-center gap-2 text-xs text-[#F4C430] font-medium">
+                            <div className="flex items-center gap-2 text-xs text-primary font-medium">
                                 <CheckCircle2 className="w-4 h-4" />
                                 Certificats PDF envoyés avec succès via votre adresse liée.
                             </div>
@@ -75,7 +75,7 @@ export function ApiSettings({ profile }: ApiSettingsProps) {
                             <Button
                                 className={`w-full md:w-auto h-10 border transition-all ${testSuccess
                                     ? 'border-green-500/50 text-green-400 bg-green-500/10'
-                                    : 'border-slate-300 dark:border-gray-700 text-slate-700 dark:text-gray-400 bg-transparent hover:bg-slate-100 dark:hover:bg-gray-800 hover:text-slate-900 dark:hover:text-[#F4C430]'
+                                    : 'border-slate-300 dark:border-gray-700 text-slate-700 dark:text-gray-400 bg-transparent hover:bg-slate-100 dark:hover:bg-gray-800 hover:text-slate-900 dark:hover:text-primary'
                                     }`}
                                 onClick={handleTestEmail}
                                 disabled={testing}

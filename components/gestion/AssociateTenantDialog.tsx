@@ -140,7 +140,7 @@ export function AssociateTenantDialog({
                         <Button
                             type="submit"
                             disabled={!selectedTenantId || !startDate || isSubmitting}
-                            className="h-11 px-8 font-medium bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
+                            className="h-11 px-8 font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md"
                         >
                             {isSubmitting ? (
                                 <>

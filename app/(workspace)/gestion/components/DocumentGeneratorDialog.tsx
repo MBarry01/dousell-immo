@@ -211,7 +211,7 @@ export function DocumentGeneratorDialog({ leases, userEmail, profile, trigger }:
                                             handleGenerateReceipt();
                                         }}
                                         disabled={!selectedReceiptLease || !amount}
-                                        className="w-full bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
+                                        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md"
                                     >
                                         Prévisualiser la Quittance
                                     </Button>
@@ -266,7 +266,7 @@ export function DocumentGeneratorDialog({ leases, userEmail, profile, trigger }:
                                                 tenantName={selectedContractLease.tenant_name}
                                                 existingContractUrl={selectedContractLease.lease_pdf_url || undefined}
                                                 variant="default"
-                                                className="w-full bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 font-medium transition-all shadow-md"
+                                                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-all shadow-md"
                                             />
                                         </div>
                                     </div>

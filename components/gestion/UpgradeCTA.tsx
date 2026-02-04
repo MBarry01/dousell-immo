@@ -49,8 +49,8 @@ export function UpgradeCTA({
     return (
       <div
         className={cn(
-          "w-full bg-gradient-to-r from-[#F4C430]/10 via-[#F4C430]/5 to-transparent",
-          "border-b border-[#F4C430]/20",
+          "w-full bg-gradient-to-r from-primary/10 via-primary/5 to-transparent",
+          "border-b border-primary/20",
           "py-3 px-4",
           className
         )}
@@ -58,14 +58,14 @@ export function UpgradeCTA({
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             {showTrialBadge && (
-              <span className="hidden sm:inline-flex items-center gap-1.5 bg-[#F4C430]/20 text-[#F4C430] text-xs font-medium px-2.5 py-1 rounded-full">
+              <span className="hidden sm:inline-flex items-center gap-1.5 bg-primary/20 text-primary text-xs font-medium px-2.5 py-1 rounded-full">
                 <Sparkle size={12} weight="fill" />
                 Essai 14 jours
               </span>
             )}
-            <p className="text-sm text-white/70">
+            <p className="text-sm text-muted-foreground">
               <span className="hidden md:inline">Vous êtes propriétaire ? </span>
-              <span className="text-white font-medium">
+              <span className="text-foreground font-medium">
                 Gérez vos biens et locataires en un clic
               </span>
             </p>
@@ -73,7 +73,7 @@ export function UpgradeCTA({
           <Button
             asChild
             size="sm"
-            className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90 whitespace-nowrap"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
           >
             <Link href={href}>
               {ctaText || "Devenir Pro"}
@@ -89,22 +89,22 @@ export function UpgradeCTA({
     return (
       <div
         className={cn(
-          "bg-gradient-to-br from-zinc-900 to-zinc-950",
-          "border border-[#F4C430]/20 rounded-2xl",
+          "bg-card",
+          "border border-primary/20 rounded-2xl",
           "p-6",
           className
         )}
       >
         <div className="flex items-start gap-4 mb-4">
-          <div className="w-12 h-12 rounded-xl bg-[#F4C430]/10 flex items-center justify-center">
-            <Buildings size={24} className="text-[#F4C430]" />
+          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Buildings size={24} className="text-primary" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-foreground">
               Passez à la gestion Pro
             </h3>
             {showTrialBadge && (
-              <span className="inline-flex items-center gap-1 text-[#F4C430] text-sm mt-1">
+              <span className="inline-flex items-center gap-1 text-primary text-sm mt-1">
                 <Sparkle size={12} weight="fill" />
                 14 jours d&apos;essai gratuit
               </span>
@@ -114,8 +114,8 @@ export function UpgradeCTA({
 
         <ul className="space-y-2 mb-6">
           {benefits.map((benefit, i) => (
-            <li key={i} className="flex items-center gap-2 text-white/70 text-sm">
-              <Check size={16} className="text-[#F4C430] flex-shrink-0" />
+            <li key={i} className="flex items-center gap-2 text-muted-foreground text-sm">
+              <Check size={16} className="text-primary flex-shrink-0" />
               {benefit}
             </li>
           ))}
@@ -123,7 +123,7 @@ export function UpgradeCTA({
 
         <Button
           asChild
-          className="w-full bg-[#F4C430] text-black hover:bg-[#F4C430]/90"
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
         >
           <Link href={href}>
             {ctaText || "Commencer l'essai gratuit"}
@@ -140,7 +140,7 @@ export function UpgradeCTA({
       asChild
       size="sm"
       className={cn(
-        "bg-[#F4C430] text-black hover:bg-[#F4C430]/90",
+        "bg-primary text-primary-foreground hover:bg-primary/90",
         className
       )}
     >

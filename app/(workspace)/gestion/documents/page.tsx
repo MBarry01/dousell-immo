@@ -188,7 +188,7 @@ export default function RentalDocumentsPage() {
 
     const getFileIcon = (mimeType: string) => {
         if (mimeType.includes("pdf")) return <FilePdf className="w-6 h-6 text-red-400" weight="duotone" />;
-        if (mimeType.includes("image")) return <ImageIcon className="w-6 h-6 text-blue-400" weight="duotone" />;
+        if (mimeType.includes("image")) return <ImageIcon className={`w-6 h-6 ${isDark ? 'text-brand' : 'text-slate-900'}`} weight="duotone" />;
         return <FileText className="w-6 h-6 text-slate-400" weight="duotone" />;
     };
 
@@ -357,7 +357,7 @@ export default function RentalDocumentsPage() {
                                                 href={doc.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className={`p-1.5 rounded-md ${isDark ? 'hover:bg-slate-800 text-slate-400 hover:text-blue-400' : 'hover:bg-gray-100 text-gray-400 hover:text-blue-600'}`}
+                                                className={`p-1.5 rounded-md ${isDark ? 'hover:bg-slate-800 text-slate-400 hover:text-brand' : 'hover:bg-gray-100 text-gray-400 hover:text-slate-900'}`}
                                                 title="Prévisualiser"
                                             >
                                                 <Eye size={18} />

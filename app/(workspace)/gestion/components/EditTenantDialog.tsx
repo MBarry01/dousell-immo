@@ -217,7 +217,7 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
+                            className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md"
                         >
                             {loading ? "Enregistrement..." : "Enregistrer"}
                         </Button>

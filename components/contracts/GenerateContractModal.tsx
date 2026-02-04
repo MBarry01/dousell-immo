@@ -126,24 +126,24 @@ export function GenerateContractModal({ leaseId, tenantName, onSuccess, children
                     {children}
                 </DialogTrigger>
             )}
-            <DialogContent className={mode === 'custom' ? "w-[95vw] sm:w-full max-w-3xl max-h-[85vh] overflow-y-auto bg-slate-900 border-slate-800 text-slate-100" : "w-[95vw] sm:w-full sm:max-w-md bg-slate-900 border-slate-800 text-slate-100"}>
+            <DialogContent className={mode === 'custom' ? "w-[95vw] sm:w-full max-w-3xl max-h-[85vh] overflow-y-auto bg-card border-border text-foreground" : "w-[95vw] sm:w-full sm:max-w-md bg-card border-border text-foreground"}>
                 <DialogHeader>
-                    <DialogTitle className="text-slate-100">
+                    <DialogTitle>
                         Générer le Contrat de Bail {tenantName ? `- ${tenantName}` : ''}
                     </DialogTitle>
                 </DialogHeader>
 
                 {mode === 'standard' ? (
                     <div className="space-y-4 py-4">
-                        <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50 text-sm text-slate-300">
-                            <p className="font-medium mb-2 text-white">Génération Standard (Recommandé)</p>
+                        <div className="bg-muted/50 p-4 rounded-lg border border-border/50 text-sm text-muted-foreground">
+                            <p className="font-medium mb-2 text-foreground">Génération Standard (Recommandé)</p>
                             <p className="mb-3">Le contrat sera généré avec les clauses juridiques standards conformes au droit sénégalais (COCC / Loi 2014) et les décrets 2023.</p>
                             <Button
                                 variant="secondary"
                                 size="sm"
                                 onClick={handlePreview}
                                 disabled={loading}
-                                className="bg-slate-700 hover:bg-slate-600 text-slate-100 h-8 text-xs w-full sm:w-auto"
+                                className="bg-muted hover:bg-muted/80 text-foreground h-8 text-xs w-full sm:w-auto"
                             >
                                 <svg className="w-3 h-3 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -153,12 +153,12 @@ export function GenerateContractModal({ leaseId, tenantName, onSuccess, children
                             </Button>
                         </div>
 
-                        <div className="bg-blue-950/20 p-3 rounded border border-blue-900/30 flex items-start gap-3">
-                            <div className="mt-1 bg-blue-900/30 text-blue-400 rounded-full p-1 shrink-0">
+                        <div className="bg-primary/5 p-3 rounded border border-primary/10 flex items-start gap-3">
+                            <div className="mt-1 bg-primary/10 text-primary rounded-full p-1 shrink-0">
                                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0" /></svg>
                             </div>
-                            <div className="text-xs text-slate-400 min-w-0 break-words">
-                                <span className="font-semibold text-blue-400">Option Avancée :</span> Vous avez besoin d'ajouter une clause spécifique (piscine, jardin) ou de modifier un article ? Passez en mode personnalisation.
+                            <div className="text-xs text-muted-foreground min-w-0 break-words">
+                                <span className="font-semibold text-primary">Option Avancée :</span> Vous avez besoin d'ajouter une clause spécifique (piscine, jardin) ou de modifier un article ? Passez en mode personnalisation.
                             </div>
                         </div>
                     </div>
@@ -166,9 +166,9 @@ export function GenerateContractModal({ leaseId, tenantName, onSuccess, children
                     <div className="space-y-6 py-4">
                         {/* SECTION 1 : Articles Standards */}
                         <div className="space-y-4">
-                            <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-                                <h3 className="font-semibold text-slate-200">Clauses Standards</h3>
-                                <Button variant="ghost" size="sm" onClick={() => setMode('standard')} className="text-xs h-7 text-slate-400 hover:text-white hover:bg-slate-800">Retour au Standard</Button>
+                            <div className="flex justify-between items-center border-b border-border pb-2">
+                                <h3 className="font-semibold text-foreground">Clauses Standards</h3>
+                                <Button variant="ghost" size="sm" onClick={() => setMode('standard')} className="text-xs h-7 text-muted-foreground hover:text-foreground hover:bg-muted">Retour au Standard</Button>
                             </div>
 
                             <div className="grid gap-8">
@@ -176,11 +176,11 @@ export function GenerateContractModal({ leaseId, tenantName, onSuccess, children
                                     const label = key.replace(/_/g, ' ').replace('article', 'Article').replace(/\d+/, (match) => match + ' :');
                                     return (
                                         <div key={key} className="space-y-6">
-                                            <Label className="text-slate-300 capitalize text-base font-medium">{label}</Label>
+                                            <Label className="text-muted-foreground capitalize text-base font-medium">{label}</Label>
                                             <Textarea
                                                 value={texts[key] ?? DEFAULT_CONTRACT_TEXTS[key]}
                                                 onChange={(e) => handleChange(key, e.target.value)}
-                                                className="min-h-[100px] resize-y bg-slate-800 border-slate-700 text-slate-200 focus:ring-blue-500 placeholder:text-slate-500 w-full"
+                                                className="min-h-[100px] resize-y bg-muted/30 border-border text-foreground focus:ring-primary placeholder:text-muted-foreground w-full"
                                             />
                                         </div>
                                     );
@@ -189,40 +189,40 @@ export function GenerateContractModal({ leaseId, tenantName, onSuccess, children
                         </div>
 
                         {/* SECTION 2 : Clauses Particulières */}
-                        <div className="space-y-4 bg-blue-950/20 p-4 rounded-lg border border-blue-900/30">
-                            <h3 className="font-semibold text-blue-400">Conditions Particulières (Ajout)</h3>
-                            <p className="text-xs text-blue-300">
+                        <div className="space-y-4 bg-primary/5 p-4 rounded-lg border border-primary/10">
+                            <h3 className="font-semibold text-primary">Conditions Particulières (Ajout)</h3>
+                            <p className="text-xs text-muted-foreground">
                                 Ajoutez ici des règles spécifiques (ex: Jardin, Piscine, Animaux interdits, Interdiction de fumer...).
                             </p>
                             <Textarea
                                 value={customClause}
                                 onChange={(e) => setCustomClause(e.target.value)}
                                 placeholder="Ex: Le locataire s'engage à entretenir la piscine..."
-                                className="h-32 bg-slate-800 border-slate-700 text-slate-200 placeholder:text-slate-500 w-full"
+                                className="h-32 bg-muted/30 border-border text-foreground placeholder:text-muted-foreground w-full"
                             />
                         </div>
                     </div>
                 )}
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <div className="flex justify-end gap-3 pt-4 border-t border-border">
                     {mode === 'standard' ? (
                         <>
                             <div className="mr-auto">
-                                <Button variant="outline" onClick={() => setMode('custom')} className="border-slate-700 text-slate-300 hover:bg-slate-800">Personnaliser</Button>
+                                <Button variant="outline" onClick={() => setMode('custom')} className="border-border text-muted-foreground hover:bg-muted">Personnaliser</Button>
                             </div>
-                            <Button onClick={handleGenerate} disabled={loading} className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90">
+                            <Button onClick={handleGenerate} disabled={loading} className="bg-primary text-primary-foreground hover:bg-primary/90">
                                 {loading ? "Traitement..." : "Générer Standard"}
                             </Button>
                         </>
                     ) : (
                         <>
                             <div className="mr-auto">
-                                <Button variant="ghost" onClick={handlePreview} disabled={loading} className="text-blue-400 hover:text-blue-300 hover:bg-blue-950/30">
+                                <Button variant="ghost" onClick={handlePreview} disabled={loading} className="text-primary hover:text-primary/80 hover:bg-primary/10">
                                     Prévisualiser les modifications
                                 </Button>
                             </div>
-                            <Button variant="outline" onClick={() => setMode('standard')} className="border-slate-700 text-slate-300 hover:bg-slate-800">Annuler</Button>
-                            <Button onClick={handleGenerate} disabled={loading} className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90">
+                            <Button variant="outline" onClick={() => setMode('standard')} className="border-border text-muted-foreground hover:bg-muted">Annuler</Button>
+                            <Button onClick={handleGenerate} disabled={loading} className="bg-primary text-primary-foreground hover:bg-primary/90">
                                 {loading ? "Traitement..." : "Valider et Générer"}
                             </Button>
                         </>

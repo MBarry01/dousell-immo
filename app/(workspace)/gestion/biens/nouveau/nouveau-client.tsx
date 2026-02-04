@@ -497,9 +497,9 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                     value={formData.price}
                     onChange={(e) => updateField("price", e.target.value)}
                     placeholder="0"
-                    className="w-full bg-card border border-border rounded-lg px-4 py-3 pr-20 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                    className="w-full bg-card border border-border rounded-lg px-4 py-3 pr-32 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                  <span className="absolute right-10 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                     FCFA{formData.category === "location" && "/mois"}
                   </span>
                 </div>
@@ -544,9 +544,9 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                       value={formData.surface}
                       onChange={(e) => updateField("surface", e.target.value)}
                       placeholder="0"
-                      className="w-full bg-card border border-border rounded-lg px-4 py-3 pr-12 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                      className="w-full bg-card border border-border rounded-lg px-4 py-3 pr-16 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">m²</span>
+                    <span className="absolute right-10 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">m²</span>
                   </div>
                 </div>
 
@@ -741,7 +741,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
             <button
               type="button"
               onClick={nextStep}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#0F172A] text-white rounded-lg font-medium hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
+              className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md"
             >
               Continuer
               <ArrowRight className="w-4 h-4" />
@@ -765,9 +765,8 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                   className="
                     flex items-center gap-2 
                     px-4 py-2 
-                    bg-[#0F172A] text-white hover:bg-[#1E293B]
-                    dark:bg-primary dark:hover:bg-primary/90 
-                    dark:text-primary-foreground font-medium 
+                    bg-primary text-primary-foreground hover:bg-primary/90
+                    font-medium 
                     rounded-l-lg rounded-r-none 
                     transition-all duration-200 ease-in-out
                     focus:z-10 focus:ring-2 focus:ring-primary/50
@@ -782,9 +781,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                       disabled={isSubmitting}
                       className="
                         px-2 py-2 
-                        bg-[#0F172A] text-white hover:bg-[#1E293B]
-                        dark:bg-primary dark:hover:bg-primary/90 
-                        dark:text-primary-foreground 
+                        bg-primary text-primary-foreground hover:bg-primary/90
                         rounded-r-lg rounded-l-none 
                         border-l border-white/10 
                         transition-all duration-200 ease-in-out

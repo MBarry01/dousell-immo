@@ -126,7 +126,7 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
     return (
         <div className={`flex flex-col h-[calc(100vh-64px)] ${isDark ? 'bg-[#0B1120]' : 'bg-gray-50'}`}>
             {/* Header */}
-            <div className={`border-b px-4 py-3 flex items-center gap-3 shadow-sm z-10 ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-gray-200'
+            <div className={`border-b px-4 py-3 flex items-center gap-3 shadow-sm z-10 ${isDark ? 'bg-card border-border' : 'bg-white border-gray-200'
                 }`}>
                 <Link href="/gestion/messages" className={`p-2 -ml-2 rounded-full transition-colors ${isDark ? 'text-slate-400 hover:bg-slate-800' : 'text-gray-500 hover:bg-gray-100'
                     }`}>
@@ -178,7 +178,7 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
                                         <div className={cn(
                                             "max-w-[75%] px-4 py-2 text-sm shadow-sm break-words relative",
                                             isMe
-                                                ? "bg-blue-600 text-white rounded-2xl rounded-br-none"
+                                                ? "bg-primary text-primary-foreground rounded-2xl rounded-br-none"
                                                 : isDark
                                                     ? "bg-slate-800 border border-slate-700 text-slate-200 rounded-2xl rounded-bl-none"
                                                     : "bg-white border border-gray-200 text-gray-900 rounded-2xl rounded-bl-none",
@@ -187,7 +187,7 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
                                             <p>{msg.content}</p>
                                             <p className={cn(
                                                 "text-[9px] mt-1 text-right opacity-70",
-                                                isMe ? "text-blue-100" : "text-slate-400"
+                                                isMe ? "text-primary-foreground/70" : "text-slate-400"
                                             )}>
                                                 {format(new Date(msg.created_at), 'HH:mm')}
                                             </p>
@@ -220,15 +220,16 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Écrire un message..."
-                        className={`flex-1 rounded-full px-4 h-11 focus:ring-2 focus:ring-blue-500 outline-none transition-all border ${isDark
-                                ? 'bg-slate-900 border-slate-800 text-white placeholder:text-slate-500'
-                                : 'bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-400'
+                        className={`flex-1 rounded-full px-4 h-11 focus:ring-2 focus:ring-primary outline-none transition-all border ${isDark
+                            ? 'bg-slate-900 border-slate-800 text-white placeholder:text-slate-500'
+                            : 'bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-400'
                             }`}
                     />
                     <button
                         type="submit"
                         disabled={!newMessage.trim() || isSending}
-                        className="w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-all disabled:opacity-50 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:shadow-none"
+                        className={`w-11 h-11 rounded-full flex items-center justify-center transition-all disabled:opacity-50 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:shadow-none ${isDark ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            }`}
                     >
                         <Send className="w-5 h-5 ml-0.5" />
                     </button>

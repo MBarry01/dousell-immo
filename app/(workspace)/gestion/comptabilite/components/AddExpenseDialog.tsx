@@ -82,7 +82,7 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-red-500 hover:bg-red-600 text-white gap-2" size="sm">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="sm">
                     <Plus className="w-4 h-4" />
                     <span className="hidden md:inline">Dépense</span>
                 </Button>
@@ -90,7 +90,7 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
             <DialogContent className={`sm:max-w-md ${isDark ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}`}>
                 <DialogHeader>
                     <DialogTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        <Receipt className="h-5 w-5 text-red-400" />
+                        <Receipt className={`h-5 w-5 ${isDark ? 'text-brand' : 'text-primary'}`} />
                         Nouvelle Dépense
                     </DialogTitle>
                     <DialogDescription className={isDark ? 'text-slate-400' : 'text-gray-600'}>
@@ -111,7 +111,7 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
                             placeholder="Ex: 50000"
                             required
                             min="1"
-                            className={`w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'
+                            className={`w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'
                                 }`}
                         />
                     </div>
@@ -127,7 +127,7 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
                             </SelectTrigger>
                             <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}>
                                 {Object.entries(EXPENSE_CATEGORY_LABELS).map(([key, label]) => (
-                                    <SelectItem key={key} value={key} className={isDark ? 'focus:bg-slate-700' : 'focus:bg-gray-100'}>
+                                    <SelectItem key={key} value={key}>
                                         {label}
                                     </SelectItem>
                                 ))}
@@ -145,7 +145,7 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
                             required
-                            className={`w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'
+                            className={`w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'
                                 }`}
                         />
                     </div>
@@ -160,11 +160,11 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
                                 <SelectValue placeholder="Aucun (dépense générale)" />
                             </SelectTrigger>
                             <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}>
-                                <SelectItem value="none" className={isDark ? 'focus:bg-slate-700' : 'focus:bg-gray-100'}>
+                                <SelectItem value="none">
                                     Aucun (dépense générale)
                                 </SelectItem>
                                 {properties.map((p) => (
-                                    <SelectItem key={p.id} value={p.id} className={isDark ? 'focus:bg-slate-700' : 'focus:bg-gray-100'}>
+                                    <SelectItem key={p.id} value={p.id}>
                                         {p.address}
                                     </SelectItem>
                                 ))}
@@ -180,7 +180,7 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Ex: Réparation fuite d'eau salle de bain..."
                             rows={2}
-                            className={`w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 outline-none resize-none ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'
+                            className={`w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none resize-none ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'
                                 }`}
                         />
                     </div>
@@ -190,7 +190,7 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
                         <Button
                             type="submit"
                             disabled={isLoading || !amount}
-                            className="w-full bg-red-500 hover:bg-red-600 text-white"
+                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                         >
                             {isLoading ? (
                                 <>

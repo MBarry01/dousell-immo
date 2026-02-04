@@ -13,10 +13,10 @@ import { type Room, type RoomItem, type MeterReadings } from '../types';
 import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 const CONDITION_OPTIONS = [
-    { value: 'bon', label: 'Bon', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500' },
-    { value: 'moyen', label: 'Moyen', color: 'bg-amber-500/20 text-amber-400 border-amber-500' },
-    { value: 'mauvais', label: 'Mauvais', color: 'bg-red-500/20 text-red-400 border-red-500' },
-    { value: 'absent', label: 'Absent', color: 'bg-slate-500/20 text-slate-400 border-slate-500' },
+    { value: 'bon', label: 'Bon', color: 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/50' },
+    { value: 'moyen', label: 'Moyen', color: 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/50' },
+    { value: 'mauvais', label: 'Mauvais', color: 'bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/50' },
+    { value: 'absent', label: 'Absent', color: 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/50' },
 ];
 
 interface InventoryEditorProps {
@@ -181,7 +181,7 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
-                <Loader2 className="w-8 h-8 text-[#F4C430] animate-spin" />
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
             </div>
         );
     }
@@ -212,11 +212,14 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
             </div>
 
             {/* On-site Instructions */}
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
-                <p className="text-sm text-blue-400 font-medium mb-1">
+            <div className={`border rounded-xl p-4 ${isDark
+                ? 'bg-primary/10 border-primary/30'
+                : 'bg-muted border-border'
+                }`}>
+                <p className={`text-sm font-medium mb-1 ${isDark ? 'text-primary' : 'text-foreground'}`}>
                     📋 Mode Contradictoire Recommandé
                 </p>
-                <p className="text-xs text-blue-300/80">
+                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
                     Ce constat doit être rempli <strong>sur place</strong> avec le locataire présent.
                     Visitez chaque pièce ensemble et convenez de l'état avant de noter.
                 </p>

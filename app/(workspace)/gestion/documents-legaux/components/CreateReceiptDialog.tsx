@@ -87,9 +87,9 @@ export function CreateReceiptDialog({ leases, userEmail, profile }: CreateReceip
         <>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogTrigger asChild>
-                    <button className={`w-full text-left p-6 rounded-xl border transition-all group outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer ${isDark
-                            ? 'border-slate-800 bg-gradient-to-br from-slate-900 to-black hover:border-slate-700'
-                            : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                    <button className={`w-full text-left p-6 rounded-xl border transition-all group outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer ${isDark
+                        ? 'border-slate-800 bg-gradient-to-br from-slate-900 to-black hover:border-slate-700'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                         }`}>
                         <div className={`h-10 w-10 rounded-lg flex items-center justify-center mb-4 transition-colors ${isDark ? 'bg-slate-800 group-hover:bg-slate-700' : 'bg-gray-100 group-hover:bg-gray-200'
                             }`}>
@@ -102,7 +102,7 @@ export function CreateReceiptDialog({ leases, userEmail, profile }: CreateReceip
                 <DialogContent className={`sm:max-w-md ${isDark ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}`}>
                     <DialogHeader>
                         <DialogTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            <FileText className="h-5 w-5 text-blue-500" />
+                            <FileText className="h-5 w-5 text-primary" />
                             Générateur de Quittance
                         </DialogTitle>
                         <DialogDescription className={isDark ? 'text-slate-400' : 'text-gray-600'}>
@@ -175,7 +175,7 @@ export function CreateReceiptDialog({ leases, userEmail, profile }: CreateReceip
                                 type="number"
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
-                                className={`w-full border rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'
+                                className={`w-full border rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'
                                     }`}
                             />
                         </div>
@@ -184,7 +184,7 @@ export function CreateReceiptDialog({ leases, userEmail, profile }: CreateReceip
                             <Button
                                 onClick={handleGenerate}
                                 disabled={!selectedLease || !amount}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                             >
                                 Prévisualiser la Quittance
                             </Button>

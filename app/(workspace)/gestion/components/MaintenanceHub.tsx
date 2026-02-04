@@ -244,7 +244,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                 onClick={handleSubmit}
                                 disabled={!description.trim() || submitting}
                                 size="sm"
-                                className="h-9 px-4 bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
+                                className="h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md"
                             >
                                 {submitting ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -334,7 +334,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                         onClick={() => handleApproveQuote(req.id)}
                                         disabled={processingId === req.id}
                                         size="sm"
-                                        className="bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md text-xs h-8"
+                                        className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md text-xs h-8"
                                     >
                                         {processingId === req.id ? (
                                             <Loader2 className="w-3 h-3 animate-spin" />
@@ -435,7 +435,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                     onClick={handleSubmitQuote}
                                     disabled={!quotePrice || !quoteDate || processingId === quoteRequestId}
                                     size="sm"
-                                    className="flex-1 bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
+                                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md"
                                 >
                                     {processingId === quoteRequestId ? (
                                         <Loader2 className="w-4 h-4 animate-spin" />

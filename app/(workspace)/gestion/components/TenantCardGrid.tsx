@@ -59,7 +59,7 @@ export function TenantCardGrid({
                                 <AddTenantButton
                                     ownerId={ownerId}
                                     trigger={
-                                        <Button size="lg" className="bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 font-semibold w-full sm:w-auto transition-all shadow-md">
+                                        <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold w-full sm:w-auto transition-all shadow-md">
                                             Créer un Bail
                                         </Button>
                                     }

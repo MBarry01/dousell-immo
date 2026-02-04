@@ -165,7 +165,7 @@ export function BiensClient({
           {canCreate && (
             <Link
               href="/gestion/biens/nouveau"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0F172A] text-white rounded-lg font-medium hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md"
             >
               <Plus className="w-5 h-5" />
               Ajouter un bien
@@ -316,7 +316,7 @@ export function BiensClient({
             {canCreate && properties.length === 0 && (
               <Link
                 href="/gestion/biens/nouveau"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0F172A] text-white rounded-lg font-medium hover:bg-[#1E293B] dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 transition-all shadow-md"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md"
               >
                 <Plus className="w-5 h-5" />
                 Ajouter un bien

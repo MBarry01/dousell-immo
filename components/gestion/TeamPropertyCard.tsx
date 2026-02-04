@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, MapPin, Bed, Bath, Square, Eye, EyeOff, Pencil, Trash2, MoreVertical, Clock, Copy, Share2, UserPlus, CheckCircle2, AlertCircle, Plus } from "lucide-react";
+import { Building2, MapPin, Bed, Bath, Square, Eye, EyeOff, Pencil, Trash2, MoreVertical, Clock, Copy, Share2, UserPlus, CheckCircle2, AlertCircle, Plus, FileText } from "lucide-react";
 import { useState } from "react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -203,8 +203,9 @@ export function TeamPropertyCard({
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href={`/gestion/baux?property=${property.id}`}>
-                      📄 Voir le Bail
+                    <Link href={`/gestion/locataires/${property.tenant.id}#documents`}>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Voir le Bail
                     </Link>
                   </DropdownMenuItem>
                 </>

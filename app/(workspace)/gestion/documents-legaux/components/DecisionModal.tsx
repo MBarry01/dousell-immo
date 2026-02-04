@@ -79,7 +79,7 @@ export function DecisionModal({ alert }: DecisionModalProps) {
             <DialogTrigger asChild>
                 <Button
                     variant="outline"
-                    className="border-primary text-primary hover:bg-primary/10"
+                    className="border-primary text-primary hover:bg-primary/10 hover:text-primary"
                     size="sm"
                 >
                     ⚠️ Action Requise
@@ -119,7 +119,10 @@ export function DecisionModal({ alert }: DecisionModalProps) {
 
                     {/* OPTION A : RENOUVELER */}
                     <TabsContent value="renew" className="space-y-4 py-4">
-                        <div className="bg-green-900/20 border border-green-900 p-3 rounded text-sm text-green-200">
+                        <div className={`p-3 rounded text-sm border ${isDark
+                                ? 'bg-green-900/20 border-green-900 text-green-200'
+                                : 'bg-green-50 border-green-200 text-green-700'
+                            }`}>
                             ℹ️ Le bail sera automatiquement renouvelé. Vous pouvez ajuster la durée et le loyer.
                         </div>
 
@@ -179,7 +182,10 @@ export function DecisionModal({ alert }: DecisionModalProps) {
 
                     {/* OPTION B : DONNER CONGÉ */}
                     <TabsContent value="terminate" className="space-y-4 py-4">
-                        <div className="bg-red-900/20 border border-red-900 p-3 rounded text-sm text-red-200">
+                        <div className={`p-3 rounded text-sm border ${isDark
+                                ? 'bg-red-900/20 border-red-900 text-red-200'
+                                : 'bg-red-50 border-red-200 text-red-700'
+                            }`}>
                             ⚠️ <strong>Attention:</strong> Au Sénégal, le congé doit respecter un préavis de 6 mois pour reprise (Loi n° 2014-22).
                         </div>
 

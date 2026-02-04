@@ -44,8 +44,8 @@
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
-  --accent: #f2c94c;
-  --accent-foreground: #0f172a;
+  --accent: #0F172A;
+  --accent-foreground: #ffffff;
   /* Bleu Nuité (Slate 900) pour remplacer le Jaune Or en mode clair */
   --primary: 222 47% 11%;
   --primary-foreground: 210 40% 98%;
@@ -229,8 +229,12 @@
   }
 
   /* Color scheme pour les contrôles natifs des inputs (spinners, etc.) */
-  input.text-gray-900,
-  input[class*="text-gray-900"] {
+  :where(.dark, [data-theme="dark"]) :where(input, textarea, select) {
+    color-scheme: dark;
+    accent-color: currentColor;
+  }
+
+  :where(.light, [data-theme="light"]) :where(input, textarea, select) {
     color-scheme: light;
   }
 

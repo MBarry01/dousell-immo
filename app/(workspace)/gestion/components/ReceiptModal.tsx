@@ -193,7 +193,7 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
                         handleSendEmail();
                     }}
                     disabled={isSending}
-                    className="bg-[#0F172A] text-white hover:bg-[#1E293B] dark:bg-primary dark:hover:bg-primary/90 dark:text-primary-foreground border-none shadow-md gap-1 md:gap-2 rounded-full text-xs md:text-sm px-3 md:px-4 h-9 md:h-10 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 border-none shadow-md gap-1 md:gap-2 rounded-full text-xs md:text-sm px-3 md:px-4 h-9 md:h-10 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSending ? (
                         <>
@@ -214,7 +214,7 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
             <Button
                 onClick={onClose}
                 variant="outline"
-                className="absolute top-4 right-4 z-50 bg-destructive hover:bg-destructive/90 text-destructive-foreground border-none shadow-md rounded-full h-9 md:h-10 w-9 md:w-10 p-0 print:hidden"
+                className="absolute top-4 right-4 z-50 bg-primary/20 hover:bg-primary/30 text-primary hover:text-primary border-none shadow-md rounded-full h-9 md:h-10 w-9 md:w-10 p-0 print:hidden"
             >
                 <X className="w-4 h-4" />
             </Button>
