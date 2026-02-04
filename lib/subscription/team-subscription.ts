@@ -7,8 +7,15 @@
 
 import { createClient } from '@/utils/supabase/server';
 
-export type SubscriptionStatus = 'none' | 'trial' | 'active' | 'expired' | 'canceled';
-export type SubscriptionTier = 'pro' | 'premium' | 'enterprise';
+export type SubscriptionStatus = 'none' | 'trial' | 'active' | 'past_due' | 'expired' | 'canceled';
+export type SubscriptionTier = 'starter' | 'pro' | 'enterprise';
+
+export interface FeatureCheckResult {
+    allowed: boolean;
+    reason?: 'limit_reached' | 'inactive_subscription' | 'trial_expired';
+    message?: string;
+    upgradeRequired?: boolean;
+}
 
 export interface TeamSubscription {
     status: SubscriptionStatus;
@@ -234,12 +241,101 @@ export async function expireTeamSubscription(
 }
 
 /**
+ * Vérifie si une équipe a accès à une fonctionnalité spécifique (Quotas)
+ * 
+ * @param teamId - ID de l'équipe
+ * @param feature - La fonctionnalité à vérifier
+ * @returns FeatureCheckResult
+ */
+export async function checkFeatureAccess(
+    teamId: string,
+    feature: 'add_property' | 'add_lease' | 'invite_member' | 'export_data'
+): Promise<FeatureCheckResult> {
+    const supabase = await createClient();
+    const subscription = await getTeamSubscriptionStatus(teamId);
+
+    // 1. Vérifier si l'abonnement est actif
+    if (!subscription.isActive) {
+        return {
+            allowed: false,
+            reason: subscription.status === 'trial' ? 'trial_expired' : 'inactive_subscription',
+            message: "Votre abonnement n'est plus actif. Veuillez régulariser votre situation.",
+            upgradeRequired: true
+        };
+    }
+
+    const { getFeaturesForTier } = await import('./features');
+    const features = getFeaturesForTier(subscription.tier);
+
+    // 2. Vérifier les quotas spécifiques
+    switch (feature) {
+        case 'add_property': {
+            const { count } = await supabase
+                .from('properties')
+                .select('*', { count: 'exact', head: true })
+                .eq('team_id', teamId);
+
+            if (count !== null && count >= features.maxProperties) {
+                return {
+                    allowed: false,
+                    reason: 'limit_reached',
+                    message: `Limite de biens atteinte (${features.maxProperties}) pour le plan ${subscription.tier}.`,
+                    upgradeRequired: true
+                };
+            }
+            break;
+        }
+
+        case 'add_lease': {
+            const { count } = await supabase
+                .from('leases')
+                .select('*', { count: 'exact', head: true })
+                .eq('team_id', teamId);
+
+            if (count !== null && count >= features.maxLeases) {
+                return {
+                    allowed: false,
+                    reason: 'limit_reached',
+                    message: `Limite de baux atteinte (${features.maxLeases}) pour le plan ${subscription.tier}.`,
+                    upgradeRequired: true
+                };
+            }
+            break;
+        }
+
+        case 'invite_member':
+            if (!features.canInviteMembers) {
+                return {
+                    allowed: false,
+                    reason: 'limit_reached',
+                    message: "L'invitation de membres n'est pas disponible dans votre plan actuel.",
+                    upgradeRequired: true
+                };
+            }
+            break;
+
+        case 'export_data':
+            if (!features.canExportData) {
+                return {
+                    allowed: false,
+                    reason: 'limit_reached',
+                    message: "L'exportation de données n'est pas disponible dans votre plan actuel.",
+                    upgradeRequired: true
+                };
+            }
+            break;
+    }
+
+    return { allowed: true };
+}
+
+/**
  * Fonction helper pour créer un abonnement par défaut
  */
 function createDefaultSubscription(): TeamSubscription {
     return {
         status: 'none',
-        tier: 'pro',
+        tier: 'starter',
         trialEndsAt: null,
         startedAt: null,
         isActive: false,

@@ -9,6 +9,7 @@ import { validateTenantCreation } from '@/lib/finance';
 import { sendEmail } from '@/lib/mail';
 import { getUserTeamContext } from "@/lib/team-context";
 import { requireTeamPermission } from "@/lib/permissions";
+import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
 
 /**
  * Récupérer les propriétés de l'équipe (pour les listes déroulantes)
@@ -117,24 +118,19 @@ export async function getRentalStats() {
 
 /**
  * Calcule les KPIs avancés pour le dashboard de l'équipe
+ * OPTIMISÉ : Utilise des counts directs et limite le déchargement de données
  */
 export async function getAdvancedStats() {
     const { teamId } = await getUserTeamContext();
     const supabase = await createClient();
 
-    const today = new Date();
-    const currentMonth = today.getMonth() + 1;
-    const currentYear = today.getFullYear();
-
-    // 1. Récupérer tous les biens de l'équipe
-    const { data: properties, count: totalPropertiesCount } = await supabase
+    // 1. Récupérer le nombre total de biens (COUNT uniquement)
+    const { count: totalProperties } = await supabase
         .from('properties')
-        .select('id', { count: 'exact' })
+        .select('*', { count: 'exact', head: true })
         .eq('team_id', teamId);
 
-    const totalProperties = totalPropertiesCount || 0;
-
-    // 2. Récupérer tous les baux actifs de l'équipe
+    // 2. Récupérer les baux actifs (On a besoin des détails pour les calculs suivants)
     const { data: activeLeases } = await supabase
         .from('leases')
         .select('id, monthly_amount, billing_day, property_address')
@@ -144,8 +140,8 @@ export async function getAdvancedStats() {
     const activeLeasesCount = activeLeases?.length || 0;
 
     // 3. Calculer le taux d'occupation
-    let occupancyBase = totalProperties;
-    if (totalProperties === 0 && activeLeasesCount > 0) {
+    let occupancyBase = totalProperties || 0;
+    if (occupancyBase === 0 && activeLeasesCount > 0) {
         const uniqueAddresses = new Set((activeLeases || []).map(l => l.property_address?.toLowerCase().trim()));
         occupancyBase = uniqueAddresses.size;
     }
@@ -156,15 +152,16 @@ export async function getAdvancedStats() {
 
     const occupancyRate = Math.min(rawOccupancyRate, 100);
 
-    // 4. Récupérer les transactions payées de l'équipe
+    // 4. Calculer le délai moyen de paiement sur les derniers mois uniquement (Limit 50 pour performance)
     const { data: paidTransactions } = await supabase
         .from('rental_transactions')
-        .select('lease_id, amount_due, status, paid_at, period_month, period_year')
+        .select('lease_id, paid_at, period_month, period_year')
         .eq('team_id', teamId)
         .eq('status', 'paid')
-        .not('paid_at', 'is', null);
+        .not('paid_at', 'is', null)
+        .order('paid_at', { ascending: false })
+        .limit(50);
 
-    // 5. Calculer le délai moyen de paiement
     let totalDelay = 0;
     let delayCount = 0;
 
@@ -184,18 +181,23 @@ export async function getAdvancedStats() {
 
     const avgPaymentDelay = delayCount > 0 ? Math.round(totalDelay / delayCount) : 0;
 
-    // 6. Taux d'impayés (transactions échec vs total attendu)
-    const { data: allTransactions } = await supabase
+    // 5. Taux d'impayés (COUNT uniquement)
+    const { count: totalTransCount } = await supabase
         .from('rental_transactions')
-        .select('status')
+        .select('*', { count: 'exact', head: true })
         .eq('team_id', teamId);
 
-    const failedCount = allTransactions?.filter(t => t.status === 'failed' || t.status === 'rejected').length || 0;
-    const unpaidRate = allTransactions && allTransactions.length > 0
-        ? Math.round((failedCount / allTransactions.length) * 100)
+    const { count: failedCount } = await supabase
+        .from('rental_transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('team_id', teamId)
+        .in('status', ['failed', 'rejected']);
+
+    const unpaidRate = (totalTransCount && totalTransCount > 0)
+        ? Math.round(((failedCount || 0) / totalTransCount) * 100)
         : 0;
 
-    // 7. Revenu moyen par bien loué
+    // 6. Revenu moyen par bien loué
     const totalMonthlyRevenue = activeLeases?.reduce((acc, l) => acc + Number(l.monthly_amount), 0) || 0;
     const avgRevenuePerProperty = activeLeasesCount > 0
         ? Math.round(totalMonthlyRevenue / activeLeasesCount)
@@ -206,7 +208,7 @@ export async function getAdvancedStats() {
         avgPaymentDelay,
         unpaidRate,
         avgRevenuePerProperty,
-        totalProperties,
+        totalProperties: totalProperties || 0,
         activeLeases: activeLeasesCount
     };
 }
@@ -315,6 +317,28 @@ async function triggerN8N(webhookPath: string, payload: Record<string, unknown>)
 export async function createNewLease(formData: Record<string, unknown>) {
     const { teamId, user } = await getUserTeamContext();
     await requireTeamPermission('leases.create');
+
+    // ✅ CHECK FEATURE QUOTA (LEASE)
+    const leaseAccess = await checkFeatureAccess(teamId, "add_lease");
+    if (!leaseAccess.allowed) {
+        return {
+            success: false,
+            error: leaseAccess.message,
+            upgradeRequired: leaseAccess.upgradeRequired
+        };
+    }
+
+    // ✅ CHECK FEATURE QUOTA (PROPERTY) if creating on-the-fly
+    if (formData.create_new_property === 'true' || formData.create_new_property === true) {
+        const propertyAccess = await checkFeatureAccess(teamId, "add_property");
+        if (!propertyAccess.allowed) {
+            return {
+                success: false,
+                error: propertyAccess.message,
+                upgradeRequired: propertyAccess.upgradeRequired
+            };
+        }
+    }
 
     const supabase = await createClient();
 
@@ -1478,7 +1502,10 @@ export async function createMaintenanceRequest(data: {
             description: data.description,
             category: data.category || 'General',
             status: status,
-            artisan_data: artisanData,
+            artisan_name: artisanData.name,
+            artisan_phone: artisanData.phone,
+            artisan_rating: artisanData.rating,
+            artisan_address: artisanData.address,
             created_at: new Date().toISOString()
         }])
         .select()

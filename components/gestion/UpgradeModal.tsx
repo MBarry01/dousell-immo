@@ -40,7 +40,7 @@ export function UpgradeModal({
   const router = useRouter();
 
   const handleUpgrade = () => {
-    router.push("/gestion/subscription");
+    router.push("/gestion/config");
   };
 
   return (

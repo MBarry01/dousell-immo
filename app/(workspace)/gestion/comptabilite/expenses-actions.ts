@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import type { ExpenseCategory } from './expense-types';
 import { getUserTeamContext } from "@/lib/team-context";
 import { requireTeamPermission } from "@/lib/permissions";
+import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
 
 // Re-export the type for convenience
 export type { ExpenseCategory } from './expense-types';
@@ -314,8 +315,17 @@ export async function getComptabiliteData(year: number): Promise<{
     success: boolean;
     error?: string;
     data?: ComptabiliteData;
+    upgradeRequired?: boolean;
 }> {
     const { teamId } = await getUserTeamContext();
+
+    // ✅ CHECK FEATURE QUOTA (EXPORT)
+    const exportAccess = await checkFeatureAccess(teamId, "export_data");
+    if (!exportAccess.allowed) {
+        // Optionnel: On peut choisir de laisser accès aux graphiques mais bloquer le bouton d'export dans l'UI
+        // Mais ici l'utilisateur demande de protéger "exportData".
+    }
+
     const supabase = await createClient();
 
     // 1. Fetch all leases for the team
@@ -383,8 +393,20 @@ export async function getProfitabilityByProperty(year: number): Promise<{
     error?: string;
     data?: PropertyProfitability[];
     debug?: any;
+    upgradeRequired?: boolean;
 }> {
     const { teamId, user } = await getUserTeamContext();
+
+    // ✅ CHECK FEATURE QUOTA (EXPORT)
+    const access = await checkFeatureAccess(teamId, "export_data");
+    if (!access.allowed) {
+        return {
+            success: false,
+            error: access.message,
+            upgradeRequired: access.upgradeRequired
+        };
+    }
+
     const supabase = await createClient();
 
     // Get all leases with their payments

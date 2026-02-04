@@ -12,7 +12,7 @@ interface DousellNavbarProps {
  * Smart Header - Server Component Wrapper
  * 
  * Vérifie la session utilisateur côté serveur et adapte le CTA:
- * - Visiteur mode owner: "Essai Gratuit" → /landing/commencer
+ * - Visiteur mode owner: "Essai Gratuit" → /register
  * - Visiteur mode tenant: "Voir les annonces" → / (détecté côté client via URL)
  * - Utilisateur connecté: "Mon Espace" → /gestion
  */

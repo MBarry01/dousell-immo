@@ -2,8 +2,7 @@ import { Settings, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { ConfigForm } from './config-form';
-import { ApiSettings } from './api-settings';
+import { ConfigTabs } from './config-tabs';
 
 export default async function ConfigPremiumPage() {
     const supabase = await createClient();
@@ -67,27 +66,24 @@ export default async function ConfigPremiumPage() {
     return (
         <div className="max-w-4xl mx-auto p-4 md:p-6 space-y-10">
             {/* Header avec retour */}
-            <div className="flex items-center gap-4 border-b border-gray-800 pb-6">
+            <div className="flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 pb-6">
                 <Link
                     href="/gestion"
-                    className="p-2 hover:bg-gray-800 rounded-xl transition-colors"
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors group"
                 >
-                    <ArrowLeft className="w-5 h-5 text-gray-400" />
+                    <ArrowLeft className="w-5 h-5 text-gray-400 group-hover:text-[#F4C430] transition-colors" />
                 </Link>
-                <div className="p-3 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-lg">
-                    <Settings className="w-6 h-6 text-white" />
+                <div className="p-3 bg-gradient-to-br from-[#F4C430] to-[#E5B520] rounded-2xl shadow-lg shadow-[#F4C430]/20 text-black">
+                    <Settings className="w-6 h-6 animate-pulse-slow" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold">Configuration Premium</h1>
-                    <p className="text-gray-400 text-sm">Personnalisez l&apos;apparence de vos documents officiels</p>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Configuration</h1>
+                    <p className="text-slate-500 dark:text-gray-400 text-sm italic">Gérez votre identité visuelle et votre abonnement</p>
                 </div>
             </div>
 
-            {/* Formulaire de configuration */}
-            <ConfigForm initialData={brandingData} />
-
-            {/* Section API / Envois automatiques */}
-            <ApiSettings profile={brandingData} />
+            {/* Interface par onglets */}
+            <ConfigTabs brandingData={brandingData} />
         </div>
     );
 }

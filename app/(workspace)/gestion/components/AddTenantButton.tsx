@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import * as XLSX from 'xlsx';
 import { createNewLease, confirmPayment, sendWelcomePack } from "../actions";
+import { UpgradeModal } from "@/components/gestion/UpgradeModal";
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { GenerateContractModal } from '@/components/contracts/GenerateContractModal';
@@ -56,6 +57,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
     const [showProfileAlert, setShowProfileAlert] = useState(false);
 
     const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     // Contract Generation Flow State
     const [showContractPrompt, setShowContractPrompt] = useState(false);
@@ -289,6 +291,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
         setLoading(false);
 
         if (result.success && result.id) {
+            // ... (rest of success logic)
             const isFirstTenant = !localStorage.getItem(FIRST_TENANT_KEY);
             if (isFirstTenant) {
                 localStorage.setItem(FIRST_TENANT_KEY, 'true');
@@ -296,23 +299,23 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
             }
             toast.success('Locataire créé ! Place à la configuration...');
 
-            // Open Wizard instead of closing
             setCreatedLease({
                 id: result.id,
                 name: tenantNameVal,
                 amount: monthlyAmount,
                 depositMonths: depositMonths
             });
-            setOpen(false); // Close the form modal first
+            setOpen(false);
 
-            // Small delay to ensure modal is closed before opening wizard
             setTimeout(() => {
-                setShowOnboardingWizard(true); // Open the wizard
+                setShowOnboardingWizard(true);
             }, 100);
 
-            // Force hard refresh to bypass cache
             router.refresh();
         } else {
+            if (result.upgradeRequired) {
+                setShowUpgradeModal(true);
+            }
             const errorMsg = result.error || 'Erreur lors de la création';
             setError(errorMsg);
             toast.error(errorMsg);
@@ -588,6 +591,12 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                     // Using location.href instead of reload() to ensure fresh fetch
                     window.location.href = window.location.pathname + '?t=' + Date.now();
                 }}
+            />
+            {/* Upgrade Modal */}
+            <UpgradeModal
+                open={showUpgradeModal}
+                onOpenChange={setShowUpgradeModal}
+                propertiesCount={10}
             />
         </>
     );

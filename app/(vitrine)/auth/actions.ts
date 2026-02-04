@@ -15,6 +15,11 @@ export async function signup(formData: FormData) {
   const fullName = formData.get("fullName") as string;
   const phone = formData.get("phone") as string;
   const turnstileToken = formData.get("turnstileToken") as string;
+  const plan = formData.get("plan") as string || "starter";
+
+  // Validation des plans autorisés
+  const validPlans = ["starter", "pro", "enterprise"];
+  const selectedPlan = validPlans.includes(plan) ? plan : "starter";
 
   // Validation des champs
   if (!email || !password || !fullName || !phone) {
@@ -105,6 +110,7 @@ export async function signup(formData: FormData) {
         data: {
           full_name: fullName.trim(),
           phone: normalizedPhone,
+          selected_plan: selectedPlan,
         },
         emailRedirectTo,
       },

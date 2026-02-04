@@ -8,6 +8,7 @@ import { KPICards } from "./components/KPICards";
 import { RevenueChart } from "./components/RevenueChart";
 import { OrphanLeasesAlert } from "./components/OrphanLeasesAlert";
 import { ExpiredBanner } from "./components/ExpiredBanner";
+import { QuotaBanner } from "./components/QuotaBanner";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import {
@@ -75,7 +76,6 @@ export default async function GestionLocativePage({
 
     // Étape 1 : Lancer toutes les requêtes EN PARALLÈLE avec fallbacks
     const [
-        userProfileResult,
         profile,
         allLeases,
         earliestLeaseResult,
@@ -83,12 +83,6 @@ export default async function GestionLocativePage({
         revenueHistory,
         expenses
     ] = await Promise.all([
-        // Statut pro
-        withTimeoutSafe(
-            Promise.resolve(supabase.from("profiles").select("pro_status").eq("id", user.id).single()),
-            'getProStatus',
-            { data: { pro_status: 'none' } } as any
-        ),
         // Profil pour les infos de quittance
         withTimeoutSafe(getOwnerProfileForReceipts(user.id), 'getOwnerProfileForReceipts', null),
         // Tous les baux du propriétaire
@@ -123,8 +117,10 @@ export default async function GestionLocativePage({
         withTimeoutSafe(getExpensesByOwner(teamId), 'getExpensesByOwner', [])
     ]);
 
+    const currentTier = team?.subscription_tier || "starter";
+
     // Extraire les données des résultats (avec fallbacks)
-    const proStatus = (userProfileResult as any)?.data?.pro_status || "none";
+    const proStatus = context?.subscription_status || "none";
     const earliestLease = earliestLeaseResult; // Déjà extrait dans la Promise
     const expensesList = expenses || [];
 
@@ -144,7 +140,7 @@ export default async function GestionLocativePage({
     // Étape 2 : Récupérer les transactions (dépend des leases filtrés)
     const leaseIds = filteredLeases.map(l => l.id);
     const rawTransactions = await withTimeoutSafe(
-        getRentalTransactions(leaseIds),
+        getRentalTransactions(leaseIds, teamId),
         'getRentalTransactions',
         [],
         4000
@@ -175,11 +171,17 @@ export default async function GestionLocativePage({
             }
         >
             {/* Banner for expired subscription */}
-            {proStatus === "expired" && (
+            {proStatus === "expired" ? (
                 <ExpiredBanner
                     proStatus={proStatus}
                     propertiesCount={allLeases.length}
                     leasesCount={filteredLeases.length}
+                />
+            ) : (
+                <QuotaBanner
+                    tier={currentTier}
+                    propertiesCount={advancedStats.totalProperties}
+                    leasesCount={advancedStats.activeLeases}
                 />
             )}
 

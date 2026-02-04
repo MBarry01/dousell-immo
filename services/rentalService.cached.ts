@@ -60,27 +60,60 @@ export async function getLeasesByTeam(
 /**
  * 💰 Récupérer les transactions de loyer pour des baux (avec cache)
  *
- * TTL : 2 minutes (paiements changent fréquemment)
- * Cache key : `rental_transactions:{leaseIds hash}`
+ * TTL : 5 minutes
+ * Cache key : `rental_transactions:team:{teamId}` (si teamId fourni)
+ * ou `rental_transactions:bulk:{leaseIds hash}` (fallback)
  */
-export async function getRentalTransactions(leaseIds: string[]) {
+export async function getRentalTransactions(leaseIds: string[], teamId?: string) {
   if (leaseIds.length === 0) {
     return [];
   }
 
-  // OPTIMISATION : Requête unique à la DB pour éviter "thundering herd"
-  // Au lieu de faire N requêtes de cache parallèles, on fait une seule requête DB
-  // pour récupérer toutes les transactions des baux concernés.
-  // Cela soulage le pool de connexion et évite les blocages sur de gros volumes.
+  // OPTIMISATION : Si teamId est fourni, on cache par ÉQUIPE
+  // Cela permet une invalidation simple et efficace lors des paiements
+  if (teamId) {
+    return getOrSetCache(
+      `rental_transactions:team:${teamId}`,
+      async () => {
+        const supabase = await createClient();
 
+        // On récupère TOUTES les transactions de l'équipe (plus efficace pour le dashboard global)
+        // La filtration par leaseIds se fera en mémoire si nécessaire, mais pour le dashboard
+        // on affiche généralement tout.
+        const { data, error } = await supabase
+          .from("rental_transactions")
+          .select(
+            "id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end, payment_method, payment_ref"
+          )
+          .eq("team_id", teamId)
+          .order("period_year", { ascending: false })
+          .order("period_month", { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+      },
+      {
+        ttl: 300,
+        namespace: "rentals",
+        debug: true,
+      }
+    ).then(allTransactions => {
+      // Filtrer pour ne retourner que ceux demandés (sécurité/cohérence)
+      if (!allTransactions) return [];
+      const leaseIdSet = new Set(leaseIds);
+      return allTransactions.filter(t => leaseIdSet.has(t.lease_id));
+    });
+  }
+
+  // FALLBACK : Ancien comportement (cache par liste d'IDs)
   return getOrSetCache(
-    `rental_transactions:bulk:${leaseIds.sort().join('_')}`, // Clé basée sur la liste d'IDs
+    `rental_transactions:bulk:${leaseIds.sort().join('_')}`,
     async () => {
       const supabase = await createClient();
       const { data, error } = await supabase
         .from("rental_transactions")
         .select(
-          "id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end"
+          "id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end, payment_method, payment_ref"
         )
         .in("lease_id", leaseIds)
         .order("period_year", { ascending: false })
@@ -90,7 +123,7 @@ export async function getRentalTransactions(leaseIds: string[]) {
       return data || [];
     },
     {
-      ttl: 300, // 5 minutes
+      ttl: 300,
       namespace: "rentals",
       debug: true,
     }

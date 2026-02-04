@@ -62,7 +62,7 @@ export function ExpiredBanner({
           </div>
           <div className="flex items-center gap-2">
             <Button
-              onClick={() => router.push("/gestion/subscription")}
+              onClick={() => router.push("/gestion/config")}
               className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90"
             >
               Réactiver

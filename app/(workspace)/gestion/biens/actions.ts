@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireTeamPermission, getUserTeamContext } from "@/lib/team-permissions.server";
 import { invalidatePropertyCaches, invalidateRentalCaches } from "@/lib/cache/invalidation";
+import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
 
 // =====================================================
 // TYPES
@@ -185,6 +186,17 @@ export async function createTeamProperty(
   const permCheck = await requireTeamPermission(teamId, "properties.create");
   if (!permCheck.success) {
     return { success: false, error: permCheck.error };
+  }
+
+  // ✅ CHECK FEATURE QUOTA
+  const access = await checkFeatureAccess(teamId, "add_property");
+  if (!access.allowed) {
+    return {
+      success: false,
+      error: access.message,
+      upgradeRequired: access.upgradeRequired,
+      reason: access.reason
+    };
   }
 
   // Validation plus souple pour les brouillons
@@ -730,6 +742,17 @@ export async function associateTenant(
   const permCheck = await requireTeamPermission(teamId, "properties.edit");
   if (!permCheck.success) {
     return { success: false, error: permCheck.error };
+  }
+
+  // ✅ CHECK FEATURE QUOTA
+  const access = await checkFeatureAccess(teamId, "add_lease");
+  if (!access.allowed) {
+    return {
+      success: false,
+      error: access.message,
+      upgradeRequired: access.upgradeRequired,
+      reason: access.reason
+    };
   }
 
   const supabase = await createClient();

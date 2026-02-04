@@ -107,7 +107,7 @@ export async function getUserTeamContext(preferredTeamId?: string): Promise<User
         if (!membership?.team) {
             // AUTO-FIX: Créer une équipe personnelle pour l'utilisateur
             console.log(`[Auto-Team] Creating personal team for user ${user.id}`);
-            const newTeamContext = await createPersonalTeam(user.id, user.email || "Utilisateur");
+            const newTeamContext = await createPersonalTeam(user.id, user.email || "Utilisateur", user.user_metadata);
             return newTeamContext;
         }
 
@@ -149,7 +149,7 @@ export async function getUserTeamContext(preferredTeamId?: string): Promise<User
 /**
  * Crée une équipe personnelle pour un utilisateur qui n'en a pas
  */
-async function createPersonalTeam(userId: string, userEmail: string): Promise<UserTeamContext | null> {
+async function createPersonalTeam(userId: string, userEmail: string, metadata?: any): Promise<UserTeamContext | null> {
     const supabase = await createClient();
 
     // Générer un slug unique
@@ -157,12 +157,24 @@ async function createPersonalTeam(userId: string, userEmail: string): Promise<Us
     const userName = userEmail.split("@")[0] || "Utilisateur";
     const teamName = `Espace de ${userName}`;
 
+    // Extraire le plan des métadonnées (inscrit via signup)
+    const selectedPlan = metadata?.selected_plan || "starter";
+    const trialDays = 14;
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + trialDays);
+
     try {
-        // Créer l'équipe
+        // Créer l'équipe avec le plan initial
         const { data: newTeam, error: teamError } = await supabase
             .from("teams")
-            .insert({ name: teamName, slug })
-            .select("id, name, slug")
+            .insert({
+                name: teamName,
+                slug,
+                subscription_tier: selectedPlan,
+                subscription_status: 'trial',
+                subscription_trial_ends_at: trialEndsAt.toISOString()
+            })
+            .select("id, name, slug, subscription_tier, subscription_status, subscription_trial_ends_at")
             .single();
 
         if (teamError || !newTeam) {
@@ -194,6 +206,9 @@ async function createPersonalTeam(userId: string, userEmail: string): Promise<Us
             team_name: newTeam.name,
             team_slug: newTeam.slug,
             user_role: "owner" as TeamRole,
+            subscription_tier: newTeam.subscription_tier as any,
+            subscription_status: newTeam.subscription_status as any,
+            subscription_trial_ends_at: newTeam.subscription_trial_ends_at,
         };
     } catch (err) {
         console.error("[Auto-Team] Unexpected error:", err);

@@ -15,7 +15,7 @@ export type MemberStatus = "active" | "suspended" | "invited" | "removed" | "lef
 
 export type InvitationStatus = "pending" | "accepted" | "expired" | "cancelled";
 
-export type SubscriptionTier = "free" | "pro" | "enterprise";
+export type SubscriptionTier = "starter" | "pro" | "enterprise";
 
 // =====================================================
 // INTERFACES PRINCIPALES
@@ -153,7 +153,7 @@ export interface UserTeamContext {
   // 🆕 Subscription fields (optimisation: évite un appel DB séparé)
   subscription_status?: 'none' | 'trial' | 'active' | 'expired' | 'canceled';
   subscription_trial_ends_at?: string | null;
-  subscription_tier?: 'pro' | 'premium' | 'enterprise';
+  subscription_tier?: SubscriptionTier;
 }
 
 // =====================================================

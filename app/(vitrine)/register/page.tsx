@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -27,6 +27,8 @@ import { signup } from "@/app/(vitrine)/auth/actions";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const plan = searchParams.get("plan") || "starter";
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
   const [phoneValue, setPhoneValue] = useState<RPNInput.Value | undefined>(undefined);
@@ -187,6 +189,7 @@ export default function RegisterPage() {
               }
 
               formData.append("turnstileToken", captchaToken);
+              formData.append("plan", plan);
 
               // Validation côté client
               const fullName = formData.get("fullName") as string;

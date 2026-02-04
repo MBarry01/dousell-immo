@@ -150,7 +150,7 @@ export default function DousellNavbarClient({
             switch (activeSection) {
                 case "pricing":
                     // Offre toujours pertinente même si connecté (upgrade ?)
-                    return { text: "Choisir une offre", href: "/auth/signup" };
+                    return { text: "Choisir une offre", href: "/landing/commencer" };
                 case "demo":
                 case "features":
                     return isLoggedIn

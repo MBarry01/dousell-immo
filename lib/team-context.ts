@@ -68,5 +68,8 @@ export const getUserTeamContext = cache(async () => {
         team, // L'objet équipe complet
         teamId: memberData.team_id as string, // L'ID pour les requêtes (plus propre que team.id)
         role: memberData.role as TeamRole, // Le rôle typé pour les permissions
+        subscription_status: team.subscription_status,
+        subscription_trial_ends_at: team.subscription_trial_ends_at,
+        subscription_tier: team.subscription_tier,
     };
 });

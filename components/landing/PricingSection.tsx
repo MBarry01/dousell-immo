@@ -3,11 +3,22 @@
 import { motion } from "framer-motion";
 import { Check, Star } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/client";
 
 export default function PricingSection() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsLoggedIn(!!user);
+    };
+    checkAuth();
+  }, []);
 
   const plans = [
     {
@@ -20,8 +31,8 @@ export default function PricingSection() {
         "Documents standards",
         "Accès communauté",
       ],
-      cta: "Essai Gratuit",
-      href: "/auth/signup?plan=starter",
+      cta: isLoggedIn ? "Choisir" : "Essai Gratuit",
+      href: isLoggedIn ? "/gestion?upgrade=starter" : "/register?plan=starter",
       description: "Parfait pour les propriétaires débutants",
     },
     {
@@ -37,8 +48,8 @@ export default function PricingSection() {
         "Collaboration équipe",
         "Intégrations Wave/OM",
       ],
-      cta: "Commencer",
-      href: "/auth/signup?plan=professional",
+      cta: isLoggedIn ? "Choisir" : "Commencer",
+      href: isLoggedIn ? "/gestion?upgrade=pro" : "/register?plan=pro",
       description: "Idéal pour les agences en croissance",
     },
     {
@@ -183,8 +194,8 @@ export default function PricingSection() {
               variants={cardVariants}
               whileHover="hover"
               className={`relative rounded-2xl p-8 backdrop-blur-sm transition-all duration-300 ${plan.popular
-                  ? "bg-gradient-to-b from-[#F4C430]/10 to-transparent border-2 border-[#F4C430]/50 shadow-2xl shadow-[#F4C430]/10"
-                  : "bg-white/5 border border-white/10 hover:border-[#F4C430]/30"
+                ? "bg-gradient-to-b from-[#F4C430]/10 to-transparent border-2 border-[#F4C430]/50 shadow-2xl shadow-[#F4C430]/10"
+                : "bg-white/5 border border-white/10 hover:border-[#F4C430]/30"
                 }`}
             >
               {/* Badge Populaire */}
@@ -218,8 +229,8 @@ export default function PricingSection() {
               <Link
                 href={plan.href}
                 className={`block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 ${plan.popular
-                    ? "bg-[#F4C430] text-black hover:bg-[#FFD700] shadow-lg shadow-[#F4C430]/25 hover:shadow-[#F4C430]/40 hover:-translate-y-1"
-                    : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
+                  ? "bg-[#F4C430] text-black hover:bg-[#FFD700] shadow-lg shadow-[#F4C430]/25 hover:shadow-[#F4C430]/40 hover:-translate-y-1"
+                  : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
                   }`}
               >
                 {plan.cta}

@@ -23,6 +23,7 @@ import { SoftwareIcon } from "@/components/ui/software-icon";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AppointmentScheduler } from "@/components/ui/appointment-scheduler";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Captcha } from "@/components/ui/captcha";
@@ -266,6 +267,8 @@ function LandingPageContent() {
     googleCalendarUrl?: string;
     meetLink?: string | null;
   } | null>(null);
+
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   const form = useForm<VisitRequestFormValues>({
     resolver: zodResolver(visitRequestSchema),
@@ -542,7 +545,13 @@ function LandingPageContent() {
               </Link>
               <a
                 href={currentContent.ctaSecondary.href}
-                className="group rounded-full w-full sm:w-auto border border-white/20 bg-white/5 px-8 sm:px-10 py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-[#F4C430]/40 active:scale-[0.97] text-[15px] sm:text-base"
+                onClick={(e) => {
+                  if (currentContent.ctaSecondary.href === "#demo") {
+                    e.preventDefault();
+                    setIsVideoOpen(true);
+                  }
+                }}
+                className="group rounded-full w-full sm:w-auto border border-white/20 bg-white/5 px-8 sm:px-10 py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-[#F4C430]/40 active:scale-[0.97] text-[15px] sm:text-base cursor-pointer"
               >
                 <span className="flex items-center justify-center gap-2">
                   {currentContent.ctaSecondary.text}
@@ -690,129 +699,151 @@ function LandingPageContent() {
 
       {/* Laptop Mockup Section - Dashboard Gestion Locative */}
       {userMode === "owner" && (
-        <section id="demo" className="relative py-12 md:py-20 bg-black overflow-hidden">
-          {/* Background gradient */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.06)_0%,_transparent_70%)]" />
+        <>
+          <section id="demo" className="relative py-12 md:py-20 bg-black overflow-hidden">
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.06)_0%,_transparent_70%)]" />
 
-          <div className="container mx-auto px-6 relative z-10">
-            {/* Section Header */}
-            <div className="text-center mb-12 md:mb-16">
-              <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
-                Tout en un seul endroit
-              </span>
-              <h2 className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-6">
-                Pilotez tout depuis{" "}
-                <span className="gradient-text-animated">un seul écran</span>
-              </h2>
-              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Loyers, contrats, quittances, alertes; plus besoin de jongler entre 10 outils.
-              </p>
-            </div>
-
-            {/* Laptop Mockup */}
-            <div className="relative max-w-5xl mx-auto">
-              {/* Glow effect */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-[#F4C430]/10 rounded-full blur-[120px]" />
-
-              {/* Floating Stats Badges - Premium Glassmorphism */}
-              <div className="hidden md:block absolute -left-14 lg:-left-24 top-12 lg:top-20 z-20 animate-float-slow">
-                <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
-                  <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">100%</div>
-                  <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Automatisé</div>
-                </div>
+            <div className="container mx-auto px-6 relative z-10">
+              {/* Section Header */}
+              <div className="text-center mb-12 md:mb-16">
+                <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
+                  Tout en un seul endroit
+                </span>
+                <h2 className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-6">
+                  Pilotez tout depuis{" "}
+                  <span className="gradient-text-animated">un seul écran</span>
+                </h2>
+                <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                  Loyers, contrats, quittances, alertes; plus besoin de jongler entre 10 outils.
+                </p>
               </div>
 
-              <div className="hidden md:block absolute -right-14 lg:-right-24 top-20 lg:top-28 z-20 animate-float-delayed-1">
-                <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
-                  <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">24/7</div>
-                  <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Accessible</div>
-                </div>
-              </div>
+              {/* Laptop Mockup */}
+              <div className="relative max-w-5xl mx-auto">
+                {/* Glow effect */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-[#F4C430]/10 rounded-full blur-[120px]" />
 
-              <div className="hidden md:block absolute -left-12 lg:-left-20 bottom-24 lg:bottom-32 z-20 animate-float-delayed-2">
-                <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
-                  <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">2x</div>
-                  <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Plus rapide</div>
-                </div>
-              </div>
-
-              <div className="hidden md:block absolute -right-12 lg:-right-20 bottom-32 lg:bottom-40 z-20 animate-float-delayed-3">
-                <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
-                  <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">0</div>
-                  <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Paperasse</div>
-                </div>
-              </div>
-
-              {/* Laptop Frame */}
-              <div className="relative">
-                {/* Screen bezel */}
-                <div className="relative bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 rounded-t-xl md:rounded-t-2xl p-2 md:p-3 pt-4 md:pt-6 shadow-2xl">
-                  {/* Camera & Sensors */}
-                  <div className="absolute top-1.5 md:top-2 left-1/2 -translate-x-1/2 flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-zinc-600 rounded-full" />
-                    <div className="w-2 h-2 md:w-3 md:h-3 bg-zinc-800 rounded-full border border-zinc-600" />
-                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-zinc-600 rounded-full" />
-                  </div>
-
-                  {/* Screen Content */}
-                  <div className="relative bg-zinc-900 rounded-lg md:rounded-xl overflow-hidden">
-                    <Image
-                      src="/images/dasboard.webp"
-                      alt="Tableau de bord gestion locative - Suivi loyers et locataires Dakar Sénégal"
-                      width={1200}
-                      height={750}
-                      className="w-full h-auto"
-                      draggable={false}
-                    />
-                    {/* Screen reflection */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
+                {/* Floating Stats Badges - Premium Glassmorphism */}
+                <div className="hidden md:block absolute -left-14 lg:-left-24 top-12 lg:top-20 z-20 animate-float-slow">
+                  <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
+                    <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">100%</div>
+                    <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Automatisé</div>
                   </div>
                 </div>
 
-                {/* Laptop Base/Keyboard */}
+                <div className="hidden md:block absolute -right-14 lg:-right-24 top-20 lg:top-28 z-20 animate-float-delayed-1">
+                  <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
+                    <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">24/7</div>
+                    <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Accessible</div>
+                  </div>
+                </div>
+
+                <div className="hidden md:block absolute -left-12 lg:-left-20 bottom-24 lg:bottom-32 z-20 animate-float-delayed-2">
+                  <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
+                    <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">2x</div>
+                    <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Plus rapide</div>
+                  </div>
+                </div>
+
+                <div className="hidden md:block absolute -right-12 lg:-right-20 bottom-32 lg:bottom-40 z-20 animate-float-delayed-3">
+                  <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
+                    <div className="text-2xl font-bold bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">0</div>
+                    <div className="text-[10px] text-slate-300 uppercase tracking-widest mt-0.5">Paperasse</div>
+                  </div>
+                </div>
+
+                {/* Laptop Frame */}
                 <div className="relative">
-                  {/* Hinge */}
-                  <div className="h-3 md:h-4 bg-gradient-to-b from-zinc-800 to-zinc-700 rounded-b-lg" />
-                  {/* Base */}
-                  <div className="h-4 md:h-6 bg-gradient-to-b from-zinc-600 to-zinc-700 rounded-b-xl mx-[5%] shadow-lg" />
-                  {/* Bottom edge */}
-                  <div className="h-1 md:h-1.5 bg-zinc-800 rounded-b-xl mx-[10%]" />
-                </div>
-              </div>
+                  {/* Screen bezel */}
+                  <div className="relative bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 rounded-t-xl md:rounded-t-2xl p-2 md:p-3 pt-4 md:pt-6 shadow-2xl">
+                    {/* Camera & Sensors */}
+                    <div className="absolute top-1.5 md:top-2 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-zinc-600 rounded-full" />
+                      <div className="w-2 h-2 md:w-3 md:h-3 bg-zinc-800 rounded-full border border-zinc-600" />
+                      <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-zinc-600 rounded-full" />
+                    </div>
 
-              {/* Label - Clickable Button with Shimmer */}
-              <Link
-                href="/gestion"
-                className="relative mt-6 mx-auto w-fit block md:absolute md:mt-0 md:-bottom-8 md:left-1/2 md:-translate-x-1/2 rounded-full px-5 py-2 shadow-lg shadow-[#F4C430]/20 transition-all hover:scale-105 hover:shadow-xl hover:shadow-[#F4C430]/30 overflow-hidden"
-              >
-                {/* Base gradient */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#F4C430] to-[#E5B82A]" />
-                {/* Shimmer wave effect */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: "linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.35) 50%, transparent 75%)",
-                    backgroundSize: "250% 100%",
-                    animation: "shimmer 2.5s ease-in-out infinite"
-                  }}
-                />
-                <span className="relative z-10 text-sm font-semibold text-black">Dashboard Gestion Locative</span>
-              </Link>
+                    {/* Screen Content */}
+                    <div className="relative bg-zinc-900 rounded-lg md:rounded-xl overflow-hidden">
+                      <Image
+                        src="/images/dasboard.webp"
+                        alt="Tableau de bord gestion locative - Suivi loyers et locataires Dakar Sénégal"
+                        width={1200}
+                        height={750}
+                        className="w-full h-auto"
+                        draggable={false}
+                      />
+                      {/* Screen reflection */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* Laptop Base/Keyboard */}
+                  <div className="relative">
+                    {/* Hinge */}
+                    <div className="h-3 md:h-4 bg-gradient-to-b from-zinc-800 to-zinc-700 rounded-b-lg" />
+                    {/* Base */}
+                    <div className="h-4 md:h-6 bg-gradient-to-b from-zinc-600 to-zinc-700 rounded-b-xl mx-[5%] shadow-lg" />
+                    {/* Bottom edge */}
+                    <div className="h-1 md:h-1.5 bg-zinc-800 rounded-b-xl mx-[10%]" />
+                  </div>
+                </div>
+
+                {/* Label - Clickable Button with Shimmer */}
+                <Link
+                  href="/gestion"
+                  className="relative mt-6 mx-auto w-fit block md:absolute md:mt-0 md:-bottom-8 md:left-1/2 md:-translate-x-1/2 rounded-full px-5 py-2 shadow-lg shadow-[#F4C430]/20 transition-all hover:scale-105 hover:shadow-xl hover:shadow-[#F4C430]/30 overflow-hidden"
+                >
+                  {/* Base gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#F4C430] to-[#E5B82A]" />
+                  {/* Shimmer wave effect */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: "linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.35) 50%, transparent 75%)",
+                      backgroundSize: "250% 100%",
+                      animation: "shimmer 2.5s ease-in-out infinite"
+                    }}
+                  />
+                  <span className="relative z-10 text-sm font-semibold text-black">Dashboard Gestion Locative</span>
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+
+          <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
+            <DialogContent className="sm:max-w-[70vw] w-full p-0 bg-black border-zinc-800 overflow-hidden shadow-2xl">
+              <DialogTitle className="sr-only">Démonstration vidéo de Dousell Immo</DialogTitle>
+              <div className="aspect-video w-full">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src="https://www.youtube.com/embed/Ydn8c3trfho?autoplay=1&rel=0"
+                  title="Dousell Demo"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
+        </>
       )}
 
       {/* Saasable Feature18 - Tabbed Features (Propriétaire uniquement) */}
-      {userMode === "owner" && (
-        <SaasableSectionWrapper>
-          <Feature18
-            heading=""
-            caption=""
-            topics={featuresDataSaasable}
-          />
-        </SaasableSectionWrapper>
-      )}
+      {
+        userMode === "owner" && (
+          <SaasableSectionWrapper>
+            <Feature18
+              heading=""
+              caption=""
+              topics={featuresDataSaasable}
+            />
+          </SaasableSectionWrapper>
+        )
+      }
 
       {/* Features Section (Propriétaire uniquement) */}
       {userMode === "owner" && <FeaturesBento />}

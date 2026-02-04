@@ -52,6 +52,7 @@ import { fr } from "date-fns/locale";
 import { createClient } from "@/utils/supabase/client";
 import { OwnerSelector } from "@/components/gestion/OwnerSelector";
 import { createTeamProperty, generateSEODescription, type TeamPropertyData } from "../actions";
+import { UpgradeModal } from "@/components/gestion/UpgradeModal";
 
 type PublishMode = "publish" | "draft" | "schedule";
 
@@ -116,6 +117,8 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
   const [publishMode, setPublishMode] = useState<PublishMode>("publish");
   const [scheduledDate, setScheduledDate] = useState("");
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [statsSummary, setStatsSummary] = useState({ properties: 0, leases: 0 });
 
   const updateField = (field: string, value: string | number | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -327,6 +330,9 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
       const successMsg = mode === "draft" ? "saved_draft" : mode === "schedule" ? "scheduled" : "created";
       router.push(`/gestion/biens?success=${successMsg}`);
     } else {
+      if (result.upgradeRequired) {
+        setShowUpgradeModal(true);
+      }
       setError(result.error || "Erreur lors de la création");
     }
   };
@@ -845,6 +851,12 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
           </DialogContent>
         </Dialog>
 
+        {/* Upgrade Modal */}
+        <UpgradeModal
+          open={showUpgradeModal}
+          onOpenChange={setShowUpgradeModal}
+          propertiesCount={10} // Just a fallback or fetch real stats
+        />
       </div >
     </div >
   );

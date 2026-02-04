@@ -120,9 +120,13 @@ export async function invalidateRentalCaches(
     );
   }
 
-  if (invalidateTransactions && leaseId) {
+  if (invalidateTransactions) {
     // Clé précise qui matche la nouvelle stratégie de cache par bail
-    rentalKeys.push(`rental_transactions:${leaseId}`);
+    if (leaseId) {
+      rentalKeys.push(`rental_transactions:${leaseId}`);
+    }
+    // Clé globale par équipe (utilisée par le dashboard pour la performance)
+    rentalKeys.push(`rental_transactions:team:${ownerId}`);
   }
 
   if (invalidateStats) {
@@ -147,10 +151,10 @@ export async function invalidateRentalCaches(
     await invalidateCacheBatch(rentalKeys, "rentals");
   }
 
-  // Revalider pages (corrected paths)
-  revalidatePath("/gestion-locative");
+  // Revalider pages
+  revalidatePath("/gestion"); // Dashboard principal (et non /gestion-locative qui est l'ancien path)
   if (leaseId) {
-    revalidatePath(`/gestion-locative/locataires/${leaseId}`);
+    revalidatePath(`/gestion/locataires/${leaseId}`);
   }
 }
 
