@@ -1,10 +1,12 @@
 import Stripe from 'stripe';
 
+const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
+
 if (!process.env.STRIPE_SECRET_KEY) {
-    throw new Error('STRIPE_SECRET_KEY is not defined');
+    console.warn('STRIPE_SECRET_KEY is not defined, Stripe features will not work.');
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(stripeKey, {
     apiVersion: '2024-06-20' as any, // Use latest stable or the one you are comfortable with
     typescript: true,
 });
