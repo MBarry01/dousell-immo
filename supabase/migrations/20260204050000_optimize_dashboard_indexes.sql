@@ -29,5 +29,12 @@ CREATE INDEX IF NOT EXISTS idx_maintenance_requests_team_status ON public.mainte
 -- (Normalement déjà indexé, mais pour être sûr)
 CREATE INDEX IF NOT EXISTS idx_properties_team_id ON public.properties(team_id);
 
+-- 6. Optimisation TEAM_MEMBERS (Pour getUserTeamContext)
+-- Vital car appelé à chaque page
+CREATE INDEX IF NOT EXISTS idx_team_members_user_status ON public.team_members(user_id, status);
+
+-- 7. Optimisation LEASES joins
+CREATE INDEX IF NOT EXISTS idx_leases_property_id ON public.leases(property_id);
+
 COMMENT ON INDEX idx_leases_team_id IS 'Performance index for fetching team leases';
 COMMENT ON INDEX idx_rental_transactions_team_period IS 'Performance index for revenue stats';

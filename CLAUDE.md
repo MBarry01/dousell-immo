@@ -95,3 +95,15 @@
 - **Currency**: Field `prix` is an integer (centimes/smallest unit).
 - **Logic**: French-first UX labels and messages.
 - **Cache**: Always invalidate after mutation (Server Actions).
+
+---
+
+## 🧩 Skills (Domain Knowledge)
+
+Skills are detailed documentation for complex subsystems. **Always read relevant skills before modifying these areas:**
+
+| Skill | Path | When to read |
+|-------|------|--------------|
+| **Rental Payments** | `.agent/skills/rental-payments/SKILL.md` | Stripe payments, webhooks, `rental_transactions` |
+
+**Load context workflow**: Run `/load_context` to auto-load all skills and project brain.

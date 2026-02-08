@@ -9,12 +9,13 @@
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { requireTeamPermission } from "@/lib/permissions";
+import { safeAction } from "@/lib/safe-action";
 import { z } from "zod";
 import type { TeamPermissionKey } from "@/lib/team-permissions";
 import {
-  notifyAccessRequest,
-  notifyAccessApproved,
-  notifyAccessRejected,
+    notifyAccessRequest,
+    notifyAccessApproved,
+    notifyAccessRejected,
 } from "@/lib/notifications/access-control-notifications";
 
 // =====================================================
@@ -51,45 +52,32 @@ const grantTemporaryPermissionSchema = z.object({
 /**
  * Créer une demande d'accès temporaire
  */
-export async function requestAccessAction(formData: FormData | {
-    teamId: string;
-    permission: string;
-    reason?: string;
-}) {
-    try {
+// ... existing imports
+
+/**
+ * Créer une demande d'accès temporaire
+ */
+export const submitAccessRequest = safeAction(
+    "submitAccessRequest",
+    requestAccessSchema,
+    async (data, { userId }) => {
+        const { teamId, permission, reason } = data;
         const supabase = await createClient();
+
         const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) {
-            return { success: false, error: "Non connecté" };
-        }
-
-        // Parse & validate
-        const data = formData instanceof FormData
-            ? Object.fromEntries(formData.entries())
-            : formData;
-
-        const validation = requestAccessSchema.safeParse(data);
-        if (!validation.success) {
-            return {
-                success: false,
-                error: validation.error.issues[0]?.message || "Données invalides"
-            };
-        }
-
-        const { teamId, permission, reason } = validation.data;
+        if (!user || user.id !== userId) throw new Error("Non connecté");
 
         // Vérifier que l'utilisateur est membre de l'équipe
         const { data: membership } = await supabase
             .from('team_members')
             .select('id, role')
             .eq('team_id', teamId)
-            .eq('user_id', user.id)
+            .eq('user_id', userId)
             .eq('status', 'active')
             .single();
 
         if (!membership) {
-            return { success: false, error: "Vous n'êtes pas membre de cette équipe" };
+            throw new Error("Vous n'êtes pas membre de cette équipe");
         }
 
         // Vérifier qu'il n'y a pas déjà une demande pending pour cette permission
@@ -97,16 +85,13 @@ export async function requestAccessAction(formData: FormData | {
             .from('access_requests')
             .select('id')
             .eq('team_id', teamId)
-            .eq('requester_id', user.id)
+            .eq('requester_id', userId)
             .eq('requested_permission', permission)
             .eq('status', 'pending')
             .maybeSingle();
 
         if (existingRequest) {
-            return {
-                success: false,
-                error: "Vous avez déjà une demande en attente pour cette permission"
-            };
+            throw new Error("Vous avez déjà une demande en attente pour cette permission");
         }
 
         // Créer la demande
@@ -114,7 +99,7 @@ export async function requestAccessAction(formData: FormData | {
             .from('access_requests')
             .insert({
                 team_id: teamId,
-                requester_id: user.id,
+                requester_id: userId,
                 requested_permission: permission,
                 reason: reason || null,
                 status: 'pending',
@@ -122,16 +107,13 @@ export async function requestAccessAction(formData: FormData | {
 
         if (insertError) {
             console.error('[Access Request] Insert error:', insertError);
-            return {
-                success: false,
-                error: "Erreur lors de la création de la demande"
-            };
+            throw new Error("Erreur lors de la création de la demande");
         }
 
         // Envoyer notification aux owners/managers
         await notifyAccessRequest({
             teamId,
-            requesterId: user.id,
+            requesterId: userId,
             permission,
             reason,
         });
@@ -140,14 +122,8 @@ export async function requestAccessAction(formData: FormData | {
             success: true,
             message: "Demande d'accès envoyée avec succès"
         };
-    } catch (error) {
-        console.error('[Access Request] Unexpected error:', error);
-        return {
-            success: false,
-            error: "Erreur inattendue lors de la création de la demande"
-        };
     }
-}
+);
 
 /**
  * Récupérer les demandes d'accès pour une équipe
@@ -293,7 +269,7 @@ export async function reviewAccessRequestAction(formData: FormData | {
             }
         }
 
-        const { error: updateError} = await adminSupabase
+        const { error: updateError } = await adminSupabase
             .from('access_requests')
             .update(updateData)
             .eq('id', requestId);

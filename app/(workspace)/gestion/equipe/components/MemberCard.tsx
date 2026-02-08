@@ -61,15 +61,15 @@ export function MemberCard({
 
   const handleRemove = async () => {
     setLoading(true);
-    const result = await removeTeamMember(teamId, member.id);
+    const { data: result, error } = await removeTeamMember({ teamId, memberId: member.id });
     setLoading(false);
 
-    if (result.success) {
+    if (result?.success) {
       toast.success("Membre retiré");
       setShowRemoveDialog(false);
       router.refresh();
     } else {
-      toast.error(result.error || "Erreur");
+      toast.error(error || "Erreur");
     }
   };
 
@@ -88,19 +88,19 @@ export function MemberCard({
 
   const initials = member.user?.full_name
     ? member.user.full_name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
     : member.user?.email?.slice(0, 2).toUpperCase() || "??";
 
   const joinedDate = member.joined_at
     ? new Date(member.joined_at).toLocaleDateString("fr-FR", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })
     : null;
 
   return (

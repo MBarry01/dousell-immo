@@ -338,6 +338,15 @@ export default function MagicTransformation() {
             )}>
               {isFlipped ? "Magie opérée" : "Cliquez pour transformer"}
             </span>
+
+            {/* Subtitle / Callout - Styled like the main H2 title */}
+            <motion.h3
+
+              className="mt-8 font-display text-2xl md:text-3xl lg:text-4xl text-white text-center max-w-3xl mx-auto leading-tight"
+            >
+              Bénéficiez d&apos;une vitrine visible sur Google. <br className="hidden md:block" />
+              <span className="text-[#F4C430]">Recevez des demandes de visite qualifiées.</span>
+            </motion.h3>
           </div>
         </div>
       </div>

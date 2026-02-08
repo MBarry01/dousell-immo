@@ -47,6 +47,12 @@ export default function LocataireLayout({
   const [tenantName, setTenantName] = useState<string>("");
   const [propertyAddress, setPropertyAddress] = useState<string>("");
 
+  // Note: We no longer block /locataire in PWA standalone mode.
+  // The tenant session uses its own `tenant_session` cookie which is
+  // independent from the Supabase auth cookie. The tenant flow
+  // (token validation → name verification → cookie creation) works
+  // identically in both browser and PWA contexts.
+
   // Pages that don't need the full navigation
   const isMinimalPage =
     pathname?.includes("/verify") || pathname?.includes("/expired");
@@ -105,26 +111,26 @@ export default function LocataireLayout({
   ];
 
   const handleLogout = async () => {
-    // Clear tenant session cookie
+    // Clear tenant session cookie (must use same path as when cookie was created: "/")
     document.cookie =
-      "tenant_session=; path=/locataire; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      "tenant_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     window.location.href = "/";
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col light">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-zinc-900/95 backdrop-blur border-b border-white/10">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link href="/locataire" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#F4C430]/10 flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-[#F4C430]" />
+            <div className="w-10 h-10 rounded-xl bg-slate-900/10 flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-slate-900" />
             </div>
             <div className="hidden sm:block">
-              <span className="font-semibold text-white">Mon Espace</span>
+              <span className="font-semibold text-slate-900">Mon Espace</span>
               {propertyAddress && (
-                <p className="text-xs text-white/50 truncate max-w-[200px]">
+                <p className="text-xs text-slate-500 truncate max-w-[200px]">
                   {propertyAddress}
                 </p>
               )}
@@ -140,14 +146,14 @@ export default function LocataireLayout({
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                   item.isActive
-                    ? "text-white bg-white/10"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
+                    ? "text-slate-900 bg-slate-100"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 )}
               >
                 <item.icon
                   className={cn(
                     "h-4 w-4",
-                    item.isActive ? "text-[#F4C430]" : "text-white/40"
+                    item.isActive ? "text-slate-900" : "text-slate-400"
                   )}
                 />
                 {item.label}
@@ -160,13 +166,13 @@ export default function LocataireLayout({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="text-white/70 hover:text-white hover:bg-white/10"
+                className="!bg-transparent hover:!bg-slate-100 data-[state=open]:!bg-slate-100 !text-slate-700 hover:!text-slate-900 data-[state=open]:!text-slate-900 hover:scale-[1.02] transition-all duration-200 border-none shadow-none"
               >
-                <span className="hidden sm:inline mr-2">
+                <span className="hidden sm:inline mr-2 !text-slate-700">
                   {tenantName || "Locataire"}
                 </span>
-                <div className="w-8 h-8 rounded-full bg-[#F4C430]/20 flex items-center justify-center">
-                  <span className="text-[#F4C430] text-sm font-semibold">
+                <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center">
+                  <span className="text-white text-sm font-semibold">
                     {tenantName?.charAt(0)?.toUpperCase() || "L"}
                   </span>
                 </div>
@@ -174,16 +180,16 @@ export default function LocataireLayout({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-56 bg-zinc-900 border-white/10"
+              className="w-56 bg-white border-slate-200"
             >
               <div className="px-2 py-2">
-                <p className="text-sm font-medium text-white">{tenantName}</p>
-                <p className="text-xs text-white/50">Espace Locataire</p>
+                <p className="text-sm font-medium text-slate-900">{tenantName}</p>
+                <p className="text-xs text-slate-500">Espace Locataire</p>
               </div>
-              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuSeparator className="bg-slate-200" />
               <DropdownMenuItem
                 onClick={handleLogout}
-                className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer"
+                className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 Se déconnecter
@@ -197,7 +203,7 @@ export default function LocataireLayout({
       <main className="flex-1 pb-20 md:pb-6">{children}</main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur border-t border-white/10 px-2 py-2 flex justify-around items-center z-50 md:hidden safe-area-pb">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 px-2 py-2 flex justify-around items-center z-50 md:hidden safe-area-pb">
         {navItems.map((item) => (
           <Link
             key={item.href}
@@ -205,8 +211,8 @@ export default function LocataireLayout({
             className={cn(
               "flex flex-col items-center gap-1 p-2 rounded-xl transition-colors min-w-[64px]",
               item.isActive
-                ? "text-[#F4C430]"
-                : "text-white/40 active:text-white"
+                ? "text-slate-900"
+                : "text-slate-400 active:text-slate-900"
             )}
           >
             <item.icon

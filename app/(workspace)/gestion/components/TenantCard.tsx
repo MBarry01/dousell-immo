@@ -125,10 +125,10 @@ export function TenantCard({
             relative group cursor-pointer
             border ${status.border} rounded-xl
             p-4 md:p-5
-            transition-all duration-200
-            ${status.glow} shadow-lg
+            transition-colors duration-200
+            ${status.glow} shadow-md
             ${isDark
-                    ? 'bg-slate-900/80 hover:bg-slate-900 hover:border-slate-700'
+                    ? 'bg-slate-900 hover:bg-slate-800 hover:border-slate-700'
                     : 'bg-white hover:bg-gray-50 hover:border-gray-300'
                 }
         `}>
@@ -224,8 +224,6 @@ export function TenantCard({
 
                         {/* Unified Status Dot */}
                         <span className="absolute -bottom-1 -right-1 flex h-3 w-3">
-                            {tenant.status === 'pending' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>}
-                            {tenant.status === 'overdue' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>}
                             <span className={`
                                 relative inline-flex rounded-full h-3 w-3 border-2 border-card
                                 ${tenant.status === 'paid' ? 'bg-green-500' : ''}

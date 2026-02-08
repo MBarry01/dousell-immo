@@ -1,28 +1,36 @@
 # Cursor Rules - Dousell Immo
 
 ## 🧠 Core Philosophy
-- **Plan First**: Reformuler le but avant de coder.
+- **Plan First**: Reformuler le but avant de coder. Use `/plan`.
 - **Reuse**: Chercher avant de créer.
 - **Justify**: Expliquer pourquoi une nouvelle solution est nécessaire.
+- **Immutability (CRITICAL)**: Toujours créer de nouveaux objets, JAMAIS de mutations.
 
 ## 🛡️ Security & Database
 - **RLS First**: Toujours penser aux politiques de sécurité Supabase.
 - **Auth**: Vérifier les rôles via `lib/permissions.ts`.
 - **Secrets**: Jamais de clés en dur.
+- **Input Validation**: Utiliser Zod pour CHAQUE entrée système.
 
 ## 👥 Team-Awareness
 - **Lease/Contract**: Vérifier `team_id` pour la propriété.
-- **Branding**: Utiliser le branding de l'équipe si présent.
+- **Branding**: Utiliser le branding de l'équipe (Luxe/Gold).
 
 ## 📱 Mobile & Performance
 - **A11y**: Lecteurs d'écran, contrastes 4.5:1, zones de toucher 44dp+.
-- **UX**: Respecter les zones sûres (notches) et les conventions plateforme.
+- **UX**: Mobile First (dvh, flex-col), Wording Français.
 
 ## 🏗️ Architecture
+- **Many Small Files**: Privilégier beaucoup de petits fichiers (<400 lignes) à quelques gros.
+- **Error Handling**: Async/await avec try-catch systématique.
 - **Discovery**: Mapper la stack et les chemins critiques avant audit.
-- **Analysis**: SRP, DRY (<3 lignes), Naming consistant, max 300 LOC/file.
 
 ## 🛠️ Commands
-- **Build**: `npm run build`
-- **Quality**: `npm run quality`
-- **Lint**: `npm run lint`
+- **New Commands**: Utilisez `/plan`, `/tdd`, `/verify`, `/learn`.
+- **Legacy**: `npm run build`, `npm run lint`.
+
+## ✅ Quality Checklist
+- [ ] Functions are small (<50 lines)
+- [ ] No deep nesting (>4 levels)
+- [ ] No `console.log` in production
+- [ ] Proper error handling with user-friendly messages

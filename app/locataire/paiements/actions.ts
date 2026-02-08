@@ -1,17 +1,28 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { getTenantSessionFromCookie } from '@/lib/tenant-magic-link';
 
+/**
+ * Get tenant payments
+ * Uses tenant session from cookie (NOT supabase auth)
+ */
 export async function getTenantPayments() {
-    const supabase = await createClient();
+    // Get tenant session from cookie
+    const session = await getTenantSessionFromCookie();
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    if (!session) {
         return null;
     }
 
-    // Chercher le bail associé à l'email de l'utilisateur
-    const { data: lease, error } = await supabase
+    // Initialize Admin Client (to bypass RLS)
+    const { createClient: createAdminClient } = await import("@supabase/supabase-js");
+    const supabaseAdmin = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Get lease details
+    const { data: lease, error } = await supabaseAdmin
         .from('leases')
         .select(`
             id,
@@ -21,20 +32,20 @@ export async function getTenantPayments() {
             property_address,
             property:properties(location)
         `)
-        .eq('tenant_email', user.email)
-        .eq('status', 'active')
+        .eq('id', session.lease_id)
         .single();
 
     if (error || !lease) {
         return null;
     }
 
-    // Récupérer les paiements/transactions
-    const { data: payments } = await supabase
+    // Get payments/transactions
+    const { data: payments } = await supabaseAdmin
         .from('rental_transactions')
         .select('*')
         .eq('lease_id', lease.id)
-        .order('period_start', { ascending: false })
+        .order('period_year', { ascending: false })
+        .order('period_month', { ascending: false })
         .limit(24);
 
     const property = lease.property as { location?: { address?: string } } | null;
@@ -43,8 +54,8 @@ export async function getTenantPayments() {
         payments: payments || [],
         leaseId: lease.id,
         monthlyAmount: lease.monthly_amount || 0,
-        tenantName: lease.tenant_name || user.user_metadata?.full_name || 'Locataire',
-        tenantEmail: lease.tenant_email || user.email || '',
-        propertyAddress: property?.location?.address || lease.property_address || '',
+        tenantName: session.tenant_name || lease.tenant_name || 'Locataire',
+        tenantEmail: session.tenant_email || lease.tenant_email || '',
+        propertyAddress: property?.location?.address || lease.property_address || session.property_address || '',
     };
 }

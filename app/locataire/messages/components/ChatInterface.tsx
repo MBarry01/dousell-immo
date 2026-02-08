@@ -1,14 +1,12 @@
 'use client';
-import { createClient } from '@/utils/supabase/client';
 
+import { createClient } from '@/utils/supabase/client';
 import { useState, useRef, useEffect } from 'react';
-import { Send, User, ChevronLeft } from 'lucide-react';
-import Link from 'next/link';
+import { Send, MessageCircle } from 'lucide-react';
 import { sendTenantMessage } from '../actions';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 interface Message {
     id: string;
@@ -20,16 +18,27 @@ interface Message {
 interface ChatProps {
     initialMessages: Message[];
     leaseId: string;
-    currentUserId: string;
+    ownerId: string; // Owner's UUID - messages from owner have this sender_id
     ownerName?: string;
 }
 
-export default function ChatInterface({ initialMessages, leaseId, currentUserId, ownerName }: ChatProps) {
+/**
+ * Chat Interface for Tenant Portal
+ * 
+ * Message identification:
+ * - Messages from owner: sender_id === ownerId
+ * - Messages from tenant: sender_id === 'tenant' OR sender_id !== ownerId
+ */
+export default function ChatInterface({ initialMessages, leaseId, ownerId, ownerName }: ChatProps) {
     const [messages, setMessages] = useState<Message[]>(initialMessages);
     const [newMessage, setNewMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const { isDark } = useTheme();
+
+    // Helper to check if message is from tenant (not owner)
+    const isFromTenant = (msg: Message) => {
+        return msg.sender_id === 'tenant' || msg.sender_id !== ownerId;
+    };
 
     // Setup Realtime Subscription
     useEffect(() => {
@@ -48,11 +57,10 @@ export default function ChatInterface({ initialMessages, leaseId, currentUserId,
                     const newMsg = payload.new as Message;
 
                     setMessages((current) => {
-                        // Avoid duplicates if already exists
                         if (current.some(m => m.id === newMsg.id)) return current;
 
-                        // Check if we have an optimistic message to replace (same content, my sender_id)
-                        if (newMsg.sender_id === currentUserId) {
+                        // Check for optimistic update replacement
+                        if (isFromTenant(newMsg)) {
                             const optimisticIndex = current.findIndex(m =>
                                 m.id.startsWith('temp-') &&
                                 m.content === newMsg.content
@@ -74,7 +82,7 @@ export default function ChatInterface({ initialMessages, leaseId, currentUserId,
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [leaseId, currentUserId]);
+    }, [leaseId, ownerId]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -95,7 +103,7 @@ export default function ChatInterface({ initialMessages, leaseId, currentUserId,
         // Optimistic update
         const optimisticMsg: Message = {
             id: 'temp-' + Date.now(),
-            sender_id: currentUserId,
+            sender_id: 'tenant',
             content: content,
             created_at: new Date().toISOString()
         };
@@ -104,16 +112,14 @@ export default function ChatInterface({ initialMessages, leaseId, currentUserId,
         const result = await sendTenantMessage(leaseId, content);
 
         if (result?.error) {
-            // Rollback (simple alert for MVP)
-            alert("Erreur lors de l'envoi");
+            alert(result.error);
             setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
         }
 
         setIsSending(false);
     };
 
-    // Helper to group messages
-    const groupedMessages = messages.reduce((groups, msg, index) => {
+    const groupedMessages = messages.reduce((groups, msg) => {
         const date = new Date(msg.created_at);
         const dateKey = format(date, 'yyyy-MM-dd');
 
@@ -125,76 +131,64 @@ export default function ChatInterface({ initialMessages, leaseId, currentUserId,
     }, {} as Record<string, Message[]>);
 
     return (
-        <div className={`flex flex-col h-[calc(100vh-64px)] ${isDark ? 'bg-[#0B1120]' : 'bg-gray-50'}`}>
+        <div className="flex flex-col h-[calc(100vh-64px)] bg-slate-50">
             {/* Header */}
-            <div className={`border-b px-4 py-3 flex items-center gap-3 shadow-sm z-10 ${
-                isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-gray-200'
-            }`}>
-                <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold border ${
-                        isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-gray-100 text-gray-600 border-gray-200'
-                    }`}>
-                        {ownerName?.[0] || 'P'}
-                    </div>
-                    <div>
-                        <h1 className={`font-semibold leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {ownerName || 'Propriétaire'}
-                        </h1>
-                        <p className="text-xs text-green-500 font-medium flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                            En ligne
-                        </p>
-                    </div>
+            <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm z-10">
+                <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold">
+                    {ownerName?.[0]?.toUpperCase() || 'P'}
+                </div>
+                <div>
+                    <h1 className="font-semibold text-slate-900 leading-tight">
+                        {ownerName || 'Propriétaire'}
+                    </h1>
+                    <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        En ligne
+                    </p>
                 </div>
             </div>
 
-            {/* Zone Messages */}
+            {/* Messages */}
             <main className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
                 {Object.entries(groupedMessages).map(([dateKey, msgs]) => (
-                    <div key={dateKey} className="space-y-4">
+                    <div key={dateKey} className="space-y-3">
                         {/* Date Header */}
                         <div className="flex justify-center">
-                            <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${
-                                isDark ? 'text-slate-500 bg-slate-800' : 'text-slate-400 bg-slate-100'
-                            }`}>
+                            <span className="text-[10px] uppercase font-semibold px-3 py-1 rounded-full text-slate-500 bg-slate-200">
                                 {format(new Date(dateKey), 'd MMMM yyyy', { locale: fr })}
                             </span>
                         </div>
 
-                        {/* Messages Group */}
+                        {/* Messages */}
                         <div className="space-y-1">
                             {msgs.map((msg, index) => {
-                                const isMe = msg.sender_id === currentUserId;
-                                const showAvatar = !isMe && (index === 0 || msgs[index - 1].sender_id !== msg.sender_id);
-                                const isLastFromSender = index === msgs.length - 1 || msgs[index + 1].sender_id !== msg.sender_id;
+                                const isMe = isFromTenant(msg);
+                                const showAvatar = !isMe && (index === 0 || isFromTenant(msgs[index - 1]));
+                                const isLastFromSender = index === msgs.length - 1 || isFromTenant(msgs[index + 1]) !== isMe;
 
                                 return (
                                     <div key={msg.id} className={cn("flex w-full items-end gap-2", isMe ? "justify-end" : "justify-start")}>
                                         {!isMe && (
                                             <div className="w-6 h-6 shrink-0">
                                                 {showAvatar && (
-                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                                                        isDark ? 'bg-slate-700 text-slate-300' : 'bg-blue-100 text-blue-600'
-                                                    }`}>
-                                                        {ownerName?.[0] || 'P'}
+                                                    <div className="w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center text-[10px] font-bold text-slate-600">
+                                                        {ownerName?.[0]?.toUpperCase() || 'P'}
                                                     </div>
                                                 )}
                                             </div>
                                         )}
 
                                         <div className={cn(
-                                            "max-w-[75%] px-4 py-2 text-sm shadow-sm break-words relative group",
+                                            "max-w-[75%] px-4 py-2.5 text-sm shadow-sm break-words",
                                             isMe
-                                                ? "bg-[#F4C430] text-black rounded-2xl rounded-br-none"
-                                                : isDark
-                                                    ? "bg-slate-800 border border-slate-700 text-white rounded-2xl rounded-bl-none"
-                                                    : "bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-bl-none",
+                                                ? "bg-slate-900 text-white rounded-2xl rounded-br-md"
+                                                : "bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-bl-md",
                                             !isLastFromSender && (isMe ? "rounded-br-2xl mb-0.5" : "rounded-bl-2xl mb-0.5")
                                         )}>
-                                            <p>{msg.content}</p>
+                                            <p className="leading-relaxed">{msg.content}</p>
                                             <p className={cn(
-                                                "text-[9px] mt-1 text-right opacity-70",
-                                                isMe ? "text-black/60" : isDark ? "text-slate-500" : "text-slate-400"
+                                                "text-[9px] mt-1 text-right",
+                                                isMe ? "text-slate-400" : "text-slate-400"
                                             )}>
                                                 {format(new Date(msg.created_at), 'HH:mm')}
                                             </p>
@@ -207,36 +201,39 @@ export default function ChatInterface({ initialMessages, leaseId, currentUserId,
                 ))}
 
                 {messages.length === 0 && (
-                    <div className={`text-center py-10 text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                        Démarrez la conversation avec votre propriétaire.
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                            <MessageCircle className="w-8 h-8 text-slate-400" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-slate-900">Nouvelle conversation</h3>
+                        <p className="max-w-xs mt-2 text-sm text-slate-500">
+                            Envoyez un message à votre propriétaire
+                        </p>
                     </div>
                 )}
                 <div ref={messagesEndRef} />
             </main>
 
-            {/* Input Zone */}
-            <footer className={`border-t p-3 ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-gray-200'}`}>
-                <form onSubmit={handleSend} className="flex items-center gap-2 max-w-md mx-auto">
+            {/* Input */}
+            <footer className="bg-white border-t border-slate-200 p-3">
+                <form onSubmit={handleSend} className="flex items-center gap-2 max-w-lg mx-auto">
                     <input
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Écrivez un message..."
-                        className={`flex-1 border-none rounded-full px-4 h-10 focus:ring-2 focus:ring-[#F4C430] outline-none transition-all ${
-                            isDark
-                                ? 'bg-slate-800 text-white placeholder:text-slate-500'
-                                : 'bg-slate-100 text-gray-900 placeholder:text-gray-400'
-                        }`}
+                        className="flex-1 bg-slate-100 border-none rounded-full px-4 h-11 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-300 outline-none transition-all"
                     />
                     <button
                         type="submit"
                         disabled={!newMessage.trim() || isSending}
-                        className="w-10 h-10 rounded-full bg-[#F4C430] text-black flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#D4A420] transition-all hover:scale-105 active:scale-95"
+                        className="w-11 h-11 rounded-full bg-slate-900 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 transition-all active:scale-95"
                     >
-                        <Send className="w-5 h-5 ml-0.5" />
+                        <Send className="w-5 h-5" />
                     </button>
                 </form>
             </footer>
         </div>
     );
 }
+

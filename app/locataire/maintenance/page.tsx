@@ -2,13 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Wrench, Clock, CheckCircle, ChevronDown, ChevronUp, Phone, Calendar, CircleDollarSign, X, Loader2 } from 'lucide-react';
+import {
+    Plus,
+    Wrench,
+    Clock,
+    CheckCircle2,
+    ChevronDown,
+    ChevronUp,
+    Phone,
+    Calendar,
+    CircleDollarSign,
+    X,
+    Loader2,
+    AlertTriangle
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { getTenantMaintenanceRequests, cancelMaintenanceRequest } from './actions';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 type MaintenanceRequest = {
     id: string;
@@ -24,25 +36,50 @@ type MaintenanceRequest = {
     intervention_date?: string;
 };
 
+const statusConfig: Record<string, { label: string; bgColor: string; textColor: string; icon: any }> = {
+    'open': {
+        label: 'En attente',
+        bgColor: 'bg-amber-50',
+        textColor: 'text-amber-700',
+        icon: Clock
+    },
+    'artisan_found': {
+        label: 'Artisan trouvé',
+        bgColor: 'bg-blue-50',
+        textColor: 'text-blue-700',
+        icon: Wrench
+    },
+    'awaiting_approval': {
+        label: 'Devis en attente',
+        bgColor: 'bg-purple-50',
+        textColor: 'text-purple-700',
+        icon: CircleDollarSign
+    },
+    'approved': {
+        label: 'Approuvé',
+        bgColor: 'bg-emerald-50',
+        textColor: 'text-emerald-700',
+        icon: CheckCircle2
+    },
+    'in_progress': {
+        label: 'En cours',
+        bgColor: 'bg-blue-50',
+        textColor: 'text-blue-700',
+        icon: Wrench
+    },
+    'completed': {
+        label: 'Terminé',
+        bgColor: 'bg-emerald-50',
+        textColor: 'text-emerald-700',
+        icon: CheckCircle2
+    },
+};
+
 export default function MaintenanceListPage() {
     const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [cancellingId, setCancellingId] = useState<string | null>(null);
-    const { isDark } = useTheme();
-
-    const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-        'open': {
-            label: 'En attente',
-            color: isDark ? 'bg-slate-700 text-slate-300' : 'bg-gray-200 text-gray-600',
-            icon: Clock
-        },
-        'artisan_found': { label: 'Artisan trouvé', color: 'bg-[#F4C430]/20 text-[#F4C430]', icon: Wrench },
-        'awaiting_approval': { label: 'Devis en attente', color: 'bg-[#F4C430]/20 text-[#F4C430]', icon: CircleDollarSign },
-        'approved': { label: 'Approuvé', color: 'bg-[#F4C430]/20 text-[#F4C430]', icon: CheckCircle },
-        'in_progress': { label: 'En cours', color: 'bg-[#F4C430]/20 text-[#F4C430]', icon: Wrench },
-        'completed': { label: 'Terminé', color: 'bg-emerald-500/20 text-emerald-500', icon: CheckCircle },
-    };
 
     useEffect(() => {
         loadRequests();
@@ -76,36 +113,39 @@ export default function MaintenanceListPage() {
     if (loading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-[#F4C430] animate-spin" />
+                <Loader2 className="w-8 h-8 text-zinc-400 animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="pb-24">
+        <div className="w-full max-w-lg mx-auto px-4 py-6 pb-24 space-y-6">
             {/* Header */}
-            <header className="mb-6">
-                <h1 className="text-2xl font-bold text-foreground">Mes Signalements</h1>
-                <p className="text-sm text-muted-foreground mt-1">Suivez vos demandes d'intervention</p>
-            </header>
+            <div>
+                <h1 className="text-xl font-bold text-zinc-900">Mes Signalements</h1>
+                <p className="text-sm text-zinc-500 mt-0.5">Suivez vos demandes d'intervention</p>
+            </div>
 
-            <main className="max-w-lg mx-auto space-y-3">
-                {requests.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 border ${
-                            isDark
-                                ? 'bg-slate-900 border-slate-800'
-                                : 'bg-gray-100 border-gray-200'
-                        }`}>
-                            <Wrench className="w-8 h-8 text-muted-foreground" />
-                        </div>
-                        <h3 className="text-lg font-medium text-foreground">Aucun signalement</h3>
-                        <p className="max-w-xs mt-2 text-sm text-muted-foreground">
-                            Vous n'avez pas encore signalé de problème. Appuyez sur le + pour commencer.
-                        </p>
+            {/* List */}
+            {requests.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mb-4">
+                        <Wrench className="w-8 h-8 text-zinc-400" />
                     </div>
-                ) : (
-                    requests.map((req) => {
+                    <h3 className="text-lg font-semibold text-zinc-900">Aucun signalement</h3>
+                    <p className="max-w-xs mt-2 text-sm text-zinc-500">
+                        Vous n'avez pas encore signalé de problème.
+                    </p>
+                    <Link href="/locataire/maintenance/new">
+                        <Button className="mt-6 bg-zinc-900 hover:bg-zinc-800 text-white">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Nouveau signalement
+                        </Button>
+                    </Link>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {requests.map((req) => {
                         const status = statusConfig[req.status] || statusConfig['open'];
                         const StatusIcon = status.icon;
                         const isExpanded = expandedId === req.id;
@@ -114,32 +154,28 @@ export default function MaintenanceListPage() {
                         return (
                             <div
                                 key={req.id}
-                                className={`rounded-xl overflow-hidden border ${
-                                    isDark
-                                        ? 'bg-slate-900 border-slate-800'
-                                        : 'bg-white border-gray-200 shadow-sm'
-                                }`}
+                                className="bg-white rounded-xl border border-zinc-200 overflow-hidden"
                             >
-                                {/* Main Row - Clickable */}
+                                {/* Main Row */}
                                 <button
                                     onClick={() => toggleExpand(req.id)}
                                     className="w-full p-4 text-left"
                                 >
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <div className="flex items-start justify-between mb-2">
+                                        <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
                                             {req.category || 'Autre'}
                                         </span>
-                                        <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}>
-                                            <StatusIcon className="w-3.5 h-3.5" />
+                                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${status.bgColor} ${status.textColor}`}>
+                                            <StatusIcon className="w-3 h-3" />
                                             {status.label}
                                         </span>
                                     </div>
 
-                                    <p className="text-foreground font-medium line-clamp-2 mb-3">
+                                    <p className="text-zinc-900 font-medium line-clamp-2 mb-3 text-sm">
                                         {req.description}
                                     </p>
 
-                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                    <div className="flex items-center justify-between text-xs text-zinc-400">
                                         <span>{format(new Date(req.created_at), 'd MMM yyyy', { locale: fr })}</span>
                                         <div className="flex items-center gap-1">
                                             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -149,9 +185,7 @@ export default function MaintenanceListPage() {
 
                                 {/* Expanded Details */}
                                 {isExpanded && (
-                                    <div className={`px-4 pb-4 pt-0 border-t space-y-3 ${
-                                        isDark ? 'border-slate-800/50' : 'border-gray-100'
-                                    }`}>
+                                    <div className="px-4 pb-4 pt-0 border-t border-zinc-100 space-y-3">
                                         {/* Photos */}
                                         {req.photo_urls && req.photo_urls.length > 0 && (
                                             <div className="flex gap-2 pt-3 overflow-x-auto">
@@ -160,9 +194,7 @@ export default function MaintenanceListPage() {
                                                         key={i}
                                                         src={url}
                                                         alt={`Photo ${i + 1}`}
-                                                        className={`w-20 h-20 rounded-lg object-cover flex-shrink-0 border ${
-                                                            isDark ? 'border-slate-700' : 'border-gray-200'
-                                                        }`}
+                                                        className="w-20 h-20 rounded-lg object-cover flex-shrink-0 border border-zinc-200"
                                                     />
                                                 ))}
                                             </div>
@@ -170,23 +202,23 @@ export default function MaintenanceListPage() {
 
                                         {/* Artisan Info */}
                                         {req.artisan_name && (
-                                            <div className={`rounded-lg p-3 space-y-2 ${
-                                                isDark ? 'bg-slate-800/50' : 'bg-gray-50'
-                                            }`}>
-                                                <p className="text-xs text-muted-foreground uppercase tracking-wider">Artisan assigné</p>
+                                            <div className="rounded-lg bg-zinc-50 p-3 space-y-2">
+                                                <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">
+                                                    Artisan assigné
+                                                </p>
                                                 <div className="flex items-center justify-between">
                                                     <div>
-                                                        <p className="text-foreground font-medium">{req.artisan_name}</p>
+                                                        <p className="text-zinc-900 font-medium">{req.artisan_name}</p>
                                                         {req.artisan_rating && (
-                                                            <p className="text-xs text-[#F4C430]">⭐ {req.artisan_rating.toFixed(1)}</p>
+                                                            <p className="text-xs text-amber-600">⭐ {req.artisan_rating.toFixed(1)}</p>
                                                         )}
                                                     </div>
                                                     {req.artisan_phone && (
                                                         <a
                                                             href={`tel:${req.artisan_phone}`}
-                                                            className="w-10 h-10 bg-[#F4C430] rounded-full flex items-center justify-center"
+                                                            className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
                                                         >
-                                                            <Phone className="w-5 h-5 text-black" />
+                                                            <Phone className="w-5 h-5 text-white" />
                                                         </a>
                                                     )}
                                                 </div>
@@ -197,26 +229,22 @@ export default function MaintenanceListPage() {
                                         {(req.quoted_price || req.intervention_date) && (
                                             <div className="grid grid-cols-2 gap-2">
                                                 {req.quoted_price && (
-                                                    <div className={`rounded-lg p-3 ${
-                                                        isDark ? 'bg-slate-800/50' : 'bg-gray-50'
-                                                    }`}>
-                                                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                                    <div className="rounded-lg bg-zinc-50 p-3">
+                                                        <p className="text-[10px] text-zinc-500 flex items-center gap-1 uppercase tracking-wider font-medium">
                                                             <CircleDollarSign className="w-3 h-3" /> Devis
                                                         </p>
-                                                        <p className="text-foreground font-semibold mt-1">
-                                                            {req.quoted_price.toLocaleString('fr-FR')} FCFA
+                                                        <p className="text-zinc-900 font-semibold mt-1">
+                                                            {req.quoted_price.toLocaleString('fr-FR')} F
                                                         </p>
                                                     </div>
                                                 )}
                                                 {req.intervention_date && (
-                                                    <div className={`rounded-lg p-3 ${
-                                                        isDark ? 'bg-slate-800/50' : 'bg-gray-50'
-                                                    }`}>
-                                                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                                    <div className="rounded-lg bg-zinc-50 p-3">
+                                                        <p className="text-[10px] text-zinc-500 flex items-center gap-1 uppercase tracking-wider font-medium">
                                                             <Calendar className="w-3 h-3" /> Intervention
                                                         </p>
-                                                        <p className="text-foreground font-semibold mt-1">
-                                                            {format(new Date(req.intervention_date), 'd MMM', { locale: fr })}
+                                                        <p className="text-zinc-900 font-semibold mt-1">
+                                                            {format(new Date(req.intervention_date), 'd MMMM', { locale: fr })}
                                                         </p>
                                                     </div>
                                                 )}
@@ -230,7 +258,7 @@ export default function MaintenanceListPage() {
                                                 size="sm"
                                                 onClick={() => handleCancel(req.id)}
                                                 disabled={cancellingId === req.id}
-                                                className="w-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
+                                                className="w-full text-zinc-500 hover:text-red-600 hover:bg-red-50"
                                             >
                                                 {cancellingId === req.id ? (
                                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -244,17 +272,19 @@ export default function MaintenanceListPage() {
                                 )}
                             </div>
                         );
-                    })
-                )}
-            </main>
+                    })}
+                </div>
+            )}
 
             {/* FAB */}
-            <Link
-                href="/locataire/maintenance/new"
-                className="fixed bottom-20 right-4 w-14 h-14 bg-[#F4C430] text-black rounded-full flex items-center justify-center shadow-lg hover:bg-[#D4A420] transition-colors z-20"
-            >
-                <Plus className="w-8 h-8" />
-            </Link>
+            {requests.length > 0 && (
+                <Link
+                    href="/locataire/maintenance/new"
+                    className="fixed bottom-24 right-4 w-14 h-14 bg-zinc-900 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-zinc-800 transition-colors z-20"
+                >
+                    <Plus className="w-7 h-7" />
+                </Link>
+            )}
         </div>
     );
 }

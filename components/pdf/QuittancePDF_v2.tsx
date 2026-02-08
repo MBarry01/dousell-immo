@@ -18,6 +18,8 @@ interface QuittanceData {
   ownerLogo?: string;
   ownerSignature?: string;
   propertyAddress: string;
+  /** If true, this is a guarantee/deposit payment, not rent */
+  isGuarantee?: boolean;
 }
 
 // Styles compacts pour tenir sur une page
@@ -219,7 +221,9 @@ export const createQuittanceDocument = (data: QuittanceData) => {
         </View>
 
         {/* Titre */}
-        <Text style={styles.title}>QUITTANCE DE LOYER</Text>
+        <Text style={styles.title}>
+          {data.isGuarantee ? 'ATTESTATION DE DÉPÔT DE GARANTIE' : 'QUITTANCE DE LOYER'}
+        </Text>
 
         {/* Blocs d'infos */}
         <View style={styles.infoBlock}>
@@ -262,7 +266,10 @@ export const createQuittanceDocument = (data: QuittanceData) => {
             <> du bien situé au <Text style={{ fontWeight: 'bold' }}>{data.propertyAddress}</Text></>
           ) : ''}, reconnais avoir reçu de{' '}
           <Text style={{ fontWeight: 'bold' }}>{data.tenantName}</Text>, locataire dudit bien, la somme détaillée
-          ci-dessous au titre du loyer et des charges pour la période concernée.
+          ci-dessous {data.isGuarantee
+            ? 'au titre du dépôt de garantie.'
+            : 'au titre du loyer et des charges pour la période concernée.'
+          }
         </Text>
 
         {/* Tableau */}
@@ -273,8 +280,10 @@ export const createQuittanceDocument = (data: QuittanceData) => {
             <Text style={[styles.col3, styles.tableHeaderText]}>Montant</Text>
           </View>
           <View style={styles.tableRow}>
-            <Text style={styles.col1}>Loyer et charges</Text>
-            <Text style={styles.col2}>Du {data.periodStart} au {data.periodEnd}</Text>
+            <Text style={styles.col1}>{data.isGuarantee ? 'Dépôt de garantie' : 'Loyer et charges'}</Text>
+            <Text style={styles.col2}>
+              {data.isGuarantee ? data.periodMonth : `Du ${data.periodStart} au ${data.periodEnd}`}
+            </Text>
             <Text style={styles.col3}>{formatAmount(data.amount)} FCFA</Text>
           </View>
           <View style={styles.tableTotalRow}>

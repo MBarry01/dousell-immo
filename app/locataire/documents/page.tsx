@@ -1,95 +1,159 @@
 import { getTenantDashboardData } from "../actions";
-import { FileText, Download, AlertCircle, ShieldCheck } from "lucide-react";
+import { FileText, Download, FolderOpen, ShieldCheck, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InsuranceUpload } from "./components/InsuranceUpload";
+
+const MONTH_NAMES = [
+    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+];
 
 export default async function TenantDocumentsPage() {
     const data = await getTenantDashboardData();
 
     if (!data.hasLease || !data.lease) {
-        return <div className="p-4 text-muted-foreground">Aucun document disponible.</div>;
+        return (
+            <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mb-4">
+                    <FolderOpen className="w-8 h-8 text-zinc-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-zinc-900">Aucun document</h3>
+                <p className="max-w-xs mt-2 text-sm text-zinc-500">
+                    Vos documents apparaîtront ici une fois votre bail activé.
+                </p>
+            </div>
+        );
     }
 
     const { lease } = data;
     const payments = lease.payments || [];
     const paidPayments = payments.filter((p: any) => p.status === 'paid');
 
+    const formatPeriod = (month: number, year: number) => {
+        return `${MONTH_NAMES[(month || 1) - 1]} ${year}`;
+    };
+
     return (
-        <div className="px-4 space-y-6">
-            <h1 className="text-2xl font-bold text-foreground">Mes Documents</h1>
+        <div className="w-full max-w-lg mx-auto px-4 py-6 space-y-6">
+            {/* Header */}
+            <div>
+                <h1 className="text-xl font-bold text-zinc-900">Mes Documents</h1>
+                <p className="text-sm text-zinc-500 mt-0.5">Contrats, quittances et attestations</p>
+            </div>
 
-            {/* 1. Le Contrat de Bail */}
-            <section>
-                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Contrat</h2>
-                <Card className="p-4 flex items-center justify-between bg-card border-border shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
-                            <FileText className="w-5 h-5" />
+            {/* Contrat de Bail */}
+            <section className="space-y-3">
+                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                    Contrat
+                </h2>
+                <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+                    <div className="flex items-center justify-between p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                                <FileText className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                                <p className="font-medium text-zinc-900">Contrat de Bail</p>
+                                <p className="text-xs text-zinc-500">
+                                    {lease.created_at
+                                        ? `Signé le ${format(new Date(lease.created_at), 'dd MMMM yyyy', { locale: fr })}`
+                                        : 'Date de signature non disponible'}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="font-medium text-foreground">Contrat de Bail</p>
-                            <p className="text-xs text-muted-foreground">Signé le {format(new Date(lease.created_at), 'dd MMMM yyyy', { locale: fr })}</p>
-                        </div>
-                    </div>
-                    {lease.lease_pdf_url ? (
-                        <a href={lease.lease_pdf_url} target="_blank" rel="noopener noreferrer">
-                            <Button variant="outline" size="sm" className="h-8">
-                                <Download className="w-4 h-4 mr-1" /> PDF
-                            </Button>
-                        </a>
-                    ) : (
-                        <span className="text-xs text-muted-foreground italic">Non disponible</span>
-                    )}
-                </Card>
-            </section>
-
-            {/* 1.5 Assurance Habitation */}
-            <section>
-                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Assurance</h2>
-                <Card className="p-4 flex items-center justify-between bg-card border-border shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-                            <ShieldCheck className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <p className="font-medium text-foreground">Assurance Habitation</p>
-                            <p className="text-xs text-muted-foreground">Obligatoire</p>
-                        </div>
-                    </div>
-                    <InsuranceUpload leaseId={lease.id} existingUrl={lease.insurance_url} />
-                </Card>
-            </section>
-
-            {/* 2. Quittances */}
-            <section>
-                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Historique des Quittances</h2>
-                {paidPayments.length > 0 ? (
-                    <div className="space-y-2">
-                        {paidPayments.map((payment: any) => (
-                            <Card key={payment.id} className="p-4 flex items-center justify-between bg-card border-border shadow-sm">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500">
-                                        <FileText className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-foreground">Quittance de Loyer</p>
-                                        <p className="text-xs text-muted-foreground">{format(new Date(payment.period_start), 'MMMM yyyy', { locale: fr })}</p>
-                                    </div>
-                                </div>
-                                {/* TODO: Lien vers le PDF de la quittance transactionnelle si disponible */}
-                                <Button variant="ghost" size="sm" className="h-8 text-muted-foreground" disabled>
+                        {lease.lease_pdf_url ? (
+                            <a href={lease.lease_pdf_url} target="_blank" rel="noopener noreferrer">
+                                <Button variant="outline" size="sm" className="h-9 gap-1.5">
                                     <Download className="w-4 h-4" />
+                                    PDF
                                 </Button>
-                            </Card>
-                        ))}
+                            </a>
+                        ) : (
+                            <span className="text-xs text-zinc-400 italic px-3">Non disponible</span>
+                        )}
+                    </div>
+                </div>
+            </section>
+
+            {/* Assurance */}
+            <section className="space-y-3">
+                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                    Assurance
+                </h2>
+                <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+                    <div className="flex items-center justify-between p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
+                                <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                            </div>
+                            <div>
+                                <p className="font-medium text-zinc-900">Assurance Habitation</p>
+                                <p className="text-xs text-zinc-500">Document obligatoire</p>
+                            </div>
+                        </div>
+                        <InsuranceUpload leaseId={lease.id} existingUrl={lease.insurance_url} />
+                    </div>
+                </div>
+            </section>
+
+            {/* Quittances */}
+            <section className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                        Quittances de loyer
+                    </h2>
+                    {paidPayments.length > 0 && (
+                        <span className="text-xs text-zinc-400">
+                            {paidPayments.length} document{paidPayments.length > 1 ? 's' : ''}
+                        </span>
+                    )}
+                </div>
+
+                {paidPayments.length > 0 ? (
+                    <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden divide-y divide-zinc-100">
+                        {paidPayments.map((payment: any) => {
+                            const period = formatPeriod(payment.period_month, payment.period_year);
+
+                            return (
+                                <div
+                                    key={payment.id}
+                                    className="flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
+                                            <FileText className="w-5 h-5 text-emerald-600" />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-zinc-900">Quittance {period}</p>
+                                            <p className="text-xs text-zinc-500">
+                                                {payment.amount_due?.toLocaleString('fr-FR')} FCFA
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {payment.receipt_url ? (
+                                        <a href={payment.receipt_url} target="_blank" rel="noopener noreferrer">
+                                            <Button variant="ghost" size="sm" className="h-9 gap-1 text-zinc-600 hover:text-zinc-900">
+                                                <Download className="w-4 h-4" />
+                                            </Button>
+                                        </a>
+                                    ) : (
+                                        <Button variant="ghost" size="sm" className="h-9 text-zinc-300" disabled>
+                                            <Download className="w-4 h-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 ) : (
-                    <div className="text-center py-8 bg-card rounded-xl border border-dashed border-border">
-                        <AlertCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground">Aucune quittance disponible</p>
+                    <div className="bg-zinc-50 rounded-xl border border-dashed border-zinc-200 py-12 px-4 text-center">
+                        <FolderOpen className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
+                        <p className="text-sm font-medium text-zinc-600">Aucune quittance disponible</p>
+                        <p className="text-xs text-zinc-400 mt-1">
+                            Vos quittances apparaîtront ici après chaque paiement validé
+                        </p>
                     </div>
                 )}
             </section>

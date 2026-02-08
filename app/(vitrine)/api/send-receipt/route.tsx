@@ -109,12 +109,17 @@ export async function POST(request: NextRequest) {
     // Priorité: ownerEmail (de la config) > email du compte utilisateur
     const ownerEmailForCC = data.ownerEmail || data.ownerAccountEmail;
 
-    // 7. Préparer l'email
+    // 7. Déterminer si c'est une garantie (period_month = 0 ou flag explicite)
+    const isGuarantee = data.isGuarantee === true;
+    const documentType = isGuarantee ? 'Dépôt de garantie' : 'Quittance de loyer';
+    const periodDisplay = isGuarantee ? 'Garantie' : data.periodMonth;
+
+    // 8. Préparer l'email
     const mailOptions = {
       from: `${data.ownerName} <${process.env.GMAIL_USER}>`,
       to: data.tenantEmail,
       cc: ownerEmailForCC, // Mettre le propriétaire en copie
-      subject: `Quittance de loyer - ${data.periodMonth}`,
+      subject: `${documentType} - ${periodDisplay}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -124,16 +129,22 @@ export async function POST(request: NextRequest) {
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px;">
           <p>Bonjour <strong>${data.tenantName}</strong>,</p>
 
-          <p>Veuillez trouver ci-joint votre quittance de loyer pour le mois de <strong>${data.periodMonth}</strong>.</p>
+          <p>Veuillez trouver ci-joint ${isGuarantee
+          ? `votre attestation de dépôt de garantie.`
+          : `votre quittance de loyer pour le mois de <strong>${data.periodMonth}</strong>.`
+        }</p>
 
-          <p><strong>Détails de la quittance :</strong></p>
+          <p><strong>Détails ${isGuarantee ? 'du dépôt' : 'de la quittance'} :</strong></p>
           <ul>
-            <li><strong>N° Quittance :</strong> ${data.receiptNumber}</li>
-            <li><strong>Période :</strong> ${data.periodMonth}</li>
+            <li><strong>N° ${isGuarantee ? 'Attestation' : 'Quittance'} :</strong> ${data.receiptNumber}</li>
+            <li><strong>${isGuarantee ? 'Nature' : 'Période'} :</strong> ${periodDisplay}</li>
             <li><strong>Montant acquitté :</strong> ${amountFormatted} FCFA</li>
           </ul>
 
-          <p>Nous accusons réception du paiement de votre loyer.</p>
+          <p>${isGuarantee
+          ? 'Nous accusons réception de votre dépôt de garantie. Ce montant vous sera restitué conformément aux termes de votre contrat de bail.'
+          : 'Nous accusons réception du paiement de votre loyer.'
+        }</p>
 
           <p>Cordialement,<br>
           <strong>${data.ownerName}</strong><br>

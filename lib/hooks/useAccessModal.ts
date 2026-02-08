@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { requestAccessAction } from "@/app/(workspace)/gestion/access-control/actions";
+import { submitAccessRequest } from "@/app/(workspace)/gestion/access-control/actions";
 
 interface AccessModalState {
   isOpen: boolean;
@@ -53,17 +53,18 @@ export const useAccessModal = create<AccessModalState>((set, get) => ({
     set({ isSubmitting: true });
 
     try {
-      const result = await requestAccessAction({
+      const result = await submitAccessRequest({
         teamId,
         permission: permissionKey,
         reason: reason || undefined,
       });
 
-      if (result.success) {
+      if (result.data?.success) {
         get().close();
+        return { success: true };
       }
 
-      return result;
+      return { success: false, error: result.error || "Erreur lors de la demande" };
     } catch (error: any) {
       return { success: false, error: error.message };
     } finally {

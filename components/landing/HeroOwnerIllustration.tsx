@@ -38,151 +38,29 @@ export default function HeroOwnerIllustration() {
           initial={{ opacity: 0, y: 40, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute top-12 left-1/2 -translate-x-1/2 w-[320px] lg:w-[380px] z-10"
+          className="absolute top-12 left-1/2 -translate-x-1/2 w-[340px] md:w-[480px] lg:w-[580px] z-10"
         >
-          <div className="relative bg-gradient-to-br from-zinc-900/95 via-zinc-900/90 to-black/95 backdrop-blur-2xl rounded-[28px] border border-white/[0.08] p-5 lg:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <div className="relative rounded-[28px] overflow-hidden border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+            <Image
+              src="/images/TabDash.png"
+              alt="Tableau de bord Revenus"
+              width={580}
+              height={387} // Approximate height to maintain aspect ratio
+              className="w-full h-auto object-cover"
+              priority
+            />
 
-            {/* Header */}
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <p className="text-white/50 text-xs lg:text-sm">Revenus du mois</p>
-                <p className="text-white/30 text-[10px]">Janvier 2026</p>
-              </div>
-              <div className="flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/20 rounded-full px-3 py-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-emerald-400 text-[10px] lg:text-xs font-medium">En direct</span>
-              </div>
-            </div>
-
-            {/* Big Revenue Number */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="mb-4"
-            >
-              <div className="flex items-baseline gap-2">
-                <span className="text-[#F4C430] text-4xl lg:text-5xl font-bold tracking-tight">3.450.000</span>
-                <span className="text-white/40 text-sm lg:text-base font-medium">FCFA</span>
-              </div>
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex items-center gap-1 text-emerald-400">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                  <span className="text-sm font-semibold">+12%</span>
-                </div>
-                <span className="text-white/30 text-xs">vs mois dernier</span>
-              </div>
-            </motion.div>
-
-            {/* Mini Graph - Curved line chart */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-              className="relative h-24 lg:h-28 mb-4 bg-white/[0.02] rounded-2xl p-3 border border-white/[0.03]"
-            >
-              <svg className="w-full h-full" viewBox="0 0 300 80" fill="none" preserveAspectRatio="none">
-                {/* Grid lines */}
-                <line x1="0" y1="20" x2="300" y2="20" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                <line x1="0" y1="40" x2="300" y2="40" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                <line x1="0" y1="60" x2="300" y2="60" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-
-                {/* Gradient fill under curve */}
-                <defs>
-                  <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#F4C430" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#F4C430" stopOpacity="0" />
-                  </linearGradient>
-                  <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#F4C430" stopOpacity="0.5" />
-                    <stop offset="50%" stopColor="#F4C430" stopOpacity="1" />
-                    <stop offset="100%" stopColor="#10B981" stopOpacity="1" />
-                  </linearGradient>
-                </defs>
-
-                {/* Area fill */}
-                <motion.path
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.5, delay: 1 }}
-                  d="M0 70 Q30 65, 50 55 T100 50 T150 40 T200 35 T250 25 T300 15 L300 80 L0 80 Z"
-                  fill="url(#chartGradient)"
-                />
-
-                {/* Main curve line */}
-                <motion.path
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 1.5, delay: 1 }}
-                  d="M0 70 Q30 65, 50 55 T100 50 T150 40 T200 35 T250 25 T300 15"
-                  stroke="url(#lineGradient)"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-
-                {/* End dot */}
-                <motion.circle
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.3, delay: 2.5 }}
-                  cx="300"
-                  cy="15"
-                  r="5"
-                  fill="#10B981"
-                />
-                <motion.circle
-                  initial={{ scale: 0 }}
-                  animate={{ scale: [1, 1.5, 1] }}
-                  transition={{ duration: 2, delay: 2.5, repeat: Infinity }}
-                  cx="300"
-                  cy="15"
-                  r="8"
-                  fill="#10B981"
-                  opacity="0.3"
-                />
-              </svg>
-
-              {/* Month labels */}
-              <div className="absolute bottom-1 left-3 right-3 flex justify-between text-[9px] text-white/20">
-                <span>Sep</span>
-                <span>Oct</span>
-                <span>Nov</span>
-                <span>Déc</span>
-                <span className="text-[#F4C430]">Jan</span>
-              </div>
-            </motion.div>
-
-            {/* Badge 100% encaissé */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.2 }}
-              className="flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-2xl p-3 lg:p-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-white text-sm lg:text-base font-semibold">100% encaissé</p>
-                  <p className="text-white/40 text-[10px] lg:text-xs">Tous les loyers du mois</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-emerald-400 text-lg lg:text-xl font-bold">8/8</p>
-                <p className="text-white/30 text-[10px]">locataires</p>
-              </div>
-            </motion.div>
-
-            {/* Card glow effect */}
-            <div className="absolute -inset-1 bg-gradient-to-br from-[#F4C430]/10 via-transparent to-emerald-500/5 rounded-[32px] blur-xl -z-10" />
+            {/* Glow overlay for better integration */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
           </div>
         </motion.div>
+
+
+
+        {/* Decorative glow elements */}
+        <div className="absolute top-1/4 -right-8 w-32 h-32 bg-[#F4C430]/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -left-8 w-28 h-28 bg-emerald-500/8 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[#F4C430]/5 rounded-full blur-3xl" />
 
         {/* Floating Notification - Pop animation */}
         <AnimatePresence>
@@ -250,7 +128,7 @@ export default function HeroOwnerIllustration() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1.6 }}
-          className="absolute bottom-16 -left-2 lg:bottom-20 lg:-left-6 z-20"
+          className="absolute bottom-6 -left-2 lg:bottom-125 lg:-left-15 z-20"
         >
           <motion.div
             animate={{ y: [0, -5, 0] }}
@@ -284,12 +162,12 @@ export default function HeroOwnerIllustration() {
           </motion.div>
         </motion.div>
 
-        {/* Floating Auto-generation Badge - Right */}
+        {/* Floating Auto-generation Badge - Moved to Left side to avoid covering person */}
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
+          initial={{ opacity: 0, x: -30 }} // Changed direction
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 1.8 }}
-          className="absolute bottom-24 -right-2 lg:bottom-28 lg:-right-6 z-20"
+          className="absolute bottom-32 -left-8 lg:bottom-40 lg:left-8 z-20"
         >
           <motion.div
             animate={{ scale: [1, 1.03, 1] }}
@@ -315,7 +193,7 @@ export default function HeroOwnerIllustration() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 2 }}
-          className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-20"
+          className="absolute bottom-20 -right-6 lg:bottom-20 lg:-right-22 z-20"
         >
           <div className="bg-gradient-to-r from-zinc-900/95 to-zinc-800/95 backdrop-blur-xl border border-[#F4C430]/20 rounded-full px-5 py-2.5 shadow-lg flex items-center gap-4">
             <div className="text-center">
@@ -334,11 +212,6 @@ export default function HeroOwnerIllustration() {
             </div>
           </div>
         </motion.div>
-
-        {/* Decorative glow elements */}
-        <div className="absolute top-1/4 -right-8 w-32 h-32 bg-[#F4C430]/8 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -left-8 w-28 h-28 bg-emerald-500/8 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[#F4C430]/5 rounded-full blur-3xl" />
       </div>
     </div>
   );

@@ -13,15 +13,15 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-primary",
+          "bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-[1.02] transition-all duration-200 ease-out focus-visible:ring-primary",
         primary:
-          "bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-primary",
+          "bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-[1.02] transition-all duration-200 ease-out focus-visible:ring-primary",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:scale-[1.02] transition-all duration-200 ease-out",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-background text-foreground hover:bg-zinc-100 hover:text-zinc-900 hover:scale-[1.02] transition-all duration-200 ease-out",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground",
+          "text-foreground hover:bg-zinc-100 hover:text-zinc-900 hover:scale-[1.02] transition-all duration-200 ease-out",
       },
       size: {
         default: "h-11 px-5",

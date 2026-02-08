@@ -7,15 +7,15 @@ import { ShieldCheck, User, ArrowLeft, Warning } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { verifyTenantIdentity } from "./actions";
+import { verifyTenantIdentity, activateTenantSession } from "./actions";
 
 /**
- * Page /locataire/verify - First-time tenant verification
+ * Page /locataire/verify - Tenant verification & session activation
  *
- * Displayed on first Magic Link access to verify tenant identity.
- * Tenant must provide their last name to confirm identity.
- *
- * Per WORKFLOW_PROPOSAL.md section 11.2
+ * Handles two scenarios:
+ * 1. First access: tenant must enter their last name to verify identity
+ * 2. Returning access (cookie expired): token is already verified in DB,
+ *    so we auto-create the session cookie and redirect immediately
  */
 export default function TenantVerifyPage() {
   const searchParams = useSearchParams();
@@ -24,16 +24,37 @@ export default function TenantVerifyPage() {
 
   const [lastName, setLastName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isActivating, setIsActivating] = useState(true); // Start true to try auto-activate
   const [attempts, setAttempts] = useState(0);
-  const [landlordName, setLandlordName] = useState<string>("");
+  const [tenantName, setTenantName] = useState<string>("");
   const [propertyAddress, setPropertyAddress] = useState<string>("");
 
   const MAX_ATTEMPTS = 3;
 
+  // On mount: try to auto-activate if token is already verified
   useEffect(() => {
     if (!token) {
       router.replace("/locataire/expired?error=invalid_link");
+      return;
     }
+
+    // Try to activate session without name (for already-verified tokens)
+    activateTenantSession(token).then((result) => {
+      if (result.success) {
+        // Token was already verified - cookie created, redirect
+        router.replace("/locataire");
+      } else if (result.error) {
+        // Token invalid or expired
+        router.replace("/locataire/expired?error=invalid_token");
+      } else {
+        // Token needs verification - populate context from session and show the form
+        if (result.tenantName) setTenantName(result.tenantName);
+        if (result.propertyAddress) setPropertyAddress(result.propertyAddress);
+        setIsActivating(false);
+      }
+    }).catch(() => {
+      setIsActivating(false);
+    });
   }, [token, router]);
 
   const handleVerify = async () => {
@@ -66,6 +87,8 @@ export default function TenantVerifyPage() {
       }
 
       // Success - redirect to main tenant page
+      // The session cookie was set by the server action, so /locataire
+      // will use the cookie path (no token needed in URL)
       toast.success("Identité vérifiée !");
       router.push("/locataire");
     } catch {
@@ -74,6 +97,18 @@ export default function TenantVerifyPage() {
       setIsSubmitting(false);
     }
   };
+
+  // Show loading while trying to auto-activate
+  if (isActivating) {
+    return (
+      <main className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-12">
+        <div className="text-center">
+          <span className="w-8 h-8 border-3 border-[#F4C430] border-t-transparent rounded-full animate-spin inline-block mb-4" />
+          <p className="text-white/60">Connexion en cours...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-12">
@@ -89,8 +124,8 @@ export default function TenantVerifyPage() {
           </h1>
 
           <p className="text-white/60">
-            {landlordName ? (
-              <>Vous avez été invité par <span className="text-white">{landlordName}</span></>
+            {tenantName ? (
+              <>Bonjour <span className="text-white">{tenantName}</span>, vérifiez votre identité</>
             ) : (
               "Pour accéder à votre espace locataire"
             )}

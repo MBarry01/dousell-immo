@@ -53,6 +53,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Build rich traceability metadata
+    const traceMeta = {
+      provider: 'kkiapay',
+      kkiapay_transaction_id: transactionId,
+      amount_fcfa: transaction.amount,
+      payment_channel: transaction.paymentMethod || 'mobile_money',
+      customer_phone: transaction.customer?.phone || null,
+      customer_name: transaction.customer?.name || null,
+      currency: 'XOF',
+      kkiapay_status: transaction.status,
+      paid_at: new Date().toISOString(),
+      kkiapay_created_at: transaction.createdAt || null,
+    };
+
     // Marquer le loyer comme payé
     const { error: rentError } = await supabase
       .from("rental_transactions")
@@ -61,6 +75,7 @@ export async function POST(request: NextRequest) {
         paid_at: new Date().toISOString(),
         payment_ref: transactionId,
         payment_method: "kkiapay",
+        meta: traceMeta,
       })
       .eq("lease_id", leaseId)
       .eq("period_month", periodMonth)

@@ -134,7 +134,7 @@ export function AddressAutocomplete({
         const region = item.address.state; // Région au Sénégal
 
         // 2. Construire le label d'affichage : Région, Ville/Quartier
-        let labelParts = [];
+        const labelParts = [];
         if (region) labelParts.push(region);
         if (mainName && mainName !== region) labelParts.push(mainName);
 
@@ -197,7 +197,7 @@ export function AddressAutocomplete({
                         const mainName = getPlaceName(item.address);
                         const region = item.address.state; // Région au Sénégal
 
-                        let labelParts = [];
+                        const labelParts = [];
                         if (region) labelParts.push(region);
                         if (mainName && mainName !== region) labelParts.push(mainName);
 

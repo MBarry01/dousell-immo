@@ -4,6 +4,8 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { ConfigTabs } from './config-tabs';
 
+// Force rebuild
+
 export default async function ConfigPremiumPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

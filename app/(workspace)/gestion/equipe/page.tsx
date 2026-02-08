@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { TeamPageClient } from "./components/TeamPageClient";
 import { CreateTeamPrompt } from "./components/CreateTeamPrompt";
 import { getTeamStats } from "./actions";
+
+// Force rebuild
 import type { Team, TeamMember, TeamRole } from "@/types/team";
 
 export const metadata = {

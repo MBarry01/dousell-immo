@@ -65,7 +65,8 @@ export async function getLeasesByTeam(
  * ou `rental_transactions:bulk:{leaseIds hash}` (fallback)
  */
 export async function getRentalTransactions(leaseIds: string[], teamId?: string) {
-  if (leaseIds.length === 0) {
+  // Si pas de baux ET pas d'équipe, on ne peut rien faire
+  if (leaseIds.length === 0 && !teamId) {
     return [];
   }
 
@@ -78,8 +79,6 @@ export async function getRentalTransactions(leaseIds: string[], teamId?: string)
         const supabase = await createClient();
 
         // On récupère TOUTES les transactions de l'équipe (plus efficace pour le dashboard global)
-        // La filtration par leaseIds se fera en mémoire si nécessaire, mais pour le dashboard
-        // on affiche généralement tout.
         const { data, error } = await supabase
           .from("rental_transactions")
           .select(
@@ -98,8 +97,12 @@ export async function getRentalTransactions(leaseIds: string[], teamId?: string)
         debug: true,
       }
     ).then(allTransactions => {
-      // Filtrer pour ne retourner que ceux demandés (sécurité/cohérence)
       if (!allTransactions) return [];
+
+      // Si aucun ID spécifié, on retourne TOUTES les transactions de l'équipe
+      if (leaseIds.length === 0) return allTransactions;
+
+      // Sinon on filtre
       const leaseIdSet = new Set(leaseIds);
       return allTransactions.filter(t => leaseIdSet.has(t.lease_id));
     });
@@ -272,9 +275,12 @@ export async function getLatePaymentsByTeam(teamId: string) {
           `period_year.lt.${currentYear},and(period_year.eq.${currentYear},period_month.lt.${currentMonth})`
         );
 
-      // Joindre avec les infos du bail
+      // Joindre avec les infos du bail (Map lookup O(1) au lieu de .find() O(n))
+      const leaseMap = new Map(
+        (leases || []).map((l) => [l.id, l])
+      );
       const latePayments = (lateTransactions || []).map((transaction) => {
-        const lease = leases.find((l) => l.id === transaction.lease_id);
+        const lease = leaseMap.get(transaction.lease_id);
         return {
           ...transaction,
           tenant_name: lease?.tenant_name,
@@ -304,27 +310,30 @@ export async function getOwnerProfileForReceipts(ownerId: string) {
     async () => {
       const supabase = await createClient();
 
-      // 1. Récupérer le profil utilisateur (base)
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select(
-          "company_name, company_address, company_email, company_ninea, signature_url, logo_url, full_name"
-        )
-        .eq("id", ownerId)
-        .maybeSingle();
+      // 1+2. Profil ET team_member EN PARALLÈLE (au lieu de séquentiel)
+      const [
+        { data: profile, error: profileError },
+        { data: member },
+      ] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select(
+            "company_name, company_address, company_email, company_ninea, signature_url, logo_url, full_name"
+          )
+          .eq("id", ownerId)
+          .maybeSingle(),
+        supabase
+          .from("team_members")
+          .select("team_id")
+          .eq("user_id", ownerId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
 
       if (profileError) throw profileError;
 
-      // 2. Chercher l'équipe (Agence)
-      // Priorité à l'équipe où l'utilisateur est membre
-      const { data: member } = await supabase
-        .from("team_members")
-        .select("team_id")
-        .eq("user_id", ownerId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
+      // 3. Team lookup (dépend du résultat de member)
       let teamData = null;
       if (member) {
         const { data: team } = await supabase
@@ -334,7 +343,6 @@ export async function getOwnerProfileForReceipts(ownerId: string) {
           .single();
         teamData = team;
       } else {
-        // Fallback: Chercher via ownership direct
         const { data: team } = await supabase
           .from("teams")
           .select("*")
@@ -345,14 +353,14 @@ export async function getOwnerProfileForReceipts(ownerId: string) {
         teamData = team;
       }
 
-      // 3. Fusionner les données (Priorité Team > Profil)
+      // Fusionner les données (Priorité Team > Profil)
       return {
         ...(profile || {}),
         company_name: teamData?.name || profile?.company_name,
         company_address: teamData?.company_address || profile?.company_address,
         company_email: teamData?.company_email || profile?.company_email,
         company_ninea: teamData?.company_ninea || profile?.company_ninea,
-        company_phone: teamData?.company_phone || null, // Ajout si dispo dans teams
+        company_phone: teamData?.company_phone || null,
         logo_url: teamData?.logo_url || profile?.logo_url,
         signature_url: teamData?.signature_url || profile?.signature_url,
       };
@@ -406,34 +414,35 @@ export async function getUserDashboardInfo(userId: string, email: string) {
     async () => {
       const supabase = await createClient();
 
-      // 1. Vérifier si c'est un locataire
-      const { data: lease } = await supabase
-        .from("leases")
-        .select("id")
-        .eq("tenant_email", email)
-        .eq("status", "active")
-        .maybeSingle();
-
-      const isTenant = !!lease;
-
-      // 2. Vérifier si c'est un propriétaire
-      const { count: propertyCount } = await supabase
-        .from("properties")
-        .select("id", { count: "exact", head: true })
-        .eq("owner_id", userId);
-
-      const isOwner = (propertyCount || 0) > 0;
-
-      // 3. Récupérer le profil pour statut gestion locative
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("gestion_locative_status, gestion_locative_enabled")
-        .eq("id", userId)
-        .single();
+      // TOUTES les requêtes en PARALLÈLE (au lieu de 3 séquentielles)
+      const [
+        { data: lease },
+        { count: propertyCount },
+        { data: profile },
+      ] = await Promise.all([
+        // 1. Vérifier si c'est un locataire
+        supabase
+          .from("leases")
+          .select("id")
+          .eq("tenant_email", email)
+          .eq("status", "active")
+          .maybeSingle(),
+        // 2. Vérifier si c'est un propriétaire
+        supabase
+          .from("properties")
+          .select("id", { count: "exact", head: true })
+          .eq("owner_id", userId),
+        // 3. Profil pour statut gestion locative
+        supabase
+          .from("profiles")
+          .select("gestion_locative_status, gestion_locative_enabled")
+          .eq("id", userId)
+          .single(),
+      ]);
 
       return {
-        isTenant,
-        isOwner,
+        isTenant: !!lease,
+        isOwner: (propertyCount || 0) > 0,
         gestionLocativeEnabled: profile?.gestion_locative_enabled || false,
         gestionLocativeStatus: profile?.gestion_locative_status || "inactive",
       };
@@ -461,6 +470,217 @@ export async function getExpensesByTeam(teamId: string) {
       return data || [];
     },
     { ttl: 300, namespace: "rentals" }
+  );
+}
+
+/**
+ * 📊 KPIs Avancés du Dashboard (avec cache)
+ *
+ * TTL : 10 minutes (calculs coûteux, acceptable avec lag)
+ * Cache key : `advanced_stats:{teamId}`
+ */
+export async function getAdvancedStatsCached(teamId: string) {
+  return getOrSetCache(
+    `advanced_stats:${teamId}`,
+    async () => {
+      const supabase = await createClient();
+
+      // TOUTES les requêtes en PARALLÈLE (au lieu de 5 séquentielles)
+      const [
+        { count: totalProperties },
+        { data: activeLeases },
+        { data: paidTransactions },
+        { count: totalTransCount },
+        { count: failedCount },
+      ] = await Promise.all([
+        // 1. Nombre total de biens
+        supabase
+          .from("properties")
+          .select("*", { count: "exact", head: true })
+          .eq("team_id", teamId),
+        // 2. Baux actifs
+        supabase
+          .from("leases")
+          .select("id, monthly_amount, billing_day, property_address")
+          .eq("team_id", teamId)
+          .eq("status", "active"),
+        // 3. Dernières transactions payées (délai moyen)
+        supabase
+          .from("rental_transactions")
+          .select("lease_id, paid_at, period_month, period_year")
+          .eq("team_id", teamId)
+          .eq("status", "paid")
+          .not("paid_at", "is", null)
+          .order("paid_at", { ascending: false })
+          .limit(50),
+        // 4. Total transactions (COUNT)
+        supabase
+          .from("rental_transactions")
+          .select("*", { count: "exact", head: true })
+          .eq("team_id", teamId),
+        // 5. Transactions échouées (COUNT)
+        supabase
+          .from("rental_transactions")
+          .select("*", { count: "exact", head: true })
+          .eq("team_id", teamId)
+          .in("status", ["failed", "rejected"]),
+      ]);
+
+      const activeLeasesCount = activeLeases?.length || 0;
+
+      // Taux d'occupation
+      let occupancyBase = totalProperties || 0;
+      if (occupancyBase === 0 && activeLeasesCount > 0) {
+        const uniqueAddresses = new Set(
+          (activeLeases || []).map((l) =>
+            l.property_address?.toLowerCase().trim()
+          )
+        );
+        occupancyBase = uniqueAddresses.size;
+      }
+
+      const rawOccupancyRate =
+        occupancyBase > 0
+          ? Math.round((activeLeasesCount / occupancyBase) * 100)
+          : activeLeasesCount > 0
+            ? 100
+            : 0;
+
+      const occupancyRate = Math.min(rawOccupancyRate, 100);
+
+      // Délai moyen de paiement (lookup par Map au lieu de .find())
+      const leaseMap = new Map(
+        (activeLeases || []).map((l) => [l.id, l])
+      );
+
+      let totalDelay = 0;
+      let delayCount = 0;
+
+      paidTransactions?.forEach((t) => {
+        const lease = leaseMap.get(t.lease_id);
+        if (lease && t.paid_at && t.period_month && t.period_year) {
+          const billingDay = lease.billing_day || 5;
+          const expectedDate = new Date(
+            t.period_year,
+            t.period_month - 1,
+            billingDay
+          );
+          const paidDate = new Date(t.paid_at);
+          const diffDays = Math.floor(
+            (paidDate.getTime() - expectedDate.getTime()) / (1000 * 60 * 60 * 24)
+          );
+          if (diffDays >= 0) {
+            totalDelay += diffDays;
+            delayCount++;
+          }
+        }
+      });
+
+      const avgPaymentDelay =
+        delayCount > 0 ? Math.round(totalDelay / delayCount) : 0;
+
+      // Taux d'impayés
+      const unpaidRate =
+        totalTransCount && totalTransCount > 0
+          ? Math.round(((failedCount || 0) / totalTransCount) * 100)
+          : 0;
+
+      // Revenu moyen par bien loué
+      const totalMonthlyRevenue =
+        activeLeases?.reduce((acc, l) => acc + Number(l.monthly_amount), 0) || 0;
+      const avgRevenuePerProperty =
+        activeLeasesCount > 0
+          ? Math.round(totalMonthlyRevenue / activeLeasesCount)
+          : 0;
+
+      return {
+        occupancyRate,
+        avgPaymentDelay,
+        unpaidRate,
+        avgRevenuePerProperty,
+        totalProperties: totalProperties || 0,
+        activeLeases: activeLeasesCount,
+      };
+    },
+    {
+      ttl: 600, // 10 minutes
+      namespace: "rentals",
+      debug: true,
+    }
+  );
+}
+
+/**
+ * 📈 Historique des Revenus (avec cache)
+ *
+ * TTL : 10 minutes (calculs coûteux, acceptable avec lag)
+ * Cache key : `revenue_history:{teamId}:{months}`
+ */
+export async function getRevenueHistoryCached(
+  teamId: string,
+  months: number = 12
+) {
+  return getOrSetCache(
+    `revenue_history:${teamId}:${months}`,
+    async () => {
+      const supabase = await createClient();
+
+      const today = new Date();
+      const history: {
+        month: string;
+        year: number;
+        monthNum: number;
+        collected: number;
+        expected: number;
+      }[] = [];
+
+      // Calculer la fenêtre de temps
+      const pastDate = new Date(today.getFullYear(), today.getMonth() - months, 1);
+      const minYear = pastDate.getFullYear();
+
+      // Récupérer TOUTES les transactions pertinentes en UNE SEULE requête
+      const { data: transactions } = await supabase
+        .from("rental_transactions")
+        .select("amount_due, status, period_month, period_year")
+        .eq("team_id", teamId)
+        .gte("period_year", minYear);
+
+      // Pré-indexer les transactions par clé "year-month" (O(n) au lieu de O(n*m))
+      const txByMonth = new Map<string, { collected: number; expected: number }>();
+      for (const t of transactions || []) {
+        const key = `${t.period_year}-${t.period_month}`;
+        const entry = txByMonth.get(key) || { collected: 0, expected: 0 };
+        const amount = Number(t.amount_due || 0);
+        entry.expected += amount;
+        if (t.status === "paid") entry.collected += amount;
+        txByMonth.set(key, entry);
+      }
+
+      // Construire l'historique avec lookup O(1) par mois
+      for (let i = months - 1; i >= 0; i--) {
+        const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const monthNum = date.getMonth() + 1;
+        const year = date.getFullYear();
+        const monthName = date.toLocaleDateString("fr-FR", { month: "short" });
+
+        const entry = txByMonth.get(`${year}-${monthNum}`) || { collected: 0, expected: 0 };
+
+        history.push({
+          month: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+          year,
+          monthNum,
+          collected: entry.collected,
+          expected: entry.expected,
+        });
+      }
+
+      return history;
+    },
+    {
+      ttl: 600, // 10 minutes
+      namespace: "rentals",
+      debug: true,
+    }
   );
 }
 

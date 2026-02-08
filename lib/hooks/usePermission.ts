@@ -11,7 +11,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { TeamPermissionKey } from '@/lib/team-permissions';
 import { useTeam } from '@/lib/hooks/useTeam';
 import { createClient } from '@/utils/supabase/client';
-import { requestAccessAction } from '@/app/(workspace)/gestion/access-control/actions';
+import { submitAccessRequest } from '@/app/(workspace)/gestion/access-control/actions';
 
 export interface UsePermissionResult {
     /**
@@ -159,18 +159,19 @@ export function usePermission(
         }
 
         try {
-            const result = await requestAccessAction({
+            const result = await submitAccessRequest({
                 teamId,
                 permission,
                 reason,
             });
 
-            if (result.success) {
+            if (result.data?.success) {
                 // Rafraîchir après la demande
                 await checkPermission();
+                return { success: true };
             }
 
-            return result;
+            return { success: false, error: result.error || "Erreur lors de la demande" };
         } catch (err: any) {
             console.error('[usePermission] Request access error:', err);
             return {

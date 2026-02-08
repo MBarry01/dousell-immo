@@ -1,10 +1,10 @@
 {
-  "id": "/",
+  "id": "/gestion",
   "name": "Dousell Immo",
   "short_name": "Dousell",
   "description": "L'immobilier de confiance à Dakar et au Sénégal.",
-  "start_url": "/?source=pwa",
-  "scope": "/",
+  "start_url": "/gestion?source=pwa",
+  "scope": "/gestion",
   "display": "minimal-ui",
   "display_override": [
     "standalone",
@@ -62,10 +62,10 @@
   ],
   "shortcuts": [
     {
-      "name": "Rechercher",
-      "short_name": "Recherche",
-      "description": "Rechercher un bien immobilier",
-      "url": "/recherche?source=pwa",
+      "name": "Tableau de bord",
+      "short_name": "Dashboard",
+      "description": "Accéder au tableau de bord",
+      "url": "/gestion?source=pwa",
       "icons": [
         {
           "src": "/icons/icon-192.png",
@@ -75,10 +75,10 @@
       ]
     },
     {
-      "name": "Favoris",
-      "short_name": "Favoris",
-      "description": "Voir mes biens favoris",
-      "url": "/favoris?source=pwa",
+      "name": "Mon équipe",
+      "short_name": "Équipe",
+      "description": "Gérer les membres de l'équipe",
+      "url": "/gestion/equipe?source=pwa",
       "icons": [
         {
           "src": "/icons/icon-192.png",

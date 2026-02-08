@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { safeAction } from "@/lib/safe-action";
 import {
   TEAM_ROLE_CONFIG,
 } from "@/lib/team-permissions";
@@ -475,22 +476,15 @@ export async function updateTeam(
 // INVITATION DE MEMBRE
 // =====================================================
 
-export async function inviteTeamMember(
-  formData: z.infer<typeof inviteMemberSchema>
-): Promise<InviteMemberResult> {
-  try {
-    const validation = inviteMemberSchema.safeParse(formData);
-    if (!validation.success) {
-      return { success: false, error: validation.error.issues[0].message };
-    }
-
-    const data = validation.data;
-
+export const inviteTeamMember = safeAction(
+  "inviteTeamMember",
+  inviteMemberSchema,
+  async (data, { userId, teamId: ctxTeamId }) => {
     // Vérifier permission
-    const { user, teamId: activeTeamId } = await requireTeamPermission("team.members.invite");
+    const { user, teamId } = await requireTeamPermission("team.members.invite");
 
-    if (activeTeamId !== data.teamId) {
-      return { success: false, error: "Accès non autorisé" };
+    if (teamId !== data.teamId) {
+      throw new Error("Accès non autorisé");
     }
 
     const supabase = await createClient();
@@ -506,12 +500,12 @@ export async function inviteTeamMember(
 
     if (teamError) {
       console.error("[Team Quota] Error fetching team:", teamError);
-      return { success: false, error: "Erreur lors de la récupération des informations de l'équipe" };
+      throw new Error("Erreur lors de la récupération des informations de l'équipe");
     }
 
     // Si équipe en trial, vérifier la limite de 3 membres
     if (team.subscription_status === 'trial') {
-      // 1. Emails des membres actifs (pour ne pas compter les invitations redondantes)
+      // 1. Emails des membres actifs
       const { data: members } = await supabaseAdmin
         .from("team_members")
         .select("user:profiles(email)")
@@ -522,7 +516,7 @@ export async function inviteTeamMember(
         members?.map(m => (m.user as any)?.email?.toLowerCase()).filter(Boolean) || []
       );
 
-      // 2. Invitations en attente valides (non expirées et pas déjà membres)
+      // 2. Invitations en attente valides
       const { data: pendingInvites } = await supabaseAdmin
         .from("team_invitations")
         .select("email, expires_at")
@@ -544,10 +538,7 @@ export async function inviteTeamMember(
 
       // Limite de 3 membres pour les équipes Trial
       if (totalCount >= 3) {
-        return {
-          success: false,
-          error: "Limite atteinte : Les équipes en période d'essai sont limitées à 3 membres. Passez à un abonnement Pro pour inviter plus de membres.",
-        };
+        throw new Error("Limite atteinte : Les équipes en période d'essai sont limitées à 3 membres. Passez à un abonnement Pro pour inviter plus de membres.");
       }
     }
 
@@ -568,11 +559,11 @@ export async function inviteTeamMember(
         .maybeSingle();
 
       if (existingMember) {
-        return { success: false, error: "Cet utilisateur est déjà membre de l'équipe" };
+        throw new Error("Cet utilisateur est déjà membre de l'équipe");
       }
     }
 
-    // Vérifier si invitation déjà en cours (avec admin client pour bypass RLS)
+    // Vérifier si invitation déjà en cours
     const { data: existingInvite } = await supabaseAdmin
       .from("team_invitations")
       .select("id")
@@ -582,7 +573,7 @@ export async function inviteTeamMember(
       .maybeSingle();
 
     if (existingInvite) {
-      return { success: false, error: "Une invitation est déjà en cours pour cet email" };
+      throw new Error("Une invitation est déjà en cours pour cet email");
     }
 
     // Récupérer les infos de l'équipe
@@ -599,20 +590,20 @@ export async function inviteTeamMember(
       .eq("id", user.id)
       .single();
 
-    // ✅ CORRECT
-    // Générer le token et l'expiration explicitement 
-    const inviteToken = crypto.randomUUID();
+    // Générer le token et l'expiration
+    const inviteToken = globalThis.crypto.randomUUID();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 jours
-    // Créer l'invitation avec le client admin (bypass RLS)
+
+    // Créer l'invitation
     const { data: invitation, error } = await supabaseAdmin
       .from("team_invitations")
       .insert({
         team_id: data.teamId,
         email: data.email.toLowerCase(),
         role: data.role,
-        token: inviteToken,           // 🆕 Token explicite
-        expires_at: expiresAt.toISOString(), // 🆕 Expiration explicite
+        token: inviteToken,
+        expires_at: expiresAt.toISOString(),
         invited_by: user.id,
         message: data.message || null,
       })
@@ -621,14 +612,14 @@ export async function inviteTeamMember(
 
     if (error) {
       console.error("Erreur création invitation:", error);
-      return { success: false, error: "Erreur lors de l'envoi de l'invitation" };
+      throw new Error("Erreur lors de l'envoi de l'invitation");
     }
 
     // Envoyer l'email d'invitation
     try {
       const roleConfig = TEAM_ROLE_CONFIG[data.role];
       const inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/gestion/equipe/invitations/accept?token=${inviteToken}`;
-      console.log("🔗 LIEN D'INVITATION GÉNÉRÉ:", inviteUrl); // DEBUG LOG
+      console.log("🔗 LIEN D'INVITATION GÉNÉRÉ:", inviteUrl);
 
       const emailHtml = `
         <!DOCTYPE html>
@@ -690,23 +681,14 @@ export async function inviteTeamMember(
       });
     } catch (emailError) {
       console.error("Erreur envoi email invitation:", emailError);
-      // On ne bloque pas si l'email échoue, l'invitation est créée
     }
-
-    // Audit log
-    await logTeamAudit(data.teamId, user.id, "member.invited", "invitation", invitation.id, null, {
-      email: data.email,
-      role: data.role,
-    });
 
     revalidatePath("/gestion/equipe");
     revalidatePath("/gestion/equipe/invitations");
 
     return { success: true, invitationId: invitation.id };
-  } catch (err: any) {
-    return { success: false, error: err.message };
   }
-}
+);
 
 /**
  * Renvoie une invitation (réinitialise l'expiration)
@@ -1057,22 +1039,15 @@ export async function acceptInvitation(token: string): Promise<AcceptInvitationR
 // CHANGEMENT DE RÔLE
 // =====================================================
 
-export async function changeMemberRole(
-  formData: z.infer<typeof changeRoleSchema>
-): Promise<TeamActionResult> {
-  try {
-    const validation = changeRoleSchema.safeParse(formData);
-    if (!validation.success) {
-      return { success: false, error: validation.error.issues[0].message };
-    }
-
-    const data = validation.data;
-
+export const changeMemberRole = safeAction(
+  "changeMemberRole",
+  changeRoleSchema,
+  async (data, { userId }) => {
     // Seul owner ou manager avec permission spécifique peut changer les rôles
     const { user, teamId: activeTeamId } = await requireTeamPermission("team.members.edit_role");
 
     if (activeTeamId !== data.teamId) {
-      return { success: false, error: "Accès non autorisé" };
+      throw new Error("Accès non autorisé");
     }
 
     const supabaseAdmin = createAdminClient();
@@ -1086,12 +1061,12 @@ export async function changeMemberRole(
       .single();
 
     if (fetchError || !member) {
-      return { success: false, error: "Membre introuvable" };
+      throw new Error("Membre introuvable");
     }
 
-    // Empêcher la modification d'un owner (sauf par lui-même si on veut autoriser le transfert, mais ici restons simple)
+    // Empêcher la modification d'un owner
     if (member.role === "owner") {
-      return { success: false, error: "Impossible de modifier le rôle du propriétaire" };
+      throw new Error("Impossible de modifier le rôle du propriétaire");
     }
 
     // Mettre à jour
@@ -1101,7 +1076,7 @@ export async function changeMemberRole(
       .eq("id", data.memberId);
 
     if (error) {
-      return { success: false, error: "Erreur lors du changement de rôle" };
+      throw new Error("Erreur lors du changement de rôle");
     }
 
     // Audit log
@@ -1117,23 +1092,26 @@ export async function changeMemberRole(
 
     revalidatePath("/gestion/equipe");
     return { success: true, message: "Rôle mis à jour" };
-  } catch (err: any) {
-    return { success: false, error: err.message };
   }
-}
+);
 
 /**
  * Supprime un membre de l'équipe
  */
-export async function removeTeamMember(
-  teamId: string,
-  memberId: string
-): Promise<TeamActionResult> {
-  try {
+const removeMemberSchema = z.object({
+  teamId: z.string().uuid(),
+  memberId: z.string().uuid()
+});
+
+export const removeTeamMember = safeAction(
+  "removeTeamMember",
+  removeMemberSchema,
+  async (data, { userId }) => {
+    const { teamId, memberId } = data;
     const { user, teamId: activeTeamId } = await requireTeamPermission("team.members.remove");
 
     if (activeTeamId !== teamId) {
-      return { success: false, error: "Accès non autorisé" };
+      throw new Error("Accès non autorisé");
     }
 
     const supabaseAdmin = createAdminClient();
@@ -1147,11 +1125,11 @@ export async function removeTeamMember(
       .single();
 
     if (fetchError || !member) {
-      return { success: false, error: "Membre introuvable" };
+      throw new Error("Membre introuvable");
     }
 
     if (member.role === "owner") {
-      return { success: false, error: "Impossible de supprimer le propriétaire" };
+      throw new Error("Impossible de supprimer le propriétaire");
     }
 
     // Suppression (logique)
@@ -1161,7 +1139,7 @@ export async function removeTeamMember(
       .eq("id", memberId);
 
     if (error) {
-      return { success: false, error: "Erreur lors de la suppression" };
+      throw new Error("Erreur lors de la suppression");
     }
 
     // Audit log
@@ -1169,10 +1147,8 @@ export async function removeTeamMember(
 
     revalidatePath("/gestion/equipe");
     return { success: true, message: "Membre supprimé" };
-  } catch (err: any) {
-    return { success: false, error: err.message };
   }
-}
+);
 
 /**
  * Récupère toutes les équipes dont l'utilisateur est membre

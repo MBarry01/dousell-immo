@@ -46,7 +46,7 @@ export function InviteMemberDialog({ teamId, onSuccess, trigger }: InviteMemberD
     e.preventDefault();
     setLoading(true);
 
-    const result = await inviteTeamMember({
+    const { data: result, error } = await inviteTeamMember({
       teamId,
       email,
       role,
@@ -55,7 +55,7 @@ export function InviteMemberDialog({ teamId, onSuccess, trigger }: InviteMemberD
 
     setLoading(false);
 
-    if (result.success) {
+    if (result?.success) {
       toast.success("Invitation envoyée !", {
         description: `Un email a été envoyé à ${email}`,
       });
@@ -66,7 +66,7 @@ export function InviteMemberDialog({ teamId, onSuccess, trigger }: InviteMemberD
       router.refresh();
       onSuccess?.();
     } else {
-      toast.error(result.error || "Erreur lors de l'envoi");
+      toast.error(error || "Erreur lors de l'envoi");
     }
   };
 

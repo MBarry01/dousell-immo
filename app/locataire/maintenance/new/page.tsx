@@ -9,24 +9,30 @@ export const metadata: Metadata = {
 
 export default function NewMaintenanceRequestPage() {
     return (
-        <div className="min-h-screen bg-slate-950 pb-24">
+        <div className="w-full max-w-lg mx-auto px-4 py-6 space-y-6">
             {/* Header */}
-            <header className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 h-14 flex items-center gap-3">
-                <Link href="/locataire/maintenance" className="p-2 -ml-2 text-slate-400 hover:text-white transition-colors">
+            <div className="flex items-center gap-3">
+                <Link
+                    href="/locataire/maintenance"
+                    className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 hover:bg-zinc-200 transition-colors"
+                >
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
-                <h1 className="font-semibold text-white">Nouveau Signalement</h1>
-            </header>
-
-            <main className="p-4 max-w-lg mx-auto">
-                <div className="mb-6">
-                    <p className="text-sm text-slate-400">
-                        Décrivez le problème précisément. Une photo est obligatoire pour un traitement rapide.
-                    </p>
+                <div>
+                    <h1 className="text-xl font-bold text-zinc-900">Nouveau Signalement</h1>
+                    <p className="text-sm text-zinc-500">Décrivez le problème rencontré</p>
                 </div>
+            </div>
 
-                <MaintenanceForm />
-            </main>
+            {/* Info */}
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <p className="text-sm text-amber-800">
+                    <strong>Conseil :</strong> Une photo claire du problème permet un traitement plus rapide de votre demande.
+                </p>
+            </div>
+
+            {/* Form */}
+            <MaintenanceForm />
         </div>
     );
 }

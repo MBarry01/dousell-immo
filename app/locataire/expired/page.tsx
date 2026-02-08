@@ -55,11 +55,16 @@ export default function TenantExpiredPage() {
   const getErrorMessage = () => {
     switch (error) {
       case "invalid_link":
+      case "invalid_token":
         return "Ce lien d'accès n'est pas valide.";
       case "expired":
         return "Ce lien d'accès a expiré.";
       case "no_lease":
         return "Aucun bail actif n'est associé à ce lien.";
+      case "max_attempts":
+        return "Trop de tentatives. Ce lien a été invalidé pour des raisons de sécurité.";
+      case "no_session":
+        return "Votre session a expiré. Veuillez demander un nouveau lien.";
       default:
         return "Votre session a expiré pour des raisons de sécurité.";
     }

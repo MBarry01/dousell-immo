@@ -1,36 +1,40 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
 import { initializeRentalPayment } from '@/lib/paydunya';
-import { withLock } from '@/lib/cache/distributed-locks';
+import { getTenantSessionFromCookie } from '@/lib/tenant-magic-link';
 
+/**
+ * Process rental payment
+ * Uses tenant session from cookie (NOT supabase auth)
+ */
 export async function processRentalPayment(leaseId: string): Promise<
     | { success: true; data: { url: string } }
     | { success: false; error: string }
     | { error: string }
 > {
-    // ⚠️ EN MODE TEST: Verrous désactivés pour faciliter les tests multiples
-    const isTestMode = process.env.PAYDUNYA_MODE === 'test';
+    // Get tenant session from cookie
+    const session = await getTenantSessionFromCookie();
 
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user || !user.email) {
-        return { error: "Non authentifié" };
+    if (!session) {
+        return { error: "Session expirée. Veuillez vous reconnecter." };
     }
 
-    // 1. Récupérer les détails du bail et du montant dû
+    // Verify the lease matches the session
+    if (session.lease_id !== leaseId) {
+        return { error: "Accès non autorisé" };
+    }
+
+    // Initialize Admin Client
     const { createClient: createAdminClient } = await import("@supabase/supabase-js");
     const supabaseAdmin = createAdminClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // On cherche la transaction en attente pour ce mois (ou la plus ancienne impayée)
-    // Pour simplifier ici, on prend le montant mensuel du bail
+    // Get lease details
     const { data: lease, error } = await supabaseAdmin
         .from('leases')
-        .select('*, tenant_name') // Assurez-vous que tenant_name est bien dans leases
+        .select('*, tenant_name, tenant_email')
         .eq('id', leaseId)
         .single();
 
@@ -46,12 +50,12 @@ export async function processRentalPayment(leaseId: string): Promise<
     try {
         const result = await initializeRentalPayment(
             lease.id,
-            lease.monthly_amount, // Montant du loyer
+            lease.monthly_amount,
             currentMonth,
             currentYear,
-            user.email,
-            lease.tenant_name || user.user_metadata?.full_name || 'Locataire',
-            user.user_metadata?.phone
+            session.tenant_email || lease.tenant_email,
+            session.tenant_name || lease.tenant_name || 'Locataire',
+            undefined // phone - not available in cookie session
         );
 
         return { success: true, data: { url: result.redirectUrl } };
@@ -62,35 +66,42 @@ export async function processRentalPayment(leaseId: string): Promise<
     }
 }
 
+/**
+ * Process custom amount rental payment
+ * Uses tenant session from cookie (NOT supabase auth)
+ */
 export async function processCustomRentalPayment(leaseId: string, customAmount: number): Promise<
     | { success: true; data: { url: string } }
     | { success: false; error: string }
     | { error: string }
 > {
-    // ⚠️ EN MODE TEST: Verrous désactivés pour faciliter les tests multiples
-    const isTestMode = process.env.PAYDUNYA_MODE === 'test';
+    // Get tenant session from cookie
+    const session = await getTenantSessionFromCookie();
 
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    if (!session) {
+        return { error: "Session expirée. Veuillez vous reconnecter." };
+    }
 
-    if (!user || !user.email) {
-        return { error: "Non authentifié" };
+    // Verify the lease matches the session
+    if (session.lease_id !== leaseId) {
+        return { error: "Accès non autorisé" };
     }
 
     if (!customAmount || customAmount <= 0) {
         return { error: "Montant invalide" };
     }
 
-    // 1. Récupérer les détails du bail
+    // Initialize Admin Client
     const { createClient: createAdminClient } = await import("@supabase/supabase-js");
     const supabaseAdmin = createAdminClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // Get lease details
     const { data: lease, error } = await supabaseAdmin
         .from('leases')
-        .select('*, tenant_name')
+        .select('*, tenant_name, tenant_email')
         .eq('id', leaseId)
         .single();
 
@@ -99,7 +110,7 @@ export async function processCustomRentalPayment(leaseId: string, customAmount: 
         return { error: "Bail introuvable" };
     }
 
-    // Validation: le montant ne peut pas dépasser 12 mois de loyer
+    // Validation: amount cannot exceed 12 months of rent
     if (customAmount > lease.monthly_amount * 12) {
         return { error: "Le montant ne peut pas dépasser 12 mois de loyer" };
     }
@@ -111,12 +122,12 @@ export async function processCustomRentalPayment(leaseId: string, customAmount: 
     try {
         const result = await initializeRentalPayment(
             lease.id,
-            customAmount, // Montant personnalisé
+            customAmount,
             currentMonth,
             currentYear,
-            user.email,
-            lease.tenant_name || user.user_metadata?.full_name || 'Locataire',
-            user.user_metadata?.phone
+            session.tenant_email || lease.tenant_email,
+            session.tenant_name || lease.tenant_name || 'Locataire',
+            undefined // phone - not available in cookie session
         );
 
         return { success: true, data: { url: result.redirectUrl } };

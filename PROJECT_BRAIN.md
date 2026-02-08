@@ -1967,7 +1967,7 @@ export const Constants = {
 ---
 ## 2. UI COMPONENTS (Existing)
 Utilise ces composants pour construire l'interface.
-# 🗺️ MAP DES COMPOSANTS (233)
+# 🗺️ MAP DES COMPOSANTS (234)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -2058,6 +2058,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<paydunya-popup-payment />** (Path: `components\payment\paydunya-popup-payment.tsx`)
 - **<paydunya-psr-button />** (Path: `components\payment\paydunya-psr-button.tsx`)
 - **<paydunya-sdk-form />** (Path: `components\payment\paydunya-sdk-form.tsx`)
+- **<StripeRentButton />** (Path: `components\payment\StripeRentButton.tsx`)
 - **<DepositReceiptPDF />** (Path: `components\pdf\DepositReceiptPDF.tsx`)
 - **<PaymentHistoryPDF />** (Path: `components\pdf\PaymentHistoryPDF.tsx`)
 - **<PreavisPDF />** (Path: `components\pdf\PreavisPDF.tsx`)

@@ -1,5 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { differenceInDays } from "date-fns";
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Charger les variables d'environnement depuis .env.local
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -16,8 +21,8 @@ async function checkStatusLogic() {
 
     const today = new Date();
     const currentDay = today.getDate();
-    const selectedMonth = 12;
-    const selectedYear = 2025;
+    const selectedMonth = 2; // Feb
+    const selectedYear = 2026;
     const isCurrentMonth = selectedMonth === (today.getMonth() + 1) && selectedYear === today.getFullYear();
 
     console.log(`Today: ${today.toISOString().split('T')[0]}`);

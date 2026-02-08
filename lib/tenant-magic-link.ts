@@ -14,7 +14,7 @@
  * Per WORKFLOW_PROPOSAL.md section 4.3, 5.1.1, and REMAINING_TASKS.md 3.5.2
  */
 
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { randomBytes, createHash } from "crypto";
 import { headers } from "next/headers";
 import { trackServerEvent, EVENTS } from "@/lib/analytics";
@@ -70,7 +70,7 @@ async function logTenantAccess(
   failureReason?: string
 ): Promise<void> {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { ipAddress, userAgent } = await getClientInfo();
 
     await supabase.from("tenant_access_logs").insert({
@@ -107,7 +107,7 @@ export interface TenantSession {
  * @returns The raw token (hex, 64 chars) - to be sent to tenant
  */
 export async function generateTenantAccessToken(leaseId: string): Promise<string> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Generate secure random token
   const rawToken = randomBytes(32).toString("hex");
@@ -162,7 +162,7 @@ export async function generateTenantAccessToken(leaseId: string): Promise<string
  * @returns TenantSession if valid, null otherwise
  */
 export async function validateTenantToken(token: string): Promise<TenantSession | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Hash the input token for comparison
   const hashedToken = hashToken(token);
@@ -236,7 +236,7 @@ export async function validateTenantToken(token: string): Promise<TenantSession 
  * @param leaseId - The lease ID
  */
 export async function markTenantTokenVerified(leaseId: string): Promise<void> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   await supabase
     .from("leases")
@@ -262,7 +262,7 @@ export async function markTenantTokenVerified(leaseId: string): Promise<void> {
  * @param leaseId - The lease ID
  */
 export async function updateTenantLastAccess(leaseId: string): Promise<void> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   await supabase
     .from("leases")
@@ -282,7 +282,7 @@ export async function updateTenantLastAccess(leaseId: string): Promise<void> {
  * @returns true if match, false otherwise
  */
 export async function validateTenantIdentity(leaseId: string, lastName: string): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: lease } = await supabase
     .from("leases")
@@ -331,7 +331,7 @@ export async function logTenantSessionCreated(leaseId: string): Promise<void> {
  * @param leaseId - The lease ID
  */
 export async function revokeTenantToken(leaseId: string): Promise<void> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   await supabase
     .from("leases")
@@ -359,14 +359,18 @@ export function getTenantMagicLinkUrl(token: string): string {
 
 /**
  * Cookie configuration for tenant session
+ *
+ * Note: path is "/" to allow API routes (/api/stripe/rent-checkout, etc.)
+ * to access the tenant session. The session is still validated against
+ * the lease and can only be created from valid magic links.
  */
 export const TENANT_SESSION_COOKIE_OPTIONS = {
   name: "tenant_session",
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "strict" as const,
+  sameSite: "lax" as const, // "lax" allows cookies on same-site navigations
   maxAge: SESSION_EXPIRATION_HOURS * 60 * 60, // in seconds
-  path: "/locataire",
+  path: "/", // Root path to include API routes
 };
 
 /**
@@ -405,9 +409,11 @@ export async function getTenantLeaseData() {
     return null;
   }
 
-  const supabase = await createClient();
+  // Use admin client to bypass RLS - tenant has no Supabase auth session
+  const adminClient = createAdminClient();
 
-  const { data: lease, error } = await supabase
+  // Fetch lease + property
+  const { data: lease, error } = await adminClient
     .from("leases")
     .select(`
       id,
@@ -427,16 +433,6 @@ export async function getTenantLeaseData() {
         location,
         details,
         images
-      ),
-      payments:lease_payments (
-        id,
-        amount,
-        payment_date,
-        payment_method,
-        status,
-        period_start,
-        period_end,
-        created_at
       )
     `)
     .eq("id", session.lease_id)
@@ -447,8 +443,23 @@ export async function getTenantLeaseData() {
     return null;
   }
 
+  // Fetch payments separately with admin client to ensure fresh data
+  const { data: payments, error: paymentsError } = await adminClient
+    .from("rental_transactions")
+    .select("id, amount_due, paid_at, payment_method, status, period_month, period_year, created_at")
+    .eq("lease_id", session.lease_id)
+    .order("period_year", { ascending: false })
+    .order("period_month", { ascending: false });
+
+  if (paymentsError) {
+    console.error("Error fetching tenant payments:", paymentsError);
+  }
+
   return {
-    lease,
+    lease: {
+      ...lease,
+      payments: payments || [],
+    },
     tenantName: session.tenant_name,
     tenantEmail: session.tenant_email,
   };
@@ -464,21 +475,35 @@ export async function getTenantLeaseData() {
  * @returns Number of failed attempts
  */
 export async function getTenantFailedAttempts(leaseId: string): Promise<number> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
-  // Count failed attempts in the last 24 hours (or restricted window)
-  const { count, error } = await supabase
+  // Find when the latest token was generated for this lease
+  // Only count failures AFTER the most recent token generation
+  const { data: lastTokenGen } = await supabase
+    .from("tenant_access_logs")
+    .select("created_at")
+    .eq("lease_id", leaseId)
+    .eq("action", "token_generated")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  // Count failed attempts since the last token generation
+  let query = supabase
     .from("tenant_access_logs")
     .select("id", { count: "exact", head: true })
     .eq("lease_id", leaseId)
-    .eq("action", "identity_verification_failed")
-  // Optional: limit lookback period if needed, currently counts all for this lease
-  // .gt("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()); 
-  // For now we count global failures for the lease to be safe until token resets
+    .eq("action", "identity_verification_failed");
+
+  if (lastTokenGen?.created_at) {
+    query = query.gt("created_at", lastTokenGen.created_at);
+  }
+
+  const { count, error } = await query;
 
   if (error) {
     console.error("Error counting failed attempts:", error);
-    return 0; // Fail open (allow attempt) or fail closed depending on strictness
+    return 0;
   }
 
   return count || 0;

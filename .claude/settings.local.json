@@ -64,7 +64,12 @@
       "Bash(node:*)",
       "Bash(xcopy:*)",
       "Bash(robocopy:*)",
-      "Bash(xargs -I {} sh -c 'echo \"\"=== File: {} ===\"\" && grep -A 15 \"\"CREATE TABLE.*team_members\"\" {} | head -20')"
+      "Bash(xargs -I {} sh -c 'echo \"\"=== File: {} ===\"\" && grep -A 15 \"\"CREATE TABLE.*team_members\"\" {} | head -20')",
+      "mcp__claude_ai_Supabase__list_tables",
+      "mcp__claude_ai_Supabase__get_advisors",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "Bash(npx next build)"
     ]
   }
 }

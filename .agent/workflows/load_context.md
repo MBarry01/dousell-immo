@@ -32,3 +32,11 @@ type docs/REMAINING_TASKS.md
 7. Read the Supabase brain (if exists - optional)
 // turbo
 type .ai/.supabase_brain.md
+
+8. List available skills
+// turbo
+dir .agent\skills /B
+
+9. Read rental payment skill (critical for Stripe/payment logic)
+// turbo
+type .agent\skills\rental-payments\SKILL.md

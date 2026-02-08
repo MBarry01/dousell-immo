@@ -1,9 +1,8 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
-import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { sendEmail } from '@/lib/mail';
+import { getTenantSessionFromCookie } from '@/lib/tenant-magic-link';
 
 // Type pour le formulaire
 export interface CreateMaintenanceRequestData {
@@ -12,16 +11,19 @@ export interface CreateMaintenanceRequestData {
     photoUrls: string[];
 }
 
+/**
+ * Create a new maintenance request
+ * Uses tenant session from cookie (NOT supabase auth)
+ */
 export async function createMaintenanceRequest(data: CreateMaintenanceRequestData) {
-    const supabase = await createClient();
+    // 1. Get tenant session from cookie
+    const session = await getTenantSessionFromCookie();
 
-    // 1. Qui est connecté ?
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || !user.email) {
-        redirect('/auth');
+    if (!session) {
+        return { error: "Session expirée. Veuillez vous reconnecter." };
     }
 
-    // 2. Initialiser Admin Client (pour contourner RLS)
+    // 2. Initialize Admin Client (to bypass RLS)
     const { createClient: createAdminClient } = await import("@supabase/supabase-js");
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
         throw new Error("Configuration serveur incomplète (Clé API manquante)");
@@ -37,25 +39,19 @@ export async function createMaintenanceRequest(data: CreateMaintenanceRequestDat
         }
     );
 
-    // 3. Trouver le bail actif du locataire
-    // On doit trouver le bail pour lier la demande
+    // 3. Get lease details (we have lease_id from session)
     const { data: lease, error: leaseError } = await supabaseAdmin
         .from('leases')
         .select('id, property_id, owner_id')
-        .eq('tenant_email', user.email)
-        .eq('status', 'active')
-        .maybeSingle();
+        .eq('id', session.lease_id)
+        .single();
 
-    if (leaseError) {
+    if (leaseError || !lease) {
         console.error("Erreur recherche bail pour maintenance:", leaseError);
         return { error: "Impossible de récupérer votre bail." };
     }
 
-    if (!lease) {
-        return { error: "Aucun bail actif trouvé. Impossible de créer une demande." };
-    }
-
-    // 4. Insérer la demande
+    // 4. Insert the maintenance request
     const { error: insertError } = await supabaseAdmin
         .from('maintenance_requests')
         .insert({
@@ -71,7 +67,7 @@ export async function createMaintenanceRequest(data: CreateMaintenanceRequestDat
         return { error: "Erreur lors de l'enregistrement de la demande." };
     }
 
-    // Notifier le propriétaire par email
+    // 5. Notify owner by email
     try {
         const { data: ownerData } = await supabaseAdmin
             .from('profiles')
@@ -85,7 +81,7 @@ export async function createMaintenanceRequest(data: CreateMaintenanceRequestDat
                 subject: `🔧 Nouvelle demande de maintenance - ${data.category}`,
                 html: `
                     <p>Bonjour ${ownerData.full_name || ''},</p>
-                    <p>Un locataire a signalé un problème sur votre bien.</p>
+                    <p>Votre locataire <strong>${session.tenant_name}</strong> a signalé un problème.</p>
                     <p><strong>Catégorie :</strong> ${data.category}</p>
                     <p><strong>Description :</strong> ${data.description}</p>
                     ${data.photoUrls.length > 0 ? `<p><strong>Photos jointes :</strong> ${data.photoUrls.length} photo(s)</p>` : ''}
@@ -100,17 +96,24 @@ export async function createMaintenanceRequest(data: CreateMaintenanceRequestDat
         }
     } catch (mailError) {
         console.error("Erreur envoi notification maintenance:", mailError);
-        // On ne bloque pas l'UI pour ça
+        // Don't block UI for email errors
     }
 
     revalidatePath('/locataire/maintenance');
     return { success: true };
 }
 
+/**
+ * Get all maintenance requests for the tenant
+ * Uses tenant session from cookie
+ */
 export async function getTenantMaintenanceRequests() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || !user.email) return [];
+    // Get tenant session from cookie
+    const session = await getTenantSessionFromCookie();
+
+    if (!session) {
+        return [];
+    }
 
     const { createClient: createAdminClient } = await import("@supabase/supabase-js");
     const supabaseAdmin = createAdminClient(
@@ -118,20 +121,11 @@ export async function getTenantMaintenanceRequests() {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Récupérer le bail ID d'abord
-    const { data: lease } = await supabaseAdmin
-        .from('leases')
-        .select('id')
-        .eq('tenant_email', user.email)
-        .eq('status', 'active')
-        .maybeSingle();
-
-    if (!lease) return [];
-
+    // Fetch maintenance requests for this lease
     const { data: requests, error } = await supabaseAdmin
         .from('maintenance_requests')
         .select('id, category, description, status, photo_urls, created_at, artisan_name, artisan_phone, artisan_rating, quoted_price, intervention_date')
-        .eq('lease_id', lease.id)
+        .eq('lease_id', session.lease_id)
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -139,18 +133,19 @@ export async function getTenantMaintenanceRequests() {
         return [];
     }
 
-    return requests;
+    return requests || [];
 }
 
 /**
- * Annuler une demande de maintenance (uniquement si status = 'open')
+ * Cancel a maintenance request (only if status = 'open')
+ * Uses tenant session from cookie
  */
 export async function cancelMaintenanceRequest(requestId: string) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // Get tenant session from cookie
+    const session = await getTenantSessionFromCookie();
 
-    if (!user || !user.email) {
-        return { error: "Non autorisé" };
+    if (!session) {
+        return { error: "Session expirée" };
     }
 
     const { createClient: createAdminClient } = await import("@supabase/supabase-js");
@@ -159,24 +154,12 @@ export async function cancelMaintenanceRequest(requestId: string) {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Vérifier que la demande appartient au locataire
-    const { data: lease } = await supabaseAdmin
-        .from('leases')
-        .select('id')
-        .eq('tenant_email', user.email)
-        .eq('status', 'active')
-        .maybeSingle();
-
-    if (!lease) {
-        return { error: "Bail non trouvé" };
-    }
-
-    // Vérifier que la demande est bien 'open' et appartient au bail
+    // Verify the request belongs to this tenant's lease and is still 'open'
     const { data: request } = await supabaseAdmin
         .from('maintenance_requests')
         .select('id, status')
         .eq('id', requestId)
-        .eq('lease_id', lease.id)
+        .eq('lease_id', session.lease_id)
         .single();
 
     if (!request) {
@@ -187,7 +170,7 @@ export async function cancelMaintenanceRequest(requestId: string) {
         return { error: "Impossible d'annuler une demande déjà en traitement" };
     }
 
-    // Supprimer la demande
+    // Delete the request
     const { error } = await supabaseAdmin
         .from('maintenance_requests')
         .delete()

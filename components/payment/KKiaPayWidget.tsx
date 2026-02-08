@@ -124,6 +124,7 @@ export default function KKiaPayWidget({
         const confirmResponse = await fetch("/api/kkiapay/confirm", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include", // Required to send tenant session cookie
           body: JSON.stringify({
             transactionId: response.transactionId,
             leaseId,

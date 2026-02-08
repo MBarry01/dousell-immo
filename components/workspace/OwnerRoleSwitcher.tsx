@@ -54,9 +54,10 @@ export function OwnerRoleSwitcher() {
         const result = await getOwnerTenantAccessLink(tenantInfo.id);
 
         if (result.success && result.url) {
-          toast.success("Redirection vers votre espace locataire...");
-          // Open in same tab to switch context
-          router.push(result.url);
+          toast.success("Ouverture de votre espace locataire...");
+          // Navigate directly using window.location to ensure we stay in the browser context
+          // using window.open often triggers the "Open with App" intent on mobile devices
+          window.location.href = result.url;
         } else {
           toast.error(result.error || "Impossible d'accéder à l'espace locataire");
         }

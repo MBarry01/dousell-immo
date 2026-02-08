@@ -1,136 +1,249 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
 import Image from "next/image";
-import { Wallet, FileText, BarChart3, ShieldCheck, Mail, Zap } from "lucide-react";
+import { Wallet, FileText, ShieldCheck, Mail, LayoutDashboard, CheckCircle2, type LucideIcon } from "lucide-react";
+import { motion, Variants } from "framer-motion";
+
+// Feature data
+const features = [
+    {
+        id: 1,
+        image: "/images/DashMock.webp",     // Updated
+        title: "Votre Patrimoine dans votre Poche",
+        paragraphs: [
+            "Fini les cahiers de notes raturés et les fichiers Excel perdus. Gérez vos biens immobiliers comme un véritable professionnel depuis votre téléphone, que vous soyez à Dakar, Paris ou New York.",
+            "Visualisez instantanément qui a payé, qui est en retard, et combien votre patrimoine vous rapporte réellement chaque mois. Plus de devinettes, place à la clarté financière.",
+            "Baux, quittances, factures, photos... Tout est centralisé, sécurisé et accessible à vie en un clic. Votre bureau tient désormais dans votre poche."
+        ],
+        icon: LayoutDashboard,
+        iconColor: "text-[#F4C430]",
+        iconBg: "bg-[#F4C430]/10",
+        badges: ["Temps Réel", "Mobile First", "Vue 360°"]
+    },
+    {
+        id: 2,
+        image: "/images/Paiement.webp",     // Updated
+        title: "Encaissez sans courir après personne",
+        paragraphs: [
+            "Ne perdez plus votre énergie à relancer les retardataires. Dousell envoie automatiquement les rappels de paiement par SMS et email avant et après l'échéance.",
+            "Vos locataires règlent leur loyer via leur méthode préférée (Wave, Orange Money, Carte Bancaire) directement depuis leur espace. L'argent est tracé, sécurisé.",
+            "Dès validation du paiement, la quittance est générée et envoyée instantanément au locataire. Plus besoin de rédiger, d'imprimer ou de se déplacer pour remettre un papier."
+        ],
+        icon: Wallet,
+        iconColor: "text-[#F4C430]",
+        iconBg: "bg-[#F4C430]/10",
+        badges: ["Wave & OM", "Quittances Auto", "0 Retards"]
+    },
+    {
+        id: 3,
+        image: "/images/document.webp",     // Updated
+        title: "Des Contrats en Béton, Signés en 2 minutes",
+        paragraphs: [
+            "Utilisez des modèles de baux 100% conformes à la législation sénégalaise. Protégez-vous avec des contrats solides, relus par des experts juridiques.",
+            "Idéal pour la diaspora : signez et faites signer vos locataires électroniquement depuis n'importe où dans le monde. Plus besoin d'envoyer un cousin avec le stylo.",
+            "Fini les baux égarés ou abîmés par l'humidité. Retrouvez n'importe quel contrat en 3 clics dans votre coffre-fort numérique, même 5 ans après le départ du locataire."
+        ],
+        icon: FileText,
+        iconColor: "text-[#F4C430]",
+        iconBg: "bg-[#F4C430]/10",
+        badges: ["Signature Élec.", "Conforme Loi", "Coffre-fort"]
+    },
+    {
+        id: 4,
+        image: "/images/Etat_Lieux.webp",  // Updated
+        title: "L'État des Lieux Incontestable",
+        paragraphs: [
+            "Prenez des photos datées et géolocalisées directement via l'application. Figez l'état réel du bien à l'entrée pour éviter tout litige à la sortie.",
+            "Ne ratez aucun détail : notre outil vous guide pièce par pièce (prises, peinture, robinetterie) pour un constat exhaustif et professionnel.",
+            "Le jour du départ, la comparaison est automatique. Le calcul des retenues sur caution devient factuel, transparent et apaisé pour tout le monde."
+        ],
+        icon: ShieldCheck,
+        iconColor: "text-[#F4C430]",
+        iconBg: "bg-[#F4C430]/10",
+        badges: ["Photos HD", "Géolocalisé", "Comparatif Auto"]
+    },
+    {
+        id: 5,
+        image: "/images/alerte.webp",       // Updated
+        title: "Votre Assistant Personnel 24/7",
+        paragraphs: [
+            "Laissez Dousell gérer votre agenda mental. Fin de bail, révision de loyer annuelle, régularisation de charges... l'application pense à tout pour vous.",
+            "Dormez sur vos deux oreilles. Vous ne raterez plus jamais une date importante ou une échéance légale qui pourrait vous coûter cher.",
+            "Montrez à vos locataires que vous gérez votre bien avec sérieux. Une communication fluide, moderne et proactive renforce la confiance et fidélise les bons payeurs."
+        ],
+        icon: Mail,
+        iconColor: "text-[#F4C430]",
+        iconBg: "bg-[#F4C430]/10",
+        badges: ["Rappels SMS", "Agenda Auto", "Tranquillité"]
+    },
+];
+
+type FeatureRowProps = {
+    image: string;
+    title: string;
+    paragraphs: string[];
+    icon: LucideIcon;
+    iconColor: string;
+    iconBg: string;
+    isReversed?: boolean;
+    badges: string[];
+};
+
+// Animation Variants
+const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.2,
+            duration: 0.5
+        }
+    }
+};
+
+const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 50,
+            damping: 20
+        }
+    }
+};
+
+const imageVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.95, filter: "blur(10px)" },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        filter: "blur(0px)",
+        transition: {
+            duration: 0.8,
+            ease: "easeOut"
+        }
+    }
+};
+
+function FeatureRow({ image, title, paragraphs, icon: Icon, iconColor, iconBg, isReversed, badges }: FeatureRowProps) {
+    return (
+        <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className={`flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-8 lg:gap-16 items-center`}
+        >
+            {/* Image Side */}
+            <motion.div
+                className="w-full lg:w-1/2 relative"
+                variants={imageVariants}
+            >
+                <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl group">
+                    <Image
+                        src={image}
+                        alt={title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    {/* Subtle overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
+
+                {/* Decorative elements */}
+                <div className={`absolute -z-10 w-72 h-72 rounded-full blur-[100px] opacity-30 ${isReversed ? '-right-20 -bottom-20 bg-[#F4C430]' : '-left-20 -bottom-20 bg-[#F4C430]'}`} />
+            </motion.div>
+
+            {/* Text Side */}
+            <motion.div
+                className="w-full lg:w-1/2 space-y-8"
+                variants={itemVariants}
+            >
+                <div className="space-y-4">
+                    {/* Icon */}
+                    <div className={`w-14 h-14 rounded-2xl ${iconBg} flex items-center justify-center ${iconColor} border border-[#F4C430]/20`}>
+                        <Icon size={28} />
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight">
+                        {title}
+                    </h3>
+                </div>
+
+                {/* Paragraphs as Bullet Points */}
+                <ul className="space-y-5">
+                    {paragraphs.map((para, idx) => (
+                        <li key={idx} className="flex gap-4 group">
+                            <div className="flex-shrink-0 mt-1">
+                                <div className="w-6 h-6 rounded-full bg-[#F4C430]/10 flex items-center justify-center group-hover:bg-[#F4C430]/20 transition-colors">
+                                    <CheckCircle2 className="w-4 h-4 text-[#F4C430]" />
+                                </div>
+                            </div>
+                            <p className="text-gray-400 text-base md:text-lg leading-relaxed group-hover:text-gray-300 transition-colors">
+                                {para}
+                            </p>
+                        </li>
+                    ))}
+                </ul>
+
+                {/* Feature highlights - Custom Badges */}
+                <div className="flex flex-wrap gap-3 pt-4 border-t border-white/5 mt-6">
+                    {badges.map((badge, idx) => (
+                        <motion.span
+                            key={idx}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 cursor-default hover:border-[#F4C430]/30 hover:text-white transition-colors"
+                        >
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#F4C430]" />
+                            {badge}
+                        </motion.span>
+                    ))}
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+}
 
 export default function FeaturesBento() {
     return (
-        <section className="py-24 bg-black relative overflow-hidden" id="features">
+        <section className="py-20 md:py-28 bg-black relative overflow-hidden" id="features">
             {/* Background Gradients */}
             <div className="absolute top-0 center w-full h-full bg-[radial-gradient(circle_at_center,_rgba(244,196,48,0.05)_0%,_transparent_70%)] pointer-events-none" />
 
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="text-center mb-16 space-y-4">
+            <div className="container mx-auto px-4 md:px-6 relative z-10">
+                {/* Section Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    className="text-center mb-16 md:mb-24 space-y-4"
+                >
                     <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
                         Fonctionnalités
                     </span>
-                    <h2 className="font-display text-4xl md:text-5xl text-white max-w-2xl mx-auto">
+                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl text-white max-w-2xl mx-auto">
                         Tout ce dont vous avez besoin pour <span className="gradient-text-animated">piloter</span> votre immobilier
                     </h2>
-                    <p className="text-gray-400 max-w-xl mx-auto">
+                    <p className="text-gray-400 max-w-xl mx-auto text-sm md:text-base">
                         Une suite complète d'outils pour automatiser, sécuriser et rentabiliser vos biens, accessible 24/7.
                     </p>
-                </div>
+                </motion.div>
 
-                {/* Bento Grid Layout */}
-                <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-3 gap-6 auto-rows-[300px]">
-
-                    {/* Feature 1: Large Card (Main Dashboard) */}
-                    <div className="md:col-span-3 md:row-span-2 relative group overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 transition-colors">
-                        {/* Image Container - Full Background */}
-                        <div className="absolute inset-0 z-0">
-                            <Image
-                                src="/images/dashboard.png"
-                                alt="Tableau de bord Dousell"
-                                fill
-                                className="object-cover object-left-top transition-transform duration-700 group-hover:scale-105"
-                            />
-                            {/* Gradient Overlay for Text Readability */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10" />
-                        </div>
-
-                        {/* Text Content */}
-                        <div className="absolute top-0 bottom-0 left-0 p-8 z-20 flex flex-col justify-center max-w-2xl">
-
-                            <h3 className="text-3xl font-bold text-white mb-4 drop-shadow-md">Tableau de Bord Intuitif</h3>
-                            <p className="text-gray-200 text-lg font-medium drop-shadow-md leading-relaxed">
-                                Suivez vos loyers, taux d'occupation et finances en temps réel.
-                                <br /><span className="text-[#F4C430] text-sm mt-2 block">Une vue d'ensemble claire pour des décisions éclairées.</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Feature 2: Vertical Card (Payments) */}
-                    <div className="md:col-span-1 md:row-span-2 relative group overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-sm transition-colors hover:bg-zinc-900/80">
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-transparent to-black/60 z-10" />
-
-                        <div className="absolute top-8 left-8 z-20 max-w-[80%]">
-                            <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400">
-                                <Wallet size={24} />
-                            </div>
-                            <h3 className="text-xl font-bold text-white mb-2 drop-shadow-md">Paiements Automatisés</h3>
-                            <p className="text-gray-200 text-sm drop-shadow-md">Encaissement des loyers via Wave/OM. Quittances générées automatiquement.</p>
-                        </div>
-
-                        {/* Payment Visual - Full Bleed Bottom */}
-                        <div className="absolute inset-x-0 bottom-0 h-3/5 overflow-hidden border-t border-white/10 bg-[#0a0a0a] shadow-lg translate-y-4 transition-transform group-hover:translate-y-2">
-                            <div className="w-full h-full relative">
-                                <Image
-                                    src="/images/pay_rent_cover.png"
-                                    alt="Paiement de loyer"
-                                    fill
-                                    className="object-cover object-top opacity-90 group-hover:opacity-100 transition-opacity"
-                                />
-                                {/* Bottom Gradient for blending */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Feature 3: Small Card (Contracts) */}
-                    <div className="md:col-span-1 md:row-span-1 relative group overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-sm transition-colors hover:bg-white/10">
-                        <div className="p-8">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
-                                    <FileText size={20} />
-                                </div>
-                                <Zap size={16} className="text-[#F4C430]" />
-                            </div>
-                            <h3 className="text-lg font-bold text-white mb-2">Contrats Digitaux</h3>
-                            <p className="text-gray-400 text-sm">Créez et signez vos baux électroniquement en quelques clics.</p>
-                        </div>
-                        {/* Mini visual */}
-                        <div className="absolute right-4 bottom-4 opacity-20">
-                            <FileText size={64} className="text-blue-400" />
-                        </div>
-                    </div>
-
-                    {/* Feature 4: Small Card (Inventory) */}
-                    <div className="md:col-span-1 md:row-span-1 relative group overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-sm transition-colors hover:bg-white/10">
-                        <div className="p-8">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
-                                    <ShieldCheck size={20} />
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-bold text-white mb-2">États des Lieux</h3>
-                            <p className="text-gray-400 text-sm">Vérification photo complète et sécurisée sur mobile/tablette.</p>
-                        </div>
-                        {/* Mini visual */}
-                        <div className="absolute right-4 bottom-4 opacity-20">
-                            <ShieldCheck size={64} className="text-purple-400" />
-                        </div>
-                    </div>
-
-                    {/* Feature 5: Wide Card (Support) */}
-                    <div className="md:col-span-2 md:row-span-1 relative group overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-sm transition-colors hover:bg-white/10">
-                        <div className="p-8">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400">
-                                    <Mail size={20} />
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-bold text-white mb-2">Alertes & Rappels</h3>
-                            <p className="text-gray-400 text-sm">Ne manquez jamais une échéance de paiement ou de renouvellement.</p>
-                        </div>
-                        {/* Mini visual */}
-                        <div className="absolute right-4 bottom-4 opacity-20">
-                            <Mail size={64} className="text-orange-400" />
-                        </div>
-                    </div>
-
+                {/* Features List - Zigzag Layout */}
+                <div className="space-y-24 md:space-y-40">
+                    {features.map((feature, index) => (
+                        <FeatureRow
+                            key={feature.id}
+                            {...feature}
+                            isReversed={index % 2 === 1}
+                        />
+                    ))}
                 </div>
             </div>
         </section>

@@ -105,29 +105,37 @@ export default function Feature18({ heading, caption, topics }: any) {
                         </GraphicsCard>
                         {topics.map((item: any, index: number) => (
                             <TabPanel value={String(index + 1)} key={index} sx={{ p: 0, width: 1 }}>
-                                <Grid container spacing={1.5} sx={{ justifyContent: 'center', pl: { xs: 0, md: 8 } }}>
+                                {/* Using Grid v5 syntax and removing padding left */}
+                                <Grid container spacing={1.5} sx={{ justifyContent: 'center' }}>
+
+                                    {/* Left Side: GIF/Image */}
                                     <Grid size={{ xs: 12, sm: 6 }}>
                                         <GraphicsCard>
                                             <motion.div
-                                                initial={{ opacity: 0, x: 100, y: 100 }}
+                                                initial={{ opacity: 0, x: -50, y: 0 }}
                                                 whileInView={{ opacity: 1, x: 0, y: 0 }}
                                                 viewport={{ once: true }}
-                                                transition={{ duration: 0.5, delay: 0.1 }}
+                                                transition={{ duration: 0.6 }}
                                             >
                                                 <Box
                                                     sx={{
                                                         pl: item.isCoverImage ? 0 : imagePadding,
                                                         pt: item.isCoverImage ? 0 : imagePadding,
-                                                        height: { xs: 260, sm: 396, md: 434 }
+                                                        height: { xs: 260, sm: 396, md: 434 },
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center'
                                                     }}
                                                 >
+                                                    {/* Force img tag for GIF support */}
                                                     <GraphicsImage
+                                                        cardMediaProps={{ component: 'img' }}
                                                         sx={{
+                                                            width: 1,
                                                             height: 1,
-                                                            backgroundPositionX: 'center',
-                                                            backgroundPositionY: 'center',
+                                                            objectFit: 'contain',
                                                             ...(item.isImageBorder && { borderTop: '5px solid', borderLeft: '5px solid', borderColor: 'grey.200' }),
-                                                            ...(item.isCoverImage && { backgroundSize: 'contain', backgroundRepeat: 'no-repeat', border: 'none' }),
+                                                            // Removed background props which contest with img tag usage
                                                             borderTopLeftRadius: { xs: 12 },
                                                             borderBottomRightRadius: { xs: 20, sm: 32, md: 40 }
                                                         }}
@@ -137,8 +145,10 @@ export default function Feature18({ heading, caption, topics }: any) {
                                             </motion.div>
                                         </GraphicsCard>
                                     </Grid>
+
+                                    {/* Right Side: Text & Features List */}
                                     <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex' }}>
-                                        <GraphicsCard bgImage={item.bgImage} overLay={true}>
+                                        <GraphicsCard overLay={true}> {/* No bgImage prop here */}
                                             <Stack
                                                 sx={{
                                                     justifyContent: 'space-between',
@@ -150,9 +160,9 @@ export default function Feature18({ heading, caption, topics }: any) {
                                             >
                                                 <motion.div
                                                     key={index}
-                                                    initial={{ opacity: 0, x: -30 }}
+                                                    initial={{ opacity: 0, x: 30 }}
                                                     animate={{ opacity: 1, x: 0 }}
-                                                    exit={{ opacity: 0, x: -30 }}
+                                                    exit={{ opacity: 0, x: 30 }}
                                                     transition={{ duration: 0.2, ease: 'linear', delay: index * 0.1 }}
                                                 >
                                                     <Stack direction="row" sx={{ gap: 1 }}>
@@ -175,33 +185,44 @@ export default function Feature18({ heading, caption, topics }: any) {
                                                         {item.description && <Typography sx={{ color: 'text.secondary' }}>{item.description}</Typography>}
                                                     </Stack>
                                                     {item.list && (
-                                                        <Grid container spacing={{ xs: 0.75, md: 1 }}>
+                                                        <Stack spacing={2} sx={{ mt: 1 }}>
                                                             {item.list.map((list: any, index: number) => (
-                                                                <Grid key={index} size={{ xs: 12, md: 6 }}>
-                                                                    <motion.div
-                                                                        key={index}
-                                                                        initial={{ opacity: 0, x: -30 }}
-                                                                        animate={{ opacity: 1, x: 0 }}
-                                                                        exit={{ opacity: 0, x: -30 }}
-                                                                        transition={{ duration: 0.2, ease: 'linear', delay: index * 0.1 }}
+                                                                <motion.div
+                                                                    key={index}
+                                                                    initial={{ opacity: 0, x: 30 }}
+                                                                    animate={{ opacity: 1, x: 0 }}
+                                                                    exit={{ opacity: 0, x: 30 }}
+                                                                    transition={{ duration: 0.2, ease: 'linear', delay: index * 0.1 }}
+                                                                >
+                                                                    <Stack
+                                                                        direction="row"
+                                                                        spacing={2}
+                                                                        sx={{
+                                                                            alignItems: 'center',
+                                                                        }}
                                                                     >
-                                                                        <Stack
-                                                                            direction="row"
+                                                                        {/* Gold Check Icon Background */}
+                                                                        <Box
                                                                             sx={{
-                                                                                gap: 0.5,
+                                                                                width: 32,
+                                                                                height: 32,
+                                                                                borderRadius: '50%',
+                                                                                bgcolor: 'rgba(244, 196, 48, 0.1)',
+                                                                                display: 'flex',
                                                                                 alignItems: 'center',
-                                                                                '& svg.tabler-rosette-discount-check': { width: { xs: 16, md: 24 }, height: { xs: 16, md: 24 } }
+                                                                                justifyContent: 'center',
+                                                                                flexShrink: 0
                                                                             }}
                                                                         >
-                                                                            <SvgIcon name="tabler-check" stroke={1} color="text.secondary" />
-                                                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                                                                {list.primary}
-                                                                            </Typography>
-                                                                        </Stack>
-                                                                    </motion.div>
-                                                                </Grid>
+                                                                            <SvgIcon name="tabler-check" size={18} stroke={3} color="#F4C430" />
+                                                                        </Box>
+                                                                        <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                                                                            {list.primary}
+                                                                        </Typography>
+                                                                    </Stack>
+                                                                </motion.div>
                                                             ))}
-                                                        </Grid>
+                                                        </Stack>
                                                     )}
                                                 </Stack>
                                             </Stack>

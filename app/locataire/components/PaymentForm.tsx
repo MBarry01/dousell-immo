@@ -1,11 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Calendar, CheckCircle, AlertCircle, FileText, Wrench, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+    ArrowRight,
+    CheckCircle2,
+    Clock,
+    FileText,
+    Wrench,
+    ChevronRight,
+    Building2,
+    Shield
+} from 'lucide-react';
 import Link from 'next/link';
 import { RentPaymentModal } from './RentPaymentModal';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 interface PaymentFormProps {
     leaseId: string;
@@ -21,10 +30,16 @@ interface PaymentFormProps {
         amount_due: number;
         amount_paid?: number | null;
         status: string;
-        period_start: string;
+        period_month: number;
+        period_year: number;
         paid_at?: string | null;
     }>;
 }
+
+const MONTH_NAMES = [
+    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+];
 
 export function PaymentForm({
     leaseId,
@@ -37,214 +52,250 @@ export function PaymentForm({
     leaseType,
     recentPayments = []
 }: PaymentFormProps) {
+    const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [showAllPayments, setShowAllPayments] = useState(false);
-    const { isDark } = useTheme();
 
-    // Calculer le solde actuel
+    // Calculs
     const pendingPayments = recentPayments.filter(p => p.status !== 'paid');
+    const paidPayments = recentPayments.filter(p => p.status === 'paid');
     const currentBalance = pendingPayments.reduce((sum, p) => sum + (p.amount_due || 0), 0);
     const isUpToDate = currentBalance === 0;
+
+    // Get the oldest pending period (sort by year then month)
+    const oldestPending = [...pendingPayments].sort((a, b) => {
+        if (a.period_year !== b.period_year) return a.period_year - b.period_year;
+        return a.period_month - b.period_month;
+    })[0];
+
+    // Determine period to pay: oldest pending or current month if up to date
+    const now = new Date();
+    // Use nullish coalescing (??) instead of || to handle period_month = 0 (guarantee)
+    const targetPeriodMonth = oldestPending?.period_month ?? (now.getMonth() + 1);
+    const targetPeriodYear = oldestPending?.period_year ?? now.getFullYear();
+    const targetAmount = oldestPending?.amount_due ?? monthlyAmount;
+
+    // DEBUG: Log payment target
+    console.log('🎯 [PaymentForm] Target payment:', {
+        targetPeriodMonth,
+        targetPeriodYear,
+        targetAmount,
+        oldestPending: oldestPending ? { month: oldestPending.period_month, year: oldestPending.period_year, amount: oldestPending.amount_due } : null,
+        pendingCount: pendingPayments.length
+    });
 
     const getCurrentMonth = () => {
         const now = new Date();
         return now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
     };
 
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleDateString('fr-FR');
-    };
-
     const formatCurrency = (amount?: number | null) => {
-        if (!amount) return '0';
-        return amount.toLocaleString('fr-FR');
+        if (!amount && amount !== 0) return '0';
+        return new Intl.NumberFormat('fr-FR').format(amount);
     };
 
-    const visiblePayments = showAllPayments ? recentPayments : recentPayments.slice(0, 3);
+    const formatPeriod = (month: number, year: number) => {
+        if (month === 0) return 'Garantie';
+        return `${MONTH_NAMES[(month || 1) - 1]} ${year}`;
+    };
+
+    const formatPaidDate = (dateString?: string | null) => {
+        if (!dateString) return null;
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    };
 
     return (
-        <div className="space-y-4 w-full max-w-2xl mx-auto px-4 lg:px-0">
-            {/* HERO : Solde & CTA */}
-            <div className={`rounded-2xl p-5 sm:p-6 border transition-colors ${
-                isDark
-                    ? 'bg-slate-900 border-slate-800'
-                    : 'bg-white border-gray-200 shadow-sm'
-            }`}>
-                {/* Header Nom */}
-                <div className="flex items-center gap-3 mb-5">
-                    <div className="w-12 h-12 rounded-xl bg-[#F4C430] flex items-center justify-center">
-                        <span className="text-black font-bold text-lg">{tenantName?.[0] || 'L'}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>Bienvenue,</p>
-                        <h1 className="text-lg font-semibold text-foreground truncate">{tenantName || 'Locataire'}</h1>
-                    </div>
+        <div className="w-full max-w-lg mx-auto px-4 py-6 space-y-6">
+
+            {/* ═══════════════════════════════════════════════════════════
+                CARTE PRINCIPALE - Style Banking App
+            ═══════════════════════════════════════════════════════════ */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800 p-6 text-white shadow-2xl">
+                {/* Pattern subtil */}
+                <div className="absolute inset-0 opacity-5">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
                 </div>
 
-                {/* KPI Solde */}
-                <div className="text-center mb-5">
-                    <p className={`text-xs uppercase tracking-wider mb-1 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-                        {isUpToDate ? 'Solde' : 'Montant dû'}
-                    </p>
-                    <div className={`text-4xl sm:text-5xl font-bold ${isUpToDate ? 'text-[#F4C430]' : 'text-foreground'}`}>
-                        {formatCurrency(isUpToDate ? 0 : currentBalance)}
-                    </div>
-                    <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-gray-400'}`}>FCFA</p>
-
-                    {isUpToDate ? (
-                        <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-[#F4C430]/10 border border-[#F4C430]/30 rounded-full">
-                            <CheckCircle className="w-3.5 h-3.5 text-[#F4C430]" />
-                            <span className="text-xs font-medium text-[#F4C430]">À jour</span>
+                <div className="relative">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <p className="text-zinc-400 text-sm">Bonjour,</p>
+                            <h1 className="text-xl font-semibold text-white">{tenantName || 'Locataire'}</h1>
                         </div>
-                    ) : (
-                        <p className={`text-xs mt-2 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-                            {pendingPayments.length} paiement(s) en attente
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center font-bold text-black">
+                            {tenantName?.[0]?.toUpperCase() || 'L'}
+                        </div>
+                    </div>
+
+                    {/* Solde */}
+                    <div className="mb-6">
+                        <p className="text-zinc-400 text-xs uppercase tracking-widest mb-2">
+                            {isUpToDate ? 'Solde actuel' : 'Montant à payer'}
                         </p>
-                    )}
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-bold tracking-tight text-white">
+                                {formatCurrency(currentBalance)}
+                            </span>
+                            <span className="text-zinc-400 text-lg">FCFA</span>
+                        </div>
+
+                        {isUpToDate ? (
+                            <div className="inline-flex items-center gap-1.5 mt-3 text-emerald-400">
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span className="text-sm font-medium">Paiements à jour</span>
+                            </div>
+                        ) : (
+                            <p className="text-zinc-500 text-sm mt-2">
+                                {pendingPayments.length} échéance{pendingPayments.length > 1 ? 's' : ''} en attente
+                            </p>
+                        )}
+                    </div>
+
+                    {/* CTA */}
+                    <Button
+                        onClick={() => setIsModalOpen(true)}
+                        className="w-full h-12 bg-white hover:bg-zinc-100 text-zinc-900 hover:text-zinc-900 font-semibold rounded-xl transition-all hover:shadow-lg hover:scale-[1.02]"
+                    >
+                        {isUpToDate ? 'Effectuer un paiement' : `Payer ${formatCurrency(currentBalance)} FCFA`}
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+
+                    <div className="flex items-center justify-center gap-1.5 mt-3 text-zinc-500">
+                        <Shield className="w-3 h-3" />
+                        <span className="text-[11px]">Paiement sécurisé · Wave, Orange Money, Carte</span>
+                    </div>
                 </div>
-
-                {/* CTA */}
-                <Button
-                    onClick={() => setIsModalOpen(true)}
-                    size="lg"
-                    className="w-full h-14 text-base font-semibold bg-[#F4C430] hover:bg-[#D4A420] text-black"
-                >
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    {isUpToDate ? 'Effectuer un paiement' : `Payer ${formatCurrency(currentBalance)} FCFA`}
-                </Button>
-
-                <p className={`text-[10px] text-center mt-2 ${isDark ? 'text-slate-500' : 'text-gray-400'}`}>
-                    Paiement sécurisé • Wave, Orange Money, Carte
-                </p>
             </div>
 
-            {/* ACTIONS RAPIDES */}
-            <div className="grid grid-cols-2 gap-4">
-                <Link href="/locataire/documents" className="block">
-                    <div className={`rounded-xl p-5 h-full border transition-all duration-200 hover:scale-[1.02] ${
-                        isDark
-                            ? 'bg-slate-900 border-slate-800 hover:border-slate-700'
-                            : 'bg-white border-gray-200 hover:border-gray-300 shadow-sm'
-                    }`}>
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
-                            isDark ? 'bg-slate-800' : 'bg-gray-100'
-                        }`}>
-                            <FileText className={`w-6 h-6 ${isDark ? 'text-slate-400' : 'text-gray-500'}`} />
+            {/* ═══════════════════════════════════════════════════════════
+                ACTIONS RAPIDES
+            ═══════════════════════════════════════════════════════════ */}
+            <div className="grid grid-cols-2 gap-3">
+                <Link href="/locataire/documents">
+                    <div className="group flex items-center gap-3 p-4 rounded-xl bg-white border border-zinc-200 hover:border-zinc-300 hover:shadow-sm transition-all">
+                        <div className="w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center group-hover:bg-zinc-200 transition-colors">
+                            <FileText className="w-5 h-5 text-zinc-600" />
                         </div>
-                        <h3 className="text-base font-semibold text-foreground">Documents</h3>
-                        <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>Contrats & quittances</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-medium text-zinc-900 text-sm">Documents</p>
+                            <p className="text-xs text-zinc-500 truncate">Contrats & quittances</p>
+                        </div>
                     </div>
                 </Link>
 
-                <Link href="/locataire/maintenance" className="block">
-                    <div className={`rounded-xl p-5 h-full border transition-all duration-200 hover:scale-[1.02] ${
-                        isDark
-                            ? 'bg-slate-900 border-slate-800 hover:border-slate-700'
-                            : 'bg-white border-gray-200 hover:border-gray-300 shadow-sm'
-                    }`}>
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
-                            isDark ? 'bg-slate-800' : 'bg-gray-100'
-                        }`}>
-                            <Wrench className={`w-6 h-6 ${isDark ? 'text-slate-400' : 'text-gray-500'}`} />
+                <Link href="/locataire/maintenance">
+                    <div className="group flex items-center gap-3 p-4 rounded-xl bg-white border border-zinc-200 hover:border-zinc-300 hover:shadow-sm transition-all">
+                        <div className="w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center group-hover:bg-zinc-200 transition-colors">
+                            <Wrench className="w-5 h-5 text-zinc-600" />
                         </div>
-                        <h3 className="text-base font-semibold text-foreground">Signaler</h3>
-                        <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>Incident ou panne</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-medium text-zinc-900 text-sm">Signaler</p>
+                            <p className="text-xs text-zinc-500 truncate">Incident ou panne</p>
+                        </div>
                     </div>
                 </Link>
             </div>
 
-            {/* HISTORIQUE */}
+            {/* ═══════════════════════════════════════════════════════════
+                HISTORIQUE DES TRANSACTIONS
+            ═══════════════════════════════════════════════════════════ */}
             {recentPayments.length > 0 && (
-                <div className={`rounded-xl p-5 border ${
-                    isDark
-                        ? 'bg-slate-900 border-slate-800'
-                        : 'bg-white border-gray-200 shadow-sm'
-                }`}>
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-base font-semibold text-foreground">Historique</h3>
-                        <Calendar className={`w-5 h-5 ${isDark ? 'text-slate-500' : 'text-gray-400'}`} />
+                <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-zinc-100">
+                        <h2 className="font-semibold text-zinc-900">Historique</h2>
                     </div>
 
-                    <div className="space-y-3">
-                        {visiblePayments.map((payment) => {
+                    <div className="divide-y divide-zinc-100">
+                        {recentPayments.slice(0, 5).map((payment) => {
                             const isPaid = payment.status === 'paid';
-                            const date = new Date(payment.period_start);
-                            const monthYear = date.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+                            const period = formatPeriod(payment.period_month, payment.period_year);
+                            const paidDate = formatPaidDate(payment.paid_at);
 
                             return (
-                                <div
+                                <button
                                     key={payment.id}
-                                    className={`flex items-center justify-between p-3 rounded-xl border ${
-                                        isDark
-                                            ? 'bg-slate-800/50 border-slate-700/50'
-                                            : 'bg-gray-50 border-gray-100'
-                                    }`}
+                                    onClick={() => isPaid ? router.push(`/locataire/paiements/${payment.id}`) : undefined}
+                                    className={`w-full flex items-center justify-between px-4 py-3.5 hover:bg-zinc-50 transition-colors text-left ${isPaid ? 'cursor-pointer' : 'cursor-default'
+                                        }`}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isPaid
-                                            ? 'bg-[#F4C430]/10 text-[#F4C430]'
-                                            : isDark
-                                                ? 'bg-slate-700 text-slate-400'
-                                                : 'bg-gray-200 text-gray-500'
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isPaid
+                                            ? 'bg-emerald-50 text-emerald-600'
+                                            : 'bg-amber-50 text-amber-600'
                                             }`}>
-                                            {isPaid ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                                            {isPaid
+                                                ? <CheckCircle2 className="w-4 h-4" />
+                                                : <Clock className="w-4 h-4" />
+                                            }
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-foreground capitalize">{monthYear}</p>
-                                            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-                                                {isPaid ? 'Payé' : 'En attente'}
+                                            <p className="font-medium text-zinc-900 text-sm">
+                                                {payment.period_month === 0 ? period : `Loyer ${period}`}
+                                            </p>
+                                            <p className="text-xs text-zinc-500">
+                                                {isPaid && paidDate
+                                                    ? `Payé le ${paidDate}`
+                                                    : 'En attente de paiement'
+                                                }
                                             </p>
                                         </div>
                                     </div>
-                                    <p className="text-base font-semibold text-foreground tabular-nums">
-                                        {formatCurrency(payment.amount_paid || payment.amount_due)}
-                                    </p>
-                                </div>
+
+                                    <div className="text-right">
+                                        <p className={`font-semibold tabular-nums ${isPaid ? 'text-zinc-900' : 'text-amber-600'
+                                            }`}>
+                                            {formatCurrency(payment.amount_paid || payment.amount_due)}
+                                            <span className="text-xs font-normal text-zinc-400 ml-1">F</span>
+                                        </p>
+                                        <span className={`inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded ${isPaid
+                                            ? 'bg-emerald-50 text-emerald-700'
+                                            : 'bg-amber-50 text-amber-700'
+                                            }`}>
+                                            {isPaid ? 'Payé' : 'En attente'}
+                                        </span>
+                                    </div>
+                                    {isPaid && (
+                                        <ChevronRight className="w-4 h-4 text-zinc-400" />
+                                    )}
+                                </button>
                             );
                         })}
                     </div>
 
-                    {recentPayments.length > 3 && (
-                        <button
-                            onClick={() => setShowAllPayments(!showAllPayments)}
-                            className={`w-full mt-3 py-2 text-xs flex items-center justify-center gap-1 transition-colors ${
-                                isDark
-                                    ? 'text-slate-400 hover:text-white'
-                                    : 'text-gray-500 hover:text-gray-900'
-                            }`}
-                        >
-                            {showAllPayments ? (
-                                <>Voir moins <ChevronUp className="w-3.5 h-3.5" /></>
-                            ) : (
-                                <>Voir tout ({recentPayments.length}) <ChevronDown className="w-3.5 h-3.5" /></>
-                            )}
-                        </button>
+                    {recentPayments.length > 5 && (
+                        <Link href="/locataire/paiements" className="block">
+                            <div className="px-4 py-3 border-t border-zinc-100 flex items-center justify-center gap-1 text-sm text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 transition-colors">
+                                Voir tout l'historique
+                                <ChevronRight className="w-4 h-4" />
+                            </div>
+                        </Link>
                     )}
                 </div>
             )}
 
-            {/* DÉTAILS BAIL (Footer) */}
-            <div className={`rounded-xl p-5 border ${
-                isDark
-                    ? 'bg-slate-900/50 border-slate-800/50'
-                    : 'bg-gray-50 border-gray-200'
-            }`}>
-                <p className={`text-xs uppercase tracking-wider mb-1 ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>Adresse</p>
-                <p className="text-sm text-foreground">{propertyAddress || 'Non renseignée'}</p>
-
-                <div className={`grid grid-cols-3 gap-4 mt-4 pt-4 border-t ${isDark ? 'border-slate-800/50' : 'border-gray-200'}`}>
-                    <div>
-                        <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>Début</p>
-                        <p className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>{formatDate(leaseStartDate)}</p>
+            {/* ═══════════════════════════════════════════════════════════
+                INFOS LOGEMENT
+            ═══════════════════════════════════════════════════════════ */}
+            <div className="bg-zinc-50 rounded-xl p-4 border border-zinc-200">
+                <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-white border border-zinc-200 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-4 h-4 text-zinc-500" />
                     </div>
-                    <div>
-                        <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>Fin</p>
-                        <p className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>{formatDate(leaseEndDate)}</p>
-                    </div>
-                    <div>
-                        <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>Type</p>
-                        <p className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>{leaseType || 'N/A'}</p>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-xs text-zinc-500 uppercase tracking-wider mb-0.5">Votre logement</p>
+                        <p className="font-medium text-zinc-900 text-sm truncate">
+                            {propertyAddress || 'Adresse non renseignée'}
+                        </p>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-zinc-500">
+                            <span>{leaseType || 'Logement'}</span>
+                            <span>•</span>
+                            <span>{formatCurrency(monthlyAmount)} F/mois</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -252,13 +303,15 @@ export function PaymentForm({
             {/* Modal */}
             <RentPaymentModal
                 leaseId={leaseId}
-                defaultAmount={currentBalance > 0 ? currentBalance : monthlyAmount}
+                defaultAmount={targetAmount}
                 month={getCurrentMonth()}
                 propertyAddress={propertyAddress}
                 tenantName={tenantName}
                 tenantEmail={tenantEmail}
                 open={isModalOpen}
                 onOpenChange={setIsModalOpen}
+                targetPeriodMonth={targetPeriodMonth}
+                targetPeriodYear={targetPeriodYear}
             />
         </div>
     );

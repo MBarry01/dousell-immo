@@ -1,8 +1,12 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { getTenantSessionFromCookie } from '@/lib/tenant-magic-link';
 
+/**
+ * Upload insurance document for tenant
+ * Uses tenant session from cookie (NOT supabase auth)
+ */
 export async function uploadInsurance(formData: FormData) {
     const file = formData.get('file') as File;
     const leaseId = formData.get('leaseId') as string;
@@ -11,41 +15,51 @@ export async function uploadInsurance(formData: FormData) {
         return { error: "Fichier ou bail manquant" };
     }
 
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // Get tenant session from cookie
+    const session = await getTenantSessionFromCookie();
 
-    if (!user) return { error: "Non authentifié" };
+    if (!session) {
+        return { error: "Session expirée. Veuillez vous reconnecter." };
+    }
+
+    // Verify the lease matches the session
+    if (session.lease_id !== leaseId) {
+        return { error: "Accès non autorisé" };
+    }
 
     try {
-        // 1. Upload du fichier
-        const fileExt = file.name.split('.').pop();
-        const fileName = `insurance_${leaseId}_${Date.now()}.${fileExt}`;
-
-        // Utilisation du bucket 'documents' (à créer si inexistant, ou 'leases'/'properties')
-        // On suppose 'documents' pour les docs locataires
-        const { error: uploadError } = await supabase.storage
-            .from('documents')
-            .upload(`insurance/${fileName}`, file);
-
-        if (uploadError) {
-            console.error("Erreur upload:", uploadError);
-            return { error: "Erreur lors de l'envoi du fichier" };
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-            .from('documents')
-            .getPublicUrl(`insurance/${fileName}`);
-
-        // 2. Mise à jour du bail (besoin des droits d'écriture sur leases -> Admin Client souvent nécessaire si RLS strictes sur update)
-        // Les locataires n'ont généralement PAS le droit d'update leur bail directement (seul le proprio ou admin).
-        // On utilise donc supabaseAdmin.
-
+        // Use admin client for storage and DB operations
         const { createClient: createAdminClient } = await import("@supabase/supabase-js");
         const supabaseAdmin = createAdminClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         );
 
+        // 1. Upload file to storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `insurance_${leaseId}_${Date.now()}.${fileExt}`;
+
+        // Convert File to ArrayBuffer for server-side upload
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        const { error: uploadError } = await supabaseAdmin.storage
+            .from('documents')
+            .upload(`insurance/${fileName}`, buffer, {
+                contentType: file.type,
+                upsert: false
+            });
+
+        if (uploadError) {
+            console.error("Erreur upload:", uploadError);
+            return { error: "Erreur lors de l'envoi du fichier" };
+        }
+
+        const { data: { publicUrl } } = supabaseAdmin.storage
+            .from('documents')
+            .getPublicUrl(`insurance/${fileName}`);
+
+        // 2. Update lease with insurance URL
         const { error: updateError } = await supabaseAdmin
             .from('leases')
             .update({ insurance_url: publicUrl })

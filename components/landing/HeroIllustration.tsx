@@ -36,92 +36,17 @@ export default function HeroIllustration() {
                 <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
               </div>
 
-              {/* Screen Content - Tenant Dashboard */}
-              <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 to-black pt-14 px-3 lg:px-4">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-[10px] lg:text-xs text-white/50">Bonjour,</p>
-                    <p className="text-sm lg:text-base text-white font-semibold">Aminata D.</p>
-                  </div>
-                  <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-[#F4C430] to-[#E5B82A] flex items-center justify-center text-black font-bold text-xs lg:text-sm">
-                    AD
-                  </div>
-                </div>
-
-                {/* Success Card */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.8 }}
-                  className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 rounded-2xl p-3 lg:p-4 mb-3"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-emerald-500/30 flex items-center justify-center">
-                      <svg className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="text-emerald-400 text-xs lg:text-sm font-semibold">Paiement réussi</span>
-                  </div>
-                  <p className="text-white text-lg lg:text-xl font-bold">350 000 FCFA</p>
-                  <p className="text-white/50 text-[10px] lg:text-xs">Loyer Janvier 2026 • via Wave</p>
-                </motion.div>
-
-                {/* Property Card */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-2.5 lg:p-3 mb-3">
-                  <div className="flex gap-2.5">
-                    <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 flex-shrink-0 overflow-hidden relative">
-                      {/* Mini house illustration */}
-                      <svg className="absolute inset-0 w-full h-full p-2" viewBox="0 0 40 40" fill="none">
-                        <rect x="8" y="18" width="24" height="18" rx="1" fill="#F4C430" fillOpacity="0.2" stroke="#F4C430" strokeWidth="1" strokeOpacity="0.5" />
-                        <path d="M5 19 L20 6 L35 19" fill="none" stroke="#F4C430" strokeWidth="1.5" strokeLinecap="round" />
-                        <rect x="16" y="26" width="8" height="10" rx="0.5" fill="#F4C430" fillOpacity="0.3" />
-                        <rect x="10" y="22" width="5" height="5" rx="0.5" fill="#F4C430" fillOpacity="0.25" />
-                        <rect x="25" y="22" width="5" height="5" rx="0.5" fill="#F4C430" fillOpacity="0.25" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white text-xs lg:text-sm font-medium truncate">Appart. Mermoz</p>
-                      <p className="text-white/40 text-[9px] lg:text-[10px]">3 pièces • 85 m²</p>
-                      <div className="flex items-center gap-1 mt-1.5">
-                        <span className="text-[#F4C430] text-[10px] lg:text-xs font-semibold">350K</span>
-                        <span className="text-white/30 text-[8px] lg:text-[9px]">FCFA/mois</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-white/5 rounded-xl p-2 text-center">
-                    <div className="w-6 h-6 lg:w-7 lg:h-7 mx-auto mb-1 rounded-lg bg-[#F4C430]/20 flex items-center justify-center">
-                      <svg className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-[#F4C430]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                    <p className="text-white/60 text-[8px] lg:text-[9px]">Documents</p>
-                  </div>
-                  <div className="bg-white/5 rounded-xl p-2 text-center">
-                    <div className="w-6 h-6 lg:w-7 lg:h-7 mx-auto mb-1 rounded-lg bg-[#F4C430]/20 flex items-center justify-center">
-                      <svg className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-[#F4C430]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <p className="text-white/60 text-[8px] lg:text-[9px]">Historique</p>
-                  </div>
-                  <div className="bg-white/5 rounded-xl p-2 text-center">
-                    <div className="w-6 h-6 lg:w-7 lg:h-7 mx-auto mb-1 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                      <svg className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                    </div>
-                    <p className="text-white/60 text-[8px] lg:text-[9px]">Support</p>
-                  </div>
-                </div>
-
-                {/* Bottom nav bar hint */}
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-28 lg:w-32 h-1 bg-white/20 rounded-full" />
+              {/* Screen Content - Image Replacement */}
+              <div className="absolute inset-0 bg-black p-1.5 lg:p-2">
+                <Image
+                  src="/images/mockpay.png"
+                  alt="Application Dousell Locataire"
+                  fill
+                  className="object-cover rounded-[32px] lg:rounded-[36px]"
+                  priority
+                />
+                {/* Overlay gradient for better integration if needed */}
+                <div className="absolute inset-0 bg-black/20 pointer-events-none rounded-[32px] lg:rounded-[36px]" />
               </div>
             </div>
 

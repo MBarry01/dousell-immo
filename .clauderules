@@ -1,28 +1,28 @@
-# Claude Rules - Dousell Immo
+# Claude Rules - Dousell Immo (ECC Engine)
 
-## 🧠 Core Philosophy
-- **Plan First**: Reformuler le but avant de coder.
-- **Reuse**: Chercher avant de créer.
-- **Justify**: Expliquer pourquoi une nouvelle solution est nécessaire.
+## 🏗️ Technical Standards
+- **Immutability**: ALWAYS use spread operators or immutable patterns.
+- **Validation**: Use Zod for all system boundaries (API, Forms, DB).
+- **Error Handling**: Comprehensive try/catch with user-friendly errors. No silent failures.
+- **Logging**: No `console.log` in production. Use proper logging.
 
-## 🛡️ Security & Database
-- **RLS First**: Toujours penser aux politiques de sécurité Supabase.
-- **Auth**: Vérifier les rôles via `lib/permissions.ts`.
-- **Secrets**: Jamais de clés en dur.
-
-## 👥 Team-Awareness
-- **Lease/Contract**: Vérifier `team_id` pour la propriété.
-- **Branding**: Utiliser le branding de l'équipe si présent.
-
-## 📱 Mobile & Performance
-- **A11y**: Lecteurs d'écran, contrastes 4.5:1, zones de toucher 44dp+.
-- **UX**: Respecter les zones sûres (notches) et les conventions plateforme.
-
-## 🏗️ Architecture
-- **Discovery**: Mapper la stack et les chemins critiques avant audit.
-- **Analysis**: SRP, DRY (<3 lignes), Naming consistant, max 300 LOC/file.
+## 📦 File Organization
+- MANY SMALL FILES > FEW LARGE FILES.
+- Max 400 lines per file (800 lines absolute max).
+- Organize by feature/domain.
 
 ## 🛠️ Commands
-- **Build**: `npm run build`
-- **Quality**: `npm run quality`
-- **Lint**: `npm run lint`
+- `/plan`: Restate requirements and create a phased plan.
+- `/tdd`: Implement with test-driven development.
+- `/verify`: Run the full quality and verification loop.
+- `/learn`: Extract patterns to `.claude/skills/learned/`.
+- `/evolve`: Improve agent capabilities based on session experience.
+
+## 🛡️ Security
+- Principles of Least Privilege.
+- Strict Supabase RLS checks.
+- Audit sensitive operations (Leases, Payments).
+
+## 📱 Mobile First
+- All UI must be tested for mobile responsive (dvh, touch targets).
+- Performance: Optimize bundle size and image loading.

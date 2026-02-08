@@ -55,7 +55,7 @@ export function TenantProfileClient({
         <div className="min-h-screen p-6 space-y-6 bg-background text-foreground">
             {/* Header / Navigation */}
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" asChild className="rounded-full hover:bg-accent text-accent-foreground">
+                <Button variant="ghost" size="icon" asChild className="rounded-full hover:bg-accent hover:text-accent-foreground text-foreground">
                     <Link href="/gestion">
                         <ChevronLeft className="w-5 h-5" />
                     </Link>

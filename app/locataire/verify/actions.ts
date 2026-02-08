@@ -72,3 +72,41 @@ export async function verifyTenantIdentity(token: string, lastName: string) {
 
   return { success: true };
 }
+
+/**
+ * Activate tenant session for an already-verified token
+ *
+ * Used when a tenant re-clicks their magic link but their cookie has expired.
+ * The token is still valid and verified in DB, so we just create the session cookie.
+ *
+ * @param token - The tenant access token
+ */
+export async function activateTenantSession(token: string) {
+  const session = await validateTenantToken(token);
+
+  if (!session) {
+    return { error: "Ce lien n'est plus valide." };
+  }
+
+  if (!session.verified) {
+    // Not yet verified - return session context for the UI
+    return {
+      needsVerification: true,
+      tenantName: session.tenant_name,
+      propertyAddress: session.property_address,
+      propertyTitle: session.property_title,
+    };
+  }
+
+  // Token is already verified - just create the session cookie
+  const cookieStore = await cookies();
+  cookieStore.set(TENANT_SESSION_COOKIE_OPTIONS.name, token, {
+    httpOnly: TENANT_SESSION_COOKIE_OPTIONS.httpOnly,
+    secure: TENANT_SESSION_COOKIE_OPTIONS.secure,
+    sameSite: TENANT_SESSION_COOKIE_OPTIONS.sameSite,
+    maxAge: TENANT_SESSION_COOKIE_OPTIONS.maxAge,
+    path: TENANT_SESSION_COOKIE_OPTIONS.path,
+  });
+
+  return { success: true };
+}

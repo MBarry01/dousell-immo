@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { LockKey, Check, X, ClockCounterClockwise } from "@phosphor-icons/react";
-import { requestAccessAction } from "@/app/(workspace)/gestion/access-control/actions";
+import { submitAccessRequest } from "@/app/(workspace)/gestion/access-control/actions";
 import type { TeamPermissionKey } from "@/lib/team-permissions";
 
 interface AccessRequestModalProps {
@@ -58,13 +58,13 @@ export function AccessRequestModal({
     setErrorMessage("");
 
     try {
-      const result = await requestAccessAction({
+      const { data: result, error } = await submitAccessRequest({
         teamId,
         permission,
         reason: reason.trim(),
       });
 
-      if (result.success) {
+      if (result?.success) {
         setStatus('success');
         setTimeout(() => {
           onOpenChange(false);
@@ -73,7 +73,7 @@ export function AccessRequestModal({
         }, 2000);
       } else {
         setStatus('error');
-        setErrorMessage(result.error || "Erreur lors de la demande");
+        setErrorMessage(error || "Erreur lors de la demande");
       }
     } catch (error: any) {
       setStatus('error');

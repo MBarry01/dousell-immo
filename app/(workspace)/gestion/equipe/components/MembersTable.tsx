@@ -67,14 +67,14 @@ export function MembersTable({
     if (!confirm("Êtes-vous sûr de vouloir retirer ce membre ?")) return;
 
     setIsLoading(memberId);
-    const result = await removeTeamMember(teamId, memberId);
+    const result = await removeTeamMember({ teamId, memberId });
     setIsLoading(null);
 
-    if (result.success) {
+    if (result.data?.success) {
       toast.success("Membre retiré de l'équipe");
       router.refresh();
     } else {
-      toast.error(result.error || "Erreur lors de la suppression");
+      toast.error(result.error || result.data?.message || "Erreur lors de la suppression");
     }
   };
 

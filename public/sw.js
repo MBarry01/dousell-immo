@@ -1,7 +1,7 @@
 // Service Worker for Dousell Immo PWA
-const CACHE_NAME = "dousell-immo-v7";
+const CACHE_NAME = "dousell-immo-v8";
 const STATIC_ASSETS = [
-  "/",
+  "/gestion",
   "/manifest.json",
   "/icons/icon.svg",
   "/icons/icon-192.png",
@@ -93,11 +93,14 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(event.request.url);
 
-  // Skip chrome extensions, Next.js static files, and API routes
+  // Skip chrome extensions, Next.js static files, API routes, and tenant portal
+  // /locataire is a separate auth context (cookie-based magic link) and must
+  // never be intercepted by the PWA service worker
   if (
     event.request.url.startsWith("chrome-extension://") ||
     event.request.url.includes("_next/static") ||
-    event.request.url.includes("api/")
+    event.request.url.includes("api/") ||
+    url.pathname.startsWith("/locataire")
   ) {
     return;
   }

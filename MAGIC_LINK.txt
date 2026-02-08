@@ -1,0 +1,6 @@
+LIEN MAGIC LOCATAIRE
+
+http://localhost:3000/locataire?token=1896fdc1627667773505ef6c35e86a4de07b10f65f6c2a0ad802e0bc9d7ba7bd
+
+Locataire: Barry BARRY
+Expire: 2026-02-15T17:13:33.532Z

@@ -57,7 +57,7 @@ export function ChangeRoleDialog({
 
     setLoading(true);
 
-    const result = await changeMemberRole({
+    const { data: result, error } = await changeMemberRole({
       teamId,
       memberId: member.id,
       newRole,
@@ -65,13 +65,13 @@ export function ChangeRoleDialog({
 
     setLoading(false);
 
-    if (result.success) {
+    if (result?.success) {
       toast.success(result.message || "Rôle modifié");
       onOpenChange(false);
       router.refresh();
       onSuccess?.();
     } else {
-      toast.error(result.error || "Erreur");
+      toast.error(error || "Erreur");
     }
   };
 

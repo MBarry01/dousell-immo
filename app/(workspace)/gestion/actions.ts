@@ -10,6 +10,11 @@ import { sendEmail } from '@/lib/mail';
 import { getUserTeamContext } from "@/lib/team-context";
 import { requireTeamPermission } from "@/lib/permissions";
 import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
+import {
+    getRentalTransactions,
+    getLeasesByTeam,
+    getRentalStatsByTeam
+} from "@/services/rentalService.cached";
 
 /**
  * Récupérer les propriétés de l'équipe (pour les listes déroulantes)
@@ -1061,7 +1066,13 @@ export async function confirmPayment(leaseId: string, transactionId?: string, mo
             status: 'paid',
             paid_at: new Date().toISOString(),
             payment_method: 'manual', // Par défaut pour confirmation manuelle
-            team_id: teamId // Sécurité
+            team_id: teamId, // Sécurité
+            meta: {
+                provider: 'manual',
+                confirmed_by: user.id,
+                confirmed_at: new Date().toISOString(),
+                currency: 'XOF',
+            },
         })
         .eq('id', targetId)
         .eq('team_id', teamId)
@@ -1158,6 +1169,22 @@ export async function confirmPayment(leaseId: string, transactionId?: string, mo
         });
     } catch (e) {
         console.error("[confirmPayment] Cache invalidation error:", e);
+    }
+
+    // 🔥 CACHE WARMING (Pré-chauffage)
+    // Pour éviter le "Thundering Herd" (Timeouts) quand le dashboard se rafraîchit
+    // on relance immédiatement les requêtes lourdes pour repeupler le cache Redis
+    // de manière séquentielle AVANT que le client ne fasse ses requêtes parallèles.
+    try {
+        console.log("[confirmPayment] 🔥 Warming up cache...");
+        await Promise.all([
+            getRentalTransactions([], teamId), // Récupérer toutes les transactions
+            getLeasesByTeam(teamId, "active"), // Récupérer les baux actifs
+            getRentalStatsByTeam(teamId)       // Recalculer les stats
+        ]);
+        console.log("[confirmPayment] ✅ Cache warmed up!");
+    } catch (warmError) {
+        console.error("[confirmPayment] ⚠️ Cache warming failed:", warmError);
     }
 
     // Revalider les pages APRÈS l'invalidation du cache
@@ -1770,36 +1797,10 @@ export async function sendTenantInvitation(leaseId: string) {
     if (lease.team_id !== teamId) return { success: false, error: "Non autorisé" };
     if (!lease.tenant_email) return { success: false, error: "Email du locataire manquant" };
 
-    // 2. Générer le lien magique via Supabase Admin
-    const adminClient = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        {
-            auth: {
-                autoRefreshToken: false,
-                persistSession: false
-            }
-        }
-    );
-
-    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
-        type: 'magiclink',
-        email: lease.tenant_email,
-        options: {
-            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/magic-verify`
-        }
-    });
-
-    if (linkError) {
-        console.error("Erreur génération lien magique:", linkError);
-        return { success: false, error: "Erreur lors de la génération du lien" };
-    }
-
-    const magicLink = linkData.properties?.action_link;
-
-    if (!magicLink) {
-        return { success: false, error: "Impossible de générer le lien" };
-    }
+    // 2. Générer le token d'accès locataire (système custom, cookie-based)
+    const { generateTenantAccessToken, getTenantMagicLinkUrl } = await import('@/lib/tenant-magic-link');
+    const rawToken = await generateTenantAccessToken(leaseId);
+    const magicLink = getTenantMagicLinkUrl(rawToken);
 
     // 3. Envoyer l'email
     try {
@@ -1819,7 +1820,7 @@ export async function sendTenantInvitation(leaseId: string) {
                             Votre propriétaire vous invite à rejoindre votre espace locataire pour le bien situé à :
                         </p>
                         <div style="background-color: #f3f4f6; padding: 12px; border-radius: 6px; margin: 12px 0; font-size: 14px; color: #111827;">
-                            📍 ${lease.property_address || 'Adresse non renseignée'}
+                            ${lease.property_address || 'Adresse non renseignée'}
                         </div>
                     </div>
 
@@ -1833,20 +1834,25 @@ export async function sendTenantInvitation(leaseId: string) {
                     </div>
 
                     <div style="text-align: center; margin: 32px 0;">
-                        <a href="${magicLink}" 
+                        <a href="${magicLink}"
                            style="display: inline-block; background-color: #F4C430; color: #000000; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             Accéder à mon espace
                         </a>
                         <p style="margin-top: 12px; font-size: 12px; color: #9ca3af;">
-                            Ce lien d'accès est personnel et valide pour 24h.
+                            Ce lien d'accès est personnel et valide pour 7 jours.
                         </p>
                     </div>
 
+                    <p style="color: #6b7280; font-size: 13px; text-align: center; margin-top: 15px;">
+                        Le lien ne fonctionne pas ? Copiez et collez cette URL dans votre navigateur :<br>
+                        <code style="background: #f3f4f6; padding: 8px; display: inline-block; margin-top: 5px; word-break: break-all; font-size: 11px;">${magicLink}</code>
+                    </p>
+
                     <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
-                    
+
                     <p style="font-size: 12px; color: #9ca3af; text-align: center;">
                         Si vous n'êtes pas le destinataire de cet email, merci de l'ignorer.<br>
-                        © ${new Date().getFullYear()} Dousell Immo.
+                        &copy; ${new Date().getFullYear()} Dousell Immo.
                     </p>
                 </div>
             `
