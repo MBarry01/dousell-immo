@@ -194,8 +194,8 @@ export default function RootLayout({
           </SplashProvider>
           {/* Analytics lazy-loaded après interaction utilisateur (GA, Clarity, GTM) */}
           <LazyAnalytics gaId={gaId} clarityId={clarityId} gtmId={gtmId} />
-          {/* Speed Insights lazy-loaded après interaction utilisateur */}
-          <LazySpeedInsights />
+          {/* Speed Insights TEMPORAIREMENT DÉSACTIVÉ pour mesurer l'impact sur critical path */}
+          {/* <LazySpeedInsights /> */}
         </ThemeProvider>
       </body>
     </html>
