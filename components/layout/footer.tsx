@@ -85,9 +85,10 @@ export const Footer = () => {
                   href={social.href}
                   target="_blank"
                   rel="noreferrer"
+                  aria-label={`Suivez-nous sur ${social.label}`}
                   className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 hover:text-white hover:border-primary/30 hover:bg-primary/10 hover:scale-110 hover:-translate-y-1 transition-all duration-200 active:scale-95"
                 >
-                  <social.icon className="h-5 w-5" />
+                  <social.icon className="h-5 w-5" aria-hidden="true" />
                 </Link>
               ))}
             </div>

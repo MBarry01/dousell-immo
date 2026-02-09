@@ -74,7 +74,7 @@ export default function HeroSection() {
             className="mt-12 flex flex-wrap justify-center gap-8 md:gap-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
           >
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-white mb-1">2K+</div>

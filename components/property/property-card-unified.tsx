@@ -37,7 +37,7 @@ export const PropertyCardUnified = ({ property, className }: PropertyCardUnified
                         alt={property.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        sizes="(max-width: 768px) 288px, 300px"
                     />
                 ) : (
                     <div className="flex h-full items-center justify-center bg-white/5 text-white/40">

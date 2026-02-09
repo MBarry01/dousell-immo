@@ -141,7 +141,7 @@ export const ListingImageCarousel = ({
                   alt={`${alt} visuel ${index + 1}`}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  sizes="(max-width: 768px) 288px, 300px"
                   priority={index === 0}
                   onError={() => handleImageError(src)}
                   unoptimized={src.includes("pexels.com") || src.includes("unsplash.com")}
