@@ -1002,3 +1002,34 @@
     transform: rotateY(180deg);
   }
 }
+/* ===== HIDE GOOGLE COOKIE BANNER ===== */
+/* Masquer la bannière cookie Google par défaut pour éviter le conflit avec notre CookieConsent personnalisé */
+
+/* Google Translate Banner */
+.goog-te-banner-frame {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Google Cookie Consent Banner (généralement injecté avec z-index très élevé) */
+div[style*="z-index: 2147483647"],
+div[style*="z-index:2147483647"] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Autres éléments de bannière Google potentiels */
+iframe[src*="consent.google.com"],
+iframe[src*="google.com/gen_204"] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Google Consent Mode Overlay */
+.google-consent-overlay,
+.google-cookie-banner {
+  display: none !important;
+  visibility: hidden !important;
+}
+

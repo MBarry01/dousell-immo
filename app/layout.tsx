@@ -9,7 +9,6 @@ import { SuppressHydrationWarning } from "@/components/providers/suppress-hydrat
 import { SplashProvider } from "@/components/providers/splash-provider";
 import { CookieConsent } from "@/components/ui/cookie-consent";
 import { LazyAnalytics } from "@/components/analytics/lazy-analytics";
-import { GoogleTagManager } from "@next/third-parties/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PhoneMissingDialog } from "@/components/auth/phone-missing-dialog";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -195,9 +194,8 @@ export default function RootLayout({
             <CookieConsent />
             <PhoneMissingDialog />
           </SplashProvider>
-          {/* Analytics lazy-loaded après interaction utilisateur */}
-          <LazyAnalytics gaId={gaId} clarityId={clarityId} />
-          {gtmId && <GoogleTagManager gtmId={gtmId} />}
+          {/* Analytics lazy-loaded après interaction utilisateur (GA, Clarity, GTM) */}
+          <LazyAnalytics gaId={gaId} clarityId={clarityId} gtmId={gtmId} />
           <SpeedInsights />
         </ThemeProvider>
       </body>

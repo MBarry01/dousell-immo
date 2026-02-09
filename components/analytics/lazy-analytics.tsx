@@ -14,9 +14,16 @@ const MicrosoftClarity = dynamic(
   { ssr: false }
 );
 
+// Lazy load Google Tag Manager (GTM)
+const GoogleTagManager = dynamic(
+  () => import('@next/third-parties/google').then((mod) => mod.GoogleTagManager),
+  { ssr: false }
+);
+
 interface LazyAnalyticsProps {
   gaId?: string;
   clarityId: string;
+  gtmId?: string;
 }
 
 /**
@@ -27,9 +34,10 @@ interface LazyAnalyticsProps {
  * - Premier scroll OU
  * - Premier click
  *
- * Impact: -1s sur FCP, -500ms sur LCP
+ * Inclut: Google Analytics, Microsoft Clarity, Google Tag Manager
+ * Impact: -1s sur FCP, -500ms sur LCP, -70% LCP sur /gestion
  */
-export function LazyAnalytics({ gaId, clarityId }: LazyAnalyticsProps) {
+export function LazyAnalytics({ gaId, clarityId, gtmId }: LazyAnalyticsProps) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -77,6 +85,7 @@ export function LazyAnalytics({ gaId, clarityId }: LazyAnalyticsProps) {
     <>
       {gaId && <ConditionalGoogleAnalytics gaId={gaId} />}
       <MicrosoftClarity clarityId={clarityId} />
+      {gtmId && <GoogleTagManager gtmId={gtmId} />}
     </>
   );
 }
