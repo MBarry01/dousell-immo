@@ -11,14 +11,16 @@ type ListingImageCarouselProps = {
   images: string[];
   alt: string;
   className?: string;
+  priority?: boolean;
 };
 
 export const ListingImageCarousel = ({
   images,
   alt,
   className,
+  priority = false,
 }: ListingImageCarouselProps) => {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+  const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: false,
     watchDrag: true,
     watchResize: true,
@@ -105,7 +107,7 @@ export const ListingImageCarousel = ({
   const hasOverflow = validImagesList.length > dots.length;
 
   return (
-    <div 
+    <div
       className={cn("group relative h-full w-full overflow-hidden touch-pan-y", className)}
       onTouchStart={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
@@ -142,7 +144,7 @@ export const ListingImageCarousel = ({
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 288px, 300px"
-                  priority={index === 0}
+                  priority={priority && index === 0}
                   onError={() => handleImageError(src)}
                   unoptimized={src.includes("pexels.com") || src.includes("unsplash.com")}
                   draggable={false}

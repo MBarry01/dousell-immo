@@ -42,7 +42,7 @@ export const HeroSection = () => {
             fill
             priority
             className="object-cover object-center md:object-contain"
-            sizes="(max-width: 375px) 375px, (max-width: 390px) 390px, (max-width: 428px) 428px, (max-width: 640px) 640px, (max-width: 768px) 768px, 100vw"
+            sizes="(max-width: 360px) 360px, (max-width: 375px) 375px, (max-width: 390px) 390px, (max-width: 414px) 414px, (max-width: 428px) 428px, (max-width: 640px) 640px, (max-width: 768px) 768px, 100vw"
             quality={85}
             style={{
               objectPosition: "center center",

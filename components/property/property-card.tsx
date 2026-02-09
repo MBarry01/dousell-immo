@@ -17,12 +17,14 @@ type PropertyCardProps = {
   property: Property;
   className?: string;
   variant?: "vertical" | "horizontal";
+  priority?: boolean;
 };
 
 export const PropertyCard = ({
   property,
   className,
   variant = "vertical",
+  priority = false,
 }: PropertyCardProps) => {
   const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
   const favorite = isFavorite(property.id);
@@ -63,6 +65,7 @@ export const PropertyCard = ({
               images={property.images}
               alt={property.title}
               className="h-full w-full"
+              priority={priority}
             />
           </div>
           <div className="absolute bottom-2 left-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold">
@@ -129,6 +132,7 @@ export const PropertyCard = ({
           images={property.images}
           alt={property.title}
           className="h-full w-full"
+          priority={priority}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
         <div className="absolute left-4 top-4 flex flex-wrap items-center gap-2">

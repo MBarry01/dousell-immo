@@ -132,6 +132,10 @@ const nextConfig: NextConfig = {
         hostname: "i.roamcdn.net",
       },
     ],
+    // Breakpoints optimisés pour mobile (360px, 375px, 414px) et tablette
+    deviceSizes: [360, 375, 390, 414, 428, 640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+
   },
 };
 
