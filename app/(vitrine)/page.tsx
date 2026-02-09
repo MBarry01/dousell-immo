@@ -6,11 +6,9 @@ import { HomeSEOContent } from "@/components/sections/home-seo-content";
 import { getHomePageSections } from "@/services/homeService.cached";
 import { VerificationSuccessToast } from "@/components/auth/verification-success-toast";
 
-// Cache la page d'accueil pendant 1 heure (3600 secondes)
-// Cela améliore les performances et réduit la charge sur Supabase
+// ISR: Régénère la page toutes les heures (3600 secondes)
+// Cela améliore drastiquement les performances (TTFB < 500ms) et réduit la charge sur Supabase
 export const revalidate = 3600;
-// Force dynamic to avoid build-time errors if env vars are missing
-export const dynamic = 'force-dynamic';
 
 import { createClient } from "@/utils/supabase/server";
 import { HomeTour } from "@/components/home/HomeTour";

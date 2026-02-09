@@ -8,9 +8,8 @@ import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { SuppressHydrationWarning } from "@/components/providers/suppress-hydration-warning";
 import { SplashProvider } from "@/components/providers/splash-provider";
 import { CookieConsent } from "@/components/ui/cookie-consent";
-import { ConditionalGoogleAnalytics } from "@/components/analytics/conditional-google-analytics";
+import { LazyAnalytics } from "@/components/analytics/lazy-analytics";
 import { GoogleTagManager } from "@next/third-parties/google";
-import { MicrosoftClarity } from "@/components/analytics/microsoft-clarity";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PhoneMissingDialog } from "@/components/auth/phone-missing-dialog";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -107,30 +106,6 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
-        {/* Script inline pour afficher écran noir AVANT React (anti-flash) */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                // Ne pas bloquer si déjà vu dans cette session
-                try {
-                  if (sessionStorage.getItem('doussel_splash_shown')) return;
-                } catch (e) {
-                  // sessionStorage peut être indisponible (Safari/PWA selon réglages) : on continue sans bloquer le script
-                }
-                
-                // Créer le blocker immédiatement
-                var d = document.createElement('div');
-                d.id = 'splash-blocker';
-                d.style.cssText = 'position:fixed;inset:0;z-index:10000;background:#000;';
-                document.documentElement.appendChild(d);
-                
-                // Bloquer le scroll
-                document.documentElement.style.overflow = 'hidden';
-              })();
-            `,
-          }}
-        />
         {/* Schema.org GEO Data */}
         <script
           type="application/ld+json"
@@ -220,8 +195,8 @@ export default function RootLayout({
             <CookieConsent />
             <PhoneMissingDialog />
           </SplashProvider>
-          {gaId && <ConditionalGoogleAnalytics gaId={gaId} />}
-          <MicrosoftClarity clarityId={clarityId} />
+          {/* Analytics lazy-loaded après interaction utilisateur */}
+          <LazyAnalytics gaId={gaId} clarityId={clarityId} />
           {gtmId && <GoogleTagManager gtmId={gtmId} />}
           <SpeedInsights />
         </ThemeProvider>
