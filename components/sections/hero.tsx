@@ -68,37 +68,31 @@ export const HeroSection = () => {
         */}
         <div className="relative z-20 flex min-h-[100svh] h-full flex-col justify-end px-4 sm:px-6 pb-2 mr-0 pb-safe-nav pt-20">
           <div className="space-y-4">
-            <FadeIn delay={0.2}>
-              <h1 className="text-4xl font-semibold leading-tight text-white">
-                Immobilier au Sénégal
-                <span className="sr-only"> : Achat, location et gestion locative</span>
-              </h1>
-            </FadeIn>
-            <FadeIn delay={0.3}>
-              <p className="text-lg text-white/90 max-w-xl">
-                Plus de 500 biens vérifiés à Dakar et sur la Petite Côte.
-              </p>
-            </FadeIn>
+            <h1 className="text-4xl font-semibold leading-tight text-white">
+              Immobilier au Sénégal
+              <span className="sr-only"> : Achat, location et gestion locative</span>
+            </h1>
+            <p className="text-lg text-white/90 max-w-xl">
+              Plus de 500 biens vérifiés à Dakar et sur la Petite Côte.
+            </p>
           </div>
-          <FadeIn delay={0.4}>
-            <div className="mt-6 flex flex-col gap-3">
-              <Button
-                asChild
-                size="lg"
-                className="h-[50px] rounded-full px-8"
-              >
-                <Link href="/recherche">Découvrir les biens</Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="h-[50px] rounded-full border border-white/20 bg-white/10 px-8 text-white hover:bg-white/20"
-              >
-                <Link href="/planifier-visite">Planifier une visite</Link>
-              </Button>
-            </div>
-          </FadeIn>
+          <div className="mt-6 flex flex-col gap-3">
+            <Button
+              asChild
+              size="lg"
+              className="h-[50px] rounded-full px-8"
+            >
+              <Link href="/recherche">Découvrir les biens</Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="h-[50px] rounded-full border border-white/20 bg-white/10 px-8 text-white hover:bg-white/20"
+            >
+              <Link href="/planifier-visite">Planifier une visite</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -106,20 +100,20 @@ export const HeroSection = () => {
       <section className="hidden md:flex relative overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-[#0d101b] via-[#05080c] to-[#05080c] p-10 min-h-[500px] items-center text-white shadow-[0_20px_120px_rgba(5,8,12,0.45)]" suppressHydrationWarning>
         <div className="relative z-10 max-w-2xl space-y-6">
           <div className="space-y-4">
-            <FadeIn delay={0.2}>
+            <FadeIn delay={0}>
               <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
                 Immobilier au Sénégal
                 <span className="sr-only sm:not-sr-only"> : Achète ou investis en toute confiance</span>
               </h1>
             </FadeIn>
-            <FadeIn delay={0.3}>
+            <FadeIn delay={0.1}>
               <p className="text-lg text-white/70 sm:text-xl">
                 <span className="md:hidden">Plus de 500 biens vérifiés à Dakar et sur la Petite Côte.</span>
                 <span className="hidden md:inline">Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte, Dousell Immo s&apos;impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l&apos;achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.</span>
               </p>
             </FadeIn>
           </div>
-          <FadeIn delay={0.4}>
+          <FadeIn delay={0.2}>
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button
                 asChild
@@ -144,7 +138,7 @@ export const HeroSection = () => {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
+          transition={{ duration: 0.8, delay: 0 }}
           className="absolute inset-0 z-0 w-full h-full pointer-events-none"
           suppressHydrationWarning
         >
@@ -166,7 +160,7 @@ export const HeroSection = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
           className="pointer-events-none absolute -right-10 top-10 h-64 w-64 rounded-full bg-amber-200/30 blur-[120px]"
           suppressHydrationWarning
         />
