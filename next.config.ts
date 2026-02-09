@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
+    // Tree-shaking optimisé pour librairies lourdes
+    optimizePackageImports: ['lucide-react', 'date-fns', 'lodash', 'recharts'],
   },
   // Redirections legacy (désactivées pour restauration des chemins)
   async redirects() {

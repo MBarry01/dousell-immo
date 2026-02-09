@@ -14,8 +14,6 @@ import { PhoneMissingDialog } from "@/components/auth/phone-missing-dialog";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
-import "react-medium-image-zoom/dist/styles.css";
-import "leaflet/dist/leaflet.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
