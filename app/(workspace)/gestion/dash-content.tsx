@@ -7,6 +7,7 @@ import { RevenueChart } from "./components/RevenueChart";
 import { OrphanLeasesAlert } from "./components/OrphanLeasesAlert";
 import { ExpiredBanner } from "./components/ExpiredBanner";
 import { QuotaBanner } from "./components/QuotaBanner";
+import { GestionTour } from "@/components/gestion/GestionTour";
 import { createClient } from "@/utils/supabase/server";
 import {
     getLeasesByTeam as getLeasesByOwner,
@@ -244,14 +245,14 @@ export default async function DashboardContent({
             isViewingTerminated={isViewingTerminated}
             filterSection={
                 !isViewingTerminated && (
-                    <>
+                    <div id="tour-gestion-actions" className="flex gap-2">
                         <DocumentGeneratorDialog
                             leases={filteredLeases}
                             userEmail={user.email}
                             profile={profile}
                         />
                         <AddTenantButton ownerId={user.id} profile={profile} />
-                    </>
+                    </div>
                 )
             }
         >
@@ -281,7 +282,7 @@ export default async function DashboardContent({
             )}
 
             {/* Table des locataires - Pleine largeur */}
-            <div className="mb-6">
+            <div id="tour-gestion-table" className="mb-6">
                 <GestionLocativeClient
                     leases={filteredLeases || []}
                     transactions={transactions || []}
@@ -298,6 +299,9 @@ export default async function DashboardContent({
             {!isViewingTerminated && (
                 <RevenueChart data={revenueHistory} />
             )}
+
+            {/* Tutoriel interactif de la page gestion */}
+            <GestionTour />
 
         </ThemedContent>
     );

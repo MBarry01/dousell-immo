@@ -85,7 +85,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
     }
 
     return (
-        <div className="p-6 rounded-xl border border-border bg-card">
+        <div id="tour-gestion-revenue-chart" className="p-6 rounded-xl border border-border bg-card">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">

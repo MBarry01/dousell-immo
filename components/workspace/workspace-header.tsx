@@ -120,7 +120,7 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-foreground transition-transform duration-200 hover:scale-110 active:scale-95"
+            className="h-9 w-9 text-foreground transition-transform duration-200 active:scale-95"
             onClick={toggleTheme}
           >
             {isDark ? (
