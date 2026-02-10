@@ -53,7 +53,7 @@ export function WorkspaceLayoutClient({
           />
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto pb-safe-nav lg:pb-0">
+          <main className="flex-1 overflow-y-auto pb-safe-nav lg:pb-0 overscroll-contain">
             <div className="p-4 md:p-6 lg:pl-0">
               <FadeIn delay={100}>
                 {children}

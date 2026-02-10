@@ -588,12 +588,12 @@
 
   /* Safe area padding renforcé pour PWA standalone */
   .pt-safe {
-    padding-top: calc(env(safe-area-inset-top, 20px) + 1rem) !important;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1rem) !important;
   }
 
   /* Header mobile en mode PWA - padding extra pour la barre d'état */
   .pwa-header-safe {
-    padding-top: max(env(safe-area-inset-top, 0px), 20px) !important;
+    padding-top: env(safe-area-inset-top, 0px) !important;
   }
 
   /* Workspace layout PWA - hauteur totale avec safe areas */
@@ -1006,6 +1006,7 @@
     transform: rotateY(180deg);
   }
 }
+
 /* ===== HIDE GOOGLE COOKIE BANNER ===== */
 /* Masquer la bannière cookie Google par défaut pour éviter le conflit avec notre CookieConsent personnalisé */
 
@@ -1036,4 +1037,3 @@ iframe[src*="google.com/gen_204"] {
   display: none !important;
   visibility: hidden !important;
 }
-

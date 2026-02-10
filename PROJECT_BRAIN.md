@@ -1967,7 +1967,7 @@ export const Constants = {
 ---
 ## 2. UI COMPONENTS (Existing)
 Utilise ces composants pour construire l'interface.
-# 🗺️ MAP DES COMPOSANTS (231)
+# 🗺️ MAP DES COMPOSANTS (232)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -1998,6 +1998,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<address-autocomplete />** (Path: `components\forms\address-autocomplete.tsx`)
 - **<address-input-with-map />** (Path: `components\forms\address-input-with-map.tsx`)
 - **<AssociateTenantDialog />** (Path: `components\gestion\AssociateTenantDialog.tsx`)
+- **<FeatureLockedState />** (Path: `components\gestion\FeatureLockedState.tsx`)
 - **<GestionTour />** (Path: `components\gestion\GestionTour.tsx`)
 - **<OwnerSelector />** (Path: `components\gestion\OwnerSelector.tsx`)
 - **<SubscriptionManager />** (Path: `components\gestion\SubscriptionManager.tsx`)
