@@ -575,7 +575,12 @@
   animation: smooth-fade-out 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* PWA Optimizations */
+/* Header safe area - toujours appliquer pour les appareils avec notch/barre d'état */
+.pwa-header-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* PWA Optimizations - mode standalone (installé) */
 @media all and (display-mode: standalone) {
   .pwa-hero-pb {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 43px) !important;
@@ -594,7 +599,6 @@
   /* Workspace layout PWA - hauteur totale avec safe areas */
   .h-dvh {
     height: calc(100dvh) !important;
-    /* Le conteneur prend toute la hauteur, les safe areas sont gérés par les enfants */
   }
 
   /* Renforcer le padding bottom de la bottom nav en PWA */

@@ -1,14 +1,20 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
-import { stripe, STRIPE_PLANS } from '@/lib/subscription/stripe';
+import { stripe } from '@/lib/subscription/stripe';
 import { getBaseUrl } from '@/lib/utils';
 import { getUserTeamContext } from '@/lib/team-context';
+import { getStripePriceId, SubscriptionTier, BillingCycle, Currency, PLANS } from '@/lib/subscription/plans-config';
 
 export async function POST(req: Request) {
     try {
-        const { planId } = await req.json();
+        const { planId, interval, currency } = await req.json();
 
-        if (!planId || !STRIPE_PLANS[planId as keyof typeof STRIPE_PLANS]) {
+        if (!planId || !interval || !currency) {
+            return NextResponse.json({ error: 'Paramètres manquants' }, { status: 400 });
+        }
+
+        const validPlan = PLANS[planId as SubscriptionTier];
+        if (!validPlan) {
             return NextResponse.json({ error: 'Plan invalide' }, { status: 400 });
         }
 
@@ -20,23 +26,51 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Non connecté' }, { status: 401 });
         }
 
-        // 1. Récupérer ou créer le Stripe Customer ID dans la table teams
+        // Security Check: Anti-Double Subscription
+        // Verify if the team already has an active subscription
         const { data: teamData, error: teamError } = await supabase
             .from('teams')
-            .select('stripe_customer_id, name')
+            .select('stripe_customer_id, stripe_subscription_id, subscription_tier, name, subscription_status')
             .eq('id', teamId)
             .single();
 
         if (teamError) throw teamError;
 
+        // Block if already active or has valid subscription state (Prevent Double Sub)
+        const ACTIVE_STATUSES = ['active', 'trialing', 'past_due', 'unpaid', 'incomplete', 'incomplete_expired'];
+        if (teamData.subscription_status && ACTIVE_STATUSES.includes(teamData.subscription_status)) {
+            return NextResponse.json({
+                error: 'Vous avez déjà un abonnement actif ou en cours. Veuillez le gérer depuis le portail.',
+                redirect: '/gestion/abonnement' // Frontend can use this to redirect to portal
+            }, { status: 400 });
+        }
+
         let stripeCustomerId = teamData.stripe_customer_id;
 
+        // 1. Check for Currency Mismatch if customer exists
+        if (stripeCustomerId) {
+            try {
+                const customer = await stripe.customers.retrieve(stripeCustomerId);
+                // Check if customer is not deleted and has a currency set
+                if (!customer.deleted && 'currency' in customer && customer.currency && customer.currency !== currency.toLowerCase()) {
+                    console.log(`💱 Currency mismatch: Customer ${stripeCustomerId} is in ${customer.currency}, requested ${currency}. Creating new customer.`);
+                    stripeCustomerId = null; // Force creation of new customer
+                }
+            } catch (err) {
+                console.warn("⚠️ Could not retrieve Stripe customer:", err);
+                // If we can't retrieve, maybe it's deleted? Safer to create new one if unsure, 
+                // but let's assume it's fine unless we get an error later.
+            }
+        }
+
+        // 2. Create Stripe Customer if missing or needed (due to currency swap)
         if (!stripeCustomerId) {
             const customer = await stripe.customers.create({
                 email: user.email,
-                name: teamData.name || team.name,
+                name: teamData.name || team.name, // Use team name for B2B usually, or User name
                 metadata: {
                     team_id: teamId,
+                    supabase_user_id: user.id
                 },
             });
             stripeCustomerId = customer.id;
@@ -47,15 +81,25 @@ export async function POST(req: Request) {
                 .eq('id', teamId);
         }
 
-        // 2. Créer la session de checkout
+        // 3. Resolve Price ID Server-Side (Secure)
+        const priceId = getStripePriceId(
+            planId as SubscriptionTier,
+            interval as BillingCycle,
+            currency as Currency
+        );
+
+        if (!priceId) {
+            return NextResponse.json({ error: 'Configuration prix introuvable' }, { status: 500 });
+        }
+
+        // 4. Create Checkout Session
         const baseUrl = getBaseUrl();
-        const plan = STRIPE_PLANS[planId as keyof typeof STRIPE_PLANS];
 
         const session = await stripe.checkout.sessions.create({
             customer: stripeCustomerId,
             line_items: [
                 {
-                    price: plan.priceId,
+                    price: priceId,
                     quantity: 1,
                 },
             ],
@@ -65,6 +109,8 @@ export async function POST(req: Request) {
             metadata: {
                 team_id: teamId,
                 plan_id: planId,
+                currency: currency,
+                interval: interval
             },
             subscription_data: {
                 metadata: {
@@ -72,11 +118,13 @@ export async function POST(req: Request) {
                     plan_id: planId,
                 },
             },
+            // Optional: Handle tax, address collection, etc. based on currency/region
+            // payment_method_types: currency === 'xof' ? ['card'] : ['card', 'sepa_debit'], // Example
         });
 
         return NextResponse.json({ url: session.url });
-    } catch (error: any) {
+    } catch (error) {
         console.error('Stripe Checkout Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
     }
 }

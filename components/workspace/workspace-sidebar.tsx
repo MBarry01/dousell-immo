@@ -42,6 +42,7 @@ interface TeamData {
   name: string;
   slug: string;
   role: string;
+  subscription_tier?: string;
 }
 
 interface NavItem {
@@ -49,6 +50,7 @@ interface NavItem {
   icon: LucideIcon;
   label: string;
   requiredPermission?: TeamPermissionKey; // Permission requise pour accéder
+  requiredTier?: 'pro' | 'enterprise'; // Tier minimum requis
 }
 
 // Navigation pour propriétaires (/gestion) avec permissions
@@ -56,11 +58,11 @@ const gestionNavItems: NavItem[] = [
   { href: "/gestion", icon: LayoutDashboard, label: "Dashboard" }, // Accessible à tous
   { href: "/gestion/biens", icon: Home, label: "Biens", requiredPermission: "properties.view" },
   { href: "/gestion/etats-lieux", icon: ClipboardList, label: "États des Lieux", requiredPermission: "inventory.view" },
-  { href: "/gestion/interventions", icon: Wrench, label: "Interventions", requiredPermission: "maintenance.view" },
+  { href: "/gestion/interventions", icon: Wrench, label: "Interventions", requiredPermission: "maintenance.view", requiredTier: 'pro' },
   { href: "/gestion/documents", icon: FolderOpen, label: "Documents", requiredPermission: "documents.view" },
   { href: "/gestion/messages", icon: MessageSquare, label: "Messagerie" }, // Accessible à tous
   { href: "/gestion/documents-legaux", icon: Scale, label: "Juridique", requiredPermission: "documents.generate" },
-  { href: "/gestion/comptabilite", icon: Wallet, label: "Comptabilité", requiredPermission: "payments.view" },
+  { href: "/gestion/comptabilite", icon: Wallet, label: "Comptabilité", requiredPermission: "payments.view", requiredTier: 'pro' },
 ];
 
 // Navigation pour locataires (/locataire)
@@ -195,8 +197,8 @@ function SidebarContent({
               item.href !== "/compte" &&
               pathname?.startsWith(`${item.href}/`));
 
-          // Utiliser LockedSidebarItem pour les items avec permission requise
-          if (item.requiredPermission && isGestionRoute) {
+          // Utiliser LockedSidebarItem pour les items avec permission requise OU tier requis
+          if ((item.requiredPermission || item.requiredTier) && isGestionRoute) {
             return (
               <LockedSidebarItem
                 key={item.href}
@@ -207,7 +209,9 @@ function SidebarContent({
                 isCollapsed={isCollapsed}
                 isMobile={isMobile}
                 requiredPermission={item.requiredPermission}
+                requiredTier={item.requiredTier}
                 currentTeamId={currentTeamId}
+                currentTeamTier={currentTeam?.subscription_tier}
                 onNavigate={() => isMobile && onMobileNavigate?.()}
                 onRequestAccess={onRequestAccess}
               />
@@ -226,7 +230,7 @@ function SidebarContent({
                 "px-[14px]",
                 isActive
                   ? "bg-[#0F172A] text-white shadow-md font-medium dark:bg-primary/10 dark:text-primary"
-                  : "text-slate-700 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               )}
               title={isCollapsed && !isMobile ? item.label : undefined}
             >

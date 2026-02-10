@@ -249,7 +249,7 @@ export async function expireTeamSubscription(
  */
 export async function checkFeatureAccess(
     teamId: string,
-    feature: 'add_property' | 'add_lease' | 'invite_member' | 'export_data'
+    feature: 'add_property' | 'add_lease' | 'invite_member' | 'export_data' | 'manage_interventions' | 'view_advanced_reports'
 ): Promise<FeatureCheckResult> {
     const supabase = await createClient();
     const subscription = await getTeamSubscriptionStatus(teamId);
@@ -275,11 +275,11 @@ export async function checkFeatureAccess(
                 .select('*', { count: 'exact', head: true })
                 .eq('team_id', teamId);
 
-            if (count !== null && count >= features.maxProperties) {
+            if (count !== null && count >= features.limits.maxProperties) {
                 return {
                     allowed: false,
                     reason: 'limit_reached',
-                    message: `Limite de biens atteinte (${features.maxProperties}) pour le plan ${subscription.tier}.`,
+                    message: `Limite de biens atteinte (${features.limits.maxProperties}) pour le plan ${subscription.tier}.`,
                     upgradeRequired: true
                 };
             }
@@ -292,11 +292,11 @@ export async function checkFeatureAccess(
                 .select('*', { count: 'exact', head: true })
                 .eq('team_id', teamId);
 
-            if (count !== null && count >= features.maxLeases) {
+            if (count !== null && count >= features.limits.maxLeases) {
                 return {
                     allowed: false,
                     reason: 'limit_reached',
-                    message: `Limite de baux atteinte (${features.maxLeases}) pour le plan ${subscription.tier}.`,
+                    message: `Limite de baux atteinte (${features.limits.maxLeases}) pour le plan ${subscription.tier}.`,
                     upgradeRequired: true
                 };
             }
@@ -312,6 +312,33 @@ export async function checkFeatureAccess(
                     upgradeRequired: true
                 };
             }
+
+            // Check member limit
+            // Note: We need admin client to count members across all statuses if needed, 
+            // but usually we count active members.
+            const { count: memberCount } = await supabase
+                .from('team_members')
+                .select('*', { count: 'exact', head: true })
+                .eq('team_id', teamId)
+                .eq('status', 'active'); // Only active members count towards limit
+
+            // Add pending invitations to the count
+            const { count: inviteCount } = await supabase
+                .from('team_invitations')
+                .select('*', { count: 'exact', head: true })
+                .eq('team_id', teamId)
+                .eq('status', 'pending');
+
+            const totalMembers = (memberCount || 0) + (inviteCount || 0);
+
+            if (totalMembers >= features.limits.maxTeamMembers) {
+                return {
+                    allowed: false,
+                    reason: 'limit_reached',
+                    message: `Limite de membres atteinte (${features.limits.maxTeamMembers}) pour le plan ${subscription.tier}.`,
+                    upgradeRequired: true
+                };
+            }
             break;
 
         case 'export_data':
@@ -320,6 +347,28 @@ export async function checkFeatureAccess(
                     allowed: false,
                     reason: 'limit_reached',
                     message: "L'exportation de données n'est pas disponible dans votre plan actuel.",
+                    upgradeRequired: true
+                };
+            }
+            break;
+
+        case 'manage_interventions':
+            if (!features.canManageInterventions) {
+                return {
+                    allowed: false,
+                    reason: 'limit_reached',
+                    message: "La gestion des incidents et interventions est réservée aux plans Pro et Enterprise.",
+                    upgradeRequired: true
+                };
+            }
+            break;
+
+        case 'view_advanced_reports':
+            if (!features.canUseAdvancedReports) {
+                return {
+                    allowed: false,
+                    reason: 'limit_reached',
+                    message: "Les analyses financières avancées sont réservées aux plans Pro et Enterprise.",
                     upgradeRequired: true
                 };
             }

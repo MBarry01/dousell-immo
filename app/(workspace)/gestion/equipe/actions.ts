@@ -10,6 +10,7 @@ import {
 } from "@/lib/team-permissions";
 import { getUserTeamContext } from "@/lib/team-context";
 import { requireTeamPermission, requireTeamRole } from "@/lib/permissions";
+import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
 import { sendEmail } from "@/lib/mail";
 import type {
   Team,
@@ -489,58 +490,15 @@ export const inviteTeamMember = safeAction(
 
     const supabase = await createClient();
 
-    // ✅ QUOTA: Vérifier la limite de membres pour les équipes Trial
+    // ✅ QUOTA: Vérifier les limites du plan (Starter/Pro/Enterprise)
+    const access = await checkFeatureAccess(data.teamId, 'invite_member');
+
+    if (!access.allowed) {
+      throw new Error(access.message || "Impossible d'inviter plus de membres avec votre plan actuel.");
+    }
+
+    // Récupérer information équipe pour l'email (optimisation: déjà fait dans checkFeatureAccess mais on a besoin du nom ici)
     const supabaseAdmin = createAdminClient();
-
-    const { data: team, error: teamError } = await supabaseAdmin
-      .from("teams")
-      .select("subscription_status")
-      .eq("id", data.teamId)
-      .single();
-
-    if (teamError) {
-      console.error("[Team Quota] Error fetching team:", teamError);
-      throw new Error("Erreur lors de la récupération des informations de l'équipe");
-    }
-
-    // Si équipe en trial, vérifier la limite de 3 membres
-    if (team.subscription_status === 'trial') {
-      // 1. Emails des membres actifs
-      const { data: members } = await supabaseAdmin
-        .from("team_members")
-        .select("user:profiles(email)")
-        .eq("team_id", data.teamId)
-        .eq("status", "active");
-
-      const memberEmails = new Set(
-        members?.map(m => (m.user as any)?.email?.toLowerCase()).filter(Boolean) || []
-      );
-
-      // 2. Invitations en attente valides
-      const { data: pendingInvites } = await supabaseAdmin
-        .from("team_invitations")
-        .select("email, expires_at")
-        .eq("team_id", data.teamId)
-        .eq("status", "pending");
-
-      const now = new Date();
-      const validPendingInvites = (pendingInvites || []).filter(
-        inv => {
-          const isExpired = new Date(inv.expires_at) <= now;
-          const isAlreadyMember = memberEmails.has(inv.email.toLowerCase());
-          return !isExpired && !isAlreadyMember;
-        }
-      );
-
-      // 3. Calcul du total
-      const activeMembersCount = memberEmails.size;
-      const totalCount = activeMembersCount + validPendingInvites.length;
-
-      // Limite de 3 membres pour les équipes Trial
-      if (totalCount >= 3) {
-        throw new Error("Limite atteinte : Les équipes en période d'essai sont limitées à 3 membres. Passez à un abonnement Pro pour inviter plus de membres.");
-      }
-    }
 
     // Vérifier si l'email est déjà membre
     const { data: profiles } = await supabase

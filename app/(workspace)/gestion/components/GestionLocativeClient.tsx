@@ -695,7 +695,7 @@ export function GestionLocativeClient({
             {/* ========================================
                 TENANT VIEW - Cards or Table
                 ======================================== */}
-            <div id="tour-tenants-list">
+            <div id="tour-tenants-list" className="mt-6">
                 <div id="tour-add-tenant">
                     {viewMode === 'cards' ? (
                         <TenantCardGrid

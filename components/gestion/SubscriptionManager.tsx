@@ -7,16 +7,15 @@ import {
     CreditCard,
     Check,
     Warning,
-    ArrowRight,
     Buildings,
     Clock,
     Sparkle,
-    Buildings as BuildingsIcon,
     Crown,
     Rocket
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getAllPlans, formatPrice, TRIAL_DURATION_DAYS } from "@/lib/subscription/plans-config";
 
 export function SubscriptionManager() {
     const router = useRouter();
@@ -35,42 +34,49 @@ export function SubscriptionManager() {
 
             if (!user) return;
 
-            // Get Team Info
-            const { data: teamMembership } = await supabase
+            // Get Team Info - Handle multiple teams by taking the first active one
+            // Ideally should use a context provider, but for now we fix the crash
+            const { data: teamMemberships } = await supabase
                 .from("team_members")
                 .select("team_id, team:teams(*)")
                 .eq("user_id", user.id)
-                .eq("status", "active")
-                .maybeSingle();
+                .eq("status", "active");
 
-            const team = teamMembership?.team as any;
+            // Take the first team found
+            const teamMembership = teamMemberships && teamMemberships.length > 0 ? teamMemberships[0] : null;
+
+            const team = teamMembership?.team as { subscription_status?: string; subscription_tier?: string; subscription_trial_ends_at?: string } | null;
             const tId = teamMembership?.team_id;
-            setTeamId(tId);
+            setTeamId(tId || null);
+
+            console.log("SubscriptionManager Team:", { tId, team });
 
             if (team) {
-                setProStatus(team.subscription_status);
-                setSubscriptionTier(team.subscription_tier);
+                setProStatus(team.subscription_status || null);
+                setSubscriptionTier(team.subscription_tier || null);
                 if (team.subscription_trial_ends_at) {
                     setTrialEndsAt(new Date(team.subscription_trial_ends_at));
                 }
             }
 
-            // Get user stats
-            const { count: propertiesCount } = await supabase
-                .from("properties")
-                .select("*", { count: "exact", head: true })
-                .eq("team_id", tId);
+            if (tId) {
+                // Get user stats only if we have a valid team ID
+                const { count: propertiesCount } = await supabase
+                    .from("properties")
+                    .select("*", { count: "exact", head: true })
+                    .eq("team_id", tId);
 
-            const { count: leasesCount } = await supabase
-                .from("leases")
-                .select("*", { count: "exact", head: true })
-                .eq("team_id", tId)
-                .eq("status", "active");
+                const { count: leasesCount } = await supabase
+                    .from("leases")
+                    .select("*", { count: "exact", head: true })
+                    .eq("team_id", tId)
+                    .eq("status", "active");
 
-            setStats({
-                properties: propertiesCount || 0,
-                leases: leasesCount || 0,
-            });
+                setStats({
+                    properties: propertiesCount || 0,
+                    leases: leasesCount || 0,
+                });
+            }
 
             setIsLoading(false);
         };
@@ -84,7 +90,11 @@ export function SubscriptionManager() {
             const response = await fetch("/api/subscription/checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ planId }),
+                body: JSON.stringify({
+                    planId,
+                    interval: 'monthly', // Default to monthly for dashboard upgrade
+                    currency: 'xof'      // Default to XOF for dashboard upgrade
+                }),
             });
 
             const data = await response.json();
@@ -135,7 +145,7 @@ export function SubscriptionManager() {
                     <div className="flex flex-col items-end gap-1">
                         <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-1.5">
                             <Clock size={16} className="text-primary" />
-                            <span className="text-primary text-xs font-medium">{daysLeft} jours d'essai restants</span>
+                            <span className="text-primary text-xs font-medium">{daysLeft} jours d&apos;essai restants</span>
                         </div>
                         {trialEndsAt && (
                             <span className="text-[10px] text-gray-500">Expire le {trialEndsAt.toLocaleDateString('fr-FR')}</span>
@@ -156,13 +166,13 @@ export function SubscriptionManager() {
             {isTrial && (
                 <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4">
                     <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-medium text-primary">Progression de l'essai gratuit</span>
-                        <span className="text-xs text-gray-500">{Math.round(((14 - daysLeft) / 14) * 100)}% complété</span>
+                        <span className="text-xs font-medium text-primary">Progression de l&apos;essai gratuit</span>
+                        <span className="text-xs text-gray-500">{Math.round(((TRIAL_DURATION_DAYS - daysLeft) / TRIAL_DURATION_DAYS) * 100)}% complété</span>
                     </div>
                     <div className="h-2 w-full bg-slate-100 dark:bg-gray-800 rounded-full overflow-hidden">
                         <div
                             className="h-full bg-primary transition-all duration-1000 shadow-[0_0_10px_rgba(var(--primary),0.3)]"
-                            style={{ width: `${Math.min(100, Math.round(((14 - daysLeft) / 14) * 100))}%` }}
+                            style={{ width: `${Math.min(100, Math.round(((TRIAL_DURATION_DAYS - daysLeft) / TRIAL_DURATION_DAYS) * 100))}%` }}
                         />
                     </div>
                 </div>
@@ -181,7 +191,7 @@ export function SubscriptionManager() {
                                 Vous avez {stats.properties} bien(s) et {stats.leases} bail(s) actif(s) qui attendent votre retour.
                             </p>
                             <p className="text-slate-400 dark:text-white/50 text-xs italic">
-                                Réactivez votre compte pour retrouver l'accès complet.
+                                Réactivez votre compte pour retrouver l&apos;accès complet.
                             </p>
                         </div>
                     </div>
@@ -190,71 +200,83 @@ export function SubscriptionManager() {
 
             {/* Pricing Cards */}
             <div className="grid md:grid-cols-2 gap-6">
-                {/* STARTER */}
-                <div className={`rounded-2xl border ${subscriptionTier === 'starter' ? 'border-primary bg-primary/5' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5'} p-6 flex flex-col`}>
-                    <div className="flex items-center gap-2 mb-4">
-                        <Rocket size={24} className="text-primary" />
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Starter</h3>
-                    </div>
-                    <div className="mb-6">
-                        <span className="text-2xl font-bold text-slate-900 dark:text-white">15 000 FCFA</span>
-                        <span className="text-gray-500 text-xs ml-1">/ mois</span>
-                    </div>
-                    <ul className="space-y-3 mb-8 flex-1">
-                        <li className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/70">
-                            <Check size={14} className="text-primary" /> Jusqu'à 10 biens
-                        </li>
-                        <li className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/70">
-                            <Check size={14} className="text-primary" /> Documents standards
-                        </li>
-                        <li className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/70">
-                            <Check size={14} className="text-primary" /> Support standard
-                        </li>
-                    </ul>
-                    <Button
-                        onClick={() => handleUpgrade('starter')}
-                        disabled={isSubmitting || (subscriptionTier === 'starter' && proStatus === 'active')}
-                        className={`w-full h-10 text-sm ${subscriptionTier === 'starter' && proStatus === 'active' ? 'bg-zinc-800 text-white/50' : 'bg-primary text-primary-foreground hover:bg-primary/90 font-bold'}`}
-                    >
-                        {subscriptionTier === 'starter' && proStatus === 'active' ? "Plan actuel" : "Choisir Starter"}
-                    </Button>
-                </div>
+                {getAllPlans()
+                    .filter(plan => plan.id !== 'enterprise') // Enterprise handled separately below
+                    .map((plan) => {
+                        const isCurrentTier = subscriptionTier === plan.id;
+                        const isTrial = proStatus === 'trial';
+                        const isActive = proStatus === 'active';
 
-                {/* PRO */}
-                <div className={`rounded-2xl border ${subscriptionTier === 'pro' ? 'border-primary bg-primary/5' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5'} p-6 flex flex-col relative`}>
-                    <div className="absolute top-4 right-4 bg-primary text-primary-foreground text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        Recommandé
-                    </div>
-                    <div className="flex items-center gap-2 mb-4">
-                        <Crown size={24} className="text-primary" />
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Pro</h3>
-                    </div>
-                    <div className="mb-6">
-                        <span className="text-2xl font-bold text-slate-900 dark:text-white">35 000 FCFA</span>
-                        <span className="text-gray-500 text-xs ml-1">/ mois</span>
-                    </div>
-                    <ul className="space-y-3 mb-8 flex-1">
-                        <li className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/70">
-                            <Check size={14} className="text-primary" /> Biens illimités
-                        </li>
-                        <li className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/70">
-                            <Check size={14} className="text-primary" /> Analyses financières
-                        </li>
-                        <li className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/70">
-                            <Check size={14} className="text-primary" /> Export de données
-                        </li>
-                        <li className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/70">
-                            <Check size={14} className="text-primary" /> Support prioritaire
-                        </li>
-                    </ul>
-                    <Button
-                        onClick={() => handleUpgrade('pro')}
-                        disabled={isSubmitting || (subscriptionTier === 'pro' && proStatus === 'active')}
-                        className={`w-full h-10 text-sm ${subscriptionTier === 'pro' && proStatus === 'active' ? 'bg-zinc-800 text-white/50' : 'bg-primary text-primary-foreground hover:bg-primary/90 font-bold'}`}
-                    >
-                        {subscriptionTier === 'pro' && proStatus === 'active' ? "Plan actuel" : "Choisir Pro"}
-                    </Button>
-                </div>
+                        // Icon selection
+                        const Icon = plan.id === 'starter' ? Rocket : Crown;
+
+                        return (
+                            <div
+                                key={plan.id}
+                                className={`rounded-2xl border ${isCurrentTier
+                                    ? 'border-primary bg-primary/5'
+                                    : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5'
+                                    } p-6 flex flex-col relative`}
+                            >
+                                {plan.popular && !isCurrentTier && (
+                                    <div className="absolute top-4 right-4 bg-primary text-primary-foreground text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                        Recommandé
+                                    </div>
+                                )}
+
+                                {isCurrentTier && (
+                                    <div className={`absolute top-4 right-4 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${isTrial ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'
+                                        }`}>
+                                        {isTrial ? 'Essai en cours' : 'Plan Actuel'}
+                                    </div>
+                                )}
+
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Icon size={24} className="text-primary" />
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                        {plan.name}
+                                    </h3>
+                                </div>
+
+                                <div className="mb-6">
+                                    <span className="text-2xl font-bold text-slate-900 dark:text-white">
+                                        {formatPrice(plan.pricing.xof.monthly.amount)}
+                                    </span>
+                                    <span className="text-gray-500 text-xs ml-1">/ mois</span>
+                                    {plan.id === 'starter' && isCurrentTier && isTrial && (
+                                        <p className="text-xs text-amber-600 mt-1">
+                                            Plan par défaut après l&apos;essai
+                                        </p>
+                                    )}
+                                </div>
+
+                                <ul className="space-y-3 mb-8 flex-1">
+                                    {plan.highlightedFeatures.slice(0, 4).map((feature, idx) => (
+                                        <li
+                                            key={idx}
+                                            className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/70"
+                                        >
+                                            <Check size={14} className="text-primary" /> {feature}
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                <Button
+                                    onClick={() => handleUpgrade(plan.id)}
+                                    disabled={isSubmitting || (isCurrentTier && isActive)}
+                                    className={`w-full h-10 text-sm ${isCurrentTier && isActive
+                                        ? 'bg-zinc-800 text-white/50 cursor-not-allowed'
+                                        : 'bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-lg shadow-primary/20'
+                                        }`}
+                                >
+                                    {isCurrentTier
+                                        ? (isTrial ? "Activer l'abonnement" : "Plan actuel")
+                                        : (plan.id === 'starter' ? "Rétrograder" : plan.ctaText)
+                                    }
+                                </Button>
+                            </div>
+                        );
+                    })}
             </div>
 
             {/* Enterprise CTA */}

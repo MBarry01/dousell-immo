@@ -79,7 +79,7 @@ export function TenantCardGrid({
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {tenants.map((tenant, index) => (
                 <div key={tenant.last_transaction_id || tenant.id} id={index === 0 ? 'tour-first-tenant' : undefined}>
                     <TenantCard

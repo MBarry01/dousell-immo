@@ -5,6 +5,7 @@ interface KPICardsProps {
         occupancyRate: number;
         avgPaymentDelay: number;
         unpaidRate: number;
+        overdueAmount: number; // New field
         avgRevenuePerProperty: number;
         totalProperties: number;
         activeLeases: number;
@@ -31,7 +32,9 @@ export function KPICards({ stats }: KPICardsProps) {
         {
             label: "Taux d'impayés",
             value: `${stats.unpaidRate}%`,
-            subtext: "ce mois",
+            subtext: stats.overdueAmount > 0
+                ? `${stats.overdueAmount.toLocaleString('fr-FR')} FCFA`
+                : "ce mois",
             icon: AlertTriangle,
             status: stats.unpaidRate === 0 ? "good" : stats.unpaidRate <= 20 ? "warning" : "bad",
         },

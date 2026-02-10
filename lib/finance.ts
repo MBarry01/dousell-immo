@@ -53,6 +53,7 @@ export interface FinancialKPIs {
     paidCount: number;      // Nombre de loyers payés
     pendingAmount: number;  // Montant en attente (FCFA)
     overdueAmount: number;  // Montant en retard (FCFA)
+    avgDelayDays: number;   // Retard moyen (jours)
 }
 
 export interface MonthlyFinancialSummary extends FinancialKPIs {
@@ -78,6 +79,7 @@ export interface TransactionInput {
     status: string; // 'pending' | 'paid' | 'overdue' etc.
     period_date?: string | Date; // Date de référence "due_date" ou période
     created_at?: string;
+    paid_at?: string | Date; // Date du paiement effectif
 }
 
 export interface ExpenseInput {
@@ -109,71 +111,119 @@ export function calculateFinancials(
     let pendingAmount = 0;
     let overdueAmount = 0;
 
-    const currentDay = new Date().getDate();
-    const isTargetMonthCurrent = isSameMonth(new Date(), targetDate);
+    const GRACE_PERIOD_DAYS = 5; // Tolérance avant de marquer "Overdue"
+
+    let totalDelayDays = 0;
+    let delaySamples = 0;
+
+    // Pour vérifier si le mois cible est le mois courant
+    const now = new Date();
+    // Comparaison stricte mois/année
+    const isTargetMonthCurrent = (
+        targetDate.getMonth() === now.getMonth() &&
+        targetDate.getFullYear() === now.getFullYear()
+    );
 
     // 1. Itération sur les BAUX (Source de vérité pour l'Attendu)
     leases.forEach(lease => {
-        // On considère un bail actif s'il est statut 'active'
-        // (Pour être plus précis, on pourrait vérifier les dates start/end par rapport au mois cible)
         if (lease.status === 'active') {
 
             // Règle 1 : L'attendu vient du bail
             const monthlyRent = Number(lease.monthly_amount) || 0;
             totalExpected += monthlyRent;
 
-            // 2. Chercher la transaction correspondante pour ce bail ce mois-ci
+            // 2. Chercher la transaction correspondante
             const leaseTransaction = transactions.find(t => t.lease_id === lease.id);
+            const billingDay = lease.billing_day || 5;
+
+            // Dates clés
+            const dueDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), billingDay);
+            const graceDate = new Date(dueDate);
+            graceDate.setDate(dueDate.getDate() + GRACE_PERIOD_DAYS);
+
+            // Pour le calcul de retard courant ("maintenant")
+            const checkDate = new Date();
 
             if (leaseTransaction) {
                 // Règle 2 : On prend ce qui a été RÉELLEMENT payé
                 let paidAmount = 0;
-                if (leaseTransaction.status === 'paid') {
-                    paidAmount = Number(leaseTransaction.amount_paid) || Number(leaseTransaction.amount_due) || 0;
-                } else {
-                    paidAmount = Number(leaseTransaction.amount_paid) || 0;
+                // Support partiel : si status 'paid', on suppose tout payé sauf si amount_paid défini
+                if (leaseTransaction.amount_paid !== undefined && leaseTransaction.amount_paid !== null) {
+                    paidAmount = Number(leaseTransaction.amount_paid);
+                } else if (leaseTransaction.status === 'paid') {
+                    paidAmount = Number(leaseTransaction.amount_due) || monthlyRent;
                 }
+
                 totalCollected += paidAmount;
                 const remainingDue = Math.max(0, monthlyRent - paidAmount);
 
-                // Comptage des statuts - SYNCHRONISÉ AVEC L'UI
-                if (leaseTransaction.status === 'paid' && remainingDue <= 0) {
-                    paidCount++;
-                } else {
-                    // Logic: Overdue check
-                    const billingDay = lease.billing_day || 5;
-                    const isPastMonth = isAfter(startOfMonth(new Date()), endOfMonth(targetDate));
+                // --- LOGIQUE DE STATUT STRICT ---
+                const isPaidFull = remainingDue <= 0;
 
+                if (isPaidFull) {
+                    paidCount++;
+                    // Calcul délai (si payé)
+                    if (leaseTransaction.paid_at) {
+                        const paidDate = new Date(leaseTransaction.paid_at);
+                        // On ne compte que les RETARDS (diff > 0)
+                        if (paidDate > dueDate) {
+                            const diffTime = paidDate.getTime() - dueDate.getTime();
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            const safeDelay = Math.max(0, diffDays);
+
+                            if (safeDelay > 0) {
+                                totalDelayDays += safeDelay;
+                                delaySamples++;
+                            }
+                        } else {
+                            // Payé à l'heure ou en avance : On NE COMPTE PAS dans la moyenne des RETARDS
+                            // (Selon feedback user : ne pas fausser la moyenne avec des 0)
+                        }
+                    } else if (leaseTransaction.status === 'paid') {
+                        // Payé sans date ? On suppose à l'heure => 0 retard
+                        delaySamples++;
+                    }
+                } else {
+                    // Partiel ou Pas payé
+                    // Overdue ?
                     let isOverdue = false;
-                    if (isPastMonth) {
+
+                    if (isAfter(new Date(), graceDate)) {
+                        // Grace period dépassée -> Overdue
                         isOverdue = true;
-                    } else if (isTargetMonthCurrent && currentDay > billingDay) {
-                        isOverdue = true;
+                    }
+                    // Si futur -> Pas overdue
+                    if (isAfter(startOfMonth(targetDate), endOfMonth(checkDate))) {
+                        isOverdue = false;
                     }
 
                     if (isOverdue) {
                         overdueCount++;
                         overdueAmount += remainingDue;
+
+                        // Retard en cours
+                        const diffTime = checkDate.getTime() - dueDate.getTime();
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        totalDelayDays += diffDays;
+                        delaySamples++;
                     } else {
                         pendingCount++;
                         pendingAmount += remainingDue;
                     }
                 }
             } else {
-                // 3. Pas de transaction
-                const billingDay = lease.billing_day || 5;
-                const isPastMonth = isAfter(startOfMonth(new Date()), endOfMonth(targetDate));
-                let isOverdue = false;
+                // Pas de transaction
+                const isActiveDelay = isAfter(new Date(), graceDate);
+                const isFuture = isAfter(startOfMonth(targetDate), endOfMonth(checkDate));
 
-                if (isPastMonth) {
-                    isOverdue = true;
-                } else if (isTargetMonthCurrent && currentDay > billingDay) {
-                    isOverdue = true;
-                }
-
-                if (isOverdue) {
+                if (isActiveDelay && !isFuture) {
                     overdueCount++;
                     overdueAmount += monthlyRent;
+                    // Retard en cours
+                    const diffTime = checkDate.getTime() - dueDate.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    totalDelayDays += diffDays;
+                    delaySamples++;
                 } else {
                     pendingCount++;
                     pendingAmount += monthlyRent;
@@ -196,6 +246,11 @@ export function calculateFinancials(
     const projectedNetProfit = totalExpected - totalExpenses;
     const hasTemporaryDebt = totalExpenses > totalCollected;
 
+    // Calcul Délai Moyen
+    const avgDelayDays = delaySamples > 0
+        ? Math.round(totalDelayDays / delaySamples)
+        : 0;
+
     return {
         totalExpected,
         totalCollected,
@@ -209,7 +264,8 @@ export function calculateFinancials(
         overdueCount,
         paidCount,
         pendingAmount,
-        overdueAmount
+        overdueAmount,
+        avgDelayDays
     };
 }
 
@@ -331,4 +387,3 @@ export async function validateTenantCreation(
 
     return { valid: true };
 }
-

@@ -6,70 +6,115 @@ import { Switch } from "@/components/ui/switch";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
+import {
+  getAllPlans,
+  formatPrice,
+  type Currency,
+} from "@/lib/subscription/plans-config";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner"; // Assuming sonner is used, or alert/console
 
 export default function PricingSection() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [currency, setCurrency] = useState<Currency>('xof');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
+  const router = useRouter();
+
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       setIsLoggedIn(!!user);
+
+      if (user) {
+        const { data: teamMembership } = await supabase
+          .from("team_members")
+          .select("team:teams(subscription_tier, subscription_status)")
+          .eq("user_id", user.id)
+          .eq("status", "active")
+          .maybeSingle();
+
+        const team = teamMembership?.team as { subscription_tier?: string; subscription_status?: string } | null;
+        if (team) {
+          setCurrentPlan(team.subscription_tier || null);
+          setSubscriptionStatus(team.subscription_status || null);
+        }
+      }
     };
     checkAuth();
   }, []);
 
-  const plans = [
-    {
-      name: "STARTER",
-      price: isAnnual ? 15000 : 19000,
-      features: [
-        "Jusqu'à 10 biens",
-        "Gestion locative de base",
-        "Support sous 48h",
-        "Documents standards",
-        "Accès communauté",
-      ],
-      cta: isLoggedIn ? "Choisir" : "Essai Gratuit",
-      href: isLoggedIn ? "/gestion?upgrade=starter" : "/register?plan=starter",
-      description: "Parfait pour les propriétaires débutants",
-    },
-    {
-      name: "PROFESSIONAL",
-      price: isAnnual ? 35000 : 45000,
-      popular: true,
-      features: [
-        "Biens illimités",
-        "Analyses financières avancées",
-        "Support sous 24h",
-        "Gestion des incidents",
-        "Support prioritaire",
-        "Collaboration équipe",
-        "Intégrations Wave/OM",
-      ],
-      cta: isLoggedIn ? "Choisir" : "Commencer",
-      href: isLoggedIn ? "/gestion?upgrade=pro" : "/register?plan=pro",
-      description: "Idéal pour les agences en croissance",
-    },
-    {
-      name: "ENTERPRISE",
-      price: isAnnual ? 95000 : 120000,
-      features: [
-        "Tout du plan Professional",
-        "Solutions sur mesure",
-        "Gestionnaire de compte dédié",
-        "Support sous 1h",
-        "Authentification SSO",
-        "Sécurité avancée",
-        "Contrats personnalisés",
-        "SLA garanti",
-      ],
-      cta: "Contacter les ventes",
-      href: "/contact?subject=enterprise",
-      description: "Pour les grandes structures immobilières",
-    },
-  ];
+  const handleUpgrade = async (planId: string) => {
+    if (!isLoggedIn) {
+      router.push(`/register?plan=${planId}&interval=${isAnnual ? 'annual' : 'monthly'}`);
+      return;
+    }
+
+    // Check if user is already on this plan (active or trial)
+    if (currentPlan === planId && (subscriptionStatus === 'active' || subscriptionStatus === 'trial')) {
+      router.push('/gestion/abonnement');
+      return;
+    }
+
+    // Direct Stripe Checkout for logged-in users
+    try {
+      setLoadingPlanId(planId);
+      const res = await fetch('/api/subscription/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId,
+          interval: isAnnual ? 'annual' : 'monthly',
+          currency,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.redirect) {
+        router.push(data.redirect);
+      } else {
+        console.error('Checkout error:', data.error);
+        toast.error("Erreur lors de l'initialisation du paiement");
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      toast.error("Une erreur inattendue est survenue");
+    } finally {
+      setLoadingPlanId(null);
+    }
+  };
+
+  // Transformation des plans depuis plans-config
+  const plans = getAllPlans().map((plan) => {
+    // Pricing logic based on currency and interval
+    const pricing = plan.pricing[currency];
+    const rawPrice = isAnnual ? pricing.annual.amount : pricing.monthly.amount;
+
+    // Display logic: show monthly equivalent if annual
+    const displayPrice = isAnnual
+      ? Math.round(pricing.annual.amount / 12)
+      : pricing.monthly.amount;
+
+    return {
+      name: plan.name.toUpperCase(),
+      price: displayPrice,
+      rawPrice, // Keep raw for calculation if needed
+      popular: plan.popular,
+      features: plan.highlightedFeatures,
+      cta: plan.ctaText,
+      // For enterprise, specific logic usually applies (contact sales)
+      // but here we align with the config cta
+      isEnterprise: plan.id === 'enterprise',
+      id: plan.id,
+      description: plan.tagline,
+    };
+  });
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -81,32 +126,10 @@ export default function PricingSection() {
     },
   };
 
-  const cardVariants: any = {
-    hidden: {
-      opacity: 0,
-      y: 20,
-      scale: 0.95,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15,
-      },
-    },
-    hover: {
-      y: -8,
-      transition: {
-        duration: 0.3,
-      },
-    },
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("fr-SN").format(price);
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 100, damping: 15 } },
+    hover: { y: -8, transition: { duration: 0.3 } },
   };
 
   return (
@@ -149,34 +172,50 @@ export default function PricingSection() {
             Choisissez le plan adapté à vos besoins. Sans engagement, annulez à tout moment.
           </motion.p>
 
-          {/* Toggle Mensuel/Annuel */}
+          {/* Controls Container (Currency + Interval) */}
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="flex items-center justify-center gap-4"
+            className="flex flex-col md:flex-row items-center justify-center gap-6" // Increased gap and flex-col for mobile
           >
-            <span
-              className={`text-sm font-medium transition-colors ${!isAnnual ? "text-[#F4C430]" : "text-gray-500"
-                }`}
-            >
-              Mensuel
-            </span>
-            <Switch
-              checked={isAnnual}
-              onCheckedChange={setIsAnnual}
-              className="data-[state=checked]:bg-[#F4C430] data-[state=unchecked]:bg-white/20"
-            />
-            <span
-              className={`text-sm font-medium transition-colors flex items-center gap-2 ${isAnnual ? "text-[#F4C430]" : "text-gray-500"
-                }`}
-            >
-              Annuel
-              <span className="text-xs bg-[#F4C430]/20 text-[#F4C430] px-2 py-0.5 rounded-full font-semibold">
-                -20%
+
+            {/* Currency Toggle */}
+            <div className="bg-white/5 p-1 rounded-full flex relative">
+              <button
+                onClick={() => setCurrency('xof')}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${currency === 'xof' ? 'bg-[#F4C430] text-black shadow-lg' : 'text-gray-400 hover:text-white'
+                  }`}
+              >
+                FCFA (XOF)
+              </button>
+              <button
+                onClick={() => setCurrency('eur')}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${currency === 'eur' ? 'bg-[#F4C430] text-black shadow-lg' : 'text-gray-400 hover:text-white'
+                  }`}
+              >
+                EUR (€)
+              </button>
+            </div>
+
+            {/* Interval Toggle */}
+            <div className="flex items-center gap-4">
+              <span className={`text-sm font-medium transition-colors ${!isAnnual ? "text-[#F4C430]" : "text-gray-500"}`}>
+                Mensuel
               </span>
-            </span>
+              <Switch
+                checked={isAnnual}
+                onCheckedChange={setIsAnnual}
+                className="data-[state=checked]:bg-[#F4C430] data-[state=unchecked]:bg-white/20"
+              />
+              <span className={`text-sm font-medium transition-colors flex items-center gap-2 ${isAnnual ? "text-[#F4C430]" : "text-gray-500"}`}>
+                Annuel
+                <span className="text-xs bg-[#F4C430]/20 text-[#F4C430] px-2 py-0.5 rounded-full font-semibold">
+                  -20%
+                </span>
+              </span>
+            </div>
           </motion.div>
         </div>
 
@@ -217,24 +256,42 @@ export default function PricingSection() {
               {/* Price */}
               <div className="mb-2 flex items-baseline">
                 <span className={`text-4xl lg:text-5xl font-bold tracking-tight ${plan.popular ? "text-[#F4C430]" : "text-white"}`}>
-                  {formatPrice(plan.price)}
+                  {formatPrice(plan.price, currency)}
                 </span>
-                <span className="text-gray-500 ml-2 text-sm">FCFA/mois</span>
+                <span className="text-gray-500 ml-2 text-sm">{currency === 'xof' ? '/mois' : '€/mois'}</span>
               </div>
 
               {/* Description */}
               <p className="text-sm text-gray-500 mb-8">{plan.description}</p>
 
               {/* CTA Button */}
-              <Link
-                href={plan.href}
-                className={`block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 ${plan.popular
-                  ? "bg-[#F4C430] text-black hover:bg-[#FFD700] shadow-lg shadow-[#F4C430]/25 hover:shadow-[#F4C430]/40 hover:-translate-y-1"
-                  : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
-                  }`}
-              >
-                {plan.cta}
-              </Link>
+              {plan.isEnterprise ? (
+                <Link
+                  href="/contact?subject=enterprise"
+                  className="block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 bg-white/10 text-white hover:bg-white/20 border border-white/10"
+                >
+                  {plan.cta}
+                </Link>
+              ) : currentPlan === plan.id && (subscriptionStatus === 'active' || subscriptionStatus === 'trial') ? (
+                <button
+                  onClick={() => router.push('/gestion/abonnement')}
+                  className="block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 bg-white/10 text-white hover:bg-white/20 border border-white/10"
+                >
+                  Gérer l&apos;abonnement
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleUpgrade(plan.id)}
+                  disabled={loadingPlanId === plan.id}
+                  className={`block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 ${plan.popular
+                    ? "bg-[#F4C430] text-black hover:bg-[#FFD700] shadow-lg shadow-[#F4C430]/25 hover:shadow-[#F4C430]/40 hover:-translate-y-1"
+                    : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
+                    } ${loadingPlanId === plan.id ? 'opacity-70 cursor-wait' : ''}`}
+                >
+                  {loadingPlanId === plan.id ? 'Chargement...' : plan.cta}
+                </button>
+              )}
+
 
               {/* Features */}
               <div className="mt-8 pt-8 border-t border-white/10">

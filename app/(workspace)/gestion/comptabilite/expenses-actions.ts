@@ -319,11 +319,10 @@ export async function getComptabiliteData(year: number): Promise<{
 }> {
     const { teamId } = await getUserTeamContext();
 
-    // ✅ CHECK FEATURE QUOTA (EXPORT)
-    const exportAccess = await checkFeatureAccess(teamId, "export_data");
-    if (!exportAccess.allowed) {
-        // Optionnel: On peut choisir de laisser accès aux graphiques mais bloquer le bouton d'export dans l'UI
-        // Mais ici l'utilisateur demande de protéger "exportData".
+    // ✅ CHECK FEATURE: Accounting Module Access
+    const access = await checkFeatureAccess(teamId, "view_advanced_reports");
+    if (!access.allowed) {
+        return { success: false, error: access.message, upgradeRequired: true };
     }
 
     const supabase = await createClient();

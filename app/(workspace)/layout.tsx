@@ -25,18 +25,19 @@ export default async function WorkspaceLayout({
     .select(`
       team_id,
       role,
-      team:teams(id, name, slug)
+      team:teams(id, name, slug, subscription_tier)
     `)
     .eq("user_id", user.id)
     .eq("status", "active");
 
   const teams = memberships?.map((m) => {
-    const team = m.team as unknown as { id: string; name: string; slug: string };
+    const team = m.team as unknown as { id: string; name: string; slug: string; subscription_tier: string };
     return {
       id: team?.id || m.team_id,
       name: team?.name || "Mon équipe",
       slug: team?.slug || "",
       role: m.role,
+      subscription_tier: team?.subscription_tier || "starter",
       status: "active",
     };
   }) || [];

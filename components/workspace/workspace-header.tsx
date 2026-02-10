@@ -66,8 +66,7 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
 
   return (
     <header
-      className="shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40 transition-all"
-      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+      className="shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40 transition-all pwa-header-safe"
     >
       <div className="flex h-14 items-center justify-between px-4 lg:px-6">
         {/* Left: Menu (mobile) + Logo + Retour site */}

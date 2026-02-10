@@ -4,74 +4,46 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import Link from "next/link";
+import {
+  getAllPlans,
+  formatPrice,
+  type BillingCycle,
+  type Currency,
+} from "@/lib/subscription/plans-config";
 
 const BILLING_PERIODS = [
   { label: "Mensuel", key: "monthly" as const, saving: null },
-  { label: "Annuel", key: "yearly" as const, saving: "2 mois offerts" },
+  { label: "Annuel", key: "annual" as const, saving: "2 mois offerts" },
 ];
 
-const plans = [
-  {
-    name: "Starter",
-    description: "Pour les propriétaires débutants avec quelques biens",
-    pricing: {
-      monthly: { amount: 15000, formattedPrice: "15 000 FCFA" },
-      yearly: { amount: 150000, formattedPrice: "150 000 FCFA" },
-    },
-    features: [
-      "Jusqu'à 5 biens immobiliers",
-      "Gestion de 10 locataires max",
-      "Documents automatisés (baux, quittances)",
-      "Paiement Mobile Money",
-      "Support par email",
-    ],
-    cta: "Commencer",
-    popular: false,
-  },
-  {
-    name: "Pro",
-    description: "Pour les gestionnaires immobiliers professionnels",
-    pricing: {
-      monthly: { amount: 35000, formattedPrice: "35 000 FCFA" },
-      yearly: { amount: 350000, formattedPrice: "350 000 FCFA" },
-    },
-    features: [
-      "Jusqu'à 25 biens immobiliers",
-      "Locataires illimités",
-      "Tout dans Starter +",
-      "Comptabilité avancée & rapports",
-      "Messagerie intégrée",
-      "États des lieux numériques",
-      "Vitrine publique personnalisée",
-      "Support prioritaire",
-    ],
-    cta: "Essayer gratuitement",
-    popular: true,
-  },
-  {
-    name: "Enterprise",
-    description: "Pour les agences et grands propriétaires",
-    pricing: {
-      monthly: { amount: 75000, formattedPrice: "75 000 FCFA" },
-      yearly: { amount: 750000, formattedPrice: "750 000 FCFA" },
-    },
-    features: [
-      "Biens illimités",
-      "Locataires illimités",
-      "Tout dans Pro +",
-      "Multi-utilisateurs & permissions",
-      "API & intégrations",
-      "Tableau de bord personnalisé",
-      "Formation & onboarding",
-      "Support dédié 24/7",
-    ],
-    cta: "Contacter l'équipe",
-    popular: false,
-  },
+const CURRENCIES = [
+  { label: "XOF", key: "xof" as const, flag: "🇸🇳", name: "FCFA" },
+  { label: "EUR", key: "eur" as const, flag: "🇪🇺", name: "€" },
 ];
 
 export default function PricingSection() {
-  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
+  const [billingPeriod, setBillingPeriod] = useState<BillingCycle>("monthly");
+  const [currency, setCurrency] = useState<Currency>("xof");
+
+  // Transformation dynamique des plans selon la devise sélectionnée
+  const plans = getAllPlans().map((plan) => ({
+    name: plan.name,
+    description: plan.tagline,
+    pricing: {
+      monthly: {
+        amount: plan.pricing[currency].monthly.amount,
+        formattedPrice: formatPrice(plan.pricing[currency].monthly.amount, currency),
+      },
+      annual: {
+        amount: plan.pricing[currency].annual.amount,
+        formattedPrice: formatPrice(plan.pricing[currency].annual.amount, currency),
+      },
+    },
+    features: plan.highlightedFeatures,
+    cta: plan.ctaText,
+    popular: plan.popular || false,
+    tier: plan.id,
+  }));
 
   return (
     <section className="py-20 md:py-28 bg-black relative" id="pricing">
@@ -94,29 +66,51 @@ export default function PricingSection() {
           </h2>
           <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-8">
             Choisissez le plan qui correspond à vos besoins. Tous les plans incluent 14 jours
-            d'essai gratuit.
+            d&apos;essai gratuit.
           </p>
 
-          {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-3 p-1 bg-white/5 border border-white/10 rounded-full">
-            {BILLING_PERIODS.map((period) => (
-              <button
-                key={period.key}
-                onClick={() => setBillingPeriod(period.key)}
-                className={`relative px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                  billingPeriod === period.key
-                    ? "bg-[#F4C430] text-black"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                {period.label}
-                {period.saving && billingPeriod === period.key && (
-                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs text-[#F4C430] whitespace-nowrap">
-                    ✨ {period.saving}
-                  </span>
-                )}
-              </button>
-            ))}
+          {/* Controls: Currency + Billing Period */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+            {/* Currency Toggle */}
+            <div className="inline-flex items-center gap-2 p-1 bg-white/5 border border-white/10 rounded-full">
+              {CURRENCIES.map((curr) => (
+                <button
+                  key={curr.key}
+                  onClick={() => setCurrency(curr.key)}
+                  className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 ${
+                    currency === curr.key
+                      ? "bg-[#F4C430] text-black"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                  title={`Afficher les prix en ${curr.name}`}
+                >
+                  <span>{curr.flag}</span>
+                  <span>{curr.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Billing Toggle */}
+            <div className="inline-flex items-center gap-3 p-1 bg-white/5 border border-white/10 rounded-full">
+              {BILLING_PERIODS.map((period) => (
+                <button
+                  key={period.key}
+                  onClick={() => setBillingPeriod(period.key)}
+                  className={`relative px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                    billingPeriod === period.key
+                      ? "bg-[#F4C430] text-black"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  {period.label}
+                  {period.saving && billingPeriod === period.key && (
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs text-[#F4C430] whitespace-nowrap">
+                      ✨ {period.saving}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </motion.div>
 
@@ -161,9 +155,9 @@ export default function PricingSection() {
                     /{billingPeriod === "monthly" ? "mois" : "an"}
                   </span>
                 </div>
-                {billingPeriod === "yearly" && (
+                {billingPeriod === "annual" && (
                   <p className="text-sm text-gray-400 mt-2">
-                    Soit {Math.round(plan.pricing.yearly.amount / 12).toLocaleString()} FCFA/mois
+                    Soit {formatPrice(Math.round(plan.pricing.annual.amount / 12), currency)}/mois
                   </p>
                 )}
               </div>

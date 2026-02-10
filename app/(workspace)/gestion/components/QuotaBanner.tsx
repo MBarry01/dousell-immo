@@ -26,8 +26,8 @@ export function QuotaBanner({
     const normalizedTier = (tier?.toLowerCase() || 'starter') as SubscriptionTier;
     const features = PLAN_FEATURES[normalizedTier] || PLAN_FEATURES.starter;
 
-    const isPropertyOverflow = propertiesCount > features.maxProperties;
-    const isLeaseOverflow = leasesCount > features.maxLeases;
+    const isPropertyOverflow = propertiesCount > features.limits.maxProperties;
+    const isLeaseOverflow = leasesCount > features.limits.maxLeases;
 
     const isOverflow = isPropertyOverflow || isLeaseOverflow;
 
@@ -45,8 +45,8 @@ export function QuotaBanner({
                     <div>
                         <p className="text-white font-medium">Limite de quota atteinte</p>
                         <p className="text-white/60 text-sm">
-                            {isPropertyOverflow && `Vous utilisez ${propertiesCount}/${features.maxProperties} biens. `}
-                            {isLeaseOverflow && `Vous utilisez ${leasesCount}/${features.maxLeases} baux. `}
+                            {isPropertyOverflow && `Vous utilisez ${propertiesCount}/${features.limits.maxProperties} biens. `}
+                            {isLeaseOverflow && `Vous utilisez ${leasesCount}/${features.limits.maxLeases} baux. `}
                             Passez au plan supérieur pour continuer à ajouter des données.
                         </p>
                     </div>

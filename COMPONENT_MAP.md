@@ -1,4 +1,4 @@
-# 🗺️ MAP DES COMPOSANTS (230)
+# 🗺️ MAP DES COMPOSANTS (231)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -13,6 +13,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<conditional-google-analytics />** (Path: `components\analytics\conditional-google-analytics.tsx`)
 - **<google-consent-mode />** (Path: `components\analytics\google-consent-mode.tsx`)
 - **<lazy-analytics />** (Path: `components\analytics\lazy-analytics.tsx`)
+- **<lazy-speed-insights />** (Path: `components\analytics\lazy-speed-insights.tsx`)
 - **<microsoft-clarity />** (Path: `components\analytics\microsoft-clarity.tsx`)
 - **<update-consent-on-load />** (Path: `components\analytics\update-consent-on-load.tsx`)
 - **<phone-missing-dialog />** (Path: `components\auth\phone-missing-dialog.tsx`)

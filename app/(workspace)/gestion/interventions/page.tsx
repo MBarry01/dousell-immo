@@ -1,6 +1,9 @@
 import { InterventionsPageClient } from "./InterventionsPageClient";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { getUserTeamContext } from "@/lib/team-context";
+import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
+import { FeatureLockedState } from "@/components/gestion/FeatureLockedState";
 
 export default async function InterventionsPage() {
     const supabase = await createClient();
@@ -8,6 +11,20 @@ export default async function InterventionsPage() {
 
     if (!user) {
         redirect('/auth');
+    }
+
+    const { teamId } = await getUserTeamContext();
+
+    // ✅ CHECK FEATURE: Interventions
+    const access = await checkFeatureAccess(teamId, "manage_interventions");
+    if (!access.allowed) {
+        return (
+            <FeatureLockedState
+                title="Gestion des Incidents & Interventions"
+                description="Centralisez les demandes de maintenance, assignez des artisans et suivez les interventions en temps réel."
+                requiredTier="pro"
+            />
+        );
     }
 
     // Récupérer les demandes de maintenance (avec infos artisan)

@@ -1,11 +1,14 @@
 // Service Worker for Dousell Immo PWA
-const CACHE_NAME = "dousell-immo-v8";
+const CACHE_NAME = "dousell-immo-v9";
 const STATIC_ASSETS = [
   "/gestion",
   "/manifest.json",
   "/icons/icon.svg",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+  "/icons/icon-maskable-192.png",
+  "/icons/icon-maskable-512.png",
+  "/icons/apple-touch-icon.png",
   "/offline.html",
 ];
 
@@ -23,7 +26,8 @@ self.addEventListener("install", (event) => {
       return cache.addAll(STATIC_ASSETS);
     })
   );
-  self.skipWaiting();
+  // skipWaiting is triggered by the client via SKIP_WAITING message
+  // to avoid breaking active tabs with stale cache
 });
 
 // Activate event - clean old caches

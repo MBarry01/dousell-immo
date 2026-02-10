@@ -14,6 +14,7 @@ interface TeamData {
   name: string;
   slug: string;
   role: string;
+  subscription_tier?: string;
 }
 
 interface WorkspaceLayoutClientProps {

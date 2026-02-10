@@ -41,6 +41,7 @@ import { DownloadReportButton } from './components/DownloadReportButton';
 import { AddExpenseDialog } from './components/AddExpenseDialog';
 import { ExpenseList } from './components/ExpenseList';
 import { ProfitabilityTable } from './components/ProfitabilityTable';
+import { FeatureLockedState } from '@/components/gestion/FeatureLockedState';
 
 interface MonthlyData {
     month: string;
@@ -75,6 +76,7 @@ export default function ComptabilitePage() {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [activeTab, setActiveTab] = useState<'revenus' | 'depenses' | 'rentabilite'>('revenus');
     const [profitabilityData, setProfitabilityData] = useState<PropertyProfitability[]>([]);
+    const [upgradeRequired, setUpgradeRequired] = useState(false);
 
     useEffect(() => {
         if (!user) return;
@@ -85,6 +87,12 @@ export default function ComptabilitePage() {
             try {
                 // 1. Fetch all comptabilité data via Server Action (team_id based)
                 const comptaResult = await getComptabiliteData(selectedYear);
+
+                if (!comptaResult.success && comptaResult.upgradeRequired) {
+                    setUpgradeRequired(true);
+                    setLoading(false);
+                    return;
+                }
 
                 if (comptaResult.success && comptaResult.data) {
                     setLeases(comptaResult.data.leases as LeaseInput[]);
@@ -137,7 +145,8 @@ export default function ComptabilitePage() {
         const txInputs: TransactionInput[] = transactions.map(t => ({
             ...t,
             period_month: (t as any).period_month,
-            period_year: (t as any).period_year
+            period_year: (t as any).period_year,
+            paid_at: (t as any).paid_at
         }));
 
         const results = calculateYearlyFinancials(leases, txInputs, expenses, selectedYear);
@@ -211,6 +220,16 @@ export default function ComptabilitePage() {
             <div className="flex items-center justify-center h-96">
                 <p className={isDark ? 'text-slate-400' : 'text-gray-500'}>Veuillez vous connecter</p>
             </div>
+        );
+    }
+
+    if (upgradeRequired) {
+        return (
+            <FeatureLockedState
+                title="Comptabilité & Analyses Financières"
+                description="Accédez à des rapports détaillés, suivez votre rentabilité en temps réel et générez des exports comptables professionnels."
+                requiredTier="pro"
+            />
         );
     }
 

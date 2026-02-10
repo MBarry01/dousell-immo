@@ -146,7 +146,7 @@ export async function POST(req: Request) {
             }
 
             case 'customer.subscription.deleted': {
-                const subscription = event.data.object as Stripe.Subscription;
+                const subscription = event.data.object as any;
                 const teamId = subscription.metadata?.team_id;
 
                 if (teamId) {
@@ -180,7 +180,7 @@ export async function POST(req: Request) {
             }
 
             case 'customer.subscription.updated': {
-                const subscription = event.data.object as Stripe.Subscription;
+                const subscription = event.data.object as any;
                 const teamId = subscription.metadata?.team_id;
                 const status = subscription.status;
 
@@ -188,8 +188,10 @@ export async function POST(req: Request) {
                     await adminClient
                         .from('teams')
                         .update({
-                            subscription_status: status === 'active' ? 'active' : (status === 'past_due' ? 'past_due' : 'canceled'),
-                            subscription_tier: subscription.metadata?.plan_id,
+                            subscription_status: status,
+                            subscription_tier: subscription.metadata?.plan_id || subscription.items.data[0].price.id, // Fallback to price ID if metadata missing
+                            subscription_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+                            subscription_currency: subscription.currency ? subscription.currency.toLowerCase() : null,
                         })
                         .eq('id', teamId);
 

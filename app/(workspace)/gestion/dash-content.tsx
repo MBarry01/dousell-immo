@@ -15,6 +15,7 @@ import {
     getOwnerProfileForReceipts,
     getExpensesByTeam as getExpensesByOwner,
 } from "@/services/rentalService.cached";
+import { calculateFinancials } from "@/lib/finance";
 
 const LOG_PREFIX = "[Gestion/dash-content]";
 
@@ -135,31 +136,41 @@ export default async function DashboardContent({
         100
     );
 
-    // Delai moyen de paiement
-    const leaseMap = new Map(activeLeases.map((l: any) => [l.id, l]));
-    const paidTxs = rawTransactions
-        .filter((t: any) => t.status === 'paid' && t.paid_at)
-        .slice(0, 50);
+    // Taux d'impayes (Aligné avec lib/finance.ts pour cohérence "Retards")
+    const currentMonthDate = new Date();
 
-    let totalDelay = 0, delayCount = 0;
-    for (const t of paidTxs) {
-        const lease = leaseMap.get(t.lease_id);
-        if (lease && t.period_month && t.period_year) {
-            const billingDay = lease.billing_day || 5;
-            const expected = new Date(t.period_year, t.period_month - 1, billingDay);
-            const paid = new Date(t.paid_at);
-            const diff = Math.floor((paid.getTime() - expected.getTime()) / (1000 * 60 * 60 * 24));
-            if (diff >= 0) { totalDelay += diff; delayCount++; }
-        }
-    }
-    const avgPaymentDelay = delayCount > 0 ? Math.round(totalDelay / delayCount) : 0;
+    // Préparer les données pour le calcul financier standardisé
+    const safeLeasesForKPI = allLeases.map((l: any) => ({
+        id: l.id,
+        monthly_amount: Number(l.monthly_amount) || 0,
+        status: l.status || 'active',
+        start_date: l.start_date || null,
+        billing_day: l.billing_day || 5
+    }));
 
-    // Taux d'impayes
-    const failedCount = rawTransactions.filter(
-        (t: any) => t.status === 'failed' || t.status === 'rejected'
-    ).length;
-    const unpaidRate = rawTransactions.length > 0
-        ? Math.round((failedCount / rawTransactions.length) * 100)
+    const currentMonthTransactionsForKPI = rawTransactions.filter((t: any) =>
+        t.period_month === (currentMonthDate.getMonth() + 1) &&
+        t.period_year === currentMonthDate.getFullYear()
+    ).map((t: any) => ({
+        id: t.id,
+        lease_id: t.lease_id,
+        amount_due: Number(t.amount_due) || 0,
+        amount_paid: t.status === 'paid' ? (Number(t.amount_paid) || Number(t.amount_due)) : Number(t.amount_paid),
+        status: t.status,
+        paid_at: t.paid_at ? new Date(t.paid_at) : undefined // Ajout pour calcul délai
+    }));
+
+    const currentMonthStats = calculateFinancials(
+        safeLeasesForKPI,
+        currentMonthTransactionsForKPI,
+        [], // KPI seulement (pas de dépenses nécessaire pour impayés)
+        currentMonthDate
+    );
+
+    // Le taux d'impayés = (Nombre de retards / Nombre de baux actifs) * 100
+    // overdueCount (calculé par finance.ts) tient compte de la date d'échéance et du paiement réel
+    const unpaidRate = activeLeasesCount > 0
+        ? Math.round((currentMonthStats.overdueCount / activeLeasesCount) * 100)
         : 0;
 
     // Revenu moyen par bien
@@ -172,8 +183,9 @@ export default async function DashboardContent({
 
     const advancedStats = {
         occupancyRate,
-        avgPaymentDelay,
+        avgPaymentDelay: currentMonthStats.avgDelayDays, // Utilise le calcul centralisé
         unpaidRate,
+        overdueAmount: currentMonthStats.overdueAmount, // Montant total en retard
         avgRevenuePerProperty,
         totalProperties: totalProperties || 0,
         activeLeases: activeLeasesCount,

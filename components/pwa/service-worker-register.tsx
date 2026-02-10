@@ -43,7 +43,6 @@ export function ServiceWorkerRegister() {
         scope: "/",
       })
       .then((registration) => {
-        console.log("Service Worker registered:", registration);
         registrationRef = registration;
 
         // Forcer une vérification immédiate (utile en PWA installée)

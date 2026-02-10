@@ -47,28 +47,25 @@ export function PushNotifications() {
   };
 
   const registerPushNotifications = async () => {
+    const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    if (!vapidKey) {
+      toast.info("Les notifications push seront disponibles prochainement");
+      return;
+    }
+
     try {
       const registration = await navigator.serviceWorker.ready;
-      
-      // Subscribe to push notifications
+
       await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-          ? urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY)
-          : undefined,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey),
       });
 
       // TODO: Send subscription to server when endpoint is ready
-      // const subscription = await registration.pushManager.subscribe({...});
-      // await fetch('/api/push/subscribe', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(subscription),
-      // });
       toast.success("Abonnement aux notifications activé");
     } catch (error) {
       console.error("Error registering push notifications:", error);
-      toast.error("Erreur lors de l'abonnement");
+      toast.error("Erreur lors de l'abonnement aux notifications");
     }
   };
 

@@ -24,7 +24,9 @@ interface LockedSidebarItemProps {
   isCollapsed: boolean;
   isMobile: boolean;
   requiredPermission?: TeamPermissionKey;
+  requiredTier?: 'pro' | 'enterprise'; // Tier requis
   currentTeamId?: string; // ID de l'équipe actuellement sélectionnée
+  currentTeamTier?: string; // Tier de l'équipe
   onNavigate?: () => void;
   onRequestAccess?: (permission: TeamPermissionKey, label: string) => void;
 }
@@ -41,6 +43,12 @@ function roleHasPermission(role: string, permission: TeamPermissionKey): boolean
   return allowedRoles.some(r => r.toLowerCase() === normalizedRole);
 }
 
+const TIER_LEVELS: Record<string, number> = {
+  'starter': 0,
+  'pro': 1,
+  'enterprise': 2
+};
+
 export function LockedSidebarItem({
   href,
   icon: Icon,
@@ -49,7 +57,9 @@ export function LockedSidebarItem({
   isCollapsed,
   isMobile,
   requiredPermission,
+  requiredTier,
   currentTeamId,
+  currentTeamTier,
   onNavigate,
   onRequestAccess,
 }: LockedSidebarItemProps) {
@@ -57,7 +67,19 @@ export function LockedSidebarItem({
   const [isLoading, setIsLoading] = useState(!!requiredPermission);
 
   useEffect(() => {
-    // Si pas de permission requise, accès autorisé
+    // 1. Vérification du Tier (Prioritaire)
+    if (requiredTier) {
+      const currentLevel = TIER_LEVELS[currentTeamTier || 'starter'] || 0;
+      const requiredLevel = TIER_LEVELS[requiredTier] || 1;
+
+      if (currentLevel < requiredLevel) {
+        setHasAccess(false);
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // 2. Si pas de permission requise, accès autorisé (si tier OK)
     if (!requiredPermission) {
       setHasAccess(true);
       setIsLoading(false);
@@ -98,12 +120,8 @@ export function LockedSidebarItem({
 
         const userRole = teamMember.role as string;
 
-        // Debug log
-        console.log(`[LockedSidebarItem] User role: "${userRole}", Permission: "${requiredPermission}"`);
-
         // 1. Vérifier si le rôle a la permission dans la matrice
         const hasRolePermission = roleHasPermission(userRole, requiredPermission);
-        console.log(`[LockedSidebarItem] Role has permission: ${hasRolePermission}`);
 
         if (hasRolePermission) {
           setHasAccess(true);
@@ -131,7 +149,7 @@ export function LockedSidebarItem({
     };
 
     checkPermission();
-  }, [requiredPermission, currentTeamId]);
+  }, [requiredPermission, requiredTier, currentTeamId, currentTeamTier]);
 
   // Pendant le chargement, afficher comme normal
   if (isLoading) {
@@ -163,7 +181,7 @@ export function LockedSidebarItem({
           "px-[14px]",
           isActive
             ? "bg-[#0F172A] text-white shadow-md font-medium dark:bg-primary/10 dark:text-primary"
-            : "text-slate-700 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
+            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         )}
         title={isCollapsed && !isMobile ? label : undefined}
       >
@@ -186,6 +204,12 @@ export function LockedSidebarItem({
   return (
     <button
       onClick={() => {
+        // Si c'est un problème de Tier, on redirige vers la config pour upgrade
+        if (requiredTier) {
+          window.location.href = '/gestion/config';
+          return;
+        }
+        // Sinon c'est une permission manquante
         if (requiredPermission && onRequestAccess) {
           onRequestAccess(requiredPermission, label);
         }
@@ -193,7 +217,7 @@ export function LockedSidebarItem({
       className={cn(
         "w-full flex items-center justify-between rounded-lg transition-all duration-200 group h-11 relative",
         "px-[14px]",
-        "text-slate-400 dark:text-zinc-500 hover:bg-slate-50 dark:hover:bg-zinc-800/50 cursor-pointer"
+        "text-muted-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer"
       )}
       title={isCollapsed && !isMobile ? `${label} (Verrouillé)` : undefined}
     >
