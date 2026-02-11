@@ -14,6 +14,7 @@ import { PhoneMissingDialog } from "@/components/auth/phone-missing-dialog";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
+export const dynamic = "force-dynamic";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

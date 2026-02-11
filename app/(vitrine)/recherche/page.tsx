@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { SearchExperience } from "@/components/search/search-experience";
 import { getUnifiedListings } from "@/services/gatewayService";
 import { type PropertyFilters } from "@/services/propertyService.cached";
@@ -11,7 +13,7 @@ export const metadata = {
 };
 
 // Désactivation du cache pour garantir des résultats frais (surtout pour les coords géocodées)
-export const dynamic = "force-dynamic";
+
 export const revalidate = 0;
 
 const recordToFilters = (

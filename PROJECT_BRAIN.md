@@ -1967,7 +1967,7 @@ export const Constants = {
 ---
 ## 2. UI COMPONENTS (Existing)
 Utilise ces composants pour construire l'interface.
-# 🗺️ MAP DES COMPOSANTS (233)
+# 🗺️ MAP DES COMPOSANTS (243)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -2004,6 +2004,15 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<SubscriptionManager />** (Path: `components\gestion\SubscriptionManager.tsx`)
 - **<TeamPropertyCard />** (Path: `components\gestion\TeamPropertyCard.tsx`)
 - **<TenantSelector />** (Path: `components\gestion\TenantSelector.tsx`)
+- **<BiensTour />** (Path: `components\gestion\tours\BiensTour.tsx`)
+- **<ComptabiliteTour />** (Path: `components\gestion\tours\ComptabiliteTour.tsx`)
+- **<ConfigTour />** (Path: `components\gestion\tours\ConfigTour.tsx`)
+- **<DocumentsTour />** (Path: `components\gestion\tours\DocumentsTour.tsx`)
+- **<EquipeTour />** (Path: `components\gestion\tours\EquipeTour.tsx`)
+- **<EtatsLieuxTour />** (Path: `components\gestion\tours\EtatsLieuxTour.tsx`)
+- **<InterventionsTour />** (Path: `components\gestion\tours\InterventionsTour.tsx`)
+- **<LegalTour />** (Path: `components\gestion\tours\LegalTour.tsx`)
+- **<MessagesTour />** (Path: `components\gestion\tours\MessagesTour.tsx`)
 - **<UpgradeCTA />** (Path: `components\gestion\UpgradeCTA.tsx`)
 - **<UpgradeModal />** (Path: `components\gestion\UpgradeModal.tsx`)
 - **<HomeTour />** (Path: `components\home\HomeTour.tsx`)
@@ -2193,6 +2202,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<touchable />** (Path: `components\ui\touchable.tsx`)
 - **<verified-badge />** (Path: `components\ui\verified-badge.tsx`)
 - **<workspace-switch />** (Path: `components\ui\workspace-switch.tsx`)
+- **<welcome-modal-client />** (Path: `components\welcome-modal-client.tsx`)
 - **<welcome-modal />** (Path: `components\welcome-modal.tsx`)
 - **<estimation-wizard />** (Path: `components\wizard\estimation-wizard.tsx`)
 - **<LockedSidebarItem />** (Path: `components\workspace\LockedSidebarItem.tsx`)
