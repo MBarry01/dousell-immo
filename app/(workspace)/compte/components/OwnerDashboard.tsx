@@ -134,10 +134,10 @@ export function OwnerDashboard({ isTenant, isOwner, gestionLocativeEnabled, gest
         .slice(0, 2) || "U";
 
     return (
-        <div className="space-y-8 py-6">
-            <FadeIn>
+        <div className="py-6">
+            <FadeIn className="space-y-6">
                 {/* Header Utilisateur */}
-                <div className="mb-8 flex items-start gap-4">
+                <div className="flex items-start gap-4">
                     <Avatar className="h-14 w-14 shrink-0 border border-border">
                         <AvatarImage src={user.user_metadata?.avatar_url as string} alt={displayName} />
                         <AvatarFallback className="bg-muted text-foreground text-lg font-semibold border border-border">
@@ -188,14 +188,14 @@ export function OwnerDashboard({ isTenant, isOwner, gestionLocativeEnabled, gest
 
                 {/* Widgets Premium (Propriétaires OU Gestion Locative activée) */}
                 {(isOwner || gestionLocativeEnabled) && (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-5 md:gap-4 md:grid-cols-2">
                         <GestionLocativeWidget {...stats} />
                         <LegalAssistantWidget />
                     </div>
                 )}
 
                 {/* Bento Grid */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-5 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {/* Card 0: Espace Locataire (Si Dual Role) */}
                     {isTenant && (
                         <motion.div

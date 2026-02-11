@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Bell, Search, LogOut, ArrowLeft, Sun, Moon, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
@@ -37,9 +37,6 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
   const router = useRouter();
   const { isDark, toggleTheme } = useTheme();
 
-  // Search params for syncing input
-  const searchParams = useSearchParams();
-  const initialQuery = searchParams?.get("q") || "";
 
   // Déterminer le titre selon le contexte
   const contextTitle = useMemo(() => {

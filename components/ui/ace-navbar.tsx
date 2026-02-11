@@ -117,9 +117,10 @@ export default function AceNavbar({
     <>
       <div
         className={cn(
-          "fixed top-6 inset-x-0 max-w-3xl mx-auto z-50 px-4 md:px-0",
+          "fixed inset-x-0 max-w-3xl mx-auto z-50 px-4 md:px-0",
           className
         )}
+        style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)" }}
       >
         <Menu setActive={setActive}>
           <div className="flex items-center w-full justify-between">

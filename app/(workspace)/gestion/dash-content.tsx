@@ -4,6 +4,7 @@ import { DocumentGeneratorDialog } from "./components/DocumentGeneratorDialog";
 import { ThemedContent } from "./components/ThemedContent";
 import { KPICards } from "./components/KPICards";
 import { RevenueChart } from "./components/RevenueChart";
+import { DashboardTabs } from "./components/DashboardTabs";
 import { OrphanLeasesAlert } from "./components/OrphanLeasesAlert";
 import { ExpiredBanner } from "./components/ExpiredBanner";
 import { QuotaBanner } from "./components/QuotaBanner";
@@ -288,28 +289,50 @@ export default async function DashboardContent({
                 <OrphanLeasesAlert count={orphanCount} leases={orphanLeases} />
             )}
 
-            {/* KPI Cards - Seulement en mode actif */}
-            {!isViewingTerminated && (
-                <KPICards stats={advancedStats} />
-            )}
+            {/* Onglets du dashboard - Seulement en mode actif */}
+            {!isViewingTerminated ? (
+                <DashboardTabs
+                    overviewContent={
+                        <>
+                            {/* Table des locataires */}
+                            <div id="tour-gestion-table">
+                                <GestionLocativeClient
+                                    leases={filteredLeases || []}
+                                    transactions={transactions || []}
+                                    expenses={expensesList || []}
+                                    profile={profile}
+                                    userEmail={user.email}
+                                    ownerId={user.id}
+                                    isViewingTerminated={isViewingTerminated}
+                                    minDate={minDateStr}
+                                />
+                            </div>
+                        </>
+                    }
+                    performanceContent={
+                        <>
+                            {/* KPI Cards analytiques */}
+                            <KPICards stats={advancedStats} />
 
-            {/* Table des locataires - Pleine largeur */}
-            <div id="tour-gestion-table" className="mb-6">
-                <GestionLocativeClient
-                    leases={filteredLeases || []}
-                    transactions={transactions || []}
-                    expenses={expensesList || []}
-                    profile={profile}
-                    userEmail={user.email}
-                    ownerId={user.id}
-                    isViewingTerminated={isViewingTerminated}
-                    minDate={minDateStr}
+                            {/* Graphique des revenus 12 mois */}
+                            <RevenueChart data={revenueHistory} />
+                        </>
+                    }
                 />
-            </div>
-
-            {/* Graphique des revenus - Seulement en mode actif */}
-            {!isViewingTerminated && (
-                <RevenueChart data={revenueHistory} />
+            ) : (
+                /* Mode résiliés : afficher directement la table sans onglets */
+                <div id="tour-gestion-table" className="mb-6">
+                    <GestionLocativeClient
+                        leases={filteredLeases || []}
+                        transactions={transactions || []}
+                        expenses={expensesList || []}
+                        profile={profile}
+                        userEmail={user.email}
+                        ownerId={user.id}
+                        isViewingTerminated={isViewingTerminated}
+                        minDate={minDateStr}
+                    />
+                </div>
             )}
 
             {/* Tutoriel interactif de la page gestion */}

@@ -111,11 +111,11 @@ export function EtatsLieuxContent({ reports, error }: { reports: any[]; error: s
                                 <ThemedCard
                                     key={report.id}
                                     hover
-                                    className="p-4 flex items-start justify-between gap-4 group"
+                                    className="p-4 flex items-start justify-between gap-2 sm:gap-4 group overflow-hidden"
                                 >
                                     <Link
                                         href={`/gestion/etats-lieux/${report.id}`}
-                                        className="flex-1 min-w-0 flex items-start justify-between gap-4"
+                                        className="flex-1 min-w-0 flex items-start justify-between gap-2 sm:gap-4"
                                     >
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
@@ -135,7 +135,7 @@ export function EtatsLieuxContent({ reports, error }: { reports: any[]; error: s
                                                 </ThemedBadge>
                                             </div>
 
-                                            <ThemedText as="h3" variant="primary" className="font-medium truncate">
+                                            <ThemedText as="h3" variant="primary" className="font-medium truncate max-w-[200px] sm:max-w-none">
                                                 {report.lease?.property_address || 'Adresse non renseignée'}
                                             </ThemedText>
                                             <ThemedText as="p" variant="muted" className="text-sm">
@@ -143,7 +143,7 @@ export function EtatsLieuxContent({ reports, error }: { reports: any[]; error: s
                                             </ThemedText>
                                         </div>
 
-                                        <div className="text-right text-xs">
+                                        <div className="text-right text-xs shrink-0 whitespace-nowrap">
                                             <ThemedText variant="muted">
                                                 {format(new Date(report.report_date), 'd MMM yyyy', { locale: fr })}
                                             </ThemedText>

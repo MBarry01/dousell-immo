@@ -573,8 +573,8 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
         .leaflet-control-zoom {
           border: none;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-          margin-top: calc(80px + env(safe-area-inset-top)); /* Eviter la barre de recherche et status bar PWA */
-          margin-left: calc(16px + env(safe-area-inset-left)); /* Marge gauche safe */
+          margin-top: calc(4rem + env(safe-area-inset-top, 0px) + 8px) !important; /* Sous le header + status bar PWA */
+          margin-left: calc(12px + env(safe-area-inset-left, 0px)) !important; /* Marge gauche safe */
         }
         .leaflet-control-zoom a {
           background-color: rgba(20, 20, 20, 0.9); /* Fond plus sombre pour le contraste */
