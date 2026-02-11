@@ -15,6 +15,7 @@ import {
     ThemedAlert
 } from '@/app/(workspace)/components/ThemedComponents';
 import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { EtatsLieuxTour } from '@/components/gestion/tours/EtatsLieuxTour';
 
 const statusConfig: Record<string, { label: string; variant: "default" | "warning" | "success"; icon: any }> = {
     'draft': { label: 'Brouillon', variant: 'default', icon: Edit },
@@ -32,6 +33,7 @@ export function EtatsLieuxContent({ reports, error }: { reports: any[]; error: s
 
     return (
         <ThemedPage>
+            <EtatsLieuxTour />
             {/* Header */}
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">

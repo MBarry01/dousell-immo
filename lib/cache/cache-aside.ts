@@ -77,7 +77,20 @@ export async function getOrSetCache<T>(
 
   try {
     // --- ÉTAPE 1 : Lecture Cache (RAPIDE) ---
-    const cachedData = await redis.get(fullKey);
+    // Timeout strict de 500ms pour éviter de bloquer le rendu si Redis rame/est down
+    // (Ajusté de 1500ms à 500ms pour privilégier la réactivité de l'UI en cas de latence Upstash)
+    const redisPromise = redis.get(fullKey);
+    const timeoutPromise = new Promise<null>((resolve) =>
+      setTimeout(() => {
+        // Log en warn plutôt qu'en error si c'est un timeout attendu en dev
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(`⌛ CACHE TIMEOUT: ${fullKey} (Redis took > 500ms) - Fallback to DB`);
+        }
+        resolve(null);
+      }, 500)
+    );
+
+    const cachedData = await Promise.race([redisPromise, timeoutPromise]);
 
     if (cachedData) {
       if (debug) console.log(`🚀 CACHE HIT: ${fullKey}`);
@@ -103,10 +116,12 @@ export async function getOrSetCache<T>(
     // --- ÉTAPE 3 : Remplissage Cache (Lazy Loading) ---
     if (freshData !== null && freshData !== undefined) {
       try {
-        await redis.set(fullKey, JSON.stringify(freshData), ttl);
+        // Non-bloquant: on n'attend pas l'écriture pour répondre
+        redis.set(fullKey, JSON.stringify(freshData), ttl).catch(err => {
+          console.error(`Cache set error for ${fullKey}:`, err);
+        });
         if (debug) console.log(`💾 CACHE SET: ${fullKey} (TTL: ${ttl}s)`);
       } catch (setError) {
-        // Non-bloquant : Si le cache fail, on continue
         console.error(`Cache set error for ${fullKey}:`, setError);
       }
     }

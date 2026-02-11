@@ -18,7 +18,7 @@ export default async function ConfigPremiumPage() {
     // Récupérer le nom de l'utilisateur pour les emails
     const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name')
+        .select('full_name, email, phone')
         .eq('id', user.id)
         .single();
 
@@ -54,12 +54,13 @@ export default async function ConfigPremiumPage() {
     }
 
     // Mapper les données pour le formulaire (teams -> BrandingData)
+    // Fallback sur les données du profil/auth si les données d'équipe sont vides
     const brandingData = teamData ? {
-        full_name: profile?.full_name,
+        full_name: profile?.full_name || user.user_metadata?.full_name,
         company_name: teamData.name,
         company_address: teamData.company_address,
-        company_phone: teamData.company_phone,
-        company_email: teamData.company_email,
+        company_phone: teamData.company_phone || profile?.phone || user.user_metadata?.phone || '',
+        company_email: teamData.company_email || profile?.email || user.email || '',
         company_ninea: teamData.company_ninea,
         logo_url: teamData.logo_url,
         signature_url: teamData.signature_url

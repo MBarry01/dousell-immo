@@ -105,9 +105,10 @@ export function QuickActions({
                 ">
                     {action.label}
                 </span>
+                {/* Texte masqué sur mobile pour n'afficher que les icônes (alignement icônes uniquement) */}
                 <span className="
                     text-xs font-medium text-muted-foreground
-                    sm:hidden
+                    hidden
                     transition-colors duration-200
                     group-hover:text-foreground
                 ">
@@ -139,12 +140,16 @@ export function QuickActions({
             <div className="flex flex-wrap gap-2">
                 {actions.map((action) => {
                     const baseClasses = `
-                        relative flex items-center gap-2 px-3 py-2
-                        rounded-lg border border-border bg-card
+                        relative flex items-center justify-center sm:justify-start
+                        gap-0 sm:gap-2 
+                        p-1 sm:px-3 sm:py-2
+                        rounded-xl border border-border bg-card
                         transition-all duration-200
                         cursor-pointer
                         group
                         hover:bg-muted
+                        min-w-[44px] sm:min-w-0
+                        h-[44px] sm:h-auto
                     `;
 
                     if (action.type === 'link') {
@@ -156,6 +161,7 @@ export function QuickActions({
                             >
                                 <ActionContent action={action} />
                                 <ChevronRight className="
+                                    hidden sm:block
                                     w-3 h-3 text-muted-foreground/50
                                     transition-all duration-200
                                     opacity-0 group-hover:opacity-100

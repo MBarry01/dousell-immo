@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/client";
 import {
   getAllPlans,
   formatPrice,
@@ -24,6 +25,16 @@ const CURRENCIES = [
 export default function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState<BillingCycle>("monthly");
   const [currency, setCurrency] = useState<Currency>("xof");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsLoggedIn(!!user);
+    };
+    checkAuth();
+  }, []);
 
   // Transformation dynamique des plans selon la devise sélectionnée
   const plans = getAllPlans().map((plan) => ({
@@ -176,7 +187,13 @@ export default function PricingSection() {
 
               {/* CTA Button */}
               <Link
-                href={plan.name === "Enterprise" ? "/contact" : "/register"}
+                href={
+                  plan.tier === "enterprise"
+                    ? "/contact?subject=enterprise"
+                    : isLoggedIn
+                      ? "/gestion/config?tab=subscription"
+                      : `/register?plan=${plan.tier}`
+                }
                 className={`block w-full text-center py-3 px-6 rounded-full font-semibold transition-all ${
                   plan.popular
                     ? "bg-[#F4C430] text-black hover:bg-[#FFD700] shadow-[0_0_20px_rgba(244,196,48,0.3)]"

@@ -134,7 +134,7 @@ export function OwnerDashboard({ isTenant, isOwner, gestionLocativeEnabled, gest
         .slice(0, 2) || "U";
 
     return (
-        <div className="py-6">
+        <div className="px-4 py-4">
             <FadeIn className="space-y-6">
                 {/* Header Utilisateur */}
                 <div className="flex items-start gap-4">

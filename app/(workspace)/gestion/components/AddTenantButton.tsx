@@ -12,6 +12,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -237,14 +238,14 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                 <DropdownMenuContent align="end" className="bg-popover border-border min-w-[200px] p-1 shadow-lg">
                     <DropdownMenuItem
                         onClick={handleTriggerClick}
-                        className="flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-accent focus:bg-accent focus:text-accent-foreground"
+                        className="flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground"
                     >
                         <User className="w-4 h-4" />
                         <span>Ajouter un locataire</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => setBulkImportOpen(true)}
-                        className="flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-accent focus:bg-accent focus:text-accent-foreground"
+                        className="flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground"
                     >
                         <FileSpreadsheet className="w-4 h-4" />
                         <span>Ajouter en masse</span>
@@ -350,9 +351,9 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground/80">
-                                    Nom complet <span className="text-destructive">*</span>
-                                </label>
+                                <Label htmlFor="tenant_name" className="text-sm font-medium text-foreground/80" required>
+                                    Nom complet
+                                </Label>
                                 <Input
                                     name="tenant_name"
                                     placeholder="ex: Amadou Ndiaye"
@@ -373,10 +374,9 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground/80">
-                                Email <span className="text-destructive">*</span>
-                                <span className="text-xs text-muted-foreground ml-2">(pour l&apos;envoi des quittances)</span>
-                            </label>
+                            <Label htmlFor="tenant_email" className="text-sm font-medium text-foreground/80" required>
+                                Email <span className="text-xs text-muted-foreground ml-2">(pour l&apos;envoi des quittances)</span>
+                            </Label>
                             <Input
                                 name="tenant_email"
                                 type="email"
@@ -402,9 +402,9 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground/80">
-                                    Loyer (FCFA) <span className="text-destructive">*</span>
-                                </label>
+                                <Label htmlFor="monthly_amount" className="text-sm font-medium text-foreground/80" required>
+                                    Loyer (FCFA)
+                                </Label>
                                 <Input
                                     name="monthly_amount"
                                     type="number"
@@ -427,9 +427,9 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground/80">
-                                    Début bail <span className="text-destructive">*</span>
-                                </label>
+                                <Label htmlFor="start_date" className="text-sm font-medium text-foreground/80" required>
+                                    Début bail
+                                </Label>
                                 <Input
                                     name="start_date"
                                     type="date"
@@ -441,10 +441,9 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground/80">
-                                Fin bail <span className="text-destructive">*</span>
-                                <span className="text-xs text-muted-foreground ml-2">(pour les alertes juridiques J-180 et J-90)</span>
-                            </label>
+                            <Label htmlFor="end_date" className="text-sm font-medium text-foreground/80" required>
+                                Fin bail <span className="text-xs text-muted-foreground ml-2">(pour les alertes juridiques J-180 et J-90)</span>
+                            </Label>
                             <Input
                                 name="end_date"
                                 type="date"

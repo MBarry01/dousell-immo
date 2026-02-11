@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Upload, PenTool, Building2, Save, Check, Phone, Mail, MapPin, Loader2, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { updateBranding } from './actions';
 import { toast } from 'sonner';
 
@@ -427,7 +428,9 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="text-sm text-slate-500 dark:text-gray-400">Nom commercial / Raison sociale</label>
+                        <Label htmlFor="company_name" className="text-sm text-slate-500 dark:text-gray-400" required>
+                            Nom commercial / Raison sociale
+                        </Label>
                         <Input
                             placeholder="ex: SCI Teranga Immo"
                             className="bg-slate-50 dark:bg-gray-800/50 border-slate-200 dark:border-gray-700 h-12 text-slate-900 dark:text-white"
@@ -447,9 +450,9 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm text-slate-500 dark:text-gray-400 flex items-center gap-2">
+                    <Label htmlFor="company_address" className="text-sm text-slate-500 dark:text-gray-400 flex items-center gap-2" required>
                         <MapPin className="w-4 h-4" /> Adresse complète
-                    </label>
+                    </Label>
                     <Input
                         placeholder="ex: Rue 10 x Avenue Cheikh Anta Diop, Dakar"
                         className="bg-slate-50 dark:bg-gray-800/50 border-slate-200 dark:border-gray-700 h-12 text-slate-900 dark:text-white"
@@ -460,9 +463,9 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="text-sm text-slate-500 dark:text-gray-400 flex items-center gap-2">
+                        <Label htmlFor="company_phone" className="text-sm text-slate-500 dark:text-gray-400 flex items-center gap-2" required>
                             <Phone className="w-4 h-4" /> Téléphone
-                        </label>
+                        </Label>
                         <Input
                             placeholder="ex: +221 77 123 45 67"
                             className="bg-slate-50 dark:bg-gray-800/50 border-slate-200 dark:border-gray-700 h-12 text-slate-900 dark:text-white"
@@ -471,9 +474,9 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm text-slate-500 dark:text-gray-400 flex items-center gap-2">
+                        <Label htmlFor="company_email" className="text-sm text-slate-500 dark:text-gray-400 flex items-center gap-2" required>
                             <Mail className="w-4 h-4" /> Email professionnel
-                        </label>
+                        </Label>
                         <Input
                             type="email"
                             placeholder="ex: contact@monagence.sn"

@@ -36,12 +36,13 @@ export async function POST(req: Request) {
 
         if (teamError) throw teamError;
 
-        // Block if already active or has valid subscription state (Prevent Double Sub)
-        const ACTIVE_STATUSES = ['active', 'trialing', 'past_due', 'unpaid', 'incomplete', 'incomplete_expired'];
-        if (teamData.subscription_status && ACTIVE_STATUSES.includes(teamData.subscription_status)) {
+        // Block if already has a PAID active subscription (Prevent Double Sub)
+        // Trial users CAN upgrade - this is standard SaaS behavior
+        const BLOCKED_STATUSES = ['active', 'trialing', 'past_due', 'unpaid', 'incomplete'];
+        if (teamData.subscription_status && BLOCKED_STATUSES.includes(teamData.subscription_status) && teamData.stripe_subscription_id) {
             return NextResponse.json({
-                error: 'Vous avez déjà un abonnement actif ou en cours. Veuillez le gérer depuis le portail.',
-                redirect: '/gestion/abonnement' // Frontend can use this to redirect to portal
+                error: 'Vous avez déjà un abonnement actif. Gérez-le depuis votre espace abonnement.',
+                redirect: '/gestion/abonnement'
             }, { status: 400 });
         }
 

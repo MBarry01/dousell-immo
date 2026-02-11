@@ -1,20 +1,20 @@
 import { createClient } from "@supabase/supabase-js";
 
-export const createAdminClient = () => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// ATTENTION: Utilise la SERVICE_ROLE_KEY, pas la ANON_KEY !
+// Ce fichier ne doit JAMAIS être importé côté client (React components).
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-    if (!supabaseUrl || !serviceRoleKey) {
-        console.error("Missing Supabase Admin credentials (URL or Service Role Key).");
-        // Return a dummy client or throw to prevent runtime crashes if env is missing in dev
-        // But for cron it should fail if keys are missing.
-        throw new Error("SUPABASE_SERVICE_ROLE_KEY is not defined");
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+    // Prevent crash during build time if envs are missing, but warn loudly
+    if (process.env.NODE_ENV !== 'production') {
+        console.warn("Missing Supabase Admin credentials (URL or Service Role Key). Admin operations will fail.");
     }
+}
 
-    return createClient(supabaseUrl, serviceRoleKey, {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false,
-        },
-    });
-};
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey || '', {
+    auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+    },
+});

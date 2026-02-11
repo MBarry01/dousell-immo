@@ -2,6 +2,7 @@
 
 import { MaintenanceHub } from '../components/MaintenanceHub';
 import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { InterventionsTour } from '@/components/gestion/tours/InterventionsTour';
 
 interface MaintenanceRequest {
     id: string;
@@ -27,6 +28,7 @@ export function InterventionsPageClient({ requests }: InterventionsPageClientPro
 
     return (
         <div className={`min-h-screen ${isDark ? 'bg-slate-950' : 'bg-gray-50'}`}>
+            <InterventionsTour />
             {/* Header */}
             <div
                 id="tour-intervention-stats"
@@ -35,11 +37,11 @@ export function InterventionsPageClient({ requests }: InterventionsPageClientPro
                     : 'border-gray-200 bg-white/50'
                     }`}
             >
-                <div className="w-full mx-auto px-4 md:px-6 py-4">
-                    <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <div className="w-full mx-auto px-4 md:px-6 py-6 text-left">
+                    <h1 className={`text-2xl md:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         Interventions & Maintenance
                     </h1>
-                    <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                    <p className={`text-sm md:text-base mt-2 ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
                         Gérez les demandes d'intervention de vos locataires
                     </p>
                 </div>

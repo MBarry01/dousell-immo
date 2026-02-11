@@ -1,4 +1,4 @@
-# 🗺️ MAP DES COMPOSANTS (232)
+# 🗺️ MAP DES COMPOSANTS (233)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -224,6 +224,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<touchable />** (Path: `components\ui\touchable.tsx`)
 - **<verified-badge />** (Path: `components\ui\verified-badge.tsx`)
 - **<workspace-switch />** (Path: `components\ui\workspace-switch.tsx`)
+- **<welcome-modal />** (Path: `components\welcome-modal.tsx`)
 - **<estimation-wizard />** (Path: `components\wizard\estimation-wizard.tsx`)
 - **<LockedSidebarItem />** (Path: `components\workspace\LockedSidebarItem.tsx`)
 - **<OwnerRoleSwitcher />** (Path: `components\workspace\OwnerRoleSwitcher.tsx`)

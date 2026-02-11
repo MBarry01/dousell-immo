@@ -22,55 +22,82 @@ interface OnboardingData {
     teamSize?: string;
 }
 
-export async function submitOnboarding(formData: OnboardingData) {
+export async function submitOnboarding(formData: OnboardingData, existingUserId?: string | null) {
     const supabase = await createClient();
 
-    // 1. Validation basique
-    if (!formData.email || !formData.password || !formData.fullName) {
-        return { error: "Veuillez remplir tous les champs obligatoires." };
-    }
+    let userId: string;
+    let isAutoConfirmed = false;
 
-    if (formData.password.length < 6) {
-        return { error: "Le mot de passe doit contenir au moins 6 caractères." };
-    }
-
-    // 2. Créer le compte utilisateur
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-            data: {
-                full_name: formData.fullName,
-                phone: formData.phone || null,
-                team_size: formData.teamSize || null,
-            },
-            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/gestion`,
-        },
-    });
-
-    if (authError) {
-        console.error("Auth Error:", authError);
-
-        // Messages d'erreur en français
-        if (authError.message.includes("already registered")) {
-            return { error: "Cet email est déjà utilisé. Connectez-vous ou utilisez un autre email." };
+    if (existingUserId) {
+        // ===== UTILISATEUR DEJA CONNECTE =====
+        // Verifier que l'utilisateur est bien authentifie
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || user.id !== existingUserId) {
+            return { error: "Session invalide. Veuillez vous reconnecter." };
         }
-        if (authError.message.includes("Password")) {
+
+        userId = user.id;
+        isAutoConfirmed = true;
+
+        // Validation: seul le nom est obligatoire (email/password deja existants)
+        if (!formData.fullName) {
+            return { error: "Veuillez renseigner votre nom." };
+        }
+
+        // Mettre a jour le nom si modifie
+        if (formData.fullName !== user.user_metadata?.full_name) {
+            await supabase.auth.updateUser({
+                data: { full_name: formData.fullName },
+            });
+        }
+    } else {
+        // ===== NOUVEAU UTILISATEUR =====
+        // 1. Validation basique
+        if (!formData.email || !formData.password || !formData.fullName) {
+            return { error: "Veuillez remplir tous les champs obligatoires." };
+        }
+
+        if (formData.password.length < 6) {
             return { error: "Le mot de passe doit contenir au moins 6 caractères." };
         }
-        if (authError.message.includes("Invalid email")) {
-            return { error: "Adresse email invalide." };
+
+        // 2. Créer le compte utilisateur
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: formData.email,
+            password: formData.password,
+            options: {
+                data: {
+                    full_name: formData.fullName,
+                    phone: formData.phone || null,
+                    team_size: formData.teamSize || null,
+                },
+                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/gestion`,
+            },
+        });
+
+        if (authError) {
+            console.error("Auth Error:", authError);
+
+            if (authError.message.includes("already registered")) {
+                return { error: "Cet email est déjà utilisé. Connectez-vous ou utilisez un autre email." };
+            }
+            if (authError.message.includes("Password")) {
+                return { error: "Le mot de passe doit contenir au moins 6 caractères." };
+            }
+            if (authError.message.includes("Invalid email")) {
+                return { error: "Adresse email invalide." };
+            }
+
+            return { error: authError.message };
         }
 
-        return { error: authError.message };
-    }
+        if (!authData.user) {
+            return { error: "Erreur lors de la création du compte." };
+        }
 
-    if (!authData.user) {
-        return { error: "Erreur lors de la création du compte." };
+        userId = authData.user.id;
+        isAutoConfirmed = !!authData.session;
     }
-
-    const userId = authData.user.id;
-    const isAutoConfirmed = !!authData.session;
 
     // 3. Mettre à jour le profil (Infos Personnelles uniquement + Flags)
     // Calculate trial end date (14 days from now)
@@ -118,7 +145,12 @@ export async function submitOnboarding(formData: OnboardingData) {
             logo_url: formData.logoUrl || null,
             signature_url: formData.signatureUrl || null,
             created_by: userId,
-            status: 'active'
+            status: 'active',
+            // Subscription fields (STANDARD SAAS ONBOARDING: Always Start with Pro Trial)
+            subscription_tier: 'pro',
+            subscription_status: 'trialing',
+            subscription_trial_ends_at: trialEndsAt.toISOString(),
+            intended_plan: formData.teamSize === '1-2' ? 'starter' : 'pro', // Simple heuristic or pass explicitly later
         })
         .select()
         .single();

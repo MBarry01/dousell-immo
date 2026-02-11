@@ -153,11 +153,12 @@ export async function POST(req: Request) {
                     await adminClient
                         .from('teams')
                         .update({
-                            subscription_status: 'canceled',
+                            subscription_status: 'expired',
+                            stripe_subscription_id: null,
                         })
                         .eq('id', teamId);
 
-                    console.log(`❌ Subscription canceled for team ${teamId}`);
+                    console.log(`❌ Subscription expired for team ${teamId}`);
                 }
                 break;
             }
@@ -189,7 +190,7 @@ export async function POST(req: Request) {
                         .from('teams')
                         .update({
                             subscription_status: status,
-                            subscription_tier: subscription.metadata?.plan_id || subscription.items.data[0].price.id, // Fallback to price ID if metadata missing
+                            subscription_tier: subscription.metadata?.plan_id, // Only use metadata, never fallback to price ID
                             subscription_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
                             subscription_currency: subscription.currency ? subscription.currency.toLowerCase() : null,
                         })

@@ -23,6 +23,7 @@ interface OnboardingTourProps {
   onComplete: () => void;
   storageKey?: string;
   isDark?: boolean; // Support mode light/dark
+  onStepChange?: (index: number) => void;
 }
 
 // --- COMPOSANT PRINCIPAL ---
@@ -32,7 +33,8 @@ export function OnboardingTour({
   onClose,
   onComplete,
   storageKey = 'dousell_tour',
-  isDark = true
+  isDark = true,
+  onStepChange
 }: OnboardingTourProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -100,7 +102,7 @@ export function OnboardingTour({
   }, [isOpen]);
 
   // Position de l'élément cible - useCallback avec dépendances stables
-  const updateTargetPosition = useCallback(() => {
+  const updateTargetPosition = useCallback((retryCount = 0) => {
     if (!isOpen || steps.length === 0) return;
 
     const step = steps[currentStepIndex];
@@ -109,11 +111,14 @@ export function OnboardingTour({
     const element = document.getElementById(step.targetId);
 
     if (element) {
-      // Cacher le tooltip pendant le repositionnement
-      setIsPositioned(false);
+      if (retryCount === 0) {
+        setIsPositioned(false);
+      }
 
-      // Scroll vers l'élément avec marge pour éviter les débordements
-      element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      // Scroll vers l'élément avec marge pour éviter les débordements (seulement au premier essai)
+      if (retryCount === 0) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      }
 
       // Délai pour laisser le scroll finir et recalculer précisément
       setTimeout(() => {
@@ -123,22 +128,32 @@ export function OnboardingTour({
         if (rect.width > 0 && rect.height > 0) {
           setTargetRect(rect);
           setIsPositioned(true);
+        } else if (retryCount < 5) {
+          // Réessayer si l'élément est dans le DOM mais pas encore de dimensions (cas de montage async)
+          updateTargetPosition(retryCount + 1);
         } else {
-          console.warn('[OnboardingTour] Element rect invalid:', step.targetId, rect);
+          // Fallback après retries : afficher au centre
+          console.warn('[OnboardingTour] Element has no dimensions after retries:', step.targetId);
           setTargetRect(null);
-          setIsPositioned(false);
+          setIsPositioned(true);
         }
-      }, 400);
+      }, retryCount === 0 ? 500 : 200);
+    } else if (retryCount < 8) {
+      // Réessayer plusieurs fois si l'élément n'est pas encore dans le DOM (cas de switch de tab)
+      setTimeout(() => updateTargetPosition(retryCount + 1), 250);
     } else {
-      console.warn(`[OnboardingTour] Element with id "${step.targetId}" not found`);
+      console.warn(`[OnboardingTour] Element with id "${step.targetId}" not found after retries`);
       setTargetRect(null);
-      setIsPositioned(false);
+      setIsPositioned(true); // Toujours afficher pour permettre de continuer (centré)
     }
   }, [currentStepIndex, isOpen, steps]);
 
   // Effet pour mettre à jour la position - NE PAS dépendre de updateTargetPosition
   useEffect(() => {
     updateTargetPosition();
+    if (onStepChange) {
+      onStepChange(currentStepIndex);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStepIndex, isOpen]); // Seulement quand l'étape change
 
@@ -336,8 +351,8 @@ export function OnboardingTour({
     const tooltipTop = typeof tooltipStyle.top === 'number' ? tooltipStyle.top : 0;
     const tooltipLeft = typeof tooltipStyle.left === 'number' ? tooltipStyle.left : 0;
 
-    const targetCenterY = targetRect.top + targetRect.height / 2;
-    const targetCenterX = targetRect.left + targetRect.width / 2;
+    const targetCenterY = (targetRect?.top || 0) + (targetRect?.height || 0) / 2;
+    const targetCenterX = (targetRect?.left || 0) + (targetRect?.width || 0) / 2;
 
     // Calculer la largeur réelle du tooltip selon le viewport
     const viewportWidth = window.innerWidth;
@@ -380,17 +395,17 @@ export function OnboardingTour({
         style={{
           background: targetRect
             ? (() => {
-                // Calculer le rayon du spotlight en fonction de la taille de l'élément
-                const elementSize = Math.max(targetRect.width, targetRect.height);
-                const innerRadius = Math.max(elementSize / 1.6, 50); // Minimum 50px
-                const outerRadius = Math.max(elementSize / 1.1, 100); // Minimum 100px
-                const centerX = targetRect.left + targetRect.width / 2;
-                const centerY = targetRect.top + targetRect.height / 2;
+              // Calculer le rayon du spotlight en fonction de la taille de l'élément
+              const elementSize = Math.max(targetRect.width, targetRect.height);
+              const innerRadius = Math.max(elementSize / 1.6, 50); // Minimum 50px
+              const outerRadius = Math.max(elementSize / 1.1, 100); // Minimum 100px
+              const centerX = (targetRect?.left || 0) + (targetRect?.width || 0) / 2;
+              const centerY = (targetRect?.top || 0) + (targetRect?.height || 0) / 2;
 
-                const overlayColor = isDark ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0.5)';
-                return `radial-gradient(circle at ${centerX}px ${centerY}px, transparent ${innerRadius}px, ${overlayColor} ${outerRadius}px)`;
-              })()
-            : isDark ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0.5)',
+              const overlayColor = isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.45)';
+              return `radial-gradient(circle at ${centerX}px ${centerY}px, transparent ${innerRadius}px, ${overlayColor} ${outerRadius}px)`;
+            })()
+            : isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.45)',
           transition: 'background 0.3s ease'
         }}
       />
@@ -470,153 +485,153 @@ export function OnboardingTour({
               left: tooltipStyle.left,
             }}
           >
-          <div className="relative">
-            {/* Arrow */}
-            {tooltipStyle.placement !== 'center' && (
-              <div
-                className="absolute w-3 h-3 rotate-45 z-0"
-                style={{
-                  ...getArrowStyle(tooltipStyle.placement),
-                  background: theme.arrowGradient,
-                }}
-              />
-            )}
-
-            {/* Inner Card Content */}
-            <div
-              className="relative z-10 overflow-hidden"
-              style={{
-                background: theme.bgGradient,
-                border: `1px solid ${accentColor}33`, // 20% opacity
-                borderRadius: '16px',
-                boxShadow: isDark
-                  ? '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(244, 196, 48, 0.1)'
-                  : '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(120, 145, 168, 0.15)',
-                transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
-              }}
-            >
-              {/* Bouton Fermer */}
-              <button
-                onClick={handleIgnore}
-                className={`absolute top-3 right-3 z-20 p-1.5 rounded-full transition-all duration-200 backdrop-blur-sm ${theme.closeBtn}`}
-              >
-                <X size={14} />
-              </button>
-
-              {/* Numéro d'étape (Badge premium) */}
-              <div
-                className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-                style={{
-                  backgroundColor: `${accentColor}1A`, // 10% opacity
-                  borderColor: `${accentColor}33`, // 20% opacity
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  transition: 'background-color 0.3s ease, border-color 0.3s ease'
-                }}
-              >
-                <span className="text-[11px] font-semibold" style={{ color: accentColor, transition: 'color 0.3s ease' }}>
-                  {currentStepIndex + 1} / {steps.length}
-                </span>
-              </div>
-
-              {/* Image (Haut) avec gradient overlay */}
-              <div className="relative h-36 w-full overflow-hidden">
-                <Image
-                  src={currentStep.imageSrc}
-                  alt={currentStep.imageAlt || currentStep.title}
-                  fill
-                  className="object-cover"
-                  unoptimized={currentStep.imageSrc.startsWith('http')}
-                />
-                {/* Gradient overlay pour fusion avec le contenu */}
-                <div className={`absolute inset-0 bg-gradient-to-t ${theme.overlayGradient} to-transparent`} />
-                {/* Accent line (couleur adaptative) */}
+            <div className="relative">
+              {/* Arrow */}
+              {tooltipStyle.placement !== 'center' && (
                 <div
-                  className="absolute bottom-0 left-0 right-0 h-[2px]"
+                  className="absolute w-3 h-3 rotate-45 z-0"
                   style={{
-                    background: `linear-gradient(to right, transparent, ${accentColor}80, transparent)`,
-                    transition: 'background 0.3s ease'
+                    ...getArrowStyle(tooltipStyle.placement),
+                    background: theme.arrowGradient,
                   }}
                 />
-              </div>
+              )}
 
-              {/* Contenu (Bas) */}
-              <div className="p-5 pt-3">
-                {/* Titre */}
-                <h3 className={`${theme.titleText} font-bold text-lg leading-tight mb-2`}>
-                  {currentStep.title}
-                </h3>
+              {/* Inner Card Content */}
+              <div
+                className="relative z-10 overflow-hidden"
+                style={{
+                  background: theme.bgGradient,
+                  border: `1px solid ${accentColor}33`, // 20% opacity
+                  borderRadius: '16px',
+                  boxShadow: isDark
+                    ? '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(244, 196, 48, 0.1)'
+                    : '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(120, 145, 168, 0.15)',
+                  transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
+                }}
+              >
+                {/* Bouton Fermer */}
+                <button
+                  onClick={handleIgnore}
+                  className={`absolute top-3 right-3 z-20 p-1.5 rounded-full transition-all duration-200 backdrop-blur-sm ${theme.closeBtn}`}
+                >
+                  <X size={14} />
+                </button>
 
-                {/* Description */}
-                <p className={`${theme.descText} text-sm leading-relaxed mb-5`}>
-                  {currentStep.description}
-                </p>
+                {/* Numéro d'étape (Badge premium) */}
+                <div
+                  className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+                  style={{
+                    backgroundColor: `${accentColor}1A`, // 10% opacity
+                    borderColor: `${accentColor}33`, // 20% opacity
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    transition: 'background-color 0.3s ease, border-color 0.3s ease'
+                  }}
+                >
+                  <span className="text-[11px] font-semibold" style={{ color: accentColor, transition: 'color 0.3s ease' }}>
+                    {currentStepIndex + 1} / {steps.length}
+                  </span>
+                </div>
 
-                {/* Footer: Dots + Boutons */}
-                <div className="flex items-center justify-between">
-                  {/* Progress Dots */}
-                  <div className="flex gap-1.5">
-                    {steps.map((_, i) => (
-                      <motion.div
-                        key={i}
-                        initial={false}
-                        animate={{
-                          width: i === currentStepIndex ? 20 : 8,
-                          backgroundColor: i === currentStepIndex ? theme.dotActive : theme.dotInactive,
-                          opacity: i <= currentStepIndex ? 1 : 0.5
+                {/* Image (Haut) avec gradient overlay */}
+                <div className="relative h-36 w-full overflow-hidden">
+                  <Image
+                    src={currentStep.imageSrc}
+                    alt={currentStep.imageAlt || currentStep.title}
+                    fill
+                    className="object-cover"
+                    unoptimized={currentStep.imageSrc.startsWith('http')}
+                  />
+                  {/* Gradient overlay pour fusion avec le contenu */}
+                  <div className={`absolute inset-0 bg-gradient-to-t ${theme.overlayGradient} to-transparent`} />
+                  {/* Accent line (couleur adaptative) */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-[2px]"
+                    style={{
+                      background: `linear-gradient(to right, transparent, ${accentColor}80, transparent)`,
+                      transition: 'background 0.3s ease'
+                    }}
+                  />
+                </div>
+
+                {/* Contenu (Bas) */}
+                <div className="p-5 pt-3">
+                  {/* Titre */}
+                  <h3 className={`${theme.titleText} font-bold text-lg leading-tight mb-2`}>
+                    {currentStep.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className={`${theme.descText} text-sm leading-relaxed mb-5`}>
+                    {currentStep.description}
+                  </p>
+
+                  {/* Footer: Dots + Boutons */}
+                  <div className="flex items-center justify-between">
+                    {/* Progress Dots */}
+                    <div className="flex gap-1.5">
+                      {steps.map((_, i) => (
+                        <motion.div
+                          key={i}
+                          initial={false}
+                          animate={{
+                            width: i === currentStepIndex ? 20 : 8,
+                            backgroundColor: i === currentStepIndex ? theme.dotActive : theme.dotInactive,
+                            opacity: i <= currentStepIndex ? 1 : 0.5
+                          }}
+                          transition={{ duration: 0.2 }}
+                          className="h-2 rounded-full"
+                        />
+                      ))}
+                    </div>
+
+                    {/* Boutons */}
+                    <div className="flex items-center gap-2">
+                      {/* Bouton Retour */}
+                      {!isFirstStep && (
+                        <button
+                          onClick={handlePrev}
+                          className={`px-3 py-1.5 text-xs font-medium transition-colors rounded-lg border ${theme.backBtn}`}
+                        >
+                          Retour
+                        </button>
+                      )}
+
+                      {/* Bouton Ignorer (seulement sur première étape) */}
+                      {isFirstStep && (
+                        <button
+                          onClick={handleIgnore}
+                          className={`px-3 py-1.5 text-xs font-medium transition-colors ${theme.ignoreBtn}`}
+                        >
+                          Ignorer
+                        </button>
+                      )}
+
+                      {/* Bouton Suivant / Terminer */}
+                      <motion.button
+                        onClick={handleNext}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg"
+                        style={{
+                          backgroundColor: accentColor,
+                          color: isDark ? '#000000' : '#ffffff',
+                          boxShadow: isDark
+                            ? '0 0 15px rgba(244, 196, 48, 0.3)'
+                            : '0 0 15px rgba(120, 145, 168, 0.3)',
+                          transition: 'background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease'
                         }}
-                        transition={{ duration: 0.2 }}
-                        className="h-2 rounded-full"
-                      />
-                    ))}
-                  </div>
-
-                  {/* Boutons */}
-                  <div className="flex items-center gap-2">
-                    {/* Bouton Retour */}
-                    {!isFirstStep && (
-                      <button
-                        onClick={handlePrev}
-                        className={`px-3 py-1.5 text-xs font-medium transition-colors rounded-lg border ${theme.backBtn}`}
                       >
-                        Retour
-                      </button>
-                    )}
-
-                    {/* Bouton Ignorer (seulement sur première étape) */}
-                    {isFirstStep && (
-                      <button
-                        onClick={handleIgnore}
-                        className={`px-3 py-1.5 text-xs font-medium transition-colors ${theme.ignoreBtn}`}
-                      >
-                        Ignorer
-                      </button>
-                    )}
-
-                    {/* Bouton Suivant / Terminer */}
-                    <motion.button
-                      onClick={handleNext}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg"
-                      style={{
-                        backgroundColor: accentColor,
-                        color: isDark ? '#000000' : '#ffffff',
-                        boxShadow: isDark
-                          ? '0 0 15px rgba(244, 196, 48, 0.3)'
-                          : '0 0 15px rgba(120, 145, 168, 0.3)',
-                        transition: 'background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease'
-                      }}
-                    >
-                      {isLastStep ? 'Terminer' : 'Suivant'}
-                      {!isLastStep && <ChevronRight className="w-3.5 h-3.5" />}
-                    </motion.button>
+                        {isLastStep ? 'Terminer' : 'Suivant'}
+                        {!isLastStep && <ChevronRight className="w-3.5 h-3.5" />}
+                      </motion.button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 

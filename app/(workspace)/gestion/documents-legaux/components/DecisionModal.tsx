@@ -120,8 +120,8 @@ export function DecisionModal({ alert }: DecisionModalProps) {
                     {/* OPTION A : RENOUVELER */}
                     <TabsContent value="renew" className="space-y-4 py-4">
                         <div className={`p-3 rounded text-sm border ${isDark
-                                ? 'bg-green-900/20 border-green-900 text-green-200'
-                                : 'bg-green-50 border-green-200 text-green-700'
+                            ? 'bg-green-900/20 border-green-900 text-green-200'
+                            : 'bg-green-50 border-green-200 text-green-700'
                             }`}>
                             ℹ️ Le bail sera automatiquement renouvelé. Vous pouvez ajuster la durée et le loyer.
                         </div>
@@ -183,14 +183,14 @@ export function DecisionModal({ alert }: DecisionModalProps) {
                     {/* OPTION B : DONNER CONGÉ */}
                     <TabsContent value="terminate" className="space-y-4 py-4">
                         <div className={`p-3 rounded text-sm border ${isDark
-                                ? 'bg-red-900/20 border-red-900 text-red-200'
-                                : 'bg-red-50 border-red-200 text-red-700'
+                            ? 'bg-red-900/20 border-red-900 text-red-200'
+                            : 'bg-red-50 border-red-200 text-red-700'
                             }`}>
                             ⚠️ <strong>Attention:</strong> Au Sénégal, le congé doit respecter un préavis de 6 mois pour reprise (Loi n° 2014-22).
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="terminationReason">Motif du congé (Obligatoire)</Label>
+                            <Label htmlFor="terminationReason" required>Motif du congé</Label>
                             <Select value={terminationReason} onValueChange={(v: 'reprise' | 'vente' | 'legitime') => setTerminationReason(v)}>
                                 <SelectTrigger className={isDark ? 'bg-black border-slate-700' : 'bg-gray-50 border-gray-300'}>
                                     <SelectValue />

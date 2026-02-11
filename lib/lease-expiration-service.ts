@@ -7,7 +7,7 @@
  * - J-90 (3 mois) : Alerte de négociation avant tacite reconduction
  */
 
-import { createAdminClient } from "@/lib/supabase-admin";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import { sendEmail } from "@/lib/mail";
 import { addMonths, isSameDay, format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -44,7 +44,7 @@ interface AlertContext {
 export async function checkLeaseExpirations(): Promise<LeaseExpirationResult> {
   console.log("📡 Radar de fin de bail : Analyse en cours...");
 
-  const supabase = createAdminClient();
+  const supabase = supabaseAdmin;
   const today = new Date();
 
   try {
@@ -115,7 +115,7 @@ export async function checkLeaseExpirations(): Promise<LeaseExpirationResult> {
 async function processLease(
   lease: LeaseData,
   today: Date,
-  supabase: ReturnType<typeof createAdminClient>
+  supabase: typeof supabaseAdmin
 ): Promise<number> {
   if (!lease.end_date) return 0;
 
@@ -151,7 +151,7 @@ async function sendExpirationAlert(
   lease: LeaseData,
   monthsRemaining: 6 | 3,
   endDate: Date,
-  supabase: ReturnType<typeof createAdminClient>
+  supabase: typeof supabaseAdmin
 ): Promise<boolean> {
   try {
     // 1. Récupérer l'email du propriétaire

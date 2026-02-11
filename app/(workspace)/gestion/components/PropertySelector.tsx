@@ -19,6 +19,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { getVacantTeamProperties, type VacantProperty } from "../actions/property-selector";
 
 interface PropertySelectorProps {
@@ -131,9 +132,9 @@ export function PropertySelector({
         <div className="space-y-3">
             {/* Sélecteur principal */}
             <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80">
-                    Bien immobilier <span className="text-destructive">*</span>
-                </label>
+                <Label className="text-sm font-medium text-foreground/80" required>
+                    Bien immobilier
+                </Label>
 
                 <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
@@ -259,7 +260,7 @@ export function PropertySelector({
 
                     <div className="grid grid-cols-1 gap-3">
                         <div className="space-y-1">
-                            <label className="text-xs text-muted-foreground">Nom du bien *</label>
+                            <Label className="text-xs text-muted-foreground" required>Nom du bien</Label>
                             <Input
                                 placeholder="ex: Appart F2 Maristes"
                                 value={newProperty.title}
@@ -271,7 +272,7 @@ export function PropertySelector({
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs text-muted-foreground">Adresse *</label>
+                            <Label className="text-xs text-muted-foreground" required>Adresse</Label>
                             <Input
                                 placeholder="ex: 58 rue Mariste, Dakar"
                                 value={newProperty.address}
@@ -283,7 +284,7 @@ export function PropertySelector({
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs text-muted-foreground">Loyer mensuel (FCFA) *</label>
+                            <Label className="text-xs text-muted-foreground" required>Loyer mensuel (FCFA)</Label>
                             <Input
                                 type="number"
                                 placeholder="300000"

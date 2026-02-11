@@ -7,7 +7,7 @@ export default function CommencerPage() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#05080c] via-[#0a1020] to-[#05080c]">
             {/* Hero Section */}
-            <div className="relative pt-20 pb-8 text-center text-white">
+            <div className="relative pt-10 pb-8 text-center text-white">
                 <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent" />
                 <div className="relative z-10 max-w-3xl mx-auto px-4">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-white to-white/70 bg-clip-text text-transparent">

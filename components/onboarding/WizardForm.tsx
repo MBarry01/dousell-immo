@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { submitOnboarding } from "@/app/pro/start/actions";
+import { createClient } from "@/utils/supabase/client";
 
 type Step = "user" | "agency" | "goals" | "confirmation";
 
@@ -47,6 +48,8 @@ export function WizardForm() {
     const [currentStep, setCurrentStep] = useState<number>(0);
     const [direction, setDirection] = useState<number>(0);
     const [isPending, setIsPending] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [loggedInUserId, setLoggedInUserId] = useState<string | null>(null);
     const [data, setData] = useState<WizardData>({
         fullName: "",
         email: "",
@@ -63,10 +66,53 @@ export function WizardForm() {
         teamSize: "",
     });
 
+    // Detecter si l'utilisateur est deja connecte et pre-remplir
+    useEffect(() => {
+        const checkAuth = async () => {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (user) {
+                // Verifier si l'utilisateur a déjà une équipe active
+                // Si oui, on le redirige directement vers le dashboard gestion
+                const { data: memberships } = await supabase
+                    .from("team_members")
+                    .select("id")
+                    .eq("user_id", user.id)
+                    .eq("status", "active")
+                    .limit(1);
+
+                if (memberships && memberships.length > 0) {
+                    console.log("Onboarding: Utilisateur a déjà une équipe, redirection...");
+                    router.push("/gestion");
+                    return;
+                }
+
+                setIsLoggedIn(true);
+                setLoggedInUserId(user.id);
+
+                // Pre-remplir depuis le profil et les metadonnees
+                const { data: profile } = await supabase
+                    .from("profiles")
+                    .select("full_name, phone")
+                    .eq("id", user.id)
+                    .single();
+
+                setData(prev => ({
+                    ...prev,
+                    fullName: profile?.full_name || user.user_metadata?.full_name || prev.fullName,
+                    email: user.email || prev.email,
+                    phone: profile?.phone || user.user_metadata?.phone || prev.phone,
+                }));
+            }
+        };
+        checkAuth();
+    }, [router]);
+
     const handleSubmit = async () => {
         setIsPending(true);
         try {
-            const result = await submitOnboarding(data);
+            const result = await submitOnboarding(data, loggedInUserId);
 
             if (result.error) {
                 toast.error(result.error);
@@ -74,7 +120,7 @@ export function WizardForm() {
             }
 
             if (result.success) {
-                toast.success("Compte créé avec succès !");
+                toast.success(isLoggedIn ? "Espace de gestion activé !" : "Compte créé avec succès !");
                 router.push("/gestion");
             }
         } catch (error) {
@@ -177,7 +223,7 @@ export function WizardForm() {
                             className="h-full"
                         >
                             {currentStep === 0 && (
-                                <StepUser data={data} updateData={updateData} />
+                                <StepUser data={data} updateData={updateData} isLoggedIn={isLoggedIn} />
                             )}
                             {currentStep === 1 && (
                                 <StepAgency data={data} updateData={updateData} />
@@ -186,7 +232,7 @@ export function WizardForm() {
                                 <StepGoals data={data} updateData={updateData} />
                             )}
                             {currentStep === 3 && (
-                                <StepConfirmation data={data} />
+                                <StepConfirmation data={data} isLoggedIn={isLoggedIn} />
                             )}
                         </motion.div>
                     </AnimatePresence>
@@ -239,13 +285,26 @@ export function WizardForm() {
     );
 }
 
-function StepUser({ data, updateData }: { data: WizardData, updateData: any }) {
+function StepUser({ data, updateData, isLoggedIn }: { data: WizardData, updateData: any, isLoggedIn: boolean }) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Créez votre compte administrateur</h2>
-                <p className="text-slate-500 dark:text-gray-400">Ces identifiants vous serviront à accéder à votre espace de gestion.</p>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                    {isLoggedIn ? "Vos informations" : "Créez votre compte administrateur"}
+                </h2>
+                <p className="text-slate-500 dark:text-gray-400">
+                    {isLoggedIn
+                        ? "Vérifiez vos informations avant de continuer. Vous pouvez les modifier si nécessaire."
+                        : "Ces identifiants vous serviront à accéder à votre espace de gestion."}
+                </p>
             </div>
+
+            {isLoggedIn && (
+                <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+                    <Check className="h-4 w-4 shrink-0" />
+                    <span>Vous êtes déjà connecté. Ces champs sont pré-remplis depuis votre compte.</span>
+                </div>
+            )}
 
             <div className="grid gap-6">
                 <div className="space-y-2">
@@ -266,7 +325,8 @@ function StepUser({ data, updateData }: { data: WizardData, updateData: any }) {
                             placeholder="contact@monagence.sn"
                             value={data.email}
                             onChange={(e) => updateData("email", e.target.value)}
-                            className="h-12 bg-slate-50 border-slate-200 dark:bg-gray-800 dark:border-gray-700"
+                            disabled={isLoggedIn}
+                            className={`h-12 bg-slate-50 border-slate-200 dark:bg-gray-800 dark:border-gray-700 ${isLoggedIn ? "opacity-60 cursor-not-allowed" : ""}`}
                         />
                     </div>
                     <div className="space-y-2">
@@ -281,16 +341,18 @@ function StepUser({ data, updateData }: { data: WizardData, updateData: any }) {
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <Label>Mot de passe</Label>
-                    <Input
-                        type="password"
-                        placeholder="••••••••"
-                        value={data.password}
-                        onChange={(e) => updateData("password", e.target.value)}
-                        className="h-12 bg-slate-50 border-slate-200 dark:bg-gray-800 dark:border-gray-700"
-                    />
-                </div>
+                {!isLoggedIn && (
+                    <div className="space-y-2">
+                        <Label>Mot de passe</Label>
+                        <Input
+                            type="password"
+                            placeholder="••••••••"
+                            value={data.password}
+                            onChange={(e) => updateData("password", e.target.value)}
+                            className="h-12 bg-slate-50 border-slate-200 dark:bg-gray-800 dark:border-gray-700"
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -605,7 +667,7 @@ function StepGoals({ data, updateData }: { data: WizardData, updateData: any }) 
     );
 }
 
-function StepConfirmation({ data }: { data: WizardData }) {
+function StepConfirmation({ data, isLoggedIn }: { data: WizardData, isLoggedIn: boolean }) {
     return (
         <div className="space-y-6 text-center">
             <div className="w-20 h-20 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center mx-auto text-primary mb-6">
@@ -614,8 +676,8 @@ function StepConfirmation({ data }: { data: WizardData }) {
 
             <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Tout est prêt !</h2>
             <p className="text-lg text-slate-600 dark:text-gray-300 max-w-lg mx-auto">
-                C'est parti, {data.fullName.split(' ')[0]} ! <br />
-                En cliquant sur "Commencer", nous allons créer votre espace pour <strong>{data.companyName || "votre agence"}</strong>.
+                C&apos;est parti, {data.fullName.split(' ')[0]} ! <br />
+                En cliquant sur &quot;Commencer&quot;, nous allons créer votre espace pour <strong>{data.companyName || "votre agence"}</strong>.
             </p>
 
             <div className="bg-slate-50 dark:bg-gray-800/50 p-6 rounded-2xl text-left max-w-sm mx-auto border border-slate-100 dark:border-gray-800">
@@ -630,9 +692,11 @@ function StepConfirmation({ data }: { data: WizardData }) {
                     </div>
                 </div>
             </div>
-            <p className="text-xs text-slate-400 dark:text-gray-500 mt-4">
-                En créant ce compte, vous acceptez nos conditions d'utilisation et notre politique de confidentialité.
-            </p>
+            {!isLoggedIn && (
+                <p className="text-xs text-slate-400 dark:text-gray-500 mt-4">
+                    En créant ce compte, vous acceptez nos conditions d&apos;utilisation et notre politique de confidentialité.
+                </p>
+            )}
         </div>
     );
 }

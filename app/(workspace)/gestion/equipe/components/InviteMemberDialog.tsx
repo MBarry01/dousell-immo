@@ -6,6 +6,7 @@ import { UserPlus, Loader2, Mail, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,10 @@ import { useTheme } from "@/components/workspace/providers/theme-provider";
 import { TEAM_ROLE_CONFIG, INVITABLE_ROLES } from "@/lib/team-permissions-config";
 import type { TeamRole } from "@/types/team";
 import { RoleBadge } from "./RoleBadge";
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 interface InviteMemberDialogProps {
   teamId: string;
@@ -95,15 +100,16 @@ export function InviteMemberDialog({ teamId, onSuccess, trigger }: InviteMemberD
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           {/* Email */}
           <div>
-            <label
+            <Label
               className={cn(
                 "text-sm font-medium mb-1.5 flex items-center gap-2",
                 isDark ? "text-slate-300" : "text-gray-700"
               )}
+              required
             >
               <Mail className="w-4 h-4" />
-              Adresse email <span className="text-red-400">*</span>
-            </label>
+              Adresse email
+            </Label>
             <Input
               type="email"
               value={email}
@@ -116,14 +122,15 @@ export function InviteMemberDialog({ teamId, onSuccess, trigger }: InviteMemberD
 
           {/* Rôle */}
           <div>
-            <label
+            <Label
               className={cn(
                 "text-sm font-medium mb-1.5 block",
                 isDark ? "text-slate-300" : "text-gray-700"
               )}
+              required
             >
-              Rôle <span className="text-red-400">*</span>
-            </label>
+              Rôle
+            </Label>
             <Select value={role} onValueChange={(v) => setRole(v as typeof role)}>
               <SelectTrigger
                 className={cn(
@@ -244,8 +251,4 @@ export function InviteMemberDialog({ teamId, onSuccess, trigger }: InviteMemberD
       </DialogContent>
     </Dialog>
   );
-}
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
 }

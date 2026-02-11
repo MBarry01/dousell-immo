@@ -22,6 +22,7 @@ import { ReceiptModal } from '../../components/ReceiptModal';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/client';
 import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { ConfigurationRequirementCheck } from '../../components/ConfigurationRequirementCheck';
 
 interface Lease {
     id: string;
@@ -99,97 +100,101 @@ export function CreateReceiptDialog({ leases, userEmail, profile }: CreateReceip
                         <p className={`text-sm mt-2 ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>Créer manuellement une quittance pour un paiement hors plateforme.</p>
                     </button>
                 </DialogTrigger>
-                <DialogContent className={`sm:max-w-md ${isDark ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}`}>
-                    <DialogHeader>
-                        <DialogTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            <FileText className="h-5 w-5 text-primary" />
-                            Générateur de Quittance
-                        </DialogTitle>
-                        <DialogDescription className={isDark ? 'text-slate-400' : 'text-gray-600'}>
-                            Créez une quittance pour un locataire existant.
-                        </DialogDescription>
-                    </DialogHeader>
+                <DialogContent className={`sm:max-w-md p-0 overflow-hidden ${isDark ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}`}>
+                    <ConfigurationRequirementCheck profile={profile} isDark={isDark}>
+                        <div className="p-6">
+                            <DialogHeader>
+                                <DialogTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    <FileText className="h-5 w-5 text-primary" />
+                                    Générateur de Quittance
+                                </DialogTitle>
+                                <DialogDescription className={isDark ? 'text-slate-400' : 'text-gray-600'}>
+                                    Créez une quittance pour un locataire existant.
+                                </DialogDescription>
+                            </DialogHeader>
 
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <label className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>Locataire & Bien</label>
-                            <Select value={selectedLeaseId} onValueChange={handleLeaseChange}>
-                                <SelectTrigger className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'}>
-                                    <SelectValue placeholder="Sélectionner un bail..." />
-                                </SelectTrigger>
-                                <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}>
-                                    {leases.length === 0 ? (
-                                        <div className={`py-6 text-center text-sm ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
-                                            Aucun bail actif trouvé
-                                        </div>
-                                    ) : (
-                                        leases.map((lease) => (
-                                            <SelectItem key={lease.id} value={lease.id} className={isDark ? 'focus:bg-slate-700 focus:text-slate-100' : 'focus:bg-gray-100 focus:text-gray-900'}>
-                                                <span className="font-medium">{lease.tenant_name}</span>
-                                            </SelectItem>
-                                        ))
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <label className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>Locataire & Bien</label>
+                                    <Select value={selectedLeaseId} onValueChange={handleLeaseChange}>
+                                        <SelectTrigger className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'}>
+                                            <SelectValue placeholder="Sélectionner un bail..." />
+                                        </SelectTrigger>
+                                        <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}>
+                                            {leases.length === 0 ? (
+                                                <div className={`py-6 text-center text-sm ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
+                                                    Aucun bail actif trouvé
+                                                </div>
+                                            ) : (
+                                                leases.map((lease) => (
+                                                    <SelectItem key={lease.id} value={lease.id} className={isDark ? 'focus:bg-slate-700 focus:text-slate-100' : 'focus:bg-gray-100 focus:text-gray-900'}>
+                                                        <span className="font-medium">{lease.tenant_name}</span>
+                                                    </SelectItem>
+                                                ))
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                    {selectedLease && (
+                                        <p className={`text-xs ml-1 ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
+                                            {selectedLease.property_address}
+                                        </p>
                                     )}
-                                </SelectContent>
-                            </Select>
-                            {selectedLease && (
-                                <p className={`text-xs ml-1 ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
-                                    {selectedLease.property_address}
-                                </p>
-                            )}
-                        </div>
+                                </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>Mois</label>
-                                <Select value={month} onValueChange={setMonth}>
-                                    <SelectTrigger className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'}>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}>
-                                        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                                            <SelectItem key={m} value={m.toString()}>
-                                                {new Date(0, m - 1).toLocaleString('fr-FR', { month: 'long' })}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>Mois</label>
+                                        <Select value={month} onValueChange={setMonth}>
+                                            <SelectTrigger className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}>
+                                                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                                                    <SelectItem key={m} value={m.toString()}>
+                                                        {new Date(0, m - 1).toLocaleString('fr-FR', { month: 'long' })}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>Année</label>
+                                        <Select value={year} onValueChange={setYear}>
+                                            <SelectTrigger className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}>
+                                                {[year, (parseInt(year) - 1).toString(), (parseInt(year) + 1).toString()].sort().map((y) => (
+                                                    <SelectItem key={y} value={y}>{y}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>Montant (FCFA)</label>
+                                    <input
+                                        type="number"
+                                        value={amount}
+                                        onChange={(e) => setAmount(e.target.value)}
+                                        className={`w-full border rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'
+                                            }`}
+                                    />
+                                </div>
+
+                                <div className="pt-2">
+                                    <Button
+                                        onClick={handleGenerate}
+                                        disabled={!selectedLease || !amount}
+                                        className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                                    >
+                                        Prévisualiser la Quittance
+                                    </Button>
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>Année</label>
-                                <Select value={year} onValueChange={setYear}>
-                                    <SelectTrigger className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'}>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}>
-                                        {[year, (parseInt(year) - 1).toString(), (parseInt(year) + 1).toString()].sort().map((y) => (
-                                            <SelectItem key={y} value={y}>{y}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
                         </div>
-
-                        <div className="space-y-2">
-                            <label className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>Montant (FCFA)</label>
-                            <input
-                                type="number"
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                className={`w-full border rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'
-                                    }`}
-                            />
-                        </div>
-
-                        <div className="pt-2">
-                            <Button
-                                onClick={handleGenerate}
-                                disabled={!selectedLease || !amount}
-                                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                            >
-                                Prévisualiser la Quittance
-                            </Button>
-                        </div>
-                    </div>
+                    </ConfigurationRequirementCheck>
                 </DialogContent>
             </Dialog>
 

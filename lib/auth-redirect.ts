@@ -58,7 +58,7 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
         // ===== 1. CHECK TEAM SUBSCRIPTION (PRIMARY - NEW ARCHITECTURE) =====
 
         // Récupérer le contexte d'équipe avec subscription (optimisé, 1 seul appel DB)
-        const { getUserTeamContext } = await import("@/lib/team-permissions.server");
+        const { getUserTeamContext, createPersonalTeam } = await import("@/lib/team-permissions.server");
         const teamContext = await getUserTeamContext();
 
         if (teamContext) {
@@ -86,6 +86,31 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
                     subscription_status: subscriptionStatus,
                 });
                 return "/gestion?upgrade=required";
+            }
+        }
+
+        // ===== 1b. AUTO-CREATE TEAM FOR EXPLICIT PLAN SIGNUP =====
+        // Si l'utilisateur a un selected_plan dans ses métadonnées (signup classique avec plan),
+        // créer automatiquement une équipe avec trial. Les users Google OAuth sans plan
+        // seront redirigés vers /bienvenue pour choisir leur parcours.
+        if (!teamContext && user.user_metadata?.selected_plan) {
+            console.log("🆕 User has selected_plan but no team, creating team...", {
+                plan: user.user_metadata.selected_plan,
+                userId: user.id,
+            });
+            const newTeam = await createPersonalTeam(
+                user.id,
+                user.email || "Utilisateur",
+                user.user_metadata
+            );
+            if (newTeam) {
+                trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
+                    from: "login",
+                    to: "/gestion",
+                    reason: "auto_team_created_with_plan",
+                    subscription_status: "trial",
+                });
+                return "/gestion";
             }
         }
 
@@ -152,16 +177,16 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
             return "/gestion";
         }
 
-        // ===== 5. FIRST LOGIN PROSPECT → /bienvenue =====
+        // ===== 5. FIRST LOGIN PROSPECT → modal bienvenue sur la vitrine =====
 
         if (profile?.first_login) {
-            console.log("✅ First login, showing /bienvenue");
+            console.log("✅ First login, showing welcome modal on vitrine");
             trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
                 from: "login",
-                to: "/bienvenue",
+                to: "/?welcome=true",
                 reason: "first_login",
             });
-            return "/bienvenue";
+            return "/?welcome=true";
         }
 
         // ===== 6. FALLBACK: Visitor → vitrine =====

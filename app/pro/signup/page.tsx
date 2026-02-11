@@ -166,7 +166,7 @@ export default function SignupPage() {
             } else if (result?.success) {
                 if (result.autoConfirmed) {
                     toast.success("Compte créé avec succès !");
-                    setTimeout(() => { router.push("/"); router.refresh(); }, 1500);
+                    setTimeout(() => { router.push("/pro/start"); router.refresh(); }, 1500);
                 } else if (result.emailSent) {
                     toast.success("Vérifiez votre email !");
                     setTimeout(() => { router.push(`/auth/check-email?email=${encodeURIComponent(email)}`); }, 1500);
@@ -282,7 +282,7 @@ export default function SignupPage() {
                         </motion.div>
 
                         {/* Tagline avec animation séparée */}
-                        
+
                     </motion.div>
                 </div>
 
@@ -294,7 +294,7 @@ export default function SignupPage() {
                     className="relative z-10 p-8 lg:p-12"
                 >
                     {/* Icon Badge */}
-                    
+
 
                     <motion.h2
                         variants={fadeInUp}
@@ -455,7 +455,7 @@ export default function SignupPage() {
                                     <motion.div variants={fadeInUp} className="grid gap-4 sm:grid-cols-2">
                                         {/* Full Name */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="fullName" className="text-sm font-medium text-white/70">
+                                            <Label htmlFor="fullName" className="text-sm font-medium text-white/70" required>
                                                 Nom complet
                                             </Label>
                                             <div className="relative">
@@ -486,7 +486,7 @@ export default function SignupPage() {
 
                                         {/* Phone */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="phone" className="text-sm font-medium text-white/70">
+                                            <Label htmlFor="phone" className="text-sm font-medium text-white/70" required>
                                                 Téléphone
                                             </Label>
                                             <PhoneInput
@@ -508,7 +508,7 @@ export default function SignupPage() {
 
                                     {/* Email */}
                                     <motion.div variants={fadeInUp} className="space-y-2">
-                                        <Label htmlFor="email" className="text-sm font-medium text-white/70">
+                                        <Label htmlFor="email" className="text-sm font-medium text-white/70" required>
                                             Adresse email
                                         </Label>
                                         <div className="relative">
@@ -540,7 +540,7 @@ export default function SignupPage() {
 
                                     {/* Password */}
                                     <motion.div variants={fadeInUp} className="space-y-2">
-                                        <Label htmlFor="password" className="text-sm font-medium text-white/70">
+                                        <Label htmlFor="password" className="text-sm font-medium text-white/70" required>
                                             Mot de passe
                                         </Label>
                                         <div className="relative">
@@ -596,7 +596,7 @@ export default function SignupPage() {
                                                     Force : <span className={cn(
                                                         "font-medium",
                                                         passwordStrength.score >= 4 ? "text-emerald-400" :
-                                                        passwordStrength.score >= 3 ? "text-yellow-400" : "text-white/70"
+                                                            passwordStrength.score >= 3 ? "text-yellow-400" : "text-white/70"
                                                     )}>{passwordStrength.label}</span>
                                                 </p>
                                             </motion.div>
@@ -605,7 +605,7 @@ export default function SignupPage() {
 
                                     {/* Confirm Password */}
                                     <motion.div variants={fadeInUp} className="space-y-2">
-                                        <Label htmlFor="confirmPassword" className="text-sm font-medium text-white/70">
+                                        <Label htmlFor="confirmPassword" className="text-sm font-medium text-white/70" required>
                                             Confirmer le mot de passe
                                         </Label>
                                         <div className="relative">

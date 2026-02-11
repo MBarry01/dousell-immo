@@ -15,6 +15,7 @@ import { RolePermissionsTable } from "./RolePermissionsTable";
 import { InviteMemberDialog } from "./InviteMemberDialog";
 import { AccessControlTab } from "./AccessControlTab";
 import type { Team, TeamMember, TeamRole, TeamStats } from "@/types/team";
+import { EquipeTour } from '@/components/gestion/tours/EquipeTour';
 
 interface TeamInvitation {
   id: string;
@@ -62,8 +63,9 @@ export function TeamPageClient({
 
   return (
     <div className="space-y-4 px-4 lg:space-y-6 lg:px-8">
+      <EquipeTour />
       {/* En-tête de la page */}
-      <div className={cn(
+      <div id="tour-team-header" className={cn(
         "rounded-2xl p-4 md:p-6",
         isDark
           ? "bg-gradient-to-r from-slate-800 to-slate-800/50 border border-slate-700"
@@ -113,7 +115,7 @@ export function TeamPageClient({
           {/* Stats rapides + Action */}
           <div className="flex items-center gap-4">
             {stats && (
-              <div className="hidden sm:flex items-center gap-4">
+              <div id="tour-team-stats" className="hidden sm:flex items-center gap-4">
                 <StatBadge
                   icon={<Users className="h-4 w-4" />}
                   value={stats.total_members}
@@ -145,7 +147,7 @@ export function TeamPageClient({
               <InviteMemberDialog
                 teamId={team.id}
                 trigger={
-                  <Button className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium">
+                  <Button id="tour-team-invite" className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium">
                     <UserPlus className="h-4 w-4 mr-2" />
                     Inviter
                   </Button>
@@ -157,7 +159,7 @@ export function TeamPageClient({
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs id="tour-team-tabs" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="w-full justify-start md:justify-center bg-transparent p-1 gap-1 md:gap-2 border border-slate-200 dark:border-slate-800 rounded-xl md:rounded-full overflow-x-auto overflow-y-hidden scrollbar-none">
           <TabsTrigger
             value="members"

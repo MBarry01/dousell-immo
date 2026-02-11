@@ -44,6 +44,7 @@ import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 import { uploadDocument, deleteDocument, getMyDocuments, getRentalDocuments } from "@/app/(workspace)/compte/mes-documents/actions";
 import { getProperties, getLeasesByOwner } from "../actions";
+import { DocumentsTour } from "@/components/gestion/tours/DocumentsTour";
 
 // Types
 type RentalDocument = {
@@ -197,7 +198,8 @@ export default function RentalDocumentsPage() {
             <div className="max-w-7xl mx-auto space-y-8">
 
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div id="tour-ged-header" className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <DocumentsTour />
                     <div>
                         <h1 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                             <Folder className="text-brand" weight="duotone" />
@@ -225,7 +227,7 @@ export default function RentalDocumentsPage() {
 
                             <div className="space-y-4 py-4">
                                 <div className="space-y-2">
-                                    <Label>Propriété concernée (Obligatoire)</Label>
+                                    <Label required>Propriété concernée</Label>
                                     <Select value={uploadPropertyId} onValueChange={setUploadPropertyId}>
                                         <SelectTrigger className={isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}>
                                             <SelectValue placeholder="Choisir un bien..." />
@@ -256,7 +258,7 @@ export default function RentalDocumentsPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>Catégorie (Obligatoire)</Label>
+                                    <Label required>Catégorie</Label>
                                     <Select value={uploadCategory} onValueChange={setUploadCategory}>
                                         <SelectTrigger className={isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}>
                                             <SelectValue placeholder="Type de document..." />

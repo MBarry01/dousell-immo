@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, Building2, Search, Filter, Grid, List, Eye, EyeOff, Clock } from "lucide-react";
 import { TeamPropertyCard } from "@/components/gestion/TeamPropertyCard";
 import { AssociateTenantDialog } from "@/components/gestion/AssociateTenantDialog";
+import { BiensTour } from "@/components/gestion/tours/BiensTour";
 import { togglePropertyPublication, deleteTeamProperty } from "./actions";
 import { useRouter } from "next/navigation";
 import type { TeamRole } from "@/types/team";
@@ -150,31 +151,35 @@ export function BiensClient({
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-7xl mx-auto px-4 py-8">
+        <BiensTour canCreate={canCreate} />
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-3">
-              <Building2 className="w-7 h-7 text-primary" />
+        <div id="tour-biens-header" className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8 text-left">
+          <div className="flex flex-col items-start">
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center justify-start gap-3">
+              <Building2 className="w-7 h-7 md:w-8 md:h-8 text-primary" />
               Biens de {teamName}
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-1 text-sm md:text-base">
               {stats.total} bien{stats.total > 1 ? "s" : ""} • {stats.published} en ligne
             </p>
           </div>
 
           {canCreate && (
-            <Link
-              href="/gestion/biens/nouveau"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md"
-            >
-              <Plus className="w-5 h-5" />
-              Ajouter un bien
-            </Link>
+            <div className="flex justify-start md:justify-end w-full md:w-auto">
+              <Link
+                href="/gestion/biens/nouveau"
+                id="tour-biens-add-button"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-lg w-full md:w-auto text-base"
+              >
+                <Plus className="w-5 h-5" />
+                Ajouter un bien
+              </Link>
+            </div>
           )}
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div id="tour-biens-stats" className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
             <div className="text-3xl font-bold">{stats.total}</div>
             <div className="text-sm text-muted-foreground">Total biens</div>
@@ -197,7 +202,7 @@ export function BiensClient({
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div id="tour-biens-search-filters" className="flex flex-col md:flex-row gap-4 mb-6">
           {/* Search */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />

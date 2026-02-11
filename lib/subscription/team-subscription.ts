@@ -7,7 +7,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 
-export type SubscriptionStatus = 'none' | 'trial' | 'active' | 'past_due' | 'expired' | 'canceled';
+export type SubscriptionStatus = 'none' | 'trial' | 'trialing' | 'active' | 'past_due' | 'unpaid' | 'incomplete' | 'expired' | 'canceled';
 export type SubscriptionTier = 'starter' | 'pro' | 'enterprise';
 
 export interface FeatureCheckResult {
@@ -53,7 +53,7 @@ export async function getTeamSubscriptionStatus(teamId: string): Promise<TeamSub
         const daysRemaining = trialEndsAt ? Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
 
         const isActive = team.subscription_status === 'active' ||
-            (team.subscription_status === 'trial' && daysRemaining > 0);
+            ((team.subscription_status === 'trial' || team.subscription_status === 'trialing') && daysRemaining > 0);
 
         return {
             status: team.subscription_status as SubscriptionStatus,
@@ -124,6 +124,8 @@ export async function requireActiveSubscription(teamId: string): Promise<{
                 : 'Abonnement expiré. Veuillez renouveler pour continuer.';
         } else if (subscription.status === 'canceled') {
             errorMessage = 'Abonnement annulé. Veuillez réactiver pour continuer.';
+        } else if (subscription.status === 'past_due' || subscription.status === 'unpaid') {
+            errorMessage = 'Paiement en attente ou échoué. Veuillez régulariser votre situation.';
         }
 
         return {
@@ -159,7 +161,7 @@ export async function activateTeamTrial(
     const { error } = await supabase
         .from('teams')
         .update({
-            subscription_status: 'trial',
+            subscription_status: 'trialing',
             subscription_trial_ends_at: trialEndsAt.toISOString(),
             subscription_started_at: new Date().toISOString(),
             subscription_tier: 'pro',

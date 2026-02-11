@@ -105,10 +105,11 @@ export async function getUserTeamContext(preferredTeamId?: string): Promise<User
             .maybeSingle();
 
         if (!membership?.team) {
-            // AUTO-FIX: Créer une équipe personnelle pour l'utilisateur
-            console.log(`[Auto-Team] Creating personal team for user ${user.id}`);
-            const newTeamContext = await createPersonalTeam(user.id, user.email || "Utilisateur", user.user_metadata);
-            return newTeamContext;
+            // Pas d'équipe trouvée - retourner null
+            // La création d'équipe se fait explicitement via createPersonalTeam()
+            // appelé depuis auth-redirect.ts quand l'utilisateur a un selected_plan
+            console.log(`[getUserTeamContext] No team for user ${user.id}, returning null`);
+            return null;
         }
 
         const teamData = membership.team;
@@ -147,9 +148,11 @@ export async function getUserTeamContext(preferredTeamId?: string): Promise<User
 }
 
 /**
- * Crée une équipe personnelle pour un utilisateur qui n'en a pas
+ * Crée une équipe personnelle pour un utilisateur qui n'en a pas.
+ * Appelé explicitement depuis auth-redirect.ts quand l'utilisateur a un selected_plan,
+ * ou depuis /pro/start quand l'utilisateur active manuellement son essai.
  */
-async function createPersonalTeam(userId: string, userEmail: string, metadata?: any): Promise<UserTeamContext | null> {
+export async function createPersonalTeam(userId: string, userEmail: string, metadata?: Record<string, unknown>): Promise<UserTeamContext | null> {
     const supabase = await createClient();
 
     // Générer un slug unique

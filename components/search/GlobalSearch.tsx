@@ -130,7 +130,7 @@ export function GlobalSearch() {
                 <Input
                     type="search"
                     placeholder="Rechercher un bien, une ville..."
-                    className="pl-9 bg-muted/50 border-0 focus-visible:ring-1 w-full"
+                    className="pl-9 bg-white/5 border-white/10 focus-visible:ring-primary/50 focus-visible:ring-offset-0 focus-visible:bg-white/10 transition-all w-full rounded-2xl placeholder:text-white/40"
                     value={query}
                     onChange={(e) => {
                         setQuery(e.target.value);

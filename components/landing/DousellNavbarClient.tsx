@@ -1,7 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import AceNavbar, { NavbarConfig } from "@/components/ui/ace-navbar";
+
+// Routes where the navbar should be hidden
+const HIDDEN_ROUTES = ["/pro/start"];
 
 const dousellConfig: NavbarConfig = {
     logo: {
@@ -28,7 +31,7 @@ const dousellConfig: NavbarConfig = {
             items: [
                 {
                     title: "Gestion Locative",
-                    href: "/gestion",
+                    href: "/pro/start",
                     src: "/images/gestionNav1.webp",
                     description:
                         "Automatisez l'envoi des quittances et encaissez vos loyers sans stress.",
@@ -69,7 +72,7 @@ const dousellConfig: NavbarConfig = {
     },
     cta: {
         text: "Essai Gratuit",
-        href: "/landing/commencer",
+        href: "/pro/start",
     },
 };
 
@@ -82,7 +85,7 @@ const loggedInCta = {
 // Configuration pour visiteur (mode propriétaire)
 const visitorOwnerCta = {
     text: "Essai Gratuit",
-    href: "/landing/commencer",
+    href: "/pro/start",
 };
 
 // Configuration pour visiteur (mode locataire/chercher un bien)
@@ -103,13 +106,15 @@ export default function DousellNavbarClient({
     isLoggedIn = false,
     ctaOverride
 }: DousellNavbarClientProps) {
-    // Lire le mode directement depuis l'URL côté client
+    const pathname = usePathname();
     const searchParams = useSearchParams();
     const urlMode = searchParams.get("mode");
     const userMode = (urlMode === "tenant" || urlMode === "owner") ? urlMode : "owner";
 
     // État pour la section active au scroll
     const [activeSection, setActiveSection] = useState<string | null>(null);
+
+    const isHidden = HIDDEN_ROUTES.some(route => pathname?.startsWith(route));
 
     // Observer les sections pour changer le bouton dynamiquement
     useEffect(() => {
@@ -138,6 +143,9 @@ export default function DousellNavbarClient({
         return () => observer.disconnect();
     }, [userMode]); // Ré-exécuter si le mode change (sections différentes affichées)
 
+    // Masquer la navbar sur certaines routes (ex: onboarding wizard)
+    if (isHidden) return null;
+
     // Calcul du CTA dynamique
     const getDynamicCta = () => {
         // 1. Override manuel (props)
@@ -150,12 +158,12 @@ export default function DousellNavbarClient({
             switch (activeSection) {
                 case "pricing":
                     // Offre toujours pertinente même si connecté (upgrade ?)
-                    return { text: "Choisir une offre", href: "/landing/commencer" };
+                    return { text: "Choisir une offre", href: "/pro/start" };
                 case "demo":
                 case "features":
                     return isLoggedIn
                         ? { text: "Mon Espace", href: "/gestion" }
-                        : { text: "Commencer gratuitement", href: "/landing/commencer" };
+                        : { text: "Commencer gratuitement", href: "/pro/start" };
                 case "hero":
                 default:
                     return isLoggedIn

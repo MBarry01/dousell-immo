@@ -115,7 +115,7 @@ const UserIcon = ({ filled }: { filled: boolean }) => (
 const navItems = [
   { href: "/", label: "Accueil", Icon: HomeIcon },
   { href: "/recherche", label: "Annonce", Icon: SearchIcon },
-  { href: "/gestion", label: "Gestion", Icon: BuildingIcon },
+  { href: "/pro/start", label: "Gestion", Icon: BuildingIcon },
   { href: "/compte", label: "Compte", Icon: UserIcon },
 ];
 

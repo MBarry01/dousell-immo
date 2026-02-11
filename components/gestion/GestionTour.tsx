@@ -9,7 +9,7 @@ export function GestionTour() {
     const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_gestion_tour', 1500);
     const { isDark } = useTheme();
     const [mounted, setMounted] = useState(false);
-    const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
+    const [isBottomNavVisible, setIsBottomNavVisible] = useState(false); // Initialize as false
     const [isMobile, setIsMobile] = useState(false);
 
     // Attendre que le composant soit monté côté client
@@ -37,6 +37,23 @@ export function GestionTour() {
         const scrollContainer = document.querySelector("main.overflow-y-auto");
         if (!scrollContainer) return;
 
+        // Initialisation immédiate
+        const initVisibility = () => {
+            if (scrollContainer.scrollTop > 100) {
+                setIsBottomNavVisible(false);
+            } else {
+                setIsBottomNavVisible(true);
+            }
+            // On met à jour lastScrollY pour éviter des sauts
+            lastScrollY = scrollContainer.scrollTop;
+        };
+
+        // 1. Check immédiat
+        initVisibility();
+
+        // 2. Check retardé pour la restauration du scroll navigateur
+        const timeoutId = setTimeout(initVisibility, 100);
+
         let lastScrollY = scrollContainer.scrollTop;
         let ticking = false;
 
@@ -46,7 +63,7 @@ export function GestionTour() {
                     const currentScrollY = scrollContainer.scrollTop;
                     const scrollDelta = currentScrollY - lastScrollY;
 
-                    // Même logique que la bottom nav
+                    // Seuil de 10px pour éviter les micro-mouvements
                     if (Math.abs(scrollDelta) > 10) {
                         if (scrollDelta > 0 && currentScrollY > 100) {
                             // Scroll vers le bas -> bottom nav cachée
@@ -77,28 +94,28 @@ export function GestionTour() {
             targetId: 'tour-gestion-kpi-cards',
             title: 'Statistiques en temps réel',
             description: 'Suivez vos indicateurs clés : taux d\'occupation, délais de paiement, taux d\'impayés et revenu moyen par bien.',
-            imageSrc: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=600',
+            imageSrc: 'https://images.unsplash.com/photo-1543286386-713df548e617?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Statistiques de gestion'
         },
         {
             targetId: 'tour-gestion-actions',
             title: 'Actions rapides',
             description: 'Générez vos documents (contrats, quittances, états des lieux) et ajoutez de nouveaux locataires en quelques clics.',
-            imageSrc: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=600',
+            imageSrc: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Actions de gestion'
         },
         {
             targetId: 'tour-gestion-table',
             title: 'Gestion des baux',
             description: 'Visualisez tous vos baux actifs, suivez les paiements, envoyez des relances et gérez vos locataires.',
-            imageSrc: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600',
+            imageSrc: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Tableau de gestion'
         },
         {
             targetId: 'tour-gestion-revenue-chart',
             title: 'Historique des revenus',
             description: 'Analysez vos revenus collectés et attendus sur les 12 derniers mois pour mieux piloter votre activité.',
-            imageSrc: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600',
+            imageSrc: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Graphique des revenus'
         }
     ], []);
@@ -140,6 +157,19 @@ export function GestionTour() {
         document.body
     ) : null;
 
+    // Callback pour changer de tab selon l'étape du tour
+    const handleStepChange = (index: number) => {
+        const step = tourSteps[index];
+        if (!step) return;
+
+        // Switch de tab basé sur le targetId
+        if (step.targetId === 'tour-gestion-kpi-cards' || step.targetId === 'tour-gestion-revenue-chart') {
+            window.dispatchEvent(new CustomEvent('dousell-tour-switch-tab', { detail: 'performance' }));
+        } else if (step.targetId === 'tour-gestion-table' || step.targetId === 'tour-gestion-actions') {
+            window.dispatchEvent(new CustomEvent('dousell-tour-switch-tab', { detail: 'overview' }));
+        }
+    };
+
     return (
         <>
             <OnboardingTour
@@ -149,10 +179,11 @@ export function GestionTour() {
                 onComplete={closeTour}
                 storageKey="dousell_gestion_tour"
                 isDark={isDark}
+                onStepChange={handleStepChange}
             />
 
-            {/* Bouton flottant monté directement dans le body via Portal */}
-            {floatingButton}
+            {/* Bouton flottant monté directement dans le body via Portal, caché pendant le tour */}
+            {!showTour && floatingButton}
         </>
     );
 }

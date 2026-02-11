@@ -20,6 +20,7 @@ import {
   ExternalLink,
   Sparkles,
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { AddressAutocomplete } from "@/components/forms/address-autocomplete";
 import { OwnerSelector } from "@/components/gestion/OwnerSelector";
 import { createClient } from "@/utils/supabase/client";
@@ -359,7 +360,7 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
             {expandedSections.general && (
               <div className="p-4 pt-0 space-y-4">
                 <div>
-                  <label className="block text-sm text-muted-foreground mb-2">Titre</label>
+                  <Label className="block text-sm text-muted-foreground mb-2" required>Titre</Label>
                   <input
                     type="text"
                     value={formData.title}
@@ -368,9 +369,9 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-muted-foreground mb-2">
+                  <Label className="block text-sm text-muted-foreground mb-2" required>
                     Prix (FCFA) {property.category === "location" && "/ mois"}
-                  </label>
+                  </Label>
                   <input
                     type="number"
                     value={formData.price}
@@ -407,7 +408,7 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
             {expandedSections.location && (
               <div className="p-4 pt-0">
                 <div>
-                  <label className="block text-sm text-muted-foreground mb-3">Adresse complète du bien</label>
+                  <Label className="block text-sm text-muted-foreground mb-3" required>Adresse complète du bien</Label>
 
                   <AddressAutocomplete
                     defaultValue={formData.address}

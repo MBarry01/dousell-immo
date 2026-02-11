@@ -1,6 +1,8 @@
 "use client";
 
-import { ReactNode, useMemo } from "react";
+export const dynamic = 'force-dynamic';
+
+import { ReactNode, Suspense, useMemo } from "react";
 import { usePathname } from "next/navigation";
 
 import { BottomNav } from "@/components/navigation/bottom-nav";
@@ -8,6 +10,7 @@ import { Header } from "@/components/navigation/header";
 import { Footer } from "@/components/layout/footer";
 import { ScrollToTop } from "@/components/layout/scroll-to-top";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { WelcomeModal } from "@/components/welcome-modal";
 
 type BreadcrumbItem = {
   label: string;
@@ -98,6 +101,7 @@ export default function VitrineLayout({ children }: VitrineLayoutProps) {
     return (
       <div className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
         <ScrollToTop />
+        <Suspense><WelcomeModal /></Suspense>
         {children}
       </div>
     );
@@ -106,6 +110,7 @@ export default function VitrineLayout({ children }: VitrineLayoutProps) {
   return (
     <div className="dark min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
       <ScrollToTop />
+      <Suspense><WelcomeModal /></Suspense>
       <div className="px-4 md:px-6 print:hidden">
         <Header />
       </div>

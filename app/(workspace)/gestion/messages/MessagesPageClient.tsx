@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { MessagesTour } from '@/components/gestion/tours/MessagesTour';
 
 interface Lease {
     id: string;
@@ -30,7 +31,8 @@ export function MessagesPageClient({
 
     return (
         <div className="space-y-6 p-4 md:p-6">
-            <div className="flex items-center justify-between">
+            <MessagesTour />
+            <div id="tour-msg-header" className="flex items-center justify-between">
                 <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     Messagerie
                 </h1>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
     Dialog,
     DialogContent,
@@ -97,9 +98,9 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                 <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground/80">
-                                Nom complet <span className="text-destructive">*</span>
-                            </label>
+                            <Label htmlFor="tenant_name" className="text-sm font-medium text-foreground/80" required>
+                                Nom complet
+                            </Label>
                             <Input
                                 name="tenant_name"
                                 required
@@ -109,9 +110,9 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground/80">
-                                Téléphone <span className="text-destructive">*</span>
-                            </label>
+                            <Label htmlFor="tenant_phone" className="text-sm font-medium text-foreground/80" required>
+                                Téléphone
+                            </Label>
                             <Input
                                 name="tenant_phone"
                                 required
@@ -123,9 +124,9 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground/80">
-                            Email <span className="text-destructive">*</span>
-                        </label>
+                        <Label htmlFor="tenant_email" className="text-sm font-medium text-foreground/80" required>
+                            Email
+                        </Label>
                         <Input
                             name="tenant_email"
                             type="email"
@@ -137,9 +138,9 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground/80">
-                            Adresse du bien <span className="text-destructive">*</span>
-                        </label>
+                        <Label htmlFor="property_address" className="text-sm font-medium text-foreground/80" required>
+                            Adresse du bien
+                        </Label>
                         <Input
                             name="property_address"
                             required
@@ -151,9 +152,9 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground/80">
-                                Loyer (FCFA) <span className="text-destructive">*</span>
-                            </label>
+                            <Label htmlFor="monthly_amount" className="text-sm font-medium text-foreground/80" required>
+                                Loyer (FCFA)
+                            </Label>
                             <Input
                                 name="monthly_amount"
                                 type="number"
@@ -164,9 +165,9 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground/80">
-                                Jour paiement <span className="text-destructive">*</span>
-                            </label>
+                            <Label htmlFor="billing_day" className="text-sm font-medium text-foreground/80" required>
+                                Jour paiement
+                            </Label>
                             <Input
                                 name="billing_day"
                                 type="number"
@@ -178,9 +179,9 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground/80">
-                                Début bail <span className="text-destructive">*</span>
-                            </label>
+                            <Label htmlFor="start_date" className="text-sm font-medium text-foreground/80" required>
+                                Début bail
+                            </Label>
                             <Input
                                 name="start_date"
                                 type="date"
@@ -192,10 +193,9 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground/80">
-                            Fin bail <span className="text-destructive">*</span>
-                            <span className="text-xs text-muted-foreground ml-2">(pour les alertes juridiques J-180 et J-90)</span>
-                        </label>
+                        <Label htmlFor="end_date" className="text-sm font-medium text-foreground/80" required>
+                            Fin bail <span className="text-xs text-muted-foreground ml-2">(pour les alertes juridiques J-180 et J-90)</span>
+                        </Label>
                         <Input
                             name="end_date"
                             type="date"

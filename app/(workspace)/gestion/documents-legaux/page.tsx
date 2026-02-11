@@ -1,4 +1,5 @@
 import { getLegalStats, getLeaseAlerts, getAllActiveLeases } from "./actions";
+import { getOwnerProfileForReceipts } from "@/services/rentalService.cached";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { LegalPageClient } from "./LegalPageClient";
@@ -13,11 +14,7 @@ export default async function LegalAssistantPage() {
         redirect('/auth');
     }
 
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+    const profile = await getOwnerProfileForReceipts(user.id);
 
     const stats = await getLegalStats();
     const alerts = await getLeaseAlerts();

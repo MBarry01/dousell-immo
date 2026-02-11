@@ -156,8 +156,8 @@ export const QuickSearch = () => {
                   key={suggestion}
                   type="button"
                   className={`w-full flex items-center gap-2 px-4 py-3 text-left text-sm rounded-lg transition-colors cursor-pointer ${index === selectedIndex
-                      ? "bg-primary/20 text-white"
-                      : "text-white/80 hover:bg-white/10 hover:text-white"
+                    ? "bg-primary/20 text-white"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
                     }`}
                   onMouseDown={(e) => {
                     e.preventDefault();
@@ -319,6 +319,32 @@ export const QuickSearch = () => {
             Rechercher
           </Button>
         </form>
+
+        {/* Quick Filters - Audited from vitrine content */}
+        <div className="mt-6 flex flex-wrap gap-2">
+          <span className="text-sm text-white/40 mr-2 flex items-center">Accès rapide :</span>
+          {[
+            { label: "Dakar", filters: { q: "Dakar", category: "location" } },
+            { label: "Ventes", filters: { category: "vente" } },
+            { label: "Terrains", filters: { category: "vente", type: "Terrain" } },
+            { label: "Appartements", filters: { type: "Appartement" } },
+          ].map((chip) => (
+            <button
+              key={chip.label}
+              type="button"
+              className="px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs text-white/70 hover:bg-primary/20 hover:border-primary/50 hover:text-white transition-all"
+              onClick={() => {
+                const params = new URLSearchParams();
+                if (chip.filters.q) params.set("q", chip.filters.q);
+                if (chip.filters.category) params.set("category", chip.filters.category);
+                if (chip.filters.type) params.set("type", chip.filters.type as string);
+                router.push(`/recherche?${params.toString()}`);
+              }}
+            >
+              {chip.label}
+            </button>
+          ))}
+        </div>
       </motion.section>
 
       <FilterDrawer

@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase-admin";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import { NextResponse } from "next/server";
 import { differenceInDays } from "date-fns";
 
@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        const supabase = createAdminClient();
+        const supabase = supabaseAdmin;
         const today = new Date();
 
         console.log('=== DEBUG REMINDERS ===');

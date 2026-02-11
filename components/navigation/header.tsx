@@ -4,7 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
+import { useState } from "react";
+import { GlobalSearch } from "@/components/search/GlobalSearch";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -25,6 +27,7 @@ export const Header = () => {
   const router = useRouter();
   const { user, loading } = useAuth();
   const scrollY = useScrollPosition();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const isActiveLink = useMemo(
     () => (href: string) => pathname === href,
@@ -67,48 +70,77 @@ export const Header = () => {
               alt="Dousell Immo"
               width={120}
               height={40}
-              className="h-8 w-auto"
+              className={cn("h-8 w-auto transition-opacity", isSearchOpen && "opacity-0 invisible w-0")}
               priority
             />
           </Link>
 
-          {/* Actions droite - Connecté */}
-          {!loading && user && (
-            <div className="flex items-center gap-2">
-              <Link
-                id="tour-home-add-mobile"
-                href="/compte/deposer"
-                className="relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-                aria-label="Déposer une annonce"
-              >
-                <Plus className="h-5 w-5 text-white" />
-              </Link>
-              <NotificationBell
-                userId={user.id}
-                className="hover:bg-white/10 text-white hover:text-white"
-              />
-              {/* Menu utilisateur avec avatar */}
-              <div id="tour-home-menu-mobile" className="relative" style={{ zIndex: 2 }}>
-                <UserNav />
-              </div>
+          {/* Mobile Search Bar Expandable */}
+          <div className={cn(
+            "absolute left-4 right-4 flex items-center transition-all duration-300",
+            isSearchOpen ? "opacity-100 translate-x-0" : "opacity-0 pointer-events-none translate-x-4"
+          )}>
+            <div className="flex-1">
+              <GlobalSearch />
             </div>
-          )}
-
-          {/* Bouton "Se connecter" si non connecté */}
-          {!loading && !user && (
             <Button
-              size="sm"
-              className="rounded-xl px-4 text-sm transition-all hover:scale-105 active:scale-95"
-              onClick={() => router.push("/login")}
+              variant="ghost"
+              size="icon"
+              className="ml-2 h-9 w-9 text-white/70"
+              onClick={() => setIsSearchOpen(false)}
             >
-              Se connecter
+              <X className="h-5 w-5" />
             </Button>
-          )}
+          </div>
 
-          {/* Placeholder pendant le chargement */}
-          {loading && (
-            <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
-          )}
+          <div className={cn("flex items-center gap-1 transition-opacity", isSearchOpen && "opacity-0 invisible")}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 text-white/70"
+              onClick={() => setIsSearchOpen(true)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+
+            {/* Actions droite - Connecté */}
+            {!loading && user && (
+              <div className="flex items-center gap-2">
+                <Link
+                  id="tour-home-add-mobile"
+                  href="/compte/deposer"
+                  className="relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  aria-label="Déposer une annonce"
+                >
+                  <Plus className="h-5 w-5 text-white" />
+                </Link>
+                <NotificationBell
+                  userId={user.id}
+                  className="hover:bg-white/10 text-white hover:text-white"
+                />
+                {/* Menu utilisateur avec avatar */}
+                <div id="tour-home-menu-mobile" className="relative" style={{ zIndex: 2 }}>
+                  <UserNav />
+                </div>
+              </div>
+            )}
+
+            {/* Bouton "Se connecter" si non connecté */}
+            {!loading && !user && (
+              <Button
+                size="sm"
+                className="rounded-xl px-4 text-sm transition-all hover:scale-105 active:scale-95"
+                onClick={() => router.push("/login")}
+              >
+                Se connecter
+              </Button>
+            )}
+
+            {/* Placeholder pendant le chargement */}
+            {loading && (
+              <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
+            )}
+          </div>
         </div>
       </header>
 
@@ -136,6 +168,12 @@ export const Header = () => {
               priority
             />
           </Link>
+
+          {/* Search Bar - Desktop */}
+          <div className="flex-1 max-w-[320px] lg:max-w-md mx-6">
+            <GlobalSearch />
+          </div>
+
           <nav className="flex items-center gap-5 text-sm font-medium text-white/70 lg:gap-6">
             {navLinks.map((link) => {
               const isActive = isActiveLink(link.href);

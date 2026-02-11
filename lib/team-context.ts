@@ -51,7 +51,11 @@ export const getUserTeamContext = cache(async () => {
                 company_email,
                 company_ninea,
                 logo_url,
-                signature_url
+                signature_url,
+                stripe_account_id,
+                stripe_account_status,
+                stripe_charges_enabled,
+                stripe_payouts_enabled
             )
         `)
         .eq('user_id', user.id)

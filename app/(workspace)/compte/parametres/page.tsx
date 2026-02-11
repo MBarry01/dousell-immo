@@ -206,8 +206,8 @@ export default function ParametresPage() {
   }
 
   return (
-    <div className="space-y-6 py-6">
-      <FadeIn>
+    <div className="px-4 py-4">
+      <FadeIn className="space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Link href="/compte">
@@ -229,14 +229,14 @@ export default function ParametresPage() {
 
         {/* Avatar Section */}
         <Card className="border-border bg-card">
-          <CardHeader>
-            <CardTitle className="text-foreground">Photo de profil</CardTitle>
-            <CardDescription className="text-muted-foreground">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg sm:text-xl text-foreground">Photo de profil</CardTitle>
+            <CardDescription className="text-muted-foreground text-xs sm:text-sm">
               Personnalisez votre avatar
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               {/* Avatar Display */}
               <div className="relative">
                 <div className="h-24 w-24 rounded-full overflow-hidden bg-muted border-2 border-border">
@@ -272,8 +272,8 @@ export default function ParametresPage() {
               </div>
 
               {/* Avatar Actions */}
-              <div className="flex-1 space-y-3">
-                <div className="space-y-2">
+              <div className="flex-1 w-full space-y-4">
+                <div className="space-y-2 text-center sm:text-left">
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -281,17 +281,17 @@ export default function ParametresPage() {
                     onChange={handleFileChange}
                     className="hidden"
                   />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     JPG, PNG ou WebP. Max 5MB.
                   </p>
                 </div>
 
                 {avatarPreview ? (
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                     <Button
                       onClick={handleUploadAvatar}
                       disabled={isUploadingAvatar}
-                      className="bg-primary text-primary-foreground hover:bg-primary/90"
+                      className="flex-1 sm:flex-none bg-primary text-primary-foreground hover:bg-primary/90 text-xs sm:text-sm"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       {isUploadingAvatar ? "Upload..." : "Enregistrer"}
@@ -300,18 +300,18 @@ export default function ParametresPage() {
                       onClick={handleCancelPreview}
                       variant="outline"
                       disabled={isUploadingAvatar}
-                      className="border-border bg-background text-foreground hover:bg-accent"
+                      className="flex-1 sm:flex-none border-border bg-background text-foreground hover:bg-accent text-xs sm:text-sm"
                     >
                       Annuler
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                     <Button
                       onClick={() => fileInputRef.current?.click()}
                       variant="outline"
                       disabled={isUploadingAvatar || isDeletingAvatar}
-                      className="border-border bg-background text-foreground hover:bg-accent"
+                      className="flex-1 sm:flex-none border-border bg-background text-foreground hover:bg-accent text-xs sm:text-sm"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Choisir une photo
@@ -321,10 +321,10 @@ export default function ParametresPage() {
                         onClick={handleDeleteAvatar}
                         variant="outline"
                         disabled={isUploadingAvatar || isDeletingAvatar}
-                        className="border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20"
+                        className="flex-1 sm:flex-none border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs sm:text-sm"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        {isDeletingAvatar ? "Suppression..." : "Supprimer"}
+                        {isDeletingAvatar ? "Suppr..." : "Supprimer"}
                       </Button>
                     )}
                   </div>
@@ -445,7 +445,7 @@ export default function ParametresPage() {
           </CardContent>
         </Card>
       </FadeIn>
-    </div>
+    </div >
   );
 }
 

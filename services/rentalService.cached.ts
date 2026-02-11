@@ -318,7 +318,7 @@ export async function getOwnerProfileForReceipts(ownerId: string) {
         supabase
           .from("profiles")
           .select(
-            "company_name, company_address, company_email, company_ninea, signature_url, logo_url, full_name"
+            "company_name, company_address, company_email, company_ninea, signature_url, logo_url, full_name, phone"
           )
           .eq("id", ownerId)
           .maybeSingle(),
@@ -356,11 +356,11 @@ export async function getOwnerProfileForReceipts(ownerId: string) {
       // Fusionner les données (Priorité Team > Profil)
       return {
         ...(profile || {}),
-        company_name: teamData?.name || profile?.company_name,
-        company_address: teamData?.company_address || profile?.company_address,
-        company_email: teamData?.company_email || profile?.company_email,
-        company_ninea: teamData?.company_ninea || profile?.company_ninea,
-        company_phone: teamData?.company_phone || null,
+        company_name: teamData?.name || profile?.company_name || null,
+        company_address: teamData?.company_address || profile?.company_address || null,
+        company_email: teamData?.company_email || profile?.company_email || null,
+        company_ninea: teamData?.company_ninea || profile?.company_ninea || null,
+        company_phone: teamData?.company_phone || profile?.phone || null,
         logo_url: teamData?.logo_url || profile?.logo_url,
         signature_url: teamData?.signature_url || profile?.signature_url,
       };

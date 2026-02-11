@@ -39,6 +39,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -476,7 +477,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
 
               {/* Title */}
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Titre de l'annonce</label>
+                <Label className="text-sm text-muted-foreground mb-2 block" required>Titre de l'annonce</Label>
                 <input
                   type="text"
                   value={formData.title}
@@ -488,9 +489,9 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
 
               {/* Price */}
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">
+                <Label className="text-sm text-muted-foreground mb-2 block" required>
                   Prix {formData.category === "location" ? "mensuel" : "de vente"}
-                </label>
+                </Label>
                 <div className="relative">
                   <input
                     type="number"
@@ -511,7 +512,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
           {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div>
-                <label className="text-sm text-muted-foreground mb-3 block">Adresse complète du bien</label>
+                <Label className="text-sm text-muted-foreground mb-3 block" required>Adresse complète du bien</Label>
 
                 <AddressAutocomplete
                   defaultValue={formData.address}

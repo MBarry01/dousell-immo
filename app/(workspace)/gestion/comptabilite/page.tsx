@@ -42,6 +42,7 @@ import { AddExpenseDialog } from './components/AddExpenseDialog';
 import { ExpenseList } from './components/ExpenseList';
 import { ProfitabilityTable } from './components/ProfitabilityTable';
 import { FeatureLockedState } from '@/components/gestion/FeatureLockedState';
+import { ComptabiliteTour } from '@/components/gestion/tours/ComptabiliteTour';
 
 interface MonthlyData {
     month: string;
@@ -235,6 +236,7 @@ export default function ComptabilitePage() {
 
     return (
         <div className={`p-4 md:p-6 space-y-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <ComptabiliteTour />
             {/* Header */}
             <div className="flex flex-col gap-4">
                 <div>

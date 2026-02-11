@@ -162,7 +162,7 @@ export function OrphanLeasesAlert({ count, leases }: OrphanLeasesAlertProps) {
                                                     <SelectItem
                                                         key={prop.id}
                                                         value={prop.id}
-                                                        className="text-foreground focus:bg-accent focus:text-accent-foreground"
+                                                        className="focus:bg-accent focus:text-accent-foreground"
                                                     >
                                                         <div className="flex items-center gap-2">
                                                             <Home className="w-4 h-4 text-primary" />

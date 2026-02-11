@@ -51,33 +51,44 @@ export default async function DashboardContent({
 
     const results = await Promise.allSettled([
         (async () => {
+            console.log(LOG_PREFIX, "▶ start profile");
             const t = Date.now();
             const r = await getOwnerProfileForReceipts(user.id);
             fetchTimers.profile = Date.now() - t;
+            console.log(LOG_PREFIX, "✓ end profile", fetchTimers.profile);
             return r;
         })(),
         (async () => {
+            console.log(LOG_PREFIX, "▶ start leases");
             const t = Date.now();
+            // Force status "all" explicitly
             const r = await getLeasesByOwner(teamId, "all");
             fetchTimers.leases = Date.now() - t;
+            console.log(LOG_PREFIX, "✓ end leases", fetchTimers.leases);
             return r;
         })(),
         (async () => {
+            console.log(LOG_PREFIX, "▶ start transactions");
             const t = Date.now();
             const r = await getRentalTransactions([], teamId);
             fetchTimers.transactions = Date.now() - t;
+            console.log(LOG_PREFIX, "✓ end transactions", fetchTimers.transactions);
             return r;
         })(),
         (async () => {
+            console.log(LOG_PREFIX, "▶ start expenses");
             const t = Date.now();
             const r = await getExpensesByOwner(teamId);
             fetchTimers.expenses = Date.now() - t;
+            console.log(LOG_PREFIX, "✓ end expenses", fetchTimers.expenses);
             return r;
         })(),
         (async () => {
+            console.log(LOG_PREFIX, "▶ start properties");
             const t = Date.now();
             const r = await supabase.from("properties").select("*", { count: "exact", head: true }).eq("team_id", teamId);
             fetchTimers.properties = Date.now() - t;
+            console.log(LOG_PREFIX, "✓ end properties", fetchTimers.properties);
             return r;
         })(),
     ]);

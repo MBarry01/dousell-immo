@@ -11,11 +11,12 @@ import {
     Clock,
     Sparkle,
     Crown,
-    Rocket
+    Rocket,
+    Receipt,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { getAllPlans, formatPrice, TRIAL_DURATION_DAYS } from "@/lib/subscription/plans-config";
+import { getAllPlans, formatPrice, getAnnualSavings, TRIAL_DURATION_DAYS, type BillingCycle } from "@/lib/subscription/plans-config";
 
 export function SubscriptionManager() {
     const router = useRouter();
@@ -25,7 +26,8 @@ export function SubscriptionManager() {
     const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
     const [trialEndsAt, setTrialEndsAt] = useState<Date | null>(null);
     const [stats, setStats] = useState({ properties: 0, leases: 0 });
-    const [teamId, setTeamId] = useState<string | null>(null);
+    const [hasStripeCustomer, setHasStripeCustomer] = useState(false);
+    const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
 
     useEffect(() => {
         const loadData = async () => {
@@ -34,33 +36,32 @@ export function SubscriptionManager() {
 
             if (!user) return;
 
-            // Get Team Info - Handle multiple teams by taking the first active one
-            // Ideally should use a context provider, but for now we fix the crash
             const { data: teamMemberships } = await supabase
                 .from("team_members")
                 .select("team_id, team:teams(*)")
                 .eq("user_id", user.id)
                 .eq("status", "active");
 
-            // Take the first team found
             const teamMembership = teamMemberships && teamMemberships.length > 0 ? teamMemberships[0] : null;
-
-            const team = teamMembership?.team as { subscription_status?: string; subscription_tier?: string; subscription_trial_ends_at?: string } | null;
+            const team = teamMembership?.team as {
+                subscription_status?: string;
+                subscription_tier?: string;
+                subscription_trial_ends_at?: string;
+                stripe_customer_id?: string;
+            } | null;
             const tId = teamMembership?.team_id;
-            setTeamId(tId || null);
-
-            console.log("SubscriptionManager Team:", { tId, team });
 
             if (team) {
                 setProStatus(team.subscription_status || null);
-                setSubscriptionTier(team.subscription_tier || null);
+                // Default to 'starter' if no tier is set (free plan)
+                setSubscriptionTier(team.subscription_tier || 'starter');
+                setHasStripeCustomer(!!team.stripe_customer_id);
                 if (team.subscription_trial_ends_at) {
                     setTrialEndsAt(new Date(team.subscription_trial_ends_at));
                 }
             }
 
             if (tId) {
-                // Get user stats only if we have a valid team ID
                 const { count: propertiesCount } = await supabase
                     .from("properties")
                     .select("*", { count: "exact", head: true })
@@ -92,8 +93,8 @@ export function SubscriptionManager() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     planId,
-                    interval: 'monthly', // Default to monthly for dashboard upgrade
-                    currency: 'xof'      // Default to XOF for dashboard upgrade
+                    interval: billingCycle,
+                    currency: 'xof',
                 }),
             });
 
@@ -101,9 +102,28 @@ export function SubscriptionManager() {
             if (data.url) {
                 window.location.href = data.url;
             } else {
-                toast.error(data.error || "Erreur lors de l'initialisation du paiement");
+                toast.error(data.error || "Erreur lors de l&apos;initialisation du paiement");
             }
-        } catch (error) {
+        } catch {
+            toast.error("Une erreur est survenue.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleOpenPortal = async () => {
+        setIsSubmitting(true);
+        try {
+            const response = await fetch("/api/subscription/portal", {
+                method: "POST",
+            });
+            const data = await response.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                toast.error(data.error || "Impossible d&apos;accéder au portail de facturation");
+            }
+        } catch {
             toast.error("Une erreur est survenue.");
         } finally {
             setIsSubmitting(false);
@@ -119,14 +139,19 @@ export function SubscriptionManager() {
         );
     }
 
-    const isExpired = proStatus === "expired";
-    const isTrial = proStatus === "trial";
+    const isExpired = proStatus === "expired" || proStatus === "canceled" || proStatus === "past_due" || proStatus === "unpaid" || proStatus === "incomplete";
+    const isTrial = proStatus === "trial" || proStatus === "trialing";
+    const isActive = proStatus === "active";
     const daysLeft = trialEndsAt
         ? Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
         : 0;
 
+    // Nom du plan actuel pour l'affichage
+    const currentPlanName = getAllPlans().find(p => p.id === subscriptionTier)?.name || 'Starter';
+
     return (
         <section className="p-6 md:p-8 bg-white dark:bg-gray-900/40 rounded-3xl border border-slate-200 dark:border-gray-800 space-y-8 shadow-sm dark:shadow-none">
+            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900 dark:text-white">
@@ -136,79 +161,125 @@ export function SubscriptionManager() {
                     <p className="text-gray-500 text-sm mt-1">Gérez votre formule et vos factures</p>
                 </div>
 
-                {isExpired ? (
-                    <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-full px-4 py-1.5">
-                        <Warning size={16} className="text-red-400" />
-                        <span className="text-red-400 text-xs font-medium">Abonnement expiré</span>
-                    </div>
-                ) : isTrial ? (
-                    <div className="flex flex-col items-end gap-1">
-                        <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-1.5">
-                            <Clock size={16} className="text-primary" />
-                            <span className="text-primary text-xs font-medium">{daysLeft} jours d&apos;essai restants</span>
+                <div className="flex items-center gap-3">
+                    {/* Stripe Portal Button - for active subscribers */}
+                    {isActive && hasStripeCustomer && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleOpenPortal}
+                            disabled={isSubmitting}
+                            className="gap-2 text-xs"
+                        >
+                            <Receipt size={14} />
+                            Gérer la facturation
+                        </Button>
+                    )}
+                </div>
+            </div>
+
+            {/* Current Plan Summary - toujours visible */}
+            <div className={`rounded-2xl p-5 border ${isExpired
+                ? 'bg-red-500/5 border-red-500/20'
+                : isTrial
+                    ? 'bg-primary/5 border-primary/20'
+                    : isActive
+                        ? 'bg-emerald-500/5 border-emerald-500/20'
+                        : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'
+                }`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isExpired ? 'bg-red-500/10' : isTrial ? 'bg-primary/10' : isActive ? 'bg-emerald-500/10' : 'bg-slate-100 dark:bg-white/10'
+                            }`}>
+                            {isExpired ? <Warning size={20} className="text-red-400" /> :
+                                isTrial ? <Clock size={20} className="text-primary" /> :
+                                    isActive ? <Sparkle size={20} className="text-emerald-400" /> :
+                                        <Rocket size={20} className="text-gray-400" />}
                         </div>
-                        {trialEndsAt && (
-                            <span className="text-[10px] text-gray-500">Expire le {trialEndsAt.toLocaleDateString('fr-FR')}</span>
-                        )}
-                    </div>
-                ) : (
-                    <div className="flex flex-col items-end gap-1">
-                        <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-4 py-1.5">
-                            <Sparkle size={16} className="text-emerald-400" />
-                            <span className="text-emerald-400 text-xs font-medium">Plan {subscriptionTier?.toUpperCase()} Actif</span>
+                        <div>
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                                Plan {currentPlanName}
+                                {isTrial && <span className="ml-2 text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">Essai gratuit</span>}
+                                {isActive && <span className="ml-2 text-xs font-medium text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">Actif</span>}
+                                {isExpired && <span className="ml-2 text-xs font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">Expiré</span>}
+                                {!proStatus && <span className="ml-2 text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">Essai gratuit</span>}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                                {isExpired && "Votre abonnement a expiré. Réactivez pour retrouver l'accès."}
+                                {isTrial && trialEndsAt && `${daysLeft} jour${daysLeft > 1 ? 's' : ''} restant${daysLeft > 1 ? 's' : ''} — expire le ${trialEndsAt.toLocaleDateString('fr-FR')}`}
+                                {isTrial && !trialEndsAt && "Essai gratuit en cours"}
+                                {isActive && "Votre abonnement est actif et à jour."}
+                                {!proStatus && trialEndsAt && `${daysLeft} jour${daysLeft > 1 ? 's' : ''} restant${daysLeft > 1 ? 's' : ''} — expire le ${trialEndsAt.toLocaleDateString('fr-FR')}`}
+                                {!proStatus && !trialEndsAt && "Essai gratuit en cours"}
+                            </p>
                         </div>
-                        <span className="text-[10px] text-gray-500">Abonnement actif et à jour</span>
+                    </div>
+                    {stats.properties > 0 && (
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <span>{stats.properties} bien{stats.properties > 1 ? 's' : ''}</span>
+                            <span>{stats.leases} bail{stats.leases > 1 ? 'x' : ''} actif{stats.leases > 1 ? 's' : ''}</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Trial Progress Bar - Integrated */}
+                {(isTrial || (!proStatus && trialEndsAt)) && (
+                    <div className="mt-6 pt-6 border-t border-primary/10">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs font-medium text-primary">Progression de l&apos;essai gratuit</span>
+                            <span className="text-xs text-gray-500">{Math.round(((TRIAL_DURATION_DAYS - daysLeft) / TRIAL_DURATION_DAYS) * 100)}% complété</span>
+                        </div>
+                        <div className="h-2 w-full bg-slate-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-primary transition-all duration-1000 shadow-[0_0_10px_rgba(var(--primary),0.3)]"
+                                style={{ width: `${Math.min(100, Math.round(((TRIAL_DURATION_DAYS - daysLeft) / TRIAL_DURATION_DAYS) * 100))}%` }}
+                            />
+                        </div>
                     </div>
                 )}
             </div>
 
-            {/* Trial Progress Bar */}
-            {isTrial && (
-                <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-medium text-primary">Progression de l&apos;essai gratuit</span>
-                        <span className="text-xs text-gray-500">{Math.round(((TRIAL_DURATION_DAYS - daysLeft) / TRIAL_DURATION_DAYS) * 100)}% complété</span>
-                    </div>
-                    <div className="h-2 w-full bg-slate-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-primary transition-all duration-1000 shadow-[0_0_10px_rgba(var(--primary),0.3)]"
-                            style={{ width: `${Math.min(100, Math.round(((TRIAL_DURATION_DAYS - daysLeft) / TRIAL_DURATION_DAYS) * 100))}%` }}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {/* Stats warning (for expired users) */}
-            {isExpired && (stats.properties > 0 || stats.leases > 0) && (
-                <div className="bg-primary/10 border border-primary/30 rounded-2xl p-6">
-                    <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-                            <Buildings size={24} className="text-primary" />
-                        </div>
-                        <div>
-                            <h3 className="text-slate-900 dark:text-white font-semibold mb-1 text-sm">Vos données sont préservées</h3>
-                            <p className="text-slate-500 dark:text-white/60 text-xs mb-3">
-                                Vous avez {stats.properties} bien(s) et {stats.leases} bail(s) actif(s) qui attendent votre retour.
-                            </p>
-                            <p className="text-slate-400 dark:text-white/50 text-xs italic">
-                                Réactivez votre compte pour retrouver l&apos;accès complet.
-                            </p>
-                        </div>
-                    </div>
+            {/* Billing Cycle Toggle */}
+            {(!isActive || isTrial || isExpired) && (
+                <div className="flex items-center justify-center gap-3">
+                    <button
+                        onClick={() => setBillingCycle('monthly')}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${billingCycle === 'monthly'
+                            ? 'bg-primary text-primary-foreground shadow-md'
+                            : 'bg-slate-100 dark:bg-white/5 text-gray-500 hover:text-gray-700 dark:hover:text-white'
+                            }`}
+                    >
+                        Mensuel
+                    </button>
+                    <button
+                        onClick={() => setBillingCycle('annual')}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${billingCycle === 'annual'
+                            ? 'bg-primary text-primary-foreground shadow-md'
+                            : 'bg-slate-100 dark:bg-white/5 text-gray-500 hover:text-gray-700 dark:hover:text-white'
+                            }`}
+                    >
+                        Annuel
+                        <span className="text-[10px] bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-bold">-20%</span>
+                    </button>
                 </div>
             )}
 
             {/* Pricing Cards */}
             <div className="grid md:grid-cols-2 gap-6">
                 {getAllPlans()
-                    .filter(plan => plan.id !== 'enterprise') // Enterprise handled separately below
+                    .filter(plan => plan.id !== 'enterprise')
                     .map((plan) => {
                         const isCurrentTier = subscriptionTier === plan.id;
-                        const isTrial = proStatus === 'trial';
-                        const isActive = proStatus === 'active';
-
-                        // Icon selection
                         const Icon = plan.id === 'starter' ? Rocket : Crown;
+                        const price = billingCycle === 'annual'
+                            ? plan.pricing.xof.annual.amount
+                            : plan.pricing.xof.monthly.amount;
+                        const monthlyEquivalent = billingCycle === 'annual'
+                            ? Math.round(plan.pricing.xof.annual.amount / 12)
+                            : null;
+                        const savings = billingCycle === 'annual'
+                            ? getAnnualSavings(plan.id, 'xof')
+                            : 0;
 
                         return (
                             <div
@@ -225,9 +296,8 @@ export function SubscriptionManager() {
                                 )}
 
                                 {isCurrentTier && (
-                                    <div className={`absolute top-4 right-4 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${isTrial ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'
-                                        }`}>
-                                        {isTrial ? 'Essai en cours' : 'Plan Actuel'}
+                                    <div className={`absolute top-4 right-4 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${(isTrial || !proStatus) ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'}`}>
+                                        {(isTrial || !proStatus) ? 'Essai en cours' : 'Plan Actuel'}
                                     </div>
                                 )}
 
@@ -239,11 +309,25 @@ export function SubscriptionManager() {
                                 </div>
 
                                 <div className="mb-6">
-                                    <span className="text-2xl font-bold text-slate-900 dark:text-white">
-                                        {formatPrice(plan.pricing.xof.monthly.amount)}
-                                    </span>
-                                    <span className="text-gray-500 text-xs ml-1">/ mois</span>
-                                    {plan.id === 'starter' && isCurrentTier && isTrial && (
+                                    {billingCycle === 'annual' ? (
+                                        <>
+                                            <span className="text-2xl font-bold text-slate-900 dark:text-white">
+                                                {formatPrice(monthlyEquivalent!)}
+                                            </span>
+                                            <span className="text-gray-500 text-xs ml-1">/ mois</span>
+                                            <p className="text-xs text-emerald-600 mt-1">
+                                                {formatPrice(price)} / an &middot; Économie de {formatPrice(savings)}
+                                            </p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="text-2xl font-bold text-slate-900 dark:text-white">
+                                                {formatPrice(price)}
+                                            </span>
+                                            <span className="text-gray-500 text-xs ml-1">/ mois</span>
+                                        </>
+                                    )}
+                                    {plan.id === 'starter' && isCurrentTier && (isTrial || !proStatus) && (
                                         <p className="text-xs text-amber-600 mt-1">
                                             Plan par défaut après l&apos;essai
                                         </p>
@@ -252,10 +336,7 @@ export function SubscriptionManager() {
 
                                 <ul className="space-y-3 mb-8 flex-1">
                                     {plan.highlightedFeatures.slice(0, 4).map((feature, idx) => (
-                                        <li
-                                            key={idx}
-                                            className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/70"
-                                        >
+                                        <li key={idx} className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/70">
                                             <Check size={14} className="text-primary" /> {feature}
                                         </li>
                                     ))}
@@ -266,12 +347,20 @@ export function SubscriptionManager() {
                                     disabled={isSubmitting || (isCurrentTier && isActive)}
                                     className={`w-full h-10 text-sm ${isCurrentTier && isActive
                                         ? 'bg-zinc-800 text-white/50 cursor-not-allowed'
-                                        : 'bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-lg shadow-primary/20'
+                                        : isCurrentTier && (isTrial || !proStatus)
+                                            ? 'bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-lg shadow-primary/20'
+                                            : 'bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-lg shadow-primary/20'
                                         }`}
                                 >
-                                    {isCurrentTier
-                                        ? (isTrial ? "Activer l'abonnement" : "Plan actuel")
-                                        : (plan.id === 'starter' ? "Rétrograder" : plan.ctaText)
+                                    {isCurrentTier && isActive
+                                        ? "Plan actuel"
+                                        : isCurrentTier && (isTrial || !proStatus)
+                                            ? "Activer l'abonnement"
+                                            : subscriptionTier === 'pro' && plan.id === 'starter'
+                                                ? "Rétrograder"
+                                                : plan.id === 'starter'
+                                                    ? "Choisir Starter"
+                                                    : plan.ctaText
                                     }
                                 </Button>
                             </div>

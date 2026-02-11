@@ -1,6 +1,6 @@
 import { internalProcessReminders } from "@/lib/reminders-service";
 import { checkLeaseExpirations } from "@/lib/lease-expiration-service";
-import { createAdminClient } from "@/lib/supabase-admin";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import { NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,6 @@ export async function GET(request: Request) {
 
     try {
         console.log('[CRON] Starting daily tasks (reminders + lease expirations)...');
-        const supabaseAdmin = createAdminClient();
 
         // 1. Process reminders
         console.log('[CRON] Processing reminders...');

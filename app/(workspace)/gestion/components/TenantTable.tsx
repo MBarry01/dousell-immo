@@ -183,178 +183,181 @@ export function TenantTable({
     return (
         <>
 
-            <div className="border border-border rounded-lg overflow-x-auto max-w-[100vw] w-full transition-colors bg-card">
-                <table className="w-full text-left text-sm">
-                    <thead className="border-b border-border bg-muted/30">
-                        <tr>
-                            {/* Locataire - Always visible */}
-                            <th className="py-3 px-2 sm:px-4">
-                                <button
-                                    onClick={() => handleSort('name')}
-                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
-                                >
-                                    Locataire
-                                    <SortIcon field="name" />
-                                </button>
-                            </th>
+            <div className="border border-border rounded-lg overflow-hidden w-full transition-colors bg-card">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm min-w-max sm:min-w-0">
+                        <thead className="border-b border-border bg-muted/30 sticky top-0">
+                            <tr>
+                                {/* Locataire - Always visible */}
+                                <th className="py-3 px-2 sm:px-4">
+                                    <button
+                                        onClick={() => handleSort('name')}
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
+                                    >
+                                        Locataire
+                                        <SortIcon field="name" />
+                                    </button>
+                                </th>
 
-                            {/* Bien - Hidden on mobile */}
-                            <th className="py-3 px-4 hidden lg:table-cell">
-                                <button
-                                    onClick={() => handleSort('property')}
-                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
-                                >
-                                    Bien
-                                    <SortIcon field="property" />
-                                </button>
-                            </th>
+                                {/* Bien - Hidden on tablet and below */}
+                                <th className="py-3 px-4 hidden xl:table-cell">
+                                    <button
+                                        onClick={() => handleSort('property')}
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
+                                    >
+                                        Bien
+                                        <SortIcon field="property" />
+                                    </button>
+                                </th>
 
-                            {/* Période - Hidden on mobile */}
-                            <th className="py-3 px-4 hidden md:table-cell">
-                                <button
-                                    onClick={() => handleSort('period')}
-                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
-                                >
-                                    Période
-                                    <SortIcon field="period" />
-                                </button>
-                            </th>
+                                {/* Période - Hidden on small devices */}
+                                <th className="py-3 px-4 hidden md:table-cell">
+                                    <button
+                                        onClick={() => handleSort('period')}
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
+                                    >
+                                        Période
+                                        <SortIcon field="period" />
+                                    </button>
+                                </th>
 
-                            {/* Statut - Always visible */}
-                            <th className="py-3 px-4">
-                                <button
-                                    onClick={() => handleSort('status')}
-                                    className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
-                                >
-                                    Statut
-                                    <SortIcon field="status" />
-                                </button>
-                            </th>
+                                {/* Statut - Always visible */}
+                                <th className="py-3 px-2 sm:px-4">
+                                    <button
+                                        onClick={() => handleSort('status')}
+                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
+                                    >
+                                        Statut
+                                        <SortIcon field="status" />
+                                    </button>
+                                </th>
 
-                            {/* Montant - Always visible */}
-                            <th className="py-3 px-4 text-right">
-                                <button
-                                    onClick={() => handleSort('rentAmount')}
-                                    className="flex items-center gap-1.5 ml-auto text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
-                                >
-                                    Montant
-                                    <SortIcon field="rentAmount" />
-                                </button>
-                            </th>
+                                {/* Montant - Always visible */}
+                                <th className="py-3 px-2 sm:px-4 text-right">
+                                    <button
+                                        onClick={() => handleSort('rentAmount')}
+                                        className="flex items-center gap-1.5 ml-auto text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
+                                    >
+                                        Montant
+                                        <SortIcon field="rentAmount" />
+                                    </button>
+                                </th>
 
-                            {/* Actions */}
-                            <th className="py-3 px-4 text-right w-12">
-                                <span className="sr-only">Actions</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/50">
-                        {filteredTenants.map((tenant) => {
-                            const periodLabel = tenant.period_month && tenant.period_year
-                                ? `${monthNames[tenant.period_month - 1]} ${tenant.period_year}`
-                                : '-';
+                                {/* Actions */}
+                                <th className="py-3 px-2 sm:px-4 text-right w-10 sm:w-12">
+                                    <span className="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/50">
+                            {filteredTenants.map((tenant) => {
+                                const periodLabel = tenant.period_month && tenant.period_year
+                                    ? `${monthNames[tenant.period_month - 1]} ${tenant.period_year}`
+                                    : '-';
 
-                            return (
-                                <tr key={tenant.last_transaction_id || tenant.id} className="transition-colors hover:bg-muted/50">
-                                    {/* Locataire */}
-                                    <td className="py-3 px-2 sm:px-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 bg-muted text-muted-foreground border border-border">
-                                                {getInitials(tenant.name)}
+                                return (
+                                    <tr key={tenant.last_transaction_id || tenant.id} className="transition-colors hover:bg-muted/50">
+                                        {/* Locataire */}
+                                        <td className="py-3 px-2 sm:px-4">
+                                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 bg-muted text-muted-foreground border border-border">
+                                                    {getInitials(tenant.name)}
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <Link href={`/gestion/locataires/${tenant.id}`} className="block group/link">
+                                                        <div className="font-medium text-xs sm:text-sm truncate transition-colors text-foreground group-hover/link:text-primary">
+                                                            {tenant.name}
+                                                        </div>
+                                                    </Link>
+                                                    <div className="text-xs truncate text-muted-foreground hidden sm:block">{tenant.email || 'Email manquant'}</div>
+                                                </div>
                                             </div>
-                                            <div className="min-w-0">
-                                                <Link href={`/gestion/locataires/${tenant.id}`} className="block group/link">
-                                                    <div className="font-medium text-sm truncate transition-colors text-foreground group-hover/link:text-primary">
-                                                        {tenant.name}
-                                                    </div>
-                                                </Link>
-                                                <div className="text-xs truncate text-muted-foreground">{tenant.email || 'Email manquant'}</div>
+                                        </td>
+
+                                        {/* Bien - Hidden on devices below xl */}
+                                        <td className="py-3 px-4 hidden xl:table-cell">
+                                            <div className="text-sm truncate max-w-[150px] text-muted-foreground">{tenant.property}</div>
+                                        </td>
+
+                                        {/* Période - Hidden on small devices */}
+                                        <td className="py-3 px-4 hidden md:table-cell">
+                                            <div className="text-xs sm:text-sm text-muted-foreground">{periodLabel}</div>
+                                        </td>
+
+                                        {/* Statut */}
+                                        <td className="py-3 px-2 sm:px-4">
+                                            <div className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium ${statusConfig[tenant.status].bg} ${statusConfig[tenant.status].text}`}>
+                                                <div className={`w-1.5 h-1.5 rounded-full ${statusConfig[tenant.status].dot}`} />
+                                                <span className="hidden sm:inline">{statusConfig[tenant.status].label}</span>
+                                                <span className="sm:hidden">{statusConfig[tenant.status].label.slice(0, 3)}</span>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    {/* Bien - Hidden on mobile */}
-                                    <td className="py-3 px-4 hidden lg:table-cell">
-                                        <div className="text-sm truncate max-w-[200px] text-muted-foreground">{tenant.property}</div>
-                                    </td>
+                                        {/* Montant */}
+                                        <td className="py-3 px-2 sm:px-4 text-right">
+                                            <div className="font-mono font-medium text-xs sm:text-sm text-foreground">{formatAmount(tenant.rentAmount)}</div>
+                                            <div className="text-xs text-muted-foreground/60 hidden sm:block">FCFA</div>
+                                        </td>
 
-                                    {/* Période - Hidden on mobile */}
-                                    <td className="py-3 px-4 hidden md:table-cell">
-                                        <div className="text-sm text-muted-foreground">{periodLabel}</div>
-                                    </td>
-
-                                    {/* Statut */}
-                                    <td className="py-3 px-4">
-                                        <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium ${statusConfig[tenant.status].bg} ${statusConfig[tenant.status].text}`}>
-                                            <div className={`w-1.5 h-1.5 rounded-full ${statusConfig[tenant.status].dot}`} />
-                                            {statusConfig[tenant.status].label}
-                                        </div>
-                                    </td>
-
-                                    {/* Montant */}
-                                    <td className="py-3 px-4 text-right">
-                                        <div className="font-mono font-medium text-sm text-foreground">{formatAmount(tenant.rentAmount)}</div>
-                                        <div className="text-xs text-muted-foreground/60">FCFA</div>
-                                    </td>
-
-                                    {/* Actions */}
-                                    <td className="py-3 px-4 text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-muted">
-                                                    <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-44">
-                                                {tenant.status === 'paid' && onViewReceipt && (
-                                                    <DropdownMenuItem onClick={() => onViewReceipt(tenant)}>
-                                                        <Eye className="mr-2 h-4 w-4" />
-                                                        Voir quittance
-                                                    </DropdownMenuItem>
-                                                )}
-                                                {(tenant.status === 'pending' || tenant.status === 'overdue') && onConfirmPayment && (
-                                                    <DropdownMenuItem onClick={() => onConfirmPayment(tenant.id, tenant.last_transaction_id)}>
-                                                        <CheckCircle className="mr-2 h-4 w-4" />
-                                                        Marquer payé
-                                                    </DropdownMenuItem>
-                                                )}
-                                                <DropdownMenuItem
-                                                    onClick={() => onEdit?.(tenant)}
-                                                >
-                                                    <Edit2 className="mr-2 h-4 w-4" />
-                                                    Modifier
-                                                </DropdownMenuItem>
-
-                                                {onInvite && tenant.email && (
+                                        {/* Actions */}
+                                        <td className="py-3 px-2 sm:px-4 text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="sm" className="h-7 w-7 sm:h-8 sm:w-8 p-0 hover:bg-muted">
+                                                        <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-44">
+                                                    {tenant.status === 'paid' && onViewReceipt && (
+                                                        <DropdownMenuItem onClick={() => onViewReceipt(tenant)}>
+                                                            <Eye className="mr-2 h-4 w-4" />
+                                                            Voir quittance
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    {(tenant.status === 'pending' || tenant.status === 'overdue') && onConfirmPayment && (
+                                                        <DropdownMenuItem onClick={() => onConfirmPayment(tenant.id, tenant.last_transaction_id)}>
+                                                            <CheckCircle className="mr-2 h-4 w-4" />
+                                                            Marquer payé
+                                                        </DropdownMenuItem>
+                                                    )}
                                                     <DropdownMenuItem
-                                                        onClick={() => onInvite(tenant.id)}
+                                                        onClick={() => onEdit?.(tenant)}
                                                     >
-                                                        <Send className="mr-2 h-4 w-4 text-muted-foreground" />
-                                                        Inviter au portail
+                                                        <Edit2 className="mr-2 h-4 w-4" />
+                                                        Modifier
                                                     </DropdownMenuItem>
-                                                )}
 
-                                                <DropdownMenuSeparator />
-                                                {isViewingTerminated && onReactivate ? (
-                                                    <DropdownMenuItem onClick={() => onReactivate(tenant.id, tenant.name)}>
-                                                        <RotateCcw className="mr-2 h-4 w-4 text-muted-foreground" />
-                                                        Réactiver
-                                                    </DropdownMenuItem>
-                                                ) : onTerminate && (
-                                                    <DropdownMenuItem onClick={() => onTerminate(tenant.id, tenant.name)} className="text-destructive focus:text-destructive focus:bg-destructive/10 transition-colors">
-                                                        <Trash2 className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-destructive" />
-                                                        Résilier
-                                                    </DropdownMenuItem>
-                                                )}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div > {
+                                                    {onInvite && tenant.email && (
+                                                        <DropdownMenuItem
+                                                            onClick={() => onInvite(tenant.id)}
+                                                        >
+                                                            <Send className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                            Inviter au portail
+                                                        </DropdownMenuItem>
+                                                    )}
+
+                                                    <DropdownMenuSeparator />
+                                                    {isViewingTerminated && onReactivate ? (
+                                                        <DropdownMenuItem onClick={() => onReactivate(tenant.id, tenant.name)}>
+                                                            <RotateCcw className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                            Réactiver
+                                                        </DropdownMenuItem>
+                                                    ) : onTerminate && (
+                                                        <DropdownMenuItem onClick={() => onTerminate(tenant.id, tenant.name)} className="text-destructive focus:text-destructive focus:bg-destructive/10 transition-colors">
+                                                            <Trash2 className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-destructive" />
+                                                            Résilier
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div> {
                 filteredTenants.length === 0 && (
                     <div className="py-8 px-4">
                         {!searchQuery ? (

@@ -53,34 +53,39 @@ export async function GET(request: Request) {
         }
     }
 
-    // 2. Search Properties (Public + Private?)
-    // For now, let's search "My Properties" if logged in, or "Public Properties" if not?
-    // The user requirement implies finding THEIR stuff in the dashboard.
-    // But usage in public area implies finding public stuff.
-    // Let's do a hybrid approach: Public properties + My properties (if logged in and not already found)
-
-    // Actually, for simplicity and safety, let's search ALL approved properties (Public Search)
-    // This is what getSearchSuggestions in propertyService does.
-    // But here we want the ID/Link to be correct.
-
+    // 2. Search Properties (Public)
     const { data: properties } = await supabase
         .from('properties')
-        .select('id, title, address, city')
-        .eq('validation_status', 'approved') // Only approved
-        .eq('status', 'disponible') // Only available
-        .or(`title.ilike.%${query}%,address.ilike.%${query}%,city.ilike.%${query}%`)
+        .select('id, title, location')
+        .eq('validation_status', 'approved')
+        .eq('status', 'disponible')
+        .or(`title.ilike.%${query}%,location->>city.ilike.%${query}%`)
         .limit(5);
 
     if (properties) {
         results.push(...properties.map(p => ({
             id: p.id,
-            label: p.title || p.address,
+            label: p.title || (p.location as any)?.city || "Bien",
+            subLabel: (p.location as any)?.city,
+            type: 'property' as const,
+            url: `/recherche?q=${encodeURIComponent(p.title || "")}`
+        })));
+    }
+
+    // 3. Search External Listings (Public) - Critical for Dakar results
+    const { data: externalProperties } = await supabase
+        .from('external_listings')
+        .select('id, title, city')
+        .or(`title.ilike.%${query}%,city.ilike.%${query}%`)
+        .limit(5);
+
+    if (externalProperties) {
+        results.push(...externalProperties.map(p => ({
+            id: p.id,
+            label: p.title,
             subLabel: p.city,
-            type: 'property',
-            url: `/recherche?q=${encodeURIComponent(p.title || "")}` // Public search link
-            // Or if it's THEIR property, maybe link to `/gestion`? 
-            // Complexity: checking ownership for each. 
-            // For now, standardize on public search link or generic query.
+            type: 'property' as const,
+            url: `/recherche?q=${encodeURIComponent(p.title || p.city || "")}`
         })));
     }
 

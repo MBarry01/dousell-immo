@@ -122,12 +122,12 @@ export const PLANS: Record<SubscriptionTier, Plan> = {
     tagline: 'Idéal pour les agences en croissance',
     pricing: {
       xof: {
-        monthly: { amount: 35000, priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY_XOF! },
-        annual: { amount: 336000, priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL_XOF! },
+        monthly: { amount: 45000, priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY_XOF! },
+        annual: { amount: 432000, priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL_XOF! },
       },
       eur: {
-        monthly: { amount: 53, priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY_EUR! },
-        annual: { amount: 510, priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL_EUR! },
+        monthly: { amount: 68, priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY_EUR! },
+        annual: { amount: 650, priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL_EUR! },
       },
     },
     features: {

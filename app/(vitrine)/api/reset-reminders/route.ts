@@ -1,11 +1,11 @@
-import { createAdminClient } from "@/lib/supabase-admin";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import { NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
     try {
-        const supabase = createAdminClient();
+        const supabase = supabaseAdmin;
 
         // Reset reminder_sent pour toutes les transactions non payées de Décembre 2025
         const { data, error } = await supabase

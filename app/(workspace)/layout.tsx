@@ -42,6 +42,12 @@ export default async function WorkspaceLayout({
     };
   }) || [];
 
+  // Si l'utilisateur n'a aucune équipe, le rediriger vers la vitrine
+  // avec le modal de bienvenue pour choisir son parcours
+  if (teams.length === 0) {
+    redirect("/pro/start");
+  }
+
   // Trouver l'équipe active (via cookie ou première par défaut)
   const { getActiveTeamId } = await import("@/lib/team-switching");
   const preferredTeamId = await getActiveTeamId();

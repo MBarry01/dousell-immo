@@ -77,6 +77,24 @@ export function WorkspaceBottomNav() {
     const scrollContainer = document.querySelector("main.overflow-y-auto");
     if (!scrollContainer) return;
 
+    // Initialisation immédiate
+    const initVisibility = () => {
+      if (scrollContainer.scrollTop > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      lastScrollY.current = scrollContainer.scrollTop;
+    };
+
+    initVisibility();
+
+    // Vérification retardée pour gérer la restauration du scroll par le navigateur
+    // (qui peut arriver après le montage)
+    const timeoutId = setTimeout(() => {
+      initVisibility();
+    }, 100);
+
     const handleScroll = () => {
       if (!ticking.current) {
         window.requestAnimationFrame(() => {
@@ -119,13 +137,14 @@ export function WorkspaceBottomNav() {
       className={cn(
         "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl lg:hidden print:hidden",
         "transition-transform duration-300 ease-out",
+        "h-fit min-h-[72px]",
         !isVisible && "translate-y-full"
       )}
       style={{
         paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
       }}
     >
-      <div className="flex items-center justify-between px-2 py-2">
+      <div className="flex items-center justify-between px-2 py-2 h-full">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -142,7 +161,7 @@ export function WorkspaceBottomNav() {
               key={item.href}
               href={item.href}
               prefetch={false} // Disable prefetch to prevent stale RSC cache
-              className="flex flex-1 flex-col items-center gap-1 px-1 py-1 min-w-0"
+              className="flex flex-1 flex-col items-center justify-center gap-1 px-1 py-1 min-w-0 h-full"
             >
               <span
                 className={cn(

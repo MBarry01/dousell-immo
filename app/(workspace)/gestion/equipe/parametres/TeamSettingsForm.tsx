@@ -6,10 +6,15 @@ import { Loader2, Save, Building2, Mail, Phone, MapPin, FileText } from "lucide-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { updateTeam } from "../actions";
 import { toast } from "sonner";
 import { useTheme } from "@/components/workspace/providers/theme-provider";
 import type { Team } from "@/types/team";
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 interface TeamSettingsFormProps {
   team: Team;
@@ -91,14 +96,15 @@ export function TeamSettingsForm({ team }: TeamSettingsFormProps) {
 
         <div className="space-y-4">
           <div>
-            <label
+            <Label
               className={cn(
                 "text-sm font-medium mb-1.5 block",
                 isDark ? "text-slate-300" : "text-gray-700"
               )}
+              required
             >
-              Nom de l'équipe <span className="text-red-400">*</span>
-            </label>
+              Nom de l'équipe
+            </Label>
             <Input
               value={formData.name}
               onChange={(e) =>
@@ -368,8 +374,4 @@ export function TeamSettingsForm({ team }: TeamSettingsFormProps) {
       </div>
     </form>
   );
-}
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
 }

@@ -50,6 +50,8 @@ export default async function GestionLocativePage({
             status: context?.subscription_status,
         });
     } catch (err) {
+        // Let Next.js redirect errors pass through (from getUserTeamContext)
+        if ((err as any)?.digest?.startsWith("NEXT_REDIRECT")) throw err;
         console.error("[Gestion/page] ✗ Erreur getUserTeamContext:", err);
         redirect("/auth/login?reason=timeout");
     }

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Plus, Receipt, Building2, Calendar, Tag, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
     Dialog,
     DialogContent,
@@ -101,9 +102,9 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
                 <form onSubmit={handleSubmit} className="space-y-4 pt-2">
                     {/* Amount */}
                     <div className="space-y-2">
-                        <label className={`text-sm font-medium flex items-center gap-2 ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>
-                            <Tag className="w-4 h-4" /> Montant (FCFA) *
-                        </label>
+                        <Label className={`text-sm font-medium flex items-center gap-2 ${isDark ? 'text-slate-300' : 'text-gray-700'}`} required>
+                            <Tag className="w-4 h-4" /> Montant (FCFA)
+                        </Label>
                         <input
                             type="number"
                             value={amount}
@@ -118,9 +119,9 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
 
                     {/* Category */}
                     <div className="space-y-2">
-                        <label className={`text-sm font-medium flex items-center gap-2 ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>
-                            <FileText className="w-4 h-4" /> Catégorie *
-                        </label>
+                        <Label className={`text-sm font-medium flex items-center gap-2 ${isDark ? 'text-slate-300' : 'text-gray-700'}`} required>
+                            <FileText className="w-4 h-4" /> Catégorie
+                        </Label>
                         <Select value={category} onValueChange={(v) => setCategory(v as ExpenseCategory)}>
                             <SelectTrigger className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'}>
                                 <SelectValue />
@@ -137,9 +138,9 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
 
                     {/* Date */}
                     <div className="space-y-2">
-                        <label className={`text-sm font-medium flex items-center gap-2 ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>
-                            <Calendar className="w-4 h-4" /> Date *
-                        </label>
+                        <Label className={`text-sm font-medium flex items-center gap-2 ${isDark ? 'text-slate-300' : 'text-gray-700'}`} required>
+                            <Calendar className="w-4 h-4" /> Date
+                        </Label>
                         <input
                             type="date"
                             value={date}

@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { useTheme } from '@/components/workspace/providers/theme-provider';
 import { Users, TrendingUp } from 'lucide-react';
 
@@ -33,6 +33,24 @@ export function DashboardTabs({
         overview: overviewContent,
         performance: performanceContent,
     };
+
+    // Reset to overview tab whenever component mounts/remounts
+    useEffect(() => {
+        setActiveTab('overview');
+    }, []);
+
+    // Support for programmatic tab switching (e.g., from the tour)
+    useEffect(() => {
+        const handleSwitchTab = (event: any) => {
+            const detail = event.detail;
+            if (detail && (detail === 'overview' || detail === 'performance')) {
+                setActiveTab(detail as TabId);
+            }
+        };
+
+        window.addEventListener('dousell-tour-switch-tab', handleSwitchTab);
+        return () => window.removeEventListener('dousell-tour-switch-tab', handleSwitchTab);
+    }, []);
 
     return (
         <div>
