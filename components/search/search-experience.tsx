@@ -137,10 +137,19 @@ export const SearchExperience = ({
     <div className="relative space-y-6 pb-32">
       <div className="relative z-50 rounded-[28px] border border-white/5 bg-black/40 p-4 backdrop-blur-xl">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="flex flex-1 items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              // On peut aussi forcer un blur ici pour fermer le clavier
+              (document.activeElement as HTMLElement)?.blur();
+            }}
+            className="flex flex-1 items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2"
+          >
             <SearchIcon className={`h-5 w-5 ${isSearching ? "text-primary animate-pulse" : "text-white/50"}`} />
             <div className="relative flex-1">
               <Input
+                type="search"
+                enterKeyHint="search"
                 value={searchQuery}
                 onChange={(event) => {
                   setSearchQuery(event.target.value);
@@ -171,7 +180,7 @@ export const SearchExperience = ({
                 </div>
               )}
             </div>
-          </div>
+          </form>
           <Button
             type="button"
             variant="secondary"

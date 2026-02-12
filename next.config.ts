@@ -63,7 +63,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+            value: 'camera=(), microphone=(self), geolocation=(), interest-cohort=()',
           },
           {
             key: 'Content-Security-Policy',
@@ -78,6 +78,7 @@ const nextConfig: NextConfig = {
               "connect-src 'self' https://*.supabase.co https://*.supabase.in https://challenges.cloudflare.com https://*.google-analytics.com https://www.googletagmanager.com https://va.vercel-scripts.com https://*.basemaps.cartocdn.com https://*.openstreetmap.org https://images.unsplash.com https://images.pexels.com https://*.googleusercontent.com wss://*.supabase.co https://www.clarity.ms https://*.clarity.ms https://c.bing.com https://api.kkiapay.me https://*.kkiapay.me https://raw.githack.com https://translate.google.com https://translate.googleapis.com https://www.gstatic.com https://fonts.gstatic.com",
               "frame-src 'self' https://*.supabase.co https://challenges.cloudflare.com https://www.youtube.com https://youtube.com https://www.google.com https://maps.google.com https://*.kkiapay.me https://translate.google.com",
               "worker-src 'self' blob:",
+              "media-src 'self' data:",
             ].join('; '),
           },
         ],

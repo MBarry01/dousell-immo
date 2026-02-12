@@ -203,17 +203,23 @@ export function BiensClient({
 
         {/* Filters */}
         <div id="tour-biens-search-filters" className="flex flex-col md:flex-row gap-4 mb-6">
-          {/* Search */}
-          <div className="relative flex-1">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              (document.activeElement as HTMLElement)?.blur();
+            }}
+            className="relative flex-1"
+          >
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
-              type="text"
+              type="search"
+              enterKeyHint="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher un bien..."
               className="w-full bg-card border border-border rounded-lg pl-10 pr-4 py-2.5 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
             />
-          </div>
+          </form>
 
           {/* GROUPE 1 : Segmented Control pour le Type */}
           <div className="bg-muted p-1 rounded-lg inline-flex">

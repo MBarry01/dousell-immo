@@ -23,7 +23,7 @@ const Command = React.forwardRef<
 ))
 Command.displayName = CommandPrimitive.displayName
 
-interface CommandDialogProps extends DialogProps {}
+interface CommandDialogProps extends DialogProps { }
 
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   return (
@@ -45,6 +45,7 @@ const CommandInput = React.forwardRef<
     <Search className="mr-2 h-4 w-4 shrink-0 opacity-50 text-white" />
     <CommandPrimitive.Input
       ref={ref}
+      enterKeyHint="search"
       className={cn(
         "flex h-11 w-full rounded-md bg-transparent py-3 text-sm text-white outline-none placeholder:text-white/50 disabled:cursor-not-allowed disabled:opacity-50",
         className

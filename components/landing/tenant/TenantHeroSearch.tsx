@@ -105,7 +105,13 @@ export default function TenantHeroSearch() {
             className="w-full max-w-4xl mx-auto mt-4 md:mt-8 relative z-20"
         >
             {/* Container Principal */}
-            <div className="bg-zinc-900/80 backdrop-blur-xl border border-white/10 p-1.5 rounded-2xl md:rounded-full flex flex-col md:flex-row shadow-2xl ring-1 ring-white/5 overflow-visible">
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSearch();
+                }}
+                className="bg-zinc-900/80 backdrop-blur-xl border border-white/10 p-1.5 rounded-2xl md:rounded-full flex flex-col md:flex-row shadow-2xl ring-1 ring-white/5 overflow-visible"
+            >
 
                 {/* Localisation avec Autocomplete */}
                 <div className="flex-1 relative group border-b md:border-b-0 md:border-r border-white/5">
@@ -118,7 +124,8 @@ export default function TenantHeroSearch() {
                     </div>
                     <input
                         ref={inputRef}
-                        type="text"
+                        type="search"
+                        enterKeyHint="search"
                         placeholder="Ville, Quartier..."
                         className="w-full h-12 md:h-16 pl-10 md:pl-14 pr-4 bg-transparent border-none text-white text-sm md:text-base placeholder-gray-400 focus:ring-0 transition-all font-medium rounded-full outline-none"
                         value={location}
@@ -154,8 +161,8 @@ export default function TenantHeroSearch() {
                                                 key={suggestion}
                                                 type="button"
                                                 className={`w-full flex items-center gap-3 px-4 py-3 text-left text-sm rounded-xl transition-all cursor-pointer ${index === selectedIndex
-                                                        ? "bg-[#F4C430] text-black font-semibold"
-                                                        : "text-gray-200 hover:bg-white/10 hover:text-white"
+                                                    ? "bg-[#F4C430] text-black font-semibold"
+                                                    : "text-gray-200 hover:bg-white/10 hover:text-white"
                                                     }`}
                                                 onMouseDown={(e) => {
                                                     e.preventDefault();
@@ -206,7 +213,7 @@ export default function TenantHeroSearch() {
                         <Search className="w-5 h-5 md:w-6 md:h-6 transition-transform duration-300 group-hover:scale-110" strokeWidth={2} />
                     </button>
                 </div>
-            </div>
+            </form>
         </motion.div>
     );
 }
