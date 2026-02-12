@@ -32,6 +32,11 @@ export function WorkspaceLayoutClient({
 }: WorkspaceLayoutClientProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+  // Hydration Log
+  useState(() => {
+    console.log("[Workspace] ⚛️ React initialization started");
+  });
+
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
       {/* Header - Full Width Top */}

@@ -13,8 +13,13 @@ export default function Error({
     reset: () => void;
 }) {
     useEffect(() => {
-        // Log the error to an error reporting service
-        console.error("Global Application Error:", error);
+        // Log real details about the error to identify the "r" problem on mobile
+        console.error("[GlobalError] ❌ CRASH DETECTED:", {
+            message: error.message,
+            digest: error.digest,
+            stack: error.stack,
+            name: error.name
+        });
     }, [error]);
 
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     AreaChart,
     Area,
@@ -26,6 +26,12 @@ interface RevenueChartProps {
 }
 
 export function RevenueChart({ data }: RevenueChartProps) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+        console.log("[RevenueChart] ✓ Component mounted");
+    }, []);
+
     const [showExpected, setShowExpected] = useState(true);
 
     // Format data for display
@@ -68,18 +74,15 @@ export function RevenueChart({ data }: RevenueChartProps) {
         return null;
     };
 
-    if (data.length === 0) {
+    if (!mounted || data.length === 0) {
         return (
-            <div className="p-6 rounded-xl border border-border bg-muted/20">
-                <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-foreground">
-                        Évolution des Revenus
-                    </h3>
+            <div className="p-6 rounded-xl border border-border bg-muted/20 min-h-[300px] flex items-center justify-center">
+                <div className="text-center space-y-2">
+                    <TrendingUp className="w-5 h-5 text-primary mx-auto animate-pulse" />
+                    <p className="text-sm text-muted-foreground">
+                        {!mounted ? "Chargement du graphique..." : "Pas encore de données."}
+                    </p>
                 </div>
-                <p className="text-center py-8 text-muted-foreground">
-                    Pas encore de données. Les revenus apparaîtront ici après les premiers encaissements.
-                </p>
             </div>
         );
     }

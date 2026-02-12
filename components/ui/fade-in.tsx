@@ -22,15 +22,19 @@ export function FadeIn({
     return (
         <div
             className={cn(
-                "duration-500 ease-out",
+                "duration-500 ease-out transition-all",
                 isVisible
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-4",
-                "transition-[opacity,transform]", // Only animate opacity and transform
                 className
             )}
         >
-            {children}
+            {/* Si isVisible est faux, on affiche quand même les enfants avec opacity-0 
+                pour permettre le référencement et éviter les sauts de layout,
+                mais on s'assure qu'ils sont cliquables après l'animation */}
+            <div className={!isVisible ? "pointer-events-none" : ""}>
+                {children}
+            </div>
         </div>
     );
 }
