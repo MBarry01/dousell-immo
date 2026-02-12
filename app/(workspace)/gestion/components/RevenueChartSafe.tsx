@@ -1,7 +1,10 @@
+```javascript
 "use client";
 
 import dynamic from "next/dynamic";
-import { TrendingUp } from "lucide-react";
+import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
+// import { RevenueChart } from './RevenueChart';
 
 // Dynamically import the RevenueChart with SSR disabled
 // This must be done in a Client Component to avoid the Vercel build error
