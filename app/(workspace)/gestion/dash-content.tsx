@@ -1,14 +1,11 @@
+import { GestionLocativeClient } from "./components/GestionLocativeClient";
 import { AddTenantButton } from "./components/AddTenantButton";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { DocumentGeneratorDialog } from "./components/DocumentGeneratorDialog";
 import { ThemedContent } from "./components/ThemedContent";
 import { KPICards } from "./components/KPICards";
-// Render RevenueChart dynamically with SSR disabled to avoid hydration/initialization crashes on mobile
-const RevenueChart = dynamic(() => import("./components/RevenueChart").then(mod => mod.RevenueChart), {
-    ssr: false,
-    loading: () => <div className="h-[300px] w-full bg-muted/10 animate-pulse rounded-xl flex items-center justify-center text-xs text-muted-foreground">Initialisation du graphique...</div>
-});
+import { RevenueChartSafe as RevenueChart } from "./components/RevenueChartSafe";
 import { DashboardTabs } from "./components/DashboardTabs";
 import { OrphanLeasesAlert } from "./components/OrphanLeasesAlert";
 import { ExpiredBanner } from "./components/ExpiredBanner";
