@@ -21,7 +21,7 @@ import {
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
-import { ThemeProvider, useTheme } from "./theme-provider";
+import { useTheme } from "@/components/workspace/providers/theme-provider";
 
 function WebAppLayoutContent({
     children,
@@ -33,7 +33,7 @@ function WebAppLayoutContent({
     const [isAuthenticated, setIsAuthenticated] = useState(true);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(true);
-    const { theme, toggleTheme, isDark } = useTheme();
+    const { toggleTheme, isDark } = useTheme();
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -329,8 +329,6 @@ export default function WebAppLayout({
     children: React.ReactNode;
 }) {
     return (
-        <ThemeProvider>
-            <WebAppLayoutContent>{children}</WebAppLayoutContent>
-        </ThemeProvider>
+        <WebAppLayoutContent>{children}</WebAppLayoutContent>
     );
 }
