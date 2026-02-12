@@ -92,11 +92,11 @@ export function GestionTour() {
     // Étapes du tour pour la page Gestion Locative
     const tourSteps: TourStep[] = useMemo(() => [
         {
-            targetId: 'tour-gestion-kpi-cards',
-            title: 'Statistiques en temps réel',
-            description: 'Suivez vos indicateurs clés : taux d\'occupation, délais de paiement, taux d\'impayés et revenu moyen par bien.',
-            imageSrc: 'https://images.unsplash.com/photo-1543286386-713df548e617?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Statistiques de gestion'
+            targetId: 'tour-gestion-table',
+            title: 'Gestion des baux',
+            description: 'Visualisez tous vos baux actifs, suivez les paiements, envoyez des relances et gérez vos locataires.',
+            imageSrc: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'Tableau de gestion'
         },
         {
             targetId: 'tour-gestion-actions',
@@ -106,11 +106,11 @@ export function GestionTour() {
             imageAlt: 'Actions de gestion'
         },
         {
-            targetId: 'tour-gestion-table',
-            title: 'Gestion des baux',
-            description: 'Visualisez tous vos baux actifs, suivez les paiements, envoyez des relances et gérez vos locataires.',
-            imageSrc: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Tableau de gestion'
+            targetId: 'tour-gestion-kpi-cards',
+            title: 'Statistiques en temps réel',
+            description: 'Suivez vos indicateurs clés : taux d\'occupation, délais de paiement, taux d\'impayés et revenu moyen par bien.',
+            imageSrc: 'https://images.unsplash.com/photo-1543286386-713df548e617?auto=format&fit=crop&q=80&w=600',
+            imageAlt: 'Statistiques de gestion'
         },
         {
             targetId: 'tour-gestion-revenue-chart',
