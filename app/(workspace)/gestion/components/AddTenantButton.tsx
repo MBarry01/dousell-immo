@@ -27,7 +27,7 @@ import { useRouter } from 'next/navigation';
 import { GenerateContractModal } from '@/components/contracts/GenerateContractModal';
 import { generateLeaseContract } from '@/lib/actions/contract-actions';
 import { getPremiumBranding } from '../config/actions';
-import confetti from 'canvas-confetti';
+// import confetti from 'canvas-confetti';
 import { PropertySelector } from './PropertySelector';
 import { type VacantProperty, getAllTeamProperties } from '../actions/property-selector';
 import { fuzzyMatchProperty } from '../utils/property-matching';
@@ -78,6 +78,10 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
 
     // Confetti celebration for first tenant creation - Golden luxury effect (Desktop optimized)
     const triggerConfetti = useCallback(() => {
+        // Confetti disabled temporarily for mobile crash investigation
+        // eslint-disable-next-line no-console
+        console.log("Confetti celebration skipped (mobile crash investigation)");
+        /*
         // Palette dorée luxe
         const goldColors = [
             '#F4C430', // Or Dousell (primary)
@@ -103,6 +107,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
             gravity: 0.8,
             ticks: 350,
             drift: 0,
+            zIndex: 9999, // Force on top
         });
 
         // Bursts supplémentaires sur desktop (gauche et droite)
@@ -116,6 +121,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                     shapes: ['circle'],
                     scalar: 1.2,
                     gravity: 0.9,
+                    zIndex: 9999,
                 });
                 confetti({
                     particleCount: 60,
@@ -125,58 +131,11 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
                     shapes: ['circle'],
                     scalar: 1.2,
                     gravity: 0.9,
+                    zIndex: 9999,
                 });
             }, 200);
         }
-
-        // Canons latéraux dorés
-        const duration = isDesktop ? 3000 : 2500;
-        const end = Date.now() + duration;
-
-        const frame = () => {
-            // Canon gauche
-            confetti({
-                particleCount: isDesktop ? 3 : 2,
-                angle: 60,
-                spread: 50,
-                origin: { x: 0, y: 0.65 },
-                colors: goldColors,
-                shapes: ['circle'],
-                scalar: isDesktop ? 1.1 : 0.9,
-                gravity: 1,
-            });
-            // Canon droit
-            confetti({
-                particleCount: isDesktop ? 3 : 2,
-                angle: 120,
-                spread: 50,
-                origin: { x: 1, y: 0.65 },
-                colors: goldColors,
-                shapes: ['circle'],
-                scalar: isDesktop ? 1.1 : 0.9,
-                gravity: 1,
-            });
-
-            if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
-        };
-
-        frame();
-
-        // Burst final après 1.5s - Grand finale
-        setTimeout(() => {
-            confetti({
-                particleCount: Math.floor(80 * particleMultiplier),
-                spread: isDesktop ? 140 : 100,
-                origin: { y: 0.5, x: 0.5 },
-                colors: goldColors,
-                shapes: ['circle'],
-                scalar: isDesktop ? 1.8 : 1.5,
-                gravity: 0.5,
-                ticks: 250,
-            });
-        }, 1500);
+        */
     }, []);
 
     const handleTriggerClick = async (e: React.MouseEvent) => {

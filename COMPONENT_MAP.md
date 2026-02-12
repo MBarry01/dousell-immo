@@ -1,4 +1,4 @@
-# 🗺️ MAP DES COMPOSANTS (243)
+# 🗺️ MAP DES COMPOSANTS (242)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -238,7 +238,6 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<estimation-wizard />** (Path: `components\wizard\estimation-wizard.tsx`)
 - **<LockedSidebarItem />** (Path: `components\workspace\LockedSidebarItem.tsx`)
 - **<OwnerRoleSwitcher />** (Path: `components\workspace\OwnerRoleSwitcher.tsx`)
-- **<theme-provider />** (Path: `components\workspace\providers\theme-provider.tsx`)
 - **<TeamSwitcher />** (Path: `components\workspace\TeamSwitcher.tsx`)
 - **<TemporaryAccessWidget />** (Path: `components\workspace\TemporaryAccessWidget.tsx`)
 - **<TemporaryPermissionsWidget />** (Path: `components\workspace\TemporaryPermissionsWidget.tsx`)

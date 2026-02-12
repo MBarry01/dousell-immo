@@ -164,6 +164,19 @@ export function GestionLocativeClient({
         setSearchQuery(urlQuery);
     }, [urlQuery]);
 
+    // DEBUG: Mobile Crash Investigation
+    useEffect(() => {
+        // eslint-disable-next-line no-console
+        console.log("[GestionLocativeClient] Component Mounted", {
+            leasesCount: leases?.length,
+            transactionsCount: transactions?.length,
+            expensesCount: expenses?.length,
+            hasProfile: !!profile,
+            ownerId,
+            timestamp: new Date().toISOString()
+        });
+    }, []);
+
     // Update URL when local search changes (Debounced)
     useEffect(() => {
         const timer = setTimeout(() => {
