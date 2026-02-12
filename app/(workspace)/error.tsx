@@ -12,7 +12,12 @@ export default function WorkspaceError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[Workspace Error]", error);
+    console.error("[Workspace Error] ❌ CRASH:", {
+      message: error.message,
+      digest: error.digest,
+      stack: error.stack,
+      name: error.name
+    });
   }, [error]);
 
   return (
