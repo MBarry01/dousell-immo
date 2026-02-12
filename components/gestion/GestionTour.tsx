@@ -37,6 +37,8 @@ export function GestionTour() {
         const scrollContainer = document.querySelector("main.overflow-y-auto");
         if (!scrollContainer) return;
 
+        let lastScrollY = scrollContainer.scrollTop;
+
         // Initialisation immédiate
         const initVisibility = () => {
             if (scrollContainer.scrollTop > 100) {
@@ -54,7 +56,6 @@ export function GestionTour() {
         // 2. Check retardé pour la restauration du scroll navigateur
         const timeoutId = setTimeout(initVisibility, 100);
 
-        let lastScrollY = scrollContainer.scrollTop;
         let ticking = false;
 
         const handleScroll = () => {
