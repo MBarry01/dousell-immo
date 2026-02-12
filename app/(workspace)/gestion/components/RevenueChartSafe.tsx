@@ -27,7 +27,9 @@ interface RevenueChartSafeProps {
 export function RevenueChartSafe({ data }: RevenueChartSafeProps) {
     if (typeof window !== 'undefined') {
         // eslint-disable-next-line no-console
-        console.log("[RevenueChartSafe] Rendering", { dataPoints: data?.length });
+        console.log("[RevenueChartSafe] Rendering (DISABLED)", { dataPoints: data?.length });
     }
-    return <RevenueChart data={data} />;
+    // Temporarily disabled to isolate Recharts crash on mobile
+    return <div className="p-4 border border-red-500 rounded text-red-500">Graphique désactivé pour test</div>;
+    // return <RevenueChart data={data} />;
 }
