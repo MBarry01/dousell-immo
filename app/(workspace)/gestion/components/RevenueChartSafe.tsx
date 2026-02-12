@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, TrendingUp } from 'lucide-react';
 // import { RevenueChart } from './RevenueChart';
 
 // Dynamically import the RevenueChart with SSR disabled
