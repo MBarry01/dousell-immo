@@ -10,16 +10,14 @@ export function PushNotifications() {
   const [isSupported, setIsSupported] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>("default");
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const checkSupport = () => {
-        setIsSupported(
-          "Notification" in window &&
-            "serviceWorker" in navigator &&
-            "PushManager" in window
-        );
-        setPermission(Notification.permission);
-      };
-      checkSupport();
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setIsSupported(
+        "serviceWorker" in navigator &&
+        "PushManager" in window
+      );
+      setPermission(Notification.permission);
+    } else {
+      setIsSupported(false);
     }
   }, []);
 

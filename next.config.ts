@@ -4,7 +4,6 @@ const isGitHubPages = process.env.GITHUB_ACTIONS === 'true';
 const repositoryName = 'dousel-immo';
 
 const nextConfig: NextConfig = {
-  productionBrowserSourceMaps: true,
   // Configuration pour GitHub Pages (seulement si déployé via GitHub Actions)
   ...(isGitHubPages && {
     output: 'export',
