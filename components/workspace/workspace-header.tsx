@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "@/components/workspace/providers/theme-provider";
-import { useMemo } from "react";
+import { useMemo, Suspense } from "react";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { OwnerRoleSwitcher } from "@/components/workspace/OwnerRoleSwitcher";
 
@@ -107,7 +107,9 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
 
         {/* Center: Search (desktop) - Functional */}
         <div className="hidden lg:flex flex-1 max-w-md mx-8">
-          <GlobalSearch />
+          <Suspense fallback={<div className="h-9 w-full bg-muted/50 rounded-md animate-pulse" />}>
+            <GlobalSearch />
+          </Suspense>
         </div>
 
         {/* Right: Actions */}

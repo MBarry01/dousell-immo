@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { TeamPageClient } from "./components/TeamPageClient";
 import { CreateTeamPrompt } from "./components/CreateTeamPrompt";
 import { getTeamStats } from "./actions";
@@ -139,13 +140,15 @@ export default async function TeamPage() {
   const stats = statsResult.success ? statsResult.stats : undefined;
 
   return (
-    <TeamPageClient
-      team={team}
-      members={members}
-      invitations={invitations}
-      stats={stats}
-      currentUserId={user.id}
-      currentUserRole={userRole}
-    />
+    <Suspense fallback={<div className="h-96 w-full animate-pulse bg-muted/20 rounded-xl" />}>
+      <TeamPageClient
+        team={team}
+        members={members}
+        invitations={invitations}
+        stats={stats}
+        currentUserId={user.id}
+        currentUserRole={userRole}
+      />
+    </Suspense>
   );
 }

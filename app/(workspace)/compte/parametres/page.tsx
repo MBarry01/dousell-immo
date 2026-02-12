@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Mail, Lock, User as UserIcon, ArrowLeft, Camera, Trash2, Upload, Phone } from "lucide-react";
@@ -207,244 +207,246 @@ export default function ParametresPage() {
 
   return (
     <div className="px-4 py-4">
-      <FadeIn className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Link href="/compte">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:text-foreground hover:bg-accent"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Profil & Sécurité</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Gérez vos informations personnelles
-            </p>
+      <Suspense fallback={<div className="h-96 w-full flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+        <FadeIn className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center gap-4">
+            <Link href="/compte">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Profil & Sécurité</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Gérez vos informations personnelles
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Avatar Section */}
-        <Card className="border-border bg-card">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg sm:text-xl text-foreground">Photo de profil</CardTitle>
-            <CardDescription className="text-muted-foreground text-xs sm:text-sm">
-              Personnalisez votre avatar
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-              {/* Avatar Display */}
-              <div className="relative">
-                <div className="h-24 w-24 rounded-full overflow-hidden bg-muted border-2 border-border">
+          {/* Avatar Section */}
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg sm:text-xl text-foreground">Photo de profil</CardTitle>
+              <CardDescription className="text-muted-foreground text-xs sm:text-sm">
+                Personnalisez votre avatar
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                {/* Avatar Display */}
+                <div className="relative">
+                  <div className="h-24 w-24 rounded-full overflow-hidden bg-muted border-2 border-border">
+                    {avatarPreview ? (
+                      <Image
+                        src={avatarPreview}
+                        alt="Aperçu avatar"
+                        width={96}
+                        height={96}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : profile?.avatar_url ? (
+                      <Image
+                        src={profile.avatar_url}
+                        alt="Avatar actuel"
+                        width={96}
+                        height={96}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center w-full h-full">
+                        <UserIcon className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 p-2 bg-primary rounded-full hover:bg-primary/90 transition-colors shadow-lg"
+                    disabled={isUploadingAvatar || isDeletingAvatar}
+                  >
+                    <Camera className="h-4 w-4 text-primary-foreground" />
+                  </button>
+                </div>
+
+                {/* Avatar Actions */}
+                <div className="flex-1 w-full space-y-4">
+                  <div className="space-y-2 text-center sm:text-left">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      JPG, PNG ou WebP. Max 5MB.
+                    </p>
+                  </div>
+
                   {avatarPreview ? (
-                    <Image
-                      src={avatarPreview}
-                      alt="Aperçu avatar"
-                      width={96}
-                      height={96}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : profile?.avatar_url ? (
-                    <Image
-                      src={profile.avatar_url}
-                      alt="Avatar actuel"
-                      width={96}
-                      height={96}
-                      className="object-cover w-full h-full"
-                    />
+                    <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+                      <Button
+                        onClick={handleUploadAvatar}
+                        disabled={isUploadingAvatar}
+                        className="flex-1 sm:flex-none bg-primary text-primary-foreground hover:bg-primary/90 text-xs sm:text-sm"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        {isUploadingAvatar ? "Upload..." : "Enregistrer"}
+                      </Button>
+                      <Button
+                        onClick={handleCancelPreview}
+                        variant="outline"
+                        disabled={isUploadingAvatar}
+                        className="flex-1 sm:flex-none border-border bg-background text-foreground hover:bg-accent text-xs sm:text-sm"
+                      >
+                        Annuler
+                      </Button>
+                    </div>
                   ) : (
-                    <div className="flex items-center justify-center w-full h-full">
-                      <UserIcon className="h-12 w-12 text-muted-foreground" />
+                    <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+                      <Button
+                        onClick={() => fileInputRef.current?.click()}
+                        variant="outline"
+                        disabled={isUploadingAvatar || isDeletingAvatar}
+                        className="flex-1 sm:flex-none border-border bg-background text-foreground hover:bg-accent text-xs sm:text-sm"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choisir une photo
+                      </Button>
+                      {profile?.avatar_url && (
+                        <Button
+                          onClick={handleDeleteAvatar}
+                          variant="outline"
+                          disabled={isUploadingAvatar || isDeletingAvatar}
+                          className="flex-1 sm:flex-none border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs sm:text-sm"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {isDeletingAvatar ? "Suppr..." : "Supprimer"}
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 p-2 bg-primary rounded-full hover:bg-primary/90 transition-colors shadow-lg"
-                  disabled={isUploadingAvatar || isDeletingAvatar}
-                >
-                  <Camera className="h-4 w-4 text-primary-foreground" />
-                </button>
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Avatar Actions */}
-              <div className="flex-1 w-full space-y-4">
-                <div className="space-y-2 text-center sm:text-left">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/png,image/webp"
-                    onChange={handleFileChange}
-                    className="hidden"
+          {/* Informations du compte */}
+          <Card className="border-border bg-card">
+            <CardHeader>
+              <CardTitle className="text-foreground">Informations du compte</CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Vos informations de connexion
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-foreground">Email</Label>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={user.email || ""}
+                    disabled
+                    className="bg-muted/50 border-input text-muted-foreground"
                   />
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    JPG, PNG ou WebP. Max 5MB.
-                  </p>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-foreground">Nom complet</Label>
+                <div className="flex items-center gap-2">
+                  <UserIcon className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={(user.user_metadata?.full_name as string) || ""}
+                    disabled
+                    className="bg-muted/50 border-input text-muted-foreground"
+                    placeholder="Non renseigné"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                {avatarPreview ? (
-                  <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+          {/* Mot de passe */}
+          <Card className="border-border bg-card">
+            <CardHeader>
+              <CardTitle className="text-foreground">Sécurité</CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Gérez votre mot de passe
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!isResettingPassword ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <p className="text-sm text-foreground">Mot de passe</p>
+                      <p className="text-xs text-muted-foreground">
+                        Dernière modification : Non disponible
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full border-border bg-background text-foreground hover:bg-accent hover:border-accent"
+                    onClick={() => setIsResettingPassword(true)}
+                  >
+                    Changer le mot de passe
+                  </Button>
+                </>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-foreground">Email de réinitialisation</Label>
+                    <Input
+                      type="email"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      placeholder={user.email || "votre@email.com"}
+                      className="bg-background border-input text-foreground"
+                    />
+                  </div>
+                  <div className="flex gap-2">
                     <Button
-                      onClick={handleUploadAvatar}
-                      disabled={isUploadingAvatar}
-                      className="flex-1 sm:flex-none bg-primary text-primary-foreground hover:bg-primary/90 text-xs sm:text-sm"
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      {isUploadingAvatar ? "Upload..." : "Enregistrer"}
-                    </Button>
-                    <Button
-                      onClick={handleCancelPreview}
                       variant="outline"
-                      disabled={isUploadingAvatar}
-                      className="flex-1 sm:flex-none border-border bg-background text-foreground hover:bg-accent text-xs sm:text-sm"
+                      className="flex-1 border-border bg-background text-foreground hover:bg-accent"
+                      onClick={() => {
+                        setIsResettingPassword(false);
+                        setResetEmail("");
+                      }}
                     >
                       Annuler
                     </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                     <Button
-                      onClick={() => fileInputRef.current?.click()}
-                      variant="outline"
-                      disabled={isUploadingAvatar || isDeletingAvatar}
-                      className="flex-1 sm:flex-none border-border bg-background text-foreground hover:bg-accent text-xs sm:text-sm"
+                      className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                      onClick={handleResetPassword}
                     >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Choisir une photo
+                      Envoyer
                     </Button>
-                    {profile?.avatar_url && (
-                      <Button
-                        onClick={handleDeleteAvatar}
-                        variant="outline"
-                        disabled={isUploadingAvatar || isDeletingAvatar}
-                        className="flex-1 sm:flex-none border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs sm:text-sm"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        {isDeletingAvatar ? "Suppr..." : "Supprimer"}
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Informations du compte */}
-        <Card className="border-border bg-card">
-          <CardHeader>
-            <CardTitle className="text-foreground">Informations du compte</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Vos informations de connexion
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-foreground">Email</Label>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  value={user.email || ""}
-                  disabled
-                  className="bg-muted/50 border-input text-muted-foreground"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-foreground">Nom complet</Label>
-              <div className="flex items-center gap-2">
-                <UserIcon className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  value={(user.user_metadata?.full_name as string) || ""}
-                  disabled
-                  className="bg-muted/50 border-input text-muted-foreground"
-                  placeholder="Non renseigné"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Mot de passe */}
-        <Card className="border-border bg-card">
-          <CardHeader>
-            <CardTitle className="text-foreground">Sécurité</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Gérez votre mot de passe
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {!isResettingPassword ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <Lock className="h-4 w-4 text-muted-foreground" />
-                  <div className="flex-1">
-                    <p className="text-sm text-foreground">Mot de passe</p>
-                    <p className="text-xs text-muted-foreground">
-                      Dernière modification : Non disponible
-                    </p>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  className="w-full border-border bg-background text-foreground hover:bg-accent hover:border-accent"
-                  onClick={() => setIsResettingPassword(true)}
-                >
-                  Changer le mot de passe
-                </Button>
-              </>
-            ) : (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-foreground">Email de réinitialisation</Label>
-                  <Input
-                    type="email"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    placeholder={user.email || "votre@email.com"}
-                    className="bg-background border-input text-foreground"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1 border-border bg-background text-foreground hover:bg-accent"
-                    onClick={() => {
-                      setIsResettingPassword(false);
-                      setResetEmail("");
-                    }}
-                  >
-                    Annuler
-                  </Button>
-                  <Button
-                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-                    onClick={handleResetPassword}
-                  >
-                    Envoyer
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Notifications */}
-        <Card className="border-border bg-card">
-          <CardHeader>
-            <CardTitle className="text-foreground">Notifications</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Gérez vos préférences de notifications
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PushNotifications />
-          </CardContent>
-        </Card>
-      </FadeIn>
+          {/* Notifications */}
+          <Card className="border-border bg-card">
+            <CardHeader>
+              <CardTitle className="text-foreground">Notifications</CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Gérez vos préférences de notifications
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PushNotifications />
+            </CardContent>
+          </Card>
+        </FadeIn>
+      </Suspense>
     </div >
   );
 }

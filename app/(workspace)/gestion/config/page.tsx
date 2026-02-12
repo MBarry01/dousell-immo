@@ -1,5 +1,6 @@
 import { Settings, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { ConfigTabs } from './config-tabs';
@@ -86,7 +87,9 @@ export default async function ConfigPremiumPage() {
             </div>
 
             {/* Interface par onglets */}
-            <ConfigTabs brandingData={brandingData} />
+            <Suspense fallback={<div className="h-96 w-full bg-slate-50 dark:bg-slate-900/50 rounded-2xl animate-pulse" />}>
+                <ConfigTabs brandingData={brandingData} />
+            </Suspense>
         </div>
     );
 }

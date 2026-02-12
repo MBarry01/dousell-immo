@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, Suspense } from "react";
 import { Plus, Search, X } from "lucide-react";
 import { useState } from "react";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
@@ -81,7 +81,9 @@ export const Header = () => {
             isSearchOpen ? "opacity-100 translate-x-0" : "opacity-0 pointer-events-none translate-x-4"
           )}>
             <div className="flex-1">
-              <GlobalSearch />
+              <Suspense>
+                <GlobalSearch />
+              </Suspense>
             </div>
             <Button
               variant="ghost"
@@ -171,7 +173,9 @@ export const Header = () => {
 
           {/* Search Bar - Desktop */}
           <div className="flex-1 max-w-[320px] lg:max-w-md mx-6">
-            <GlobalSearch />
+            <Suspense>
+              <GlobalSearch />
+            </Suspense>
           </div>
 
           <nav className="flex items-center gap-5 text-sm font-medium text-white/70 lg:gap-6">

@@ -1,5 +1,6 @@
-export const dynamic = "force-dynamic";
 
+
+import { Suspense } from "react";
 import { SearchExperience } from "@/components/search/search-experience";
 import { getUnifiedListings } from "@/services/gatewayService";
 import { type PropertyFilters } from "@/services/propertyService.cached";
@@ -84,7 +85,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <div className="space-y-6 py-6">
       <h1 className="text-3xl font-semibold text-white">Explorer les biens</h1>
-      <SearchExperience initialFilters={filters} initialResults={properties} />
+      <Suspense fallback={<div className="h-96 animate-pulse bg-white/5 rounded-xl" />}>
+        <SearchExperience initialFilters={filters} initialResults={properties} />
+      </Suspense>
     </div>
   );
 }

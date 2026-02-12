@@ -1,5 +1,6 @@
 import { GestionLocativeClient } from "./components/GestionLocativeClient";
 import { AddTenantButton } from "./components/AddTenantButton";
+import { Suspense } from "react";
 import { DocumentGeneratorDialog } from "./components/DocumentGeneratorDialog";
 import { ThemedContent } from "./components/ThemedContent";
 import { KPICards } from "./components/KPICards";
@@ -281,19 +282,21 @@ export default async function DashboardContent({
             }
         >
             {/* Banner for expired subscription */}
-            {proStatus === "expired" ? (
-                <ExpiredBanner
-                    proStatus={proStatus}
-                    propertiesCount={allLeases.length}
-                    leasesCount={filteredLeases.length}
-                />
-            ) : (
-                <QuotaBanner
-                    tier={currentTier}
-                    propertiesCount={advancedStats.totalProperties}
-                    leasesCount={advancedStats.activeLeases}
-                />
-            )}
+            <Suspense fallback={null}>
+                {proStatus === "expired" ? (
+                    <ExpiredBanner
+                        proStatus={proStatus}
+                        propertiesCount={allLeases.length}
+                        leasesCount={filteredLeases.length}
+                    />
+                ) : (
+                    <QuotaBanner
+                        tier={currentTier}
+                        propertiesCount={advancedStats.totalProperties}
+                        leasesCount={advancedStats.activeLeases}
+                    />
+                )}
+            </Suspense>
 
             {/* Alerte baux orphelins */}
             {!isViewingTerminated && orphanCount > 0 && (
@@ -307,16 +310,18 @@ export default async function DashboardContent({
                         <>
                             {/* Table des locataires */}
                             <div id="tour-gestion-table">
-                                <GestionLocativeClient
-                                    leases={filteredLeases || []}
-                                    transactions={transactions || []}
-                                    expenses={expensesList || []}
-                                    profile={profile}
-                                    userEmail={user.email}
-                                    ownerId={user.id}
-                                    isViewingTerminated={isViewingTerminated}
-                                    minDate={minDateStr}
-                                />
+                                <Suspense fallback={<div className="h-64 w-full bg-muted/20 animate-pulse rounded-xl" />}>
+                                    <GestionLocativeClient
+                                        leases={filteredLeases || []}
+                                        transactions={transactions || []}
+                                        expenses={expensesList || []}
+                                        profile={profile}
+                                        userEmail={user.email}
+                                        ownerId={user.id}
+                                        isViewingTerminated={isViewingTerminated}
+                                        minDate={minDateStr}
+                                    />
+                                </Suspense>
                             </div>
                         </>
                     }
@@ -333,16 +338,18 @@ export default async function DashboardContent({
             ) : (
                 /* Mode résiliés : afficher directement la table sans onglets */
                 <div id="tour-gestion-table" className="mb-6">
-                    <GestionLocativeClient
-                        leases={filteredLeases || []}
-                        transactions={transactions || []}
-                        expenses={expensesList || []}
-                        profile={profile}
-                        userEmail={user.email}
-                        ownerId={user.id}
-                        isViewingTerminated={isViewingTerminated}
-                        minDate={minDateStr}
-                    />
+                    <Suspense fallback={<div className="h-64 w-full bg-muted/20 animate-pulse rounded-xl" />}>
+                        <GestionLocativeClient
+                            leases={filteredLeases || []}
+                            transactions={transactions || []}
+                            expenses={expensesList || []}
+                            profile={profile}
+                            userEmail={user.email}
+                            ownerId={user.id}
+                            isViewingTerminated={isViewingTerminated}
+                            minDate={minDateStr}
+                        />
+                    </Suspense>
                 </div>
             )}
 

@@ -135,16 +135,15 @@ export function WorkspaceBottomNav() {
   return (
     <nav
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl lg:hidden print:hidden",
+        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/80 backdrop-blur-lg lg:hidden print:hidden",
         "transition-transform duration-300 ease-out",
-        "h-fit min-h-[72px]",
         !isVisible && "translate-y-full"
       )}
       style={{
-        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
+        paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      <div className="flex items-center justify-between px-2 py-2 h-full">
+      <div className="flex h-16 items-center justify-between px-4">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -161,11 +160,11 @@ export function WorkspaceBottomNav() {
               key={item.href}
               href={item.href}
               prefetch={false} // Disable prefetch to prevent stale RSC cache
-              className="flex flex-1 flex-col items-center justify-center gap-1 px-1 py-1 min-w-0 h-full"
+              className="flex flex-1 flex-col items-center justify-center gap-1 min-w-0"
             >
               <span
                 className={cn(
-                  "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
+                  "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
                   isActive
                     ? "text-[#F4C430] bg-[#F4C430]/10"
                     : "text-muted-foreground"

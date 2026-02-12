@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { Suspense } from "react";
 import DousellNavbarClient, { DousellNavbarClientProps } from "./DousellNavbarClient";
 
 interface DousellNavbarProps {
@@ -25,10 +26,12 @@ export default async function DousellNavbar({ ctaOverride }: DousellNavbarProps)
   const isLoggedIn = !!user;
 
   return (
-    <DousellNavbarClient
-      isLoggedIn={isLoggedIn}
-      ctaOverride={ctaOverride}
-    />
+    <Suspense>
+      <DousellNavbarClient
+        isLoggedIn={isLoggedIn}
+        ctaOverride={ctaOverride}
+      />
+    </Suspense>
   );
 }
 
