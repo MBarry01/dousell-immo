@@ -1,7 +1,7 @@
 "use client";
 
 import { Users, UserPlus } from "lucide-react";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import { MemberCard } from "./MemberCard";
 import { InvitationCard } from "./InvitationCard";
 import { InviteMemberDialog } from "./InviteMemberDialog";

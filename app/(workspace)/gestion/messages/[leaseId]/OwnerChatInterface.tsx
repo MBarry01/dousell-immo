@@ -8,7 +8,7 @@ import { sendOwnerMessage } from '../actions'; // Important: Import from updated
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 interface Message {
     id: string;

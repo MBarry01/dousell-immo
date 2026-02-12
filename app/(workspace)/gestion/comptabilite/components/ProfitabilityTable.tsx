@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Building2, Loader2 } from 'lucide-react';
 import { getProfitabilityByProperty, PropertyProfitability } from '../expenses-actions';
 import { toast } from 'sonner';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 interface ProfitabilityTableProps {
     year: number;
@@ -68,7 +68,7 @@ export function ProfitabilityTable({ year }: ProfitabilityTableProps) {
     return (
         <div className="space-y-4">
             {/* Theme Debug - WILL REMOVE LATER */}
-            
+
 
             {/* Summary Card */}
             <div className={`grid grid-cols-2 md:grid-cols-4 gap-2`}>

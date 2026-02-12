@@ -9,7 +9,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 import { MessagesTour } from '@/components/gestion/tours/MessagesTour';
 
 interface Lease {

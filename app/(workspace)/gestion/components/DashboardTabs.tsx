@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useState, useEffect } from 'react';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 import { Users, TrendingUp } from 'lucide-react';
 
 type TabId = 'overview' | 'performance';

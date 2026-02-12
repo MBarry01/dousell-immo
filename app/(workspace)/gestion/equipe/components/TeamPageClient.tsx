@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import { TEAM_ROLE_CONFIG } from "@/lib/team-permissions";
 import { MembersTable } from "./MembersTable";
 import { RolePermissionsTable } from "./RolePermissionsTable";

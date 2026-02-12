@@ -23,7 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import {
   Clock,
   CheckCircle,

@@ -1,7 +1,7 @@
 'use client';
 
 import { MaintenanceHub } from '../components/MaintenanceHub';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 import { InterventionsTour } from '@/components/gestion/tours/InterventionsTour';
 
 interface MaintenanceRequest {

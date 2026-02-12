@@ -6,7 +6,7 @@ import { Download } from 'lucide-react';
 import { FinancialReportPDF } from './FinancialReportPDF';
 import { PropertyProfitability } from '../expenses-actions';
 import { Button } from '@/components/ui/button';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 interface DownloadReportButtonProps {
     year: number;

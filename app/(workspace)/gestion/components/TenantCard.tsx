@@ -25,7 +25,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 
 interface Tenant {
     id: string;

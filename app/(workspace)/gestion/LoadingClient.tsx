@@ -1,7 +1,7 @@
 'use client';
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 export function LoadingClient() {
     const { isDark } = useTheme();

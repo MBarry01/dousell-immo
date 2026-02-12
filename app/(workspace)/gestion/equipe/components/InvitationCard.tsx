@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Mail, RefreshCw, XCircle, Clock, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import { RoleBadge } from "./RoleBadge";
 import { resendInvitation, cancelInvitation } from "../actions";
 import { toast } from "sonner";

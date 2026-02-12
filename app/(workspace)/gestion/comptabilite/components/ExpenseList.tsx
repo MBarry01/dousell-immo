@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Expense, deleteExpense } from '../expenses-actions';
 import { EXPENSE_CATEGORY_LABELS, ExpenseCategory } from '../expense-types';
 import { toast } from 'sonner';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 interface ExpenseListProps {
     expenses: Expense[];

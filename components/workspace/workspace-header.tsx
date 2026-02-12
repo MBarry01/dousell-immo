@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import { useMemo, Suspense } from "react";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { OwnerRoleSwitcher } from "@/components/workspace/OwnerRoleSwitcher";

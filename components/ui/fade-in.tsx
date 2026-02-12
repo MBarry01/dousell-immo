@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
@@ -12,12 +13,18 @@ export function FadeIn({
     className?: string,
     delay?: number
 }) {
+    const { mounted } = useTheme();
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => setIsVisible(true), delay);
         return () => clearTimeout(timer);
     }, [delay]);
+
+    // Hydration guard to prevent double renders or flickering
+    if (!mounted) {
+        return <div className="opacity-0 translate-y-4">{children}</div>;
+    }
 
     return (
         <div

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 import { ReactNode } from "react";
 
 export function ThemedPage({ children }: { children: ReactNode }) {
@@ -18,8 +18,8 @@ export function ThemedCard({ children, className = "" }: { children: ReactNode; 
 
     return (
         <div className={`${className} ${isDark
-                ? 'bg-slate-900 border-slate-800'
-                : 'bg-white border-gray-200'
+            ? 'bg-slate-900 border-slate-800'
+            : 'bg-white border-gray-200'
             } border rounded-xl`}>
             {children}
         </div>

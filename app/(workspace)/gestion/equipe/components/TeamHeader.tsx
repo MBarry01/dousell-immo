@@ -3,7 +3,7 @@
 import { Building2, Users, Mail, Clock, Settings } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import { RoleBadge } from "./RoleBadge";
 import { InviteMemberDialog } from "./InviteMemberDialog";
 import type { Team, TeamRole, TeamStats } from "@/types/team";

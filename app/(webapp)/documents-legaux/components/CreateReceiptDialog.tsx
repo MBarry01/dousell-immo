@@ -21,7 +21,7 @@ import {
 import { ReceiptModal } from '@/app/(workspace)/gestion/components/ReceiptModal';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/client';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 interface Lease {
     id: string;

@@ -33,7 +33,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 import { calculateYearlyFinancials, LeaseInput, TransactionInput } from '@/lib/finance';
 import { getExpensesByYear, getExpensesSummary, getProfitabilityByProperty, getComptabiliteData, PropertyProfitability, Expense } from './expenses-actions';

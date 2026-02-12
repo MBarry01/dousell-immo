@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { inviteTeamMember } from "../actions";
 import { toast } from "sonner";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import { TEAM_ROLE_CONFIG, INVITABLE_ROLES } from "@/lib/team-permissions-config";
 import type { TeamRole } from "@/types/team";
 import { RoleBadge } from "./RoleBadge";

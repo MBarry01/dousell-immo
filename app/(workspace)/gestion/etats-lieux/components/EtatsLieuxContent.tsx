@@ -14,7 +14,7 @@ import {
     ThemedBadge,
     ThemedAlert
 } from '@/app/(workspace)/components/ThemedComponents';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 import { EtatsLieuxTour } from '@/components/gestion/tours/EtatsLieuxTour';
 
 const statusConfig: Record<string, { label: string; variant: "default" | "warning" | "success"; icon: any }> = {

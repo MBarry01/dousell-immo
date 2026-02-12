@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { getInventoryReportById, updateInventoryReport, uploadInventoryPhoto } from '../actions';
 import { type Room, type RoomItem, type MeterReadings } from '../types';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 const CONDITION_OPTIONS = [
     { value: 'bon', label: 'Bon', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500' },

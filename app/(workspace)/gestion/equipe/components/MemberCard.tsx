@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { removeTeamMember, leaveTeam } from "../actions";
 import { toast } from "sonner";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import { RoleBadge } from "./RoleBadge";
 import { ChangeRoleDialog } from "./ChangeRoleDialog";
 import type { TeamMember, TeamRole } from "@/types/team";

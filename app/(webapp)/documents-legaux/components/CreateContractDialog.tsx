@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { GenerateContractButton } from '@/components/contracts/GenerateContractButton';
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 interface Lease {
     id: string;

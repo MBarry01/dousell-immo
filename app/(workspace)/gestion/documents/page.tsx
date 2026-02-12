@@ -40,7 +40,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 import { uploadDocument, deleteDocument, getMyDocuments, getRentalDocuments } from "@/app/(workspace)/compte/mes-documents/actions";
 import { getProperties, getLeasesByOwner } from "../actions";

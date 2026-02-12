@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { OnboardingTour, useOnboardingTour, TourStep } from '@/components/onboarding/OnboardingTour';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 export function EtatsLieuxTour() {
     const { showTour, closeTour, resetTour } = useOnboardingTour('dousell_edl_tour', 1000);

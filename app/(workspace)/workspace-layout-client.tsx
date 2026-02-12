@@ -1,7 +1,7 @@
 "use client";
 
 import { User } from "@supabase/supabase-js";
-import { ThemeProvider } from "@/components/workspace/providers/theme-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import { WorkspaceSidebar } from "@/components/workspace/workspace-sidebar";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { FadeIn } from "@/components/ui/fade-in";

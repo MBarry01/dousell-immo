@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { getInventoryReportById, signInventoryReport, getOwnerSignature } from '../actions';
 import { SignatureCanvas } from '../components/SignatureCanvas';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 interface SignaturePageProps {
     reportId: string;

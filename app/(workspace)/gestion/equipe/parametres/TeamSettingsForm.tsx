@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { updateTeam } from "../actions";
 import { toast } from "sonner";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import type { Team } from "@/types/team";
 
 function cn(...classes: (string | boolean | undefined)[]) {

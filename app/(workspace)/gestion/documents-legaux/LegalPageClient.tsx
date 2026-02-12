@@ -7,7 +7,7 @@ import { fr } from "date-fns/locale";
 import { DecisionModal } from "./components/DecisionModal";
 import { CreateContractDialog } from "./components/CreateContractDialog";
 import { CreateReceiptDialog } from "./components/CreateReceiptDialog";
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 import { LegalTour } from '@/components/gestion/tours/LegalTour';
 
 interface LegalPageClientProps {

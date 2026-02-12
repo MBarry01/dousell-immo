@@ -23,7 +23,7 @@ import { GenerateContractButton } from '@/components/contracts/GenerateContractB
 import { ReceiptModal } from './ReceiptModal';
 import { cn } from '@/lib/utils'; // Assumed utility
 import { ConfigurationRequirementCheck } from './ConfigurationRequirementCheck';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 interface Lease {
     id: string;

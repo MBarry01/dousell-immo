@@ -2,7 +2,7 @@
 
 import { Check, X, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import {
   Tooltip,
   TooltipContent,

@@ -22,7 +22,7 @@ import {
 import { addExpense } from '../expenses-actions';
 import { ExpenseCategory, EXPENSE_CATEGORY_LABELS } from '../expense-types';
 import { toast } from 'sonner';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 interface Property {
     id: string;

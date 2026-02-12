@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import { TEAM_ROLE_CONFIG } from "@/lib/team-permissions";
 import { ChangeRoleDialog } from "./ChangeRoleDialog";
 import { removeTeamMember, leaveTeam, cancelInvitation, resendInvitation } from "../actions";

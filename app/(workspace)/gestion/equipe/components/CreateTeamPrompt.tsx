@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { createTeam } from "../actions";
 import { toast } from "sonner";
-import { useTheme } from "@/components/workspace/providers/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 
 interface ProfileData {
   company_name: string | null;

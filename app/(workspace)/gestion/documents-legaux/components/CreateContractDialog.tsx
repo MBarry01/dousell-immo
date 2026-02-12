@@ -19,7 +19,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { GenerateContractButton } from '@/components/contracts/GenerateContractButton';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 import { ConfigurationRequirementCheck } from '../../components/ConfigurationRequirementCheck';
 
 interface Lease {

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { createInventoryReport, getLeasesForInventory } from '../actions';
 import { PropertyType, PROPERTY_TYPE_LABELS } from '../types';
-import { useTheme } from '@/components/workspace/providers/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 type Lease = {
     id: string;
