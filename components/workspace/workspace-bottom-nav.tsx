@@ -61,8 +61,16 @@ const compteNavItems: NavItem[] = [
 export function WorkspaceBottomNav() {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
+  const scrollContainerRef = useRef<Element | null>(null);
+  const scrollHandlerRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
 
   // Déterminer le contexte et les items de navigation
   const navItems = useMemo(() => {
@@ -73,58 +81,65 @@ export function WorkspaceBottomNav() {
   }, [pathname]);
 
   useEffect(() => {
-    // Trouver le conteneur scrollable (main dans workspace-layout)
-    const scrollContainer = document.querySelector("main.overflow-y-auto");
-    if (!scrollContainer) return;
-
-    // Initialisation immédiate
-    const initVisibility = () => {
-      if (scrollContainer.scrollTop > 100) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-      lastScrollY.current = scrollContainer.scrollTop;
-    };
-
-    initVisibility();
-
-    // Vérification retardée pour gérer la restauration du scroll par le navigateur
-    // (qui peut arriver après le montage)
+    // Attendre que le DOM soit stable avant de chercher le conteneur
+    // (évite les race conditions sur mobile lors de la navigation)
     const timeoutId = setTimeout(() => {
-      initVisibility();
-    }, 100);
+      try {
+        const scrollContainer = document.querySelector("main.overflow-y-auto");
+        if (!scrollContainer) return;
 
-    const handleScroll = () => {
-      if (!ticking.current) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = scrollContainer.scrollTop;
-          const scrollDelta = currentScrollY - lastScrollY.current;
-
-          // Seuil de 10px pour éviter les micro-mouvements
-          if (Math.abs(scrollDelta) > 10) {
-            if (scrollDelta > 0 && currentScrollY > 100) {
-              // Scroll vers le bas (après 100px) -> masquer
-              setIsVisible(false);
-            } else if (scrollDelta < 0) {
-              // Scroll vers le haut -> afficher
-              setIsVisible(true);
-            }
-            lastScrollY.current = currentScrollY;
+        // Initialisation
+        const initVisibility = () => {
+          if (scrollContainer.scrollTop > 100) {
+            setIsVisible(false);
+          } else {
+            setIsVisible(true);
           }
+          lastScrollY.current = scrollContainer.scrollTop;
+        };
 
-          ticking.current = false;
-        });
-        ticking.current = true;
+        initVisibility();
+
+        const handleScroll = () => {
+          if (!ticking.current) {
+            requestAnimationFrame(() => {
+              const currentScrollY = scrollContainer.scrollTop;
+              const scrollDelta = currentScrollY - lastScrollY.current;
+
+              if (Math.abs(scrollDelta) > 10) {
+                if (scrollDelta > 0 && currentScrollY > 100) {
+                  setIsVisible(false);
+                } else if (scrollDelta < 0) {
+                  setIsVisible(true);
+                }
+                lastScrollY.current = currentScrollY;
+              }
+
+              ticking.current = false;
+            });
+            ticking.current = true;
+          }
+        };
+
+        scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+
+        // Stocker la ref pour le cleanup
+        scrollContainerRef.current = scrollContainer;
+        scrollHandlerRef.current = handleScroll;
+      } catch (err) {
+        // Silently ignore DOM errors on mobile navigation
       }
-    };
-
-    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+    }, 150);
 
     return () => {
-      scrollContainer.removeEventListener("scroll", handleScroll);
+      clearTimeout(timeoutId);
+      const container = scrollContainerRef.current;
+      const handler = scrollHandlerRef.current;
+      if (container && handler) {
+        container.removeEventListener("scroll", handler);
+      }
     };
-  }, []);
+  }, [pathname]);
 
   // Toujours visible au changement de page
   useEffect(() => {
@@ -132,8 +147,11 @@ export function WorkspaceBottomNav() {
     lastScrollY.current = 0;
   }, [pathname]);
 
+  if (!mounted) return null;
+
   return (
     <nav
+
       className={cn(
         "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/80 backdrop-blur-lg lg:hidden print:hidden",
         "transition-transform duration-300 ease-out",

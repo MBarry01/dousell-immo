@@ -55,13 +55,16 @@ export function WorkspaceLayoutClient({
           </Suspense>
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto pb-safe-nav lg:pb-0 overscroll-contain">
-            <div className="px-0 py-4 md:p-6 lg:pl-0">
-              <FadeIn delay={100}>
-                {children}
-              </FadeIn>
-            </div>
+          <main className="flex-1 overflow-y-auto pb-safe-nav lg:pb-0 overscroll-contain bg-background">
+            <Suspense fallback={<div className="p-6 animate-pulse bg-muted/20" />}>
+              <div className="px-0 py-4 md:p-6 lg:pl-0">
+                <FadeIn delay={100}>
+                  {children}
+                </FadeIn>
+              </div>
+            </Suspense>
           </main>
+
         </div>
 
         {/* Mobile Bottom Navigation */}

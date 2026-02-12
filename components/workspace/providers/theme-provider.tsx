@@ -16,7 +16,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const [theme, setTheme] = useState<Theme>("dark");
     const [mounted, setMounted] = useState(false);
 
-    // Load theme from localStorage on mount
+    // Initialisation
     useEffect(() => {
         setMounted(true);
         const savedTheme = localStorage.getItem("webapp-theme") as Theme;
@@ -25,22 +25,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    // Apply theme class to document and save to localStorage
+    // Application du thème
     useEffect(() => {
-        if (mounted) {
-            localStorage.setItem("webapp-theme", theme);
-            // Appliquer la classe au document HTML pour que Tailwind fonctionne
-            const root = document.documentElement;
-            if (theme === "dark") {
-                root.classList.add("dark");
-                root.classList.remove("light");
-            } else {
-                root.classList.remove("dark");
-                root.classList.add("light");
-            }
-            // Mettre à jour l'attribut data-theme pour les composants shadcn
-            root.setAttribute("data-theme", theme);
+        if (!mounted) return;
+
+        localStorage.setItem("webapp-theme", theme);
+        const root = document.documentElement;
+        if (theme === "dark") {
+            root.classList.add("dark");
+            root.classList.remove("light");
+        } else {
+            root.classList.remove("dark");
+            root.classList.add("light");
         }
+        root.setAttribute("data-theme", theme);
     }, [theme, mounted]);
 
     const toggleTheme = () => {
@@ -53,13 +51,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         isDark: theme === "dark",
     };
 
-    // Prevent flash of wrong theme
-    if (!mounted) {
-        return null;
-    }
-
-    return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+    return (
+        <ThemeContext.Provider value={value}>
+            {/* 
+                IMPORTANT: We render children immediately to avoid hydration breakage on mobile.
+                The 'mounted' check only controls the theme application side-effect.
+            */}
+            {children}
+        </ThemeContext.Provider>
+    );
 }
+
 
 export function useTheme() {
     const context = useContext(ThemeContext);
