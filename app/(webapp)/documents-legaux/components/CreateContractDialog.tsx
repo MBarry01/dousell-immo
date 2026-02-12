@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { GenerateContractButton } from '@/components/contracts/GenerateContractButton';
 import { cn } from '@/lib/utils';
-import { useTheme } from '../../theme-provider';
+import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 interface Lease {
     id: string;
@@ -46,8 +46,8 @@ export function CreateContractDialog({ leases, trigger }: CreateContractDialogPr
             <DialogTrigger asChild>
                 {trigger ? trigger : (
                     <button id="tour-generate-contract" className={`w-full text-left p-6 rounded-xl border transition-all group outline-none focus:ring-2 focus:ring-blue-500/50 ${isDark
-                            ? 'border-slate-800 bg-gradient-to-br from-slate-900 to-black hover:border-slate-700'
-                            : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                        ? 'border-slate-800 bg-gradient-to-br from-slate-900 to-black hover:border-slate-700'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                         }`}>
                         <div className={`h-10 w-10 rounded-lg flex items-center justify-center mb-4 transition-colors ${isDark ? 'bg-slate-800 group-hover:bg-slate-700' : 'bg-gray-100 group-hover:bg-gray-200'
                             }`}>

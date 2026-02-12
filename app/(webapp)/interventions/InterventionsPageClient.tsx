@@ -1,7 +1,7 @@
 'use client';
 
 import { MaintenanceHub } from "@/app/(workspace)/gestion/components/MaintenanceHub";
-import { useTheme } from "../theme-provider";
+import { useTheme } from "@/components/workspace/providers/theme-provider";
 
 interface MaintenanceRequest {
     id: string;

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from 'sonner';
 import { renewLease, terminateLease } from '../actions';
 import type { LeaseAlert } from '../actions';
-import { useTheme } from '../../theme-provider';
+import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 interface DecisionModalProps {
     alert: LeaseAlert;

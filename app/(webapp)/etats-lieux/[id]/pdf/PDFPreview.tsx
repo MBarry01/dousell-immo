@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { getInventoryReportById, getAgencyBranding } from '../../actions';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useTheme } from '../../../theme-provider';
+import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 interface PDFPageProps {
     reportId: string;

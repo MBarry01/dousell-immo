@@ -14,7 +14,7 @@ import {
     ThemedBadge,
     ThemedAlert
 } from '../../components/ThemedComponents';
-import { useTheme } from '../../theme-provider';
+import { useTheme } from '@/components/workspace/providers/theme-provider';
 
 const statusConfig: Record<string, { label: string; variant: "default" | "warning" | "success"; icon: any }> = {
     'draft': { label: 'Brouillon', variant: 'default', icon: Edit },

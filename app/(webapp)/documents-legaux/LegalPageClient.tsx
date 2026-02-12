@@ -7,7 +7,7 @@ import { fr } from "date-fns/locale";
 import { DecisionModal } from "./components/DecisionModal";
 import { CreateContractDialog } from "./components/CreateContractDialog";
 import { CreateReceiptDialog } from "./components/CreateReceiptDialog";
-import { useTheme } from "../theme-provider";
+import { useTheme } from "@/components/workspace/providers/theme-provider";
 
 interface LegalPageClientProps {
     stats: {
@@ -108,8 +108,8 @@ export function LegalPageClient({ stats, alerts, leases, userEmail, profile }: L
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm text-left min-w-[600px]">
                                     <thead className={`font-medium border-b ${isDark
-                                            ? 'bg-slate-900/50 text-slate-400 border-slate-800'
-                                            : 'bg-gray-50 text-gray-600 border-gray-200'
+                                        ? 'bg-slate-900/50 text-slate-400 border-slate-800'
+                                        : 'bg-gray-50 text-gray-600 border-gray-200'
                                         }`}>
                                         <tr>
                                             <th className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">Locataire & Bien</th>
@@ -142,8 +142,8 @@ export function LegalPageClient({ stats, alerts, leases, userEmail, profile }: L
                                                 <td className="px-4 md:px-6 py-3 md:py-4">
                                                     <div className="flex items-center gap-2">
                                                         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${alert.alert_type === 'J-180'
-                                                                ? 'bg-orange-500'
-                                                                : 'bg-blue-500'
+                                                            ? 'bg-orange-500'
+                                                            : 'bg-blue-500'
                                                             }`} />
                                                         <span className={`text-xs md:text-sm whitespace-nowrap ${isDark ? 'text-slate-300' : 'text-gray-700'
                                                             }`}>

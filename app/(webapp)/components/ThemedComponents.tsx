@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from "../theme-provider";
+import { useTheme } from "@/components/workspace/providers/theme-provider";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
