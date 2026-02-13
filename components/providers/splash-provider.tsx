@@ -111,17 +111,21 @@ export const SplashProvider = ({
         </AnimatePresence>
       )}
 
-      {/* Contenu principal - propre handover */}
+      {/* Contenu principal - propre handover sans saccade */}
       <div
         key="main-content"
         className="will-change-[opacity]"
         style={{
           opacity: showSplash ? 0 : 1,
           pointerEvents: showSplash ? "none" : "auto",
-          transition: "opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1)",
-          // CLEAN HANDOVER: Ne pas rendre les inputs tant que le splash est là
-          // Cela empêche l'autofill de mot de passe de parasiter le splash.
-          display: isReady && !showSplash ? "block" : "none",
+          transition: "opacity 1s cubic-bezier(0.22, 1, 0.36, 1)",
+          // ZERO STUTTER: Utiliser visibility au lieu de display: none
+          // Cela permet au navigateur de pré-calculer le layout sans l'afficher.
+          visibility: isReady && !showSplash ? "visible" : "hidden",
+          // S'assurer que le fond est déjà noir sous le splash
+          backgroundColor: "#05080c",
+          position: "relative",
+          zIndex: 1,
         }}
       >
         {children}

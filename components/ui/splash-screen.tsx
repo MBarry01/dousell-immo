@@ -26,7 +26,7 @@ export const SplashScreen = ({ onAnimationComplete }: SplashScreenProps) => {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black"
+      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#05080c]"
       initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -146,7 +146,7 @@ export const SplashScreen = ({ onAnimationComplete }: SplashScreenProps) => {
         <span className="text-xs font-medium tracking-[0.4em] text-white/50">
           DOUSSEL IMMO
         </span>
-        
+
         {/* Barre de progression subtile */}
         <motion.div
           className="mt-3 h-[2px] w-16 overflow-hidden rounded-full bg-white/10"

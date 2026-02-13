@@ -115,9 +115,16 @@ export default function RootLayout({
                   if (isDark) {
                     document.documentElement.classList.add('dark');
                     document.documentElement.style.backgroundColor = '#05080c';
+                    // Force background on body too
+                    const style = document.createElement('style');
+                    style.innerHTML = 'body { background-color: #05080c !important; }';
+                    document.head.appendChild(style);
                   } else {
                     document.documentElement.classList.add('light');
                     document.documentElement.style.backgroundColor = '#f8fafc';
+                    const style = document.createElement('style');
+                    style.innerHTML = 'body { background-color: #f8fafc !important; }';
+                    document.head.appendChild(style);
                   }
 
                   // Create splash-blocker if needed (prevent initial layout shifts)
