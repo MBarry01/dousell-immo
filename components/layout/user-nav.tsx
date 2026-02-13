@@ -48,11 +48,14 @@ export function UserNav() {
 
   // Si non connecté, afficher un bouton "Se connecter"
   if (!loading && !user) {
+    const currentPath = typeof window !== "undefined" ? window.location.pathname + window.location.search : "";
+    const loginUrl = currentPath ? `/login?redirect=${encodeURIComponent(currentPath)}` : "/login";
+
     return (
       <Button
         size="sm"
         className="rounded-2xl px-4 transition-all hover:scale-105 active:scale-95"
-        onClick={() => router.push("/login")}
+        onClick={() => router.push(loginUrl)}
       >
         Se connecter
       </Button>

@@ -10,8 +10,11 @@ import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ListingImageCarousel } from "@/components/property/listing-image-carousel";
 import { cn, formatCurrency } from "@/lib/utils";
 import { hapticFeedback } from "@/lib/haptic";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import { useFavoritesStore } from "@/store/use-store";
 import { useMounted } from "@/hooks/use-mounted";
+import { useRouter } from "next/navigation";
 import type { Property } from "@/types/property";
 
 type PropertyCardProps = {
@@ -31,9 +34,28 @@ export const PropertyCard = ({
   const mounted = useMounted();
   const favorite = mounted ? isFavorite(property.id) : false;
 
+  const { user } = useAuth();
+  const router = useRouter();
+
   const toggleFavorite = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
+
+    // AUTH GUARD: Require login to add favorites
+    if (!user) {
+      const currentPath = typeof window !== "undefined" ? window.location.pathname + window.location.search : "";
+      const loginUrl = currentPath ? `/login?redirect=${encodeURIComponent(currentPath)}` : "/login";
+
+      toast.error("Connexion requise", {
+        description: "Connectez-vous pour enregistrer vos favoris.",
+        action: {
+          label: "Se connecter",
+          onClick: () => router.push(loginUrl),
+        },
+      });
+      return;
+    }
+
     hapticFeedback.light();
     if (favorite) {
       removeFavorite(property.id);

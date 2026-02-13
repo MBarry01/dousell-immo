@@ -36,6 +36,7 @@ import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useFavoritesStore } from "@/store/use-store";
 import { useMounted } from "@/hooks/use-mounted";
+import { useAuth } from "@/hooks/use-auth";
 import { formatCurrency } from "@/lib/utils";
 import { incrementView } from "@/services/propertyService";
 import type { Property } from "@/types/property";
@@ -85,7 +86,24 @@ export const PropertyDetailView = ({
     ];
   }, [property]);
 
+  const { user } = useAuth();
+
   const toggleFavorite = () => {
+    // AUTH GUARD: Require login to add favorites
+    if (!user) {
+      const currentPath = typeof window !== "undefined" ? window.location.pathname + window.location.search : "";
+      const loginUrl = currentPath ? `/login?redirect=${encodeURIComponent(currentPath)}` : "/login";
+
+      toast.error("Connexion requise", {
+        description: "Connectez-vous pour enregistrer vos favoris.",
+        action: {
+          label: "Se connecter",
+          onClick: () => router.push(loginUrl),
+        },
+      });
+      return;
+    }
+
     if (favorite) {
       removeFavorite(property.id);
       toast.success("Retiré des favoris", { description: property.title });

@@ -166,9 +166,14 @@ export default function DousellNavbarClient({
                         : { text: "Commencer gratuitement", href: "/pro/start" };
                 case "hero":
                 default:
-                    return isLoggedIn
-                        ? { text: "Mon Espace", href: "/gestion" }
-                        : visitorOwnerCta;
+                    if (isLoggedIn) {
+                        return { text: "Mon Espace", href: "/gestion" };
+                    }
+                    // Propager le redirect pour le bouton login du hero
+                    const currentRef = typeof window !== "undefined" ? window.location.pathname + window.location.search : "";
+                    const loginHref = currentRef ? `/login?redirect=${encodeURIComponent(currentRef)}` : "/pro/start";
+
+                    return { text: "Essai Gratuit", href: loginHref };
             }
         }
 
