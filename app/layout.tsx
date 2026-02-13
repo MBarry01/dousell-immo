@@ -102,6 +102,56 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
+        {/* Anti-Flash & Instant Dark Mode Script */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const storedTheme = localStorage.getItem('theme');
+                  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  const isDark = storedTheme === 'dark' || (!storedTheme && systemDark) || (storedTheme === 'system' && systemDark);
+                  
+                  if (isDark) {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.style.backgroundColor = '#05080c';
+                  } else {
+                    document.documentElement.classList.add('light');
+                    document.documentElement.style.backgroundColor = '#f8fafc';
+                  }
+
+                  // Create splash-blocker if needed (prevent initial layout shifts)
+                  if (!sessionStorage.getItem('doussel_splash_shown')) {
+                    const style = document.createElement('style');
+                    style.id = 'splash-style-blocker';
+                    style.innerHTML = 'body { overflow: hidden !important; }';
+                    document.head.appendChild(style);
+                    
+                    const blocker = document.createElement('div');
+                    blocker.id = 'splash-blocker';
+                    blocker.style.position = 'fixed';
+                    blocker.style.inset = '0';
+                    blocker.style.zIndex = '9999';
+                    blocker.style.backgroundColor = isDark ? '#05080c' : '#f8fafc';
+                    document.documentElement.appendChild(blocker);
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+
+        {/* Standard iOS Splash Screens (Apple Touch Startup Image) */}
+        <link rel="apple-touch-startup-image" href="/splash/iphone5_splash.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
+        <link rel="apple-touch-startup-image" href="/splash/iphone6_splash.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+        <link rel="apple-touch-startup-image" href="/splash/iphoneplus_splash.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" />
+        <link rel="apple-touch-startup-image" href="/splash/iphonex_splash.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
+        <link rel="apple-touch-startup-image" href="/splash/iphonexr_splash.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" />
+        <link rel="apple-touch-startup-image" href="/splash/iphonexsmax_splash.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" />
+        <link rel="apple-touch-startup-image" href="/splash/ipad_splash.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" />
+        <link rel="apple-touch-startup-image" href="/splash/ipadpro1_splash.png" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)" />
+        <link rel="apple-touch-startup-image" href="/splash/ipadpro2_splash.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" />
+
         {/* Schema.org GEO Data */}
         <script
           type="application/ld+json"

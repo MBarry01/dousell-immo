@@ -11,6 +11,7 @@ import { ListingImageCarousel } from "@/components/property/listing-image-carous
 import { cn, formatCurrency } from "@/lib/utils";
 import { hapticFeedback } from "@/lib/haptic";
 import { useFavoritesStore } from "@/store/use-store";
+import { useMounted } from "@/hooks/use-mounted";
 import type { Property } from "@/types/property";
 
 type PropertyCardProps = {
@@ -27,7 +28,8 @@ export const PropertyCard = ({
   priority = false,
 }: PropertyCardProps) => {
   const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
-  const favorite = isFavorite(property.id);
+  const mounted = useMounted();
+  const favorite = mounted ? isFavorite(property.id) : false;
 
   const toggleFavorite = (event: MouseEvent) => {
     event.preventDefault();

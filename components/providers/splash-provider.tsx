@@ -16,13 +16,21 @@ interface SplashProviderProps {
 }
 
 /**
- * Supprime le blocker HTML créé par le script inline
+ * Supprime le blocker HTML créé par le script inline dans layout.tsx
  */
 const removeSplashBlocker = () => {
+  if (typeof document === 'undefined') return;
+
   const blocker = document.getElementById("splash-blocker");
   if (blocker) {
     blocker.remove();
   }
+
+  const styleBlocker = document.getElementById("splash-style-blocker");
+  if (styleBlocker) {
+    styleBlocker.remove();
+  }
+
   document.documentElement.style.overflow = "";
 };
 
@@ -54,15 +62,15 @@ export const SplashProvider = ({
     // Supprimer le blocker HTML - React prend le relais
     removeSplashBlocker();
     setIsReady(true);
-    
+
     // Bloquer le scroll pendant le splash
     document.body.style.overflow = "hidden";
-    
+
     // Timer pour masquer le splash
     const timer = setTimeout(() => {
       setShowSplash(false);
       document.body.style.overflow = "";
-      
+
       // Marquer comme affiché pour cette session
       if (!showEveryVisit) {
         sessionStorage.setItem(SESSION_KEY, "true");
@@ -84,19 +92,20 @@ export const SplashProvider = ({
           <SplashScreen key="splash-screen" />
         </AnimatePresence>
       )}
-      
+
       {/* Contenu principal - toujours rendu mais caché si splash visible */}
       <div
         key="main-content"
+        className="will-change-[opacity]"
         style={{
           opacity: showSplash ? 0 : 1,
           pointerEvents: showSplash ? "none" : "auto",
-          transition: "opacity 0.4s ease-out",
+          transition: "opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
         }}
       >
         {children}
       </div>
-      
+
       {/* Écran noir de fallback avant hydratation */}
       {!isReady && (
         <div key="fallback-black" className="fixed inset-0 z-[9999] bg-black" />

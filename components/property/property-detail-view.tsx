@@ -35,6 +35,7 @@ import { AgentCard } from "@/components/property/agent-card";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useFavoritesStore } from "@/store/use-store";
+import { useMounted } from "@/hooks/use-mounted";
 import { formatCurrency } from "@/lib/utils";
 import { incrementView } from "@/services/propertyService";
 import type { Property } from "@/types/property";
@@ -57,7 +58,8 @@ export const PropertyDetailView = ({
 }: PropertyDetailViewProps) => {
   const router = useRouter();
   const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
-  const favorite = isFavorite(property.id);
+  const mounted = useMounted();
+  const favorite = mounted ? isFavorite(property.id) : false;
 
   // Tracker la vue de la page (compteur incrémental optimisé)
   useEffect(() => {
