@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, Children, Fragment } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AnimatePresence } from "framer-motion";
+import { useAuth } from "@/hooks/use-auth";
 import { SplashScreen } from "@/components/ui/splash-screen";
 
-const SPLASH_DURATION = 2500; // ms - durée totale avant fade out
+const MIN_SPLASH_DURATION = 1600; // ms - Toujours montrer au moins 1.6s
+const MAX_SPLASH_TIMEOUT = 5000; // ms - Sécurité pour ne pas bloquer l'utilisateur
 const SESSION_KEY = "doussel_splash_shown";
 
 interface SplashProviderProps {
@@ -42,14 +44,16 @@ const removeSplashBlocker = () => {
 export const SplashProvider = ({
   children,
   showEveryVisit = false,
-  duration = SPLASH_DURATION,
+  duration = MIN_SPLASH_DURATION,
 }: SplashProviderProps) => {
+  const { loading: authLoading } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
   const [isReady, setIsReady] = useState(false);
+  const [minDurationPassed, setMinDurationPassed] = useState(false);
 
   useEffect(() => {
-    // Vérifier sessionStorage pour éviter de re-montrer le splash
-    if (!showEveryVisit) {
+    // 1. Vérifier si le splash est nécessaire
+    if (!showEveryVisit && typeof window !== "undefined") {
       const hasShown = sessionStorage.getItem(SESSION_KEY);
       if (hasShown) {
         removeSplashBlocker();
@@ -59,29 +63,43 @@ export const SplashProvider = ({
       }
     }
 
-    // Supprimer le blocker HTML - React prend le relais
-    removeSplashBlocker();
     setIsReady(true);
-
-    // Bloquer le scroll pendant le splash
     document.body.style.overflow = "hidden";
 
-    // Timer pour masquer le splash
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-      document.body.style.overflow = "";
-
-      // Marquer comme affiché pour cette session
-      if (!showEveryVisit) {
-        sessionStorage.setItem(SESSION_KEY, "true");
-      }
+    // 2. Timer pour la durée minimale (effet visuel)
+    const minTimer = setTimeout(() => {
+      setMinDurationPassed(true);
     }, duration);
 
+    // 3. Sécurité (Max Timeout) pour éviter de bloquer sur une erreur auth
+    const maxTimer = setTimeout(() => {
+      setMinDurationPassed(true);
+      // On force la fin du splash même si authLoading est encore true
+    }, MAX_SPLASH_TIMEOUT);
+
     return () => {
-      clearTimeout(timer);
+      clearTimeout(minTimer);
+      clearTimeout(maxTimer);
       document.body.style.overflow = "";
     };
   }, [duration, showEveryVisit]);
+
+  // 4. Sortie du splash synchronisée
+  useEffect(() => {
+    // On ne sort que si : 
+    // - On est déjà prêt (isReady)
+    // - ET l'auth a fini de charger (pour éviter les sauts de UI)
+    // - ET la durée minimale visuelle est passée
+    if (isReady && !authLoading && minDurationPassed) {
+      setShowSplash(false);
+      removeSplashBlocker();
+      document.body.style.overflow = "";
+
+      if (!showEveryVisit) {
+        sessionStorage.setItem(SESSION_KEY, "true");
+      }
+    }
+  }, [isReady, authLoading, minDurationPassed, showEveryVisit]);
 
   // Structure stable - un seul wrapper pour éviter les warnings de key dans Next.js App Router
   return (
@@ -93,14 +111,17 @@ export const SplashProvider = ({
         </AnimatePresence>
       )}
 
-      {/* Contenu principal - toujours rendu mais caché si splash visible */}
+      {/* Contenu principal - propre handover */}
       <div
         key="main-content"
         className="will-change-[opacity]"
         style={{
           opacity: showSplash ? 0 : 1,
           pointerEvents: showSplash ? "none" : "auto",
-          transition: "opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
+          transition: "opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1)",
+          // CLEAN HANDOVER: Ne pas rendre les inputs tant que le splash est là
+          // Cela empêche l'autofill de mot de passe de parasiter le splash.
+          display: isReady && !showSplash ? "block" : "none",
         }}
       >
         {children}
