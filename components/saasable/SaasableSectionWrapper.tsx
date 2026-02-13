@@ -5,9 +5,6 @@ import { Suspense, useEffect, useState } from 'react';
 // @mui - Using a minimal approach to avoid global style pollution
 import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material/styles';
 
-// @project
-import { ConfigProvider } from '@/components/saasable/contexts/ConfigContext';
-
 // Inline minimal dark theme to avoid the complex theme with global effects
 const minimalDarkTheme = createTheme({
     palette: {
@@ -69,8 +66,6 @@ function ThemeWrapper({ children }: { children: React.ReactNode }) {
 
 export default function SaasableSectionWrapper({ children }: { children: React.ReactNode }) {
     return (
-        <ConfigProvider>
-            <ThemeWrapper>{children}</ThemeWrapper>
-        </ConfigProvider>
+        <ThemeWrapper>{children}</ThemeWrapper>
     );
 }

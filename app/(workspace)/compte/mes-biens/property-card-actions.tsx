@@ -13,28 +13,48 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { markPropertyAsSold, deleteUserProperty } from "./actions";
+import { AssociateTenantDialog } from "@/components/gestion/AssociateTenantDialog";
 
 type PropertyCardActionsProps = {
   propertyId: string;
   validationStatus: "pending" | "payment_pending" | "approved" | "rejected";
-  status: "disponible" | "sous-offre" | "vendu";
+  status: "disponible" | "sous-offre" | "vendu" | "loué";
+  category?: "vente" | "location";
+  teamId?: string | null;
+  propertyTitle?: string;
+  propertyAddress?: string;
+  propertyPrice?: number;
+  ownerId?: string;
 };
 
 export function PropertyCardActions({
   propertyId,
   validationStatus,
   status,
+  category,
+  teamId,
+  propertyTitle,
+  propertyAddress,
+  propertyPrice,
+  ownerId,
 }: PropertyCardActionsProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isMarkingSold, setIsMarkingSold] = useState(false);
+  const [isAssociateOpen, setIsAssociateOpen] = useState(false);
 
   const handleEdit = () => {
     router.push(`/compte/biens/edit/${propertyId}`);
   };
 
   const handleMarkAsSold = async () => {
-    if (!confirm("Marquer ce bien comme vendu/loué ?")) {
+    // Si c'est une location et que l'utilisateur a un compte gestion, on ouvre la modale d'association
+    if (category === "location" && teamId) {
+      setIsAssociateOpen(true);
+      return;
+    }
+
+    if (!confirm(`Marquer ce bien comme ${category === "location" ? "loué" : "vendu"} ?`)) {
       return;
     }
 
@@ -44,7 +64,7 @@ export function PropertyCardActions({
       if (result.error) {
         toast.error("Erreur", { description: result.error });
       } else {
-        toast.success("Bien marqué comme vendu/loué");
+        toast.success(`Bien marqué comme ${category === "location" ? "loué" : "vendu"}`);
       }
     } catch (error) {
       console.error(error);
@@ -97,14 +117,14 @@ export function PropertyCardActions({
           <Edit className="mr-2 h-4 w-4" />
           {validationStatus === "rejected" ? "Ré-soumettre" : "Modifier"}
         </DropdownMenuItem>
-        {status !== "vendu" && (
+        {status !== "vendu" && status !== "loué" && (
           <DropdownMenuItem
             onClick={handleMarkAsSold}
             disabled={isMarkingSold}
             className="cursor-pointer text-popover-foreground hover:bg-accent hover:text-accent-foreground"
           >
             <CheckCircle className="mr-2 h-4 w-4" />
-            Marquer comme Vendu/Loué
+            Marquer comme {category === "location" ? "Loué" : "Vendu"}
           </DropdownMenuItem>
         )}
         <DropdownMenuItem
@@ -116,6 +136,20 @@ export function PropertyCardActions({
           Supprimer
         </DropdownMenuItem>
       </DropdownMenuContent>
+
+      {/* Modale d'association (Mode Business) */}
+      {isAssociateOpen && teamId && (
+        <AssociateTenantDialog
+          isOpen={isAssociateOpen}
+          onClose={() => setIsAssociateOpen(false)}
+          propertyId={propertyId}
+          propertyTitle={propertyTitle || ""}
+          propertyAddress={propertyAddress}
+          propertyPrice={propertyPrice}
+          ownerId={ownerId || ""}
+          teamId={teamId}
+        />
+      )}
     </DropdownMenu>
   );
 }

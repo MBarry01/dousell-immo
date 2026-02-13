@@ -5,8 +5,6 @@
  * - 1er utilisateur : 300ms (DB)
  * - Utilisateurs suivants : 5ms (Redis)
  * - Gain : 98% réduction latence
- *
- * @see REDIS_CACHE_STRATEGY.md
  */
 
 import {
@@ -46,11 +44,10 @@ function mergeWithExternals(
 
 /**
  * Récupère les locations populaires à Dakar (VERSION CACHÉE + MÉTRIQUES)
- * TTL : 5 minutes (données changent rarement)
  */
 export async function getPopularLocations(limit = 8): Promise<SectionResult> {
   return getOrSetCacheWithMetrics(
-    `popular_locations_v3_${limit}`, // v3: with partner listings
+    `popular_locations_v4_${limit}`,
     async () => {
       try {
         const filters = {
@@ -59,7 +56,6 @@ export async function getPopularLocations(limit = 8): Promise<SectionResult> {
           limit,
         } as PropertyFilters;
 
-        // Requêtes parallèles: internes + externes + compteurs
         const [internalProperties, internalCount, externalProperties, externalCount] = await Promise.all([
           getProperties(filters),
           getPropertiesCount(filters),
@@ -67,7 +63,6 @@ export async function getPopularLocations(limit = 8): Promise<SectionResult> {
           getExternalListingsCount("location", { city: "Dakar" }),
         ]);
 
-        // Fusion avec priorité aux internes
         const properties = mergeWithExternals(internalProperties, externalProperties, limit);
 
         return { properties, total: internalCount + externalCount };
@@ -80,34 +75,55 @@ export async function getPopularLocations(limit = 8): Promise<SectionResult> {
       }
     },
     {
-      ttl: 10, // 10 secondes
+      ttl: 60, // 1 minute
       namespace: "homepage",
       debug: process.env.NODE_ENV === "development",
     }
   );
 }
 
+/**
+ * Récupère les propriétés à vendre (Villas, Appartements, Studios)
+ * EXCLUT les terrains de manière robuste
+ */
 export async function getPropertiesForSale(limit = 8): Promise<SectionResult> {
   return getOrSetCacheWithMetrics(
-    `properties_for_sale_v3_${limit}`, // v3: with partner listings
+    `properties_for_sale_v4_${limit}`,
     async () => {
       try {
         const filters = {
           category: "vente",
-          types: ["Maison", "Appartement", "Studio"],
-          limit: limit,
+          types: ["Villa", "Maison", "Appartement", "Studio"],
+          limit: limit * 2, // Récupérer plus pour filtrer les terrains
         } as PropertyFilters;
 
-        // Requêtes parallèles: internes + externes + compteurs
         const [internalProperties, internalCount, externalProperties, externalCount] = await Promise.all([
           getProperties(filters),
           getPropertiesCount(filters),
-          getExternalListingsByType("vente", { limit }),
+          getExternalListingsByType("vente", { limit: limit * 2 }),
           getExternalListingsCount("vente"),
         ]);
 
-        // Fusion avec priorité aux internes
-        const properties = mergeWithExternals(internalProperties, externalProperties, limit);
+        // Fusion initiale
+        const merged = mergeWithExternals(internalProperties, externalProperties, limit * 3);
+
+        // FILTRAGE INTELLIGENT de sécurité (évite les fuites de terrains mal catégorisés)
+        const keywords = ["maison", "villa", "studio", "appartement", "duplex", "immeuble", "chambre", "suite", "étage", "résidence"];
+        const properties = merged
+          .filter((p) => {
+            const type = (p.details.type || "").toLowerCase();
+            const title = (p.title || "").toLowerCase();
+            const desc = (p.description || "").toLowerCase();
+
+            // EXCLUSION stricte des terrains
+            if (type.includes("terrain") || title.includes("terrain") || title.includes("parcelle") || desc.includes("terrain nu")) {
+              return false;
+            }
+
+            // INCLUSION si le type ou le titre match un mot-clé de logement
+            return keywords.some(k => type.includes(k) || title.includes(k));
+          })
+          .slice(0, limit);
 
         return { properties, total: internalCount + externalCount };
       } catch (error) {
@@ -119,7 +135,7 @@ export async function getPropertiesForSale(limit = 8): Promise<SectionResult> {
       }
     },
     {
-      ttl: 10, // 10 secondes
+      ttl: 60,
       namespace: "homepage",
       debug: process.env.NODE_ENV === "development",
     }
@@ -128,29 +144,43 @@ export async function getPropertiesForSale(limit = 8): Promise<SectionResult> {
 
 /**
  * Récupère les terrains à vendre (VERSION CACHÉE + MÉTRIQUES)
- * TTL : 5 minutes
  */
 export async function getLandForSale(limit = 8): Promise<SectionResult> {
   return getOrSetCacheWithMetrics(
-    `land_for_sale_v3_${limit}`, // v3: with partner listings
+    `land_for_sale_v4_${limit}`,
     async () => {
       try {
         const filters = {
           category: "vente",
           type: "Terrain",
-          limit: limit,
+          limit: limit * 2,
         } as PropertyFilters;
 
-        // Requêtes parallèles: internes + externes + compteurs
         const [internalProperties, internalCount, externalProperties, externalCount] = await Promise.all([
           getProperties(filters),
           getPropertiesCount(filters),
-          getExternalListingsByType("vente", { category: "Terrain", limit }),
+          getExternalListingsByType("vente", { category: "Terrain", limit: limit * 2 }),
           getExternalListingsCount("vente", { category: "Terrain" }),
         ]);
 
-        // Fusion avec priorité aux internes
-        const properties = mergeWithExternals(internalProperties, externalProperties, limit);
+        // Fusion initiale
+        const merged = mergeWithExternals(internalProperties, externalProperties, limit * 3);
+
+        // FILTRAGE INTELLIGENT pour ne garder que les terrains
+        const landKeywords = ["terrain", "parcelle", "lotissement", "zone industrielle", "champ", "hectare"];
+        const properties = merged
+          .filter((p) => {
+            const typeValue = (p.details.type || "").toLowerCase();
+            const titleValue = (p.title || "").toLowerCase();
+            const descValue = (p.description || "").toLowerCase();
+
+            return landKeywords.some(k =>
+              typeValue.includes(k) ||
+              titleValue.includes(k) ||
+              descValue.includes(k)
+            );
+          })
+          .slice(0, limit);
 
         return { properties, total: internalCount + externalCount };
       } catch (error) {
@@ -159,7 +189,7 @@ export async function getLandForSale(limit = 8): Promise<SectionResult> {
       }
     },
     {
-      ttl: 10, // 10 secondes
+      ttl: 60,
       namespace: "homepage",
       debug: process.env.NODE_ENV === "development",
     }
@@ -168,21 +198,12 @@ export async function getLandForSale(limit = 8): Promise<SectionResult> {
 
 /**
  * Récupère toutes les sections de la home page en parallèle (VERSION CACHÉE SWR)
- *
- * Utilise le pattern Stale-While-Revalidate :
- * 1. Retourne le cache stale IMMÉDIATEMENT (<5ms)
- * 2. Rafraîchit en background si nécessaire
- *
- * Performance attendue :
- * - Latence perçue : ~5ms (constante)
- * - Freshness : Max 50% du TTL de retard (2.5 mins)
  */
 export async function getHomePageSections() {
   return getOrSetCacheSWR(
-    "all_sections_v3", // v3: with partner listings fill strategy
+    "all_sections_v4",
     async () => {
       try {
-        // Les 3 sections utilisent getOrSetCacheWithMetrics individuellement
         const [locations, ventes, terrains] = await Promise.all([
           getPopularLocations(8),
           getPropertiesForSale(8),
@@ -207,7 +228,7 @@ export async function getHomePageSections() {
       }
     },
     {
-      ttl: 10, // 10 secondes pour tests rapides
+      ttl: 60,
       namespace: "homepage",
       debug: process.env.NODE_ENV === "development",
     }

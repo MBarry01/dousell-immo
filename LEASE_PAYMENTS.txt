@@ -1,6 +1,0 @@
-Bail: 32fac8ad-26fd-4760-9f06-9aa6f69036c4
-Transactions: 3
-
-1. 2/2026 | 15000 FCFA | paid | paid_at: 2026-02-08T17:51:06.157+00:00 | created: 2026-02-08T17:49:28.289022+00:00
-2. 1/2026 | 15000 FCFA | pending | paid_at: null | created: 2026-01-25T21:16:39.389405+00:00
-3. 0/2026 | 30000 FCFA | pending | paid_at: null | created: 2026-01-25T21:16:39.31274+00:00

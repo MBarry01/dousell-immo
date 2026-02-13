@@ -28,6 +28,9 @@ type PropertyWithStatus = Property & {
   verification_status?: "pending" | "verified" | "rejected";
   rejection_reason?: string | null;
   views_count?: number;
+  category?: "vente" | "location";
+  owner_id?: string;
+  // Occupation status (to be computed from leases)
   occupation_status?: "occupied" | "vacant" | "maintenance";
 };
 
@@ -187,7 +190,7 @@ export default function MesBiensPage() {
   }
 
   return (
-    <div className="space-y-6 py-6 text-foreground">
+    <div className="px-4 md:px-6 lg:px-8 space-y-6 py-6 text-foreground">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>

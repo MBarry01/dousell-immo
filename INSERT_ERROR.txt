@@ -1,6 +1,0 @@
-{
-  "code": "PGRST204",
-  "details": null,
-  "hint": null,
-  "message": "Could not find the 'amount_paid' column of 'rental_transactions' in the schema cache"
-}

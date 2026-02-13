@@ -287,7 +287,7 @@ export async function createTeamProperty(
     status: "disponible",
     team_id: teamId,
     created_by: permCheck.userId,
-    owner_id: data.owner_id || null,
+    owner_id: data.owner_id || permCheck.userId, // Default to creator for Vitrine sync
     is_agency_listing: true,
     validation_status: validationStatus,
     service_type: "mandat_confort",

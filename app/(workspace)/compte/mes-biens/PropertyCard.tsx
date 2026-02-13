@@ -30,6 +30,8 @@ type PropertyWithStatus = Property & {
     verification_status?: 'pending' | 'verified' | 'rejected';
     rejection_reason?: string | null;
     views_count?: number;
+    category?: "vente" | "location";
+    owner_id?: string;
     // Occupation status (to be computed from leases)
     occupation_status?: 'occupied' | 'vacant' | 'maintenance';
 };
@@ -165,6 +167,12 @@ export function PropertyCard({ property, viewMode, onRefresh }: PropertyCardProp
                         propertyId={property.id}
                         validationStatus={property.validation_status || 'pending'}
                         status={property.status || 'disponible'}
+                        category={property.category}
+                        teamId={property.team_id}
+                        propertyTitle={property.title}
+                        propertyAddress={property.location?.address || property.location?.city}
+                        propertyPrice={property.price}
+                        ownerId={property.owner_id}
                     />
                 </div>
             </motion.div>
@@ -211,6 +219,12 @@ export function PropertyCard({ property, viewMode, onRefresh }: PropertyCardProp
                         propertyId={property.id}
                         validationStatus={property.validation_status || 'pending'}
                         status={property.status || 'disponible'}
+                        category={property.category}
+                        teamId={property.team_id}
+                        propertyTitle={property.title}
+                        propertyAddress={property.location?.address || property.location?.city}
+                        propertyPrice={property.price}
+                        ownerId={property.owner_id}
                     />
                 </div>
             </div>

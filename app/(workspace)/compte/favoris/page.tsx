@@ -17,7 +17,7 @@ export default function FavorisPage() {
     // via l'ID stocké dans favorites. Ici on simule ou on affiche juste l'état vide.
 
     return (
-        <div className="space-y-6 py-6 text-foreground min-h-[60vh]">
+        <div className="px-4 md:px-6 lg:px-8 space-y-6 py-6 text-foreground min-h-[60vh]">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-semibold">Mes Favoris</h1>

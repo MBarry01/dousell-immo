@@ -45,7 +45,7 @@ export async function uploadVerificationDoc(formData: FormData) {
   // Ici on utilise supabase standard (RLS) pour vérifier la propriété légitime
   const { data: property, error: fetchError } = await supabase
     .from("properties")
-    .select("owner_id")
+    .select("owner_id, category, team_id")
     .eq("id", propertyId)
     .single();
 
@@ -114,7 +114,7 @@ export async function uploadVerificationDoc(formData: FormData) {
 }
 
 /**
- * Marquer un bien comme vendu/loué
+ * Marquer un bien comme vendu ou loué
  */
 export async function markPropertyAsSold(propertyId: string) {
   const supabase = await createClient();
@@ -131,7 +131,7 @@ export async function markPropertyAsSold(propertyId: string) {
   // Vérifier que le bien appartient à l'utilisateur
   const { data: property, error: fetchError } = await supabase
     .from("properties")
-    .select("owner_id")
+    .select("owner_id, category, team_id")
     .eq("id", propertyId)
     .single();
 
@@ -143,17 +143,26 @@ export async function markPropertyAsSold(propertyId: string) {
     return { error: "Vous n'êtes pas autorisé à modifier ce bien." };
   }
 
+  const newStatus = property.category === "location" ? "loué" : "vendu";
+
   const { error } = await supabase
     .from("properties")
-    .update({ status: "vendu" })
+    .update({
+      status: newStatus,
+      validation_status: "pending" // Retirer de la vitrine publique
+    })
     .eq("id", propertyId);
 
   if (error) {
-    console.error("Error marking property as sold:", error);
+    console.error(`Error marking property as ${newStatus}:`, error);
     return { error: "Erreur lors de la mise à jour." };
   }
 
   revalidatePath("/compte/mes-biens");
+  if (property.team_id) {
+    revalidatePath("/gestion/biens");
+    revalidatePath("/gestion");
+  }
   return { success: true };
 }
 
@@ -175,7 +184,7 @@ export async function deleteUserProperty(propertyId: string) {
   // Vérifier que le bien appartient à l'utilisateur
   const { data: property, error: fetchError } = await supabase
     .from("properties")
-    .select("owner_id")
+    .select("owner_id, team_id")
     .eq("id", propertyId)
     .single();
 

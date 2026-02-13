@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { scrollToTop } from "@/lib/scroll-utils";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -18,7 +19,7 @@ import {
     Sun,
     Moon
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/theme-provider";
@@ -34,6 +35,12 @@ function WebAppLayoutContent({
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(true);
     const { toggleTheme, isDark } = useTheme();
+    const mainRef = useRef<HTMLElement>(null);
+
+    // Scroll to top on navigation
+    useEffect(() => {
+        scrollToTop();
+    }, [pathname]);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -312,10 +319,13 @@ function WebAppLayoutContent({
                 {/* ========================================
                     MAIN CONTENT AREA
                     ======================================== */}
-                <main className={`flex-1 w-full h-full overflow-y-auto transition-colors ${isDark
-                    ? 'bg-black'
-                    : 'bg-gray-50'
-                    }`}>
+                <main
+                    ref={mainRef}
+                    id="main-scroll-container"
+                    className={`flex-1 w-full h-full overflow-y-auto transition-colors ${isDark
+                        ? 'bg-black'
+                        : 'bg-gray-50'
+                        }`}>
                     {children}
                 </main>
             </div>

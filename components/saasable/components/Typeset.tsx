@@ -1,24 +1,21 @@
+'use client';
+
 // @mui
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-/***************************  COMMON - TYPESET  ***************************/
+/***************************  COMPONENT - TYPESET  ***************************/
 
-export default function Typeset({ heading, caption, stackProps, headingProps, captionProps }: any) {
-    const { sx, ...rest } = stackProps || {};
-
+export default function Typeset({ heading, caption, stackProps }: any) {
     return (
-        <Stack {...rest} sx={{ gap: { xs: 1, sm: 1.5 }, ...sx }}>
-            <Typography variant="h2" {...headingProps} sx={{ ...(headingProps?.sx && { ...headingProps.sx }) }}>
-                {heading}
-            </Typography>
+        <Stack spacing={1} {...stackProps}>
+            {heading && (
+                <Typography variant="h2" sx={{ fontWeight: 700 }}>
+                    {heading}
+                </Typography>
+            )}
             {caption && (
-                <Typography
-                    component="p"
-                    variant="h6"
-                    {...captionProps}
-                    sx={{ color: 'text.secondary', ...(captionProps?.sx && { ...captionProps.sx }) }}
-                >
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                     {caption}
                 </Typography>
             )}

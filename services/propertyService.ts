@@ -113,6 +113,24 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
     : (row.owner || (row as Record<string, unknown>).profiles);
   const owner = (ownerData ?? {}) as Record<string, unknown>;
 
+  // Détection intelligente du type si manquant ou trop générique (ex: Appartement par défaut)
+  let detectedType = details.type || "Appartement";
+  const titleLower = row.title.toLowerCase();
+  const descLower = row.description.toLowerCase();
+
+  const genericTypes = ["Appartement", "Autre", "Bien", "Propriété"];
+  if (!details.type || genericTypes.includes(detectedType)) {
+    if (titleLower.includes("terrain") || descLower.includes("terrain") || titleLower.includes("parcelle")) {
+      detectedType = "Terrain";
+    } else if (titleLower.includes("villa") || descLower.includes("villa") || titleLower.includes("maison")) {
+      detectedType = "Villa";
+    } else if (titleLower.includes("studio")) {
+      detectedType = "Studio";
+    } else if (titleLower.includes("bureau")) {
+      detectedType = "Bureau";
+    }
+  }
+
   return {
     id: row.id,
     title: row.title,
@@ -134,7 +152,7 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
       dpe: specs.dpe ?? "C",
     },
     details: {
-      type: details.type ?? "Appartement",
+      type: detectedType as any,
       year: details.year ?? 0,
       heating: details.heating ?? "",
       charges: details.charges,

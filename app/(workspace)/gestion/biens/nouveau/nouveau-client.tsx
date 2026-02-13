@@ -54,6 +54,7 @@ import { createClient } from "@/utils/supabase/client";
 import { OwnerSelector } from "@/components/gestion/OwnerSelector";
 import { createTeamProperty, generateSEODescription, type TeamPropertyData } from "../actions";
 import { UpgradeModal } from "@/components/gestion/UpgradeModal";
+import { scrollToTop } from "@/lib/scroll-utils";
 
 type PublishMode = "publish" | "draft" | "schedule";
 
@@ -277,10 +278,14 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
   const nextStep = () => {
     if (validateStep(currentStep)) {
       setCurrentStep((prev) => Math.min(prev + 1, 5));
+      scrollToTop();
     }
   };
 
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
+  const prevStep = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    scrollToTop();
+  };
 
   // Submit
   const handleSubmit = async (mode: PublishMode = "publish", date?: string) => {
@@ -376,34 +381,34 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
 
       {/* Progress Steps */}
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
           {STEPS.map((step, index) => {
             const Icon = step.icon;
             const isActive = currentStep === step.id;
             const isCompleted = currentStep > step.id;
 
             return (
-              <div key={step.id} className="flex items-center">
+              <div key={step.id} className="flex items-center shrink-0">
                 <button
                   onClick={() => step.id < currentStep && setCurrentStep(step.id)}
                   className={`flex flex-col items-center gap-2 transition-all ${step.id <= currentStep ? "cursor-pointer" : "cursor-default"
                     }`}
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isActive
+                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all ${isActive
                     ? "bg-primary text-primary-foreground shadow-lg"
                     : isCompleted
                       ? "bg-primary/20 text-primary"
                       : "bg-muted text-muted-foreground"
                     }`}>
-                    {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                    {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </div>
-                  <span className={`text-xs font-medium hidden sm:block ${isActive ? "text-foreground" : isCompleted ? "text-primary" : "text-muted-foreground"
+                  <span className={`text-[10px] sm:text-xs font-medium hidden sm:block ${isActive ? "text-foreground" : isCompleted ? "text-primary" : "text-muted-foreground"
                     }`}>
                     {step.title}
                   </span>
                 </button>
                 {index < STEPS.length - 1 && (
-                  <div className={`w-12 sm:w-20 h-0.5 mx-2 ${currentStep > step.id ? "bg-primary/30" : "bg-muted"
+                  <div className={`w-6 sm:w-20 h-0.5 mx-1 sm:mx-2 ${currentStep > step.id ? "bg-primary/30" : "bg-muted"
                     }`} />
                 )}
               </div>
@@ -426,11 +431,11 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
               {/* Transaction Toggle */}
               <div>
                 <label className="text-sm text-muted-foreground mb-3 block">Type de transaction</label>
-                <div className="flex bg-muted rounded-lg p-1 w-fit">
+                <div className="flex bg-muted rounded-lg p-1 w-full sm:w-fit">
                   <button
                     type="button"
                     onClick={() => updateField("category", "location")}
-                    className={`px-6 py-2.5 rounded-md text-sm font-medium transition-all ${formData.category === "location"
+                    className={`flex-1 sm:flex-none px-6 py-2.5 rounded-md text-sm font-medium transition-all ${formData.category === "location"
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                       }`}
@@ -440,7 +445,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                   <button
                     type="button"
                     onClick={() => updateField("category", "vente")}
-                    className={`px-6 py-2.5 rounded-md text-sm font-medium transition-all ${formData.category === "vente"
+                    className={`flex-1 sm:flex-none px-6 py-2.5 rounded-md text-sm font-medium transition-all ${formData.category === "vente"
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                       }`}
@@ -453,7 +458,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
               {/* Property Type Cards */}
               <div>
                 <label className="text-sm text-muted-foreground mb-3 block">Type de bien</label>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                   {PROPERTY_TYPES.map((type) => {
                     const Icon = type.icon;
                     return (
@@ -461,14 +466,14 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                         key={type.value}
                         type="button"
                         onClick={() => updateField("type", type.value)}
-                        className={`p-4 rounded-xl border transition-all text-center ${formData.type === type.value
+                        className={`p-3 sm:p-4 rounded-xl border transition-all text-center ${formData.type === type.value
                           ? "bg-primary/10 border-primary/50 text-primary"
                           : "bg-card border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
                           }`}
                       >
-                        <Icon className={`w-6 h-6 mx-auto mb-2 ${formData.type === type.value ? "text-primary" : "text-muted-foreground"
+                        <Icon className={`w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-2 ${formData.type === type.value ? "text-primary" : "text-muted-foreground"
                           }`} />
-                        <span className="text-xs font-medium">{type.label}</span>
+                        <span className="text-[11px] sm:text-xs font-medium">{type.label}</span>
                       </button>
                     );
                   })}

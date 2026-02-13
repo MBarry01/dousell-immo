@@ -7,7 +7,9 @@ import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { FadeIn } from "@/components/ui/fade-in";
 import { WorkspaceBottomNav } from "@/components/workspace/workspace-bottom-nav";
 import { switchTeam } from "@/app/actions/team-switching";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { scrollToTop } from "@/lib/scroll-utils";
 
 interface TeamData {
   id: string;
@@ -31,6 +33,13 @@ export function WorkspaceLayoutClient({
   children,
 }: WorkspaceLayoutClientProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const pathname = usePathname();
+  const mainRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top on navigation
+  useEffect(() => {
+    scrollToTop();
+  }, [pathname]);
 
   // Hydration Log
   useState(() => {
@@ -59,9 +68,13 @@ export function WorkspaceLayoutClient({
         </Suspense>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto pb-safe-nav lg:pb-0 overscroll-contain bg-background">
+        <main
+          ref={mainRef}
+          id="main-scroll-container"
+          className="flex-1 overflow-y-auto pb-safe-nav lg:pb-0 overscroll-contain bg-background"
+        >
           <Suspense fallback={<div className="p-6 animate-pulse bg-muted/20" />}>
-            <div className="px-0 py-4 md:p-6 lg:pl-0">
+            <div className="w-full py-4 md:py-6">
               <FadeIn delay={100}>
                 {children}
               </FadeIn>

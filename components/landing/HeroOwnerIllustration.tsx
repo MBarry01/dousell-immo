@@ -30,15 +30,15 @@ export default function HeroOwnerIllustration() {
       {/* Glow background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(244,196,48,0.15)_0%,_transparent_70%)]" />
 
-      {/* Main container */}
-      <div className="relative w-[380px] h-[500px] lg:w-[440px] lg:h-[560px]">
+      {/* Main container - Adjusted for better responsiveness on mid-size screens */}
+      <div className="relative w-full max-w-[380px] h-[500px] lg:max-w-[440px] xl:max-w-[520px] lg:h-[560px]">
 
         {/* Main Financial Card - Glassmorphism */}
         <motion.div
           initial={{ opacity: 0, y: 40, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute top-12 left-1/2 -translate-x-1/2 w-[340px] md:w-[480px] lg:w-[580px] z-10"
+          className="absolute top-12 left-1/2 -translate-x-1/2 w-[90%] md:w-[110%] lg:w-[120%] z-10"
         >
           <div className="relative rounded-[28px] overflow-hidden border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
             <Image
@@ -70,7 +70,7 @@ export default function HeroOwnerIllustration() {
               animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
               exit={{ opacity: 0, y: -10, scale: 0.9 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="absolute top-4 right-0 lg:-right-4 z-30"
+              className="absolute top-4 -right-2 lg:-right-8 z-30"
             >
               <div className="bg-zinc-900/95 backdrop-blur-xl border border-[#F4C430]/30 rounded-2xl p-3 lg:p-4 shadow-[0_10px_40px_rgba(244,196,48,0.2)] max-w-[260px] lg:max-w-[280px]">
                 <div className="flex items-start gap-3">
@@ -128,7 +128,7 @@ export default function HeroOwnerIllustration() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1.6 }}
-          className="absolute bottom-6 -left-2 lg:bottom-125 lg:-left-15 z-20"
+          className="absolute bottom-6 -left-2 lg:top-8 lg:-left-6 z-20"
         >
           <motion.div
             animate={{ y: [0, -5, 0] }}
@@ -193,7 +193,7 @@ export default function HeroOwnerIllustration() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 2 }}
-          className="absolute bottom-20 -right-6 lg:bottom-20 lg:-right-22 z-20"
+          className="absolute bottom-20 -right-6 lg:bottom-20 lg:-right-13 z-20"
         >
           <div className="bg-gradient-to-r from-zinc-900/95 to-zinc-800/95 backdrop-blur-xl border border-[#F4C430]/20 rounded-full px-5 py-2.5 shadow-lg flex items-center gap-4">
             <div className="text-center">

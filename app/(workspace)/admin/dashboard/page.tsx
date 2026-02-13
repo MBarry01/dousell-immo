@@ -20,11 +20,11 @@ export const dynamic = 'force-dynamic';
 export default async function AdminDashboardPage() {
   // Ensure user is authorized admin
   await requireAnyRole(["admin", "moderateur", "agent", "superadmin"]);
-  
+
   const properties = await getAllPropertiesForAdmin();
 
   return (
-    <div className="space-y-6 py-6">
+    <div className="px-4 md:px-6 lg:px-8 space-y-6 py-6">
       <ModerationNotification />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -100,22 +100,20 @@ export default async function AdminDashboardPage() {
                 <td className="px-4 py-4">
                   <div className="flex flex-col gap-2">
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        statusColors[property.status ?? "disponible"] ??
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${statusColors[property.status ?? "disponible"] ??
                         "bg-white/10 text-white/80"
-                      }`}
+                        }`}
                     >
                       {property.status ?? "disponible"}
                     </span>
                     {property.validationStatus && property.validationStatus !== "approved" && (
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs ${
-                          property.validationStatus === "pending"
+                        className={`rounded-full px-2 py-0.5 text-xs ${property.validationStatus === "pending"
                             ? "bg-amber-500/20 text-amber-300"
                             : property.validationStatus === "rejected"
-                            ? "bg-red-500/20 text-red-300"
-                            : "bg-white/10 text-white/60"
-                        }`}
+                              ? "bg-red-500/20 text-red-300"
+                              : "bg-white/10 text-white/60"
+                          }`}
                       >
                         {property.validationStatus}
                       </span>

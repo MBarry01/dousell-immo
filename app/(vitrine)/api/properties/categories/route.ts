@@ -22,7 +22,7 @@ const CATEGORY_CONFIG: Record<string, {
 }> = {
   villas: {
     name: "Villas de Luxe",
-    searchType: "Maison",
+    searchType: "Villa",
     filters: { types: ["Villa", "Maison"] }
   },
   appartements: {

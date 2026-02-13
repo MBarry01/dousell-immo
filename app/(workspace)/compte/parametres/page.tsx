@@ -206,7 +206,7 @@ export default function ParametresPage() {
   }
 
   return (
-    <div className="px-4 py-4">
+    <div className="px-4 md:px-6 lg:px-8 py-4">
       <Suspense fallback={<div className="h-96 w-full flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
         <FadeIn className="space-y-6">
           {/* Header */}

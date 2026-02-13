@@ -595,7 +595,7 @@ function LandingPageContent() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="hidden lg:flex flex-1 items-center justify-center max-w-md xl:max-w-lg"
+            className="hidden lg:flex flex-1 items-center justify-center max-w-md xl:max-w-[580px]"
           >
             {userMode === "tenant" ? <HeroIllustration /> : <HeroOwnerIllustration />}
           </motion.div>

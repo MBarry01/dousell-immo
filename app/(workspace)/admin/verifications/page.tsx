@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function VerificationsIndexPage() {
     return (
-        <div className="space-y-6 p-6">
+        <div className="px-4 md:px-6 lg:px-8 space-y-6 py-6">
             {/* Header */}
             <div className="flex items-center gap-4">
                 <div className="rounded-xl bg-primary/10 p-3 border border-primary/20">

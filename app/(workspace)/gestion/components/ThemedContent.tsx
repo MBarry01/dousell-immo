@@ -21,7 +21,7 @@ export function ThemedContent({ isViewingTerminated, children, filterSection }: 
                 ? 'border-slate-800 bg-slate-900/50'
                 : 'border-gray-200 bg-white/50'
                 }`}>
-                <div className="w-full mx-auto px-4 md:px-6 py-3">
+                <div className="w-full mx-auto px-4 md:px-6 lg:px-8 py-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className={`flex items-center gap-2 px-3 py-1 border rounded-lg ${isDark
                             ? 'bg-slate-900 border-slate-800'
@@ -58,7 +58,7 @@ export function ThemedContent({ isViewingTerminated, children, filterSection }: 
             </div>
 
             {/* Contenu principal */}
-            <div className="w-full mx-auto px-4 md:px-6 py-6">
+            <div className="w-full mx-auto px-4 md:px-6 lg:px-8 py-6">
                 {children}
             </div>
         </div>

@@ -36,14 +36,21 @@ export async function getPropertiesForSale(limit = 8): Promise<Property[]> {
       limit: limit * 3, // Récupérer 3x plus pour compenser le filtrage
     } as PropertyFilters);
 
-    // Filtrer pour exclure les terrains
+    // Filtrer intelligemment pour exclure les terrains
+    const keywords = ["maison", "villa", "studio", "appartement", "duplex", "immeuble", "chambre", "suite"];
     return allProperties
-      .filter(
-        (p) =>
-          p.details.type === "Maison" ||
-          p.details.type === "Appartement" ||
-          p.details.type === "Studio"
-      )
+      .filter((p) => {
+        const type = (p.details.type || "").toLowerCase();
+        const title = (p.title || "").toLowerCase();
+
+        // Exclure si c'est explicitement un terrain
+        if (type.includes("terrain") || title.includes("terrain") || title.includes("parcelle")) {
+          return false;
+        }
+
+        // Inclure si le type ou le titre match un mot-clé de "logement"
+        return keywords.some(k => type.includes(k) || title.includes(k));
+      })
       .slice(0, limit);
   } catch (error) {
     console.error("[homeService] Error fetching properties for sale:", error);
@@ -64,13 +71,19 @@ export async function getLandForSale(limit = 8): Promise<Property[]> {
     } as PropertyFilters);
 
     // Filtrer pour ne garder que les terrains
+    const landKeywords = ["terrain", "parcelle", "lotissement", "zone industrielle"];
     return allProperties
-      .filter(
-        (p) =>
-          p.details.type?.toLowerCase().includes("terrain") ||
-          p.title.toLowerCase().includes("terrain") ||
-          p.description.toLowerCase().includes("terrain")
-      )
+      .filter((p) => {
+        const type = (p.details.type || "").toLowerCase();
+        const title = (p.title || "").toLowerCase();
+        const desc = (p.description || "").toLowerCase();
+
+        return landKeywords.some(k =>
+          type.includes(k) ||
+          title.includes(k) ||
+          desc.includes(k)
+        );
+      })
       .slice(0, limit);
   } catch (error) {
     console.error("[homeService] Error fetching land for sale:", error);

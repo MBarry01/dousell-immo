@@ -7,6 +7,9 @@ import { sendEmail, getAdminNotificationEmails, getAdminEmail } from "@/lib/mail
 import { ListingSubmittedEmail } from "@/emails/listing-submitted-email";
 import { getBaseUrl } from "@/lib/utils";
 import { invalidatePropertyCaches } from "@/lib/cache/invalidation";
+import { getUserTeamContext } from "@/lib/team-permissions.server";
+import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
+import { notifyUser } from "@/lib/notifications";
 
 type SubmitListingData = {
   type: string;
@@ -127,8 +130,36 @@ export async function submitUserListing(data: SubmitListingData) {
     }
 
 
-    // 100% GRATUIT - Toutes les annonces en attente de validation
-    const validationStatus = "pending";
+    console.log("✅ Profil récupéré/créé:", user.id);
+
+    // --- LOGIQUE DE SYNCHRONISATION GESTION ---
+    // Vérifier si l'utilisateur possède une équipe (Mode Business)
+    const teamContext = await getUserTeamContext();
+    const teamId = teamContext?.team_id;
+    let validationStatus = "pending";
+    let verificationStatus: string | null = data.proof_document_url ? "pending" : null;
+    let isAgencyListing = false;
+
+    if (teamId) {
+      console.log("🏢 Mode Business détecté, Team ID:", teamId);
+
+      // 1. Vérifier les quotas de l'équipe
+      const access = await checkFeatureAccess(teamId, "add_property");
+      if (!access.allowed) {
+        console.warn("⚠️ Quota atteint pour l'équipe:", teamId);
+        return {
+          error: access.message,
+          upgradeRequired: access.upgradeRequired,
+          reason: access.reason
+        };
+      }
+
+      // 2. Bypass de modération pour les comptes business
+      validationStatus = "approved";
+      verificationStatus = "verified"; // Auto-vérifié si compte business
+      isAgencyListing = true;
+      console.log("🚀 Bypass modération activé pour compte business");
+    }
 
     // Déterminer si c'est un terrain
     const isTerrain = data.type === "terrain";
@@ -151,11 +182,13 @@ export async function submitUserListing(data: SubmitListingData) {
       };
 
     // Mapper le type pour details
-    const typeMap: Record<string, "Appartement" | "Maison" | "Studio"> = {
-      villa: "Maison",
+    const typeMap: Record<string, string> = {
+      villa: "Villa",
       appartement: "Appartement",
-      immeuble: "Appartement",
-      terrain: "Appartement",
+      immeuble: "Immeuble",
+      terrain: "Terrain",
+      studio: "Studio",
+      bureau: "Bureau",
     };
 
     const payload = {
@@ -165,7 +198,8 @@ export async function submitUserListing(data: SubmitListingData) {
       category: data.category,
       status: "disponible",
       owner_id: user.id,
-      is_agency_listing: false,
+      team_id: teamId || null,
+      is_agency_listing: isAgencyListing,
       validation_status: validationStatus,
       service_type: "mandat_confort", // 100% gratuit
       contact_phone: data.contact_phone || null,
@@ -180,13 +214,13 @@ export async function submitUserListing(data: SubmitListingData) {
       features: {},
       details: isTerrain
         ? {
-          type: "Appartement" as const,
+          type: "Terrain",
           year: new Date().getFullYear(),
           heating: "",
           juridique: data.juridique,
         }
         : {
-          type: typeMap[data.type] ?? "Appartement",
+          type: typeMap[data.type] || "Appartement",
           year: new Date().getFullYear(),
           heating: "Climatisation",
         },
@@ -194,7 +228,7 @@ export async function submitUserListing(data: SubmitListingData) {
       views_count: 0,
       proof_document_url: data.proof_document_url || null,
       virtual_tour_url: cleanVirtualTourUrl(data.virtual_tour_url),
-      verification_status: data.proof_document_url ? "pending" : null,
+      verification_status: verificationStatus,
     };
 
     const { data: insertedProperty, error } = await supabase
@@ -245,6 +279,17 @@ export async function submitUserListing(data: SubmitListingData) {
       console.error("❌ Erreur lors de la création des notifications:", notificationResult.errors);
     }
 
+    // Notifier l'utilisateur du succès (spécial business)
+    if (validationStatus === "approved") {
+      await notifyUser({
+        userId: user.id,
+        type: "success",
+        title: "Annonce publiée !",
+        message: `Votre annonce "${data.title}" est immédiatement en ligne grâce à votre abonnement business.`,
+        resourcePath: `/biens/${insertedProperty.id}`
+      });
+    }
+
     // Envoyer un email à l'admin (même si la notification échoue)
     const baseUrl = getBaseUrl();
     const adminUrl = `${baseUrl}/admin/moderation`;
@@ -279,13 +324,14 @@ export async function submitUserListing(data: SubmitListingData) {
     await invalidatePropertyCaches(insertedProperty.id, data.city, {
       invalidateHomepage: true,
       invalidateSearch: true,
-      invalidateDetail: false, // Pas encore visible (pending)
+      invalidateDetail: validationStatus === "approved",
       invalidateOwner: true,
       ownerId: user.id,
     });
 
     revalidatePath("/compte/mes-biens");
     revalidatePath("/admin/moderation");
+    if (teamId) revalidatePath("/gestion/biens");
 
     return { success: true };
   } catch (error) {

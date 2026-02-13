@@ -316,7 +316,7 @@ export default function MesDocumentsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-black px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-black px-4 md:px-6 lg:px-8 py-12">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <motion.div

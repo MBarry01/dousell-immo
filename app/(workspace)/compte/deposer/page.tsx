@@ -11,6 +11,7 @@ import {
   Building2,
   Home,
   MapPin,
+  Ruler,
   ImageIcon,
   Send,
   Loader2,
@@ -22,6 +23,7 @@ import {
   TreePine,
   Briefcase,
   Store,
+  ChevronDown,
 } from "lucide-react";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { AddressAutocomplete } from "@/components/forms/address-autocomplete";
@@ -29,6 +31,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/utils/supabase/client";
 import { submitUserListing, generateAIDescription } from "./actions";
 import { smartGeocode } from "@/lib/geocoding";
+import { scrollToTop } from "@/lib/scroll-utils";
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -47,8 +50,11 @@ const PROPERTY_TYPES = [
 ];
 
 const STEPS = [
-  { id: 1, title: "Informations", icon: Building2 },
-  { id: 2, title: "Média & Publication", icon: Send },
+  { id: 1, title: "L'essentiel", icon: Building2 },
+  { id: 2, title: "Localisation", icon: MapPin },
+  { id: 3, title: "Détails", icon: Ruler },
+  { id: 4, title: "Média", icon: ImageIcon },
+  { id: 5, title: "Publication", icon: Send },
 ];
 
 function DeposerPageContent() {
@@ -93,7 +99,7 @@ function DeposerPageContent() {
       try {
         const data = JSON.parse(stored);
         setFormData((prev) => ({ ...prev, ...data }));
-      } catch {}
+      } catch { }
     }
     const storedStep = localStorage.getItem(STORAGE_KEYS.step);
     if (storedStep) setCurrentStep(parseInt(storedStep, 10) || 1);
@@ -170,8 +176,9 @@ function DeposerPageContent() {
 
   // AI Description
   const handleGenerateAI = async () => {
-    if (!formData.city || !formData.price) {
-      setError("Renseignez la ville et le prix pour générer une description.");
+    const isReady = currentStep >= 3 && formData.city && formData.price;
+    if (!isReady) {
+      setError("Renseignez au moins la ville et le prix.");
       return;
     }
     setIsGeneratingAI(true);
@@ -202,59 +209,68 @@ function DeposerPageContent() {
   // Validation
   const validateStep = (step: number): boolean => {
     setError(null);
-    if (step === 1) {
-      if (!formData.title || formData.title.length < 3) {
-        setError("Le titre doit contenir au moins 3 caractères");
-        return false;
-      }
-      if (!formData.price || parseInt(formData.price) <= 0) {
-        setError("Le prix est requis");
-        return false;
-      }
-      if (!formData.city) {
-        setError("La ville est requise");
-        return false;
-      }
-      if (!formData.district) {
-        setError("Le quartier est requis");
-        return false;
-      }
+    switch (step) {
+      case 1:
+        if (!formData.title || formData.title.length < 3) {
+          setError("Le titre doit contenir au moins 3 caractères");
+          return false;
+        }
+        if (!formData.price || parseInt(formData.price) <= 0) {
+          setError("Le prix est requis");
+          return false;
+        }
+        return true;
+      case 2:
+        if (!formData.city) {
+          setError("La ville est requise");
+          return false;
+        }
+        if (!formData.district) {
+          setError("Le quartier est requis");
+          return false;
+        }
+        return true;
+      case 3:
+        return true;
+      case 4:
+        if (formData.images.length === 0) {
+          setError("Au moins une photo est requise");
+          return false;
+        }
+        return true;
+      case 5:
+        return true;
+      default:
+        return true;
     }
-    if (step === 2) {
-      if (formData.images.length === 0) {
-        setError("Au moins une photo est requise");
-        return false;
-      }
-    }
-    return true;
   };
 
   const nextStep = async () => {
     if (validateStep(currentStep)) {
-      // Auto-generate description when going to step 2
-      if (currentStep === 1 && (!formData.description || formData.description.length < 10)) {
+      // Auto-generate description when going to step 4
+      if (currentStep === 3 && (!formData.description || formData.description.length < 10)) {
         await handleGenerateAI();
       }
-      setCurrentStep(2);
-      window.scrollTo({ top: 0, behavior: "instant" });
+      setCurrentStep((prev) => Math.min(prev + 1, 5));
+      scrollToTop();
     }
   };
 
   const prevStep = () => {
-    setCurrentStep(1);
-    window.scrollTo({ top: 0, behavior: "instant" });
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    scrollToTop();
   };
 
   // Submit
   const handleSubmit = async () => {
-    if (!validateStep(2)) return;
+    if (!validateStep(1) || !validateStep(2) || !validateStep(4)) return;
     setIsSubmitting(true);
     setError(null);
 
     let coordinates = { lat: 14.7167, lng: -17.4677 };
     try {
       coordinates = await smartGeocode(formData.address, formData.district, formData.city);
-    } catch {}
+    } catch { }
 
     try {
       const result = await submitUserListing({
@@ -343,28 +359,29 @@ function DeposerPageContent() {
 
       <div className="max-w-4xl mx-auto px-4 py-6">
         {/* Stepper */}
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-between mb-8 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
           {STEPS.map((step, index) => {
             const Icon = step.icon;
             const isActive = currentStep === step.id;
             const isCompleted = currentStep > step.id;
             return (
-              <div key={step.id} className="flex items-center">
+              <div key={step.id} className="flex items-center shrink-0">
                 <button
                   onClick={() => step.id < currentStep && setCurrentStep(step.id)}
-                  className={`flex flex-col items-center gap-2 ${step.id <= currentStep ? "cursor-pointer" : "cursor-default"}`}
+                  className={`flex flex-col items-center gap-2 transition-all ${step.id <= currentStep ? "cursor-pointer" : "cursor-default"}`}
                 >
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                    isActive ? "bg-[#F4C430] text-black" : isCompleted ? "bg-[#F4C430]/20 text-[#F4C430]" : "bg-zinc-800 text-zinc-500"
-                  }`}>
-                    {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all ${isActive
+                    ? "bg-[#F4C430] text-black shadow-lg shadow-[#F4C430]/20"
+                    : isCompleted ? "bg-[#F4C430]/20 text-[#F4C430]" : "bg-zinc-800 text-zinc-500"
+                    }`}>
+                    {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </div>
-                  <span className={`text-xs font-medium ${isActive ? "text-white" : isCompleted ? "text-[#F4C430]" : "text-zinc-500"}`}>
+                  <span className={`text-[10px] sm:text-xs font-medium ${isActive ? "text-white" : isCompleted ? "text-[#F4C430]" : "text-zinc-500"}`}>
                     {step.title}
                   </span>
                 </button>
                 {index < STEPS.length - 1 && (
-                  <div className={`w-24 sm:w-32 h-0.5 mx-4 ${currentStep > step.id ? "bg-[#F4C430]/30" : "bg-zinc-800"}`} />
+                  <div className={`w-6 sm:w-20 h-0.5 mx-1 sm:mx-2 ${currentStep > step.id ? "bg-[#F4C430]/30" : "bg-zinc-800"}`} />
                 )}
               </div>
             );
@@ -378,289 +395,319 @@ function DeposerPageContent() {
           </div>
         )}
 
-        {/* Step 1: Informations */}
-        {currentStep === 1 && (
-          <div className="space-y-8 animate-in fade-in duration-300">
-            {/* Transaction Toggle */}
-            <div>
-              <label className="text-sm text-zinc-400 mb-3 block">Type de transaction</label>
-              <div className="flex bg-zinc-800/50 rounded-lg p-1 w-fit">
-                <button
-                  type="button"
-                  onClick={() => updateField("category", "location")}
-                  className={`px-6 py-2.5 rounded-md text-sm font-medium transition-all ${
-                    formData.category === "location" ? "bg-[#F4C430] text-black" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  Location
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateField("category", "vente")}
-                  className={`px-6 py-2.5 rounded-md text-sm font-medium transition-all ${
-                    formData.category === "vente" ? "bg-[#F4C430] text-black" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  Vente
-                </button>
-              </div>
-            </div>
-
-            {/* Property Type */}
-            <div>
-              <label className="text-sm text-zinc-400 mb-3 block">Type de bien</label>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                {PROPERTY_TYPES.map((type) => {
-                  const Icon = type.icon;
-                  return (
-                    <button
-                      key={type.value}
-                      type="button"
-                      onClick={() => updateField("type", type.value)}
-                      className={`p-4 rounded-xl border transition-all text-center ${
-                        formData.type === type.value
-                          ? "bg-[#F4C430]/10 border-[#F4C430]/50 text-[#F4C430]"
-                          : "bg-zinc-800/30 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+        {/* Step Content */}
+        <div className="space-y-8">
+          {/* Step 1: L'essentiel */}
+          {currentStep === 1 && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              {/* Transaction Toggle */}
+              <div>
+                <label className="text-sm text-zinc-400 mb-3 block">Type de transaction</label>
+                <div className="flex bg-zinc-800/50 rounded-lg p-1 w-full sm:w-fit">
+                  <button
+                    type="button"
+                    onClick={() => updateField("category", "location")}
+                    className={`flex-1 sm:flex-none px-6 py-2.5 rounded-md text-sm font-medium transition-all ${formData.category === "location" ? "bg-[#F4C430] text-black" : "text-zinc-400 hover:text-white"
                       }`}
-                    >
-                      <Icon className={`w-6 h-6 mx-auto mb-2 ${formData.type === type.value ? "text-[#F4C430]" : "text-zinc-500"}`} />
-                      <span className="text-xs font-medium">{type.label}</span>
-                    </button>
-                  );
-                })}
+                  >
+                    Location
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateField("category", "vente")}
+                    className={`flex-1 sm:flex-none px-6 py-2.5 rounded-md text-sm font-medium transition-all ${formData.category === "vente" ? "bg-[#F4C430] text-black" : "text-zinc-400 hover:text-white"
+                      }`}
+                  >
+                    Vente
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Title */}
-            <div>
-              <label className="text-sm text-zinc-400 mb-2 block">Titre de l'annonce</label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => updateField("title", e.target.value)}
-                placeholder="Ex: Belle villa avec piscine"
-                className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
-              />
-            </div>
-
-            {/* Price */}
-            <div>
-              <label className="text-sm text-zinc-400 mb-2 block">{priceLabel}</label>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) => updateField("price", e.target.value)}
-                  placeholder="0"
-                  className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 pr-24 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">
-                  FCFA{formData.category === "location" && "/mois"}
-                </span>
-              </div>
-            </div>
-
-            {/* Location */}
-            <div className="grid grid-cols-2 gap-4">
+              {/* Property Type */}
               <div>
-                <label className="text-sm text-zinc-400 mb-2 block">Ville / Région</label>
+                <label className="text-sm text-zinc-400 mb-3 block">Type de bien</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                  {PROPERTY_TYPES.map((type) => {
+                    const Icon = type.icon;
+                    return (
+                      <button
+                        key={type.value}
+                        type="button"
+                        onClick={() => updateField("type", type.value)}
+                        className={`p-3 sm:p-4 rounded-xl border transition-all text-center ${formData.type === type.value
+                          ? "bg-[#F4C430]/10 border-[#F4C430]/50 text-[#F4C430]"
+                          : "bg-zinc-800/30 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white"
+                          }`}
+                      >
+                        <Icon className={`w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-2 ${formData.type === type.value ? "text-[#F4C430]" : "text-zinc-500"}`} />
+                        <span className="text-[11px] sm:text-xs font-medium">{type.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="text-sm text-zinc-400 mb-2 block">Titre de l'annonce</label>
                 <input
                   type="text"
-                  value={formData.city}
-                  onChange={(e) => updateField("city", e.target.value)}
-                  placeholder="Dakar"
+                  value={formData.title}
+                  onChange={(e) => updateField("title", e.target.value)}
+                  placeholder="Ex: Belle villa avec piscine"
                   className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
                 />
               </div>
-              <div>
-                <label className="text-sm text-zinc-400 mb-2 block">Quartier</label>
-                <input
-                  type="text"
-                  value={formData.district}
-                  onChange={(e) => updateField("district", e.target.value)}
-                  placeholder="Almadies"
-                  className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
-                />
-              </div>
-            </div>
 
-            {/* Address */}
-            <div>
-              <label className="text-sm text-zinc-400 mb-2 block">
-                Adresse précise <span className="text-zinc-600">(optionnel)</span>
-              </label>
-              <AddressAutocomplete
-                defaultValue={formData.address}
-                onAddressSelect={(details) => {
-                  updateField("address", details.display_name);
-                  if (details.state) updateField("city", details.state);
-                  const quartier = details.suburb || details.city || details.road;
-                  if (quartier) updateField("district", quartier);
-                }}
-                className="w-full"
-              />
-            </div>
-
-            {/* Characteristics */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {/* Price */}
               <div>
-                <label className="text-sm text-zinc-400 mb-2 block">Surface</label>
+                <label className="text-sm text-zinc-400 mb-2 block">{priceLabel}</label>
                 <div className="relative">
                   <input
                     type="number"
-                    value={formData.surface}
-                    onChange={(e) => updateField("surface", e.target.value)}
+                    value={formData.price}
+                    onChange={(e) => updateField("price", e.target.value)}
                     placeholder="0"
-                    className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                    className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 pr-24 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">m²</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">
+                    FCFA{formData.category === "location" && "/mois"}
+                  </span>
                 </div>
               </div>
-              {!isTerrain && (
-                <>
-                  <div>
-                    <label className="text-sm text-zinc-400 mb-2 block">Pièces</label>
+            </div>
+          )}
+
+          {/* Step 2: Localisation */}
+          {currentStep === 2 && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              {/* Location */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-zinc-400 mb-2 block">Ville / Région</label>
+                  <input
+                    type="text"
+                    value={formData.city}
+                    onChange={(e) => updateField("city", e.target.value)}
+                    placeholder="Dakar"
+                    className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-zinc-400 mb-2 block">Quartier</label>
+                  <input
+                    type="text"
+                    value={formData.district}
+                    onChange={(e) => updateField("district", e.target.value)}
+                    placeholder="Almadies"
+                    className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Address */}
+              <div>
+                <label className="text-sm text-zinc-400 mb-2 block">
+                  Adresse précise <span className="text-zinc-600">(optionnel)</span>
+                </label>
+                <AddressAutocomplete
+                  defaultValue={formData.address}
+                  onAddressSelect={(details) => {
+                    updateField("address", details.display_name);
+                    if (details.state) updateField("city", details.state);
+                    const quartier = details.suburb || details.city || details.road;
+                    if (quartier) updateField("district", quartier);
+                  }}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Landmark */}
+              <div>
+                <label className="text-sm text-zinc-400 mb-2 block">Point de repère <span className="text-zinc-600">(optionnel)</span></label>
+                <input
+                  type="text"
+                  value={formData.landmark}
+                  onChange={(e) => updateField("landmark", e.target.value)}
+                  placeholder="Près de l'école..."
+                  className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Détails */}
+          {currentStep === 3 && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <label className="text-sm text-zinc-400 mb-2 block">Surface</label>
+                  <div className="relative">
                     <input
                       type="number"
-                      value={formData.rooms}
-                      onChange={(e) => updateField("rooms", e.target.value)}
+                      value={formData.surface}
+                      onChange={(e) => updateField("surface", e.target.value)}
                       placeholder="0"
-                      className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                      className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
                     />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">m²</span>
                   </div>
-                  <div>
-                    <label className="text-sm text-zinc-400 mb-2 block">Chambres</label>
-                    <input
-                      type="number"
-                      value={formData.bedrooms}
-                      onChange={(e) => updateField("bedrooms", e.target.value)}
-                      placeholder="0"
-                      className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm text-zinc-400 mb-2 block">Salles de bain</label>
-                    <input
-                      type="number"
-                      value={formData.bathrooms}
-                      onChange={(e) => updateField("bathrooms", e.target.value)}
-                      placeholder="0"
-                      className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
-                    />
-                  </div>
-                </>
+                </div>
+                {!isTerrain && (
+                  <>
+                    <div>
+                      <label className="text-sm text-zinc-400 mb-2 block">Pièces</label>
+                      <input
+                        type="number"
+                        value={formData.rooms}
+                        onChange={(e) => updateField("rooms", e.target.value)}
+                        placeholder="0"
+                        className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-zinc-400 mb-2 block">Chambres</label>
+                      <input
+                        type="number"
+                        value={formData.bedrooms}
+                        onChange={(e) => updateField("bedrooms", e.target.value)}
+                        placeholder="0"
+                        className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-zinc-400 mb-2 block">Salles de bain</label>
+                      <input
+                        type="number"
+                        value={formData.bathrooms}
+                        onChange={(e) => updateField("bathrooms", e.target.value)}
+                        placeholder="0"
+                        className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+              {isTerrain && (
+                <p className="text-sm text-zinc-500">
+                  Pour un terrain, seule la surface est requise.
+                </p>
               )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Step 2: Média & Publication */}
-        {currentStep === 2 && (
-          <div className="space-y-8 animate-in fade-in duration-300">
-            {/* Photos */}
-            <div>
-              <label className="text-sm text-zinc-400 mb-3 block">Photos ({formData.images.length}/10)</label>
-              <div
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-                  dragActive ? "border-[#F4C430] bg-[#F4C430]/5" : "border-zinc-700 hover:border-zinc-600"
-                }`}
-              >
-                {uploadingImages ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="w-8 h-8 text-[#F4C430] animate-spin" />
-                    <p className="text-zinc-400">Upload en cours...</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-3">
-                    <Upload className="w-10 h-10 text-zinc-500" />
-                    <p className="text-zinc-300">Glissez vos photos ici</p>
-                    <label className="cursor-pointer px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded-lg transition-colors">
-                      Parcourir
-                      <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="hidden" />
-                    </label>
-                    <p className="text-xs text-zinc-600">JPG, PNG, WebP • Max 5MB</p>
+          {/* Step 4: Média */}
+          {currentStep === 4 && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              {/* Photos */}
+              <div>
+                <label className="text-sm text-zinc-400 mb-3 block">Photos ({formData.images.length}/10)</label>
+                <div
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${dragActive ? "border-[#F4C430] bg-[#F4C430]/5" : "border-zinc-700 hover:border-zinc-600"
+                    }`}
+                >
+                  {uploadingImages ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <Loader2 className="w-8 h-8 text-[#F4C430] animate-spin" />
+                      <p className="text-zinc-400">Upload en cours...</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3">
+                      <Upload className="w-10 h-10 text-zinc-500" />
+                      <p className="text-zinc-300">Glissez vos photos ici</p>
+                      <label className="cursor-pointer px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded-lg transition-colors">
+                        Parcourir
+                        <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="hidden" />
+                      </label>
+                      <p className="text-xs text-zinc-600">JPG, PNG, WebP • Max 5MB</p>
+                    </div>
+                  )}
+                </div>
+
+                {formData.images.length > 0 && (
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mt-4">
+                    {formData.images.map((url, index) => (
+                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
+                        <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-1 right-1 p-1 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                        {index === 0 && (
+                          <span className="absolute bottom-1 left-1 px-2 py-0.5 bg-[#F4C430] text-black text-xs font-medium rounded">
+                            Principale
+                          </span>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {formData.images.length > 0 && (
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mt-4">
-                  {formData.images.map((url, index) => (
-                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
-                      <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 p-1 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="w-4 h-4 text-white" />
-                      </button>
-                      {index === 0 && (
-                        <span className="absolute bottom-1 left-1 px-2 py-0.5 bg-[#F4C430] text-black text-xs font-medium rounded">
-                          Principale
-                        </span>
-                      )}
-                    </div>
-                  ))}
+              {/* Description */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm text-zinc-400">Description</label>
+                  <button
+                    type="button"
+                    onClick={handleGenerateAI}
+                    disabled={isGeneratingAI}
+                    className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-[#F4C430] transition-colors disabled:opacity-50"
+                  >
+                    {isGeneratingAI ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                    Générer avec l'IA
+                  </button>
                 </div>
-              )}
-            </div>
-
-            {/* Description */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-sm text-zinc-400">Description</label>
-                <button
-                  type="button"
-                  onClick={handleGenerateAI}
-                  disabled={isGeneratingAI}
-                  className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-[#F4C430] transition-colors disabled:opacity-50"
-                >
-                  {isGeneratingAI ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                  Générer avec l'IA
-                </button>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => updateField("description", e.target.value)}
+                  placeholder="Décrivez le bien, ses atouts..."
+                  rows={5}
+                  className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 resize-none transition-colors"
+                />
               </div>
-              <textarea
-                value={formData.description}
-                onChange={(e) => updateField("description", e.target.value)}
-                placeholder="Décrivez le bien, ses atouts..."
-                rows={5}
-                className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 resize-none transition-colors"
-              />
-            </div>
 
-            {/* Virtual Tour */}
-            <div>
-              <label className="text-sm text-zinc-400 mb-2 block">
-                Visite virtuelle <span className="text-zinc-600">(optionnel)</span>
-              </label>
-              <input
-                type="text"
-                value={formData.virtual_tour_url}
-                onChange={(e) => updateField("virtual_tour_url", e.target.value)}
-                placeholder="Lien YouTube"
-                className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
-              />
+              {/* Virtual Tour */}
+              <div>
+                <label className="text-sm text-zinc-400 mb-2 block">
+                  Visite virtuelle <span className="text-zinc-600">(optionnel)</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.virtual_tour_url}
+                  onChange={(e) => updateField("virtual_tour_url", e.target.value)}
+                  placeholder="Lien YouTube"
+                  className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
+                />
+              </div>
             </div>
+          )}
 
-            {/* Contact */}
-            <div>
-              <label className="text-sm text-zinc-400 mb-2 block">
-                Téléphone de contact <span className="text-zinc-600">(optionnel)</span>
-              </label>
-              <PhoneInput
-                value={formData.contact_phone || undefined}
-                onChange={(val) => updateField("contact_phone", val || "")}
-                defaultCountry="SN"
-                international
-              />
+          {/* Step 5: Publication */}
+          {currentStep === 5 && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              {/* Contact */}
+              <div>
+                <label className="text-sm text-zinc-400 mb-2 block">
+                  Téléphone de contact <span className="text-zinc-600">(optionnel)</span>
+                </label>
+                <PhoneInput
+                  value={formData.contact_phone || undefined}
+                  onChange={(val) => updateField("contact_phone", val || "")}
+                  defaultCountry="SN"
+                  international
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Navigation */}
         <div className="flex items-center justify-between mt-12 pt-6 border-t border-zinc-800/50">
@@ -674,11 +721,11 @@ function DeposerPageContent() {
             Retour
           </button>
 
-          {currentStep < 2 ? (
+          {currentStep < 5 ? (
             <button
               type="button"
               onClick={nextStep}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#F4C430] text-black font-medium rounded-lg hover:bg-[#F4C430]/90 transition-colors"
+              className="flex items-center gap-2 px-6 py-2.5 bg-[#F4C430] text-black font-medium rounded-lg hover:bg-[#F4C430]/90 transition-colors shadow-lg shadow-[#F4C430]/10"
             >
               Continuer
               <ArrowRight className="w-4 h-4" />

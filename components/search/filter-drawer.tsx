@@ -10,7 +10,9 @@ import {
   RotateCcw,
   Home,
   Building2,
-  PanelTop
+  PanelTop,
+  Map as MapIcon,
+  Building
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,8 +31,8 @@ import { cn } from "@/lib/utils";
 
 const propertyTypeOptions = [
   {
-    value: "Maison",
-    label: "Maison",
+    value: "Villa",
+    label: "Villa",
     icon: Home
   },
   {
@@ -42,6 +44,16 @@ const propertyTypeOptions = [
     value: "Studio",
     label: "Studio",
     icon: PanelTop
+  },
+  {
+    value: "Terrain",
+    label: "Terrain",
+    icon: MapIcon
+  },
+  {
+    value: "Immeuble",
+    label: "Immeuble",
+    icon: Building
   },
 ];
 
