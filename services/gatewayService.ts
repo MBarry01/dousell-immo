@@ -441,13 +441,13 @@ export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
             const data = externalResult.value.data || [];
             externalProps = data.map(mapExternalListing);
 
-            // Debug: Vérifier quelques coordonnées pour le monitoring
-            if (externalProps.length > 0) {
-                const sample = externalProps.find(p => p.location.coords.lat !== 14.6928); // Chercher un non-default
+            // Debug: coordonnées (dev only pour éviter spam console)
+            if (process.env.NODE_ENV === "development" && externalProps.length > 0) {
+                const sample = externalProps.find(p => p.location.coords.lat !== 14.6928);
                 if (sample) {
                     console.log(`[gatewayService] ✅ Coords loaded for ${sample.id}:`, sample.location.coords);
                 } else {
-                    console.warn(`[gatewayService] ⚠️ All ${externalProps.length} external props seem to use default fallback coords (Dakar)`);
+                    console.warn(`[gatewayService] ⚠️ All ${externalProps.length} external props use default fallback coords (Dakar)`);
                 }
             }
         } else {
