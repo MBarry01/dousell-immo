@@ -1,0 +1,79 @@
+﻿
+> dousell-immo@0.1.0 build
+> next build
+
+node.exe : [baseline-browser-mapping] 
+The data in this module is over two 
+months old.  To ensure accurate 
+Baseline data, please update: `npm i 
+baseline-browser-mapping@latest -D`
+Au caractère Ligne:1 : 1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecif 
+   ied: ([baseline-brows...ping@latest  
+   -D`:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCom 
+   mandError
+ 
+Ôû▓ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  ┬À optimizePackageImports
+  ┬À serverActions
+
+ÔÜá The "middleware" file convention is 
+deprecated. Please use "proxy" instead. 
+Learn more: https://nextjs.org/docs/mess
+ages/middleware-to-proxy
+  Creating an optimized production build ...
+[baseline-browser-mapping] The data in 
+this module is over two months old.  To 
+ensure accurate Baseline data, please 
+update: `npm i 
+baseline-browser-mapping@latest -D`
+Ô£ô Compiled successfully in 53s
+  Running TypeScript ...
+Failed to compile.
+
+./components/property/property-detail-vi
+ew.tsx:556:126
+Type error: Property 'dpe' does not 
+exist on type '{ surface: number; 
+rooms: number; bedrooms: number; 
+bathrooms: number; }'.
+
+[0m [90m 554 |[39m                   
+[33m<[39m[33m/[39m[33mdt[39m[33m>
+[39m
+ [90m 555 |[39m                   
+[33m<[39m[33mdd[39m className[33m=
+[39m[32m"mt-1"[39m[33m>[39m
+[31m[1m>[22m[39m[90m 556 |[39m    
+                 
+[33m<[39m[33mspan[39m 
+className[33m=[39m{[32m`inline-flex 
+items-center rounded-full px-3 py-1 
+text-xs font-semibold 
+${property.specs.dpe === "A" ? 
+"bg-green-500/20 text-green-500" :[39m
+ [90m     |[39m                       
+                                        
+                                        
+                       
+[31m[1m^[22m[39m
+ [90m 557 |[39m [32m                 
+     property.specs.dpe === "B" ? 
+"bg-blue-500/20 text-blue-500" :[39m
+ [90m 558 |[39m [32m                 
+       property.specs.dpe === "C" ? 
+"bg-yellow-500/20 text-yellow-500" 
+:[39m
+ [90m 559 |[39m [32m                 
+         property.specs.dpe === "D" ? 
+"bg-orange-500/20 text-orange-500" 
+:[39m[0m
+Next.js build worker exited with code: 
+1 and signal: null

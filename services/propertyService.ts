@@ -40,7 +40,6 @@ type SupabasePropertyRow = {
     rooms?: number;
     bedrooms?: number;
     bathrooms?: number;
-    dpe?: Property["specs"]["dpe"];
   };
   features?: {
     hasGenerator?: boolean;
@@ -126,8 +125,18 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
       detectedType = "Villa";
     } else if (titleLower.includes("studio")) {
       detectedType = "Studio";
-    } else if (titleLower.includes("bureau")) {
+    } else if (titleLower.includes("duplex")) {
+      detectedType = "Duplex";
+    } else if (titleLower.includes("immeuble")) {
+      detectedType = "Immeuble";
+    } else if (titleLower.includes("bureau") || descLower.includes("bureau")) {
       detectedType = "Bureau";
+    } else if (titleLower.includes("hangar") || titleLower.includes("entrepôt") || titleLower.includes("entrepot") || descLower.includes("hangar")) {
+      detectedType = "Entrepôt";
+    } else if (titleLower.includes("magasin") || titleLower.includes("boutique") || titleLower.includes("commerce") || titleLower.includes("local commercial")) {
+      detectedType = "Local commercial";
+    } else if (titleLower.includes("chambre") && !titleLower.includes("appartement")) {
+      detectedType = "Chambre";
     }
   }
 
@@ -149,7 +158,6 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
       rooms: specs.rooms ?? 0,
       bedrooms: specs.bedrooms ?? 0,
       bathrooms: specs.bathrooms ?? 0,
-      dpe: specs.dpe ?? "C",
     },
     details: {
       type: detectedType as any,

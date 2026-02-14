@@ -76,10 +76,24 @@ const mapExternalListing = (row: ExternalListingRow): Property => {
             rooms: rooms,
             bedrooms: bedrooms,
             bathrooms: 0,
-            dpe: "C",
+
         },
         details: {
-            type: row.category || "Autre",
+            type: (() => {
+                const t = row.title?.toLowerCase() || "";
+                const cat = row.category?.toLowerCase() || "";
+                if (t.includes("terrain") || t.includes("parcelle")) return "Terrain";
+                if (t.includes("villa") || t.includes("maison")) return "Villa";
+                if (t.includes("studio")) return "Studio";
+                if (t.includes("duplex")) return "Duplex";
+                if (t.includes("immeuble")) return "Immeuble";
+                if (t.includes("bureau")) return "Bureau";
+                if (t.includes("hangar") || t.includes("entrepôt") || t.includes("entrepot")) return "Entrepôt";
+                if (t.includes("magasin") || t.includes("boutique") || t.includes("commerce") || t.includes("local commercial")) return "Local commercial";
+                if (t.includes("chambre") && !t.includes("appartement")) return "Chambre";
+                if (t.includes("appartement") || cat.includes("appartement")) return "Appartement";
+                return row.category || "Appartement";
+            })(),
             year: new Date().getFullYear(),
             heating: "",
         },
@@ -97,6 +111,30 @@ const mapExternalListing = (row: ExternalListingRow): Property => {
         exclusive: false,
     };
 };
+
+/**
+ * Récupère une annonce partenaire par son ID
+ * Utilisé par la page teaser /biens/ext-[id]
+ */
+export async function getExternalListingById(id: string): Promise<Property | null> {
+    try {
+        const { data, error } = await supabase
+            .from("external_listings")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+        if (error || !data) {
+            console.error("[gatewayService] getExternalListingById error:", error);
+            return null;
+        }
+
+        return mapExternalListing(data);
+    } catch (err) {
+        console.error("[gatewayService] getExternalListingById error:", err);
+        return null;
+    }
+}
 
 /**
  * Récupère les annonces partenaires par type de transaction

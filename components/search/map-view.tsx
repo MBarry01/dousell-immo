@@ -353,9 +353,9 @@ export const MapView = ({ properties, showCarousel = true, onClose, searchQuery 
     }, []);
 
     const handleMarkerRedirect = useCallback((property: Property) => {
-        // Pour les annonces externes, ouvrir dans un nouvel onglet
-        if (property.isExternal && property.source_url) {
-            window.open(property.source_url, '_blank', 'noopener,noreferrer');
+        // Pour les annonces externes, naviguer vers la page teaser interne
+        if (property.isExternal) {
+            router.push(`/biens/ext/${property.id}`);
         } else {
             // Rediriger vers la page de détail du bien
             router.push(`/biens/${property.id}`);

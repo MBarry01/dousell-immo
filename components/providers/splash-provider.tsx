@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { SplashScreen } from "@/components/ui/splash-screen";
@@ -37,9 +37,22 @@ const removeSplashBlocker = () => {
 };
 
 /**
+ * Détecte si l'app tourne en mode PWA standalone
+ * (installée sur l'écran d'accueil)
+ */
+const checkIsPWA = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+};
+
+/**
  * SplashProvider - Gère l'affichage du splash screen au chargement
  * 
- * Structure stable pour éviter les warnings de key dans Next.js App Router
+ * En mode navigateur classique : le splash est totalement désactivé.
+ * En mode PWA (app installée) : le splash s'affiche une fois par session.
  */
 export const SplashProvider = ({
   children,
@@ -47,34 +60,42 @@ export const SplashProvider = ({
   duration = MIN_SPLASH_DURATION,
 }: SplashProviderProps) => {
   const { loading: authLoading } = useAuth();
-  const [showSplash, setShowSplash] = useState(true);
-  const [isReady, setIsReady] = useState(false);
+  // Commencer avec splash désactivé → pas de flash en mode navigateur
+  const [showSplash, setShowSplash] = useState(false);
+  const [isPWASplashActive, setIsPWASplashActive] = useState(false);
   const [minDurationPassed, setMinDurationPassed] = useState(false);
 
   useEffect(() => {
-    // 1. Vérifier si le splash est nécessaire
-    if (!showEveryVisit && typeof window !== "undefined") {
+    const isPWA = checkIsPWA();
+
+    // Navigateur classique → rien à faire, children rendus normalement
+    if (!isPWA) {
+      removeSplashBlocker();
+      return;
+    }
+
+    // PWA: vérifier si déjà montré cette session
+    if (!showEveryVisit) {
       const hasShown = sessionStorage.getItem(SESSION_KEY);
       if (hasShown) {
         removeSplashBlocker();
-        setShowSplash(false);
-        setIsReady(true);
         return;
       }
     }
 
-    setIsReady(true);
+    // PWA + première visite → activer le splash
+    setShowSplash(true);
+    setIsPWASplashActive(true);
     document.body.style.overflow = "hidden";
 
-    // 2. Timer pour la durée minimale (effet visuel)
+    // Timer pour la durée minimale (effet visuel)
     const minTimer = setTimeout(() => {
       setMinDurationPassed(true);
     }, duration);
 
-    // 3. Sécurité (Max Timeout) pour éviter de bloquer sur une erreur auth
+    // Sécurité (Max Timeout) pour éviter de bloquer sur une erreur auth
     const maxTimer = setTimeout(() => {
       setMinDurationPassed(true);
-      // On force la fin du splash même si authLoading est encore true
     }, MAX_SPLASH_TIMEOUT);
 
     return () => {
@@ -84,14 +105,11 @@ export const SplashProvider = ({
     };
   }, [duration, showEveryVisit]);
 
-  // 4. Sortie du splash synchronisée
+  // Sortie du splash synchronisée (PWA uniquement)
   useEffect(() => {
-    // On ne sort que si : 
-    // - On est déjà prêt (isReady)
-    // - ET l'auth a fini de charger (pour éviter les sauts de UI)
-    // - ET la durée minimale visuelle est passée
-    if (isReady && !authLoading && minDurationPassed) {
+    if (isPWASplashActive && !authLoading && minDurationPassed) {
       setShowSplash(false);
+      setIsPWASplashActive(false);
       removeSplashBlocker();
       document.body.style.overflow = "";
 
@@ -99,19 +117,42 @@ export const SplashProvider = ({
         sessionStorage.setItem(SESSION_KEY, "true");
       }
     }
-  }, [isReady, authLoading, minDurationPassed, showEveryVisit]);
+  }, [isPWASplashActive, authLoading, minDurationPassed, showEveryVisit]);
 
-  // Structure stable - un seul wrapper pour éviter les warnings de key dans Next.js App Router
+  // Fallback de sécurité absolu (PWA uniquement)
+  useEffect(() => {
+    if (!isPWASplashActive) return;
+
+    const forceExitTimer = setTimeout(() => {
+      if (showSplash) {
+        console.warn("[SplashProvider] Force exit après timeout de sécurité");
+        setShowSplash(false);
+        setIsPWASplashActive(false);
+        removeSplashBlocker();
+        document.body.style.overflow = "";
+        if (!showEveryVisit) {
+          sessionStorage.setItem(SESSION_KEY, "true");
+        }
+      }
+    }, MAX_SPLASH_TIMEOUT + 1000);
+
+    return () => clearTimeout(forceExitTimer);
+  }, [showSplash, isPWASplashActive, showEveryVisit]);
+
+  // En mode navigateur : rendu direct sans wrapper de masquage
+  if (!showSplash && !isPWASplashActive) {
+    return <>{children}</>;
+  }
+
+  // En mode PWA avec splash actif : wrapper avec masquage + animation
   return (
     <>
-      {/* Splash Screen avec AnimatePresence */}
-      {showSplash && isReady && (
+      {showSplash && (
         <AnimatePresence mode="wait">
           <SplashScreen key="splash-screen" />
         </AnimatePresence>
       )}
 
-      {/* Contenu principal - propre handover sans saccade */}
       <div
         key="main-content"
         className="will-change-[opacity]"
@@ -119,10 +160,7 @@ export const SplashProvider = ({
           opacity: showSplash ? 0 : 1,
           pointerEvents: showSplash ? "none" : "auto",
           transition: "opacity 1s cubic-bezier(0.22, 1, 0.36, 1)",
-          // ZERO STUTTER: Utiliser visibility au lieu de display: none
-          // Cela permet au navigateur de pré-calculer le layout sans l'afficher.
-          visibility: isReady && !showSplash ? "visible" : "hidden",
-          // S'assurer que le fond est déjà noir sous le splash
+          visibility: showSplash ? "hidden" : "visible",
           backgroundColor: "#05080c",
           position: "relative",
           zIndex: 1,
@@ -130,11 +168,6 @@ export const SplashProvider = ({
       >
         {children}
       </div>
-
-      {/* Écran noir de fallback avant hydratation */}
-      {!isReady && (
-        <div key="fallback-black" className="fixed inset-0 z-[9999] bg-black" />
-      )}
     </>
   );
 };

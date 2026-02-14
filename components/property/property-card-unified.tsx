@@ -14,15 +14,13 @@ interface PropertyCardUnifiedProps {
 
 export const PropertyCardUnified = ({ property, className }: PropertyCardUnifiedProps) => {
     const isExternal = property.isExternal;
-    // Ensure href is always a string (never undefined)
+    // Lien interne vers la page teaser pour les biens externes
     const href = isExternal
-        ? (property.source_url || '#')
+        ? `/biens/ext/${property.id}`
         : `/biens/${property.id}`;
 
-    const CardWrapper = isExternal ? 'a' : Link;
-    const cardProps = isExternal
-        ? { href, target: "_blank" as const, rel: "noopener noreferrer" }
-        : { href };
+    const CardWrapper = Link;
+    const cardProps = { href };
 
     return (
         <CardWrapper

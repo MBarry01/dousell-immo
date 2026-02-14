@@ -88,10 +88,10 @@ export default function FeaturedPropertiesHero() {
           {properties.map((property, index) => {
             const isExternal = property.isExternal;
             const targetUrl = isExternal
-              ? (property.source_url || '#')
+              ? `/biens/ext/${property.id}`
               : (isDemo ? "/recherche" : `/biens/${property.id}`);
-            const LinkComponent = isExternal ? "a" : Link;
-            const linkProps = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
+            const LinkComponent = Link;
+            const linkProps = {};
 
             return (
               <motion.div

@@ -13,11 +13,22 @@ export function useAuth() {
     let subscription: { unsubscribe: () => void } | null = null;
 
     const initAuth = async () => {
+      // Timeout de sécurité pour éviter un chargement infini
+      const timeoutId = setTimeout(() => {
+        if (mounted) {
+          console.warn("[useAuth] Timeout - Force loading à false");
+          setLoading(false);
+          setUser(null);
+        }
+      }, 10000); // 10 secondes max
+
       try {
         const supabase = createClient();
 
         // Get initial session (getSession() est plus silencieux que getUser() pour les utilisateurs non connectés)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        clearTimeout(timeoutId);
         
         if (mounted) {
           if (sessionError) {
@@ -46,6 +57,8 @@ export function useAuth() {
 
         subscription = authSubscription;
       } catch (error) {
+        clearTimeout(timeoutId);
+        
         // Ignorer silencieusement les erreurs de session manquante
         const isSessionMissing = (error as Error)?.message?.includes("session") ||
                                  (error as { name?: string })?.name === "AuthSessionMissingError";
@@ -55,6 +68,7 @@ export function useAuth() {
           console.error("Error initializing auth:", error);
         }
         
+        // Toujours définir loading à false pour éviter un chargement infini
         if (mounted) {
           setUser(null);
           setLoading(false);

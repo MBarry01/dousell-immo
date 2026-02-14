@@ -20,6 +20,7 @@ import {
   Bed,
   Bath,
   LayoutGrid,
+  Lock,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -94,13 +95,53 @@ export const PropertyDetailView = ({
       const currentPath = typeof window !== "undefined" ? window.location.pathname + window.location.search : "";
       const loginUrl = currentPath ? `/login?redirect=${encodeURIComponent(currentPath)}` : "/login";
 
-      toast.error("Connexion requise", {
-        description: "Connectez-vous pour enregistrer vos favoris.",
-        action: {
-          label: "Se connecter",
-          onClick: () => router.push(loginUrl),
-        },
-      });
+      toast.custom(
+        (t) => (
+          <div
+            className="flex items-start gap-4 rounded-2xl border border-white/10 bg-[#0c1117]/95 p-5 shadow-2xl backdrop-blur-xl transition-all animate-in fade-in-0 zoom-in-95"
+            style={{ minWidth: "320px", maxWidth: "420px" }}
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+              <Lock className="h-5 w-5 text-white/70" />
+            </div>
+            <div className="flex-1 space-y-2">
+              <h3 className="font-semibold text-white">
+                Connexion requise
+              </h3>
+              <p className="text-sm text-white/60">
+                Connectez-vous pour enregistrer vos favoris et accéder à toutes les fonctionnalités.
+              </p>
+              <button
+                onClick={() => {
+                  router.push(loginUrl);
+                  toast.dismiss(t);
+                }}
+                className="mt-3 w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-black transition-all hover:bg-primary/90 active:scale-95"
+              >
+                Se connecter
+              </button>
+            </div>
+            <button
+              onClick={() => toast.dismiss(t)}
+              className="h-6 w-6 shrink-0 rounded-full text-white/40 transition-colors hover:bg-white/10 hover:text-white/70"
+              aria-label="Fermer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="h-5 w-5"
+              >
+                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+              </svg>
+            </button>
+          </div>
+        ),
+        {
+          duration: 6000,
+          position: "top-center",
+        }
+      );
       return;
     }
 
@@ -507,21 +548,6 @@ export const PropertyDetailView = ({
                     </dd>
                   </div>
                 )}
-                <div>
-                  <dt className="text-xs uppercase tracking-widest text-gray-400 dark:text-white/50">
-                    Performance énergétique
-                  </dt>
-                  <dd className="mt-1">
-                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${property.specs.dpe === "A" ? "bg-green-500/20 text-green-500" :
-                      property.specs.dpe === "B" ? "bg-blue-500/20 text-blue-500" :
-                        property.specs.dpe === "C" ? "bg-yellow-500/20 text-yellow-500" :
-                          property.specs.dpe === "D" ? "bg-orange-500/20 text-orange-500" :
-                            "bg-red-500/20 text-red-500"
-                      }`}>
-                      DPE {property.specs.dpe}
-                    </span>
-                  </dd>
-                </div>
               </dl>
             </div>
           )}

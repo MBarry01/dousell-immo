@@ -1,0 +1,67 @@
+﻿
+> dousell-immo@0.1.0 build
+> next build
+
+node.exe : [baseline-browser-mapping] 
+The data in this module is over two 
+months old.  To ensure accurate 
+Baseline data, please update: `npm i 
+baseline-browser-mapping@latest -D`
+Au caractère Ligne:1 : 1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecif 
+   ied: ([baseline-brows...ping@latest  
+   -D`:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCom 
+   mandError
+ 
+Ôû▓ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  ┬À optimizePackageImports
+  ┬À serverActions
+
+ÔÜá The "middleware" file convention is 
+deprecated. Please use "proxy" instead. 
+Learn more: https://nextjs.org/docs/mess
+ages/middleware-to-proxy
+  Creating an optimized production build ...
+[baseline-browser-mapping] The data in 
+this module is over two months old.  To 
+ensure accurate Baseline data, please 
+update: `npm i 
+baseline-browser-mapping@latest -D`
+Ô£ô Compiled successfully in 48s
+  Running TypeScript ...
+Failed to compile.
+
+./components/property/property-info.tsx:
+111:17
+Type error: Element implicitly has an 
+'any' type because expression of type 
+'any' can't be used to index type 
+'Record<"G" | "B" | "A" | "C" | "D" | 
+"E" | "F", string>'.
+
+[0m [90m 109 |[39m               
+className[33m=[39m{cn(
+ [90m 110 |[39m                 
+[32m"mx-auto w-fit rounded-full px-4 
+py-1 text-sm 
+font-semibold"[39m[33m,[39m
+[31m[1m>[22m[39m[90m 111 |[39m    
+             dpeColorMap[property[33m.
+[39mspecs[33m.[39mdpe]
+ [90m     |[39m                 
+[31m[1m^[22m[39m
+ [90m 112 |[39m               )}
+ [90m 113 |[39m             
+[33m>[39m
+ [90m 114 |[39m               
+[33mDPE[39m {property[33m.[39mspecs
+[33m.[39mdpe}[0m
+Next.js build worker exited with code: 
+1 and signal: null

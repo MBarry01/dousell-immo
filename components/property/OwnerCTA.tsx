@@ -27,7 +27,7 @@ export function OwnerCTA({ city, variant = "banner" }: OwnerCTAProps) {
                             Propriétaire à <span className="text-primary">{formattedCity}</span> ?
                         </h3>
                         <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-[200px] mx-auto">
-                            Rejoignez l'élite des propriétaires. Publiez gratuitement et louez en 48h.
+                            Rejoignez l&apos;élite des propriétaires. Publiez gratuitement et louez en 48h.
                         </p>
                     </div>
 

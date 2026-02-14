@@ -134,48 +134,6 @@ export const QuickSearch = () => {
   // Compteur de filtres actifs pour le badge
   const activeFilterCount = [location, maxPrice, minSurface].filter(Boolean).length;
 
-  // Composant de suggestions réutilisable
-  const SuggestionsDropdown = () => (
-    <AnimatePresence>
-      {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl border border-white/10 bg-[#0F172A] shadow-2xl shadow-black/50 overflow-hidden"
-        >
-          {isLoadingSuggestions ? (
-            <div className="flex items-center justify-center py-4 text-white/50">
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              <span className="text-sm">Recherche...</span>
-            </div>
-          ) : (
-            <div className="p-1">
-              {suggestions.map((suggestion, index) => (
-                <button
-                  key={suggestion}
-                  type="button"
-                  className={`w-full flex items-center gap-2 px-4 py-3 text-left text-sm rounded-lg transition-colors cursor-pointer ${index === selectedIndex
-                    ? "bg-primary/20 text-white"
-                    : "text-white/80 hover:bg-white/10 hover:text-white"
-                    }`}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleSelectSuggestion(suggestion);
-                  }}
-                  onMouseEnter={() => setSelectedIndex(index)}
-                >
-                  <MapPin className="h-4 w-4 text-primary shrink-0" />
-                  <span className="truncate">{suggestion}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
   return (
     <>
       <motion.section
@@ -247,7 +205,14 @@ export const QuickSearch = () => {
                     onKeyDown={handleKeyDown}
                     autoComplete="off"
                   />
-                  <SuggestionsDropdown />
+                  <SuggestionsDropdown
+                    showSuggestions={showSuggestions}
+                    suggestions={suggestions}
+                    isLoadingSuggestions={isLoadingSuggestions}
+                    selectedIndex={selectedIndex}
+                    handleSelectSuggestion={handleSelectSuggestion}
+                    setSelectedIndex={setSelectedIndex}
+                  />
                 </div>
                 <Input
                   placeholder="Budget max (FCFA)"
@@ -298,7 +263,14 @@ export const QuickSearch = () => {
               onKeyDown={handleKeyDown}
               autoComplete="off"
             />
-            <SuggestionsDropdown />
+            <SuggestionsDropdown
+              showSuggestions={showSuggestions}
+              suggestions={suggestions}
+              isLoadingSuggestions={isLoadingSuggestions}
+              selectedIndex={selectedIndex}
+              handleSelectSuggestion={handleSelectSuggestion}
+              setSelectedIndex={setSelectedIndex}
+            />
           </div>
           <Input
             placeholder="Budget max (FCFA)"
@@ -331,3 +303,61 @@ export const QuickSearch = () => {
     </>
   );
 };
+
+// Composant de suggestions réutilisable (déclaré à l'extérieur pour éviter le re-render lint error)
+type SuggestionsDropdownProps = {
+  showSuggestions: boolean;
+  suggestions: string[];
+  isLoadingSuggestions: boolean;
+  selectedIndex: number;
+  handleSelectSuggestion: (s: string) => void;
+  setSelectedIndex: (i: number) => void;
+};
+
+const SuggestionsDropdown = ({
+  showSuggestions,
+  suggestions,
+  isLoadingSuggestions,
+  selectedIndex,
+  handleSelectSuggestion,
+  setSelectedIndex,
+}: SuggestionsDropdownProps) => (
+  <AnimatePresence>
+    {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl border border-white/10 bg-[#0F172A] shadow-2xl shadow-black/50 overflow-hidden"
+      >
+        {isLoadingSuggestions ? (
+          <div className="flex items-center justify-center py-4 text-white/50">
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <span className="text-sm">Recherche...</span>
+          </div>
+        ) : (
+          <div className="p-1">
+            {suggestions.map((suggestion, index) => (
+              <button
+                key={suggestion}
+                type="button"
+                className={`w-full flex items-center gap-2 px-4 py-3 text-left text-sm rounded-lg transition-colors cursor-pointer ${index === selectedIndex
+                  ? "bg-primary/20 text-white"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                  }`}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleSelectSuggestion(suggestion);
+                }}
+                onMouseEnter={() => setSelectedIndex(index)}
+              >
+                <MapPin className="h-4 w-4 text-primary shrink-0" />
+                <span className="truncate">{suggestion}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    )}
+  </AnimatePresence>
+);

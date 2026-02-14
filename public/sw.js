@@ -1,5 +1,5 @@
 // Service Worker for Dousell Immo PWA
-const CACHE_NAME = "dousell-immo-v9";
+const CACHE_NAME = "dousell-immo-v10";
 const STATIC_ASSETS = [
   "/gestion",
   "/manifest.json",
@@ -97,12 +97,14 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(event.request.url);
 
-  // Skip chrome extensions, Next.js static files, API routes, and tenant portal
+  // Skip chrome extensions, Next.js static files, API routes, image optimization, and tenant portal
   // /locataire is a separate auth context (cookie-based magic link) and must
   // never be intercepted by the PWA service worker
+  // /_next/image is Next.js image optimization endpoint - let browser handle it
   if (
     event.request.url.startsWith("chrome-extension://") ||
     event.request.url.includes("_next/static") ||
+    event.request.url.includes("_next/image") ||
     event.request.url.includes("api/") ||
     url.pathname.startsWith("/locataire")
   ) {
@@ -132,6 +134,7 @@ self.addEventListener("fetch", (event) => {
     "fonts.googleapis.com",     // Google Fonts
     "kkiapay.me",               // Kkiapay payment
     "rokt.com",                 // Rokt (extension ads)
+    "coinafrique.com",          // Images externes CoinAfrique
   ];
 
   // Vérifie si l'URL contient un des domaines externes

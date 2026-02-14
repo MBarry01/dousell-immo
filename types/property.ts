@@ -23,7 +23,6 @@ export type Property = {
     rooms: number;
     bedrooms: number;
     bathrooms: number;
-    dpe: "A" | "B" | "C" | "D" | "E" | "F" | "G";
   };
   details: {
     type: "Appartement" | "Maison" | "Studio" | "Terrain" | "Villa" | string;

@@ -1967,7 +1967,7 @@ export const Constants = {
 ---
 ## 2. UI COMPONENTS (Existing)
 Utilise ces composants pour construire l'interface.
-# 🗺️ MAP DES COMPOSANTS (224)
+# 🗺️ MAP DES COMPOSANTS (226)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -2074,8 +2074,10 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<booking-card />** (Path: `components\property\booking-card.tsx`)
 - **<contact-bar />** (Path: `components\property\contact-bar.tsx`)
 - **<cost-simulator />** (Path: `components\property\cost-simulator.tsx`)
+- **<external-property-teaser />** (Path: `components\property\external-property-teaser.tsx`)
 - **<gallery-grid />** (Path: `components\property\gallery-grid.tsx`)
 - **<listing-image-carousel />** (Path: `components\property\listing-image-carousel.tsx`)
+- **<management-promo-card />** (Path: `components\property\management-promo-card.tsx`)
 - **<OwnerCTA />** (Path: `components\property\OwnerCTA.tsx`)
 - **<property-card-unified />** (Path: `components\property\property-card-unified.tsx`)
 - **<property-card />** (Path: `components\property\property-card.tsx`)

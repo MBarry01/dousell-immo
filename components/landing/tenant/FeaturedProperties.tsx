@@ -30,9 +30,9 @@ export default function FeaturedProperties({ properties }: FeaturedPropertiesPro
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {properties.map((property, index) => {
                         const isExternal = property.isExternal;
-                        const href = isExternal ? (property.source_url || '#') : `/biens/${property.id}`;
-                        const LinkComponent = isExternal ? 'a' : Link;
-                        const linkProps = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
+                        const href = isExternal ? `/biens/ext/${property.id}` : `/biens/${property.id}`;
+                        const LinkComponent = Link;
+                        const linkProps = {};
 
                         return (
                             <motion.div

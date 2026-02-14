@@ -5,7 +5,7 @@ export const properties: Property[] = [
     id: "villa-horizon-almadies",
     title: "Villa Horizon Almadies",
     price: 650_000_000,
-     transaction: "vente",
+    transaction: "vente",
     location: {
       city: "Almadies",
       address: "Route des Almadies, Dakar",
@@ -24,7 +24,6 @@ export const properties: Property[] = [
       rooms: 7,
       bedrooms: 5,
       bathrooms: 4,
-      dpe: "B",
     },
     details: {
       type: "Maison",
@@ -75,7 +74,6 @@ export const properties: Property[] = [
       rooms: 5,
       bedrooms: 3,
       bathrooms: 3,
-      dpe: "A",
     },
     details: {
       type: "Appartement",
@@ -126,7 +124,6 @@ export const properties: Property[] = [
       rooms: 4,
       bedrooms: 3,
       bathrooms: 2,
-      dpe: "B",
     },
     details: {
       type: "Appartement",
@@ -176,7 +173,6 @@ export const properties: Property[] = [
       rooms: 3,
       bedrooms: 2,
       bathrooms: 2,
-      dpe: "C",
     },
     details: {
       type: "Appartement",
@@ -226,7 +222,6 @@ export const properties: Property[] = [
       rooms: 4,
       bedrooms: 3,
       bathrooms: 3,
-      dpe: "B",
     },
     details: {
       type: "Maison",
@@ -276,7 +271,6 @@ export const properties: Property[] = [
       rooms: 5,
       bedrooms: 4,
       bathrooms: 3,
-      dpe: "B",
     },
     details: {
       type: "Maison",

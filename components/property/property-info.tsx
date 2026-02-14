@@ -5,7 +5,6 @@ import {
   Bath,
   Bed,
   Home,
-  Leaf,
   MapPin,
   Info,
   CheckCircle2,
@@ -18,7 +17,7 @@ import { ProximitiesSection } from "@/components/property/proximities-section";
 import { SimilarProperties } from "@/components/property/similar-properties";
 import { StaticMap } from "@/components/property/static-map";
 import { Button } from "@/components/ui/button";
-import { cn, dpeColorMap, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import type { Property } from "@/types/property";
 
 type PropertyInfoProps = {
@@ -101,22 +100,6 @@ export const PropertyInfo = ({ property, similar }: PropertyInfoProps) => {
               <p className="text-sm text-gray-500 dark:text-white/60">{label}</p>
             </div>
           ))}
-          <div className="rounded-2xl bg-gray-50 p-4 text-center shadow-sm dark:bg-white/5">
-            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-900 dark:bg-white/10 dark:text-white">
-              <Leaf className="h-5 w-5" />
-            </div>
-            <p
-              className={cn(
-                "mx-auto w-fit rounded-full px-4 py-1 text-sm font-semibold",
-                dpeColorMap[property.specs.dpe]
-              )}
-            >
-              DPE {property.specs.dpe}
-            </p>
-            <p className="text-sm text-gray-500 dark:text-white/60">
-              Performance énergétique
-            </p>
-          </div>
         </div>
 
         <div className="space-y-3">
@@ -153,7 +136,7 @@ export const PropertyInfo = ({ property, similar }: PropertyInfoProps) => {
               [
                 "Taxe foncière",
                 property.details.taxeFonciere &&
-                  formatCurrency(property.details.taxeFonciere),
+                formatCurrency(property.details.taxeFonciere),
               ],
               ["Parking", property.details.parking ?? "—"],
             ]
@@ -185,8 +168,8 @@ export const PropertyInfo = ({ property, similar }: PropertyInfoProps) => {
           landmark={property.location.landmark}
         />
 
-        <AgentCard 
-          agent={property.agent} 
+        <AgentCard
+          agent={property.agent}
           property={property}
           propertyId={property.id}
           propertyTitle={property.title}
@@ -197,24 +180,24 @@ export const PropertyInfo = ({ property, similar }: PropertyInfoProps) => {
         {(property.details.hasBackupGenerator ||
           property.details.hasWaterTank ||
           property.details.security) && (
-          <div className="flex flex-wrap gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white">
-            {property.details.hasBackupGenerator && (
-              <span className="inline-flex items-center gap-2 rounded-full bg-black/30 px-3 py-1 text-xs">
-                ⚡ Groupe électrogène
-              </span>
-            )}
-            {property.details.hasWaterTank && (
-              <span className="inline-flex items-center gap-2 rounded-full bg-black/30 px-3 py-1 text-xs">
-                💧 Réservoir / Surpresseur
-              </span>
-            )}
-            {property.details.security && (
-              <span className="inline-flex items-center gap-2 rounded-full bg-black/30 px-3 py-1 text-xs">
-                🛡 Gardiennage 24/7
-              </span>
-            )}
-          </div>
-        )}
+            <div className="flex flex-wrap gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white">
+              {property.details.hasBackupGenerator && (
+                <span className="inline-flex items-center gap-2 rounded-full bg-black/30 px-3 py-1 text-xs">
+                  ⚡ Groupe électrogène
+                </span>
+              )}
+              {property.details.hasWaterTank && (
+                <span className="inline-flex items-center gap-2 rounded-full bg-black/30 px-3 py-1 text-xs">
+                  💧 Réservoir / Surpresseur
+                </span>
+              )}
+              {property.details.security && (
+                <span className="inline-flex items-center gap-2 rounded-full bg-black/30 px-3 py-1 text-xs">
+                  🛡 Gardiennage 24/7
+                </span>
+              )}
+            </div>
+          )}
 
         <div className="flex items-center gap-2 rounded-2xl border border-emerald-300/30 bg-emerald-500/5 p-4 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
           <CheckCircle2 className="h-5 w-5" />

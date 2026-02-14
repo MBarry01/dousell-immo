@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { Filter, Map, Search as SearchIcon, Bell, MapPin } from "lucide-react";
 
 import { PropertyCardUnified } from "@/components/property/property-card-unified";
+import { ManagementPromoCard } from "@/components/property/management-promo-card";
 import { FilterDrawer } from "@/components/search/filter-drawer";
 import { CreateAlertDialog } from "@/components/search/create-alert-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -73,7 +74,7 @@ export const SearchExperience = ({
     if (debouncedSearchQuery && debouncedSearchQuery.length >= 2) {
       getSearchSuggestions(debouncedSearchQuery).then(setSuggestions);
     } else {
-      setSuggestions([]);
+      setTimeout(() => setSuggestions([]), 0);
     }
   }, [debouncedSearchQuery]);
 
@@ -102,7 +103,7 @@ export const SearchExperience = ({
       };
       searchFilters();
     }
-  }, [debouncedSearchQuery]); // Exclure filters et setFilters des dépendances pour éviter les boucles
+  }, [debouncedSearchQuery, filters, setFilters]);
 
   const applyFilters = useCallback(async (nextFilters: PropertyFilters) => {
     setIsSearching(true);
@@ -343,6 +344,8 @@ export const SearchExperience = ({
           filters={filters}
         />
       )}
+
+      <ManagementPromoCard />
     </div>
   );
 };

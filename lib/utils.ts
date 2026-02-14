@@ -28,18 +28,7 @@ export const formatCurrencyShort = (value: number) => {
   return `${value} FCFA`;
 };
 
-export const dpeColorMap: Record<
-  "A" | "B" | "C" | "D" | "E" | "F" | "G",
-  string
-> = {
-  A: "bg-emerald-500/15 text-emerald-400",
-  B: "bg-lime-500/15 text-lime-400",
-  C: "bg-amber-500/15 text-amber-400",
-  D: "bg-orange-500/15 text-orange-400",
-  E: "bg-rose-500/15 text-rose-400",
-  F: "bg-red-500/15 text-red-400",
-  G: "bg-red-700/20 text-red-400",
-};
+
 
 /**
  * Récupère l'URL de base de l'application
