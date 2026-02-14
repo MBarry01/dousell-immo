@@ -300,7 +300,7 @@ export async function resendConfirmationEmail(email: string) {
       type: "signup",
       email: email.trim().toLowerCase(),
       options: {
-        emailRedirectTo,
+        emailRedirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(emailRedirectTo.split('next=')[1] || '/')}`,
       },
     });
 
@@ -393,7 +393,7 @@ export async function signInWithGoogle() {
 
   // Détection automatique de l'URL (pour Vercel et localhost)
   const appUrl = getBaseUrl();
-  const redirectTo = `${appUrl}/auth/callback?next=/`;
+  const redirectTo = `${appUrl}/auth/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -426,11 +426,32 @@ export async function signOut() {
   redirect("/login");
 }
 
-export async function resetPassword(email: string) {
+export async function resetPassword(email: string, next?: string, captchaToken?: string) {
   const supabase = await createClient();
+  const appUrl = getBaseUrl();
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${getBaseUrl()}/auth/callback?next=/compte/reset-password`,
+  // Vérification Turnstile manuelle (identique au flow signup)
+  if (!captchaToken) {
+    return {
+      error: "Vérification anti-robot requise. Veuillez réessayer.",
+    };
+  }
+
+  const verification = await verifyTurnstileToken(captchaToken);
+  if (!verification.success) {
+    return {
+      error: verification.error || "Vérification anti-robot échouée. Veuillez réessayer.",
+    };
+  }
+
+  const nextPath = next
+    ? `/compte/reset-password?redirect=${encodeURIComponent(next)}`
+    : `/compte/reset-password`;
+
+  const redirectTo = `${appUrl}/auth/confirm?next=${encodeURIComponent(nextPath)}`;
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+    redirectTo,
   });
 
   if (error) {
@@ -446,3 +467,30 @@ export async function resetPassword(email: string) {
   };
 }
 
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient();
+  const password = formData.get("password") as string;
+  const redirectPath = formData.get("redirect") as string || "/compte";
+
+  if (!password || password.length < 6) {
+    return {
+      error: "Le mot de passe doit contenir au moins 6 caractères",
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: password,
+  });
+
+  if (error) {
+    console.error("Update password error:", error);
+    return {
+      error: error.message,
+    };
+  }
+
+  return {
+    success: true,
+    redirectPath,
+  };
+}

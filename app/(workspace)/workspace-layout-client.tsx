@@ -46,6 +46,20 @@ export function WorkspaceLayoutClient({
     console.log("[Workspace] ⚛️ React initialization started");
   });
 
+  const isDistractionFree = pathname === "/compte/reset-password";
+
+  if (isDistractionFree) {
+    return (
+      <div className="flex h-dvh flex-col overflow-hidden bg-[#05080c] text-white">
+        <main className="flex-1 overflow-y-auto w-full flex items-center justify-center">
+          <FadeIn delay={100} className="w-full">
+            {children}
+          </FadeIn>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
       {/* Header - Full Width Top */}

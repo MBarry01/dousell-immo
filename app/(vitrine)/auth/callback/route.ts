@@ -58,9 +58,9 @@ export async function GET(request: Request) {
 
       if (data.session) {
         console.log("✅ Email verified, session created");
-        // Utiliser la redirection intelligente
-        const smartRedirect = await getSmartRedirectPath();
-        return NextResponse.redirect(`${origin}${smartRedirect}?verified=true`);
+        // Utiliser la redirection intelligente avec le paramètre next si fourni
+        const smartRedirect = await getSmartRedirectPath(next || undefined);
+        return NextResponse.redirect(`${origin}${smartRedirect}${smartRedirect.includes('?') ? '&' : '?'}verified=true`);
       }
 
       console.error("❌ No session after OTP verification");
@@ -104,9 +104,10 @@ export async function GET(request: Request) {
       }
 
       // Sinon, utiliser la redirection intelligente
-      // Si un next est spécifié explicitement (pas /), l'utiliser
-      if (next && next !== "/") {
+      // Si un next est spécifié explicitement, l'utiliser
+      if (next) {
         const redirectUrl = `${origin}${next}`;
+        console.log("🔀 Redirecting to explicit next:", redirectUrl);
         return NextResponse.redirect(redirectUrl);
       }
 

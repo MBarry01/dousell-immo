@@ -132,7 +132,10 @@ export const Header = () => {
               <Button
                 size="sm"
                 className="rounded-xl px-4 text-sm transition-all hover:scale-105 active:scale-95"
-                onClick={() => router.push("/login")}
+                onClick={() => {
+                  const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
+                  router.push(redirectUrl);
+                }}
               >
                 Se connecter
               </Button>
@@ -155,10 +158,10 @@ export const Header = () => {
           transform: "translateZ(0)",
         }}
       >
-        <div className="glass-panel mx-auto flex max-w-[1360px] items-center justify-between rounded-[32px] border border-white/5 px-6 py-3.5 shadow-lg shadow-black/20 lg:px-8 lg:py-4 relative">
+        <div className="glass-panel mx-auto flex max-w-[1360px] items-center justify-between rounded-[32px] border border-white/5 px-4 py-3 shadow-lg shadow-black/20 lg:px-8 lg:py-4 relative">
           <Link
             href="/"
-            className="flex items-center transition-opacity active:opacity-70 hover:opacity-80"
+            className="flex items-center transition-opacity active:opacity-70 hover:opacity-80 shrink-0"
             aria-label="Dousell Immo - Accueil"
           >
             <Image
@@ -166,19 +169,19 @@ export const Header = () => {
               alt="Dousell Immo"
               width={240}
               height={80}
-              className="h-11 w-auto transition-transform hover:scale-105 lg:h-14"
+              className="h-9 w-auto transition-transform hover:scale-105 lg:h-14"
               priority
             />
           </Link>
 
           {/* Search Bar - Desktop */}
-          <div className="flex-1 max-w-[320px] lg:max-w-md mx-6">
+          <div className="flex-1 max-w-[200px] xl:max-w-md mx-2 lg:mx-6">
             <Suspense>
               <GlobalSearch />
             </Suspense>
           </div>
 
-          <nav className="flex items-center gap-5 text-sm font-medium text-white/70 lg:gap-6">
+          <nav className="flex items-center gap-3 text-xs font-medium text-white/70 lg:gap-6 lg:text-sm">
             {navLinks.map((link) => {
               const isActive = isActiveLink(link.href);
               return (

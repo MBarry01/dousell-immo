@@ -1,3 +1,7 @@
+"use client";
+
+import { useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -25,6 +29,10 @@ export const ExternalPropertyTeaser = ({
     property,
     similar,
 }: ExternalPropertyTeaserProps) => {
+    useEffect(() => {
+        console.log("[ExternalPropertyTeaser] Mounting for external property:", property.id, property.title);
+    }, [property.id, property.title]);
+
     const breadcrumbItems = [
         { label: "Accueil", href: "/" },
         {
@@ -172,6 +180,9 @@ export const ExternalPropertyTeaser = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group flex items-center justify-center gap-3 rounded-2xl bg-primary px-8 py-5 text-lg font-bold text-black transition-all duration-300 hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 active:scale-[0.98]"
+                        onClick={() => {
+                            console.log("[ExternalPropertyTeaser] User clicking external link to:", sourceSite);
+                        }}
                     >
                         <ExternalLink className="h-6 w-6 transition-transform group-hover:rotate-12" />
                         Voir l&apos;annonce complète sur {sourceSite}

@@ -94,13 +94,25 @@ export async function updateSession(request: NextRequest) {
   try {
     const {
       data: { user: authUser },
+      error: authError
     } = await supabase.auth.getUser();
-    user = authUser;
 
+    if (authError) {
+      // Silence common session expiration errors to keep the console clean
+      const isSessionExpired = authError.message?.includes("refresh_token_not_found") ||
+        authError.status === 400 ||
+        authError.message?.includes("Refresh Token Not Found");
+
+      if (!isSessionExpired) {
+        console.warn("Middleware: Auth error:", authError.message);
+      }
+    }
+
+    user = authUser;
   } catch (error) {
     // If Supabase is not available or credentials are invalid, continue without auth
     // This allows the app to work even if Supabase is not configured yet
-    console.warn("Middleware: Error getting user (this is OK if Supabase is not configured):", error);
+    console.debug("Middleware: Unexpected error getting user:", error);
   }
 
   // ============================================
@@ -193,14 +205,23 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // If the user is logged in and tries to access login/register, redirect to account
+  // If the user is logged in and tries to access login/register, redirect to account (or intended redirect)
   if (
     user &&
     (request.nextUrl.pathname.startsWith("/login") ||
       request.nextUrl.pathname.startsWith("/register"))
   ) {
+    const redirectParam = request.nextUrl.searchParams.get("redirect");
     const url = request.nextUrl.clone();
-    url.pathname = "/compte";
+
+    if (redirectParam && redirectParam.startsWith("/")) {
+      url.pathname = redirectParam;
+      // Clean up the search params to avoid infinite loops if it redirects back to login
+      url.searchParams.delete("redirect");
+    } else {
+      url.pathname = "/compte";
+    }
+
     return NextResponse.redirect(url);
   }
 

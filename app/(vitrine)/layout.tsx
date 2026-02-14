@@ -54,8 +54,13 @@ const formatSegmentLabel = (segment: string) => {
 
 export default function VitrineLayout({ children }: VitrineLayoutProps) {
   const pathname = usePathname();
-  const isPropertyDetail =
-    pathname?.startsWith("/biens/") && pathname.split("/").length === 3;
+  const segments = pathname?.split("/").filter(Boolean) || [];
+  const isInternalDetail = segments.length === 2 && segments[0] === "biens";
+  const isExternalDetail = segments.length === 3 && segments[0] === "biens" && segments[1] === "ext";
+  const isAuthPage = pathname === "/login" || pathname === "/register" || pathname === "/reset-password";
+
+  const isDistractionFree = isInternalDetail || isExternalDetail || isAuthPage;
+
   const shouldHideFooter = hideFooterRoutes.some((route) =>
     pathname?.startsWith(route)
   );
@@ -97,7 +102,7 @@ export default function VitrineLayout({ children }: VitrineLayoutProps) {
 
   const shouldShowBreadcrumbs = breadcrumbItems.length > 1;
 
-  if (isPropertyDetail) {
+  if (isDistractionFree) {
     return (
       <div className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
         <ScrollToTop />

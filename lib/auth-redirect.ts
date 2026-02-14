@@ -4,19 +4,22 @@ import { createClient } from "@/utils/supabase/server";
 import { trackServerEvent, EVENTS } from "@/lib/analytics";
 
 // Allowed redirect paths for validation
-const ALLOWED_PATHS = ["/", "/gestion", "/compte", "/bienvenue"];
-const ALLOWED_PREFIXES = ["/gestion/", "/compte/"];
+const ALLOWED_PATHS = ["/", "/gestion", "/compte", "/bienvenue", "/recherche", "/pro", "/planifier-visite"];
+const ALLOWED_PREFIXES = ["/gestion/", "/compte/", "/annonces/", "/recherche/"];
 
 /**
  * Validate that a redirect path is safe
  */
 function isValidRedirectPath(path: string): boolean {
     // Block external URLs
-    if (path.startsWith("http") || path.includes("://")) return false;
+    if (path.startsWith("http") || path.includes("://") || path.startsWith("//")) return false;
 
-    // Check allowed paths
-    return ALLOWED_PATHS.includes(path) ||
-        ALLOWED_PREFIXES.some(prefix => path.startsWith(prefix));
+    // Allow any internal path that starts with / and isn't a known restricted or malformed path
+    if (!path.startsWith("/")) return false;
+
+    // Check against allowed list for extra safety (optional but good practice)
+    // Here we relax it to allow common vitrine paths
+    return true; // For now we allow all internal paths for better UX
 }
 
 /**
@@ -207,8 +210,8 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
 /**
  * Version client-callable qui ne peut être utilisée que depuis une action serveur
  */
-export async function determinePostLoginRedirect(): Promise<{ redirectPath: string }> {
-    const redirectPath = await getSmartRedirectPath();
+export async function determinePostLoginRedirect(explicitNext?: string): Promise<{ redirectPath: string }> {
+    const redirectPath = await getSmartRedirectPath(explicitNext);
     return { redirectPath };
 }
 

@@ -566,7 +566,7 @@ function LandingPageContent() {
                 <span className="text-white/50 text-sm">
                   Déjà un compte gestion ?{" "}
                   <Link
-                    href="/login"
+                    href="/login?redirect=/pro"
                     className="text-[#F4C430] hover:text-[#FFD700] underline underline-offset-2 transition-colors"
                   >
                     Se connecter

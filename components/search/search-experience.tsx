@@ -91,27 +91,66 @@ export const SearchExperience = ({
 
   // Effet pour appliquer la recherche debouncée
   useEffect(() => {
-    if (debouncedSearchQuery !== filters.q) {
+    // Synchroniser searchQuery avec filters.q lors d'un changement d'URL (ex: retour arrière)
+    if (filters.q !== undefined && filters.q !== searchQuery) {
+      console.log("[SearchExperience] Sync searchQuery from filters.q:", filters.q);
+      setSearchQuery(filters.q);
+    }
+  }, [filters.q]);
+
+  useEffect(() => {
+    let ignoreResult = false;
+
+    if (debouncedSearchQuery !== (filters.q ?? "")) {
       const searchFilters = async () => {
+        console.log("[SearchExperience] Triggering search for:", debouncedSearchQuery);
         setIsSearching(true);
         const nextFilters = { ...filters, q: debouncedSearchQuery || undefined };
+
+        console.log("[SearchExperience] Updating URL with filters:", nextFilters);
         setFilters(nextFilters);
-        const data = await getUnifiedListings(nextFilters);
-        setResults(data);
-        setCurrentPage(1); // Reset page on search change
-        setIsSearching(false);
+
+        try {
+          console.log("[SearchExperience] Fetching listings for:", debouncedSearchQuery);
+          const data = await getUnifiedListings(nextFilters);
+
+          if (!ignoreResult) {
+            console.log("[SearchExperience] Search results received:", data.length);
+            setResults(data);
+            setCurrentPage(1);
+          } else {
+            console.log("[SearchExperience] Result ignored (stale call)");
+          }
+        } catch (error) {
+          console.error("[SearchExperience] Search error:", error);
+        } finally {
+          if (!ignoreResult) {
+            setIsSearching(false);
+          }
+        }
       };
       searchFilters();
     }
+
+    return () => {
+      ignoreResult = true;
+    };
   }, [debouncedSearchQuery, filters, setFilters]);
 
   const applyFilters = useCallback(async (nextFilters: PropertyFilters) => {
+    console.log("[SearchExperience] Applying filters:", nextFilters);
     setIsSearching(true);
     setFilters(nextFilters);
-    const data = await getUnifiedListings(nextFilters);
-    setResults(data);
-    setCurrentPage(1); // Reset page on filter apply
-    setIsSearching(false);
+    try {
+      const data = await getUnifiedListings(nextFilters);
+      console.log("[SearchExperience] Filtered results received:", data.length);
+      setResults(data);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("[SearchExperience] Filter application error:", error);
+    } finally {
+      setIsSearching(false);
+    }
   }, [setFilters]);
 
   // Mémoiser le nombre de résultats et les résultats paginés
@@ -230,7 +269,9 @@ export const SearchExperience = ({
             onAction={
               activeFilters
                 ? () => {
+                  console.log("[SearchExperience] Clearing all filters");
                   const clearedFilters: PropertyFilters = {};
+                  setSearchQuery("");
                   setFilters(clearedFilters);
                   applyFilters(clearedFilters);
                 }

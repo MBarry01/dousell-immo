@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { type ReactNode, useState, useEffect } from "react";
 
 type FadeInProps = {
   children: ReactNode;
@@ -19,12 +19,15 @@ export function FadeIn({
   direction = "up",
   className,
 }: FadeInProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const yOffset = direction === "up" ? 20 : direction === "down" ? -20 : 0;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: yOffset }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={mounted ? { opacity: 0, y: yOffset } : undefined}
+      whileInView={mounted ? { opacity: 1, y: 0 } : undefined}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay, ease: "easeOut" as const }}
       className={className}
@@ -48,10 +51,13 @@ export function StaggerContainer({
   className,
   staggerDelay = 0.1,
 }: StaggerContainerProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <motion.div
-      initial="hidden"
-      whileInView="visible"
+      initial={mounted ? "hidden" : undefined}
+      whileInView={mounted ? "visible" : undefined}
       viewport={{ once: true, margin: "-50px" }}
       variants={{
         hidden: { opacity: 0 },
@@ -101,10 +107,13 @@ export function ScaleOnHover({
   scale = 1.02,
   tapScale = 0.98,
 }: ScaleOnHoverProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <motion.div
-      whileHover={{ scale }}
-      whileTap={{ scale: tapScale }}
+      whileHover={mounted ? { scale } : undefined}
+      whileTap={mounted ? { scale: tapScale } : undefined}
       transition={{
         type: "spring",
         stiffness: 400,

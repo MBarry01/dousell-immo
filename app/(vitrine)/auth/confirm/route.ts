@@ -39,7 +39,8 @@ export async function GET(request: Request) {
 
       if (data.session) {
         console.log("✅ Session créée avec succès via code");
-        return NextResponse.redirect(`${origin}/?verified=true`);
+        const redirectUrl = next ? `${origin}${next}` : `${origin}/?verified=true`;
+        return NextResponse.redirect(redirectUrl);
       }
     }
 
@@ -69,8 +70,9 @@ export async function GET(request: Request) {
       }
 
       console.log("✅ Email vérifié avec succès via token_hash - Session active:", session.user.email);
-      // Redirection vers l'accueil
-      return NextResponse.redirect(`${origin}/`);
+      // Redirection
+      const redirectUrl = next ? `${origin}${next}` : `${origin}/`;
+      return NextResponse.redirect(redirectUrl);
     }
 
     // Si aucun token valide

@@ -65,8 +65,11 @@ export const PropertyDetailView = ({
 
   // Tracker la vue de la page (compteur incrémental optimisé)
   useEffect(() => {
-    void incrementView(property.id);
-  }, [property.id]);
+    console.log("[PropertyDetailView] Mounting component for property:", property.id, property.title);
+    void incrementView(property.id).then(() => {
+      console.log("[PropertyDetailView] View incremented for:", property.id);
+    });
+  }, [property.id, property.title]);
 
   const breadcrumbItems = useMemo(() => {
     const transaction = property.transaction ?? "vente";

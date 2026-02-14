@@ -472,7 +472,7 @@ export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
 
 
     } catch (err) {
-        console.error("Gateway Error", err);
+        console.error("[gatewayService] getUnifiedListings Gateway Error", err);
         return []; // Fail safe, au moins on ne crashe pas l'app
     }
 };
