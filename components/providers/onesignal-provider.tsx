@@ -39,14 +39,14 @@ export default function OneSignalProvider({ userId }: { userId?: string }) {
                 console.log("📊 OneSignal State:", { isPushSupported, permission });
 
                 if (isPushSupported && !permission) {
-                    // @ts-ignore
-                    const canPrompt = await OneSignal.Slidedown.isSlidedownActionDismissed("push");
-                    console.log("❓ OneSignal: Can prompt slidedown?", !canPrompt);
-
                     setTimeout(async () => {
-                        console.log("👋 OneSignal: Showing slidedown...");
-                        await OneSignal.Slidedown.promptPush({ force: true });
-                    }, 3000);
+                        console.log("👋 OneSignal: Permission not granted, showing slidedown...");
+                        try {
+                            await OneSignal.Slidedown.promptPush({ force: true });
+                        } catch (e) {
+                            console.warn("OneSignal prompt error:", e);
+                        }
+                    }, 5000);
                 }
 
             } catch (error) {
