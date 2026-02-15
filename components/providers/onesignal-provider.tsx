@@ -1,53 +1,49 @@
-"use client";
-
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import OneSignal from "react-onesignal";
 
 export default function OneSignalProvider({ userId }: { userId?: string }) {
+    const isInitialized = useRef(false);
+
     useEffect(() => {
         if (typeof window === "undefined") return;
 
         const initOneSignal = async () => {
+            if (isInitialized.current) {
+                if (userId) {
+                    console.log("👤 OneSignal: Syncing login for ID:", userId);
+                    await OneSignal.login(userId);
+                }
+                return;
+            }
+
             console.log("🏁 OneSignalProvider: Initializing...");
             try {
-                // Vérifier si OneSignal est déjà initialisé
-                // @ts-ignore
-                if (window.OneSignal && window.OneSignal.initialized) {
-                    console.log("ℹ️ OneSignal already initialized");
-                }
-
                 await OneSignal.init({
                     appId: "a7fba1dc-348a-4ee5-9647-3e7253c13cb8",
                     allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
-                    serviceWorkerPath: "/sw.js",
-                    serviceWorkerParam: { scope: "/" },
                 });
 
+                isInitialized.current = true;
                 console.log("✅ OneSignal Init Success");
 
                 if (userId) {
                     console.log("👤 OneSignal: Attempting login for ID:", userId);
                     await OneSignal.login(userId);
-                    console.log("✅ OneSignal: Login successful");
                 }
 
-                // Initial diagnostic logs
+                // Check state
                 const permission = OneSignal.Notifications.permission;
                 const isPushSupported = OneSignal.Notifications.isPushSupported();
-                console.log("📊 OneSignal Initial State:", { isPushSupported, permission });
+                console.log("📊 OneSignal State:", { isPushSupported, permission });
 
-                // Auto-prompt logic: trigger slidedown if not yet asked
                 if (isPushSupported && !permission) {
-                    console.log("👋 OneSignal: Permission not granted, showing slidedown in 3s...");
+                    // @ts-ignore
+                    const canPrompt = await OneSignal.Slidedown.isSlidedownActionDismissed("push");
+                    console.log("❓ OneSignal: Can prompt slidedown?", !canPrompt);
+
                     setTimeout(async () => {
-                        try {
-                            await OneSignal.Slidedown.promptPush({
-                                force: true,
-                            });
-                            console.log("📣 OneSignal Slidedown prompted");
-                        } catch (promptError) {
-                            console.warn("⚠️ OneSignal Slidedown prompt failed:", promptError);
-                        }
+                        console.log("👋 OneSignal: Showing slidedown...");
+                        await OneSignal.Slidedown.promptPush({ force: true });
                     }, 3000);
                 }
 
