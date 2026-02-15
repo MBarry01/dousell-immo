@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useState, useEffect, useRef } from 'react';
 import { Send, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
-import { sendOwnerMessage } from '../actions'; // Important: Import from updated actions
+import { sendOwnerMessage, markConversationAsRead } from '../actions';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -36,6 +36,11 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
+    // Mark tenant messages as read when opening conversation
+    useEffect(() => {
+        markConversationAsRead(leaseId);
+    }, [leaseId]);
+
     // Setup Realtime Subscription
     useEffect(() => {
         const supabase = createClient();
@@ -51,6 +56,11 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
                 },
                 (payload) => {
                     const newMsg = payload.new as Message;
+
+                    // Mark as read immediately if it's from tenant (owner has chat open)
+                    if (newMsg.sender_type === 'tenant') {
+                        markConversationAsRead(leaseId);
+                    }
 
                     setMessages((current) => {
                         // Avoid duplicates

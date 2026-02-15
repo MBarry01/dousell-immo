@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/client';
 import { useState, useRef, useEffect } from 'react';
 import { Send, MessageCircle } from 'lucide-react';
-import { sendTenantMessage } from '../actions';
+import { sendTenantMessage, markTenantMessagesAsRead } from '../actions';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -40,6 +40,11 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
     const isFromTenant = (msg: Message) => {
         return msg.sender_type === 'tenant' || msg.id.startsWith('temp-');
     };
+
+    // Mark owner messages as read when opening conversation
+    useEffect(() => {
+        markTenantMessagesAsRead();
+    }, []);
 
     // Setup Realtime Subscription
     useEffect(() => {

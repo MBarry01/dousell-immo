@@ -31,6 +31,26 @@ export async function getOwnerMessages(leaseId: string) {
     return { messages: messages || [], tenantName: lease.tenant_name };
 }
 
+/**
+ * Mark all tenant messages in a conversation as read by the owner.
+ */
+export async function markConversationAsRead(leaseId: string) {
+    const { teamId, user } = await getUserTeamContext();
+    const supabase = await createClient();
+
+    if (!user) return;
+
+    // Only mark tenant messages as read (owner's own messages don't need read_at)
+    await supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('lease_id', leaseId)
+        .eq('sender_type', 'tenant')
+        .is('read_at', null);
+
+    revalidatePath('/gestion/messages');
+}
+
 export async function sendOwnerMessage(leaseId: string, content: string) {
     const { teamId, user } = await getUserTeamContext();
     await requireTeamPermission('leases.view'); // Base permission for messaging

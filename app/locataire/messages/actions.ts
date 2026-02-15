@@ -61,6 +61,28 @@ export async function getTenantMessages() {
 }
 
 /**
+ * Mark all owner messages as read by the tenant.
+ * Uses cookie-based tenant session (NOT supabase auth)
+ */
+export async function markTenantMessagesAsRead() {
+    const session = await getTenantSessionFromCookie();
+    if (!session) return;
+
+    const { createClient: createAdminClient } = await import("@supabase/supabase-js");
+    const supabaseAdmin = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    await supabaseAdmin
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('lease_id', session.lease_id)
+        .eq('sender_type', 'owner')
+        .is('read_at', null);
+}
+
+/**
  * Send a message from tenant to owner
  * Uses cookie-based tenant session (NOT supabase auth)
  */
