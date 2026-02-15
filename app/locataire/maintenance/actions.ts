@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { sendEmail } from '@/lib/mail';
 import { getTenantSessionFromCookie } from '@/lib/tenant-magic-link';
+import { notifyUser } from '@/lib/notifications';
 
 // Type pour le formulaire
 export interface CreateMaintenanceRequestData {
@@ -101,6 +102,15 @@ export async function createMaintenanceRequest(data: CreateMaintenanceRequestDat
         console.error("Erreur envoi notification maintenance:", mailError);
         // Don't block UI for email errors
     }
+
+    // Notification Push à l'Owner
+    await notifyUser({
+        userId: lease.owner_id,
+        type: 'maintenance',
+        title: "Nouvelle demande d'intervention 🔧",
+        message: `${session.tenant_name} a signalé un problème : ${data.category}`,
+        resourcePath: "/gestion/interventions"
+    });
 
     revalidatePath('/locataire/maintenance');
     return { success: true };

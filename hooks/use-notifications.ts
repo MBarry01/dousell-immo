@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
-export type NotificationType = "info" | "success" | "warning" | "error";
+export type NotificationType = "info" | "success" | "warning" | "error" | "message" | "maintenance";
 
 export interface Notification {
   id: string;
@@ -97,7 +97,7 @@ export function useNotifications(userId: string | null) {
       }));
 
       const unread = typedNotifications.filter((n) => !n.is_read).length;
-      
+
       setNotifications(typedNotifications);
       setUnreadCount(unread);
       setError(null);
@@ -206,7 +206,7 @@ export function useNotifications(userId: string | null) {
                 setUnreadCount(unread);
                 return updated;
               });
-              
+
               // Si plusieurs notifications sont mises à jour en même temps (marquer toutes comme lues),
               // refetch pour s'assurer que tout est à jour
               debouncedRefetch();
@@ -236,7 +236,7 @@ export function useNotifications(userId: string | null) {
 
     const startPolling = () => {
       if (pollingInterval) return; // Déjà en cours
-      
+
       pollingInterval = setInterval(() => {
         // Vérifier si Realtime a fonctionné récemment (dans les 60 dernières secondes)
         const timeSinceLastRealtime = Date.now() - lastRealtimeCheck.current;

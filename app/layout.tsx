@@ -12,6 +12,7 @@ import { LazyAnalytics } from "@/components/analytics/lazy-analytics";
 import { LazySpeedInsights } from "@/components/analytics/lazy-speed-insights";
 import { PhoneMissingDialog } from "@/components/auth/phone-missing-dialog";
 import { ThemeProvider } from "@/components/theme-provider";
+import OneSignalProvider from "@/components/providers/onesignal-provider";
 
 import "./globals.css";
 
@@ -89,7 +90,7 @@ export const viewport: Viewport = {
   themeColor: "#05080c",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -98,6 +99,11 @@ export default function RootLayout({
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID || "ui7ik5nepa";
   // TODO: Configure NEXT_PUBLIC_GTM_ID in your .env.local file
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+
+  // Get authenticated user for OneSignal login
+  const { createClient } = await import("@/utils/supabase/server");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <html lang="fr" suppressHydrationWarning>
@@ -239,6 +245,7 @@ export default function RootLayout({
             <Toaster position="top-center" richColors />
             <CookieConsent />
             <PhoneMissingDialog />
+            <OneSignalProvider userId={user?.id} />
           </SplashProvider>
           {/* Analytics lazy-loaded après interaction utilisateur (GA, Clarity, GTM) */}
           <LazyAnalytics gaId={gaId} clarityId={clarityId} gtmId={gtmId} />

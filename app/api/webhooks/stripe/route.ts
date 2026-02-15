@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import ReactPDF from '@react-pdf/renderer';
 import { createQuittanceDocument } from '@/components/pdf/QuittancePDF_v2';
 import { storeDocumentInGED } from '@/lib/ged-utils';
+import { sendOneSignalNotification } from '@/lib/onesignal';
 
 export async function POST(req: Request) {
     const body = await req.text();
@@ -156,6 +157,22 @@ export async function POST(req: Request) {
                 }, supabaseAdmin);
 
                 console.log('✅ Receipt generated and stored in GED');
+
+                // Notify Owner
+                await sendOneSignalNotification({
+                    userIds: [lease.owner_id],
+                    title: "Loyer reçu ! 💰",
+                    content: `Paiement de ${paymentData.amountFcfa.toLocaleString()} FCFA reçu de ${lease.tenant_name}.`,
+                    url: `/gestion/locations/${lease.id}`,
+                });
+
+                // Notify Tenant (target by Lease ID)
+                await sendOneSignalNotification({
+                    userIds: [lease.id],
+                    title: "Paiement confirmé ✅",
+                    content: "Votre quittance de loyer est disponible.",
+                    url: "/locataire/documents",
+                });
 
             } catch (err) {
                 console.error('Error processing payment:', err);

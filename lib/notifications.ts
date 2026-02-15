@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import type { NotificationType } from "@/hooks/use-notifications";
 import { getAdminEmail } from "@/lib/mail";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { sendOneSignalNotification } from "@/lib/onesignal";
 
 type NotifyUserParams = {
   userId: string;
@@ -33,9 +34,9 @@ export async function notifyUser({
     // Utiliser le service role client si disponible pour bypasser RLS
     const notificationClient = process.env.SUPABASE_SERVICE_ROLE_KEY
       ? createSupabaseClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY
-        )
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+      )
       : await createClient();
 
     // Essayer d'abord avec l'insertion directe
@@ -55,7 +56,7 @@ export async function notifyUser({
       // Si l'insertion échoue (RLS bloqué), essayer avec la fonction RPC
       if (error.code === "42501" || error.message?.includes("permission denied") || error.message?.includes("policy")) {
         console.warn("⚠️ RLS bloque l'insertion directe, tentative avec RPC create_notification");
-        
+
         try {
           const supabase = await createClient();
           const { data: rpcData, error: rpcError } = await supabase.rpc("create_notification", {
@@ -90,11 +91,47 @@ export async function notifyUser({
     }
 
     console.log("✅ Notification créée avec succès:", data?.id);
+
+    // Fire-and-forget push notification (non-blocking)
+    sendOneSignalNotification({
+      userIds: [userId],
+      title,
+      content: message,
+      url: resourcePath || undefined,
+      data: { type, resourcePath },
+    }).catch((err) => console.error("OneSignal push failed:", err));
+
     return { success: true, notificationId: data?.id };
   } catch (error) {
     console.error("❌ Erreur inattendue dans notifyUser:", error);
     throw error;
   }
+}
+
+/**
+ * Notifier un locataire (via OneSignal uniquement car pas de user_id auth)
+ */
+export async function notifyTenant({
+  leaseId,
+  title,
+  message,
+  url,
+}: {
+  leaseId: string;
+  title: string;
+  message: string;
+  url?: string;
+}) {
+  console.log(`🔔 Notifying tenant ${leaseId}: ${title}`);
+
+  // Send OneSignal Notification
+  return sendOneSignalNotification({
+    userIds: [leaseId], // Tenant identified by Lease ID
+    title,
+    content: message,
+    url,
+    data: { type: "tenant_notification", leaseId },
+  }).catch((err) => console.error("OneSignal Tenant Push failed:", err));
 }
 
 /**
@@ -181,9 +218,9 @@ export async function notifyAdmin({
     // Créer la notification avec le service role client si disponible pour bypasser RLS
     const notificationClient = process.env.SUPABASE_SERVICE_ROLE_KEY
       ? createSupabaseClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY
-        )
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+      )
       : supabase;
 
     console.log("📝 Création de la notification pour l'admin:", adminUserId);
@@ -205,9 +242,9 @@ export async function notifyAdmin({
     return { success: true, notificationId: data?.[0]?.id };
   } catch (error) {
     console.error("❌ Erreur inattendue dans notifyAdmin:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Erreur inconnue" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erreur inconnue"
     };
   }
 }
@@ -320,9 +357,9 @@ export async function createAdminNotification(
   // Créer la notification avec le service role client si disponible pour bypasser RLS
   const notificationClient = process.env.SUPABASE_SERVICE_ROLE_KEY
     ? createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY
-      )
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
     : supabase;
 
   const { error } = await notificationClient.from("notifications").insert({

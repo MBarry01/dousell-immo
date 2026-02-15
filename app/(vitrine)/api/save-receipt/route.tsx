@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Utiliser l'utilitaire centralisé pour le stockage
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+         
         const { storeDocumentInGED } = require('@/lib/ged-utils');
 
         const result = await storeDocumentInGED({

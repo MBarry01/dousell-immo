@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    ".claude/**",
+    ".clauderules",
+    "scripts/generate-supabase-brain.js",
+    "public/assets/images/logo.ts",
+    ".*/**",
   ]),
 ]);
 

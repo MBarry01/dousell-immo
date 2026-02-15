@@ -603,13 +603,13 @@ export async function createNewLease(formData: Record<string, unknown>) {
         };
 
         // Générer le PDF
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+         
         const { generateLeasePDF } = require('@/lib/pdf-generator');
         const pdfResult = await generateLeasePDF(contractData);
 
         if (pdfResult.success && pdfResult.pdfBytes) {
             // Stocker dans la GED
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
+             
             const { storeDocumentInGED } = require('@/lib/ged-utils');
 
             // Utiliser un client admin pour outrepasser les restrictions de session sur le storage

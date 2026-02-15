@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { sendEmail } from '@/lib/mail';
 import { getUserTeamContext } from "@/lib/team-context";
 import { requireTeamPermission } from "@/lib/permissions";
+import { notifyTenant } from "@/lib/notifications";
 
 export async function getOwnerMessages(leaseId: string) {
     const { teamId, user } = await getUserTeamContext();
@@ -98,6 +99,14 @@ export async function sendOwnerMessage(leaseId: string, content: string) {
         } catch (mailError) {
             console.error("Erreur notif mail owner:", mailError);
         }
+
+        // Notification Push
+        await notifyTenant({
+            leaseId,
+            title: `Message de ${ownerName}`,
+            message: content,
+            url: "/locataire/messages"
+        });
     }
 
     revalidatePath(`/gestion/messages/${leaseId}`);

@@ -79,7 +79,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
     // Confetti celebration for first tenant creation - Golden luxury effect (Desktop optimized)
     const triggerConfetti = useCallback(() => {
         // Confetti disabled temporarily for mobile crash investigation
-        // eslint-disable-next-line no-console
+         
         console.log("Confetti celebration skipped (mobile crash investigation)");
         /*
         // Palette dorée luxe

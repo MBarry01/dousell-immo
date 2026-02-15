@@ -12,8 +12,10 @@ import {
   CreditCard,
   LogOut,
 } from "lucide-react";
+import OneSignalProvider from "@/components/providers/onesignal-provider";
 import { useTenantUnreadCounts } from "@/hooks/use-unread-counts";
 import { Button } from "@/components/ui/button";
+import { TenantPushNotifications } from "@/components/pwa/tenant-push-notifications";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +49,7 @@ export default function LocataireLayout({
   const pathname = usePathname();
   const [tenantName, setTenantName] = useState<string>("");
   const [propertyAddress, setPropertyAddress] = useState<string>("");
+  const [leaseId, setLeaseId] = useState<string>("");
   const { unreadMessages, pendingMaintenance } = useTenantUnreadCounts();
 
   // Note: We no longer block /locataire in PWA standalone mode.
@@ -72,6 +75,7 @@ export default function LocataireLayout({
           const data = await res.json();
           setTenantName(data.tenant_name || "Locataire");
           setPropertyAddress(data.property_address || "");
+          setLeaseId(data.lease_id || "");
         }
       } catch (error) {
         console.error("Error fetching tenant info:", error);
@@ -216,8 +220,10 @@ export default function LocataireLayout({
             ))}
           </nav>
 
-          {/* Right: Messages + User Menu */}
+          {/* Right: Push Notifications + Messages + User Menu */}
           <div className="flex items-center gap-1">
+            {/* Push notification toggle */}
+            <TenantPushNotifications />
             {/* Messages button (like a notification bell) */}
             <Link
               href="/locataire/messages"
@@ -237,40 +243,40 @@ export default function LocataireLayout({
               )}
             </Link>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="!bg-transparent hover:!bg-slate-100 data-[state=open]:!bg-slate-100 !text-slate-700 hover:!text-slate-900 data-[state=open]:!text-slate-900 hover:scale-[1.02] transition-all duration-200 border-none shadow-none"
-              >
-                <span className="hidden sm:inline mr-2 !text-slate-700">
-                  {tenantName || "Locataire"}
-                </span>
-                <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">
-                    {tenantName?.charAt(0)?.toUpperCase() || "L"}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="!bg-transparent hover:!bg-slate-100 data-[state=open]:!bg-slate-100 !text-slate-700 hover:!text-slate-900 data-[state=open]:!text-slate-900 hover:scale-[1.02] transition-all duration-200 border-none shadow-none"
+                >
+                  <span className="hidden sm:inline mr-2 !text-slate-700">
+                    {tenantName || "Locataire"}
                   </span>
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-56 bg-white border-slate-200"
-            >
-              <div className="px-2 py-2">
-                <p className="text-sm font-medium text-slate-900">{tenantName}</p>
-                <p className="text-xs text-slate-500">Espace Locataire</p>
-              </div>
-              <DropdownMenuSeparator className="bg-slate-200" />
-              <DropdownMenuItem
-                onClick={handleLogout}
-                className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                  <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center">
+                    <span className="text-white text-sm font-semibold">
+                      {tenantName?.charAt(0)?.toUpperCase() || "L"}
+                    </span>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-56 bg-white border-slate-200"
               >
-                <LogOut className="mr-2 h-4 w-4" />
-                Se déconnecter
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <div className="px-2 py-2">
+                  <p className="text-sm font-medium text-slate-900">{tenantName}</p>
+                  <p className="text-xs text-slate-500">Espace Locataire</p>
+                </div>
+                <DropdownMenuSeparator className="bg-slate-200" />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Se déconnecter
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -279,6 +285,9 @@ export default function LocataireLayout({
       <main className="flex-1 pb-20 md:pb-6">{children}</main>
 
       {/* Mobile Bottom Navigation */}
+
+      <OneSignalProvider userId={leaseId} />
+
       <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 px-2 py-2 flex justify-around items-center z-50 md:hidden safe-area-pb">
         {mobileNavItems.map((item) => (
           <Link

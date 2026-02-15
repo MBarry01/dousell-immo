@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { sendEmail } from '@/lib/mail';
 import { getTenantSessionFromCookie } from '@/lib/tenant-magic-link';
+import { notifyUser } from '@/lib/notifications';
 
 /**
  * Get messages for the tenant's lease
@@ -155,6 +156,15 @@ export async function sendTenantMessage(leaseId: string, content: string) {
             // Don't block UI for email errors
         }
     }
+
+    // Notification Push à l'Owner
+    await notifyUser({
+        userId: lease.owner_id,
+        type: 'message',
+        title: `Message de ${tenantName}`,
+        message: content,
+        resourcePath: `/gestion/messages/${leaseId}`
+    });
 
     revalidatePath('/locataire/messages');
     return { success: true };
