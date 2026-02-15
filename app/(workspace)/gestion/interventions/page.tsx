@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getUserTeamContext } from "@/lib/team-context";
 import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
 import { FeatureLockedState } from "@/components/gestion/FeatureLockedState";
+import { markMaintenanceAsViewed } from "@/lib/unread-counts";
 
 export default async function InterventionsPage() {
     const supabase = await createClient();
@@ -32,9 +33,9 @@ export default async function InterventionsPage() {
         .from('maintenance_requests')
         .select(`
             id, description, status, created_at, photo_urls,
-            artisan_name, artisan_phone, artisan_rating, artisan_address, 
-            quoted_price, quote_url, category, intervention_date, owner_approved, 
-            tenant_response, tenant_suggested_date, rejection_reason,
+            artisan_name, artisan_phone, artisan_rating, artisan_address,
+            quoted_price, quote_url, category, intervention_date, owner_approved,
+            tenant_response, tenant_suggested_date, rejection_reason, owner_viewed_at,
             leases (
                 tenant_name,
                 tenant_email,
@@ -85,6 +86,8 @@ export default async function InterventionsPage() {
             tenant_response: req.tenant_response,
             tenant_suggested_date: req.tenant_suggested_date,
             rejection_reason: req.rejection_reason,
+            // New/unviewed: only for active (non-terminal) requests without owner_viewed_at
+            is_new: !(req as any).owner_viewed_at && !['completed', 'rejected', 'cancelled'].includes(req.status),
             // Infos Bien & Locataire
             property_title: property?.title,
             property_images: property?.images,
@@ -92,6 +95,9 @@ export default async function InterventionsPage() {
             tenant_email: lease?.tenant_email
         };
     });
+
+    // Mark maintenance as viewed AFTER query (so is_new reflects pre-view state)
+    markMaintenanceAsViewed();
 
     return <InterventionsPageClient requests={formattedRequests} />;
 }

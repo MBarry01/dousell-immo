@@ -25,6 +25,7 @@ interface MaintenanceRequest {
     property_images?: string[];
     tenant_name?: string;
     tenant_email?: string;
+    is_new?: boolean;
 }
 
 interface InterventionsPageClientProps {

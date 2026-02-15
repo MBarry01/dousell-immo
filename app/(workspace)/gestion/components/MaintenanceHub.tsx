@@ -41,6 +41,7 @@ interface MaintenanceRequest {
     property_title?: string;
     property_images?: string[];
     tenant_email?: string;
+    is_new?: boolean;
 }
 
 interface Lease {
@@ -368,7 +369,13 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                 {/* Liste des demandes */}
                 <div className="space-y-3">
                     {requests.length > 0 ? requests.map((req) => (
-                        <div key={req.id} className="rounded-2xl border border-border bg-muted/20 overflow-hidden transition-all duration-200">
+                        <div key={req.id} className={`rounded-2xl border overflow-hidden transition-all duration-200 ${req.is_new ? 'border-blue-500/40 bg-blue-500/5' : 'border-border bg-muted/20'}`}>
+                            {req.is_new && (
+                                <div className="px-4 py-1.5 bg-blue-500/10 border-b border-blue-500/20 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                                    <span className="text-xs font-medium text-blue-400">Nouveau</span>
+                                </div>
+                            )}
                             {/* En-tête cliquable */}
                             <div
                                 className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
