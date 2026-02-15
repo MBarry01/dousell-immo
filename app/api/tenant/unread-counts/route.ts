@@ -36,12 +36,12 @@ export async function GET() {
       .eq("sender_type", "owner")
       .is("read_at", null);
 
-    // Fetch pending maintenance requests that need tenant attention
+    // Fetch all active maintenance requests (everything except terminal states)
     const { count: pendingMaintenance } = await supabaseAdmin
       .from("maintenance_requests")
       .select("*", { count: "exact", head: true })
       .eq("lease_id", session.lease_id)
-      .in("status", ["artisan_found", "awaiting_approval"]);
+      .not("status", "in", '("completed","rejected","cancelled")');
 
     return NextResponse.json({
       unreadMessages: unreadMessages || 0,

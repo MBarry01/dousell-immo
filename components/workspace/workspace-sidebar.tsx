@@ -224,6 +224,7 @@ function SidebarContent({
                 currentTeamTier={currentTeam?.subscription_tier}
                 onNavigate={() => isMobile && onMobileNavigate?.()}
                 onRequestAccess={onRequestAccess}
+                badgeCount={badgeCount}
               />
             );
           }

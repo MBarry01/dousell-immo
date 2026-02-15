@@ -29,6 +29,7 @@ interface LockedSidebarItemProps {
   currentTeamTier?: string; // Tier de l'équipe
   onNavigate?: () => void;
   onRequestAccess?: (permission: TeamPermissionKey, label: string) => void;
+  badgeCount?: number;
 }
 
 /**
@@ -62,6 +63,7 @@ export function LockedSidebarItem({
   currentTeamTier,
   onNavigate,
   onRequestAccess,
+  badgeCount = 0,
 }: LockedSidebarItemProps) {
   const [hasAccess, setHasAccess] = useState(true); // Par défaut autorisé
   const [isLoading, setIsLoading] = useState(!!requiredPermission);
@@ -185,16 +187,30 @@ export function LockedSidebarItem({
         )}
         title={isCollapsed && !isMobile ? label : undefined}
       >
-        <Icon
-          className={cn(
-            "h-5 w-5 shrink-0 transition-all",
-            isActive
-              ? "text-white dark:text-primary"
-              : "text-muted-foreground group-hover:text-foreground"
+        <span className="relative shrink-0">
+          <Icon
+            className={cn(
+              "h-5 w-5 transition-all",
+              isActive
+                ? "text-white dark:text-primary"
+                : "text-muted-foreground group-hover:text-foreground"
+            )}
+          />
+          {badgeCount > 0 && isCollapsed && !isMobile && (
+            <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white">
+              {badgeCount > 9 ? "9+" : badgeCount}
+            </span>
           )}
-        />
+        </span>
         {(!isCollapsed || isMobile) && (
-          <span className="text-sm truncate ml-3">{label}</span>
+          <>
+            <span className="text-sm truncate ml-3 flex-1">{label}</span>
+            {badgeCount > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white ml-auto">
+                {badgeCount > 9 ? "9+" : badgeCount}
+              </span>
+            )}
+          </>
         )}
       </Link>
     );

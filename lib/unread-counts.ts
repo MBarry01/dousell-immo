@@ -34,12 +34,12 @@ export async function getOwnerUnreadCounts() {
       .eq("sender_type", "tenant")
       .is("read_at", null);
 
-    // Pending maintenance requests needing owner action
+    // All active maintenance requests (everything except terminal states)
     const { count: pendingMaintenance } = await supabase
       .from("maintenance_requests")
       .select("*", { count: "exact", head: true })
       .in("lease_id", leaseIds)
-      .in("status", ["submitted", "open", "quote_received"]);
+      .not("status", "in", '("completed","rejected","cancelled")');
 
     return {
       unreadMessages: unreadMessages || 0,
