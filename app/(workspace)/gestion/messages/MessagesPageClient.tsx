@@ -21,11 +21,13 @@ interface Lease {
 interface MessagesPageClientProps {
     activeConversations: Lease[];
     tenantsWithoutConversation: Lease[];
+    unreadByLease?: Record<string, number>;
 }
 
 export function MessagesPageClient({
     activeConversations,
-    tenantsWithoutConversation
+    tenantsWithoutConversation,
+    unreadByLease = {},
 }: MessagesPageClientProps) {
     const { isDark } = useTheme();
 
@@ -81,33 +83,55 @@ export function MessagesPageClient({
 
             <div id="tour-msg-list" className="grid gap-4">
                 {activeConversations.length > 0 ? (
-                    activeConversations.map((lease) => (
-                        <Link
-                            key={lease.id}
-                            href={`/gestion/messages/${lease.id}`}
-                            className={`p-4 rounded-xl border flex items-center justify-between transition-all ${isDark
-                                ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
-                                : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                    activeConversations.map((lease) => {
+                        const unread = unreadByLease[lease.id] || 0;
+                        return (
+                            <Link
+                                key={lease.id}
+                                href={`/gestion/messages/${lease.id}`}
+                                className={`p-4 rounded-xl border flex items-center justify-between transition-all ${
+                                    unread > 0
+                                        ? isDark
+                                            ? 'bg-zinc-900 border-blue-500/40 hover:border-blue-400/60'
+                                            : 'bg-blue-50/50 border-blue-200 hover:border-blue-300 hover:shadow-sm'
+                                        : isDark
+                                            ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+                                            : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
                                 }`}
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-lg">
-                                    {(lease.tenant_name || 'L')[0].toUpperCase()}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="relative">
+                                        <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-lg">
+                                            {(lease.tenant_name || 'L')[0].toUpperCase()}
+                                        </div>
+                                        {unread > 0 && (
+                                            <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                                                {unread > 9 ? '9+' : unread}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                            {lease.tenant_name}
+                                        </h3>
+                                        <p className={`text-sm line-clamp-1 ${isDark ? 'text-zinc-500' : 'text-gray-500'}`}>
+                                            {Array.isArray(lease.property)
+                                                ? lease.property[0]?.title
+                                                : lease.property?.title}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                        {lease.tenant_name}
-                                    </h3>
-                                    <p className={`text-sm line-clamp-1 ${isDark ? 'text-zinc-500' : 'text-gray-500'}`}>
-                                        {Array.isArray(lease.property)
-                                            ? lease.property[0]?.title
-                                            : lease.property?.title}
-                                    </p>
+                                <div className="flex items-center gap-2">
+                                    {unread > 0 && (
+                                        <span className={`text-xs font-medium ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+                                            {unread} nouveau{unread > 1 ? 'x' : ''}
+                                        </span>
+                                    )}
+                                    <ChevronRight className={`w-5 h-5 ${isDark ? 'text-zinc-500' : 'text-gray-400'}`} />
                                 </div>
-                            </div>
-                            <ChevronRight className={`w-5 h-5 ${isDark ? 'text-zinc-500' : 'text-gray-400'}`} />
-                        </Link>
-                    ))
+                            </Link>
+                        );
+                    })
                 ) : (
                     <div className={`text-center py-12 rounded-xl border border-dashed ${isDark
                         ? 'bg-zinc-900/50 border-zinc-800'
