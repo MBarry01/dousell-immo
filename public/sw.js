@@ -97,6 +97,7 @@ self.addEventListener("fetch", (event) => {
     "kkiapay.me",               // Kkiapay payment
     "rokt.com",                 // Rokt (extension ads)
     "coinafrique.com",          // Images externes CoinAfrique
+    "onesignal.com",            // OneSignal SDK & Styles
   ];
 
   // Vérifie si l'URL contient un des domaines externes
@@ -123,17 +124,20 @@ self.addEventListener("fetch", (event) => {
         }
         return response;
       })
-      .catch(() => {
+      .catch(async () => {
         // Échec réseau, essayer le cache
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // Si pas de cache, retourner la page offline pour les requêtes de navigation
-          if (event.request.mode === "navigate") {
-            return caches.match("/offline.html");
-          }
-        });
+        const cachedResponse = await caches.match(event.request);
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        // Si pas de cache, retourner la page offline pour les requêtes de navigation
+        if (event.request.mode === "navigate") {
+          return caches.match("/offline.html");
+        }
+
+        // Si c'est une ressource critique (style/script) interne qui échoue, 
+        // on laisse l'erreur se propager proprement plutôt que de retourner undefined
+        throw new Error("Resource not found in cache");
       })
   );
 });

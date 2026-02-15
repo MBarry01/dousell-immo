@@ -66,7 +66,7 @@ const nextConfig = {
                     },
                     {
                         key: 'X-Debug-CSP-Version',
-                        value: 'v10.6-final-js',
+                        value: 'v10.7-final-js',
                     },
                     {
                         key: 'Content-Security-Policy',
