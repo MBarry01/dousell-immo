@@ -87,7 +87,7 @@ export async function sendTenantMessage(leaseId: string, content: string) {
     // Get the owner_id from lease to set as sender context
     const { data: lease } = await supabaseAdmin
         .from('leases')
-        .select('owner_id, tenant_name, owner:profiles(email, full_name)')
+        .select('owner_id, team_id, tenant_name, owner:profiles(email, full_name)')
         .eq('id', leaseId)
         .single();
 
@@ -95,25 +95,20 @@ export async function sendTenantMessage(leaseId: string, content: string) {
         return { error: "Bail non trouvé" };
     }
 
-    // Insert message with sender_id as 'tenant' (special marker)
-    // We use a fixed UUID for tenant to satisfy foreign key constraints
-    // Alternatively, we could use owner_id and add a sender_type column
+    // Insert message: sender_id is UUID type, so use owner_id as placeholder
+    // and sender_type='tenant' to distinguish tenant messages from owner messages
     const { error } = await supabaseAdmin
         .from('messages')
         .insert({
             lease_id: leaseId,
-            sender_id: 'tenant', // Special marker for tenant messages
-            content: content
+            sender_id: lease.owner_id,
+            sender_type: 'tenant',
+            content: content,
+            ...(lease.team_id ? { team_id: lease.team_id } : {}),
         });
 
     if (error) {
         console.error("Erreur envoi message:", error);
-        // If sender_id foreign key fails, we need to handle differently
-        if (error.code === '23503') { // Foreign key violation
-            // Try with a different approach - store owner_id but mark as tenant
-            // For now, return a helpful error
-            return { error: "Configuration messagerie requise. Contactez le support." };
-        }
         return { error: "Impossible d'envoyer le message" };
     }
 

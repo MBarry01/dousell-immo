@@ -43,6 +43,7 @@ export async function sendOwnerMessage(leaseId: string, content: string) {
         .insert({
             lease_id: leaseId,
             sender_id: user.id,
+            sender_type: 'owner',
             team_id: teamId,
             content: content
         });

@@ -95,6 +95,9 @@ export default async function TenantPortalPage({ searchParams }: PageProps) {
         leaseStartDate={lease.start_date}
         leaseEndDate={lease.end_date}
         leaseType={property?.details?.type || "Appartement"}
+        leaseStatus={lease.status}
+        billingDay={lease.billing_day || 5}
+        ownerName={(lease.owner as any)?.full_name || undefined}
         recentPayments={lease.payments || []}
       />
     </>

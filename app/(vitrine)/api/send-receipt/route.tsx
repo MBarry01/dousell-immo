@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 import ReactPDF from '@react-pdf/renderer';
 import { createQuittanceDocument } from '@/components/pdf/QuittancePDF_v2';
 import { createClient } from '@supabase/supabase-js';
+import { storeDocumentInGED } from '@/lib/ged-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,33 +60,20 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (lease?.owner_id) {
-          const fileName = `${lease.owner_id}/quittances/${data.receiptNumber}_${Date.now()}.pdf`;
-
-          // Upload vers Storage
-          const { error: uploadError } = await supabaseAdmin.storage
-            .from('verification-docs')
-            .upload(fileName, pdfBuffer, {
-              contentType: 'application/pdf',
-              upsert: false
-            });
-
-          if (!uploadError) {
-            // Créer l'entrée dans user_documents
-            await supabaseAdmin.from('user_documents').insert({
-              user_id: lease.owner_id,
-              file_name: `Quittance_${data.receiptNumber}.pdf`,
-              file_path: fileName,
-              file_type: 'quittance',
-              file_size: pdfBuffer.length,
-              mime_type: 'application/pdf',
-              source: 'generated',
-              lease_id: data.leaseId,
-              category: 'quittance'
-            });
-            console.log('💾 Quittance sauvegardée dans la GED:', fileName);
-          } else {
-            console.error('⚠️ Erreur upload Storage:', uploadError.message);
-          }
+          // Utiliser l'utilitaire centralisé pour le stockage
+          await storeDocumentInGED({
+            userId: lease.owner_id,
+            fileBuffer: new Uint8Array(pdfBuffer),
+            fileName: `Quittance_${data.receiptNumber}.pdf`,
+            bucketName: 'receipts',
+            documentType: 'quittance',
+            metadata: {
+              leaseId: data.leaseId,
+              tenantName: data.tenantName,
+              description: `Quittance - ${data.periodMonth} - ${data.tenantName}`
+            }
+          }, supabaseAdmin);
+          console.log('💾 Quittance sauvegardée dans la GED via utility');
         }
       } catch (storageError) {
         // Ne pas bloquer l'envoi d'email si le stockage échoue

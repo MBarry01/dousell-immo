@@ -11,7 +11,8 @@ import {
     Wrench,
     ChevronRight,
     Building2,
-    Shield
+    MessageSquare,
+    Calendar,
 } from 'lucide-react';
 import Link from 'next/link';
 import { RentPaymentModal } from './RentPaymentModal';
@@ -25,6 +26,9 @@ interface PaymentFormProps {
     leaseStartDate?: string;
     leaseEndDate?: string;
     leaseType?: string;
+    leaseStatus?: string;
+    billingDay?: number;
+    ownerName?: string;
     recentPayments?: Array<{
         id: string;
         amount_due: number;
@@ -33,6 +37,7 @@ interface PaymentFormProps {
         period_month: number;
         period_year: number;
         paid_at?: string | null;
+        payment_method?: string | null;
     }>;
 }
 
@@ -50,6 +55,9 @@ export function PaymentForm({
     leaseStartDate,
     leaseEndDate,
     leaseType,
+    leaseStatus,
+    billingDay = 5,
+    ownerName,
     recentPayments = []
 }: PaymentFormProps) {
     const router = useRouter();
@@ -57,34 +65,35 @@ export function PaymentForm({
 
     // Calculs
     const pendingPayments = recentPayments.filter(p => p.status !== 'paid');
-    const paidPayments = recentPayments.filter(p => p.status === 'paid');
     const currentBalance = pendingPayments.reduce((sum, p) => sum + (p.amount_due || 0), 0);
     const isUpToDate = currentBalance === 0;
 
-    // Get the oldest pending period (sort by year then month)
+    // Get the oldest pending period
     const oldestPending = [...pendingPayments].sort((a, b) => {
         if (a.period_year !== b.period_year) return a.period_year - b.period_year;
         return a.period_month - b.period_month;
     })[0];
 
-    // Determine period to pay: oldest pending or current month if up to date
+    // Determine period to pay
     const now = new Date();
-    // Use nullish coalescing (??) instead of || to handle period_month = 0 (guarantee)
     const targetPeriodMonth = oldestPending?.period_month ?? (now.getMonth() + 1);
     const targetPeriodYear = oldestPending?.period_year ?? now.getFullYear();
     const targetAmount = oldestPending?.amount_due ?? monthlyAmount;
 
-    // DEBUG: Log payment target
-    console.log('🎯 [PaymentForm] Target payment:', {
-        targetPeriodMonth,
-        targetPeriodYear,
-        targetAmount,
-        oldestPending: oldestPending ? { month: oldestPending.period_month, year: oldestPending.period_year, amount: oldestPending.amount_due } : null,
-        pendingCount: pendingPayments.length
-    });
+    // Next rent calculation
+    const getNextRentInfo = () => {
+        const nextDate = new Date();
+        // If billing day hasn't passed this month, next rent is this month
+        // Otherwise, next month
+        if (now.getDate() >= billingDay) {
+            nextDate.setMonth(nextDate.getMonth() + 1);
+        }
+        nextDate.setDate(billingDay);
+        const monthName = MONTH_NAMES[nextDate.getMonth()];
+        return `${billingDay} ${monthName.toLowerCase()} - ${formatCurrency(monthlyAmount)} FCFA`;
+    };
 
     const getCurrentMonth = () => {
-        const now = new Date();
         return now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
     };
 
@@ -108,6 +117,15 @@ export function PaymentForm({
         });
     };
 
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return null;
+        return new Date(dateString).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+
     return (
         <div className="w-full max-w-lg mx-auto px-4 py-6 space-y-6">
 
@@ -115,6 +133,9 @@ export function PaymentForm({
                 CARTE PRINCIPALE - Style Banking App
             ═══════════════════════════════════════════════════════════ */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800 p-6 text-white shadow-2xl">
+                {/* Status indicator bar */}
+                <div className={`absolute top-0 left-0 right-0 h-1 ${isUpToDate ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+
                 {/* Pattern subtil */}
                 <div className="absolute inset-0 opacity-5">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
@@ -138,7 +159,7 @@ export function PaymentForm({
                             {isUpToDate ? 'Solde actuel' : 'Montant à payer'}
                         </p>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-bold tracking-tight text-white">
+                            <span className="text-5xl font-bold tracking-tight text-white">
                                 {formatCurrency(currentBalance)}
                             </span>
                             <span className="text-zinc-400 text-lg">FCFA</span>
@@ -156,20 +177,39 @@ export function PaymentForm({
                         )}
                     </div>
 
-                    {/* CTA */}
-                    <Button
-                        onClick={() => setIsModalOpen(true)}
-                        className="w-full h-12 bg-white hover:bg-zinc-100 text-zinc-900 hover:text-zinc-900 font-semibold rounded-xl transition-all hover:shadow-lg hover:scale-[1.02]"
-                    >
-                        {isUpToDate ? 'Effectuer un paiement' : `Payer ${formatCurrency(currentBalance)} FCFA`}
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
+                    {/* CTA or Positive message */}
+                    {isUpToDate ? (
+                        <div className="w-full py-3 px-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center gap-2">
+                            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                            <span className="text-emerald-300 font-medium text-sm">Aucun paiement dû</span>
+                        </div>
+                    ) : (
+                        <Button
+                            onClick={() => setIsModalOpen(true)}
+                            className="w-full h-12 bg-white hover:bg-zinc-100 text-zinc-900 hover:text-zinc-900 font-semibold rounded-xl transition-all hover:shadow-lg hover:scale-[1.02]"
+                        >
+                            {`Payer ${formatCurrency(currentBalance)} FCFA`}
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+                    )}
 
-                    <div className="flex items-center justify-center gap-1.5 mt-3 text-zinc-500">
-                        <Shield className="w-3 h-3" />
-                        <span className="text-[11px]">Paiement sécurisé · Wave, Orange Money, Carte</span>
-                    </div>
+                    {/* Prochain loyer */}
+                    {isUpToDate && (
+                        <div className="flex items-center gap-2 mt-3 text-zinc-500">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span className="text-xs">Prochain loyer : {getNextRentInfo()}</span>
+                        </div>
+                    )}
                 </div>
+            </div>
+
+            {/* Secure payment logos */}
+            <div className="flex items-center justify-center">
+                <img
+                    src="/images/bouton-senegal.png"
+                    alt="Paiement sécurisé - Wave, Orange Money, Carte"
+                    className="h-10 w-auto object-contain"
+                />
             </div>
 
             {/* ═══════════════════════════════════════════════════════════
@@ -246,22 +286,34 @@ export function PaymentForm({
                                         </div>
                                     </div>
 
-                                    <div className="text-right">
-                                        <p className={`font-semibold tabular-nums ${isPaid ? 'text-zinc-900' : 'text-amber-600'
-                                            }`}>
-                                            {formatCurrency(payment.amount_paid || payment.amount_due)}
-                                            <span className="text-xs font-normal text-zinc-400 ml-1">F</span>
-                                        </p>
-                                        <span className={`inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded ${isPaid
-                                            ? 'bg-emerald-50 text-emerald-700'
-                                            : 'bg-amber-50 text-amber-700'
-                                            }`}>
-                                            {isPaid ? 'Payé' : 'En attente'}
-                                        </span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="text-right">
+                                            <p className={`font-semibold tabular-nums ${isPaid ? 'text-zinc-900' : 'text-amber-600'
+                                                }`}>
+                                                {formatCurrency(payment.amount_paid || payment.amount_due)}
+                                                <span className="text-xs font-normal text-zinc-400 ml-1">F</span>
+                                            </p>
+                                            <div className="flex items-center gap-1 justify-end">
+                                                {isPaid && payment.payment_method && (
+                                                    <span className="text-[9px] font-medium text-zinc-400 bg-zinc-100 px-1 py-0.5 rounded">
+                                                        {payment.payment_method === 'stripe' ? 'Carte' :
+                                                         payment.payment_method === 'kkiapay' ? 'Mobile' :
+                                                         payment.payment_method === 'paydunya' ? 'Mobile' :
+                                                         payment.payment_method}
+                                                    </span>
+                                                )}
+                                                <span className={`inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded ${isPaid
+                                                    ? 'bg-emerald-50 text-emerald-700'
+                                                    : 'bg-amber-50 text-amber-700'
+                                                    }`}>
+                                                    {isPaid ? 'Payé' : 'En attente'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {isPaid && (
+                                            <ChevronRight className="w-4 h-4 text-zinc-400" />
+                                        )}
                                     </div>
-                                    {isPaid && (
-                                        <ChevronRight className="w-4 h-4 text-zinc-400" />
-                                    )}
                                 </button>
                             );
                         })}
@@ -270,7 +322,7 @@ export function PaymentForm({
                     {recentPayments.length > 5 && (
                         <Link href="/locataire/paiements" className="block">
                             <div className="px-4 py-3 border-t border-zinc-100 flex items-center justify-center gap-1 text-sm text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 transition-colors">
-                                Voir tout l'historique
+                                Voir tout l&apos;historique
                                 <ChevronRight className="w-4 h-4" />
                             </div>
                         </Link>
@@ -291,14 +343,75 @@ export function PaymentForm({
                         <p className="font-medium text-zinc-900 text-sm truncate">
                             {propertyAddress || 'Adresse non renseignée'}
                         </p>
-                        <div className="flex items-center gap-3 mt-2 text-xs text-zinc-500">
+                        <div className="flex items-center gap-2 mt-2 text-xs text-zinc-500 flex-wrap">
                             <span>{leaseType || 'Logement'}</span>
-                            <span>•</span>
+                            <span>·</span>
                             <span>{formatCurrency(monthlyAmount)} F/mois</span>
+                            {leaseStatus && (
+                                <>
+                                    <span>·</span>
+                                    <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                                        leaseStatus === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-200 text-zinc-600'
+                                    }`}>
+                                        {leaseStatus === 'active' ? 'Bail actif' : leaseStatus}
+                                    </span>
+                                </>
+                            )}
                         </div>
+                        {(leaseStartDate || ownerName) && (
+                            <div className="flex items-center gap-2 mt-1.5 text-xs text-zinc-400 flex-wrap">
+                                {leaseStartDate && (
+                                    <span>Du {formatDate(leaseStartDate)}{leaseEndDate ? ` au ${formatDate(leaseEndDate)}` : ''}</span>
+                                )}
+                                {ownerName && (
+                                    <>
+                                        {leaseStartDate && <span>·</span>}
+                                        <span>Propriétaire : {ownerName}</span>
+                                    </>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
+
+            {/* ═══════════════════════════════════════════════════════════
+                CONTACT PROPRIÉTAIRE
+            ═══════════════════════════════════════════════════════════ */}
+            <Link href="/locataire/messages">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-zinc-200 hover:border-zinc-300 hover:shadow-sm transition-all">
+                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <MessageSquare className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="font-medium text-zinc-900 text-sm">Contacter le propriétaire</p>
+                        <p className="text-xs text-zinc-500">
+                            {ownerName ? `Envoyer un message à ${ownerName}` : 'Envoyer un message'}
+                        </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-zinc-400" />
+                </div>
+            </Link>
+
+            {/* ═══════════════════════════════════════════════════════════
+                CTA STICKY MOBILE (si dette > 0)
+            ═══════════════════════════════════════════════════════════ */}
+            {!isUpToDate && (
+                <div className="fixed bottom-16 left-0 right-0 z-40 md:hidden safe-area-pb">
+                    <div className="bg-zinc-900 px-4 py-3 flex items-center justify-between rounded-t-xl shadow-2xl border-t border-zinc-700">
+                        <div>
+                            <p className="text-white font-semibold text-sm">{formatCurrency(currentBalance)} FCFA</p>
+                            <p className="text-zinc-400 text-[10px]">{pendingPayments.length} échéance{pendingPayments.length > 1 ? 's' : ''}</p>
+                        </div>
+                        <Button
+                            onClick={() => setIsModalOpen(true)}
+                            className="bg-white hover:bg-zinc-100 text-zinc-900 font-semibold rounded-lg px-5 h-10 text-sm"
+                        >
+                            Payer maintenant
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {/* Modal */}
             <RentPaymentModal

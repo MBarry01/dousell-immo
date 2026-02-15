@@ -42,7 +42,7 @@ export async function createMaintenanceRequest(data: CreateMaintenanceRequestDat
     // 3. Get lease details (we have lease_id from session)
     const { data: lease, error: leaseError } = await supabaseAdmin
         .from('leases')
-        .select('id, property_id, owner_id')
+        .select('id, property_id, owner_id, team_id')
         .eq('id', session.lease_id)
         .single();
 
@@ -56,10 +56,12 @@ export async function createMaintenanceRequest(data: CreateMaintenanceRequestDat
         .from('maintenance_requests')
         .insert({
             lease_id: lease.id,
+            property_id: lease.property_id,
+            team_id: lease.team_id,
             category: data.category,
             description: data.description,
             photo_urls: data.photoUrls,
-            status: 'open'
+            status: 'submitted' // En attente de validation propriétaire
         });
 
     if (insertError) {
@@ -84,11 +86,12 @@ export async function createMaintenanceRequest(data: CreateMaintenanceRequestDat
                     <p>Votre locataire <strong>${session.tenant_name}</strong> a signalé un problème.</p>
                     <p><strong>Catégorie :</strong> ${data.category}</p>
                     <p><strong>Description :</strong> ${data.description}</p>
+                    <p>Cette demande est en attente de votre validation pour lancer la recherche d'artisan.</p>
                     ${data.photoUrls.length > 0 ? `<p><strong>Photos jointes :</strong> ${data.photoUrls.length} photo(s)</p>` : ''}
                     <p style="margin-top: 20px;">
                         <a href="${process.env.NEXT_PUBLIC_APP_URL}/gestion/interventions"
                            style="background-color: #F4C430; color: black; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                            Voir les interventions
+                            Voir et Valider l'intervention
                         </a>
                     </p>
                 `
@@ -124,7 +127,7 @@ export async function getTenantMaintenanceRequests() {
     // Fetch maintenance requests for this lease
     const { data: requests, error } = await supabaseAdmin
         .from('maintenance_requests')
-        .select('id, category, description, status, photo_urls, created_at, artisan_name, artisan_phone, artisan_rating, quoted_price, intervention_date')
+        .select('id, category, description, status, photo_urls, created_at, artisan_name, artisan_phone, artisan_rating, quoted_price, quote_url, intervention_date, tenant_response, tenant_suggested_date, rejection_reason')
         .eq('lease_id', session.lease_id)
         .order('created_at', { ascending: false });
 
@@ -133,11 +136,56 @@ export async function getTenantMaintenanceRequests() {
         return [];
     }
 
-    return requests || [];
+    // Filter out cancelled requests for a cleaner view
+    return (requests || []).filter(r => r.status !== 'cancelled');
 }
 
 /**
- * Cancel a maintenance request (only if status = 'open')
+ * Respond to a maintenance slot (confirm or request reschedule)
+ */
+export async function respondToMaintenanceSlot(
+    requestId: string,
+    response: 'confirmed' | 'reschedule_requested',
+    suggestedDate?: string
+) {
+    const session = await getTenantSessionFromCookie();
+    if (!session) return { error: "Session expirée" };
+
+    const { createClient: createAdminClient } = await import("@supabase/supabase-js");
+    const supabaseAdmin = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Verify ownership
+    const { data: request } = await supabaseAdmin
+        .from('maintenance_requests')
+        .select('id, lease_id')
+        .eq('id', requestId)
+        .eq('lease_id', session.lease_id)
+        .single();
+
+    if (!request) return { error: "Demande non trouvée" };
+
+    const { error } = await supabaseAdmin
+        .from('maintenance_requests')
+        .update({
+            tenant_response: response,
+            tenant_suggested_date: suggestedDate || null
+        })
+        .eq('id', requestId);
+
+    if (error) {
+        console.error("Erreur réponse locataire:", error);
+        return { error: "Erreur lors de l'enregistrement de votre réponse" };
+    }
+
+    revalidatePath('/locataire/maintenance');
+    return { success: true };
+}
+
+/**
+ * Cancel a maintenance request (only if status is 'submitted')
  * Uses tenant session from cookie
  */
 export async function cancelMaintenanceRequest(requestId: string) {
@@ -154,7 +202,7 @@ export async function cancelMaintenanceRequest(requestId: string) {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Verify the request belongs to this tenant's lease and is still 'open'
+    // Verify the request belongs to this tenant's lease and is still 'submitted'
     const { data: request } = await supabaseAdmin
         .from('maintenance_requests')
         .select('id, status')
@@ -166,18 +214,20 @@ export async function cancelMaintenanceRequest(requestId: string) {
         return { error: "Demande non trouvée" };
     }
 
-    if (request.status !== 'open') {
-        return { error: "Impossible d'annuler une demande déjà en traitement" };
+    // Only allow cancellation if it hasn't progressed to artisan found / quote
+    const cancellableStatuses = ['submitted', 'open'];
+    if (!cancellableStatuses.includes(request.status)) {
+        return { error: "Impossible d'annuler une demande déjà en traitement (artisan contacté)" };
     }
 
-    // Delete the request
+    // Update status to 'cancelled' instead of deleting
     const { error } = await supabaseAdmin
         .from('maintenance_requests')
-        .delete()
+        .update({ status: 'cancelled' })
         .eq('id', requestId);
 
     if (error) {
-        console.error("Erreur suppression demande:", error);
+        console.error("Erreur annulation demande:", error);
         return { error: "Erreur lors de l'annulation" };
     }
 

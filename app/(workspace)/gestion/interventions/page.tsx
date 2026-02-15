@@ -27,10 +27,23 @@ export default async function InterventionsPage() {
         );
     }
 
-    // Récupérer les demandes de maintenance (avec infos artisan)
+    // Récupérer les demandes de maintenance (avec infos artisan, bien et locataire)
     const { data: maintenanceData, error: maintenanceError } = await supabase
         .from('maintenance_requests')
-        .select('id, description, status, created_at, lease_id, artisan_name, artisan_phone, artisan_rating, artisan_address, quoted_price, intervention_date, owner_approved')
+        .select(`
+            id, description, status, created_at, photo_urls,
+            artisan_name, artisan_phone, artisan_rating, artisan_address, 
+            quoted_price, quote_url, category, intervention_date, owner_approved, 
+            tenant_response, tenant_suggested_date, rejection_reason,
+            leases (
+                tenant_name,
+                tenant_email,
+                properties (
+                    title,
+                    images
+                )
+            )
+        `)
         .order('created_at', { ascending: false });
 
     const maintenanceRequests = maintenanceData || [];
@@ -41,6 +54,11 @@ export default async function InterventionsPage() {
 
     // Transformer les demandes de maintenance pour MaintenanceHub
     const formattedRequests = (maintenanceRequests || []).map(req => {
+        // @ts-ignore - Supabase join types can be tricky
+        const lease = Array.isArray(req.leases) ? req.leases[0] : req.leases;
+        // @ts-ignore
+        const property = Array.isArray(lease?.properties) ? lease.properties[0] : lease?.properties;
+
         // Extraire la catégorie de la description si elle existe (format: "description [Catégorie]")
         const categoryMatch = req.description?.match(/\[([^\]]+)\]$/);
         const category = categoryMatch ? categoryMatch[1] : undefined;
@@ -49,9 +67,10 @@ export default async function InterventionsPage() {
         return {
             id: req.id,
             description: cleanDescription,
-            category: category,
+            category: req.category || category,
             status: req.status,
             created_at: req.created_at,
+            photo_urls: req.photo_urls,
             // Infos artisan (Make.com)
             artisan_name: req.artisan_name,
             artisan_phone: req.artisan_phone,
@@ -59,8 +78,18 @@ export default async function InterventionsPage() {
             artisan_address: req.artisan_address,
             // Infos devis
             quoted_price: req.quoted_price,
+            quote_url: req.quote_url,
             intervention_date: req.intervention_date,
-            owner_approved: req.owner_approved
+            owner_approved: req.owner_approved,
+            // Coordination & Feedback
+            tenant_response: req.tenant_response,
+            tenant_suggested_date: req.tenant_suggested_date,
+            rejection_reason: req.rejection_reason,
+            // Infos Bien & Locataire
+            property_title: property?.title,
+            property_images: property?.images,
+            tenant_name: lease?.tenant_name,
+            tenant_email: lease?.tenant_email
         };
     });
 

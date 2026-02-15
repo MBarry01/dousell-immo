@@ -5,7 +5,9 @@ import { redirect } from 'next/navigation';
 import {
     getTenantSessionFromCookie,
     getTenantLeaseData,
-    validateTenantToken,
+    validateTenantSession,
+    invalidateTenantSession,
+    checkAndRotateSession,
     TENANT_SESSION_COOKIE_OPTIONS,
 } from '@/lib/tenant-magic-link';
 
@@ -87,10 +89,31 @@ export async function getTenantSessionInfo() {
 }
 
 /**
+ * Logout tenant - invalidate session in DB and clear cookie
+ *
+ * Must be called before clearing the cookie client-side.
+ * Clears tenant_session_hash in DB and logs the event.
+ */
+export async function logoutTenant(): Promise<{ success: boolean }> {
+    const session = await getTenantSessionFromCookie();
+
+    if (session) {
+        await invalidateTenantSession(session.lease_id);
+    }
+
+    // Clear cookie server-side
+    const cookieStore = await cookies();
+    cookieStore.delete('tenant_session');
+
+    return { success: true };
+}
+
+/**
  * Migrate tenant session cookie to new path
  *
  * This Server Action refreshes the tenant session cookie with the correct
  * path setting so it's available for API routes at /api/*.
+ * Also handles session rotation every 4 hours.
  *
  * Called automatically by the tenant portal on page load.
  */
@@ -102,16 +125,20 @@ export async function migrateTenantCookie(): Promise<{ success: boolean }> {
         return { success: false };
     }
 
-    // Validate the token is still valid
-    const session = await validateTenantToken(sessionToken);
+    // Validate the session token
+    const session = await validateTenantSession(sessionToken);
 
     if (!session) {
         return { success: false };
     }
 
+    // Check if session needs rotation (every 4h)
+    const newToken = await checkAndRotateSession(session.lease_id);
+    const tokenToSet = newToken || sessionToken;
+
     // Refresh cookie with correct path (delete old + set new)
     cookieStore.delete('tenant_session');
-    cookieStore.set(TENANT_SESSION_COOKIE_OPTIONS.name, sessionToken, {
+    cookieStore.set(TENANT_SESSION_COOKIE_OPTIONS.name, tokenToSet, {
         httpOnly: TENANT_SESSION_COOKIE_OPTIONS.httpOnly,
         secure: TENANT_SESSION_COOKIE_OPTIONS.secure,
         sameSite: TENANT_SESSION_COOKIE_OPTIONS.sameSite,

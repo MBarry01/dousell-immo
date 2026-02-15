@@ -49,7 +49,7 @@ export const ManagementPromoCard = () => {
     const href = user ? "/gestion" : "/pro/start";
 
     return (
-        <div className="fixed bottom-20 left-4 right-4 z-40 mx-auto max-w-3xl animate-in slide-in-from-bottom-8 fade-in-0 duration-500 md:bottom-6">
+        <div className="fixed left-4 right-4 z-40 mx-auto max-w-3xl animate-in slide-in-from-bottom-8 fade-in-0 duration-500 bottom-above-mobile-nav">
             <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-[#0c1117]/95 shadow-2xl shadow-black/40 backdrop-blur-xl transition-all hover:border-primary/40 hover:shadow-primary/10">
                 <Link
                     href={href}

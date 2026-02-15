@@ -12,10 +12,17 @@ export async function GET(
         const supabase = await createClient();
         const transactionId = id;
 
-        // 1. Vérifier l'authentification
-        const { data: { user } } = await supabase.auth.getUser();
+        // 1. Vérifier l'authentification (plus souple pour les nouveaux onglets)
+        let { data: { user } } = await supabase.auth.getUser();
+
         if (!user) {
-            return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+            const { data: { session } } = await supabase.auth.getSession();
+            user = session?.user || null;
+        }
+
+        if (!user) {
+            console.error("Auth failed for receipt API: No user session found");
+            return NextResponse.json({ error: 'Session expirée ou non trouvée. Veuillez vous reconnecter.' }, { status: 401 });
         }
 
         // 2. Récupérer les détails de la transaction et du bail
@@ -33,10 +40,8 @@ export async function GET(
                     property_address,
                     owner_id,
                     profiles:owner_id (
-                        first_name,
-                        last_name,
-                        email,
-                        phone_number
+                        full_name,
+                        email
                     )
                 )
             `)
@@ -51,11 +56,12 @@ export async function GET(
         // Sécurité: vérifier que l'user est le propriétaire
         // TODO: Ajouter check locataire si on ouvre l'accès locataire
         if (lease.owner_id !== user.id) {
-            return NextResponse.json({ error: 'Accès interdit' }, { status: 403 });
+            console.error(`Access denied: Lease owner is ${lease.owner_id}, requesting user is ${user.id}`);
+            return NextResponse.json({ error: 'Accès interdit: Cette quittance ne vous appartient pas.' }, { status: 403 });
         }
 
         const ownerProfile = lease.profiles;
-        const ownerName = ownerProfile ? `${ownerProfile.first_name || ''} ${ownerProfile.last_name || ''}`.trim() : 'Propriétaire';
+        const ownerName = ownerProfile?.full_name || 'Propriétaire';
 
         // 3. Préparer les données pour le PDF
         const periodDate = new Date(transaction.period_year, transaction.period_month - 1);
@@ -95,7 +101,7 @@ export async function GET(
         return new NextResponse(pdfBuffer, {
             headers: {
                 'Content-Type': 'application/pdf',
-                'Content-Disposition': `attachment; filename="Quittance_${pdfData.receiptNumber}.pdf"`,
+                'Content-Disposition': `inline; filename="Quittance_${pdfData.receiptNumber}.pdf"`,
             },
         });
 

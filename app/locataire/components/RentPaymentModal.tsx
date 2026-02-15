@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Shield, CreditCard, Smartphone, ChevronRight, ArrowLeft } from "lucide-react";
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
-import KKiaPayWidget from '@/components/payment/KKiaPayWidget';
+import { PayDunyaRentButton } from '@/components/payment/PayDunyaRentButton';
 import { StripeRentButton } from '@/components/payment/StripeRentButton';
 
 interface RentPaymentModalProps {
@@ -211,9 +211,9 @@ export function RentPaymentModal({
                                 <span className="font-semibold text-zinc-900">Mobile Money</span>
                             </div>
                             <p className="text-xs text-zinc-600 mb-4">
-                                Payez avec Wave ou Orange Money directement depuis votre téléphone.
+                                Payez avec Wave ou Orange Money. Vous serez redirigé vers la page de paiement sécurisée.
                             </p>
-                            <KKiaPayWidget
+                            <PayDunyaRentButton
                                 amount={amount}
                                 leaseId={leaseId}
                                 tenantName={tenantName}
@@ -221,8 +221,7 @@ export function RentPaymentModal({
                                 periodMonth={periodMonth}
                                 periodYear={periodYear}
                                 onSuccess={() => {
-                                    toast.success("Paiement confirmé !");
-                                    onOpenChange(false);
+                                    toast.success("Redirection vers PayDunya...");
                                 }}
                                 onError={(error) => {
                                     toast.error(error);
@@ -232,7 +231,7 @@ export function RentPaymentModal({
 
                         <div className="flex items-center justify-center gap-2 text-xs text-zinc-400">
                             <Shield className="w-3 h-3" />
-                            Paiement sécurisé par KKiaPay
+                            Paiement sécurisé par PayDunya
                         </div>
                     </div>
                 )}

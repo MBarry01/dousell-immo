@@ -1,4 +1,4 @@
-# 🗺️ MAP DES COMPOSANTS (226)
+# 🗺️ MAP DES COMPOSANTS (227)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -95,6 +95,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<paydunya-popup-payment />** (Path: `components\payment\paydunya-popup-payment.tsx`)
 - **<paydunya-psr-button />** (Path: `components\payment\paydunya-psr-button.tsx`)
 - **<paydunya-sdk-form />** (Path: `components\payment\paydunya-sdk-form.tsx`)
+- **<PayDunyaRentButton />** (Path: `components\payment\PayDunyaRentButton.tsx`)
 - **<StripeRentButton />** (Path: `components\payment\StripeRentButton.tsx`)
 - **<DepositReceiptPDF />** (Path: `components\pdf\DepositReceiptPDF.tsx`)
 - **<PaymentHistoryPDF />** (Path: `components\pdf\PaymentHistoryPDF.tsx`)

@@ -5,6 +5,7 @@ import {
   validateTenantToken,
   validateTenantIdentity,
   markTenantTokenVerified,
+  createTenantSession,
   revokeTenantToken,
   TENANT_SESSION_COOKIE_OPTIONS,
   getTenantFailedAttempts,
@@ -19,13 +20,14 @@ const MAX_ATTEMPTS = 3;
  * Security measures:
  * - Max 3 attempts per token (persistent via DB logging)
  * - Token is invalidated after max attempts
- * - Creates session cookie on success
+ * - Magic link is single-use: invalidated after session creation
+ * - Creates separate session token in cookie
  *
- * @param token - The tenant access token
+ * @param token - The tenant access token (from magic link URL)
  * @param lastName - The last name provided by the user
  */
 export async function verifyTenantIdentity(token: string, lastName: string) {
-  // Check if token exists and is valid
+  // Check if magic link token exists and is valid
   const session = await validateTenantToken(token);
 
   if (!session) {
@@ -36,7 +38,6 @@ export async function verifyTenantIdentity(token: string, lastName: string) {
   const attempts = await getTenantFailedAttempts(session.lease_id);
 
   if (attempts >= MAX_ATTEMPTS) {
-    // Revoke token after max attempts
     await revokeTenantToken(session.lease_id);
     return { error: "Trop de tentatives. Ce lien a été invalidé." };
   }
@@ -45,11 +46,9 @@ export async function verifyTenantIdentity(token: string, lastName: string) {
   const isValid = await validateTenantIdentity(session.lease_id, lastName);
 
   if (!isValid) {
-    // Failed attempt is already logged by validateTenantIdentity in DB
     const newAttempts = attempts + 1;
 
     if (newAttempts >= MAX_ATTEMPTS) {
-      // Revoke token after max attempts
       await revokeTenantToken(session.lease_id);
       return { error: "Trop de tentatives. Ce lien a été invalidé." };
     }
@@ -60,9 +59,12 @@ export async function verifyTenantIdentity(token: string, lastName: string) {
   // Mark token as verified
   await markTenantTokenVerified(session.lease_id);
 
-  // Create session cookie
+  // Create a separate session token (invalidates magic link = single-use)
+  const sessionToken = await createTenantSession(session.lease_id);
+
+  // Set session cookie with the new session token
   const cookieStore = await cookies();
-  cookieStore.set(TENANT_SESSION_COOKIE_OPTIONS.name, token, {
+  cookieStore.set(TENANT_SESSION_COOKIE_OPTIONS.name, sessionToken, {
     httpOnly: TENANT_SESSION_COOKIE_OPTIONS.httpOnly,
     secure: TENANT_SESSION_COOKIE_OPTIONS.secure,
     sameSite: TENANT_SESSION_COOKIE_OPTIONS.sameSite,
@@ -76,10 +78,10 @@ export async function verifyTenantIdentity(token: string, lastName: string) {
 /**
  * Activate tenant session for an already-verified token
  *
- * Used when a tenant re-clicks their magic link but their cookie has expired.
- * The token is still valid and verified in DB, so we just create the session cookie.
+ * Used when a tenant clicks their magic link.
+ * Creates a new session token and invalidates the magic link (single-use).
  *
- * @param token - The tenant access token
+ * @param token - The tenant access token (from magic link URL)
  */
 export async function activateTenantSession(token: string) {
   const session = await validateTenantToken(token);
@@ -98,9 +100,11 @@ export async function activateTenantSession(token: string) {
     };
   }
 
-  // Token is already verified - just create the session cookie
+  // Token is verified - create session and invalidate magic link (single-use)
+  const sessionToken = await createTenantSession(session.lease_id);
+
   const cookieStore = await cookies();
-  cookieStore.set(TENANT_SESSION_COOKIE_OPTIONS.name, token, {
+  cookieStore.set(TENANT_SESSION_COOKIE_OPTIONS.name, sessionToken, {
     httpOnly: TENANT_SESSION_COOKIE_OPTIONS.httpOnly,
     secure: TENANT_SESSION_COOKIE_OPTIONS.secure,
     sameSite: TENANT_SESSION_COOKIE_OPTIONS.sameSite,

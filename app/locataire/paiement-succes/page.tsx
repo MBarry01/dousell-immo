@@ -1,16 +1,17 @@
 import { redirect } from 'next/navigation';
-import { CheckCircle2, ArrowLeft, Receipt } from 'lucide-react';
+import { CheckCircle2, ArrowLeft, Receipt, Download } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { processStripeRentPayment } from '@/lib/stripe-rent';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { invalidateCacheBatch } from '@/lib/cache/cache-aside';
+import { HapticTrigger } from './haptic-trigger';
 
 // Force dynamic rendering - must process payment and write to DB
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-    searchParams: Promise<{ session_id?: string }>;
+    searchParams: Promise<{ session_id?: string; provider?: string }>;
 }
 
 /**
@@ -270,9 +271,11 @@ async function invalidateRentalRedisCache(teamOrOwnerId: string, leaseId?: strin
 }
 
 export default async function PaymentSuccessPage({ searchParams }: PageProps) {
-    const { session_id } = await searchParams;
+    const { session_id, provider } = await searchParams;
 
-    if (!session_id) {
+    const isPayDunya = provider === 'paydunya';
+
+    if (!session_id && !isPayDunya) {
         redirect('/locataire');
     }
 
@@ -280,25 +283,27 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
     let error = null;
     let quittanceSent = false;
 
-    try {
-        paymentDetails = await processStripeRentPayment(session_id);
+    // PayDunya: le webhook gère la mise à jour DB, la page est juste une confirmation visuelle
+    if (session_id && !isPayDunya) {
+        try {
+            paymentDetails = await processStripeRentPayment(session_id);
 
-        // Save to database as fallback (idempotent - won't duplicate if webhook worked)
-        if (paymentDetails) {
-            await saveRentPaymentFallback(paymentDetails, session_id);
+            // Save to database as fallback (idempotent - won't duplicate if webhook worked)
+            if (paymentDetails) {
+                await saveRentPaymentFallback(paymentDetails, session_id);
 
-            // Always send quittance email after Stripe payment
-            // (webhooks and manual flows don't send quittances for Stripe payments)
-            try {
-                await sendQuittanceEmail(paymentDetails);
-                quittanceSent = true;
-            } catch (emailErr) {
-                console.error('[sendQuittance] Failed (non-blocking):', emailErr);
+                // Always send quittance email after Stripe payment
+                try {
+                    await sendQuittanceEmail(paymentDetails);
+                    quittanceSent = true;
+                } catch (emailErr) {
+                    console.error('[sendQuittance] Failed (non-blocking):', emailErr);
+                }
             }
+        } catch (e) {
+            console.error('Error verifying payment:', e);
+            error = e instanceof Error ? e.message : 'Erreur de vérification';
         }
-    } catch (e) {
-        console.error('Error verifying payment:', e);
-        error = e instanceof Error ? e.message : 'Erreur de vérification';
     }
 
     const MONTH_NAMES = [
@@ -361,7 +366,9 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
                         </div>
                         <div className="flex justify-between">
                             <span className="text-zinc-500">Méthode</span>
-                            <span className="text-zinc-900">Carte bancaire (Stripe)</span>
+                            <span className="text-zinc-900">
+                                {isPayDunya ? 'Mobile Money (PayDunya)' : 'Carte bancaire (Stripe)'}
+                            </span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-zinc-500">Statut</span>
@@ -386,26 +393,38 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
             {/* Info Card */}
             <div className="bg-zinc-50 rounded-xl p-4 mb-6">
                 <p className="text-sm text-zinc-600">
-                    {quittanceSent
-                        ? <>Votre quittance de loyer a été envoyée par <strong>email</strong>. Elle est également disponible dans la section <strong>Documents</strong>.</>
-                        : <>Une quittance de loyer sera générée et disponible dans la section <strong>Documents</strong> sous 24h.</>
+                    {isPayDunya
+                        ? <>Votre paiement est en cours de traitement. Une confirmation et votre quittance vous seront envoyées par <strong>email</strong> dès réception.</>
+                        : quittanceSent
+                            ? <>Votre quittance de loyer a été envoyée par <strong>email</strong>. Elle est également disponible dans la section <strong>Documents</strong>.</>
+                            : <>Une quittance de loyer sera générée et disponible dans la section <strong>Documents</strong> sous 24h.</>
                     }
                 </p>
             </div>
 
+            {/* Haptic feedback on mount */}
+            <HapticTrigger />
+
             {/* Actions */}
             <div className="space-y-3">
-                <Link href="/locataire" className="block">
+                <Link href="/locataire/documents" className="block">
                     <Button className="w-full h-12 bg-zinc-900 hover:bg-zinc-800 text-white font-semibold rounded-xl">
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Retour à l'accueil
+                        <Download className="w-4 h-4 mr-2" />
+                        Voir le reçu
                     </Button>
                 </Link>
 
-                <Link href="/locataire/paiements" className="block">
+                <Link href="/locataire" className="block">
                     <Button variant="outline" className="w-full h-12 rounded-xl">
-                        Voir l'historique des paiements
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Retour à l&apos;accueil
                     </Button>
+                </Link>
+
+                <Link href="/locataire/paiements" className="block text-center">
+                    <span className="text-sm text-zinc-500 hover:text-zinc-700 transition-colors">
+                        Voir l&apos;historique des paiements
+                    </span>
                 </Link>
             </div>
         </div>

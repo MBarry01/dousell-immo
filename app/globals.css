@@ -420,6 +420,16 @@
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 7rem);
   }
 
+  /* Bannière promo : au-dessus de la bottom nav sur mobile, position standard sur desktop */
+  .bottom-above-mobile-nav {
+    bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px) + 0.5rem);
+  }
+  @media (min-width: 768px) {
+    .bottom-above-mobile-nav {
+      bottom: 1.5rem;
+    }
+  }
+
   .glass-panel {
     backdrop-filter: blur(18px);
     background-color: rgba(10, 13, 23, 0.65);

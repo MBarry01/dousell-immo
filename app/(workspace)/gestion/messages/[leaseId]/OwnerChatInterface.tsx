@@ -13,6 +13,7 @@ import { useTheme } from "@/components/theme-provider";
 interface Message {
     id: string;
     sender_id: string;
+    sender_type?: string;
     content: string;
     created_at: string;
 }
@@ -158,9 +159,10 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
 
                         <div className="space-y-1">
                             {msgs.map((msg, index) => {
-                                const isMe = msg.sender_id === currentUserId;
-                                const showAvatar = !isMe && (index === 0 || msgs[index - 1].sender_id !== msg.sender_id);
-                                const isLastFromSender = index === msgs.length - 1 || msgs[index + 1].sender_id !== msg.sender_id;
+                                const isFromMe = (m: Message) => m.sender_id === currentUserId && m.sender_type !== 'tenant';
+                                const isMe = isFromMe(msg);
+                                const showAvatar = !isMe && (index === 0 || isFromMe(msgs[index - 1]));
+                                const isLastFromSender = index === msgs.length - 1 || isFromMe(msgs[index + 1]) !== isMe;
 
                                 return (
                                     <div key={msg.id} className={cn("flex w-full items-end gap-2", isMe ? "justify-end" : "justify-start")}>

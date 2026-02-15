@@ -70,17 +70,27 @@ export async function POST(request: Request) {
 
       // Vérifier si c'est un paiement de loyer
       if (metadata?.type === "rent" && metadata.lease_id && metadata.period_month && metadata.period_year) {
-        const supabase = await createClient();
+        // Utiliser un client admin pour les opérations de webhook (fiabilité)
+        const { createClient: createSupabaseAdmin } = await import('@supabase/supabase-js');
+        const supabaseAdmin = createSupabaseAdmin(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
 
         // Récupérer infos du bail
-        const { data: lease } = await supabase
+        const { data: lease } = await supabaseAdmin
           .from("leases")
           .select("tenant_email, tenant_name, monthly_amount, owner_id, owner:profiles(email, full_name)")
           .eq("id", metadata.lease_id)
           .single();
 
+        if (!lease) {
+          console.error("❌ Webhook KKiaPay: Bail introuvable", metadata.lease_id);
+          return Response.json({ success: true });
+        }
+
         // Marquer le loyer comme payé
-        const { error: rentError } = await supabase
+        const { data: updatedTx, error: rentError } = await supabaseAdmin
           .from("rental_transactions")
           .update({
             status: "paid",
@@ -90,12 +100,64 @@ export async function POST(request: Request) {
           })
           .eq("lease_id", metadata.lease_id)
           .eq("period_month", metadata.period_month)
-          .eq("period_year", metadata.period_year);
+          .eq("period_year", metadata.period_year)
+          .select('id')
+          .single();
 
-        if (rentError) {
+        if (rentError || !updatedTx) {
           console.error("Erreur maj loyer:", rentError);
         } else {
           console.log(`✅ Loyer payé via KKiaPay webhook: Bail ${metadata.lease_id}`);
+
+          // --- GÉNÉRATION ET STOCKAGE QUITTANCE PDF ---
+          try {
+            const ReactPDF = require('@react-pdf/renderer');
+            const { createQuittanceDocument } = require('@/components/pdf/QuittancePDF_v2');
+            const { storeDocumentInGED } = require('@/lib/ged-utils');
+
+            const owner = lease.owner as { email?: string; full_name?: string } | undefined;
+
+            const receiptData = {
+              leaseId: metadata.lease_id,
+              tenantName: lease.tenant_name,
+              tenantEmail: lease.tenant_email,
+              amount: lease.monthly_amount,
+              periodMonth: `${String(metadata.period_month).padStart(2, '0')}/${metadata.period_year}`,
+              periodStart: new Date(metadata.period_year, metadata.period_month - 1, 1).toLocaleDateString('fr-FR'),
+              periodEnd: new Date(metadata.period_year, metadata.period_month, 0).toLocaleDateString('fr-FR'),
+              receiptNumber: `QUITT-${Date.now().toString().slice(-6)}`,
+              ownerName: owner?.full_name || 'Propriétaire',
+              ownerEmail: owner?.email
+            };
+
+            const pdfDocument = createQuittanceDocument(receiptData);
+            const stream = await ReactPDF.renderToStream(pdfDocument);
+            const chunks: Uint8Array[] = [];
+            const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
+              stream.on('data', (chunk: any) => chunks.push(chunk));
+              stream.on('end', () => resolve(Buffer.concat(chunks)));
+              stream.on('error', reject);
+            });
+
+            await storeDocumentInGED({
+              userId: lease.owner_id,
+              fileBuffer: new Uint8Array(pdfBuffer),
+              fileName: `Quittance_${receiptData.receiptNumber}_KKIA_${lease.tenant_name.replace(/\s+/g, '_')}.pdf`,
+              bucketName: 'receipts',
+              documentType: 'quittance',
+              metadata: {
+                leaseId: metadata.lease_id,
+                transactionId: updatedTx.id,
+                tenantName: lease.tenant_name,
+                description: `Quittance - ${receiptData.periodMonth} - ${lease.tenant_name}`
+              }
+            }, supabaseAdmin);
+            console.log("✅ Quittance PDF générée et stockée via utility (KKiaPay)");
+
+          } catch (pdfError) {
+            console.error("❌ Erreur génération PDF Quittance KKiaPay:", pdfError);
+          }
+          // -------------------------------------------
 
           // Invalidation du cache
           if (lease?.owner_id) {

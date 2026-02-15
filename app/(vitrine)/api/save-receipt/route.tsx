@@ -45,42 +45,31 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Propriétaire introuvable' }, { status: 404 });
         }
 
-        const fileName = `${lease.owner_id}/quittances/${data.receiptNumber}_${Date.now()}.pdf`;
+        // Utiliser l'utilitaire centralisé pour le stockage
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { storeDocumentInGED } = require('@/lib/ged-utils');
 
-        // Upload Storage
-        const { error: uploadError } = await supabaseAdmin.storage
-            .from('verification-docs')
-            .upload(fileName, pdfBuffer, {
-                contentType: 'application/pdf',
-                upsert: false
-            });
-
-        if (uploadError) {
-            throw new Error(`Upload Storage failed: ${uploadError.message}`);
-        }
-
-        // Insert user_documents
-        const { error: dbError } = await supabaseAdmin.from('user_documents').insert({
-            user_id: lease.owner_id,
-            file_name: `Quittance_${data.receiptNumber}.pdf`,
-            file_path: fileName,
-            file_type: 'quittance',
-            file_size: pdfBuffer.length,
-            mime_type: 'application/pdf',
-            source: 'generated',
-            lease_id: data.leaseId,
-            category: 'quittance',
-            description: `Quittance - ${data.periodMonth} - ${data.tenantName}`
+        const result = await storeDocumentInGED({
+            userId: lease.owner_id,
+            fileBuffer: new Uint8Array(pdfBuffer),
+            fileName: `Quittance_${data.receiptNumber.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`,
+            bucketName: 'receipts', // On utilise le bucket dédié
+            documentType: 'quittance',
+            metadata: {
+                leaseId: data.leaseId,
+                tenantName: data.tenantName,
+                description: `Quittance - ${data.periodMonth} - ${data.tenantName}`
+            }
         });
 
-        if (dbError) {
-            throw new Error(`Database insert failed: ${dbError.message}`);
+        if (!result.success) {
+            throw new Error(result.error);
         }
 
         return NextResponse.json({
             success: true,
             message: 'Quittance sauvegardée avec succès',
-            fileName
+            fileName: result.filePath
         });
 
     } catch (error) {

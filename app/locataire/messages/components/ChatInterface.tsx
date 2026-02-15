@@ -11,6 +11,7 @@ import { fr } from 'date-fns/locale';
 interface Message {
     id: string;
     sender_id: string;
+    sender_type?: string;
     content: string;
     created_at: string;
 }
@@ -27,7 +28,7 @@ interface ChatProps {
  * 
  * Message identification:
  * - Messages from owner: sender_id === ownerId
- * - Messages from tenant: sender_id === 'tenant' OR sender_id !== ownerId
+ * - Messages from tenant: sender_type === 'tenant'
  */
 export default function ChatInterface({ initialMessages, leaseId, ownerId, ownerName }: ChatProps) {
     const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -37,7 +38,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
 
     // Helper to check if message is from tenant (not owner)
     const isFromTenant = (msg: Message) => {
-        return msg.sender_id === 'tenant' || msg.sender_id !== ownerId;
+        return msg.sender_type === 'tenant' || msg.id.startsWith('temp-');
     };
 
     // Setup Realtime Subscription
@@ -103,7 +104,8 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
         // Optimistic update
         const optimisticMsg: Message = {
             id: 'temp-' + Date.now(),
-            sender_id: 'tenant',
+            sender_id: ownerId,
+            sender_type: 'tenant',
             content: content,
             created_at: new Date().toISOString()
         };

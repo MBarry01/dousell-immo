@@ -7,11 +7,12 @@
  * Security measures:
  * - Tokens are hashed (SHA-256) before storing in DB
  * - Raw tokens are sent to tenants via email (never stored)
- * - Cookie stores raw token, validation hashes it for comparison
- * - Tokens expire after 7 days
+ * - Magic link tokens are single-use (invalidated after first login)
+ * - Session uses a separate hash (tenant_session_hash) from the magic link token
+ * - Cookie is httpOnly, secure, sameSite: strict
+ * - Tokens expire after 24 hours
+ * - Session rotates every 4 hours
  * - All access attempts are logged to tenant_access_logs table
- *
- * Per WORKFLOW_PROPOSAL.md section 4.3, 5.1.1, and REMAINING_TASKS.md 3.5.2
  */
 
 import { createAdminClient } from "@/utils/supabase/admin";
@@ -30,10 +31,12 @@ type TenantAccessAction =
   | "session_created"
   | "session_expired";
 
-// Token expiration: 7 days
-const TOKEN_EXPIRATION_DAYS = 7;
+// Magic link token expiration: 24 hours
+const TOKEN_EXPIRATION_HOURS = 24;
 // Session cookie expiration: 24 hours
 const SESSION_EXPIRATION_HOURS = 24;
+// Session rotation interval: 4 hours
+const SESSION_ROTATION_HOURS = 4;
 
 /**
  * Hash a token using SHA-256
@@ -41,6 +44,13 @@ const SESSION_EXPIRATION_HOURS = 24;
  */
 function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
+}
+
+/**
+ * Generate a secure random token (64 hex chars)
+ */
+function generateSecureToken(): string {
+  return randomBytes(32).toString("hex");
 }
 
 /**
@@ -77,7 +87,7 @@ async function logTenantAccess(
       lease_id: leaseId || null,
       action,
       ip_address: ipAddress,
-      user_agent: userAgent?.slice(0, 500), // Truncate long user agents
+      user_agent: userAgent?.slice(0, 500),
       failure_reason: failureReason || null,
     });
   } catch (error) {
@@ -100,8 +110,11 @@ export interface TenantSession {
 /**
  * Generate a new tenant access token for a lease
  *
- * Security: The raw token is returned to be sent via email.
- * Only the SHA-256 hash is stored in the database.
+ * Security:
+ * - Revokes any previous token first (audit trail)
+ * - The raw token is returned to be sent via email
+ * - Only the SHA-256 hash is stored in the database
+ * - Token expires in 24 hours (single-use after first login)
  *
  * @param leaseId - The lease ID to generate token for
  * @returns The raw token (hex, 64 chars) - to be sent to tenant
@@ -109,15 +122,18 @@ export interface TenantSession {
 export async function generateTenantAccessToken(leaseId: string): Promise<string> {
   const supabase = createAdminClient();
 
+  // Revoke any existing token first for audit trail
+  await revokeTenantToken(leaseId);
+
   // Generate secure random token
-  const rawToken = randomBytes(32).toString("hex");
+  const rawToken = generateSecureToken();
 
   // Hash the token for secure storage
   const hashedToken = hashToken(rawToken);
 
-  // Calculate expiration date
+  // Calculate expiration (24 hours)
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + TOKEN_EXPIRATION_DAYS);
+  expiresAt.setHours(expiresAt.getHours() + TOKEN_EXPIRATION_HOURS);
 
   // Update lease with HASHED token (never store raw)
   const { error } = await supabase
@@ -126,6 +142,7 @@ export async function generateTenantAccessToken(leaseId: string): Promise<string
       tenant_access_token: hashedToken,
       tenant_token_expires_at: expiresAt.toISOString(),
       tenant_token_verified: false,
+      tenant_session_hash: null, // Clear any previous session
     })
     .eq("id", leaseId);
 
@@ -136,7 +153,6 @@ export async function generateTenantAccessToken(leaseId: string): Promise<string
 
   // Log token generation to audit table
   await logTenantAccess("token_generated", leaseId);
-  console.log(`[TENANT_ACCESS] Token generated for lease ${leaseId}`);
 
   // Track analytics
   trackServerEvent(EVENTS.TENANT_MAGIC_LINK_SENT, {
@@ -148,17 +164,17 @@ export async function generateTenantAccessToken(leaseId: string): Promise<string
 }
 
 /**
- * Validate a tenant access token
+ * Validate a tenant magic link token (from URL)
  *
  * Security: The input token is hashed before comparison.
- * This ensures the raw token is never stored or logged server-side.
+ * This validates the one-time magic link token, NOT the session.
  *
  * Checks:
  * 1. Token hash exists in leases table
  * 2. Token is not expired
  * 3. Lease is active
  *
- * @param token - The raw token to validate (from URL or cookie)
+ * @param token - The raw token to validate (from URL)
  * @returns TenantSession if valid, null otherwise
  */
 export async function validateTenantToken(token: string): Promise<TenantSession | null> {
@@ -167,6 +183,7 @@ export async function validateTenantToken(token: string): Promise<TenantSession 
   // Hash the input token for comparison
   const hashedToken = hashToken(token);
 
+  // First try to validate against the magic link token (tenant_access_token)
   const { data: lease, error } = await supabase
     .from("leases")
     .select(`
@@ -192,7 +209,6 @@ export async function validateTenantToken(token: string): Promise<TenantSession 
     // Determine failure reason
     let failureReason = "Token not found";
     if (error?.code === "PGRST116") {
-      // Check if token exists but is expired or inactive
       const { data: expiredLease } = await supabase
         .from("leases")
         .select("id, status, tenant_token_expires_at")
@@ -208,15 +224,12 @@ export async function validateTenantToken(token: string): Promise<TenantSession 
       }
     }
 
-    // Log failed validation attempt to database
     await logTenantAccess("token_validation_failed", null, failureReason);
-    console.log(`[TENANT_ACCESS] Token validation failed: ${failureReason}`);
     return null;
   }
 
-  // Log successful validation to database
+  // Log successful validation
   await logTenantAccess("token_validated", lease.id);
-  console.log(`[TENANT_ACCESS] Token validated for lease ${lease.id}`);
 
   return {
     lease_id: lease.id,
@@ -228,6 +241,114 @@ export async function validateTenantToken(token: string): Promise<TenantSession 
     expires_at: new Date(lease.tenant_token_expires_at),
     verified: lease.tenant_token_verified || false,
   };
+}
+
+/**
+ * Validate a tenant session token (from cookie)
+ *
+ * This validates the session hash stored in tenant_session_hash,
+ * separate from the one-time magic link token.
+ *
+ * @param sessionToken - The raw session token from cookie
+ * @returns TenantSession if valid, null otherwise
+ */
+export async function validateTenantSession(sessionToken: string): Promise<TenantSession | null> {
+  const supabase = createAdminClient();
+
+  const hashedSession = hashToken(sessionToken);
+
+  const { data: lease, error } = await supabase
+    .from("leases")
+    .select(`
+      id,
+      property_id,
+      status,
+      tenant_name,
+      tenant_email,
+      tenant_token_expires_at,
+      tenant_token_verified,
+      property_address,
+      property:properties (
+        title,
+        location
+      )
+    `)
+    .eq("tenant_session_hash", hashedSession)
+    .eq("status", "active")
+    .single();
+
+  if (error || !lease) {
+    return null;
+  }
+
+  return {
+    lease_id: lease.id,
+    property_id: lease.property_id,
+    tenant_name: lease.tenant_name,
+    tenant_email: lease.tenant_email,
+    property_title: (lease.property as unknown as { title?: string } | null)?.title || "Bien immobilier",
+    property_address: lease.property_address || ((lease.property as unknown as { location?: { city?: string } } | null)?.location?.city) || null,
+    expires_at: lease.tenant_token_expires_at ? new Date(lease.tenant_token_expires_at) : new Date(),
+    verified: lease.tenant_token_verified || false,
+  };
+}
+
+/**
+ * Create a tenant session after successful magic link validation
+ *
+ * Generates a separate session token, stores its hash in tenant_session_hash,
+ * and invalidates the magic link token (single-use).
+ *
+ * @param leaseId - The lease ID
+ * @returns The raw session token to store in cookie
+ */
+export async function createTenantSession(leaseId: string): Promise<string> {
+  const supabase = createAdminClient();
+
+  // Generate a new session token (separate from magic link token)
+  const rawSessionToken = generateSecureToken();
+  const hashedSession = hashToken(rawSessionToken);
+
+  // Invalidate magic link token (single-use) and set session hash
+  await supabase
+    .from("leases")
+    .update({
+      tenant_access_token: null, // Magic link is now single-use
+      tenant_session_hash: hashedSession,
+      tenant_last_access_at: new Date().toISOString(),
+    })
+    .eq("id", leaseId);
+
+  // Log session creation
+  await logTenantAccess("session_created", leaseId);
+
+  return rawSessionToken;
+}
+
+/**
+ * Rotate tenant session token
+ *
+ * Generates a new session token and updates the hash in DB.
+ * Called periodically to limit session hijacking window.
+ *
+ * @param leaseId - The lease ID
+ * @returns The new raw session token for cookie update
+ */
+export async function rotateTenantSession(leaseId: string): Promise<string> {
+  const supabase = createAdminClient();
+
+  const rawSessionToken = generateSecureToken();
+  const hashedSession = hashToken(rawSessionToken);
+
+  await supabase
+    .from("leases")
+    .update({
+      tenant_session_hash: hashedSession,
+      tenant_last_access_at: new Date().toISOString(),
+    })
+    .eq("id", leaseId);
+
+  return rawSessionToken;
 }
 
 /**
@@ -347,6 +468,27 @@ export async function revokeTenantToken(leaseId: string): Promise<void> {
 }
 
 /**
+ * Invalidate tenant session (logout)
+ *
+ * Clears the session hash in DB and logs the event.
+ * Must be called before clearing the cookie client-side.
+ *
+ * @param leaseId - The lease ID
+ */
+export async function invalidateTenantSession(leaseId: string): Promise<void> {
+  const supabase = createAdminClient();
+
+  await supabase
+    .from("leases")
+    .update({
+      tenant_session_hash: null,
+    })
+    .eq("id", leaseId);
+
+  await logTenantAccess("session_expired", leaseId);
+}
+
+/**
  * Generate the magic link URL for a tenant
  *
  * @param token - The access token
@@ -360,29 +502,31 @@ export function getTenantMagicLinkUrl(token: string): string {
 /**
  * Cookie configuration for tenant session
  *
- * Note: path is "/" to allow API routes (/api/stripe/rent-checkout, etc.)
- * to access the tenant session. The session is still validated against
- * the lease and can only be created from valid magic links.
+ * Security:
+ * - httpOnly: prevents JavaScript access
+ * - secure: HTTPS only in production
+ * - sameSite: strict (cookie is only set after server-side validation, not on magic link click)
+ * - path: "/" to allow API routes access
  */
 export const TENANT_SESSION_COOKIE_OPTIONS = {
   name: "tenant_session",
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const, // "lax" allows cookies on same-site navigations
-  maxAge: SESSION_EXPIRATION_HOURS * 60 * 60, // in seconds
-  path: "/", // Root path to include API routes
+  sameSite: "strict" as const,
+  maxAge: SESSION_EXPIRATION_HOURS * 60 * 60,
+  path: "/",
 };
 
 /**
  * Get tenant session from cookie (server-side)
  *
  * Use this in Server Actions and API routes to get the current tenant session.
- * Returns null if no valid session exists.
+ * Validates against tenant_session_hash (not the magic link token).
+ * Handles session rotation every 4 hours.
  *
  * @returns TenantSession if valid, null otherwise
  */
 export async function getTenantSessionFromCookie(): Promise<TenantSession | null> {
-  // Dynamic import to avoid issues with client components
   const { cookies } = await import("next/headers");
   const cookieStore = await cookies();
   const token = cookieStore.get("tenant_session")?.value;
@@ -391,7 +535,43 @@ export async function getTenantSessionFromCookie(): Promise<TenantSession | null
     return null;
   }
 
+  // First try session hash validation (new system)
+  const session = await validateTenantSession(token);
+  if (session) {
+    return session;
+  }
+
+  // Fallback: try legacy magic link token validation (for existing sessions)
   return validateTenantToken(token);
+}
+
+/**
+ * Check if session needs rotation and rotate if needed
+ *
+ * @param leaseId - The lease ID
+ * @returns New session token if rotated, null if no rotation needed
+ */
+export async function checkAndRotateSession(leaseId: string): Promise<string | null> {
+  const supabase = createAdminClient();
+
+  const { data: lease } = await supabase
+    .from("leases")
+    .select("tenant_last_access_at")
+    .eq("id", leaseId)
+    .single();
+
+  if (!lease?.tenant_last_access_at) {
+    return null;
+  }
+
+  const lastAccess = new Date(lease.tenant_last_access_at);
+  const hoursSinceLastAccess = (Date.now() - lastAccess.getTime()) / (1000 * 60 * 60);
+
+  if (hoursSinceLastAccess >= SESSION_ROTATION_HOURS) {
+    return rotateTenantSession(leaseId);
+  }
+
+  return null;
 }
 
 /**
@@ -412,7 +592,7 @@ export async function getTenantLeaseData() {
   // Use admin client to bypass RLS - tenant has no Supabase auth session
   const adminClient = createAdminClient();
 
-  // Fetch lease + property
+  // Fetch lease + property + owner info
   const { data: lease, error } = await adminClient
     .from("leases")
     .select(`
@@ -423,16 +603,21 @@ export async function getTenantLeaseData() {
       tenant_email,
       tenant_phone,
       monthly_amount,
+      billing_day,
       start_date,
       end_date,
       status,
       property_address,
+      lease_pdf_url,
       property:properties (
         id,
         title,
         location,
         details,
         images
+      ),
+      owner:profiles!leases_owner_id_fkey (
+        full_name
       )
     `)
     .eq("id", session.lease_id)
@@ -446,7 +631,7 @@ export async function getTenantLeaseData() {
   // Fetch payments separately with admin client to ensure fresh data
   const { data: payments, error: paymentsError } = await adminClient
     .from("rental_transactions")
-    .select("id, amount_due, paid_at, payment_method, status, period_month, period_year, created_at")
+    .select("id, amount_due, amount_paid, paid_at, payment_method, status, period_month, period_year, created_at, receipt_url")
     .eq("lease_id", session.lease_id)
     .order("period_year", { ascending: false })
     .order("period_month", { ascending: false });
@@ -467,10 +652,10 @@ export async function getTenantLeaseData() {
 
 /**
  * Get the number of failed verification attempts for a specific lease
- * 
+ *
  * Helper for security throttling.
  * Queries tenant_access_logs for recent 'identity_verification_failed' events.
- * 
+ *
  * @param leaseId - The lease ID to check
  * @returns Number of failed attempts
  */

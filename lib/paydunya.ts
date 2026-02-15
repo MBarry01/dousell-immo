@@ -489,8 +489,8 @@ export async function initializeRentalPayment(
       period_year: periodYear
     },
     actions: {
-      return_url: `${appUrl}/portal?status=success`,
-      cancel_url: `${appUrl}/portal?status=cancel`,
+      return_url: `${appUrl}/locataire/paiement-succes?provider=paydunya`,
+      cancel_url: `${appUrl}/locataire?status=cancel`,
       callback_url: callbackUrl,
     },
     customer: {

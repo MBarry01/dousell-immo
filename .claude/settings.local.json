@@ -71,7 +71,9 @@
       "mcp__claude_ai_Supabase__apply_migration",
       "Bash(npx next build)",
       "Bash(del /F /Q .nextlock)",
-      "Bash(npx vercel logs:*)"
+      "Bash(npx vercel logs:*)",
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__get_logs"
     ]
   }
 }

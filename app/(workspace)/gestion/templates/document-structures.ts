@@ -1,7 +1,7 @@
 /**
  * Structures des documents PDF pour la Gestion Locative
- * Ces templates définissent les éléments envoyés à n8n pour générer les PDF conformes
- * au droit sénégalais (loi n° 2014-03 sur la baisse des loyers)
+ * Ces templates définissent les structures de données pour la génération interne des PDF
+ * conformes au droit sénégalais (loi n° 2014-03 sur la baisse des loyers)
  */
 
 // ============================================================

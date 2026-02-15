@@ -8,7 +8,7 @@ interface MaintenanceRequest {
     id: string;
     description: string;
     category?: string;
-    status: 'open' | 'artisan_found' | 'awaiting_approval' | 'approved' | 'in_progress' | 'completed';
+    status: 'submitted' | 'open' | 'artisan_found' | 'awaiting_approval' | 'approved' | 'in_progress' | 'completed' | 'rejected' | 'cancelled';
     created_at: string;
     artisan_name?: string;
     artisan_phone?: string;
@@ -17,6 +17,14 @@ interface MaintenanceRequest {
     quoted_price?: number;
     intervention_date?: string;
     owner_approved?: boolean;
+    tenant_response?: 'confirmed' | 'reschedule_requested';
+    tenant_suggested_date?: string;
+    rejection_reason?: string;
+    photo_urls?: string[];
+    property_title?: string;
+    property_images?: string[];
+    tenant_name?: string;
+    tenant_email?: string;
 }
 
 interface InterventionsPageClientProps {

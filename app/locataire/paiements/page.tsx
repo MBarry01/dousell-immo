@@ -23,6 +23,7 @@ type Payment = {
     period_month: number;
     period_year: number;
     paid_at?: string | null;
+    payment_method?: string | null;
 };
 
 type PaymentData = {
@@ -179,85 +180,118 @@ export default function TenantPaymentsPage() {
                 ))}
             </div>
 
-            {/* Payments List */}
-            <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
-                <div className="divide-y divide-zinc-100">
-                    {filteredPayments.map((payment) => {
-                        const isPaid = payment.status === 'paid';
-                        const isOverdue = payment.status === 'overdue';
-                        const period = formatPeriod(payment.period_month, payment.period_year);
-                        const paidDate = formatPaidDate(payment.paid_at);
+            {/* Payments List with Year Separators */}
+            <div className="space-y-4">
+                {(() => {
+                    // Group payments by year
+                    const byYear = filteredPayments.reduce<Record<number, Payment[]>>((acc, p) => {
+                        const year = p.period_year;
+                        if (!acc[year]) acc[year] = [];
+                        acc[year].push(p);
+                        return acc;
+                    }, {});
 
+                    const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
+
+                    if (years.length === 0) {
                         return (
-                            <button
-                                key={payment.id}
-                                onClick={() => isPaid ? router.push(`/locataire/paiements/${payment.id}`) : undefined}
-                                className={`w-full flex items-center justify-between px-4 py-4 hover:bg-zinc-50 transition-colors text-left ${
-                                    isPaid ? 'cursor-pointer' : 'cursor-default'
-                                }`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                        isPaid
-                                            ? 'bg-emerald-50 text-emerald-600'
-                                            : isOverdue
-                                                ? 'bg-red-50 text-red-600'
-                                                : 'bg-amber-50 text-amber-600'
-                                    }`}>
-                                        {isPaid
-                                            ? <CheckCircle2 className="w-5 h-5" />
-                                            : isOverdue
-                                                ? <AlertTriangle className="w-5 h-5" />
-                                                : <Clock className="w-5 h-5" />
-                                        }
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-zinc-900">
-                                            Loyer {period}
-                                        </p>
-                                        <p className="text-xs text-zinc-500">
-                                            {isPaid && paidDate
-                                                ? `Payé le ${paidDate}`
-                                                : isOverdue
-                                                    ? 'Paiement en retard'
-                                                    : 'En attente de paiement'
-                                            }
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    <div className="text-right">
-                                        <p className={`font-semibold tabular-nums ${
-                                            isPaid ? 'text-zinc-900' : isOverdue ? 'text-red-600' : 'text-amber-600'
-                                        }`}>
-                                            {formatCurrency(payment.amount_paid || payment.amount_due)}
-                                            <span className="text-xs font-normal text-zinc-400 ml-1">F</span>
-                                        </p>
-                                        <span className={`inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded mt-1 ${
-                                            isPaid
-                                                ? 'bg-emerald-50 text-emerald-700'
-                                                : isOverdue
-                                                    ? 'bg-red-50 text-red-700'
-                                                    : 'bg-amber-50 text-amber-700'
-                                        }`}>
-                                            {isPaid ? 'Payé' : isOverdue ? 'En retard' : 'En attente'}
-                                        </span>
-                                    </div>
-                                    {isPaid && (
-                                        <ChevronRight className="w-4 h-4 text-zinc-400" />
-                                    )}
-                                </div>
-                            </button>
+                            <div className="bg-white rounded-xl border border-zinc-200 py-12 text-center">
+                                <p className="text-sm text-zinc-500">Aucun paiement dans cette catégorie</p>
+                            </div>
                         );
-                    })}
-                </div>
+                    }
 
-                {filteredPayments.length === 0 && (
-                    <div className="py-12 text-center">
-                        <p className="text-sm text-zinc-500">Aucun paiement dans cette catégorie</p>
-                    </div>
-                )}
+                    return years.map(year => (
+                        <div key={year}>
+                            <div className="sticky top-16 z-10 bg-slate-50/95 backdrop-blur px-1 py-2">
+                                <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{year}</h3>
+                            </div>
+                            <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+                                <div className="divide-y divide-zinc-100">
+                                    {byYear[year].map((payment) => {
+                                        const isPaid = payment.status === 'paid';
+                                        const isOverdue = payment.status === 'overdue';
+                                        const period = formatPeriod(payment.period_month, payment.period_year);
+                                        const paidDate = formatPaidDate(payment.paid_at);
+                                        const methodLabel = payment.payment_method === 'stripe' ? 'Carte' :
+                                                           payment.payment_method === 'kkiapay' ? 'Mobile' :
+                                                           payment.payment_method || null;
+
+                                        return (
+                                            <button
+                                                key={payment.id}
+                                                onClick={() => isPaid ? router.push(`/locataire/paiements/${payment.id}`) : undefined}
+                                                className={`w-full flex items-center justify-between px-4 py-4 hover:bg-zinc-50 transition-colors text-left ${
+                                                    isPaid ? 'cursor-pointer' : 'cursor-default'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                                        isPaid
+                                                            ? 'bg-emerald-50 text-emerald-600'
+                                                            : isOverdue
+                                                                ? 'bg-red-50 text-red-600'
+                                                                : 'bg-amber-50 text-amber-600'
+                                                    }`}>
+                                                        {isPaid
+                                                            ? <CheckCircle2 className="w-5 h-5" />
+                                                            : isOverdue
+                                                                ? <AlertTriangle className="w-5 h-5" />
+                                                                : <Clock className="w-5 h-5" />
+                                                        }
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-zinc-900">
+                                                            Loyer {period}
+                                                        </p>
+                                                        <p className="text-xs text-zinc-500">
+                                                            {isPaid && paidDate
+                                                                ? `Payé le ${paidDate}`
+                                                                : isOverdue
+                                                                    ? 'Paiement en retard'
+                                                                    : 'En attente de paiement'
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <div className="text-right">
+                                                        <p className={`font-semibold tabular-nums ${
+                                                            isPaid ? 'text-zinc-900' : isOverdue ? 'text-red-600' : 'text-amber-600'
+                                                        }`}>
+                                                            {formatCurrency(payment.amount_paid || payment.amount_due)}
+                                                            <span className="text-xs font-normal text-zinc-400 ml-1">F</span>
+                                                        </p>
+                                                        <div className="flex items-center gap-1 justify-end">
+                                                            {isPaid && methodLabel && (
+                                                                <span className="text-[9px] font-medium text-zinc-400 bg-zinc-100 px-1 py-0.5 rounded">
+                                                                    {methodLabel}
+                                                                </span>
+                                                            )}
+                                                            <span className={`inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                                                                isPaid
+                                                                    ? 'bg-emerald-50 text-emerald-700'
+                                                                    : isOverdue
+                                                                        ? 'bg-red-50 text-red-700'
+                                                                        : 'bg-amber-50 text-amber-700'
+                                                            }`}>
+                                                                {isPaid ? 'Payé' : isOverdue ? 'En retard' : 'En attente'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    {isPaid && (
+                                                        <ChevronRight className="w-4 h-4 text-zinc-400" />
+                                                    )}
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    ));
+                })()}
             </div>
 
             {/* Modal */}

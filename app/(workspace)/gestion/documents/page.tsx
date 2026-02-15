@@ -77,6 +77,7 @@ const DOCUMENT_CATEGORIES = [
     { value: "bail", label: "Contrat de Bailli" },
     { value: "quittance", label: "Quittance de Loyer" },
     { value: "etat_lieux", label: "État des Lieux" },
+    { value: "devis", label: "Devis" },
     { value: "facture_travaux", label: "Facture Travaux" },
     { value: "assurance", label: "Assurance" },
     { value: "courrier", label: "Courrier / Avis" },
@@ -350,11 +351,22 @@ export default function RentalDocumentsPage() {
                                         : 'bg-white border-gray-200 hover:border-brand/30 hover:shadow-brand/5'
                                         }`}
                                 >
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div className={`p-2 rounded-lg ${isDark ? 'bg-slate-950' : 'bg-gray-100'}`}>
+                                    {/* Lien global cliquable (Stretched link pattern) */}
+                                    {doc.url && (
+                                        <a
+                                            href={doc.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="absolute inset-0 z-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                                            aria-label={`Voir le document ${doc.name}`}
+                                        />
+                                    )}
+
+                                    <div className="flex items-start justify-between mb-3 relative z-10 pointer-events-none">
+                                        <div className={`p-2 rounded-lg pointer-events-auto ${isDark ? 'bg-slate-950' : 'bg-gray-100'}`}>
                                             {getFileIcon(doc.type || "")}
                                         </div>
-                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
                                             <a
                                                 href={doc.url}
                                                 target="_blank"
@@ -362,7 +374,7 @@ export default function RentalDocumentsPage() {
                                                 className={`p-1.5 rounded-md ${isDark ? 'hover:bg-slate-800 text-slate-400 hover:text-brand' : 'hover:bg-gray-100 text-gray-400 hover:text-slate-900'}`}
                                                 title="Prévisualiser"
                                             >
-                                                <Eye size={18} />
+                                                <Eye size={18} weight="bold" />
                                             </a>
                                             <a
                                                 href={doc.url}
@@ -375,7 +387,10 @@ export default function RentalDocumentsPage() {
                                                 <DownloadSimple size={18} />
                                             </a>
                                             <button
-                                                onClick={() => handleDelete(doc.id)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Important pour ne pas trigger le lien global (même si z-index gère)
+                                                    handleDelete(doc.id);
+                                                }}
                                                 className={`p-1.5 rounded-md ${isDark ? 'hover:bg-red-900/20 text-slate-400 hover:text-red-400' : 'hover:bg-red-50 text-gray-400 hover:text-red-600'}`}
                                                 title="Supprimer"
                                             >

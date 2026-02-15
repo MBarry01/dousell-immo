@@ -615,9 +615,9 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     // B. Documents liés aux baux de l'équipe (peu importe qui les a uploadés)
     let queryTeamDocs = teamLeaseIds.length > 0
       ? supabase
-          .from("user_documents")
-          .select(`*`)
-          .in("lease_id", teamLeaseIds)
+        .from("user_documents")
+        .select(`*`)
+        .in("lease_id", teamLeaseIds)
       : Promise.resolve({ data: [], error: null });
 
     if (filters?.propertyId) {
@@ -717,6 +717,7 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
         status,
         created_at,
         quoted_price,
+        quote_url,
         leases!inner (
           id,
           tenant_name,
@@ -743,21 +744,33 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     // Dédoublonnage au cas où (par sécurité, bien que les queries soient disjointe par user_id)
     const uniqueManuals = Array.from(new Map(allManualsData.map(item => [item.id, item])).values());
 
-    // --- Traitement Documents Manuels ---
-    const manualDocs = await Promise.all(
+    // --- Traitement de TOUS les documents pour obtenir les URLs signées ---
+    const docsWithUrls = await Promise.all(
       uniqueManuals.map(async (doc) => {
-        // Déterminer le bon bucket
-        const bucketName = doc.category === 'lease_contract' ? 'lease-contracts' : 'verification-docs';
+        // Déterminer le bon bucket selon le type ou la catégorie
+        let bucketName: 'verification-docs' | 'lease-contracts' | 'receipts' | 'properties' = 'verification-docs';
+        if (doc.category === 'lease_contract' || doc.entity_type === 'lease' || doc.file_type === 'bail') {
+          bucketName = 'lease-contracts';
+        } else if (doc.entity_type === 'payment' || doc.entity_type === 'quittance' || doc.file_type === 'quittance') {
+          bucketName = 'receipts';
+        } else if (doc.file_type === 'maintenance' || doc.file_path?.includes('maintenance/')) {
+          bucketName = 'properties';
+        }
 
         const { data } = await supabase.storage
           .from(bucketName)
           .createSignedUrl(doc.file_path, 604800);
 
+        let signedUrl = data?.signedUrl || "";
+        if (signedUrl) {
+          // Force inline display instead of download
+          signedUrl += (signedUrl.includes('?') ? '&' : '?') + 'response-content-disposition=inline';
+        }
+
         // Since we removed joins, construct property_title from description or file_name
-        // For lease contracts, use description which contains "Contrat de bail - <tenant_name>"
         const propertyTitle = doc.description || doc.file_name || "Document";
 
-        // Extract tenant name from description if available (format: "Contrat de bail - Sidy Dia")
+        // Extract tenant name from description if available
         let tenantName = null;
         if (doc.description && doc.description.includes(' - ')) {
           tenantName = doc.description.split(' - ')[1];
@@ -765,14 +778,38 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
 
         return {
           ...doc,
-          name: doc.description || doc.file_name || "Document sans nom",  // CRITICAL: Display name for UI
+          name: doc.description || doc.file_name || "Document sans nom",
           url: data?.signedUrl || "",
           property_title: propertyTitle,
           tenant_name: tenantName,
-          uploaded_at: doc.created_at || doc.updated_at || null  // Ensure date is available
+          uploaded_at: doc.created_at || doc.updated_at || null
         };
       })
     );
+
+    // --- Indexation des documents GED pour lookup rapide ---
+    // Maintenant docsWithUrls contient les URLs signées
+    const gedIndex = new Map<string, any>(); // Key: "type:id" -> Document
+    docsWithUrls.forEach(doc => {
+      if (doc.entity_type && doc.entity_id) {
+        gedIndex.set(`${doc.entity_type}:${doc.entity_id}`, doc);
+      }
+      // Support legacy/fallback: parfois on n'a que lease_id
+      if (doc.file_type === 'bail' && doc.lease_id) {
+        gedIndex.set(`lease:${doc.lease_id}`, doc);
+      }
+    });
+
+    // --- Traitement Documents Manuels ---
+    const manualDocs = docsWithUrls.filter(doc => {
+      // Exclure les documents qui sont déjà traités dans les sections spécifiques (Baux, Quittances)
+      const isHandledElsewhere =
+        (doc.entity_type === 'lease' || doc.file_type === 'bail') ||
+        (doc.entity_type === 'payment' || doc.entity_type === 'quittance' || doc.file_type === 'quittance') ||
+        (doc.entity_type === 'maintenance_request' || doc.file_type === 'maintenance');
+
+      return !isHandledElsewhere;
+    });
 
     // --- Traitement Quittances ---
     const validReceipts = (receiptsRes.data || []).filter(r => true);
@@ -780,19 +817,26 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     const receiptDocs = validReceipts.map(r => {
       const lease = r.leases as any;
       const dateStr = new Date(r.period_year, r.period_month - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+      // Chercher un document GED existant pour cette transaction
+      const existingDoc = gedIndex.get(`payment:${r.id}`) || gedIndex.get(`quittance:${r.id}`);
+
+      // L'URL est soit celle du doc stocké (si présent), soit l'API dynamique
+      const docUrl = existingDoc?.url || `/api/documents/receipt/${r.id}`;
+
       return {
         id: `receipt-${r.id}`,
-        name: `Quittance - ${dateStr}`,
+        name: existingDoc?.name || `Quittance - ${dateStr}`,
         type: "quittance",
         category: "quittance",
-        size: 0,
-        url: "",
+        size: existingDoc?.size || 0,
+        url: docUrl, // Priorité au document stocké
         uploaded_at: r.paid_at || new Date().toISOString(),
         property_id: null,
         lease_id: lease?.id,
         property_title: lease?.property_address || "Propriété sans titre",
         tenant_name: lease?.tenant_name,
-        is_virtual: true,
+        is_virtual: !existingDoc, // N'est plus virtuel si on a un doc physique
         virtual_type: 'receipt',
         virtual_data: {
           transactionId: r.id,
@@ -805,6 +849,7 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     // --- Traitement États des Lieux ---
     const inventoryDocs = (inventoryRes.data || []).map(r => {
       const lease = r.leases as any;
+      // TODO: Vérifier si un EDL stocké existe (entity_type='inventory'?)
       return {
         id: `inventory-${r.id}`,
         name: `État des lieux (${r.report_type === 'entry' ? 'Entrée' : 'Sortie'})`,
@@ -823,54 +868,90 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     });
 
     // --- Traitement Contrats (Baux) ---
-    const leaseDocs = (leasesRes.data || []).map(l => ({
-      id: `lease-${l.id}`,
-      name: `Contrat de Bail - ${l.tenant_name}`,
-      type: "bail",
-      category: "bail",
-      size: 0,
-      url: `/gestion-locative?leaseId=${l.id}`,
-      uploaded_at: l.created_at,
-      property_id: null,
-      lease_id: l.id,
-      property_title: l.property_address || "Propriété sans titre",
-      tenant_name: l.tenant_name,
-      is_virtual: true,
-      virtual_type: 'lease'
-    }));
+    const leaseDocs = (leasesRes.data || []).map(l => {
+      // Chercher un document GED existant pour ce bail
+      const existingDoc = gedIndex.get(`lease:${l.id}`);
 
-    // --- Traitement Interventions ---
-    const maintenanceDocs = (maintenanceRes.data || []).map(m => {
-      const lease = m.leases as any;
+      const docUrl = existingDoc?.url || `/api/documents/lease/${l.id}`;
+
       return {
-        id: `maintenance-${m.id}`,
-        name: `Intervention: ${m.description.substring(0, 30)}...`,
-        type: "facture_travaux",
-        category: "facture_travaux",
-        size: 0,
-        url: `/compte/interventions`,
-        uploaded_at: m.created_at,
+        id: `lease-${l.id}`,
+        name: existingDoc?.name || `Contrat de Bail - ${l.tenant_name}`,
+        type: "bail",
+        category: "bail",
+        size: existingDoc?.size || 0,
+        url: docUrl,
+        uploaded_at: l.created_at,
         property_id: null,
-        lease_id: lease?.id,
-        property_title: lease?.property_address || "Propriété sans titre",
-        tenant_name: lease?.tenant_name,
-        is_virtual: true,
-        virtual_type: 'maintenance',
-        virtual_data: {
-          status: m.status,
-          price: m.quoted_price
-        }
+        lease_id: l.id,
+        property_title: l.property_address || "Propriété sans titre",
+        tenant_name: l.tenant_name,
+        is_virtual: !existingDoc,
+        virtual_type: 'lease'
       };
     });
+
+    // --- Traitement Interventions ---
+    // On ne garde que celles qui ont une URL de devis/facture valide
+    const maintenanceDocs = await Promise.all((maintenanceRes.data || [])
+      .filter(m => !!m.quote_url)
+      .map(async (m) => {
+        const lease = m.leases as any;
+        const isCompleted = m.status === 'completed';
+
+        let finalUrl = m.quote_url || `/gestion`;
+
+        // Si on a un quote_url qui est une URL Supabase, on essaie de la signer pour être sûr de l'accès
+        if (m.quote_url && (m.quote_url.includes('storage/v1/object/public/properties/') || m.quote_url.includes('storage/v1/object/sign/properties/'))) {
+          try {
+            // Extraire le path relatif (après /properties/)
+            const filePath = m.quote_url.split('/properties/')[1].split('?')[0];
+            const { data: signedData } = await supabase.storage
+              .from('properties')
+              .createSignedUrl(filePath, 604800);
+            if (signedData?.signedUrl) {
+              finalUrl = signedData.signedUrl + (signedData.signedUrl.includes('?') ? '&' : '?') + 'response-content-disposition=inline';
+            }
+          } catch (e) {
+            console.warn("Erreur signature URL maintenance:", e);
+          }
+        }
+
+        return {
+          id: `maintenance-${m.id}`,
+          name: isCompleted ? `Facture: ${m.description.substring(0, 30)}...` : `Devis: ${m.description.substring(0, 30)}...`,
+          type: isCompleted ? "facture_travaux" : "devis",
+          category: isCompleted ? "facture_travaux" : "devis",
+          size: 0,
+          url: finalUrl,
+          uploaded_at: m.created_at,
+          property_id: null,
+          lease_id: lease?.id,
+          property_title: lease?.property_address || "Propriété sans titre",
+          tenant_name: lease?.tenant_name,
+          is_virtual: true,
+          virtual_type: 'maintenance',
+          virtual_data: {
+            status: m.status,
+            price: m.quoted_price
+          }
+        };
+      }));
 
 
     // Fusionner et trier par date décroissante
     // On inclut les documents manuels/générés ET les documents virtuels (quittances, etc.)
     const allDocs = [
-      ...manualDocs
-    ].sort((a, b) =>
-      new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
-    );
+      ...manualDocs,
+      ...receiptDocs,
+      ...inventoryDocs,
+      ...leaseDocs,
+      ...maintenanceDocs
+    ].sort((a, b) => {
+      const dateA = a.uploaded_at ? new Date(a.uploaded_at).getTime() : 0;
+      const dateB = b.uploaded_at ? new Date(b.uploaded_at).getTime() : 0;
+      return dateB - dateA;
+    });
 
 
     return { success: true, data: allDocs };
