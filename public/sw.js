@@ -1,4 +1,5 @@
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
+// v10.1 - OneSignal CSP Fix check
 
 // Service Worker for Dousell Immo PWA
 
