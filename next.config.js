@@ -65,10 +65,6 @@ const nextConfig = {
                         value: 'camera=(), microphone=(self), geolocation=(), interest-cohort=()',
                     },
                     {
-                        key: 'X-Debug-CSP-Version',
-                        value: 'v10.7-final-js',
-                    },
-                    {
                         key: 'Content-Security-Policy',
                         value: [
                             "default-src 'self'",

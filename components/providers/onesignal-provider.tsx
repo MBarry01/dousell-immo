@@ -23,6 +23,25 @@ export default function OneSignalProvider({ userId }: { userId?: string }) {
                 await OneSignal.init({
                     appId: "a7fba1dc-348a-4ee5-9647-3e7253c13cb8",
                     allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
+                    promptOptions: {
+                        slidedown: {
+                            prompts: [
+                                {
+                                    type: "push",
+                                    autoPrompt: true,
+                                    text: {
+                                        actionMessage: "Souhaitez-vous recevoir des notifications pour les nouvelles annonces et mises à jour de vos dossiers ?",
+                                        acceptButton: "S'abonner",
+                                        cancelButton: "Plus tard",
+                                    },
+                                    delay: {
+                                        pageViews: 1,
+                                        timeDelay: 5,
+                                    }
+                                }
+                            ]
+                        }
+                    }
                 });
 
                 isInitialized.current = true;
