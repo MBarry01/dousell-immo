@@ -1,4 +1,4 @@
-# 🗺️ MAP DES COMPOSANTS (227)
+# 🗺️ MAP DES COMPOSANTS (229)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -123,11 +123,13 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<share-button />** (Path: `components\property\share-button.tsx`)
 - **<similar-properties />** (Path: `components\property\similar-properties.tsx`)
 - **<static-map />** (Path: `components\property\static-map.tsx`)
+- **<onesignal-provider />** (Path: `components\providers\onesignal-provider.tsx`)
 - **<splash-provider />** (Path: `components\providers\splash-provider.tsx`)
 - **<suppress-hydration-warning />** (Path: `components\providers\suppress-hydration-warning.tsx`)
 - **<install-prompt />** (Path: `components\pwa\install-prompt.tsx`)
 - **<push-notifications />** (Path: `components\pwa\push-notifications.tsx`)
 - **<service-worker-register />** (Path: `components\pwa\service-worker-register.tsx`)
+- **<tenant-push-notifications />** (Path: `components\pwa\tenant-push-notifications.tsx`)
 - **<Feature18 />** (Path: `components\saasable\blocks\Feature18.tsx`)
 - **<Typeset />** (Path: `components\saasable\components\Typeset.tsx`)
 - **<SaasableSectionWrapper />** (Path: `components\saasable\SaasableSectionWrapper.tsx`)

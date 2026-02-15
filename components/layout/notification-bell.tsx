@@ -9,6 +9,8 @@ import {
   AlertTriangle,
   XCircle,
   CheckCheck,
+  MessageSquare,
+  Wrench,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
@@ -36,13 +38,17 @@ const notificationIcons: Record<NotificationType, typeof Info> = {
   success: CheckCircle,
   warning: AlertTriangle,
   error: XCircle,
+  message: MessageSquare,
+  maintenance: Wrench,
 };
 
 const notificationStyles: Record<NotificationType, string> = {
   info: "bg-blue-500/10 text-blue-400",
-  success: "bg-green-500/10 text-green-400",
-  warning: "bg-yellow-500/10 text-yellow-400",
-  error: "bg-red-500/10 text-red-400",
+  success: "text-green-500 bg-green-50 dark:bg-green-900/10",
+  warning: "text-yellow-500 bg-yellow-50 dark:bg-yellow-900/10",
+  error: "text-red-500 bg-red-50 dark:bg-red-900/10",
+  message: "text-blue-500 bg-blue-50 dark:bg-blue-900/10",
+  maintenance: "text-orange-500 bg-orange-50 dark:bg-orange-900/10",
 };
 
 export function NotificationBell({ userId, className }: NotificationBellProps) {
