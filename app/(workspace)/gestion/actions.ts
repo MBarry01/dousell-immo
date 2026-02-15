@@ -10,6 +10,9 @@ import { sendEmail } from '@/lib/mail';
 import { getUserTeamContext } from "@/lib/team-context";
 import { requireTeamPermission } from "@/lib/permissions";
 import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
+import { generateMaintenancePDF } from '@/lib/maintenance-pdf-generator';
+import { uploadPDFToStorage } from '@/lib/pdf-generator';
+import { storeDocumentInGED } from '@/lib/ged-utils';
 import {
     getRentalTransactions,
     getLeasesByTeam,
@@ -543,28 +546,105 @@ export async function createNewLease(formData: Record<string, unknown>) {
         // On ne bloque pas la création du bail, mais on log l'erreur
     }
 
-    // DÉCLENCHEUR N8N : Génération du contrat de bail PDF (email)
-    // Note: On ne l'envoie plus automatiquement ici si on veut faire un "Pack de Bienvenue" groupé
-    // MAIS pour l'instant on garde la génération du PDF pour qu'il soit prêt.
-    await triggerN8N('generate-lease-pdf', {
-        leaseId: lease.id,
-        tenantName: lease.tenant_name,
-        tenantEmail: lease.tenant_email,
-        tenantPhone: lease.tenant_phone,
-        amount: lease.monthly_amount,
-        currency: 'FCFA',
-        startDate: lease.start_date,
-        billingDay: lease.billing_day,
-        ownerEmail: user.email,
-        ownerId: user.id
-    });
-
     // Invalidation complète du cache pour mise à jour UI immédiate
     await invalidateRentalCaches(teamId, lease.id, {
         invalidateLeases: true,
         invalidateTransactions: true,
         invalidateStats: true
     });
+
+    // ==============================================
+    // 4. GÉNÉRATION ET STOCKAGE GED DU BAIL PDF
+    // ==============================================
+    try {
+        // Préparer les données pour le PDF (ContractData)
+        // Note: On utilise les données brutes car le profil owner est peut-être fraîchement créé
+        const { data: ownerProfile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+
+        // Construction des données du contrat
+        // Import dynamique pour éviter les cycles si besoin, ou utiliser les imports existants
+        // On suppose que les types sont dispos via imports en haut de fichier (à ajouter si absent)
+
+        const contractData = {
+            landlord: {
+                firstName: ownerProfile?.first_name || user.user_metadata?.full_name?.split(' ')[0] || 'Propriétaire',
+                lastName: ownerProfile?.last_name || user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '',
+                address: ownerProfile?.company_address || 'Adresse non renseignée',
+                phone: ownerProfile?.phone_number || '',
+                email: user.email,
+                companyName: ownerProfile?.company_name,
+                ninea: ownerProfile?.company_ninea
+            },
+            tenant: {
+                firstName: lease.tenant_name?.split(' ')[0] || '',
+                lastName: lease.tenant_name?.split(' ').slice(1).join(' ') || '',
+                phone: lease.tenant_phone || '',
+                email: lease.tenant_email,
+                nationalId: '',
+                address: propertyAddress
+            },
+            property: {
+                address: propertyAddress || '',
+                description: (finalData as any).custom_data?.description || propertyAddress || 'Bien immobilier', // Fallback description
+                propertyType: 'appartement' as any
+            },
+            lease: {
+                monthlyRent: Number(lease.monthly_amount),
+                securityDeposit: Number(lease.monthly_amount) * (depositMonths || 2),
+                depositMonths: depositMonths || 2,
+                startDate: new Date(lease.start_date),
+                duration: Number(lease.duration) || 12,
+                billingDay: Number(lease.billing_day) || 5,
+            },
+            signatures: {
+                signatureCity: 'Dakar',
+                signatureDate: new Date()
+            }
+        };
+
+        // Générer le PDF
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { generateLeasePDF } = require('@/lib/pdf-generator');
+        const pdfResult = await generateLeasePDF(contractData);
+
+        if (pdfResult.success && pdfResult.pdfBytes) {
+            // Stocker dans la GED
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const { storeDocumentInGED } = require('@/lib/ged-utils');
+
+            // Utiliser un client admin pour outrepasser les restrictions de session sur le storage
+            const { createClient: createAdminSupabase } = require('@supabase/supabase-js');
+            const supabaseAdmin = createAdminSupabase(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!
+            );
+
+            await storeDocumentInGED({
+                userId: user.id,
+                teamId: teamId,
+                fileBuffer: pdfResult.pdfBytes,
+                fileName: `Bail - ${lease.tenant_name} - ${new Date().getFullYear()}.pdf`,
+                bucketName: 'lease-contracts',
+                documentType: 'bail',
+                metadata: {
+                    leaseId: lease.id,
+                    propertyId: propertyId,
+                    tenantName: lease.tenant_name,
+                    description: `Contrat de bail pour ${lease.tenant_name}`
+                }
+            }, supabaseAdmin);
+            console.log("✅ Bail PDF généré et stocké en GED via utility");
+        } else {
+            console.error("❌ Echec génération PDF interne:", pdfResult.error);
+        }
+
+    } catch (gedError) {
+        console.error("❌ Erreur processus GED Bail:", gedError);
+        // On ne bloque pas la réponse, le bail est créé
+    }
+
+    // DÉCLENCHEUR N8N : Supprimé car génération interne
+    // La génération du PDF est maintenant gérée ci-dessus par generateLeasePDF et stockée dans la GED.
 
     // Invalider aussi le cache du profil propriétaire et le CACHE VITRINE (Homepage)
     // pour que le bien disparaisse de la liste "disponible"
@@ -1528,7 +1608,7 @@ export async function createMaintenanceRequest(data: {
             team_id: teamId,
             description: data.description,
             category: data.category || 'General',
-            status: status,
+            status: status || 'open', // 'open' triggers artisan search if artisan found, otherwise searching
             artisan_name: artisanData.name,
             artisan_phone: artisanData.phone,
             artisan_rating: artisanData.rating,
@@ -1561,17 +1641,120 @@ export async function createMaintenanceRequest(data: {
 export async function submitQuote(requestId: string, data: {
     quoted_price: number;
     intervention_date: string;
+    quote_url?: string;
 }) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return { success: false, error: "Non autorisé" };
 
+    // 1. Récupérer les infos pour le PDF
+    const { data: request, error: reqError } = await supabase
+        .from('maintenance_requests')
+        .select(`
+            id, 
+            description, 
+            category, 
+            lease_id,
+            artisan_name,
+            artisan_phone,
+            leases (
+                tenant_name,
+                property_id,
+                properties (
+                    title,
+                    location
+                )
+            )
+        `)
+        .eq('id', requestId)
+        .single();
+
+    if (reqError || !request) return { success: false, error: "Intervention introuvable" };
+
+    // 2. Récupérer le profil du propriétaire pour le branding
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, company_name, company_address, logo_url')
+        .eq('id', user.id)
+        .single();
+
+    let finalQuoteUrl = data.quote_url;
+
+    try {
+        let fileBuffer: Uint8Array | null = null;
+        let fileName = `Devis_${request.category || 'Intervention'}_${requestId.slice(0, 5)}.pdf`;
+        let isAutoGenerated = false;
+
+        // 3. Préparer le buffer (Génération ou Téléchargement pour standardisation)
+        if (!finalQuoteUrl) {
+            // Génération Auto
+            const pdfBytes = await generateMaintenancePDF({
+                requestId: request.id,
+                description: request.description,
+                category: request.category || 'Maintenance',
+                interventionDate: data.intervention_date,
+                quotedPrice: data.quoted_price,
+                propertyTitle: (request.leases as any)?.properties?.title || 'Bien non spécifié',
+                propertyAddress: (request.leases as any)?.properties?.location?.address || '',
+                tenantName: (request.leases as any)?.tenant_name || 'Locataire',
+                artisanName: request.artisan_name || undefined,
+                artisanPhone: request.artisan_phone || undefined,
+                ownerName: profile?.full_name || 'Propriétaire',
+                ownerCompany: profile?.company_name || undefined,
+                ownerAddress: profile?.company_address || undefined,
+                logoUrl: profile?.logo_url || undefined,
+            });
+            fileBuffer = pdfBytes;
+            fileName = `auto_quote_${requestId}_${Date.now()}.pdf`;
+            isAutoGenerated = true;
+        } else {
+            // Récupération fichier existant (upload manuel client)
+            // On le récupère pour le ré-uploader proprement via GED (standardisation metadonnées)
+            const response = await fetch(finalQuoteUrl);
+            if (!response.ok) throw new Error("Impossible de récupérer le fichier uploadé");
+            const arrayBuffer = await response.arrayBuffer();
+            fileBuffer = new Uint8Array(arrayBuffer);
+            fileName = `manual_quote_${requestId}_${Date.now()}.pdf`;
+        }
+
+        // 4. Stockage unifié via GED
+        // Utilisation du bucket 'properties' car les fichiers doivent être accessibles publiquement (pour le tenant)
+        // storeDocumentInGED gère aussi l'inscription dans user_documents
+        const gedResult = await storeDocumentInGED({
+            userId: user.id,
+            fileBuffer: fileBuffer!,
+            fileName: fileName,
+            bucketName: 'properties',
+            documentType: 'maintenance',
+            metadata: {
+                requestId: requestId,
+                propertyId: (request.leases as any)?.property_id || null,
+                leaseId: request.lease_id || null,
+                tenantName: (request.leases as any)?.tenant_name,
+                description: `Devis ${isAutoGenerated ? 'auto' : 'manuel'} pour : ${request.description.slice(0, 50)}`
+            }
+        }, supabase);
+
+        if (gedResult.success && gedResult.fileUrl) {
+            finalQuoteUrl = gedResult.fileUrl;
+        } else {
+            console.error("Erreur GED:", gedResult.error);
+            // Si auto-généré et échec GED, c'est bloquant car on n'a pas d'URL
+            if (isAutoGenerated && !finalQuoteUrl) throw new Error("Echec stockage GED du devis auto: " + (gedResult.error || "erreur inconnue"));
+        }
+
+    } catch (err: any) {
+        console.error("Erreur traitement devis:", err);
+        return { success: false, error: "Erreur lors du traitement du document: " + err.message };
+    }
+
     const { error } = await supabase
         .from('maintenance_requests')
         .update({
             quoted_price: data.quoted_price,
             intervention_date: data.intervention_date,
+            quote_url: finalQuoteUrl,
             status: 'awaiting_approval' // En attente de validation propriétaire
         })
         .eq('id', requestId);
@@ -1583,6 +1766,166 @@ export async function submitQuote(requestId: string, data: {
 
     revalidatePath('/gestion');
     return { success: true, message: "Devis enregistré, en attente de validation." };
+}
+
+/**
+ * Répondre à une demande de report du locataire
+ */
+export async function handleOwnerRescheduleResponse(requestId: string, action: 'accept' | 'decline', newDate?: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "Non autorisé" };
+
+    const updateData: any = {};
+    if (action === 'accept') {
+        // Récupérer la date suggérée
+        const { data: request } = await supabase
+            .from('maintenance_requests')
+            .select('tenant_suggested_date')
+            .eq('id', requestId)
+            .single();
+
+        if (request?.tenant_suggested_date) {
+            updateData.intervention_date = request.tenant_suggested_date;
+            updateData.tenant_response = 'confirmed'; // On remet à confirmé
+            updateData.tenant_suggested_date = null;
+        }
+    } else if (newDate) {
+        updateData.intervention_date = newDate;
+        updateData.tenant_response = null; // On attend la nouvelle réponse du locataire
+        updateData.tenant_suggested_date = null;
+    }
+
+    const { error } = await supabase
+        .from('maintenance_requests')
+        .update(updateData)
+        .eq('id', requestId);
+
+    if (error) {
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/gestion');
+    return { success: true, message: action === 'accept' ? "Nouveau créneau accepté." : "Nouvelle date proposée." };
+}
+
+/**
+ * Valider une demande de maintenance (Locataire -> Recherche Artisan)
+ * Passe le statut de 'submitted' à 'open' et déclenche le webhook de recherche
+ */
+export async function validateMaintenanceRequest(requestId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "Non autorisé" };
+
+    // 1. Récupérer les détails de la demande
+    const { data: request, error: fetchError } = await supabase
+        .from('maintenance_requests')
+        .select(`
+            *,
+            leases(property_address, tenant_name, tenant_phone, tenant_email)
+        `)
+        .eq('id', requestId)
+        .single();
+
+    if (fetchError || !request) {
+        return { success: false, error: "Intervention introuvable" };
+    }
+
+    const lease = Array.isArray(request.leases) ? request.leases[0] : request.leases;
+
+    // 2. Tenter de trouver un artisan via Webhook (comme lors de la création directe par owner)
+    let artisanData: {
+        name?: string;
+        phone?: string;
+        rating?: number;
+        address?: string;
+    } = {};
+    let newStatus = 'open';
+
+    const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL;
+
+    if (MAKE_WEBHOOK_URL) {
+        try {
+            const response = await fetch(MAKE_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    category: request.category || "General",
+                    location: lease?.property_address || "Dakar, Sénégal",
+                    issue: request.description,
+                    tenantName: lease?.tenant_name,
+                    tenantPhone: lease?.tenant_phone,
+                    tenantEmail: lease?.tenant_email,
+                    webhookType: 'find_artisan'
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.artisan_name) {
+                    artisanData = {
+                        name: result.artisan_name,
+                        phone: result.artisan_phone,
+                        rating: parseFloat(result.rating) || undefined,
+                        address: result.address
+                    };
+                    newStatus = 'artisan_found';
+                }
+            }
+        } catch (e) {
+            console.error("Erreur Webhook validation:", e);
+        }
+    }
+
+    // 3. Mettre à jour la demande
+    const { error: updateError } = await supabase
+        .from('maintenance_requests')
+        .update({
+            status: newStatus,
+            artisan_name: artisanData.name,
+            artisan_phone: artisanData.phone,
+            artisan_rating: artisanData.rating,
+            artisan_address: artisanData.address,
+        })
+        .eq('id', requestId);
+
+    if (updateError) {
+        return { success: false, error: updateError.message };
+    }
+
+    revalidatePath('/gestion');
+    return {
+        success: true,
+        message: newStatus === 'artisan_found' ? "Intervention validée et artisan trouvé !" : "Intervention validée, recherche d'artisan en cours..."
+    };
+}
+
+/**
+ * Rejeter une demande de maintenance
+ */
+export async function rejectMaintenanceRequest(requestId: string, reason?: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "Non autorisé" };
+
+    const { error } = await supabase
+        .from('maintenance_requests')
+        .update({
+            status: 'rejected',
+            rejection_reason: reason
+        })
+        .eq('id', requestId);
+
+    if (error) {
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/gestion');
+    return { success: true, message: "Signalement rejeté." };
 }
 
 /**
@@ -1626,7 +1969,13 @@ export async function approveQuoteByOwner(requestId: string) {
     // Notification au locataire par email (Nodemailer)
     if (tenantEmail && request.artisan_name) {
         const datePrevue = request.intervention_date
-            ? new Date(request.intervention_date).toLocaleDateString('fr-FR')
+            ? new Date(request.intervention_date).toLocaleString('fr-FR', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace(':', 'h')
             : 'à confirmer';
 
         try {

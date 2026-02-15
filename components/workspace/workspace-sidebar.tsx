@@ -26,7 +26,9 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
+import { useOwnerUnreadCounts } from "@/hooks/use-unread-counts";
+import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet";
 import { TeamSwitcher } from "./TeamSwitcher";
@@ -101,6 +103,7 @@ interface SidebarContentProps {
   currentTeamId?: string;
   onSwitchTeam?: (teamId: string) => Promise<void>;
   onRequestAccess?: (permission: TeamPermissionKey, label: string) => void;
+  badgeCounts?: { unreadMessages: number; pendingMaintenance: number };
 }
 
 function SidebarContent({
@@ -112,6 +115,7 @@ function SidebarContent({
   currentTeamId,
   onSwitchTeam,
   onRequestAccess,
+  badgeCounts = { unreadMessages: 0, pendingMaintenance: 0 },
 }: SidebarContentProps) {
   const pathname = usePathname();
   const isGestionRoute = pathname?.startsWith("/gestion");
@@ -190,6 +194,12 @@ function SidebarContent({
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-2 space-y-1">
         {navItems.map((item) => {
+          // Compute badge for this item
+          const badgeCount = item.href === "/gestion/messages"
+            ? badgeCounts.unreadMessages
+            : item.href === "/gestion/interventions"
+              ? badgeCounts.pendingMaintenance
+              : 0;
           const isActive = pathname === item.href ||
             (item.href !== "/gestion" &&
               item.href !== "/locataire" &&
@@ -236,13 +246,29 @@ function SidebarContent({
             >
               {(() => {
                 const Icon = item.icon;
-                return <Icon className={cn(
-                  "h-5 w-5 shrink-0 transition-all",
-                  isActive ? "text-white dark:text-primary" : "text-muted-foreground group-hover:text-foreground"
-                )} />;
+                return (
+                  <span className="relative shrink-0">
+                    <Icon className={cn(
+                      "h-5 w-5 transition-all",
+                      isActive ? "text-white dark:text-primary" : "text-muted-foreground group-hover:text-foreground"
+                    )} />
+                    {badgeCount > 0 && isCollapsed && !isMobile && (
+                      <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white">
+                        {badgeCount > 9 ? "9+" : badgeCount}
+                      </span>
+                    )}
+                  </span>
+                );
               })()}
               {(!isCollapsed || isMobile) && (
-                <span className="text-sm truncate ml-3">{item.label}</span>
+                <>
+                  <span className="text-sm truncate ml-3 flex-1">{item.label}</span>
+                  {badgeCount > 0 && (
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white ml-auto">
+                      {badgeCount > 9 ? "9+" : badgeCount}
+                    </span>
+                  )}
+                </>
               )}
             </Link>
           );
@@ -326,6 +352,17 @@ export function WorkspaceSidebar({
 }: WorkspaceSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get the current user ID for the unread counts hook
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserId(user?.id || null);
+    });
+  }, []);
+
+  const badgeCounts = useOwnerUnreadCounts(userId, currentTeamId || null);
 
   // Hook pour gérer la modale de demande d'accès
   const { open: openAccessModal, Modal: AccessModal, isOpen: isAccessModalOpen } = useAccessRequestModal();
@@ -377,6 +414,7 @@ export function WorkspaceSidebar({
             currentTeamId={currentTeamId}
             onSwitchTeam={onSwitchTeam}
             onRequestAccess={handleRequestAccess}
+            badgeCounts={badgeCounts}
           />
         </SheetContent>
       </Sheet>
@@ -403,6 +441,7 @@ export function WorkspaceSidebar({
             currentTeamId={currentTeamId}
             onSwitchTeam={onSwitchTeam}
             onRequestAccess={handleRequestAccess}
+            badgeCounts={badgeCounts}
           />
         </aside>
       </div>

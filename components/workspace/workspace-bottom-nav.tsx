@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { useOwnerUnreadCounts } from "@/hooks/use-unread-counts";
+import { createClient } from "@/utils/supabase/client";
 import {
   Building2,
   Home,
@@ -66,10 +68,30 @@ export function WorkspaceBottomNav() {
   const ticking = useRef(false);
   const scrollContainerRef = useRef<Element | null>(null);
   const scrollHandlerRef = useRef<(() => void) | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [teamId, setTeamId] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    // Get user and team for badge counts
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setUserId(user.id);
+        // Get active team from cookie or team_members
+        const savedTeam = document.cookie
+          .split("; ")
+          .find((c) => c.startsWith("current_team_id="))
+          ?.split("=")[1];
+        if (savedTeam) setTeamId(savedTeam);
+      }
+    });
   }, []);
+
+  const badgeCounts = useOwnerUnreadCounts(
+    pathname?.startsWith("/gestion") ? userId : null,
+    teamId
+  );
 
 
   // Déterminer le contexte et les items de navigation
@@ -173,6 +195,13 @@ export function WorkspaceBottomNav() {
 
           const Icon = item.icon;
 
+          // Badge count for this item
+          const badgeCount = item.href === "/gestion/interventions"
+            ? badgeCounts.pendingMaintenance
+            : item.href === "/gestion/comptabilite"
+              ? 0
+              : 0;
+
           return (
             <Link
               key={item.href}
@@ -182,7 +211,7 @@ export function WorkspaceBottomNav() {
             >
               <span
                 className={cn(
-                  "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
+                  "relative inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
                   isActive
                     ? "text-[#F4C430] bg-[#F4C430]/10"
                     : "text-muted-foreground"
@@ -192,6 +221,11 @@ export function WorkspaceBottomNav() {
                   className="h-5 w-5"
                   strokeWidth={isActive ? 2.5 : 1.5}
                 />
+                {badgeCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white">
+                    {badgeCount > 9 ? "9+" : badgeCount}
+                  </span>
+                )}
               </span>
               <span
                 className={cn(
