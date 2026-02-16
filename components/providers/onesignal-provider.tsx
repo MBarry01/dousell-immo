@@ -22,6 +22,9 @@ export const initOneSignal = async () => {
             await OneSignal.init({
                 appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "",
                 allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
+                // IMPORTANT: Explicitly point to our custom SW which imports OneSignalSDK
+                // This fixes the "Event handler of 'message' event must be added on the initial evaluation" error
+                serviceWorkerPath: "/sw.js",
                 serviceWorkerParam: { scope: "/" },
                 promptOptions: {
                     slidedown: {

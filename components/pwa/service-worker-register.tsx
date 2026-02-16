@@ -9,7 +9,7 @@ export function ServiceWorkerRegister() {
     }
 
     // Register service worker in production or if explicitly enabled
-    const shouldRegister = 
+    const shouldRegister =
       process.env.NODE_ENV === "production" ||
       process.env.NEXT_PUBLIC_ENABLE_SW === "true";
 
@@ -69,16 +69,13 @@ export function ServiceWorkerRegister() {
         console.error("Service Worker registration failed:", error);
       });
 
-    // Handle service worker updates (with anti-loop guard)
+    // Handle service worker updates (silent update without forced reload)
+    // We removed the aggressive window.location.reload() to prevent infinite loops
+    // caused by "Update on reload" in DevTools or frequent SW updates.
     const handleControllerChange = () => {
-      const key = "sw-last-reload";
-      const lastReload = sessionStorage.getItem(key);
-      const now = Date.now();
-      if (lastReload && now - parseInt(lastReload, 10) < 5000) {
-        return;
-      }
-      sessionStorage.setItem(key, String(now));
-      window.location.reload();
+      console.log("🔄 Service Worker updated. New version active.");
+      // Optional: You could show a toast here asking the user to reload if needed
+      // toast.info("Mise à jour disponible. Rechargez la page.", { action: { label: "Recharger", onClick: () => window.location.reload() } });
     };
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
 
