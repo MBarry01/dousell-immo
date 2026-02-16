@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase-client';
+import { createClient } from '@/utils/supabase/client';
 import type { FinancialKPIs, MonthlyFinancialSummary } from '@/lib/finance';
 import { getFinancialStatsForTeam, getMonthlyFinancialSummary } from '@/lib/finance-service';
 
@@ -66,7 +66,7 @@ export function useFinancialStatsRealTime({
         console.log(`🔄 S'abonnant aux changements pour team: ${teamId}`);
 
         // Canal 1 : Changements dans expenses
-        const expensesChannel = supabase
+        const expensesChannel = createClient()
             .channel(`expenses:team_id=eq.${teamId}`)
             .on(
                 'postgres_changes',
@@ -95,7 +95,7 @@ export function useFinancialStatsRealTime({
             });
 
         // Canal 2 : Changements dans rental_transactions
-        const transactionsChannel = supabase
+        const transactionsChannel = createClient()
             .channel(`rental_transactions:team_id=eq.${teamId}`)
             .on(
                 'postgres_changes',
@@ -120,7 +120,7 @@ export function useFinancialStatsRealTime({
             });
 
         // Canal 3 : Changements dans leases (statut, montant)
-        const leasesChannel = supabase
+        const leasesChannel = createClient()
             .channel(`leases:team_id=eq.${teamId}`)
             .on(
                 'postgres_changes',
@@ -147,9 +147,9 @@ export function useFinancialStatsRealTime({
         // 4. Cleanup : Unsubscribe au unmount
         return () => {
             console.log('🔌 Unsubscribing from channels');
-            supabase.removeChannel(expensesChannel);
-            supabase.removeChannel(transactionsChannel);
-            supabase.removeChannel(leasesChannel);
+            createClient().removeChannel(expensesChannel);
+            createClient().removeChannel(transactionsChannel);
+            createClient().removeChannel(leasesChannel);
         };
     }, [teamId, year, enabled, queryClient, fetchStats]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { supabase } from "@/lib/supabase-client";
+import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 export type AuthUser = User | null;
@@ -11,7 +11,7 @@ export type AuthUser = User | null;
 export async function getCurrentUser(): Promise<AuthUser> {
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await createClient().auth.getUser();
   return user;
 }
 
@@ -19,7 +19,7 @@ export async function getCurrentUser(): Promise<AuthUser> {
  * Sign in with email and password
  */
 export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await createClient().auth.signInWithPassword({
     email: email.trim().toLowerCase(),
     password,
   });
@@ -48,7 +48,7 @@ export async function signUp(
   password: string,
   metadata?: { full_name?: string; phone?: string }
 ) {
-  const { data, error } = await supabase.auth.signUp({
+  const { data, error } = await createClient().auth.signUp({
     email: email.trim().toLowerCase(),
     password,
     options: {
@@ -76,7 +76,7 @@ export async function signUp(
  * Sign out
  */
 export async function signOut() {
-  const { error } = await supabase.auth.signOut();
+  const { error } = await createClient().auth.signOut();
   if (error) throw error;
 }
 
@@ -84,7 +84,7 @@ export async function signOut() {
  * Reset password
  */
 export async function resetPassword(email: string) {
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  const { error } = await createClient().auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/compte/reset-password`,
   });
   if (error) throw error;
