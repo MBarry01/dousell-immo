@@ -10,6 +10,7 @@ import { fr } from 'date-fns/locale';
 
 interface Message {
     id: string;
+    lease_id: string;
     sender_id: string;
     sender_type?: string;
     content: string;
@@ -62,6 +63,11 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                 (payload) => {
                     const newMsg = payload.new as Message;
 
+                    // If message is from owner, mark as read immediately
+                    if (newMsg.sender_type === 'owner' && newMsg.lease_id === leaseId) {
+                        markTenantMessagesAsRead();
+                    }
+
                     setMessages((current) => {
                         if (current.some(m => m.id === newMsg.id)) return current;
 
@@ -109,6 +115,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
         // Optimistic update
         const optimisticMsg: Message = {
             id: 'temp-' + Date.now(),
+            lease_id: leaseId,
             sender_id: ownerId,
             sender_type: 'tenant',
             content: content,

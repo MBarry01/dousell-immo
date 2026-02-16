@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { validateTenantToken } from "@/lib/tenant-magic-link";
 import { createClient } from "@supabase/supabase-js";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 /**
  * GET /api/tenant/unread-counts
  *
