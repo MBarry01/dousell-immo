@@ -29,9 +29,10 @@ export async function sendOneSignalNotification({
         return;
     }
 
-    const payload = {
+    const payload: any = {
         app_id: ONESIGNAL_APP_ID,
-        // New API format (v5+) uses include_aliases for external IDs
+        // use both legacy and new targeting for maximum compatibility
+        include_external_user_ids: userIds,
         include_aliases: {
             external_id: userIds
         },

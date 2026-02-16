@@ -25,8 +25,10 @@ async function testPayload(name: string, payload: any) {
         });
 
         const data = await response.json();
-        console.log(`Status: ${response.status}`);
-        console.log("Response:", JSON.stringify(data, null, 2));
+        console.log(`[${name}] Status: ${response.status}`);
+        console.log(`[${name}] Recipients: ${data.recipients || 0}`);
+        console.log(`[${name}] ID: ${data.id || "N/A"}`);
+        if (data.errors) console.log(`[${name}] Errors:`, data.errors);
     } catch (e) {
         console.error("Error:", e);
     }

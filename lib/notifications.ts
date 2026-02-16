@@ -52,6 +52,8 @@ export async function notifyUser({
       .select()
       .single();
 
+    let finalNotificationId = data?.id;
+
     if (error) {
       // Si l'insertion échoue (RLS bloqué), essayer avec la fonction RPC
       if (error.code === "42501" || error.message?.includes("permission denied") || error.message?.includes("policy")) {
@@ -78,21 +80,23 @@ export async function notifyUser({
           }
 
           console.log("✅ Notification créée via RPC avec succès:", rpcData);
-          return { success: true, notificationId: rpcData };
+          finalNotificationId = rpcData;
+          // Continuer vers l'envoi du push au lieu de retourner
         } catch (rpcErr) {
           // Si RPC échoue aussi, relancer l'erreur originale
           throw error;
         }
+      } else {
+        console.error("❌ Error creating user notification:", error);
+        console.error("Détails:", JSON.stringify(error, null, 2));
+        throw error;
       }
-
-      console.error("❌ Error creating user notification:", error);
-      console.error("Détails:", JSON.stringify(error, null, 2));
-      throw error;
+    } else {
+      console.log("✅ Notification créée avec succès:", finalNotificationId);
     }
 
-    console.log("✅ Notification créée avec succès:", data?.id);
-
     // Fire-and-forget push notification (non-blocking)
+    // Toujours envoyé si on arrive ici (donc si l'insertion ou le RPC a réussi)
     sendOneSignalNotification({
       userIds: [userId],
       title,
@@ -101,7 +105,7 @@ export async function notifyUser({
       data: { type, resourcePath: resourcePath || "" },
     }).catch((err) => console.error("OneSignal push failed:", err));
 
-    return { success: true, notificationId: data?.id };
+    return { success: true, notificationId: finalNotificationId };
   } catch (error) {
     console.error("❌ Erreur inattendue dans notifyUser:", error);
     throw error;
