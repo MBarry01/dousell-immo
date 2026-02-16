@@ -31,7 +31,11 @@ export async function sendOneSignalNotification({
 
     const payload = {
         app_id: ONESIGNAL_APP_ID,
-        include_external_user_ids: userIds,
+        // New API format (v5+) uses include_aliases for external IDs
+        include_aliases: {
+            external_id: userIds
+        },
+        target_channel: "push",
         contents: { en: content, fr: content },
         headings: { en: title, fr: title },
         web_url: url ? (url.startsWith("http") ? url : `${BASE_URL}${url}`) : undefined,
