@@ -12,7 +12,7 @@ import {
   CreditCard,
   LogOut,
 } from "lucide-react";
-import OneSignalProvider from "@/components/providers/onesignal-provider";
+import OneSignalProvider, { loginOneSignal } from "@/components/providers/onesignal-provider";
 import { useTenantUnreadCounts } from "@/hooks/use-unread-counts";
 import { Button } from "@/components/ui/button";
 import { TenantPushNotifications } from "@/components/pwa/tenant-push-notifications";
@@ -76,6 +76,11 @@ export default function LocataireLayout({
           setTenantName(data.tenant_name || "Locataire");
           setPropertyAddress(data.property_address || "");
           setLeaseId(data.lease_id || "");
+
+          // Login to OneSignal as soon as we have the leaseId
+          if (data.lease_id) {
+            loginOneSignal(data.lease_id);
+          }
         }
       } catch (error) {
         console.error("Error fetching tenant info:", error);
@@ -284,9 +289,8 @@ export default function LocataireLayout({
       {/* Main Content */}
       <main className="flex-1 pb-20 md:pb-6">{children}</main>
 
-      {/* Mobile Bottom Navigation */}
-
-      {leaseId && <OneSignalProvider userId={leaseId} />}
+      {/* Note: OneSignal is initialized in RootLayout. 
+          Login is triggered in the useEffect above when leaseId is fetched. */}
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 px-2 py-2 flex justify-around items-center z-50 md:hidden safe-area-pb">
         {mobileNavItems.map((item) => (

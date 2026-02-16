@@ -3,100 +3,103 @@
 import { useEffect, useRef } from "react";
 import OneSignal from "react-onesignal";
 
+// Singleton state to track initialization across the entire application
+let isOneSignalInitialized = false;
+let initializationPromise: Promise<void> | null = null;
+
+/**
+ * Programmatic OneSignal initialization
+ */
+export const initOneSignal = async () => {
+    if (typeof window === "undefined") return;
+    if (isOneSignalInitialized) return;
+    if (initializationPromise) return initializationPromise;
+
+    console.log("🏁 OneSignal: Starting Singleton Initialization...");
+
+    initializationPromise = (async () => {
+        try {
+            await OneSignal.init({
+                appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "",
+                allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
+                serviceWorkerParam: { scope: "/" },
+                promptOptions: {
+                    slidedown: {
+                        prompts: [
+                            {
+                                type: "push",
+                                autoPrompt: false,
+                                text: {
+                                    actionMessage: "Activez les notifications pour être alerté des paiements, messages et mises à jour de vos biens. Désactivable à tout moment.",
+                                    acceptButton: "Activer",
+                                    cancelButton: "Plus tard",
+                                },
+                                delay: {
+                                    pageViews: 1,
+                                    timeDelay: 5,
+                                }
+                            }
+                        ]
+                    }
+                }
+            });
+
+            isOneSignalInitialized = true;
+            console.log("✅ OneSignal: Singleton Init Success");
+
+            // Check and log state
+            const permission = OneSignal.Notifications.permission;
+            const isPushEnabled = OneSignal.User.PushSubscription.optedIn;
+            const nativePermission = typeof Notification !== 'undefined' ? Notification.permission : 'default';
+
+            console.log("📊 OneSignal Init State:", { permission, nativePermission, isPushEnabled });
+
+            // Auto-opt-in if permission is granted but subscription is lost
+            if (permission && !isPushEnabled) {
+                console.log("🔄 OneSignal: Re-subscribing...");
+                await OneSignal.User.PushSubscription.optIn().catch(e => console.warn("OptIn error:", e));
+            }
+
+        } catch (error) {
+            console.error("❌ OneSignal: Initialization Failed:", error);
+            initializationPromise = null; // Allow retry on failure
+        }
+    })();
+
+    return initializationPromise;
+};
+
+/**
+ * Programmatic OneSignal login
+ */
+export const loginOneSignal = async (userId: string) => {
+    if (!userId) return;
+
+    // Ensure initialized first
+    await initOneSignal();
+
+    if (isOneSignalInitialized) {
+        console.log("👤 OneSignal: Syncing login for ID:", userId);
+        try {
+            await OneSignal.login(userId);
+            console.log("✅ OneSignal: Login successful");
+        } catch (error) {
+            console.error("❌ OneSignal: Login failed:", error);
+        }
+    }
+};
+
 export default function OneSignalProvider({ userId }: { userId?: string }) {
-    const isInitialized = useRef(false);
+    const lastUserId = useRef<string | undefined>(userId);
 
     useEffect(() => {
-        if (typeof window === "undefined") return;
-
-        const initOneSignal = async () => {
-            if (isInitialized.current) {
-                if (userId) {
-                    console.log("👤 OneSignal: Syncing login for ID:", userId);
-                    await OneSignal.login(userId);
-                }
-                return;
-            }
-
-            console.log("🏁 OneSignalProvider: Initializing...");
-            try {
-                await OneSignal.init({
-                    appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "",
-                    allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
-                    serviceWorkerParam: { scope: "/" },
-                    promptOptions: {
-                        slidedown: {
-                            prompts: [
-                                {
-                                    type: "push",
-                                    autoPrompt: false,
-                                    text: {
-                                        actionMessage: "Activez les notifications pour être alerté des paiements, messages et mises à jour de vos biens. Désactivable à tout moment.",
-                                        acceptButton: "Activer",
-                                        cancelButton: "Plus tard",
-                                    },
-                                    delay: {
-                                        pageViews: 1,
-                                        timeDelay: 5,
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                });
-
-                isInitialized.current = true;
-                console.log("✅ OneSignal Init Success");
-
-                if (userId) {
-                    console.log("👤 OneSignal: Attempting login for ID:", userId);
-                    await OneSignal.login(userId);
-                }
-
-                // Check state
-                const permission = OneSignal.Notifications.permission;
-                const isPushSupported = OneSignal.Notifications.isPushSupported();
-                const nativePermission = typeof Notification !== 'undefined' ? Notification.permission : 'default';
-                const isPushEnabled = OneSignal.User.PushSubscription.optedIn;
-
-                console.log("📊 OneSignal State:", { isPushSupported, permission, nativePermission, isPushEnabled });
-
-                if (!isPushSupported) return;
-
-                if (nativePermission === 'denied') {
-                    console.warn("🚫 OneSignal: Browser permission is 'denied'. User must reset it in site settings.");
-                    return;
-                }
-
-                // Case 1: Permission granted but subscription inactive → re-opt-in
-                if (permission && !isPushEnabled) {
-                    console.log("🔄 OneSignal: Permission granted but not opted in. Re-subscribing...");
-                    try {
-                        await OneSignal.User.PushSubscription.optIn();
-                        console.log("✅ OneSignal: Re-subscribed successfully");
-                    } catch (e) {
-                        console.warn("OneSignal re-subscribe error:", e);
-                    }
-                }
-
-                // Case 2: No permission yet → show slidedown prompt
-                if (!permission) {
-                    setTimeout(async () => {
-                        console.log("👋 OneSignal: Permission not granted, showing slidedown...");
-                        try {
-                            await OneSignal.Slidedown.promptPush({ force: true });
-                        } catch (e) {
-                            console.warn("OneSignal prompt error:", e);
-                        }
-                    }, 5000);
-                }
-
-            } catch (error) {
-                console.error("❌ OneSignal Detailed Error:", error);
-            }
-        };
-
+        // Initial init on mount
         initOneSignal();
+
+        // Sync login if userId changes or is present
+        if (userId) {
+            loginOneSignal(userId);
+        }
     }, [userId]);
 
     return null;

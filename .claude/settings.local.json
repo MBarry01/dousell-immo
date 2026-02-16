@@ -73,7 +73,9 @@
       "Bash(del /F /Q .nextlock)",
       "Bash(npx vercel logs:*)",
       "mcp__claude_ai_Supabase__list_projects",
-      "mcp__claude_ai_Supabase__get_logs"
+      "mcp__claude_ai_Supabase__get_logs",
+      "Bash(must be added on initial evaluation\" warnings.\nEOF\n\\)\")",
+      "Bash(npx vercel:*)"
     ]
   }
 }
