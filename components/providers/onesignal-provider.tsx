@@ -24,7 +24,6 @@ export default function OneSignalProvider({ userId }: { userId?: string }) {
                     appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "",
                     allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
                     serviceWorkerParam: { scope: "/" },
-                    serviceWorkerPath: "/OneSignalSDKWorker.js",
                     promptOptions: {
                         slidedown: {
                             prompts: [
@@ -58,7 +57,7 @@ export default function OneSignalProvider({ userId }: { userId?: string }) {
                 const permission = OneSignal.Notifications.permission;
                 const isPushSupported = OneSignal.Notifications.isPushSupported();
                 const nativePermission = typeof Notification !== 'undefined' ? Notification.permission : 'default';
-                const isPushEnabled = await OneSignal.User.PushSubscription.optedIn;
+                const isPushEnabled = OneSignal.User.PushSubscription.optedIn;
 
                 console.log("📊 OneSignal State:", { isPushSupported, permission, nativePermission, isPushEnabled });
 
