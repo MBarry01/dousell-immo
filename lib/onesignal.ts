@@ -1,5 +1,9 @@
 const ONESIGNAL_APP_ID = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "";
 const ONESIGNAL_REST_API_KEY = process.env.ONESIGNAL_REST_API_KEY || "";
+const BASE_URL =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "https://dousell-immo.vercel.app");
 
 type SendNotificationParams = {
     userIds: string[]; // External User IDs (Supabase Auth ID ou Lease ID)
@@ -15,7 +19,7 @@ type SendNotificationParams = {
  */
 export async function sendOneSignalNotification({
     userIds,
-    title = "Dousell Immo",
+    title = "Notification",
     content,
     url,
     data,
@@ -30,9 +34,8 @@ export async function sendOneSignalNotification({
         include_external_user_ids: userIds,
         contents: { en: content, fr: content },
         headings: { en: title, fr: title },
-        url: url,
+        web_url: url ? (url.startsWith("http") ? url : `${BASE_URL}${url}`) : undefined,
         data: data,
-        web_url: url,
     };
 
     try {

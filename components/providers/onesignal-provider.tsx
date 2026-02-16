@@ -30,10 +30,10 @@ export default function OneSignalProvider({ userId }: { userId?: string }) {
                             prompts: [
                                 {
                                     type: "push",
-                                    autoPrompt: false, // On déclenche manuellement via le timeout
+                                    autoPrompt: false,
                                     text: {
-                                        actionMessage: "Souhaitez-vous recevoir des notifications pour les nouvelles annonces et mises à jour de vos dossiers ?",
-                                        acceptButton: "S'abonner",
+                                        actionMessage: "Activez les notifications pour être alerté des paiements, messages et mises à jour de vos biens. Désactivable à tout moment.",
+                                        acceptButton: "Activer",
                                         cancelButton: "Plus tard",
                                     },
                                     delay: {
