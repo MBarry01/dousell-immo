@@ -23,6 +23,7 @@ export default function OneSignalProvider({ userId }: { userId?: string }) {
                 await OneSignal.init({
                     appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "",
                     allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
+                    serviceWorkerParam: { scope: "/" },
                     promptOptions: {
                         slidedown: {
                             prompts: [
