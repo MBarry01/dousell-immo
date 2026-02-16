@@ -76,7 +76,6 @@
     "@types/pg": "^8.16.0",
     "@upstash/redis": "^1.36.0",
     "@vercel/speed-insights": "^1.2.0",
-    "axios": "^1.13.2",
     "browser-image-compression": "^2.0.2",
     "canvas-confetti": "^1.9.4",
     "cheerio": "^1.1.2",
@@ -122,7 +121,6 @@
     "sonner": "^2.0.7",
     "stripe": "^20.3.0",
     "tailwind-merge": "^3.4.0",
-    "web-push": "^3.6.7",
     "xlsx": "^0.18.5",
     "zod": "^4.1.12",
     "zustand": "^5.0.8"
@@ -137,7 +135,6 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
-    "@types/web-push": "^3.6.4",
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",

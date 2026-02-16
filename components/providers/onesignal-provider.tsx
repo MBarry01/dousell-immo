@@ -21,14 +21,14 @@ export default function OneSignalProvider({ userId }: { userId?: string }) {
             console.log("🏁 OneSignalProvider: Initializing...");
             try {
                 await OneSignal.init({
-                    appId: "a7fba1dc-348a-4ee5-9647-3e7253c13cb8",
+                    appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "",
                     allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
                     promptOptions: {
                         slidedown: {
                             prompts: [
                                 {
                                     type: "push",
-                                    autoPrompt: true,
+                                    autoPrompt: false, // On déclenche manuellement via le timeout
                                     text: {
                                         actionMessage: "Souhaitez-vous recevoir des notifications pour les nouvelles annonces et mises à jour de vos dossiers ?",
                                         acceptButton: "S'abonner",
@@ -55,9 +55,16 @@ export default function OneSignalProvider({ userId }: { userId?: string }) {
                 // Check state
                 const permission = OneSignal.Notifications.permission;
                 const isPushSupported = OneSignal.Notifications.isPushSupported();
-                console.log("📊 OneSignal State:", { isPushSupported, permission });
+                const nativePermission = typeof Notification !== 'undefined' ? Notification.permission : 'default';
+
+                console.log("📊 OneSignal State:", { isPushSupported, permission, nativePermission });
 
                 if (isPushSupported && !permission) {
+                    if (nativePermission === 'denied') {
+                        console.warn("🚫 OneSignal: Browser permission is 'denied'. User must reset it in site settings.");
+                        return;
+                    }
+
                     setTimeout(async () => {
                         console.log("👋 OneSignal: Permission not granted, showing slidedown...");
                         try {

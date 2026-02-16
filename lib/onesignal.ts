@@ -1,15 +1,12 @@
-import axios from "axios";
-
-const ONESIGNAL_APP_ID = "a7fba1dc-348a-4ee5-9647-3e7253c13cb8";
-// IMPORTANT: Cette clé doit être dans .env.local
-const ONESIGNAL_REST_API_KEY = process.env.ONESIGNAL_REST_API_KEY || "os_v2_app_u752dxburjholfshhzzfhqj4xdxkbz7nicmuww57y4bsh4fkda6zyb5zmxofhhr72eyd4vh3ez7jofw22fydwjxbbovn45vcofvobby";
+const ONESIGNAL_APP_ID = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "";
+const ONESIGNAL_REST_API_KEY = process.env.ONESIGNAL_REST_API_KEY || "";
 
 type SendNotificationParams = {
     userIds: string[]; // External User IDs (Supabase Auth ID ou Lease ID)
     title?: string;
     content: string;
     url?: string;
-    data?: Record<string, any>;
+    data?: Record<string, string>;
 };
 
 /**
@@ -23,8 +20,8 @@ export async function sendOneSignalNotification({
     url,
     data,
 }: SendNotificationParams) {
-    if (!ONESIGNAL_REST_API_KEY) {
-        console.warn("⚠️ ONESIGNAL_REST_API_KEY manquant. Notification ignorée.");
+    if (!ONESIGNAL_REST_API_KEY || !ONESIGNAL_APP_ID) {
+        console.warn("⚠️ ONESIGNAL config manquante. Notification ignorée.");
         return;
     }
 
@@ -38,27 +35,29 @@ export async function sendOneSignalNotification({
         headings: { en: title, fr: title },
         url: url,
         data: data,
-        // Configuration spécifique Web Push
         web_url: url,
     };
 
     try {
-        const response = await axios.post(
-            "https://onesignal.com/api/v1/notifications",
-            payload,
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Basic ${ONESIGNAL_REST_API_KEY}`,
-                },
-            }
-        );
-        console.log("✅ OneSignal Push Sent:", response.data);
-        return response.data;
-    } catch (error: any) {
-        console.error(
-            "❌ OneSignal Push Error:",
-            error.response?.data || error.message
-        );
+        const response = await fetch("https://onesignal.com/api/v1/notifications", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Basic ${ONESIGNAL_REST_API_KEY}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            console.error("❌ OneSignal Push Error:", responseData);
+            return;
+        }
+
+        console.log("✅ OneSignal Push Sent:", responseData);
+        return responseData;
+    } catch (error: unknown) {
+        console.error("❌ OneSignal Push Error:", (error as Error).message);
     }
 }

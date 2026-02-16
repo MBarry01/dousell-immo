@@ -98,7 +98,7 @@ export async function notifyUser({
       title,
       content: message,
       url: resourcePath || undefined,
-      data: { type, resourcePath },
+      data: { type, resourcePath: resourcePath || "" },
     }).catch((err) => console.error("OneSignal push failed:", err));
 
     return { success: true, notificationId: data?.id };
