@@ -69,8 +69,15 @@ export function ServiceWorkerRegister() {
         console.error("Service Worker registration failed:", error);
       });
 
-    // Handle service worker updates
+    // Handle service worker updates (with anti-loop guard)
     const handleControllerChange = () => {
+      const key = "sw-last-reload";
+      const lastReload = sessionStorage.getItem(key);
+      const now = Date.now();
+      if (lastReload && now - parseInt(lastReload, 10) < 5000) {
+        return;
+      }
+      sessionStorage.setItem(key, String(now));
       window.location.reload();
     };
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
