@@ -24,6 +24,7 @@ export default function OneSignalProvider({ userId }: { userId?: string }) {
                     appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "",
                     allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
                     serviceWorkerParam: { scope: "/" },
+                    serviceWorkerPath: "/OneSignalSDKWorker.js",
                     promptOptions: {
                         slidedown: {
                             prompts: [
