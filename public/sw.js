@@ -1,9 +1,7 @@
-importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
-// v10.1 - OneSignal CSP Fix check
-
 // Service Worker for Dousell Immo PWA
+// OneSignal uses its own service workers (OneSignalSDK.sw.js / OneSignalSDKWorker.js)
 
-const CACHE_NAME = "dousell-immo-v10";
+const CACHE_NAME = "dousell-immo-v11";
 const STATIC_ASSETS = [
   "/gestion",
   "/manifest.json",
