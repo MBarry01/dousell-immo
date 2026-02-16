@@ -1,7 +1,8 @@
-// Service Worker for Dousell Immo PWA
-// OneSignal uses its own service workers (OneSignalSDK.sw.js / OneSignalSDKWorker.js)
+// Service Worker for Dousell Immo PWA + OneSignal Push
+// Import OneSignal SW SDK so this worker can handle push events
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-const CACHE_NAME = "dousell-immo-v11";
+const CACHE_NAME = "dousell-immo-v12";
 const STATIC_ASSETS = [
   "/gestion",
   "/manifest.json",
