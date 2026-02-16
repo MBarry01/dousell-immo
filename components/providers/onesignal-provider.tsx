@@ -58,15 +58,30 @@ export default function OneSignalProvider({ userId }: { userId?: string }) {
                 const permission = OneSignal.Notifications.permission;
                 const isPushSupported = OneSignal.Notifications.isPushSupported();
                 const nativePermission = typeof Notification !== 'undefined' ? Notification.permission : 'default';
+                const isPushEnabled = await OneSignal.User.PushSubscription.optedIn;
 
-                console.log("📊 OneSignal State:", { isPushSupported, permission, nativePermission });
+                console.log("📊 OneSignal State:", { isPushSupported, permission, nativePermission, isPushEnabled });
 
-                if (isPushSupported && !permission) {
-                    if (nativePermission === 'denied') {
-                        console.warn("🚫 OneSignal: Browser permission is 'denied'. User must reset it in site settings.");
-                        return;
+                if (!isPushSupported) return;
+
+                if (nativePermission === 'denied') {
+                    console.warn("🚫 OneSignal: Browser permission is 'denied'. User must reset it in site settings.");
+                    return;
+                }
+
+                // Case 1: Permission granted but subscription inactive → re-opt-in
+                if (permission && !isPushEnabled) {
+                    console.log("🔄 OneSignal: Permission granted but not opted in. Re-subscribing...");
+                    try {
+                        await OneSignal.User.PushSubscription.optIn();
+                        console.log("✅ OneSignal: Re-subscribed successfully");
+                    } catch (e) {
+                        console.warn("OneSignal re-subscribe error:", e);
                     }
+                }
 
+                // Case 2: No permission yet → show slidedown prompt
+                if (!permission) {
                     setTimeout(async () => {
                         console.log("👋 OneSignal: Permission not granted, showing slidedown...");
                         try {
