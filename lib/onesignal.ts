@@ -24,6 +24,14 @@ export async function sendOneSignalNotification({
     url,
     data,
 }: SendNotificationParams) {
+    // Clean userIds (remove nulls, undefined, and empty strings)
+    const cleanUserIds = userIds.filter(id => !!id && typeof id === 'string');
+
+    if (cleanUserIds.length === 0) {
+        console.warn("⚠️ No valid userIds provided for OneSignal push. Skipping.");
+        return;
+    }
+
     if (!ONESIGNAL_REST_API_KEY || !ONESIGNAL_APP_ID) {
         console.warn("⚠️ ONESIGNAL config manquante. Notification ignorée.");
         return;
@@ -31,17 +39,21 @@ export async function sendOneSignalNotification({
 
     const payload: any = {
         app_id: ONESIGNAL_APP_ID,
-        // use both legacy and new targeting for maximum compatibility
-        include_external_user_ids: userIds,
+        // Targets
+        include_external_user_ids: cleanUserIds,
         include_aliases: {
-            external_id: userIds
+            external_id: cleanUserIds
         },
-        target_channel: "push",
+        // Content
         contents: { en: content, fr: content },
         headings: { en: title, fr: title },
+        // Metadata
+        target_channel: "push",
         web_url: url ? (url.startsWith("http") ? url : `${BASE_URL}${url}`) : undefined,
         data: data,
     };
+
+    console.log(`📡 Sending OneSignal push to ${cleanUserIds.length} recipients:`, cleanUserIds);
 
     try {
         const response = await fetch("https://onesignal.com/api/v1/notifications", {
@@ -56,13 +68,21 @@ export async function sendOneSignalNotification({
         const responseData = await response.json();
 
         if (!response.ok) {
-            console.error("❌ OneSignal Push Error:", responseData);
+            console.error("❌ OneSignal Push Error (API):", responseData);
             return;
         }
 
-        console.log("✅ OneSignal Push Sent:", responseData);
+        if (responseData.errors && responseData.errors.length > 0) {
+            console.warn("⚠️ OneSignal Push warning:", responseData.errors);
+        }
+
+        console.log(`✅ OneSignal Push Sent for "${title}":`, {
+            recipients: responseData.recipients,
+            id: responseData.id
+        });
+
         return responseData;
     } catch (error: unknown) {
-        console.error("❌ OneSignal Push Error:", (error as Error).message);
+        console.error("❌ OneSignal Push Error (Network):", (error as Error).message);
     }
 }
