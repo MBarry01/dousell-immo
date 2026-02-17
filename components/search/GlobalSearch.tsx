@@ -144,7 +144,7 @@ export function GlobalSearch() {
             </form>
 
             {isOpen && (query.length >= 2) && (
-                <div className="absolute top-full left-0 right-0 mt-2 rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95 z-50 max-h-[300px] overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-2 rounded-xl border bg-popover p-1 text-popover-foreground shadow-xl outline-none animate-in fade-in-0 zoom-in-95 z-[100] max-h-[250px] sm:max-h-[400px] overflow-y-auto">
                     {loading ? (
                         <div className="flex items-center justify-center p-4 text-sm text-muted-foreground">
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

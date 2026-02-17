@@ -171,8 +171,9 @@ export function OwnerSelector({ value, onChange, className = "" }: OwnerSelector
               {showCreateForm ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-muted-foreground mb-1">Nom complet *</label>
+                    <label htmlFor="owner_fullname" className="block text-sm text-muted-foreground mb-1">Nom complet *</label>
                     <input
+                      id="owner_fullname"
                       type="text"
                       value={newOwner.full_name}
                       onChange={(e) => setNewOwner({ ...newOwner, full_name: e.target.value })}
@@ -181,8 +182,9 @@ export function OwnerSelector({ value, onChange, className = "" }: OwnerSelector
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-muted-foreground mb-1">Téléphone *</label>
+                    <label htmlFor="owner_phone" className="block text-sm text-muted-foreground mb-1">Téléphone *</label>
                     <input
+                      id="owner_phone"
                       type="tel"
                       value={newOwner.phone}
                       onChange={(e) => setNewOwner({ ...newOwner, phone: e.target.value })}
@@ -191,8 +193,9 @@ export function OwnerSelector({ value, onChange, className = "" }: OwnerSelector
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-muted-foreground mb-1">Email (optionnel)</label>
+                    <label htmlFor="owner_email" className="block text-sm text-muted-foreground mb-1">Email (optionnel)</label>
                     <input
+                      id="owner_email"
                       type="email"
                       value={newOwner.email}
                       onChange={(e) => setNewOwner({ ...newOwner, email: e.target.value })}

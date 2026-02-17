@@ -135,15 +135,15 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
     }, {} as Record<string, Message[]>);
 
     return (
-        <div className={`flex flex-col h-[calc(100vh-64px)] ${isDark ? 'bg-[#0B1120]' : 'bg-gray-50'}`}>
+        <div className={`flex flex-col h-[calc(100dvh-64px)] lg:h-[calc(100dvh-64px)] h-[calc(100dvh-64px-var(--mobile-nav-height))] ${isDark ? 'bg-[#0B1120]' : 'bg-gray-50'}`}>
             {/* Header */}
-            <div className={`border-b px-4 py-3 flex items-center gap-3 shadow-sm z-10 ${isDark ? 'bg-card border-border' : 'bg-white border-gray-200'
+            <div className={`border-b px-4 py-3 flex items-center gap-3 shadow-sm z-10 shrink-0 ${isDark ? 'bg-card border-border' : 'bg-white border-gray-200'
                 }`}>
                 <Link href="/gestion/messages" className={`p-2 -ml-2 rounded-full transition-colors ${isDark ? 'text-slate-400 hover:bg-slate-800' : 'text-gray-500 hover:bg-gray-100'
                     }`}>
                     <ChevronLeft className="w-5 h-5" />
                 </Link>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 cursor-pointer" onClick={() => (window.location.href = `/gestion/locations/${leaseId}`)}>
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold border ${isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-gray-100 text-gray-600 border-gray-200'
                         }`}>
                         {tenantName?.[0] || 'L'}
@@ -156,12 +156,12 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
             </div>
 
             {/* Zone Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent pb-4">
                 {Object.entries(groupedMessages).map(([dateKey, msgs]) => (
                     <div key={dateKey} className="space-y-4">
                         {/* Date Header */}
-                        <div className="flex justify-center">
-                            <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full border shadow-sm ${isDark ? 'text-slate-500 bg-slate-900 border-slate-800' : 'text-gray-500 bg-white border-gray-200'
+                        <div className="flex justify-center sticky top-0 z-10 py-2">
+                            <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full border shadow-sm backdrop-blur-sm ${isDark ? 'text-slate-500 bg-slate-900/80 border-slate-800' : 'text-gray-500 bg-white/80 border-gray-200'
                                 }`}>
                                 {format(new Date(dateKey), 'd MMMM yyyy', { locale: fr })}
                             </span>
@@ -224,9 +224,9 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
             </div>
 
             {/* Input */}
-            <div className={`border-t p-4 z-10 ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-gray-200'
+            <div className={`border-t px-4 py-3 z-10 shrink-0 ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-gray-200'
                 }`}>
-                <form onSubmit={handleSend} className="flex items-center gap-2 w-full mx-auto">
+                <form onSubmit={handleSend} className="flex items-center gap-2 w-full mx-auto max-w-4xl">
                     <input
                         type="text"
                         value={newMessage}
@@ -240,7 +240,7 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
                     <button
                         type="submit"
                         disabled={!newMessage.trim() || isSending}
-                        className={`w-11 h-11 rounded-full flex items-center justify-center transition-all disabled:opacity-50 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:shadow-none ${isDark ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        className={`w-11 h-11 rounded-full flex items-center justify-center transition-all disabled:opacity-50 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:shadow-none shrink-0 ${isDark ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-primary text-primary-foreground hover:bg-primary/90'
                             }`}
                     >
                         <Send className="w-5 h-5 ml-0.5" />

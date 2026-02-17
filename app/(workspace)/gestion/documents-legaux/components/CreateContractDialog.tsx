@@ -80,7 +80,7 @@ export function CreateContractDialog({ leases, trigger, profile }: CreateContrac
                                         }`}>
                                         <SelectValue placeholder="Sélectionner un bail..." />
                                     </SelectTrigger>
-                                    <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}>
+                                    <SelectContent className={`${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'} max-w-[calc(100vw-2rem)]`}>
                                         {leases.length === 0 ? (
                                             <div className={`py-6 text-center text-sm ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
                                                 Aucun bail actif trouvé
@@ -88,10 +88,12 @@ export function CreateContractDialog({ leases, trigger, profile }: CreateContrac
                                         ) : (
                                             leases.map((lease) => (
                                                 <SelectItem key={lease.id} value={lease.id} className={isDark ? 'focus:bg-slate-700 focus:text-slate-100 data-[state=checked]:bg-slate-700' : 'focus:bg-gray-100 focus:text-gray-900 data-[state=checked]:bg-gray-100'}>
-                                                    <span className="font-medium">{lease.tenant_name}</span>
-                                                    <span className={`ml-2 text-xs truncate max-w-[200px] inline-block align-bottom ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
-                                                        - {lease.property_address}
-                                                    </span>
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 max-w-full overflow-hidden">
+                                                        <span className="font-medium truncate">{lease.tenant_name}</span>
+                                                        <span className={`text-xs truncate ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
+                                                            - {lease.property_address}
+                                                        </span>
+                                                    </div>
                                                 </SelectItem>
                                             ))
                                         )}

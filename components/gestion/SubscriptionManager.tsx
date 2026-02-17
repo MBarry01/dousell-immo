@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getAllPlans, formatPrice, getAnnualSavings, TRIAL_DURATION_DAYS, type BillingCycle } from "@/lib/subscription/plans-config";
+import { reactivateSubscription } from "@/app/(workspace)/gestion/abonnement/actions";
 
 export function SubscriptionManager() {
     const router = useRouter();
@@ -28,6 +29,7 @@ export function SubscriptionManager() {
     const [stats, setStats] = useState({ properties: 0, leases: 0 });
     const [hasStripeCustomer, setHasStripeCustomer] = useState(false);
     const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
+    const [canReactivateTrial, setCanReactivateTrial] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -48,14 +50,32 @@ export function SubscriptionManager() {
                 subscription_tier?: string;
                 subscription_trial_ends_at?: string;
                 stripe_customer_id?: string;
+                trial_reactivation_count?: number;
             } | null;
             const tId = teamMembership?.team_id;
 
             if (team) {
-                setProStatus(team.subscription_status || null);
-                // Default to 'starter' if no tier is set (free plan)
-                setSubscriptionTier(team.subscription_tier || 'starter');
+                let effectiveStatus = team.subscription_status || null;
+                let effectiveTier = team.subscription_tier || 'starter';
+
+                // Normaliser : si trialing mais date expirée, traiter comme expiré
+                if (effectiveStatus === 'trialing' && team.subscription_trial_ends_at) {
+                    const trialEnd = new Date(team.subscription_trial_ends_at);
+                    if (trialEnd < new Date()) {
+                        effectiveStatus = 'past_due';
+                        effectiveTier = 'starter';
+                    }
+                }
+
+                setProStatus(effectiveStatus);
+                setSubscriptionTier(effectiveTier);
                 setHasStripeCustomer(!!team.stripe_customer_id);
+
+                // Peut réactiver l'essai si expiré et pas encore utilisé la réactivation
+                const MAX_REACTIVATIONS = 1;
+                const isExpiredStatus = effectiveStatus === 'past_due' || effectiveStatus === 'canceled';
+                const reactivationsUsed = team.trial_reactivation_count ?? 0;
+                setCanReactivateTrial(isExpiredStatus && reactivationsUsed < MAX_REACTIVATIONS && !team.stripe_customer_id);
                 if (team.subscription_trial_ends_at) {
                     setTrialEndsAt(new Date(team.subscription_trial_ends_at));
                 }
@@ -102,7 +122,7 @@ export function SubscriptionManager() {
             if (data.url) {
                 window.location.href = data.url;
             } else {
-                toast.error(data.error || "Erreur lors de l&apos;initialisation du paiement");
+                toast.error(data.error || "Erreur lors de l'initialisation du paiement");
             }
         } catch {
             toast.error("Une erreur est survenue.");
@@ -121,10 +141,27 @@ export function SubscriptionManager() {
             if (data.url) {
                 window.location.href = data.url;
             } else {
-                toast.error(data.error || "Impossible d&apos;accéder au portail de facturation");
+                toast.error(data.error || "Impossible d'accéder au portail de facturation");
             }
         } catch {
             toast.error("Une erreur est survenue.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleReactivateTrial = async () => {
+        setIsSubmitting(true);
+        try {
+            const result = await reactivateSubscription();
+            if (result?.data?.success) {
+                toast.success("Essai gratuit réactivé ! Vous avez 14 jours supplémentaires.");
+                router.refresh();
+            } else {
+                toast.error(result?.error || "Erreur lors de la réactivation.");
+            }
+        } catch (err: any) {
+            toast.error(err.message || "Une erreur est survenue.");
         } finally {
             setIsSubmitting(false);
         }
@@ -139,8 +176,8 @@ export function SubscriptionManager() {
         );
     }
 
-    const isExpired = proStatus === "expired" || proStatus === "canceled" || proStatus === "past_due" || proStatus === "unpaid" || proStatus === "incomplete";
-    const isTrial = proStatus === "trial" || proStatus === "trialing";
+    const isExpired = proStatus === "canceled" || proStatus === "past_due" || proStatus === "unpaid" || proStatus === "incomplete";
+    const isTrial = proStatus === "trialing";
     const isActive = proStatus === "active";
     const daysLeft = trialEndsAt
         ? Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
@@ -202,15 +239,12 @@ export function SubscriptionManager() {
                                 {isTrial && <span className="ml-2 text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">Essai gratuit</span>}
                                 {isActive && <span className="ml-2 text-xs font-medium text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">Actif</span>}
                                 {isExpired && <span className="ml-2 text-xs font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">Expiré</span>}
-                                {!proStatus && <span className="ml-2 text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">Essai gratuit</span>}
                             </p>
                             <p className="text-xs text-gray-500 mt-0.5">
                                 {isExpired && "Votre abonnement a expiré. Réactivez pour retrouver l'accès."}
                                 {isTrial && trialEndsAt && `${daysLeft} jour${daysLeft > 1 ? 's' : ''} restant${daysLeft > 1 ? 's' : ''} — expire le ${trialEndsAt.toLocaleDateString('fr-FR')}`}
                                 {isTrial && !trialEndsAt && "Essai gratuit en cours"}
                                 {isActive && "Votre abonnement est actif et à jour."}
-                                {!proStatus && trialEndsAt && `${daysLeft} jour${daysLeft > 1 ? 's' : ''} restant${daysLeft > 1 ? 's' : ''} — expire le ${trialEndsAt.toLocaleDateString('fr-FR')}`}
-                                {!proStatus && !trialEndsAt && "Essai gratuit en cours"}
                             </p>
                         </div>
                     </div>
@@ -223,7 +257,7 @@ export function SubscriptionManager() {
                 </div>
 
                 {/* Trial Progress Bar - Integrated */}
-                {(isTrial || (!proStatus && trialEndsAt)) && (
+                {isTrial && trialEndsAt && (
                     <div className="mt-6 pt-6 border-t border-primary/10">
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-xs font-medium text-primary">Progression de l&apos;essai gratuit</span>
@@ -234,6 +268,26 @@ export function SubscriptionManager() {
                                 className="h-full bg-primary transition-all duration-1000 shadow-[0_0_10px_rgba(var(--primary),0.3)]"
                                 style={{ width: `${Math.min(100, Math.round(((TRIAL_DURATION_DAYS - daysLeft) / TRIAL_DURATION_DAYS) * 100))}%` }}
                             />
+                        </div>
+                    </div>
+                )}
+
+                {/* Reactivation CTA */}
+                {isExpired && canReactivateTrial && (
+                    <div className="mt-6 pt-6 border-t border-red-500/10">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <p className="text-sm font-medium text-slate-900 dark:text-white">Réactiver l&apos;essai gratuit</p>
+                                <p className="text-xs text-gray-500">Profitez de 14 jours supplémentaires avec toutes les fonctionnalités Pro.</p>
+                            </div>
+                            <Button
+                                onClick={handleReactivateTrial}
+                                disabled={isSubmitting}
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shrink-0"
+                            >
+                                <Clock size={16} className="mr-2" />
+                                {isSubmitting ? "Réactivation..." : "Réactiver (14 jours)"}
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -296,8 +350,8 @@ export function SubscriptionManager() {
                                 )}
 
                                 {isCurrentTier && (
-                                    <div className={`absolute top-4 right-4 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${(isTrial || !proStatus) ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'}`}>
-                                        {(isTrial || !proStatus) ? 'Essai en cours' : 'Plan Actuel'}
+                                    <div className={`absolute top-4 right-4 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${isTrial ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'}`}>
+                                        {isTrial ? 'Essai en cours' : 'Plan Actuel'}
                                     </div>
                                 )}
 
@@ -327,7 +381,7 @@ export function SubscriptionManager() {
                                             <span className="text-gray-500 text-xs ml-1">/ mois</span>
                                         </>
                                     )}
-                                    {plan.id === 'starter' && isCurrentTier && (isTrial || !proStatus) && (
+                                    {plan.id === 'starter' && isCurrentTier && isTrial && (
                                         <p className="text-xs text-amber-600 mt-1">
                                             Plan par défaut après l&apos;essai
                                         </p>
@@ -347,14 +401,12 @@ export function SubscriptionManager() {
                                     disabled={isSubmitting || (isCurrentTier && isActive)}
                                     className={`w-full h-10 text-sm ${isCurrentTier && isActive
                                         ? 'bg-zinc-800 text-white/50 cursor-not-allowed'
-                                        : isCurrentTier && (isTrial || !proStatus)
-                                            ? 'bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-lg shadow-primary/20'
-                                            : 'bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-lg shadow-primary/20'
+                                        : 'bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-lg shadow-primary/20'
                                         }`}
                                 >
                                     {isCurrentTier && isActive
                                         ? "Plan actuel"
-                                        : isCurrentTier && (isTrial || !proStatus)
+                                        : isTrial
                                             ? "Activer l'abonnement"
                                             : subscriptionTier === 'pro' && plan.id === 'starter'
                                                 ? "Rétrograder"

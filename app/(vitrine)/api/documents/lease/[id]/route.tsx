@@ -99,7 +99,8 @@ export async function GET(
             property: {
                 address: property.location?.address || '',
                 description: property.description || lease.property_address || '', // Fallback
-                propertyType: property.type as any,
+                // Cast to specific ContractData property type, defaulting to 'appartement' if unknown or mismatched
+                propertyType: (property.type as ContractData['property']['propertyType']) || 'appartement',
                 floor: property.floor,
                 buildingName: property.building_name
             },
@@ -128,7 +129,7 @@ export async function GET(
         }
 
         // 5. Retourner le PDF
-        return new NextResponse(result.pdfBytes as any, {
+        return new NextResponse(result.pdfBytes as unknown as BodyInit, {
             headers: {
                 'Content-Type': 'application/pdf',
                 'Content-Disposition': `inline; filename="Bail_${lease.tenant_name.replace(/\s+/g, '_')}.pdf"`,

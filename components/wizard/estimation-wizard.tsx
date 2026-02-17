@@ -186,10 +186,10 @@ export const EstimationWizard = () => {
 
   const onSubmit = async (formValues: WizardValues) => {
     setIsSubmitting(true);
-    
+
     // Track la complétion du formulaire
     analyticsEvents.estimateComplete(formValues.type, formValues.quartier);
-    
+
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsSubmitting(false);
     setSubmitted(true);
@@ -259,11 +259,10 @@ export const EstimationWizard = () => {
                     <button
                       type="button"
                       key={type.value}
-                      className={`flex h-20 items-center gap-3 rounded-2xl border px-4 text-left ${
-                        values.type === type.value
+                      className={`flex h-20 items-center gap-3 rounded-2xl border px-4 text-left ${values.type === type.value
                           ? "border-white bg-white/10"
                           : "border-white/10 bg-white/5 text-white/70"
-                      }`}
+                        }`}
                       onClick={() => setValue("type", type.value as "appartement" | "villa" | "terrain" | "commercial")}
                     >
                       <type.icon className="h-6 w-6" />
@@ -284,8 +283,9 @@ export const EstimationWizard = () => {
             {step === 1 && (
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm text-white/70">Quartier</label>
+                  <label htmlFor="quartier" className="text-sm text-white/70">Quartier</label>
                   <select
+                    id="quartier"
                     {...register("quartier")}
                     className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                   >
@@ -303,10 +303,11 @@ export const EstimationWizard = () => {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm text-white/70">
+                  <label htmlFor="landmark" className="text-sm text-white/70">
                     Point de repère
                   </label>
                   <Textarea
+                    id="landmark"
                     placeholder="Ex: Derrière la pharmacie des Mamelles..."
                     {...register("landmark")}
                   />
@@ -325,6 +326,7 @@ export const EstimationWizard = () => {
                   <p className="text-sm text-white/60">Surface estimée</p>
                   <div className="mt-2 flex items-center justify-center gap-2 text-5xl font-semibold">
                     <Input
+                      id="surface"
                       {...register("surface")}
                       className="w-40 rounded-[40px] border-white/20 bg-white/10 text-center text-4xl tracking-wide"
                       placeholder="150"
@@ -376,11 +378,10 @@ export const EstimationWizard = () => {
                       key={condition.value}
                       type="button"
                       onClick={() => setValue("condition", condition.value as "neuf" | "bon" | "renover")}
-                      className={`w-full rounded-2xl border px-4 py-4 text-left ${
-                        values.condition === condition.value
+                      className={`w-full rounded-2xl border px-4 py-4 text-left ${values.condition === condition.value
                           ? "border-white bg-white/10"
                           : "border-white/10 bg-white/5 text-white/70"
-                      }`}
+                        }`}
                     >
                       {condition.label}
                     </button>
@@ -400,8 +401,9 @@ export const EstimationWizard = () => {
                   Recevez votre estimation par WhatsApp
                 </h3>
                 <div>
-                  <label className="text-sm text-white/70">Prénom Nom</label>
+                  <label htmlFor="fullName" className="text-sm text-white/70">Prénom Nom</label>
                   <Input
+                    id="fullName"
                     {...register("fullName")}
                     placeholder="Ex: Fatou Ndiaye"
                     className="mt-2"
@@ -413,8 +415,9 @@ export const EstimationWizard = () => {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm text-white/70">Téléphone</label>
+                  <label htmlFor="phone" className="text-sm text-white/70">Téléphone</label>
                   <Input
+                    id="phone"
                     {...register("phone")}
                     type="tel"
                     placeholder="+221 77 000 00 00"
@@ -427,10 +430,11 @@ export const EstimationWizard = () => {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm text-white/70">
+                  <label htmlFor="email" className="text-sm text-white/70">
                     Email (optionnel)
                   </label>
                   <Input
+                    id="email"
                     {...register("email")}
                     type="email"
                     placeholder="contact@exemple.com"
@@ -442,8 +446,9 @@ export const EstimationWizard = () => {
                     </p>
                   )}
                 </div>
-                <label className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80">
+                <label htmlFor="consent" className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80">
                   <input
+                    id="consent"
                     type="checkbox"
                     {...register("consent")}
                     className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent"
@@ -474,8 +479,9 @@ export const EstimationWizard = () => {
             <li>Avance (1 mois)</li>
             <li>Frais d&apos;agence (1 mois)</li>
             <li>
-              <label className="mt-2 inline-flex items-center gap-2">
+              <label htmlFor="includeTaxes" className="mt-2 inline-flex items-center gap-2">
                 <input
+                  id="includeTaxes"
                   type="checkbox"
                   checked={values.includeTaxes}
                   onChange={(event) =>

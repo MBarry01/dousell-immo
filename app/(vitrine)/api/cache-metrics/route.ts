@@ -58,14 +58,14 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
       env: process.env.NODE_ENV,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching cache metrics:', error);
 
     return NextResponse.json(
       {
         success: false,
         error: 'Erreur lors de la récupération des métriques',
-        details: error.message,
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -92,14 +92,14 @@ export async function POST(request: NextRequest) {
       message: 'Métriques réinitialisées',
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error resetting cache metrics:', error);
 
     return NextResponse.json(
       {
         success: false,
         error: 'Erreur lors de la réinitialisation',
-        details: error.message,
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

@@ -134,7 +134,7 @@ export const ListingImageCarousel = ({
         <div className="flex h-full">
           {validImagesList.map((src, index) => (
             <div
-              className="relative h-full min-w-full shrink-0 touch-none"
+              className="relative h-full min-w-full shrink-0 touch-pan-y"
               key={`${src}-${index}`}
             >
               <div className="relative h-full w-full">

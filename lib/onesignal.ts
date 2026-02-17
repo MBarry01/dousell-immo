@@ -37,7 +37,7 @@ export async function sendOneSignalNotification({
         return;
     }
 
-    const payload: any = {
+    const payload: Record<string, unknown> = {
         app_id: ONESIGNAL_APP_ID,
         // Targets
         include_external_user_ids: cleanUserIds,

@@ -118,13 +118,13 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-foreground transition-transform duration-200 active:scale-95"
+            className="h-9 w-9 text-foreground transition-transform duration-200 active:scale-95 hover:bg-accent hover:text-accent-foreground group"
             onClick={toggleTheme}
           >
             {isDark ? (
-              <Sun className="h-4 w-4" />
+              <Sun className="h-4 w-4 transition-colors group-hover:text-inherit" />
             ) : (
-              <Moon className="h-4 w-4" />
+              <Moon className="h-4 w-4 transition-colors group-hover:text-inherit" />
             )}
             <span className="sr-only">Basculer le thème</span>
           </Button>
@@ -133,7 +133,7 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
           {/* Notifications component - handles dropdown & realtime */}
           <NotificationBell
             userId={user?.id || null}
-            className="hover:bg-muted hover:text-foreground"
+            className="hover:bg-accent hover:text-accent-foreground [&_svg]:transition-colors"
           />
 
           {/* User Menu */}

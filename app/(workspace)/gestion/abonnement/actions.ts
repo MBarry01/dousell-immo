@@ -43,7 +43,7 @@ export const reactivateSubscription = safeAction(
       // Vérifier que l'équipe peut être réactivée
       const { data: team } = await supabase
         .from("teams")
-        .select("subscription_status")
+        .select("subscription_status, trial_reactivation_count")
         .eq("id", teamContext.team_id)
         .single();
 
@@ -51,8 +51,16 @@ export const reactivateSubscription = safeAction(
         throw new Error("Équipe introuvable.");
       }
 
-      if (team.subscription_status !== "expired" && team.subscription_status !== "none" && team.subscription_status !== "canceled") {
+      if (team.subscription_status !== "past_due" && team.subscription_status !== "canceled") {
         throw new Error("Votre abonnement est déjà actif.");
+      }
+
+      // Bloquer si la réactivation d'essai a déjà été utilisée
+      const MAX_TRIAL_REACTIVATIONS = 1;
+      if ((team.trial_reactivation_count ?? 0) >= MAX_TRIAL_REACTIVATIONS) {
+        throw new Error(
+          "Vous avez déjà utilisé votre réactivation d'essai gratuit. Veuillez souscrire à un abonnement pour continuer."
+        );
       }
 
       // Réactiver l'abonnement de l'équipe (14 jours d'essai)

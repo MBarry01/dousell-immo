@@ -479,7 +479,7 @@ export function OnboardingTour({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-            className="absolute pointer-events-auto w-[320px] md:w-[340px] lg:w-[360px] max-w-[calc(100vw-24px)]"
+            className="absolute pointer-events-auto w-[calc(100vw-32px)] md:w-[340px] lg:w-[360px]"
             style={{
               top: tooltipStyle.top,
               left: tooltipStyle.left,

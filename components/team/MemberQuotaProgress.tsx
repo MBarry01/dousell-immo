@@ -20,7 +20,7 @@ interface MemberQuotaProgressProps {
   /** Limite maximale (3 pour Trial) */
   limit: number;
   /** Statut de l'abonnement */
-  subscriptionStatus?: 'none' | 'trial' | 'active' | 'expired' | 'canceled';
+  subscriptionStatus?: 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete';
   /** Afficher en mode compact */
   compact?: boolean;
   /** Classe CSS personnalisée */
@@ -34,7 +34,7 @@ export function MemberQuotaProgress({
   activeMembersCount,
   pendingInvitesCount,
   limit,
-  subscriptionStatus = 'trial',
+  subscriptionStatus = 'trialing',
   compact = false,
   className,
 }: MemberQuotaProgressProps) {
@@ -46,7 +46,7 @@ export function MemberQuotaProgress({
 
   // Déterminer la couleur selon le statut
   const { color, bgColor, icon: Icon } = useMemo(() => {
-    if (subscriptionStatus === 'active') {
+    if (subscriptionStatus === 'active' || subscriptionStatus === 'trialing') {
       return {
         color: 'text-green-400',
         bgColor: 'bg-green-500',
@@ -184,7 +184,7 @@ export function MemberQuotaProgress({
       </div>
 
       {/* CTA pour upgrade si limite atteinte */}
-      {isAtLimit && subscriptionStatus === 'trial' && (
+      {isAtLimit && subscriptionStatus === 'trialing' && (
         <div className="mt-2">
           <a
             href="/gestion/subscription"
@@ -236,6 +236,6 @@ export async function getTeamMemberQuota(teamId: string) {
     limit: team?.subscription_status === 'active' ? Infinity : 3,
     remaining: Math.max(limit - ((activeMembersCount || 0) + (pendingInvitesCount || 0)), 0),
     isAtLimit: ((activeMembersCount || 0) + (pendingInvitesCount || 0)) >= limit,
-    subscriptionStatus: team?.subscription_status || 'none',
+    subscriptionStatus: team?.subscription_status || 'canceled',
   };
 }

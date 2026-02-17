@@ -39,18 +39,18 @@ export default function NewInventoryReportPage() {
     const [propertyType, setPropertyType] = useState<PropertyType>('studio');
 
     useEffect(() => {
+        const loadLeases = async () => {
+            const result = await getLeasesForInventory();
+            if (result.error) {
+                toast.error(result.error);
+            } else {
+                setLeases(result.data);
+            }
+            setLoading(false);
+        };
+
         loadLeases();
     }, []);
-
-    const loadLeases = async () => {
-        const result = await getLeasesForInventory();
-        if (result.error) {
-            toast.error(result.error);
-        } else {
-            setLeases(result.data);
-        }
-        setLoading(false);
-    };
 
     const handleCreate = async () => {
         if (!selectedLeaseId) {

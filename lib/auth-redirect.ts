@@ -68,7 +68,7 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
             // Vérifier le statut d'abonnement de l'équipe
             const subscriptionStatus = teamContext.subscription_status;
 
-            if (subscriptionStatus === 'trial' || subscriptionStatus === 'active') {
+            if (subscriptionStatus === 'trialing' || subscriptionStatus === 'active') {
                 console.log("✅ Team has active subscription:", subscriptionStatus, "→ /gestion");
                 trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
                     from: "login",
@@ -80,7 +80,7 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
             }
 
             // Équipe expirée → modal upgrade
-            if (subscriptionStatus === 'expired' || subscriptionStatus === 'canceled') {
+            if (subscriptionStatus === 'past_due' || subscriptionStatus === 'canceled') {
                 console.log("⚠️ Team subscription expired/canceled → /gestion?upgrade=required");
                 trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
                     from: "login",

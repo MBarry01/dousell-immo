@@ -36,12 +36,38 @@ export async function storeDocumentInGED(params: StoreDocumentParams, supabaseCl
         const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_\.]/g, '_');
         const filePath = `${userId}/${Date.now()}_${sanitizedFileName}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        let { data: uploadData, error: uploadError } = await supabase.storage
             .from(bucketName)
             .upload(filePath, fileBuffer, {
                 contentType: 'application/pdf',
                 upsert: true
             });
+
+        // Retry: Auto-create bucket if missing (requires admin/service_role client)
+        if (uploadError && uploadError.message.includes("Bucket not found")) {
+            console.log(`⚠️ Bucket '${bucketName}' introuvable. Tentative de création...`);
+            const { error: createError } = await supabase.storage.createBucket(bucketName, {
+                public: false,
+                fileSizeLimit: 52428800, // 50MB
+                allowedMimeTypes: ['application/pdf', 'image/png', 'image/jpeg']
+            });
+
+            if (createError) {
+                console.error("❌ Échec création bucket:", createError);
+                return { success: false, error: "Bucket introuvable et impossible à créer: " + createError.message };
+            }
+
+            // Retry upload
+            const retry = await supabase.storage
+                .from(bucketName)
+                .upload(filePath, fileBuffer, {
+                    contentType: 'application/pdf',
+                    upsert: true
+                });
+
+            uploadData = retry.data;
+            uploadError = retry.error;
+        }
 
         if (uploadError) {
             console.error("Erreur Upload Storage:", uploadError);

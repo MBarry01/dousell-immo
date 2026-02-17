@@ -30,7 +30,7 @@ export function ExpiredBanner({
   const [showModal, setShowModal] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
-  const isExpired = proStatus === "expired";
+  const isExpired = proStatus === "past_due" || proStatus === "canceled" || proStatus === "unpaid";
   const upgradeRequired = searchParams.get("upgrade") === "required";
 
   // Show modal if ?upgrade=required

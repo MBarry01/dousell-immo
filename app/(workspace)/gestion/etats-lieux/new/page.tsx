@@ -124,11 +124,13 @@ export default function NewInventoryReportPage() {
                         <SelectTrigger className={`w-full ${isDark ? 'bg-slate-800 border-slate-700' : ''}`}>
                             <SelectValue placeholder="Choisir un bail..." />
                         </SelectTrigger>
-                        <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-white' : ''}>
+                        <SelectContent className={`${isDark ? 'bg-slate-800 border-slate-700 text-white' : ''} max-w-[calc(100vw-2rem)]`}>
                             {leases.map((lease) => (
                                 <SelectItem key={lease.id} value={lease.id}>
-                                    <span className="font-medium">{lease.property_address || 'Adresse inconnue'}</span>
-                                    <span className="text-muted-foreground ml-2">({lease.tenant_name})</span>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 max-w-full overflow-hidden">
+                                        <span className="font-medium truncate">{lease.property_address || 'Adresse inconnue'}</span>
+                                        <span className="text-muted-foreground text-xs sm:text-sm truncate">({lease.tenant_name})</span>
+                                    </div>
                                 </SelectItem>
                             ))}
                         </SelectContent>

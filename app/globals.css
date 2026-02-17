@@ -181,6 +181,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
   }
 
   * {
@@ -407,6 +408,19 @@
     color: var(--foreground) !important;
   }
 
+  /* Variables globales pour le layout */
+  :root {
+    --header-height: 64px;
+    --mobile-nav-height: 0px;
+  }
+
+  @media (max-width: 1024px) {
+    :root {
+      /* 4rem (64px) + safe-area (pour la bottom nav) */
+      --mobile-nav-height: calc(4rem + env(safe-area-inset-bottom));
+    }
+  }
+
   .pt-safe {
     padding-top: calc(var(--safe-area-top) + 1rem);
   }
@@ -416,15 +430,17 @@
   }
 
   /* Padding pour le contenu au-dessus de la bottom nav mobile */
+  /* Utilise la variable calculée pour être parfaitement synchro */
   .pb-safe-nav {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 7rem);
+    padding-bottom: var(--mobile-nav-height) !important;
   }
 
-  /* Bannière promo : au-dessus de la bottom nav sur mobile, position standard sur desktop */
+  /* Bannière promo : au-dessus de la bottom nav sur mobile */
   .bottom-above-mobile-nav {
-    bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px) + 0.5rem);
+    bottom: calc(var(--mobile-nav-height) + 0.5rem);
   }
-  @media (min-width: 768px) {
+
+  @media (min-width: 1024px) {
     .bottom-above-mobile-nav {
       bottom: 1.5rem;
     }

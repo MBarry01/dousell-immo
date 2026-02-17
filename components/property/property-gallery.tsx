@@ -54,7 +54,7 @@ export const PropertyGallery = ({
         <div className="flex h-full">
           {memoizedImages.map((src, index) => (
             <div
-              className="relative h-[50vh] min-w-full shrink-0 overflow-hidden touch-none"
+              className="relative h-[50vh] min-w-full shrink-0 overflow-hidden touch-pan-y"
               key={`${propertyId}-${src}-${index}`}
             >
               <div className="relative h-full w-full">
@@ -83,9 +83,8 @@ export const PropertyGallery = ({
             key={`dot-${index}`}
             type="button"
             onClick={() => scrollTo(index)}
-            className={`h-2.5 rounded-full transition-all ${
-              selectedIndex === index ? "w-8 bg-white" : "w-2 bg-white/40"
-            }`}
+            className={`h-2.5 rounded-full transition-all ${selectedIndex === index ? "w-8 bg-white" : "w-2 bg-white/40"
+              }`}
           />
         ))}
       </div>

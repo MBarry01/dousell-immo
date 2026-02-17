@@ -27,9 +27,14 @@ interface RevenueChartProps {
 
 export function RevenueChart({ data }: RevenueChartProps) {
     const [mounted, setMounted] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
     useEffect(() => {
         setMounted(true);
-        console.log("[RevenueChart] ✓ Component mounted");
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
     }, []);
 
     const [showExpected, setShowExpected] = useState(true);
@@ -153,13 +158,13 @@ export function RevenueChart({ data }: RevenueChartProps) {
                         />
                         <XAxis
                             dataKey="name"
-                            tick={{ fill: "currentColor", fontSize: 11 }}
+                            tick={{ fill: "currentColor", fontSize: isMobile ? 9 : 11 }}
                             className="text-muted-foreground"
                             tickLine={false}
                             axisLine={{ stroke: "currentColor", className: "text-border" }}
                         />
                         <YAxis
-                            tick={{ fill: "currentColor", fontSize: 11 }}
+                            tick={{ fill: "currentColor", fontSize: isMobile ? 9 : 11 }}
                             className="text-muted-foreground"
                             tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
                             tickLine={false}

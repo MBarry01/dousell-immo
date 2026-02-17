@@ -603,17 +603,17 @@ export async function createNewLease(formData: Record<string, unknown>) {
         };
 
         // Générer le PDF
-         
-        const { generateLeasePDF } = require('@/lib/pdf-generator');
+
+        const { generateLeasePDF } = await import('@/lib/pdf-generator');
         const pdfResult = await generateLeasePDF(contractData);
 
         if (pdfResult.success && pdfResult.pdfBytes) {
             // Stocker dans la GED
-             
-            const { storeDocumentInGED } = require('@/lib/ged-utils');
+
+            const { storeDocumentInGED } = await import('@/lib/ged-utils');
 
             // Utiliser un client admin pour outrepasser les restrictions de session sur le storage
-            const { createClient: createAdminSupabase } = require('@supabase/supabase-js');
+            const { createClient: createAdminSupabase } = await import('@supabase/supabase-js');
             const supabaseAdmin = createAdminSupabase(
                 process.env.NEXT_PUBLIC_SUPABASE_URL!,
                 process.env.SUPABASE_SERVICE_ROLE_KEY!

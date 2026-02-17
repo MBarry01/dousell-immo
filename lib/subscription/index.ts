@@ -9,6 +9,11 @@ export {
     activateTeamSubscription,
     expireTeamSubscription,
     type TeamSubscription,
+    type FeatureCheckResult,
+} from './team-subscription';
+
+// Source unique de vérité pour les types
+export {
     type SubscriptionStatus,
     type SubscriptionTier,
-} from './team-subscription';
+} from './plans-config';

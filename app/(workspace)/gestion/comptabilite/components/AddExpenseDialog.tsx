@@ -160,13 +160,13 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
                             <SelectTrigger className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'}>
                                 <SelectValue placeholder="Aucun (dépense générale)" />
                             </SelectTrigger>
-                            <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}>
+                            <SelectContent className={`${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'} max-w-[calc(100vw-2rem)]`}>
                                 <SelectItem value="none">
                                     Aucun (dépense générale)
                                 </SelectItem>
                                 {properties.map((p) => (
                                     <SelectItem key={p.id} value={p.id}>
-                                        {p.address}
+                                        <span className="truncate block max-w-full">{p.address}</span>
                                     </SelectItem>
                                 ))}
                             </SelectContent>

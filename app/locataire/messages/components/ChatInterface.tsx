@@ -2,7 +2,8 @@
 
 import { createClient } from '@/utils/supabase/client';
 import { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle } from 'lucide-react';
+import { Send, MessageCircle, ChevronLeft } from 'lucide-react';
+import Link from 'next/link';
 import { sendTenantMessage, markTenantMessagesAsRead } from '../actions';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -145,30 +146,33 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
     }, {} as Record<string, Message[]>);
 
     return (
-        <div className="flex flex-col h-[calc(100vh-64px)] bg-slate-50">
+        <div className="flex flex-col h-[calc(100dvh-64px)] lg:h-[calc(100dvh-64px)] h-[calc(100dvh-64px-var(--mobile-nav-height))] bg-slate-50">
             {/* Header */}
-            <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm z-10">
-                <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold">
-                    {ownerName?.[0]?.toUpperCase() || 'P'}
-                </div>
-                <div>
-                    <h1 className="font-semibold text-slate-900 leading-tight">
-                        {ownerName || 'Propriétaire'}
-                    </h1>
-                    <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        En ligne
-                    </p>
+            <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm z-10 shrink-0">
+                <Link href="/locataire/dashboard" className="p-2 -ml-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
+                    <ChevronLeft className="w-5 h-5" />
+                </Link>
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold border border-slate-200">
+                        {ownerName?.[0]?.toUpperCase() || 'P'}
+                    </div>
+                    <div>
+                        <h2 className="font-semibold text-slate-900 leading-tight">{ownerName || 'Propriétaire'}</h2>
+                        <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            En ligne
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            {/* Messages */}
-            <main className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+            {/* Zone Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent pb-4">
                 {Object.entries(groupedMessages).map(([dateKey, msgs]) => (
-                    <div key={dateKey} className="space-y-3">
+                    <div key={dateKey} className="space-y-4">
                         {/* Date Header */}
-                        <div className="flex justify-center">
-                            <span className="text-[10px] uppercase font-semibold px-3 py-1 rounded-full text-slate-500 bg-slate-200">
+                        <div className="flex justify-center sticky top-0 z-10 py-2">
+                            <span className="text-[10px] uppercase font-bold px-2 py-1 rounded-full border shadow-sm backdrop-blur-sm text-slate-500 bg-white/80 border-gray-200">
                                 {format(new Date(dateKey), 'd MMMM yyyy', { locale: fr })}
                             </span>
                         </div>
@@ -193,16 +197,16 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                                         )}
 
                                         <div className={cn(
-                                            "max-w-[75%] px-4 py-2.5 text-sm shadow-sm break-words",
+                                            "max-w-[75%] px-4 py-2.5 text-sm shadow-sm break-words relative",
                                             isMe
-                                                ? "bg-slate-900 text-white rounded-2xl rounded-br-md"
-                                                : "bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-bl-md",
+                                                ? "bg-slate-900 text-white rounded-2xl rounded-br-none"
+                                                : "bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-bl-none",
                                             !isLastFromSender && (isMe ? "rounded-br-2xl mb-0.5" : "rounded-bl-2xl mb-0.5")
                                         )}>
                                             <p className="leading-relaxed">{msg.content}</p>
                                             <p className={cn(
-                                                "text-[9px] mt-1 text-right",
-                                                isMe ? "text-slate-400" : "text-slate-400"
+                                                "text-[9px] mt-1 text-right ml-2 opacity-70",
+                                                isMe ? "text-slate-300" : "text-slate-400"
                                             )}>
                                                 {format(new Date(msg.created_at), 'HH:mm')}
                                             </p>
@@ -226,10 +230,10 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                     </div>
                 )}
                 <div ref={messagesEndRef} />
-            </main>
+            </div>
 
             {/* Input */}
-            <footer className="bg-white border-t border-slate-200 p-3">
+            <div className="bg-white border-t border-slate-200 px-4 py-3 z-10 shrink-0">
                 <form onSubmit={handleSend} className="flex items-center gap-2 max-w-lg mx-auto">
                     <input
                         type="text"
@@ -241,13 +245,12 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                     <button
                         type="submit"
                         disabled={!newMessage.trim() || isSending}
-                        className="w-11 h-11 rounded-full bg-slate-900 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 transition-all active:scale-95"
+                        className="w-11 h-11 rounded-full bg-slate-900 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 transition-all active:scale-95 shrink-0"
                     >
                         <Send className="w-5 h-5" />
                     </button>
                 </form>
-            </footer>
+            </div>
         </div>
     );
 }
-

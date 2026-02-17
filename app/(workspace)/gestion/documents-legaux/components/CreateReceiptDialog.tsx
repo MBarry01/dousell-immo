@@ -120,7 +120,7 @@ export function CreateReceiptDialog({ leases, userEmail, profile }: CreateReceip
                                         <SelectTrigger className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-300 text-gray-900'}>
                                             <SelectValue placeholder="Sélectionner un bail..." />
                                         </SelectTrigger>
-                                        <SelectContent className={isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}>
+                                        <SelectContent className={`${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'} max-w-[calc(100vw-2rem)]`}>
                                             {leases.length === 0 ? (
                                                 <div className={`py-6 text-center text-sm ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
                                                     Aucun bail actif trouvé
@@ -128,7 +128,12 @@ export function CreateReceiptDialog({ leases, userEmail, profile }: CreateReceip
                                             ) : (
                                                 leases.map((lease) => (
                                                     <SelectItem key={lease.id} value={lease.id} className={isDark ? 'focus:bg-slate-700 focus:text-slate-100' : 'focus:bg-gray-100 focus:text-gray-900'}>
-                                                        <span className="font-medium">{lease.tenant_name}</span>
+                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 max-w-full overflow-hidden">
+                                                            <span className="font-medium truncate">{lease.tenant_name}</span>
+                                                            <span className={`text-xs truncate ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
+                                                                - {lease.property_address}
+                                                            </span>
+                                                        </div>
                                                     </SelectItem>
                                                 ))
                                             )}

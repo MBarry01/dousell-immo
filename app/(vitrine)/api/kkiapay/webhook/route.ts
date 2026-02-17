@@ -80,7 +80,7 @@ export async function POST(request: Request) {
         // Récupérer infos du bail
         const { data: lease } = await supabaseAdmin
           .from("leases")
-          .select("tenant_email, tenant_name, monthly_amount, owner_id, owner:profiles(email, full_name)")
+          .select("tenant_email, tenant_name, monthly_amount, owner_id, property_address, owner:profiles(email, full_name, company_address, address)")
           .eq("id", metadata.lease_id)
           .single();
 
@@ -111,11 +111,11 @@ export async function POST(request: Request) {
 
           // --- GÉNÉRATION ET STOCKAGE QUITTANCE PDF ---
           try {
-            const ReactPDF = require('@react-pdf/renderer');
-            const { createQuittanceDocument } = require('@/components/pdf/QuittancePDF_v2');
-            const { storeDocumentInGED } = require('@/lib/ged-utils');
+            const { createQuittanceDocument } = await import('@/components/pdf/QuittancePDF_v2');
+            const { renderToStream } = await import('@react-pdf/renderer'); // Corrected import for renderToStream
+            const { storeDocumentInGED } = await import('@/lib/ged-utils');
 
-            const owner = lease.owner as { email?: string; full_name?: string } | undefined;
+            const owner = lease.owner as { email?: string; full_name?: string; company_address?: string; address?: string } | undefined;
 
             const receiptData = {
               leaseId: metadata.lease_id,
@@ -127,11 +127,18 @@ export async function POST(request: Request) {
               periodEnd: new Date(metadata.period_year, metadata.period_month, 0).toLocaleDateString('fr-FR'),
               receiptNumber: `QUITT-${Date.now().toString().slice(-6)}`,
               ownerName: owner?.full_name || 'Propriétaire',
-              ownerEmail: owner?.email
+              ownerEmail: owner?.email,
+              ownerAddress: owner?.company_address || owner?.address || 'Adresse non renseignée',
+              propertyAddress: lease.property_address || 'Adresse non renseignée'
             };
 
             const pdfDocument = createQuittanceDocument(receiptData);
-            const stream = await ReactPDF.renderToStream(pdfDocument);
+            // ReactPDF might be a module with named exports or default depending on how it's built.
+            // But usually renderToStream is a top level export or on the default instance.
+            // If the previous code was require('@react-pdf/renderer'), it got the module.
+            // If typical usage is import { renderToStream } ...
+            // Let's assume renderToStream is available on the module (or default)
+            const stream = await renderToStream(pdfDocument);
             const chunks: Uint8Array[] = [];
             const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
               stream.on('data', (chunk: any) => chunks.push(chunk));

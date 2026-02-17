@@ -55,7 +55,7 @@ export default function PricingSection() {
     }
 
     // Check if user is already on this plan (active or trial)
-    if (currentPlan === planId && (subscriptionStatus === 'active' || subscriptionStatus === 'trial')) {
+    if (currentPlan === planId && (subscriptionStatus === 'active' || subscriptionStatus === 'trialing')) {
       router.push('/gestion/abonnement');
       return;
     }
@@ -272,7 +272,7 @@ export default function PricingSection() {
                 >
                   {plan.cta}
                 </Link>
-              ) : currentPlan === plan.id && (subscriptionStatus === 'active' || subscriptionStatus === 'trial') ? (
+              ) : currentPlan === plan.id && (subscriptionStatus === 'active' || subscriptionStatus === 'trialing') ? (
                 <button
                   onClick={() => router.push('/gestion/abonnement')}
                   className="block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 bg-white/10 text-white hover:bg-white/20 border border-white/10"

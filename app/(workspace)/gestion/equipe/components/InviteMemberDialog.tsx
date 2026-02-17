@@ -140,7 +140,7 @@ export function InviteMemberDialog({ teamId, onSuccess, trigger }: InviteMemberD
                 <SelectValue />
               </SelectTrigger>
               <SelectContent
-                className={cn(isDark && "bg-slate-800 border-slate-700")}
+                className={cn(isDark && "bg-slate-800 border-slate-700", "max-w-[calc(100vw-2rem)]")}
               >
                 {INVITABLE_ROLES.map((r) => {
                   const config = TEAM_ROLE_CONFIG[r];
@@ -150,11 +150,11 @@ export function InviteMemberDialog({ teamId, onSuccess, trigger }: InviteMemberD
                       value={r}
                       className={cn(isDark && "text-white focus:bg-slate-700")}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 max-w-full overflow-hidden">
                         <RoleBadge role={r} size="sm" />
                         <span
                           className={cn(
-                            "text-xs",
+                            "text-xs truncate",
                             isDark ? "text-slate-400" : "text-gray-500"
                           )}
                         >

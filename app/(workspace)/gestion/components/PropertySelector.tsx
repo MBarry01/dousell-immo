@@ -172,7 +172,7 @@ export function PropertySelector({
                         </Button>
                     </PopoverTrigger>
 
-                    <PopoverContent className="w-[400px] p-0 bg-popover border-border shadow-2xl">
+                    <PopoverContent className="w-[calc(100vw-32px)] md:w-[400px] p-0 bg-popover border-border shadow-2xl">
                         <Command className="bg-popover">
                             <CommandInput
                                 placeholder="Rechercher un bien..."

@@ -27,6 +27,7 @@ interface LockedSidebarItemProps {
   requiredTier?: 'pro' | 'enterprise'; // Tier requis
   currentTeamId?: string; // ID de l'équipe actuellement sélectionnée
   currentTeamTier?: string; // Tier de l'équipe
+  currentTeamStatus?: string; // Statut de l'abonnement
   onNavigate?: () => void;
   onRequestAccess?: (permission: TeamPermissionKey, label: string) => void;
   badgeCount?: number;
@@ -61,6 +62,7 @@ export function LockedSidebarItem({
   requiredTier,
   currentTeamId,
   currentTeamTier,
+  currentTeamStatus,
   onNavigate,
   onRequestAccess,
   badgeCount = 0,
@@ -69,7 +71,15 @@ export function LockedSidebarItem({
   const [isLoading, setIsLoading] = useState(!!requiredPermission);
 
   useEffect(() => {
-    // 1. Vérification du Tier (Prioritaire)
+    // 0. Vérification du statut d'abonnement (bloqué = lecture seule)
+    const BLOCKED_STATUSES = ['past_due', 'canceled', 'unpaid', 'incomplete'];
+    if (requiredTier && currentTeamStatus && BLOCKED_STATUSES.includes(currentTeamStatus)) {
+      setHasAccess(false);
+      setIsLoading(false);
+      return;
+    }
+
+    // 1. Vérification du Tier
     if (requiredTier) {
       const currentLevel = TIER_LEVELS[currentTeamTier || 'starter'] || 0;
       const requiredLevel = TIER_LEVELS[requiredTier] || 1;
@@ -151,7 +161,7 @@ export function LockedSidebarItem({
     };
 
     checkPermission();
-  }, [requiredPermission, requiredTier, currentTeamId, currentTeamTier]);
+  }, [requiredPermission, requiredTier, currentTeamId, currentTeamTier, currentTeamStatus]);
 
   // Pendant le chargement, afficher comme normal
   if (isLoading) {

@@ -26,36 +26,36 @@ export function SignaturePage({ reportId }: SignaturePageProps) {
     const [tenantSignature, setTenantSignature] = useState('');
 
     useEffect(() => {
+        const loadReport = async () => {
+            // Fetch report and owner's saved signature in parallel
+            const [reportResult, signatureResult] = await Promise.all([
+                getInventoryReportById(reportId),
+                getOwnerSignature()
+            ]);
+
+            if (reportResult.error) {
+                toast.error(reportResult.error);
+                router.push('/etats-lieux');
+                return;
+            }
+
+            setReport(reportResult.data);
+
+            // If report already has signatures, use them
+            if (reportResult.data?.owner_signature) {
+                setOwnerSignature(reportResult.data.owner_signature);
+            } else if (signatureResult.signature_url) {
+                // Otherwise use saved signature from profile
+                setOwnerSignature(signatureResult.signature_url);
+                setSavedOwnerSignature(signatureResult.signature_url);
+            }
+
+            setTenantSignature(reportResult.data?.tenant_signature || '');
+            setLoading(false);
+        };
+
         loadReport();
-    }, [reportId]);
-
-    const loadReport = async () => {
-        // Fetch report and owner's saved signature in parallel
-        const [reportResult, signatureResult] = await Promise.all([
-            getInventoryReportById(reportId),
-            getOwnerSignature()
-        ]);
-
-        if (reportResult.error) {
-            toast.error(reportResult.error);
-            router.push('/etats-lieux');
-            return;
-        }
-
-        setReport(reportResult.data);
-
-        // If report already has signatures, use them
-        if (reportResult.data?.owner_signature) {
-            setOwnerSignature(reportResult.data.owner_signature);
-        } else if (signatureResult.signature_url) {
-            // Otherwise use saved signature from profile
-            setOwnerSignature(signatureResult.signature_url);
-            setSavedOwnerSignature(signatureResult.signature_url);
-        }
-
-        setTenantSignature(reportResult.data?.tenant_signature || '');
-        setLoading(false);
-    };
+    }, [reportId, router]);
 
     const handleSign = async () => {
         if (!ownerSignature || !tenantSignature) {

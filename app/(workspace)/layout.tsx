@@ -25,19 +25,37 @@ export default async function WorkspaceLayout({
     .select(`
       team_id,
       role,
-      team:teams(id, name, slug, subscription_tier)
+      team:teams(id, name, slug, subscription_tier, subscription_status, subscription_trial_ends_at, stripe_subscription_id)
     `)
     .eq("user_id", user.id)
     .eq("status", "active");
 
   const teams = memberships?.map((m) => {
-    const team = m.team as unknown as { id: string; name: string; slug: string; subscription_tier: string };
+    const team = m.team as unknown as {
+      id: string; name: string; slug: string;
+      subscription_tier: string; subscription_status: string;
+      subscription_trial_ends_at: string | null; stripe_subscription_id: string | null;
+    };
+
+    // Calculer le statut et tier effectifs (le cron peut ne pas avoir encore tourné)
+    let effectiveStatus = team?.subscription_status || "canceled";
+    let effectiveTier = team?.subscription_tier || "starter";
+
+    if (effectiveStatus === "trialing" && team?.subscription_trial_ends_at) {
+      const trialEnd = new Date(team.subscription_trial_ends_at);
+      if (trialEnd < new Date()) {
+        effectiveStatus = "past_due";
+        effectiveTier = "starter";
+      }
+    }
+
     return {
       id: team?.id || m.team_id,
       name: team?.name || "Mon équipe",
       slug: team?.slug || "",
       role: m.role,
-      subscription_tier: team?.subscription_tier || "starter",
+      subscription_tier: effectiveTier,
+      subscription_status: effectiveStatus,
       status: "active",
     };
   }) || [];

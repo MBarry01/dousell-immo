@@ -14,6 +14,12 @@
 
 export type SubscriptionTier = 'starter' | 'pro' | 'enterprise';
 
+/**
+ * Statuts d'abonnement - aligné avec la contrainte CHECK en base de données.
+ * Source unique de vérité pour tout le projet.
+ */
+export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete';
+
 export type BillingCycle = 'monthly' | 'annual';
 
 export type Currency = 'xof' | 'eur';
@@ -276,13 +282,17 @@ export function getPlanLimits(tier: SubscriptionTier): PlanLimits {
 /**
  * Vérifie si une valeur dépasse la limite d'un plan
  */
+/**
+ * Vérifie si une valeur dépasse la limite d'un plan.
+ * Les limites >= 9999 sont considérées comme illimitées.
+ */
 export function exceedsLimit(
   tier: SubscriptionTier,
   limitType: keyof PlanLimits,
   currentValue: number
 ): boolean {
   const limit = PLANS[tier].features.limits[limitType];
-  return limit !== Infinity && currentValue >= limit;
+  return limit < 9999 && currentValue >= limit;
 }
 
 /**

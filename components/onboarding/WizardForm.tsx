@@ -308,8 +308,9 @@ function StepUser({ data, updateData, isLoggedIn }: { data: WizardData, updateDa
 
             <div className="grid gap-6">
                 <div className="space-y-2">
-                    <Label>Nom complet du référent</Label>
+                    <Label htmlFor="fullName">Nom complet du référent</Label>
                     <Input
+                        id="fullName"
                         placeholder="Ex: Babacar Diop"
                         value={data.fullName}
                         onChange={(e) => updateData("fullName", e.target.value)}
@@ -319,8 +320,9 @@ function StepUser({ data, updateData, isLoggedIn }: { data: WizardData, updateDa
 
                 <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <Label>Email professionnel</Label>
+                        <Label htmlFor="email">Email professionnel</Label>
                         <Input
+                            id="email"
                             type="email"
                             placeholder="contact@monagence.sn"
                             value={data.email}
@@ -343,8 +345,9 @@ function StepUser({ data, updateData, isLoggedIn }: { data: WizardData, updateDa
 
                 {!isLoggedIn && (
                     <div className="space-y-2">
-                        <Label>Mot de passe</Label>
+                        <Label htmlFor="password">Mot de passe</Label>
                         <Input
+                            id="password"
                             type="password"
                             placeholder="••••••••"
                             value={data.password}
@@ -493,12 +496,12 @@ function StepAgency({ data, updateData }: { data: WizardData; updateData: any })
             <div className="grid gap-4">
                 <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label>Nom de l&apos;agence</Label>
-                        <Input placeholder="Ex: Immobilière du Sud" value={data.companyName} onChange={(e) => updateData("companyName", e.target.value)} className="h-11 bg-slate-50 dark:bg-gray-800" />
+                        <Label htmlFor="companyName">Nom de l&apos;agence</Label>
+                        <Input id="companyName" placeholder="Ex: Immobilière du Sud" value={data.companyName} onChange={(e) => updateData("companyName", e.target.value)} className="h-11 bg-slate-50 dark:bg-gray-800" />
                     </div>
                     <div className="space-y-2">
-                        <Label>Adresse du siège</Label>
-                        <Input placeholder="Ex: 123 Rue de la République" value={data.companyAddress} onChange={(e) => updateData("companyAddress", e.target.value)} className="h-11 bg-slate-50 dark:bg-gray-800" />
+                        <Label htmlFor="companyAddress">Adresse du siège</Label>
+                        <Input id="companyAddress" placeholder="Ex: 123 Rue de la République" value={data.companyAddress} onChange={(e) => updateData("companyAddress", e.target.value)} className="h-11 bg-slate-50 dark:bg-gray-800" />
                     </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -507,8 +510,8 @@ function StepAgency({ data, updateData }: { data: WizardData; updateData: any })
                         <PhoneInput placeholder="33 800 00 00" value={data.companyPhone} onChange={(val) => updateData("companyPhone", val)} className="bg-slate-50 dark:bg-gray-800" defaultCountry="SN" />
                     </div>
                     <div className="space-y-2">
-                        <Label>NINEA (optionnel)</Label>
-                        <Input placeholder="Ex: 0000000 0 00" value={data.companyNinea} onChange={(e) => updateData("companyNinea", e.target.value)} className="h-11 bg-slate-50 dark:bg-gray-800" />
+                        <Label htmlFor="companyNinea">NINEA (optionnel)</Label>
+                        <Input id="companyNinea" placeholder="Ex: 0000000 0 00" value={data.companyNinea} onChange={(e) => updateData("companyNinea", e.target.value)} className="h-11 bg-slate-50 dark:bg-gray-800" />
                     </div>
                 </div>
             </div>

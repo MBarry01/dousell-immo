@@ -71,7 +71,7 @@ export const GalleryGrid = ({
           {images.map((src, index) => (
             <div
               key={`${propertyId}-${src}-${index}`}
-              className="relative h-[50vh] min-w-full shrink-0 overflow-hidden touch-none"
+              className="relative h-[50vh] min-w-full shrink-0 overflow-hidden touch-pan-y"
               onClick={() => openLightbox(index)}
             >
               <Image

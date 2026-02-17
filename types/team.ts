@@ -151,7 +151,7 @@ export interface UserTeamContext {
   team_slug: string;
   user_role: TeamRole;
   // 🆕 Subscription fields (optimisation: évite un appel DB séparé)
-  subscription_status?: 'none' | 'trial' | 'active' | 'expired' | 'canceled';
+  subscription_status?: 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete';
   subscription_trial_ends_at?: string | null;
   subscription_tier?: SubscriptionTier;
 }

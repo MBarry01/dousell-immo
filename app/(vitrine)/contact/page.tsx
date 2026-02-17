@@ -18,6 +18,14 @@ import {
   visitRequestSchema,
   type VisitRequestFormValues,
 } from "@/lib/schemas/visit-request";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Controller } from "react-hook-form";
 
 const faq = [
   {
@@ -320,7 +328,7 @@ export default function ContactPage() {
               <Input
                 type="text"
                 placeholder="Ex: Amy Ndiaye"
-                className="border-white/10 bg-background/5 text-white placeholder:text-white/40"
+                className="border-white/10 bg-background/5 text-base text-white placeholder:text-white/40 min-h-[44px]"
                 {...form.register("fullName")}
               />
               {form.formState.errors.fullName && (
@@ -335,7 +343,7 @@ export default function ContactPage() {
                 type="tel"
                 inputMode="tel"
                 placeholder="77 000 00 00"
-                className="border-white/10 bg-background/5 text-white placeholder:text-white/40"
+                className="border-white/10 bg-background/5 text-base text-white placeholder:text-white/40 min-h-[44px]"
                 {...form.register("phone")}
               />
               {form.formState.errors.phone && (
@@ -347,44 +355,40 @@ export default function ContactPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm text-white/70">Type de projet</label>
-                <select
-                  className="h-12 w-full rounded-2xl border border-white/10 bg-background/5 px-4 text-white outline-none transition focus:border-white/30 appearance-none bg-no-repeat bg-right pr-10"
-                  style={{
-                    backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
-                    backgroundPosition: "right 0.75rem center",
-                    backgroundSize: "1.5em 1.5em"
-                  }}
-                  {...form.register("projectType")}
-                >
-                  <option value="achat" className="bg-[#121212] text-white py-2">
-                    Achat
-                  </option>
-                  <option value="location" className="bg-[#121212] text-white py-2">
-                    Location
-                  </option>
-                </select>
+                <Controller
+                  name="projectType"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger className="border-white/10 bg-background/5 text-white">
+                        <SelectValue placeholder="Choisir..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#121212] border-white/20">
+                        <SelectItem value="achat">Achat</SelectItem>
+                        <SelectItem value="location">Location</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-sm text-white/70">Disponibilité</label>
-                <select
-                  className="h-12 w-full rounded-2xl border border-white/10 bg-background/5 px-4 text-white outline-none transition focus:border-white/30 appearance-none bg-no-repeat bg-right pr-10"
-                  style={{
-                    backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
-                    backgroundPosition: "right 0.75rem center",
-                    backgroundSize: "1.5em 1.5em"
-                  }}
-                  {...form.register("availability")}
-                >
-                  <option value="semaine-matin" className="bg-[#121212] text-white py-2">
-                    En semaine (Matin)
-                  </option>
-                  <option value="semaine-apres-midi" className="bg-[#121212] text-white py-2">
-                    En semaine (Après-midi)
-                  </option>
-                  <option value="weekend" className="bg-[#121212] text-white py-2">
-                    Le week-end
-                  </option>
-                </select>
+                <Controller
+                  name="availability"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger className="border-white/10 bg-background/5 text-white">
+                        <SelectValue placeholder="Choisir..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#121212] border-white/20">
+                        <SelectItem value="semaine-matin">En semaine (Matin)</SelectItem>
+                        <SelectItem value="semaine-apres-midi">En semaine (Après-midi)</SelectItem>
+                        <SelectItem value="weekend">Le week-end</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
             </div>
             <div className="space-y-2">
@@ -394,7 +398,7 @@ export default function ContactPage() {
               <Textarea
                 placeholder="Décrivez votre projet, budget, quartiers souhaités..."
                 rows={4}
-                className="border-white/10 bg-background/5 text-white placeholder:text-white/40 resize-none"
+                className="border-white/10 bg-background/5 text-base text-white placeholder:text-white/40 resize-none min-h-[44px]"
                 {...form.register("message")}
               />
             </div>

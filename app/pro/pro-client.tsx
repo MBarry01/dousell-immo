@@ -993,8 +993,8 @@ function LandingPageContent() {
                   <label className="text-sm text-white/70">Nom complet</label>
                   <Input
                     type="text"
-                    placeholder="Ex: Amy Ndiaye"
-                    className="border-white/10 bg-white/5 text-white placeholder:text-white/40"
+                    placeholder="Nom complet"
+                    className="h-12 border-white/10 bg-white/5 text-base text-white placeholder:text-white/40 focus:border-[#F4C430]/50 focus:ring-[#F4C430]/20"
                     {...form.register("fullName")}
                   />
                   {form.formState.errors.fullName && (
@@ -1006,8 +1006,8 @@ function LandingPageContent() {
                   <Input
                     type="tel"
                     inputMode="tel"
-                    placeholder="77 000 00 00"
-                    className="border-white/10 bg-white/5 text-white placeholder:text-white/40"
+                    placeholder="Téléphone"
+                    className="h-12 border-white/10 bg-white/5 text-base text-white placeholder:text-white/40 focus:border-[#F4C430]/50 focus:ring-[#F4C430]/20"
                     {...form.register("phone")}
                   />
                   {form.formState.errors.phone && (
@@ -1018,7 +1018,7 @@ function LandingPageContent() {
                   <div className="space-y-2">
                     <label className="text-sm text-white/70">Type de projet</label>
                     <select
-                      className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none transition focus:border-white/30 appearance-none"
+                      className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-white outline-none transition focus:border-white/30 appearance-none"
                       style={{
                         backgroundImage: "url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
                         backgroundPosition: "right 0.75rem center",
@@ -1034,7 +1034,7 @@ function LandingPageContent() {
                   <div className="space-y-2">
                     <label className="text-sm text-white/70">Disponibilité</label>
                     <select
-                      className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none transition focus:border-white/30 appearance-none"
+                      className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-white outline-none transition focus:border-white/30 appearance-none"
                       style={{
                         backgroundImage: "url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
                         backgroundPosition: "right 0.75rem center",
@@ -1054,7 +1054,7 @@ function LandingPageContent() {
                   <Textarea
                     placeholder="Décrivez votre projet..."
                     rows={3}
-                    className="border-white/10 bg-white/5 text-white placeholder:text-white/40 resize-none"
+                    className="border-white/10 bg-white/5 text-base text-white placeholder:text-white/40 resize-none"
                     {...form.register("message")}
                   />
                 </div>

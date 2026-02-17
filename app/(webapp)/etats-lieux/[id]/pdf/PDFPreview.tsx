@@ -32,37 +32,37 @@ export function PDFPreview({ reportId }: PDFPageProps) {
     const printRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        const loadData = async () => {
+            const [reportResult, brandingResult] = await Promise.all([
+                getInventoryReportById(reportId),
+                getAgencyBranding()
+            ]);
+
+            if (reportResult.error) {
+                toast.error(reportResult.error);
+                router.push('/etats-lieux');
+                return;
+            }
+
+            if (reportResult.data?.status !== 'signed') {
+                toast.error('Le rapport doit être signé avant de générer le PDF');
+                router.push(`/compte/etats-lieux/${reportId}/sign`);
+                return;
+            }
+
+            if (brandingResult && !('error' in brandingResult)) {
+                setAgencyBranding({
+                    name: brandingResult.agency_name,
+                    logo: brandingResult.logo_url
+                });
+            }
+
+            setReport(reportResult.data);
+            setLoading(false);
+        };
+
         loadData();
-    }, [reportId]);
-
-    const loadData = async () => {
-        const [reportResult, brandingResult] = await Promise.all([
-            getInventoryReportById(reportId),
-            getAgencyBranding()
-        ]);
-
-        if (reportResult.error) {
-            toast.error(reportResult.error);
-            router.push('/etats-lieux');
-            return;
-        }
-
-        if (reportResult.data?.status !== 'signed') {
-            toast.error('Le rapport doit être signé avant de générer le PDF');
-            router.push(`/compte/etats-lieux/${reportId}/sign`);
-            return;
-        }
-
-        if (brandingResult && !('error' in brandingResult)) {
-            setAgencyBranding({
-                name: brandingResult.agency_name,
-                logo: brandingResult.logo_url
-            });
-        }
-
-        setReport(reportResult.data);
-        setLoading(false);
-    };
+    }, [reportId, router]);
 
     const handlePrint = () => {
         window.print();

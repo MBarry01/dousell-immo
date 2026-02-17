@@ -45,6 +45,7 @@ interface TeamData {
   slug: string;
   role: string;
   subscription_tier?: string;
+  subscription_status?: string;
 }
 
 interface NavItem {
@@ -222,6 +223,7 @@ function SidebarContent({
                 requiredTier={item.requiredTier}
                 currentTeamId={currentTeamId}
                 currentTeamTier={currentTeam?.subscription_tier}
+                currentTeamStatus={currentTeam?.subscription_status}
                 onNavigate={() => isMobile && onMobileNavigate?.()}
                 onRequestAccess={onRequestAccess}
                 badgeCount={badgeCount}

@@ -188,7 +188,7 @@ export function AddressAutocomplete({
                 </div>
             </PopoverTrigger>
             <PopoverContent
-                className="p-0 w-[350px]"
+                className="p-0 w-[calc(100vw-32px)] md:w-[350px]"
                 align="start"
                 onOpenAutoFocus={(e: Event) => e.preventDefault()}
             >

@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Utiliser l'utilitaire centralisé pour le stockage
-         
-        const { storeDocumentInGED } = require('@/lib/ged-utils');
+
+        const { storeDocumentInGED } = await import('@/lib/ged-utils');
 
         const result = await storeDocumentInGED({
             userId: lease.owner_id,
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
                 tenantName: data.tenantName,
                 description: `Quittance - ${data.periodMonth} - ${data.tenantName}`
             }
-        });
+        }, supabaseAdmin);
 
         if (!result.success) {
             throw new Error(result.error);

@@ -147,13 +147,18 @@ export function DocumentGeneratorDialog({ leases, userEmail, profile, trigger }:
                                                 <SelectTrigger className="bg-background border-border text-foreground">
                                                     <SelectValue placeholder="Sélectionner un bail..." />
                                                 </SelectTrigger>
-                                                <SelectContent className="bg-popover border-border text-foreground">
+                                                <SelectContent className="bg-popover border-border text-foreground max-w-[calc(100vw-2rem)]">
                                                     {leases.length === 0 ? (
                                                         <div className="py-6 text-center text-sm text-muted-foreground">Aucun bail actif</div>
                                                     ) : (
                                                         leases.map((lease) => (
-                                                            <SelectItem key={lease.id} value={lease.id} className="focus:bg-accent focus:text-accent-foreground">
-                                                                <span className="font-medium">{lease.tenant_name}</span>
+                                                            <SelectItem key={lease.id} value={lease.id}>
+                                                                <div className="flex flex-col min-w-0 py-0.5">
+                                                                    <span className="font-medium truncate block">{lease.tenant_name}</span>
+                                                                    <span className="text-[10px] truncate block opacity-70">
+                                                                        {lease.property_address}
+                                                                    </span>
+                                                                </div>
                                                             </SelectItem>
                                                         ))
                                                     )}
@@ -238,11 +243,13 @@ export function DocumentGeneratorDialog({ leases, userEmail, profile, trigger }:
                                                         <div className="py-6 text-center text-sm text-muted-foreground">Aucun bail actif</div>
                                                     ) : (
                                                         leases.map((lease) => (
-                                                            <SelectItem key={lease.id} value={lease.id} className="focus:bg-accent focus:text-accent-foreground">
-                                                                <span className="font-medium">{lease.tenant_name}</span>
-                                                                <span className="ml-2 opacity-60 text-xs truncate max-w-[200px] inline-block align-bottom">
-                                                                    - {lease.property_address}
-                                                                </span>
+                                                            <SelectItem key={lease.id} value={lease.id}>
+                                                                <div className="flex flex-col min-w-0 py-0.5">
+                                                                    <span className="font-medium truncate block">{lease.tenant_name}</span>
+                                                                    <span className="text-[10px] truncate block opacity-70">
+                                                                        {lease.property_address}
+                                                                    </span>
+                                                                </div>
                                                             </SelectItem>
                                                         ))
                                                     )}

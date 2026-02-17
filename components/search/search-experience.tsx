@@ -201,7 +201,7 @@ export const SearchExperience = ({
                 className="border-none bg-transparent p-0 text-white placeholder:text-white/50 focus-visible:ring-0"
               />
               {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 mt-2 w-full origin-top-left rounded-xl border border-white/10 bg-[#0F172A] p-1 shadow-2xl shadow-black/50 z-50 overflow-hidden">
+                <div className="absolute top-full left-0 mt-2 w-full origin-top-left rounded-xl border border-white/10 bg-[#0F172A] p-1 shadow-2xl shadow-black/50 z-[60] overflow-y-auto max-h-[40vh] pb-safe">
                   {suggestions.map((suggestion, index) => (
                     <button
                       key={index}

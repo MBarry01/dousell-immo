@@ -54,7 +54,7 @@ function WebAppLayoutContent({
         };
 
         checkAuth();
-    }, [router]);
+    }, []);
 
     // Close sidebar on route change (mobile)
     useEffect(() => {

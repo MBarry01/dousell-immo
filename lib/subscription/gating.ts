@@ -1,6 +1,6 @@
-import { SubscriptionTier, PlanFeatures, PLANS } from './plans-config';
+import { SubscriptionTier, SubscriptionStatus } from './plans-config';
 
-export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete';
+export type { SubscriptionStatus };
 
 export interface TeamSubscriptionContext {
     subscription_tier: SubscriptionTier;
@@ -9,10 +9,10 @@ export interface TeamSubscriptionContext {
 
 /**
  * Determines if a team has write access to the platform.
- * 
+ *
  * Logic:
  * - Active & Trialing -> Write Access (OK)
- * - Past Due, Canceled, Unpaid -> Read Only (Blocked)
+ * - Past Due, Canceled, Unpaid, Incomplete -> Read Only (Blocked)
  */
 export function canWrite(team: TeamSubscriptionContext | null | undefined): boolean {
     if (!team) return false;
@@ -31,18 +31,4 @@ export function isBlocked(team: TeamSubscriptionContext | null | undefined): boo
 
     const BLOCKED_STATUSES: SubscriptionStatus[] = ['past_due', 'canceled', 'unpaid', 'incomplete'];
     return BLOCKED_STATUSES.includes(team.subscription_status);
-}
-
-/**
- * Determines if a team has access to a specific feature.
- * This combines subscription tier limits AND write access status.
- */
-export function canAccessFeature(
-    team: TeamSubscriptionContext,
-    feature: keyof PlanFeatures
-): boolean {
-    const plan = PLANS[team.subscription_tier];
-    if (!plan) return false;
-
-    return true;
 }

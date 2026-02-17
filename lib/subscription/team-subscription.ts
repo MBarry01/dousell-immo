@@ -6,9 +6,24 @@
  */
 
 import { createClient } from '@/utils/supabase/server';
+import { SubscriptionStatus, SubscriptionTier } from './plans-config';
 
-export type SubscriptionStatus = 'none' | 'trial' | 'trialing' | 'active' | 'past_due' | 'unpaid' | 'incomplete' | 'expired' | 'canceled';
-export type SubscriptionTier = 'starter' | 'pro' | 'enterprise';
+export type { SubscriptionStatus, SubscriptionTier };
+
+/**
+ * Statuts legacy utilisés dans profiles.pro_status (migration en cours).
+ * Mapper vers les statuts DB valides avant utilisation.
+ */
+type LegacyStatus = 'none' | 'trial' | 'expired';
+
+function normalizeLegacyStatus(status: string): SubscriptionStatus {
+    switch (status) {
+        case 'trial': return 'trialing';
+        case 'expired': return 'past_due';
+        case 'none': return 'canceled';
+        default: return status as SubscriptionStatus;
+    }
+}
 
 export interface FeatureCheckResult {
     allowed: boolean;
@@ -53,7 +68,7 @@ export async function getTeamSubscriptionStatus(teamId: string): Promise<TeamSub
         const daysRemaining = trialEndsAt ? Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
 
         const isActive = team.subscription_status === 'active' ||
-            ((team.subscription_status === 'trial' || team.subscription_status === 'trialing') && daysRemaining > 0);
+            (team.subscription_status === 'trialing' && daysRemaining > 0);
 
         return {
             status: team.subscription_status as SubscriptionStatus,
@@ -86,8 +101,8 @@ export async function getTeamSubscriptionStatus(teamId: string): Promise<TeamSub
 
     const trialEndsAt = profile.pro_trial_ends_at ? new Date(profile.pro_trial_ends_at) : null;
     const daysRemaining = trialEndsAt ? Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
-    const status = (profile.pro_status || 'none') as SubscriptionStatus;
-    const isActive = status === 'active' || (status === 'trial' && daysRemaining > 0);
+    const status = normalizeLegacyStatus(profile.pro_status || 'none');
+    const isActive = status === 'active' || (status === 'trialing' && daysRemaining > 0);
 
     return {
         status,
@@ -118,14 +133,14 @@ export async function requireActiveSubscription(teamId: string): Promise<{
     if (!subscription.isActive) {
         let errorMessage = 'Abonnement requis pour accéder à cette fonctionnalité.';
 
-        if (subscription.status === 'expired') {
-            errorMessage = subscription.daysRemaining < 0
-                ? `Votre essai a expiré il y a ${Math.abs(subscription.daysRemaining)} jours. Activez votre abonnement pour continuer.`
-                : 'Abonnement expiré. Veuillez renouveler pour continuer.';
+        if (subscription.status === 'past_due') {
+            errorMessage = subscription.trialEndsAt && subscription.trialEndsAt < new Date()
+                ? 'Votre essai a expiré. Activez votre abonnement pour continuer.'
+                : 'Paiement en attente ou échoué. Veuillez régulariser votre situation.';
         } else if (subscription.status === 'canceled') {
             errorMessage = 'Abonnement annulé. Veuillez réactiver pour continuer.';
-        } else if (subscription.status === 'past_due' || subscription.status === 'unpaid') {
-            errorMessage = 'Paiement en attente ou échoué. Veuillez régulariser votre situation.';
+        } else if (subscription.status === 'unpaid') {
+            errorMessage = 'Paiement échoué. Veuillez régulariser votre situation.';
         }
 
         return {
@@ -158,6 +173,16 @@ export async function activateTeamTrial(
     const trialEndsAt = new Date();
     trialEndsAt.setDate(trialEndsAt.getDate() + trialDays);
 
+    // Lire le compteur actuel pour savoir si c'est une réactivation
+    const { data: currentTeam } = await supabase
+        .from('teams')
+        .select('subscription_status, trial_reactivation_count')
+        .eq('id', teamId)
+        .single();
+
+    const isReactivation = currentTeam?.subscription_status === 'past_due' || currentTeam?.subscription_status === 'canceled';
+    const newCount = isReactivation ? (currentTeam?.trial_reactivation_count ?? 0) + 1 : (currentTeam?.trial_reactivation_count ?? 0);
+
     const { error } = await supabase
         .from('teams')
         .update({
@@ -165,6 +190,7 @@ export async function activateTeamTrial(
             subscription_trial_ends_at: trialEndsAt.toISOString(),
             subscription_started_at: new Date().toISOString(),
             subscription_tier: 'pro',
+            trial_reactivation_count: newCount,
         })
         .eq('id', teamId);
 
@@ -173,7 +199,7 @@ export async function activateTeamTrial(
         return { success: false, error: 'Erreur lors de l\'activation de l\'essai' };
     }
 
-    console.log(`✅ Team trial activated: ${teamId} (${trialDays} days)`);
+    console.log(`✅ Team trial activated: ${teamId} (${trialDays} days, reactivation #${newCount})`);
     return { success: true };
 }
 
@@ -218,11 +244,11 @@ export async function activateTeamSubscription(
  * Utilisé pour end of trial ou annulation
  * 
  * @param teamId - ID de l'équipe
- * @param reason - 'expired' (fin essai) ou 'canceled' (user action)
+ * @param reason - 'past_due' (fin essai/paiement échoué) ou 'canceled' (user action)
  */
 export async function expireTeamSubscription(
     teamId: string,
-    reason: 'expired' | 'canceled' = 'expired'
+    reason: 'past_due' | 'canceled' = 'past_due'
 ): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
 
@@ -260,7 +286,7 @@ export async function checkFeatureAccess(
     if (!subscription.isActive) {
         return {
             allowed: false,
-            reason: subscription.status === 'trial' ? 'trial_expired' : 'inactive_subscription',
+            reason: 'inactive_subscription',
             message: "Votre abonnement n'est plus actif. Veuillez régulariser votre situation.",
             upgradeRequired: true
         };
@@ -385,7 +411,7 @@ export async function checkFeatureAccess(
  */
 function createDefaultSubscription(): TeamSubscription {
     return {
-        status: 'none',
+        status: 'canceled',
         tier: 'starter',
         trialEndsAt: null,
         startedAt: null,

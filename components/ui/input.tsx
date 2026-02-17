@@ -20,14 +20,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className
         )}
         ref={ref}
-        whileFocus={{
-          scale: 1.01,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 400,
-          damping: 30,
-        }}
         {...(props as React.ComponentPropsWithoutRef<typeof motion.input>)}
       />
     );

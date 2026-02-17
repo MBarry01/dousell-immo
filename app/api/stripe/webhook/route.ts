@@ -1,8 +1,31 @@
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/subscription/stripe';
-import { createClient } from '@/utils/supabase/server';
 import Stripe from 'stripe';
+
+/**
+ * Helper: Resolve team_id from subscription metadata or fallback to DB lookup
+ */
+async function resolveTeamId(
+    adminClient: any,
+    metadata: Record<string, string> | null | undefined,
+    subscriptionId: string | null
+): Promise<string | null> {
+    const teamId = metadata?.team_id;
+    if (teamId) return teamId;
+
+    // Fallback: lookup by stripe_subscription_id
+    if (subscriptionId) {
+        const { data: team } = await adminClient
+            .from('teams')
+            .select('id')
+            .eq('stripe_subscription_id', subscriptionId)
+            .single();
+        return team?.id ?? null;
+    }
+
+    return null;
+}
 
 export async function POST(req: Request) {
     const body = await req.text();
@@ -24,13 +47,33 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
     }
 
-    const supabase = await createClient(); // WARNING: Webhooks might need service role if RLS is tight
-
     // Use admin client to bypass RLS for background updates
     const { createAdminClient } = await import('@/utils/supabase/admin');
     const adminClient = createAdminClient();
 
     try {
+        // ═══════════════════════════════════════════════════════
+        // IDEMPOTENCY CHECK - skip already-processed events
+        // ═══════════════════════════════════════════════════════
+        const { data: existingEvent } = await adminClient
+            .from('stripe_events_log')
+            .select('id')
+            .eq('stripe_event_id', event.id)
+            .single();
+
+        if (existingEvent) {
+            console.log(`⏭️ Event already processed: ${event.id}`);
+            return NextResponse.json({ received: true });
+        }
+
+        // Log event for idempotency (UNIQUE constraint on stripe_event_id)
+        await adminClient
+            .from('stripe_events_log')
+            .insert({
+                stripe_event_id: event.id,
+                type: event.type,
+            });
+
         switch (event.type) {
             case 'checkout.session.completed': {
                 const session = event.data.object as Stripe.Checkout.Session;
@@ -147,18 +190,20 @@ export async function POST(req: Request) {
 
             case 'customer.subscription.deleted': {
                 const subscription = event.data.object as any;
-                const teamId = subscription.metadata?.team_id;
+                const teamId = await resolveTeamId(adminClient, subscription.metadata, subscription.id);
 
                 if (teamId) {
                     await adminClient
                         .from('teams')
                         .update({
-                            subscription_status: 'expired',
+                            subscription_status: 'canceled',
                             stripe_subscription_id: null,
                         })
                         .eq('id', teamId);
 
-                    console.log(`❌ Subscription expired for team ${teamId}`);
+                    console.log(`❌ Subscription canceled for team ${teamId}`);
+                } else {
+                    console.warn(`⚠️ customer.subscription.deleted: no team found for subscription ${subscription.id}`);
                 }
                 break;
             }
@@ -182,7 +227,7 @@ export async function POST(req: Request) {
 
             case 'customer.subscription.updated': {
                 const subscription = event.data.object as any;
-                const teamId = subscription.metadata?.team_id;
+                const teamId = await resolveTeamId(adminClient, subscription.metadata, subscription.id);
                 const status = subscription.status;
 
                 if (teamId) {
@@ -190,13 +235,15 @@ export async function POST(req: Request) {
                         .from('teams')
                         .update({
                             subscription_status: status,
-                            subscription_tier: subscription.metadata?.plan_id, // Only use metadata, never fallback to price ID
+                            subscription_tier: subscription.metadata?.plan_id,
                             subscription_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
                             subscription_currency: subscription.currency ? subscription.currency.toLowerCase() : null,
                         })
                         .eq('id', teamId);
 
                     console.log(`🔄 Subscription updated for team ${teamId}: ${status}`);
+                } else {
+                    console.warn(`⚠️ customer.subscription.updated: no team found for subscription ${subscription.id}`);
                 }
                 break;
             }

@@ -120,7 +120,7 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
   const bellButton = (
     <button
       className={cn(
-        "relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 text-foreground",
+        "relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 text-foreground group",
         className
       )}
       aria-label="Notifications"
@@ -129,7 +129,7 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
         if (isMobile) setIsOpen(true);
       }}
     >
-      <Bell className="h-5 w-5" />
+      <Bell className="h-5 w-5 transition-colors group-hover:text-inherit" />
       {unreadCount > 0 && (
         <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground animate-pulse">
           {unreadCount > 9 ? "9+" : unreadCount}
