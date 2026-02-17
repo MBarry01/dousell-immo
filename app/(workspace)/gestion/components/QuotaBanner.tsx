@@ -54,7 +54,7 @@ export function QuotaBanner({
                 <div className="flex items-center gap-2">
                     <Button
                         onClick={() => router.push("/gestion/config#subscription")}
-                        className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90"
+                        className="bg-primary text-primary-foreground hover:bg-primary/90"
                         size="sm"
                     >
                         Passer à Pro

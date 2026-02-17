@@ -43,7 +43,7 @@ export const reactivateSubscription = safeAction(
       // Vérifier que l'équipe peut être réactivée
       const { data: team } = await supabase
         .from("teams")
-        .select("subscription_status, trial_reactivation_count")
+        .select("subscription_status, trial_reactivation_count, subscription_trial_ends_at")
         .eq("id", teamContext.team_id)
         .single();
 
@@ -51,7 +51,16 @@ export const reactivateSubscription = safeAction(
         throw new Error("Équipe introuvable.");
       }
 
-      if (team.subscription_status !== "past_due" && team.subscription_status !== "canceled") {
+      // Normaliser le statut (le cron peut ne pas avoir encore tourné)
+      let effectiveStatus = team.subscription_status;
+      if (effectiveStatus === "trialing" && team.subscription_trial_ends_at) {
+        const trialEnd = new Date(team.subscription_trial_ends_at);
+        if (trialEnd < new Date()) {
+          effectiveStatus = "past_due";
+        }
+      }
+
+      if (effectiveStatus !== "past_due" && effectiveStatus !== "canceled") {
         throw new Error("Votre abonnement est déjà actif.");
       }
 

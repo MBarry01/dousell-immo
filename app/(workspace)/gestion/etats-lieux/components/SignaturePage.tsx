@@ -74,7 +74,7 @@ export function SignaturePage({ reportId }: SignaturePageProps) {
             toast.error(result.error);
         } else {
             toast.success('État des lieux signé !');
-            router.push(`/compte/etats-lieux/${reportId}/pdf`);
+            router.push(`/gestion/etats-lieux/${reportId}/pdf`);
         }
 
         setSaving(false);
@@ -94,7 +94,7 @@ export function SignaturePage({ reportId }: SignaturePageProps) {
         <div className="space-y-6 pb-8">
             {/* Header */}
             <div className="flex items-center gap-4">
-                <Link href={`/compte/etats-lieux/${reportId}`} className={`transition-colors ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
+                <Link href={`/gestion/etats-lieux/${reportId}`} className={`transition-colors ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
                 <div>
@@ -113,7 +113,7 @@ export function SignaturePage({ reportId }: SignaturePageProps) {
                         Cet état des lieux a été signé le {new Date(report.signed_at).toLocaleDateString('fr-FR')}
                     </p>
                     <Button asChild className="bg-[#F4C430] hover:bg-[#D4A420] text-black">
-                        <Link href={`/compte/etats-lieux/${reportId}/pdf`}>
+                        <Link href={`/gestion/etats-lieux/${reportId}/pdf`}>
                             <Download className="w-4 h-4 mr-2" />
                             Télécharger le PDF
                         </Link>

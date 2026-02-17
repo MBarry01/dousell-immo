@@ -11,16 +11,10 @@ import {
 } from "@/components/ui/select";
 import { Building2, PlusCircle, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface TeamData {
-  id: string;
-  name: string;
-  slug: string;
-  role: string;
-}
+import type { WorkspaceTeamData } from "@/types/team";
 
 interface TeamSwitcherProps {
-  teams: TeamData[];
+  teams: WorkspaceTeamData[];
   currentTeamId: string;
   onSwitchTeam?: (teamId: string) => Promise<void>;
   isCollapsed?: boolean;

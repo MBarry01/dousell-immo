@@ -47,7 +47,7 @@ export function LegalAlertsWidget({ alerts }: LegalAlertsWidgetProps) {
 
     // Avec des alertes
     return (
-        <Link href="/compte/legal" className="block group">
+        <Link href="/gestion/documents-legaux" className="block group">
             <div className="relative overflow-hidden rounded-xl transition-all duration-300 p-5 border bg-card border-border hover:border-accent">
                 <div className="relative">
                     {/* Header */}

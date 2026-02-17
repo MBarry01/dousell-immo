@@ -36,17 +36,9 @@ import { TemporaryAccessWidget } from "./TemporaryAccessWidget";
 import { LockedSidebarItem } from "./LockedSidebarItem";
 import { AccessRequestModal, useAccessRequestModal } from "@/components/modals/AccessRequestModal";
 import type { TeamPermissionKey } from "@/lib/team-permissions";
+import type { WorkspaceTeamData } from "@/types/team";
 
 import type { LucideIcon } from "lucide-react";
-
-interface TeamData {
-  id: string;
-  name: string;
-  slug: string;
-  role: string;
-  subscription_tier?: string;
-  subscription_status?: string;
-}
 
 interface NavItem {
   href: string;
@@ -100,7 +92,7 @@ interface SidebarContentProps {
   onCollapse?: () => void;
   isMobile?: boolean;
   onMobileNavigate?: () => void;
-  teams?: TeamData[];
+  teams?: WorkspaceTeamData[];
   currentTeamId?: string;
   onSwitchTeam?: (teamId: string) => Promise<void>;
   onRequestAccess?: (permission: TeamPermissionKey, label: string) => void;
@@ -297,6 +289,8 @@ function SidebarContent({
             isMobile={isMobile}
             requiredPermission="team.members.view"
             currentTeamId={currentTeamId}
+            currentTeamTier={currentTeam?.subscription_tier}
+            currentTeamStatus={currentTeam?.subscription_status}
             onNavigate={() => isMobile && onMobileNavigate?.()}
             onRequestAccess={onRequestAccess}
           />
@@ -309,6 +303,8 @@ function SidebarContent({
             isMobile={isMobile}
             requiredPermission="team.settings.view"
             currentTeamId={currentTeamId}
+            currentTeamTier={currentTeam?.subscription_tier}
+            currentTeamStatus={currentTeam?.subscription_status}
             onNavigate={() => isMobile && onMobileNavigate?.()}
             onRequestAccess={onRequestAccess}
           />
@@ -339,7 +335,7 @@ function SidebarContent({
 }
 
 interface WorkspaceSidebarProps {
-  teams?: TeamData[];
+  teams?: WorkspaceTeamData[];
   currentTeamId?: string;
   onSwitchTeam?: (teamId: string) => Promise<void>;
   isMobileOpen?: boolean;

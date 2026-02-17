@@ -69,7 +69,7 @@ export function OwnerCTA({ city, variant = "banner" }: OwnerCTAProps) {
                         variant="secondary"
                         className="font-bold text-base px-8 py-6 h-auto shadow-lg hover:shadow-xl transition-all"
                     >
-                        <Link href="/publier-annonce">
+                        <Link href="/compte/deposer">
                             <PlusCircle className="mr-2 h-5 w-5" />
                             Publier mon bien à {formattedCity}
                         </Link>

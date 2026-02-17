@@ -82,17 +82,17 @@ function WebAppLayoutContent({
         },
         {
             id: "tour-nav-documents",
-            href: "/gestion-locative/documents",
+            href: "/gestion/documents",
             icon: FolderOpen,
             label: "Documents",
-            isActive: pathname?.startsWith('/gestion-locative/documents'),
+            isActive: pathname?.startsWith('/gestion/documents'),
         },
         {
             id: "tour-nav-messages",
-            href: "/gestion-locative/messages",
+            href: "/gestion/messages",
             icon: MessageSquare,
             label: "Messagerie",
-            isActive: pathname?.startsWith('/gestion-locative/messages'),
+            isActive: pathname?.startsWith('/gestion/messages'),
         },
         {
             id: "tour-nav-legal",
@@ -103,10 +103,10 @@ function WebAppLayoutContent({
         },
         {
             id: "tour-nav-accounting",
-            href: "/gestion-locative/comptabilite",
+            href: "/gestion/comptabilite",
             icon: Wallet,
             label: "Comptabilité",
-            isActive: pathname === '/gestion-locative/comptabilite',
+            isActive: pathname === '/gestion/comptabilite',
         },
     ];
 
@@ -239,12 +239,12 @@ function WebAppLayoutContent({
                         }`}>
                         {/* Gestion Locative (Dashboard Principal) */}
                         <Link
-                            href="/gestion-locative"
+                            href="/gestion"
                             className={`
                                 flex items-center gap-2 px-3 py-2 rounded-md
                                 transition-colors duration-200 group
                                 ${isCollapsed ? 'lg:justify-center' : ''}
-                                ${(pathname === '/gestion-locative' || pathname?.startsWith('/gestion-locative/locataires'))
+                                ${(pathname === '/gestion' || pathname?.startsWith('/gestion/locataires'))
                                     ? isDark
                                         ? 'bg-gray-900 text-white font-medium'
                                         : 'bg-gray-100 text-gray-900 font-medium'
@@ -255,7 +255,7 @@ function WebAppLayoutContent({
                             `}
                             title="Gestion Locative"
                         >
-                            <Building2 className={`w-4 h-4 shrink-0 transition-colors ${(pathname === '/gestion-locative' || pathname?.startsWith('/gestion-locative/locataires'))
+                            <Building2 className={`w-4 h-4 shrink-0 transition-colors ${(pathname === '/gestion' || pathname?.startsWith('/gestion/locataires'))
                                 ? 'text-current'
                                 : 'text-gray-500 group-hover:text-current'
                                 }`} />
@@ -298,7 +298,7 @@ function WebAppLayoutContent({
                     {/* Bottom Section - Settings */}
                     <div className={`p-3 border-t shrink-0 ${isDark ? 'border-slate-800' : 'border-gray-200'}`}>
                         <Link
-                            href="/gestion-locative/config"
+                            href="/gestion/config"
                             className={`
                                 flex items-center gap-2 px-3 py-2 rounded-md
                                 transition-colors

@@ -856,7 +856,7 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
         type: "etat_lieux",
         category: "etat_lieux",
         size: 0,
-        url: `/compte/etats-lieux/${r.id}/pdf`,
+        url: `/gestion/etats-lieux/${r.id}/pdf`,
         uploaded_at: r.updated_at || r.date,
         property_id: null,
         lease_id: lease?.id,

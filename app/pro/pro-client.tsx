@@ -874,7 +874,7 @@ function LandingPageContent() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/auth/signup"
+                href="/pro/signup"
                 className="btn-shimmer rounded-full px-12 py-5 font-semibold text-black text-lg transition-all duration-300 hover:scale-105 gold-glow animate-pulse-gold"
               >
                 Commencer maintenant

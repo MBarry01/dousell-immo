@@ -82,7 +82,7 @@ export function LegalAssistantWidget() {
     const hasAlerts = totalAlerts > 0;
 
     return (
-        <Link href="/compte/legal">
+        <Link href="/gestion/documents-legaux">
             <Card className={`cursor-pointer border transition-all hover:shadow-lg ${hasAlerts
                     ? 'border-orange-500/30 bg-orange-500/5 hover:border-orange-500/50'
                     : 'border-green-500/30 bg-green-500/5 hover:border-green-500/50'

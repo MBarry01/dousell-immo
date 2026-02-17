@@ -462,7 +462,7 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
                             asChild
                             className={`flex-1 ${isDark ? 'bg-[#F4C430] hover:bg-[#D4A420] text-black' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
                         >
-                            <Link href={`/compte/etats-lieux/${reportId}/sign`}>
+                            <Link href={`/etats-lieux/${reportId}/sign`}>
                                 <Check className="w-4 h-4 mr-2" />
                                 Signatures
                             </Link>

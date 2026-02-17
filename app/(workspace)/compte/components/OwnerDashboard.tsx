@@ -204,7 +204,7 @@ export function OwnerDashboard({ isTenant, isOwner, gestionLocativeEnabled, gest
                             transition={{ type: "spring", stiffness: 400, damping: 30 }}
                             className="col-span-full md:col-span-2 lg:col-span-1 border-2 border-primary/20 rounded-xl overflow-hidden"
                         >
-                            <Link href="/portal">
+                            <Link href="/locataire">
                                 <Card className="h-full cursor-pointer bg-card border-border transition-all hover:bg-accent/50 hover:border-primary/50">
                                     <CardHeader className="p-6">
                                         <div className="flex items-center gap-3 mb-4">

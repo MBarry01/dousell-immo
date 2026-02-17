@@ -30,7 +30,7 @@ export function ExpiredBanner({
   const [showModal, setShowModal] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
-  const isExpired = proStatus === "past_due" || proStatus === "canceled" || proStatus === "unpaid";
+  const isExpired = proStatus === "past_due" || proStatus === "canceled" || proStatus === "unpaid" || proStatus === "incomplete";
   const upgradeRequired = searchParams.get("upgrade") === "required";
 
   // Show modal if ?upgrade=required
@@ -54,7 +54,11 @@ export function ExpiredBanner({
               <Warning size={20} className="text-amber-500" />
             </div>
             <div>
-              <p className="text-white font-medium">Votre essai a expiré</p>
+              <p className="text-white font-medium">
+                {proStatus === "canceled" ? "Votre abonnement a été résilié" :
+                 proStatus === "unpaid" || proStatus === "incomplete" ? "Paiement en attente" :
+                 "Votre essai a expiré"}
+              </p>
               <p className="text-white/60 text-sm">
                 Accès en lecture seule. Réactivez pour modifier vos données.
               </p>
@@ -62,8 +66,8 @@ export function ExpiredBanner({
           </div>
           <div className="flex items-center gap-2">
             <Button
-              onClick={() => router.push("/gestion/config")}
-              className="bg-[#F4C430] text-black hover:bg-[#F4C430]/90"
+              onClick={() => router.push("/gestion/abonnement")}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Réactiver
               <ArrowRight size={16} className="ml-1" />
@@ -86,6 +90,7 @@ export function ExpiredBanner({
         blocking={upgradeRequired}
         propertiesCount={propertiesCount}
         leasesCount={leasesCount}
+        proStatus={proStatus}
       />
     </>
   );

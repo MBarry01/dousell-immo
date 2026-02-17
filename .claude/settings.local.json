@@ -75,7 +75,12 @@
       "mcp__claude_ai_Supabase__list_projects",
       "mcp__claude_ai_Supabase__get_logs",
       "Bash(must be added on initial evaluation\" warnings.\nEOF\n\\)\")",
-      "Bash(npx vercel:*)"
+      "Bash(npx vercel:*)",
+      "mcp__claude_ai_Supabase__list_extensions",
+      "Bash(# Check what the webapp layout /gestion-locative links are - these get middleware redirected # But there''s also /gestion-locative/config and /gestion-locative/comptabilite - do those exist after redirect? echo \"\"=== /gestion/comptabilite ===\"\" ls \"\"c:/Users/Barry/Downloads/Doussel_immo/app/\\(workspace\\)/gestion/comptabilite\"\")",
+      "Bash(# Check for compte/etats-lieux references - where are those links pointing? grep -rn \"\"compte/etats-lieux\"\" \"\"c:/Users/Barry/Downloads/Doussel_immo/app\"\")",
+      "Bash(# Verify the \\(webapp\\) etats-lieux /compte/ redirects - those are under webapp, not workspace # The middleware only handles /etats-lieux/* → /gestion/etats-lieux/* # But /compte/etats-lieux/* isn''t redirected # Let''s find where these are used in the WORKSPACE gestion module grep -rn \"\"compte/etats-lieux\"\" \"\"c:/Users/Barry/Downloads/Doussel_immo/app/\\(workspace\\)/gestion\"\" # Also check workspace sidebar for the items grep -n \"\"href\"\" \"\"c:/Users/Barry/Downloads/Doussel_immo/components/workspace/workspace-sidebar.tsx\"\")",
+      "Bash(# portal: check if there''s any portal directory at the app root or under vitrine/workspace find \"\"c:/Users/Barry/Downloads/Doussel_immo/app\"\" -name \"\"page.tsx\"\")"
     ]
   }
 }

@@ -10,19 +10,11 @@ import { switchTeam } from "@/app/actions/team-switching";
 import { useState, Suspense, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { scrollToTop } from "@/lib/scroll-utils";
-
-interface TeamData {
-  id: string;
-  name: string;
-  slug: string;
-  role: string;
-  subscription_tier?: string;
-  subscription_status?: string;
-}
+import type { WorkspaceTeamData } from "@/types/team";
 
 interface WorkspaceLayoutClientProps {
   user: User;
-  teams?: TeamData[];
+  teams?: WorkspaceTeamData[];
   currentTeamId?: string | null;
   children: React.ReactNode;
 }
@@ -41,11 +33,6 @@ export function WorkspaceLayoutClient({
   useEffect(() => {
     scrollToTop();
   }, [pathname]);
-
-  // Hydration Log
-  useState(() => {
-    console.log("[Workspace] ⚛️ React initialization started");
-  });
 
   const isDistractionFree = pathname === "/compte/reset-password";
 

@@ -73,7 +73,7 @@ export function LockedSidebarItem({
   useEffect(() => {
     // 0. Vérification du statut d'abonnement (bloqué = lecture seule)
     const BLOCKED_STATUSES = ['past_due', 'canceled', 'unpaid', 'incomplete'];
-    if (requiredTier && currentTeamStatus && BLOCKED_STATUSES.includes(currentTeamStatus)) {
+    if (currentTeamStatus && BLOCKED_STATUSES.includes(currentTeamStatus) && requiredTier) {
       setHasAccess(false);
       setIsLoading(false);
       return;

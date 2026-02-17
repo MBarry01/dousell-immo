@@ -37,6 +37,10 @@ export interface Team {
   currency: string;
   status: TeamStatus;
   subscription_tier: SubscriptionTier;
+  subscription_status?: string;
+  subscription_trial_ends_at?: string | null;
+  stripe_customer_id?: string | null;
+  trial_reactivation_count?: number;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -143,6 +147,19 @@ export interface TeamWithMembers extends Team {
 
 export interface TeamMemberWithTeam extends TeamMember {
   team: Team;
+}
+
+/**
+ * Lightweight team data passed through workspace layout chain.
+ * Used by WorkspaceLayoutClient, WorkspaceSidebar, TeamSwitcher.
+ */
+export interface WorkspaceTeamData {
+  id: string;
+  name: string;
+  slug: string;
+  role: string;
+  subscription_tier?: string;
+  subscription_status?: string;
 }
 
 export interface UserTeamContext {

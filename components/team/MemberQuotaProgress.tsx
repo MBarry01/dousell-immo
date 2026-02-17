@@ -134,7 +134,7 @@ export function MemberQuotaProgress({
                   <p className="text-zinc-500">
                     Les équipes en période d'essai sont limitées à {limit} membres.{" "}
                     <a
-                      href="/gestion/subscription"
+                      href="/gestion/abonnement"
                       className="text-blue-400 hover:underline"
                     >
                       Passer à Pro
@@ -153,7 +153,7 @@ export function MemberQuotaProgress({
                     {remaining === 1 && (
                       <>
                         <a
-                          href="/gestion/subscription"
+                          href="/gestion/abonnement"
                           className="text-blue-400 hover:underline"
                         >
                           Passez à Pro
@@ -187,7 +187,7 @@ export function MemberQuotaProgress({
       {isAtLimit && subscriptionStatus === 'trialing' && (
         <div className="mt-2">
           <a
-            href="/gestion/subscription"
+            href="/gestion/abonnement"
             className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
           >
             <Crown size={14} />

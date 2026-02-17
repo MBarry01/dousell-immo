@@ -46,7 +46,7 @@ export function PDFPreview({ reportId }: PDFPageProps) {
 
             if (reportResult.data?.status !== 'signed') {
                 toast.error('Le rapport doit être signé avant de générer le PDF');
-                router.push(`/compte/etats-lieux/${reportId}/sign`);
+                router.push(`/etats-lieux/${reportId}/sign`);
                 return;
             }
 

@@ -284,7 +284,7 @@ export default async function DashboardContent({
         >
             {/* Banner for expired subscription */}
             <Suspense fallback={null}>
-                {(proStatus === "past_due" || proStatus === "canceled" || proStatus === "unpaid") ? (
+                {(proStatus === "past_due" || proStatus === "canceled" || proStatus === "unpaid" || proStatus === "incomplete") ? (
                     <ExpiredBanner
                         proStatus={proStatus}
                         propertiesCount={allLeases.length}

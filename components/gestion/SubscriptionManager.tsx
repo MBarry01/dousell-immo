@@ -33,6 +33,7 @@ export function SubscriptionManager() {
 
     useEffect(() => {
         const loadData = async () => {
+          try {
             const supabase = createClient();
             const { data: { user } } = await supabase.auth.getUser();
 
@@ -75,7 +76,7 @@ export function SubscriptionManager() {
                 const MAX_REACTIVATIONS = 1;
                 const isExpiredStatus = effectiveStatus === 'past_due' || effectiveStatus === 'canceled';
                 const reactivationsUsed = team.trial_reactivation_count ?? 0;
-                setCanReactivateTrial(isExpiredStatus && reactivationsUsed < MAX_REACTIVATIONS && !team.stripe_customer_id);
+                setCanReactivateTrial(isExpiredStatus && reactivationsUsed < MAX_REACTIVATIONS);
                 if (team.subscription_trial_ends_at) {
                     setTrialEndsAt(new Date(team.subscription_trial_ends_at));
                 }
@@ -98,8 +99,11 @@ export function SubscriptionManager() {
                     leases: leasesCount || 0,
                 });
             }
-
+          } catch (err) {
+            console.error("[SubscriptionManager] Failed to load data:", err);
+          } finally {
             setIsLoading(false);
+          }
         };
 
         loadData();
@@ -156,7 +160,8 @@ export function SubscriptionManager() {
             const result = await reactivateSubscription();
             if (result?.data?.success) {
                 toast.success("Essai gratuit réactivé ! Vous avez 14 jours supplémentaires.");
-                router.refresh();
+                window.location.reload();
+                return;
             } else {
                 toast.error(result?.error || "Erreur lors de la réactivation.");
             }
@@ -350,8 +355,8 @@ export function SubscriptionManager() {
                                 )}
 
                                 {isCurrentTier && (
-                                    <div className={`absolute top-4 right-4 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${isTrial ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'}`}>
-                                        {isTrial ? 'Essai en cours' : 'Plan Actuel'}
+                                    <div className={`absolute top-4 right-4 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${isExpired ? 'bg-red-500 text-white' : isTrial ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'}`}>
+                                        {isExpired ? 'Expiré' : isTrial ? 'Essai en cours' : 'Plan Actuel'}
                                     </div>
                                 )}
 
@@ -407,7 +412,7 @@ export function SubscriptionManager() {
                                     {isCurrentTier && isActive
                                         ? "Plan actuel"
                                         : isTrial
-                                            ? "Activer l'abonnement"
+                                            ? `Activer ${plan.name}`
                                             : subscriptionTier === 'pro' && plan.id === 'starter'
                                                 ? "Rétrograder"
                                                 : plan.id === 'starter'

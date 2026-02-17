@@ -20,15 +20,17 @@ interface UpgradeModalProps {
   propertiesCount?: number;
   /** Number of active leases */
   leasesCount?: number;
+  /** Subscription status for adaptive messaging */
+  proStatus?: string | null;
 }
 
 /**
- * Upgrade Modal - Shown to users with expired subscription
+ * Upgrade Modal - Shown to users with expired/canceled/unpaid subscription
  *
- * Per WORKFLOW_PROPOSAL.md section 11.1:
- * - Users with pro_status: "expired" see this modal
- * - They can access /gestion in READ-ONLY mode
- * - This modal prompts them to reactivate
+ * Adapts its title and description based on the subscription status:
+ * - past_due (trial expired) -> "Votre essai a expiré"
+ * - canceled -> "Votre abonnement a été résilié"
+ * - unpaid/incomplete -> "Paiement en attente"
  */
 export function UpgradeModal({
   open,
@@ -36,12 +38,26 @@ export function UpgradeModal({
   blocking = false,
   propertiesCount = 0,
   leasesCount = 0,
+  proStatus,
 }: UpgradeModalProps) {
   const router = useRouter();
 
   const handleUpgrade = () => {
-    router.push("/gestion/config");
+    router.push("/gestion/abonnement");
   };
+
+  // Adaptive title based on subscription status
+  const title = proStatus === "canceled"
+    ? "Votre abonnement a été résilié"
+    : proStatus === "unpaid" || proStatus === "incomplete"
+      ? "Paiement en attente"
+      : "Votre essai a expiré";
+
+  const description = proStatus === "canceled"
+    ? "Réactivez votre abonnement pour retrouver l'accès complet à la gestion locative."
+    : proStatus === "unpaid" || proStatus === "incomplete"
+      ? "Un paiement est en attente. Régularisez votre situation pour retrouver l'accès complet."
+      : "Réactivez votre abonnement pour retrouver l'accès complet à la gestion locative.";
 
   return (
     <Dialog
@@ -58,10 +74,10 @@ export function UpgradeModal({
             <Warning size={32} className="text-primary" />
           </div>
           <DialogTitle className="text-xl text-foreground">
-            Votre essai a expiré
+            {title}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Réactivez votre abonnement pour retrouver l&apos;accès complet à la gestion locative.
+            {description}
           </DialogDescription>
         </DialogHeader>
 

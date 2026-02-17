@@ -247,7 +247,7 @@ export async function generateNotice(formData: FormData) {
 
         // TODO: Marquer l'alerte comme traitée dans une table lease_alerts
 
-        revalidatePath('/compte/legal');
+        revalidatePath('/gestion/documents-legaux');
 
         return {
             success: true,
@@ -450,7 +450,7 @@ export async function renewLease(formData: FormData) {
             }
         }
 
-        revalidatePath('/compte/legal');
+        revalidatePath('/gestion/documents-legaux');
         revalidatePath('/gestion-locative');
 
         return {
@@ -588,7 +588,7 @@ export async function terminateLease(formData: FormData) {
             console.error("Erreur lors de l'enregistrement de la décision:", decisionError);
         }
 
-        revalidatePath('/compte/legal');
+        revalidatePath('/gestion/documents-legaux');
         revalidatePath('/gestion-locative');
 
         return {

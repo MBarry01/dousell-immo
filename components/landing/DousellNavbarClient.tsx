@@ -45,14 +45,14 @@ const dousellConfig: NavbarConfig = {
                 },
                 {
                     title: "Syndic de Copro",
-                    href: "/landing/syndic",
+                    href: "/pro/syndic",
                     src: "/images/copro.webp",
                     description:
                         "Une gestion transparente, des AG en ligne et une comptabilité claire.",
                 },
                 {
                     title: "Investissement",
-                    href: "/landing/investissement",
+                    href: "/pro/investissement",
                     src: "/images/Invesstissement.webp",
                     description:
                         "Projets clés en main à haute rentabilité locative au Sénégal.",
@@ -63,10 +63,10 @@ const dousellConfig: NavbarConfig = {
         lastGroup: {
             title: "Dousell",
             items: [
-                { title: "Qui sommes-nous ?", href: "/landing/a-propos" },
+                { title: "Qui sommes-nous ?", href: "/pro/a-propos" },
                 { title: "Nous contacter", href: "#contact" },
-                { title: "Blog Immobilier", href: "/landing/blog" },
-                { title: "Recrutement", href: "/landing/carrieres" },
+                { title: "Blog Immobilier", href: "/pro/blog" },
+                { title: "Recrutement", href: "/pro/carrieres" },
             ],
         },
     },

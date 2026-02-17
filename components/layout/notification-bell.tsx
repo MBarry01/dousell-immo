@@ -57,7 +57,7 @@ const notificationStyles: Record<NotificationType, string> = {
 };
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -116,6 +116,27 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
       return "Récemment";
     }
   };
+
+  // Render a static bell during SSR / before hydration to avoid mismatch
+  // (Radix Popover injects aria-controls with generated IDs that differ server vs client)
+  if (isMobile === null) {
+    return (
+      <button
+        className={cn(
+          "relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 text-foreground group",
+          className
+        )}
+        aria-label="Notifications"
+      >
+        <Bell className="h-5 w-5 transition-colors group-hover:text-inherit" />
+        {unreadCount > 0 && (
+          <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground animate-pulse">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
+      </button>
+    );
+  }
 
   const bellButton = (
     <button

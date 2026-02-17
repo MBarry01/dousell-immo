@@ -30,7 +30,7 @@ export default function MagicVerifyContent() {
                         if (error) throw error;
 
                         setMessage('Session établie ! Redirection...');
-                        router.push('/portal');
+                        router.push('/locataire');
                         router.refresh();
                         return;
                     }
@@ -47,7 +47,7 @@ export default function MagicVerifyContent() {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' && session) {
                 setMessage('Connexion réussie ! Redirection...');
-                router.push('/portal');
+                router.push('/locataire');
                 router.refresh();
             }
         });

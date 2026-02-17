@@ -70,7 +70,7 @@ export default function NewInventoryReportPage() {
             setCreating(false);
         } else if (result.data) {
             toast.success('État des lieux créé !');
-            router.push(`/compte/etats-lieux/${result.data.id}`);
+            router.push(`/etats-lieux/${result.data.id}`);
         }
     };
 
