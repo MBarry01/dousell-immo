@@ -157,6 +157,7 @@ export interface WorkspaceTeamData {
   id: string;
   name: string;
   slug: string;
+  logo_url?: string | null;
   role: string;
   subscription_tier?: string;
   subscription_status?: string;

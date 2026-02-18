@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Select,
   SelectContent,
@@ -63,6 +64,15 @@ export function TeamSwitcher({
       >
         {currentTeam?.slug.startsWith("perso-") ? (
           <User className="h-5 w-5 text-primary" />
+        ) : currentTeam?.logo_url ? (
+          <div className="relative h-5 w-5 overflow-hidden rounded-sm">
+            <Image
+              src={currentTeam.logo_url}
+              alt={currentTeam.name}
+              fill
+              className="object-cover"
+            />
+          </div>
         ) : (
           <Building2 className="h-5 w-5 text-primary" />
         )}
@@ -80,9 +90,18 @@ export function TeamSwitcher({
           className
         )}
       >
-        <div className="flex items-center justify-center h-8 w-8 rounded-md bg-primary/10">
+        <div className="flex items-center justify-center h-8 w-8 rounded-md bg-primary/10 shrink-0 overflow-hidden">
           {currentTeam?.slug.startsWith("perso-") ? (
             <User className="h-4 w-4 text-primary" />
+          ) : currentTeam?.logo_url ? (
+            <div className="relative h-full w-full">
+              <Image
+                src={currentTeam.logo_url}
+                alt={currentTeam.name}
+                fill
+                className="object-cover"
+              />
+            </div>
           ) : (
             <Building2 className="h-4 w-4 text-primary" />
           )}
@@ -117,9 +136,18 @@ export function TeamSwitcher({
         )}
       >
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center h-8 w-8 rounded-md bg-primary/10 shrink-0">
+          <div className="flex items-center justify-center h-8 w-8 rounded-md bg-primary/10 shrink-0 overflow-hidden">
             {currentTeam?.slug.startsWith("perso-") ? (
               <User className="h-4 w-4 text-primary" />
+            ) : currentTeam?.logo_url ? (
+              <div className="relative h-full w-full">
+                <Image
+                  src={currentTeam.logo_url}
+                  alt={currentTeam.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
             ) : (
               <Building2 className="h-4 w-4 text-primary" />
             )}
@@ -147,9 +175,18 @@ export function TeamSwitcher({
             className="cursor-pointer py-2 group focus:bg-[#0F172A] focus:text-white"
           >
             <div className="flex items-center gap-3 w-full">
-              <div className="flex items-center justify-center h-7 w-7 rounded-md bg-slate-100 dark:bg-slate-800 shrink-0 group-focus:bg-white/10 transition-colors">
+              <div className="flex items-center justify-center h-7 w-7 rounded-md bg-slate-100 dark:bg-slate-800 shrink-0 group-focus:bg-white/10 transition-colors overflow-hidden">
                 {team.slug.startsWith("perso-") ? (
                   <User className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400 group-focus:text-white" />
+                ) : team.logo_url ? (
+                  <div className="relative h-full w-full">
+                    <Image
+                      src={team.logo_url}
+                      alt={team.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 ) : (
                   <Building2 className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400 group-focus:text-white" />
                 )}

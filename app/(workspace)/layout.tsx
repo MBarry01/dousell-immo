@@ -25,14 +25,14 @@ export default async function WorkspaceLayout({
     .select(`
       team_id,
       role,
-      team:teams(id, name, slug, subscription_tier, subscription_status, subscription_trial_ends_at, stripe_subscription_id)
+      team:teams(id, name, slug, logo_url, subscription_tier, subscription_status, subscription_trial_ends_at, stripe_subscription_id)
     `)
     .eq("user_id", user.id)
     .eq("status", "active");
 
   const teams = memberships?.map((m) => {
     const team = m.team as unknown as {
-      id: string; name: string; slug: string;
+      id: string; name: string; slug: string; logo_url: string | null;
       subscription_tier: string; subscription_status: string;
       subscription_trial_ends_at: string | null; stripe_subscription_id: string | null;
     };
@@ -53,6 +53,7 @@ export default async function WorkspaceLayout({
       id: team?.id || m.team_id,
       name: team?.name || "Mon équipe",
       slug: team?.slug || "",
+      logo_url: team?.logo_url,
       role: m.role,
       subscription_tier: effectiveTier,
       subscription_status: effectiveStatus,
