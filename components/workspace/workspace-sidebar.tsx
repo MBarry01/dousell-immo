@@ -129,7 +129,16 @@ function SidebarContent({
       const hour = new Date().getHours();
       const greeting = hour < 18 ? "Bonjour" : "Bonsoir";
       const userName = user?.user_metadata?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || "Propriétaire";
-      return { navItems: gestionNavItems, title: `${greeting} ${userName}` };
+
+      return {
+        navItems: gestionNavItems,
+        title: (
+          <span className="flex items-center gap-1.5 overflow-hidden">
+            <span className="truncate">{greeting} {userName}</span>
+            <span className="animate-wave inline-block origin-[70%_70%]">👋</span>
+          </span>
+        )
+      };
     }
     if (pathname?.startsWith("/locataire")) {
       return { navItems: locataireNavItems, title: "Espace Locataire" };
@@ -458,4 +467,31 @@ export function WorkspaceSidebar({
       </div>
     </>
   );
+}
+
+// Ajout de l'animation CSS pour la main qui salue (sobre et élégante)
+const wavingStyle = `
+  @keyframes wave-animation {
+    0% { transform: rotate(0deg); }
+    10% { transform: rotate(14deg); }
+    20% { transform: rotate(-8deg); }
+    30% { transform: rotate(14deg); }
+    40% { transform: rotate(-4deg); }
+    50% { transform: rotate(10deg); }
+    60% { transform: rotate(0deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .animate-wave {
+    animation: wave-animation 2.5s infinite;
+    display: inline-block;
+  }
+`;
+
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.id = 'waving-hand-style';
+  if (!document.getElementById('waving-hand-style')) {
+    style.textContent = wavingStyle;
+    document.head.appendChild(style);
+  }
 }
