@@ -2,7 +2,7 @@ import { updateSession } from "@/utils/supabase/middleware";
 import type { NextRequest } from "next/server";
 import { contextStorage } from "./lib/context";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const requestId = globalThis.crypto?.randomUUID() || Math.random().toString(36).substring(7);
   const pathname = request.nextUrl.pathname;
 

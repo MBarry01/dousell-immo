@@ -58,3 +58,38 @@ export function getBaseUrl() {
   return "http://localhost:3000";
 }
 
+/**
+ * Fetch with exponential backoff retry logic
+ */
+export async function fetchWithRetry(
+  url: string | URL | Request,
+  options?: RequestInit,
+  maxRetries: number = 2
+): Promise<Response> {
+  let retryCount = 0;
+  while (retryCount <= maxRetries) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok || retryCount === maxRetries) return response;
+
+      // Retry on server errors
+      if (response.status >= 500) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return response;
+    } catch (error: any) {
+      const isNetworkError = error.message?.toLowerCase().includes("fetch failed") ||
+        error.name === "TypeError" ||
+        error.message?.includes("aborted");
+
+      if (isNetworkError && retryCount < maxRetries) {
+        retryCount++;
+        const delay = 100 * Math.pow(2, retryCount);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error("Maximum retries reached");
+}
