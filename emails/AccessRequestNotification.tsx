@@ -36,11 +36,11 @@ export function AccessRequestNotification({
     <Html>
       <Head />
       <Preview>
-        Nouvelle demande d'accès temporaire de {requesterName}
+        Nouvelle demande d&apos;accès temporaire de {requesterName}
       </Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>🔑 Nouvelle demande d'accès</Heading>
+          <Heading style={h1}>🔑 Nouvelle demande d&apos;accès</Heading>
 
           <Text style={text}>
             <strong>{requesterName}</strong> ({requesterEmail}) a demandé un
@@ -63,7 +63,7 @@ export function AccessRequestNotification({
           <Hr style={hr} />
 
           <Text style={text}>
-            En tant que responsable de l'équipe, vous pouvez approuver ou
+            En tant que responsable de l&apos;équipe, vous pouvez approuver ou
             rejeter cette demande.
           </Text>
 
@@ -74,7 +74,7 @@ export function AccessRequestNotification({
           </Section>
 
           <Text style={footer}>
-            Vous recevez cet email car vous êtes responsable de l'équipe{" "}
+            Vous recevez cet email car vous êtes responsable de l&apos;équipe{" "}
             {teamName} sur Dousell Immo.
           </Text>
         </Container>

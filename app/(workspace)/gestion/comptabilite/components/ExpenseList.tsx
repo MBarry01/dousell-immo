@@ -55,7 +55,7 @@ export function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
             <div className={`flex flex-col items-center justify-center py-12 ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
                 <AlertCircle className="w-12 h-12 mb-4 opacity-50" />
                 <p className="text-lg font-medium">Aucune dépense ce mois</p>
-                <p className="text-sm">Cliquez sur "Dépense" pour en ajouter une.</p>
+                <p className="text-sm">Cliquez sur &quot;Dépense&quot; pour en ajouter une.</p>
             </div>
         );
     }

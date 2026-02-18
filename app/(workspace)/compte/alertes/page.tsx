@@ -70,7 +70,7 @@ export default function AlertesPage() {
   const { notifications, unreadCount, loading: notificationsLoading } = useNotifications(user?.id || null);
   const [alerts, setAlerts] = useState<SearchAlert[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateAlert, setShowCreateAlert] = useState(false);
+  const [_showCreateAlert, _setShowCreateAlert] = useState(false);
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     new_properties: true,
     property_updates: true,
@@ -113,7 +113,7 @@ export default function AlertesPage() {
       }
 
       setAlerts(data || []);
-    } catch (error) {
+    } catch (_error) {
       // Erreur silencieuse - utiliser un tableau vide
       // Ne pas logger car c'est normal si la table n'existe pas
       setAlerts([]);
@@ -138,7 +138,7 @@ export default function AlertesPage() {
         setPreferences(result.data);
       }
       // Sinon, les valeurs par défaut sont déjà définies
-    } catch (error) {
+    } catch (_error) {
       // Erreur silencieuse - utiliser les valeurs par défaut
       // Ne pas logger car c'est normal si la table n'existe pas
     }
@@ -480,7 +480,7 @@ export default function AlertesPage() {
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">Mises à jour de vos annonces</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Alertes sur l'état de vos biens déposés (approuvé, refusé, etc.)
+                  Alertes sur l&apos;état de vos biens déposés (approuvé, refusé, etc.)
                 </p>
               </div>
               <Switch

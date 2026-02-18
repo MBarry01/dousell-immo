@@ -119,7 +119,7 @@ export default function FeaturesSection() {
             Tout ce dont vous avez besoin
           </h2>
           <p className="text-[clamp(1rem,1.5vw,1.25rem)] text-gray-400 max-w-3xl mx-auto">
-            Une suite complète d'outils pour optimiser la gestion de vos biens immobiliers au
+            Une suite complète d&apos;outils pour optimiser la gestion de vos biens immobiliers au
             Sénégal. De la vitrine publique à la gestion locative.
           </p>
         </motion.div>

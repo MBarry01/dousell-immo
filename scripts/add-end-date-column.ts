@@ -38,7 +38,7 @@ async function addEndDateColumn() {
             console.log('⚠️  La fonction RPC exec_sql n\'existe pas. Utilisation d\'une approche alternative...');
 
             // Vérifier si la colonne existe déjà
-            const { data: columns, error: checkError } = await supabase
+            const { data: _columns, error: checkError } = await supabase
                 .from('leases')
                 .select('*')
                 .limit(1);

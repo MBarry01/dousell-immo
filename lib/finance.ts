@@ -119,7 +119,7 @@ export function calculateFinancials(
     // Pour vérifier si le mois cible est le mois courant
     const now = new Date();
     // Comparaison stricte mois/année
-    const isTargetMonthCurrent = (
+    const _isTargetMonthCurrent = (
         targetDate.getMonth() === now.getMonth() &&
         targetDate.getFullYear() === now.getFullYear()
     );

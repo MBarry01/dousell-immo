@@ -16,18 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-// Import dynamique pour éviter les erreurs SSR
-const L = typeof window !== "undefined" ? require("leaflet") : null;
-
-// Fix pour les icônes Leaflet avec Next.js
-if (typeof window !== "undefined" && L) {
-  delete (L.Icon.Default.prototype as Record<string, unknown>)._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-    iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-  });
-}
 
 // Coordonnées de Dakar par défaut
 const DAKAR_CENTER: LatLngExpression = [14.7167, -17.4677];
@@ -84,12 +72,28 @@ export function LocationPickerDialog({
   );
 
   useEffect(() => {
-    setMounted(true);
+    // Use setTimeout to avoid synchronous setState in effect
+    setTimeout(() => setMounted(true), 0);
+
+    // Fix pour les icônes Leaflet
+    (async () => {
+      try {
+        const L = (await import('leaflet')).default;
+        delete (L.Icon.Default.prototype as any)._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+          iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+          shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+        });
+      } catch (e) {
+        console.warn('Leaflet icon fix failed', e);
+      }
+    })();
   }, []);
 
   useEffect(() => {
     if (initialPosition) {
-      setSelectedPosition([initialPosition.lat, initialPosition.lng]);
+      setTimeout(() => setSelectedPosition([initialPosition.lat, initialPosition.lng]), 0);
     } else if (open && initialAddress && !initialPosition) {
       // Si pas de position initiale mais une adresse, on essaie de géocoder
       const geocodeAddress = async () => {
@@ -127,8 +131,6 @@ export function LocationPickerDialog({
   const handleConfirm = useCallback(() => {
     const [lat, lng] = selectedPosition as [number, number];
     onLocationSelect(lat, lng);
-    // On ne ferme plus le dialog ici, c'est le parent qui le fera après le chargement
-    // onOpenChange(false); 
   }, [selectedPosition, onLocationSelect]);
 
   if (!mounted) {
@@ -211,4 +213,3 @@ export function LocationPickerDialog({
     </Dialog>
   );
 }
-

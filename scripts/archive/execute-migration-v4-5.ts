@@ -29,7 +29,7 @@ async function runMigration() {
 
     console.log("⌛ Tentative d'exécution via RPC execute_sql...");
 
-    const { data, error } = await supabase.rpc("execute_sql", { sql_query: sql });
+    const { _data, error } = await supabase.rpc("execute_sql", { sql_query: sql });
 
     if (error) {
         if (error.message.includes("function \"execute_sql\" does not exist")) {

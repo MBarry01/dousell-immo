@@ -20,7 +20,7 @@ function DashboardSkeleton() {
     );
 }
 
-function DashboardError({ error }: { error: string }) {
+function _DashboardError({ error }: { error: string }) {
     return (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-center space-y-2">
             <p className="text-red-400 font-semibold">Erreur de chargement du dashboard</p>

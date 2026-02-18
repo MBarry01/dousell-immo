@@ -122,7 +122,7 @@ export function PropertySelector({
         setOpen(false);
     };
 
-    const handleCreateSubmit = () => {
+    const _handleCreateSubmit = () => {
         if (newProperty.title && newProperty.address && newProperty.price > 0) {
             onCreateNew(newProperty);
         }
@@ -301,7 +301,7 @@ export function PropertySelector({
                     </div>
 
                     <p className="text-xs text-muted-foreground/60">
-                        💡 Ce bien sera créé en mode "brouillon" (sans photos). Vous pourrez l'enrichir plus tard.
+                        💡 Ce bien sera créé en mode &quot;brouillon&quot; (sans photos). Vous pourrez l&apos;enrichir plus tard.
                     </p>
                 </div>
             )}

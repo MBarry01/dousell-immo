@@ -23,7 +23,7 @@ export function PushNotifications() {
         try {
           const state = await OneSignal.User.PushSubscription.optedIn;
           setIsSubscribed(!!state);
-        } catch (e) {
+        } catch (_e) {
           console.log("OneSignal not ready yet");
         }
       };
@@ -51,7 +51,7 @@ export function PushNotifications() {
       // Fallback: show prompt
       try {
         await OneSignal.Slidedown.promptPush();
-      } catch (e) {
+      } catch (_e) {
         toast.error("Impossible de modifier les paramètres de notification");
       }
     }

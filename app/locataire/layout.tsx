@@ -12,7 +12,7 @@ import {
   CreditCard,
   LogOut,
 } from "lucide-react";
-import OneSignalProvider, { loginOneSignal } from "@/components/providers/onesignal-provider";
+import _OneSignalProvider, { loginOneSignal } from "@/components/providers/onesignal-provider";
 import { useTenantUnreadCounts } from "@/hooks/use-unread-counts";
 import { Button } from "@/components/ui/button";
 import { TenantPushNotifications } from "@/components/pwa/tenant-push-notifications";
@@ -49,7 +49,7 @@ export default function LocataireLayout({
   const pathname = usePathname();
   const [tenantName, setTenantName] = useState<string>("");
   const [propertyAddress, setPropertyAddress] = useState<string>("");
-  const [leaseId, setLeaseId] = useState<string>("");
+  const [_leaseId, setLeaseId] = useState<string>("");
   const { unreadMessages, pendingMaintenance } = useTenantUnreadCounts();
 
   // Note: We no longer block /locataire in PWA standalone mode.

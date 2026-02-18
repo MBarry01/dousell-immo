@@ -11,7 +11,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 async function createRoleNotification(
   userId: string,
   role: UserRole,
-  supabase: SupabaseClient
+  _supabase: SupabaseClient
 ) {
   try {
     const roleLabels: Record<UserRole, string> = {

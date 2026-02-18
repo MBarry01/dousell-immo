@@ -99,7 +99,7 @@ export function ProgrammaticSectionFAQ({ city, properties }: ProgrammaticSection
         ? Math.round(properties.reduce((acc, curr) => acc + curr.price, 0) / properties.length)
         : 0;
 
-    const count = properties.length;
+    const _count = properties.length;
     // Formatage du nom de la ville
     const formattedCity = formatCityName(city);
 
@@ -125,7 +125,7 @@ export function ProgrammaticSectionFAQ({ city, properties }: ProgrammaticSection
         <section className="py-12 bg-background border-t border-border/50 mt-12">
             <div className="container max-w-4xl mx-auto px-4">
                 <h2 className="text-2xl font-bold mb-8 text-center text-foreground">
-                    Questions fréquentes sur l'immobilier à <span className="text-primary">{formattedCity}</span>
+                    Questions fréquentes sur l&apos;immobilier à <span className="text-primary">{formattedCity}</span>
                 </h2>
 
                 <Accordion type="single" collapsible className="w-full bg-card rounded-lg shadow-sm border border-border px-6 py-2">

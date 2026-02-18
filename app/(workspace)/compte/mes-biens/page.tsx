@@ -35,7 +35,7 @@ type PropertyWithStatus = Property & {
 };
 
 type OccupationFilter = "all" | "occupied" | "vacant" | "maintenance";
-type ValidationFilter = "all" | "approved" | "pending" | "rejected";
+type _ValidationFilter = "all" | "approved" | "pending" | "rejected";
 
 const occupationFilters = [
   { value: "all" as const, label: "Tous", icon: Home },

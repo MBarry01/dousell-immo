@@ -15,7 +15,7 @@ export function TenantPushNotifications() {
         try {
           const state = await OneSignal.User.PushSubscription.optedIn;
           setIsSubscribed(!!state);
-        } catch (e) {
+        } catch (_e) {
           // OneSignal might not be ready
         }
       };
@@ -33,7 +33,7 @@ export function TenantPushNotifications() {
       // Fallback
       try {
         await OneSignal.Slidedown.promptPush();
-      } catch (e) {
+      } catch (_e) {
         // ignore
       }
     }

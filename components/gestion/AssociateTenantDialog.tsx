@@ -65,7 +65,7 @@ export function AssociateTenantDialog({
                                 href={`/gestion/etats-lieux/new?property=${propertyId}&type=entree`}
                                 className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm transition-colors"
                             >
-                                📝 Planifier l'État des Lieux
+                                📝 Planifier l&apos;État des Lieux
                             </a>
                         </div>
                     </div>,
@@ -112,7 +112,7 @@ export function AssociateTenantDialog({
                     {/* DATE D'ENTRÉE */}
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-foreground">
-                            Date d'entrée (Début du bail)
+                            Date d&apos;entrée (Début du bail)
                         </label>
                         <div className="relative">
                             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />

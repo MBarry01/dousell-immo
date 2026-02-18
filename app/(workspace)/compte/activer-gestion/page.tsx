@@ -99,10 +99,10 @@ export default function ActiverGestionPage() {
                         className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8"
                     >
                         <Clock className="w-16 h-16 text-amber-400 mx-auto mb-4" />
-                        <h1 className="text-2xl font-bold text-white mb-2">Demande en cours d'examen</h1>
+                        <h1 className="text-2xl font-bold text-white mb-2">Demande en cours d&apos;examen</h1>
                         <p className="text-zinc-400 mb-6">
-                            Votre demande d'activation est en cours de vérification par notre équipe.
-                            Vous recevrez une notification dès qu'elle sera traitée.
+                            Votre demande d&apos;activation est en cours de vérification par notre équipe.
+                            Vous recevrez une notification dès qu&apos;elle sera traitée.
                         </p>
                         <Button variant="outline" onClick={() => router.push('/compte')}>
                             Retour au compte
@@ -170,7 +170,7 @@ export default function ActiverGestionPage() {
                                 {/* Pièce d'identité */}
                                 <div className="space-y-2">
                                     <Label className="text-zinc-300">
-                                        Pièce d'identité *
+                                        Pièce d&apos;identité *
                                     </Label>
                                     <input
                                         type="file"

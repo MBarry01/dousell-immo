@@ -13,7 +13,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { submitOnboarding } from "@/app/pro/start/actions";
 import { createClient } from "@/utils/supabase/client";
 
-type Step = "user" | "agency" | "goals" | "confirmation";
+type _Step = "user" | "agency" | "goals" | "confirmation";
 
 interface WizardData {
     // User Step

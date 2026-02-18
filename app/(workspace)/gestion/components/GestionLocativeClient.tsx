@@ -197,7 +197,7 @@ export function GestionLocativeClient({
     const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards'); // Default to cards (Noflaye style)
     const [isReceiptOpen, setIsReceiptOpen] = useState(false);
     const [currentReceipt, setCurrentReceipt] = useState<ReceiptData | null>(null);
-    const [saving, setSaving] = useState(false);
+    const [_saving, setSaving] = useState(false);
     const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'pending' | 'overdue'>('all');
 
     const handleMonthChange = (month: number, year: number) => {
@@ -343,7 +343,7 @@ export function GestionLocativeClient({
     }, [formattedTenants, filterStatus]);
 
     // Helper function to format CSV data
-    const formatCSVValue = (value: string | number | null | undefined): string => {
+    const _formatCSVValue = (value: string | number | null | undefined): string => {
         if (value === null || value === undefined) return '';
         const stringValue = String(value);
         if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
@@ -396,7 +396,7 @@ export function GestionLocativeClient({
     };
 
     // Format montant avec espaces
-    const formatAmount = (amount: number) => {
+    const _formatAmount = (amount: number) => {
         return amount.toLocaleString('fr-FR');
     };
 

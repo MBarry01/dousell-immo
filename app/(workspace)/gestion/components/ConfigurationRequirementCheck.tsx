@@ -64,7 +64,7 @@ export function ConfigurationRequirementCheck({
                         Accès Restreint : Profil Incomplet
                     </DialogTitle>
                     <DialogDescription className={`text-sm max-w-[320px] mx-auto text-center ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                        Pour générer des documents légaux conformes, vous devez d'abord renseigner vos informations obligatoires dans les paramètres.
+                        Pour générer des documents légaux conformes, vous devez d&apos;abord renseigner vos informations obligatoires dans les paramètres.
                     </DialogDescription>
                 </DialogHeader>
             </div>

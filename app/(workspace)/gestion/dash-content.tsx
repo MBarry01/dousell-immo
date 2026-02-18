@@ -1,7 +1,7 @@
 import { GestionLocativeClient } from "./components/GestionLocativeClient";
 import { AddTenantButton } from "./components/AddTenantButton";
 import { Suspense } from "react";
-import dynamic from "next/dynamic";
+import _dynamic from "next/dynamic";
 import { DocumentGeneratorDialog } from "./components/DocumentGeneratorDialog";
 import { ThemedContent } from "./components/ThemedContent";
 import { KPICards } from "./components/KPICards";

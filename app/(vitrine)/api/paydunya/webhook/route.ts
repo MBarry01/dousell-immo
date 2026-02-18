@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     }
 
     // Valider le hash SHA-512 de la MasterKey
-    if (!validatePayDunyaWebhook(payload.hash)) {
+    if (!await validatePayDunyaWebhook(payload.hash)) {
       console.error("Webhook PayDunya: Hash invalide", {
         receivedHash: payload.hash.substring(0, 20) + '...',
       });

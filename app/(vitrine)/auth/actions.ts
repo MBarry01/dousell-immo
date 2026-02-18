@@ -130,7 +130,7 @@ export async function signup(formData: FormData) {
       // Log JSON complet
       try {
         console.error("🚨 ERREUR SUPABASE SIGNUP (JSON):", JSON.stringify(error, null, 2));
-      } catch (e) {
+      } catch (_e) {
         console.error("🚨 Impossible de sérialiser l'erreur en JSON");
       }
 

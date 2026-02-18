@@ -53,7 +53,7 @@ export default function RegisterContent() {
     return { Flag, callingCode };
   };
 
-  const { Flag: SelectedFlag, callingCode } = getCountryInfo(selectedCountry);
+  const { Flag: _SelectedFlag, callingCode } = getCountryInfo(selectedCountry);
 
   // Synchroniser le pays sélectionné avec la valeur du téléphone
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function RegisterContent() {
         if (phoneNumber && phoneNumber.country) {
           setSelectedCountry(phoneNumber.country as RPNInput.Country);
         }
-      } catch (e) {
+      } catch (_e) {
         // Ignorer les erreurs de détection de pays (numéro invalide, etc.)
       }
     }

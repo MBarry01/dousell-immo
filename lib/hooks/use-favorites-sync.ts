@@ -46,7 +46,7 @@ interface UseFavoritesSyncReturn {
 
 export function useFavoritesSync(options: UseFavoritesSyncOptions = {}): UseFavoritesSyncReturn {
   const { userId, triggerSync = false, showToasts = true } = options;
-  const router = useRouter();
+  const _router = useRouter();
   const { favorites, addFavorite, removeFavorite } = useFavoritesStore();
   const syncInProgress = useRef(false);
   const hasSynced = useRef(false);
@@ -107,7 +107,7 @@ export function useFavoritesSync(options: UseFavoritesSyncOptions = {}): UseFavo
         }
 
         // Fetch server favorites to get complete list
-        const serverIds = await getServerFavoritesAction();
+        const _serverIds = await getServerFavoritesAction();
 
         // We keep localStorage for offline access, but server is source of truth
         // Clear sync flag to prevent re-sync on refresh

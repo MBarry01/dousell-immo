@@ -18,10 +18,10 @@ export default async function ActivationRequestsPage() {
                 <div>
                     <h1 className="text-2xl font-bold text-white flex items-center gap-3">
                         <Building2 className="w-7 h-7" />
-                        Demandes d'activation
+                        Demandes d&apos;activation
                     </h1>
                     <p className="text-zinc-400 mt-1">
-                        Validez les demandes d'activation Gestion Locative
+                        Validez les demandes d&apos;activation Gestion Locative
                     </p>
                 </div>
                 {pendingCount > 0 && (

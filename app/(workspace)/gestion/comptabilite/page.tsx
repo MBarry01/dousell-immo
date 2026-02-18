@@ -44,7 +44,7 @@ import { ProfitabilityTable } from './components/ProfitabilityTable';
 import { FeatureLockedState } from '@/components/gestion/FeatureLockedState';
 import { ComptabiliteTour } from '@/components/gestion/tours/ComptabiliteTour';
 
-interface MonthlyData {
+interface _MonthlyData {
     month: string;
     shortMonth: string;
     expected: number;
@@ -55,7 +55,7 @@ interface MonthlyData {
     collectionRate: number;
 }
 
-const COLORS = {
+const _COLORS = {
     collected: '#22c55e',
     pending: '#f59e0b',
     overdue: '#ef4444',

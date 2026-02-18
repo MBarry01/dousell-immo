@@ -14,7 +14,7 @@ export type { SubscriptionStatus, SubscriptionTier };
  * Statuts legacy utilisés dans profiles.pro_status (migration en cours).
  * Mapper vers les statuts DB valides avant utilisation.
  */
-type LegacyStatus = 'none' | 'trial' | 'expired';
+type _LegacyStatus = 'none' | 'trial' | 'expired';
 
 function normalizeLegacyStatus(status: string): SubscriptionStatus {
     switch (status) {

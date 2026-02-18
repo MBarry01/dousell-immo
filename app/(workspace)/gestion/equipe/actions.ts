@@ -480,7 +480,7 @@ export async function updateTeam(
 export const inviteTeamMember = safeAction(
   "inviteTeamMember",
   inviteMemberSchema,
-  async (data, { userId, teamId: ctxTeamId }) => {
+  async (data, { userId, teamId: _ctxTeamId }) => {
     // Vérifier permission
     const { user, teamId } = await requireTeamPermission("team.members.invite");
 

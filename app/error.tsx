@@ -31,7 +31,7 @@ export default function Error({
                 Oups ! Une erreur est survenue
             </h1>
             <p className="mb-8 max-w-md text-muted-foreground">
-                L'application a rencontré une exception inattendue. Veuillez nous excuser pour ce désagrément.
+                L&apos;application a rencontré une exception inattendue. Veuillez nous excuser pour ce désagrément.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
@@ -48,13 +48,13 @@ export default function Error({
                 >
                     <Link href="/">
                         <Home className="h-4 w-4" />
-                        Retour à l'accueil
+                        Retour à l&apos;accueil
                     </Link>
                 </Button>
             </div>
             {process.env.NODE_ENV === "development" && (
                 <div className="mt-8 max-w-2xl overflow-auto rounded-lg bg-muted p-4 text-left text-xs font-mono text-muted-foreground">
-                    <p className="mb-2 font-bold text-red-500">Détails de l'erreur (Dev uniquement) :</p>
+                    <p className="mb-2 font-bold text-red-500">Détails de l&apos;erreur (Dev uniquement) :</p>
                     <pre>{error.stack || error.message}</pre>
                 </div>
             )}

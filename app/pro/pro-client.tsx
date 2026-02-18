@@ -39,7 +39,7 @@ import Feature18 from "@/components/saasable/blocks/Feature18";
 import TenantHeroSearch from "@/components/landing/tenant/TenantHeroSearch";
 import PropertyCategories from "@/components/landing/tenant/PropertyCategories";
 import TenantSteps from "@/components/landing/tenant/TenantSteps";
-import TenantTestimonials from "@/components/landing/tenant/TenantTestimonials";
+import _TenantTestimonials from "@/components/landing/tenant/TenantTestimonials";
 import FeaturedPropertiesHero from "@/components/landing/tenant/FeaturedPropertiesHero";
 import TrustSection from "@/components/landing/tenant/TrustSection";
 import TenantBentoGrid from "@/components/landing/tenant/TenantBentoGrid";
@@ -137,7 +137,7 @@ const featuresDataSaasable = [
   }
 ];
 
-const features = [
+const _features = [
   {
     icon: Buildings,
     title: "Gestion des Biens",
@@ -189,7 +189,7 @@ function LandingPageContent() {
       setUserMode(mode);
     }
   }, [searchParams]);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [_isHydrated, setIsHydrated] = useState(false);
 
   // Charger le mode depuis localStorage après hydratation
   useEffect(() => {
@@ -208,7 +208,7 @@ function LandingPageContent() {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         setIsLoggedIn(!!user);
-      } catch (error) {
+      } catch (_error) {
         setIsLoggedIn(false);
       }
     };

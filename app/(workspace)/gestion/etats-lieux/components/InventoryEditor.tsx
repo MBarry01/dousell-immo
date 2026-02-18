@@ -221,7 +221,7 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
                 </p>
                 <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-muted-foreground'}`}>
                     Ce constat doit être rempli <strong>sur place</strong> avec le locataire présent.
-                    Visitez chaque pièce ensemble et convenez de l'état avant de noter.
+                    Visitez chaque pièce ensemble et convenez de l&apos;état avant de noter.
                 </p>
             </div>
 

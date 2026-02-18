@@ -4,7 +4,7 @@ import { stripe } from '@/lib/subscription/stripe';
 import { getBaseUrl } from '@/lib/utils';
 import { getUserTeamContext } from '@/lib/team-context';
 
-export async function POST(req: Request) {
+export async function POST(_req: Request) {
     try {
         const { teamId } = await getUserTeamContext();
         const supabase = await createClient();

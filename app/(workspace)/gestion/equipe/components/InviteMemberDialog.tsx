@@ -242,7 +242,7 @@ export function InviteMemberDialog({ teamId, onSuccess, trigger }: InviteMemberD
               ) : (
                 <>
                   <UserPlus className="w-4 h-4 mr-2" />
-                  Envoyer l'invitation
+                  Envoyer l&apos;invitation
                 </>
               )}
             </Button>

@@ -67,7 +67,7 @@ async function applyMigration() {
 
     // 4. Remplir automatiquement les end_date (durée par défaut: 2 ans)
     console.log('\n4️⃣ Calcul automatique des dates de fin (2 ans par défaut)...');
-    const { data: updated, error: updateError } = await supabase.rpc('exec_sql', {
+    const { data: _updated, error: updateError } = await supabase.rpc('exec_sql', {
       sql: `
         UPDATE leases
         SET end_date = start_date + INTERVAL '2 years'

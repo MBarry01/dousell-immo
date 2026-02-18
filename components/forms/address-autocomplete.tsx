@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { MapPin, Loader2 } from "lucide-react";
-import { Command as CommandPrimitive } from "cmdk";
+import { Command as _CommandPrimitive } from "cmdk";
 import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";

@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { CheckCircle2, XCircle, FileText, ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import Link from "next/link";
+import _Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {

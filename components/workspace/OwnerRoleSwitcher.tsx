@@ -23,7 +23,7 @@ interface TenantLeaseInfo {
  * Per WORKFLOW_PROPOSAL.md section 2.5 - Switch role Owners
  */
 export function OwnerRoleSwitcher() {
-  const router = useRouter();
+  const _router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [tenantInfo, setTenantInfo] = useState<TenantLeaseInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);

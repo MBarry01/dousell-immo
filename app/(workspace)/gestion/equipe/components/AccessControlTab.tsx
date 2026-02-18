@@ -241,7 +241,7 @@ export function AccessControlTab({ teamId }: AccessControlTabProps) {
             )}
           </div>
           <CardDescription>
-            Demandes d'accès temporaire de vos membres
+            Demandes d&apos;accès temporaire de vos membres
             {selectedCategory !== "all" && (
               <span className="ml-1 text-primary">
                 • Catégorie: {PERMISSION_CATEGORIES.find(c => c.id === selectedCategory)?.label}
@@ -403,7 +403,7 @@ function PendingRequestCard({
             </div>
             {request.reason && (
               <p className="text-xs md:text-sm text-muted-foreground mt-2 italic line-clamp-2 md:line-clamp-none">
-                "{request.reason}"
+                &quot;{request.reason}&quot;
               </p>
             )}
           </div>
@@ -451,7 +451,7 @@ function PendingRequestCard({
           isDark ? "border-slate-700" : "border-slate-200"
         )}>
           <div>
-            <Label className="text-xs text-muted-foreground">Durée de l'accès</Label>
+            <Label className="text-xs text-muted-foreground">Durée de l&apos;accès</Label>
             <Select value={durationHours} onValueChange={setDurationHours}>
               <SelectTrigger className="mt-1">
                 <SelectValue />

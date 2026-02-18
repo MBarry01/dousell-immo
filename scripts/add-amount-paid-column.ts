@@ -15,7 +15,7 @@ async function addAmountPaidColumn() {
 
     try {
         // Exécuter la requête SQL directement
-        const { data, error } = await supabase.rpc('exec_sql', {
+        const { _data, error } = await supabase.rpc('exec_sql', {
             sql_query: `
                 ALTER TABLE rental_transactions
                 ADD COLUMN IF NOT EXISTS amount_paid INTEGER DEFAULT 0;

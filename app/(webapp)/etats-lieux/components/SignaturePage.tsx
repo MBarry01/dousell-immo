@@ -125,7 +125,7 @@ export function SignaturePage({ reportId }: SignaturePageProps) {
                     <div className="bg-[#F4C430]/10 border border-[#F4C430]/30 rounded-xl p-4">
                         <p className="text-sm text-[#F4C430]">
                             <FileText className="w-4 h-4 inline mr-2" />
-                            Votre signature est pré-remplie. Le locataire signe sur place lors de l'état des lieux.
+                            Votre signature est pré-remplie. Le locataire signe sur place lors de l&apos;état des lieux.
                         </p>
                     </div>
 
@@ -148,7 +148,7 @@ export function SignaturePage({ reportId }: SignaturePageProps) {
                     <div className={`border rounded-xl p-4 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}>
                         <div className="flex items-center gap-2 text-blue-400 text-sm mb-3 bg-blue-500/10 rounded-lg px-3 py-2">
                             <FileText className="w-4 h-4" />
-                            👇 Passez l'appareil au locataire pour signature
+                            👇 Passez l&apos;appareil au locataire pour signature
                         </div>
                         <SignatureCanvas
                             label="✍️ Signature du Locataire"

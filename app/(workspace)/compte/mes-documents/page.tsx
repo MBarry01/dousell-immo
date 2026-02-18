@@ -150,7 +150,7 @@ export default function MesDocumentsPage() {
       } else {
         toast.error(result.error || "Erreur lors de l'upload");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Erreur lors de l'upload du document");
     } finally {
       setUploading(false);
@@ -297,12 +297,12 @@ export default function MesDocumentsPage() {
       } else {
         toast.error(result.error || "Erreur lors de la suppression");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Erreur lors de la suppression");
     }
   };
 
-  const formatFileSize = (bytes: number) => {
+  const _formatFileSize = (bytes: number) => {
     if (bytes < 1024) return bytes + " B";
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
@@ -475,7 +475,7 @@ export default function MesDocumentsPage() {
               })() ? (
                 <Card className="bg-background border-white/10 p-8 text-center">
                   <ShieldCheck weight="light" className="h-12 w-12 mx-auto mb-3 text-white/20" />
-                  <h3 className="text-lg font-semibold text-white mb-1">Aucune pièce d'identité</h3>
+                  <h3 className="text-lg font-semibold text-white mb-1">Aucune pièce d&apos;identité</h3>
                   <p className="text-sm text-white/50">Ajoutez votre CNI ou passeport pour être vérifié</p>
                 </Card>
               ) : (
@@ -511,7 +511,7 @@ export default function MesDocumentsPage() {
                         <div className="space-y-1">
                           <h3 className="text-sm font-semibold text-gray-100 truncate">{doc.name}</h3>
                           <p className="text-[11px] text-gray-500 flex items-center gap-1">
-                            Vérification d'identité
+                            Vérification d&apos;identité
                           </p>
                         </div>
 
@@ -521,7 +521,7 @@ export default function MesDocumentsPage() {
                             <p className="font-bold flex items-center gap-1.5 mb-1.5">
                               <WarningCircle weight="light" className="w-3.5 h-3.5" /> Motif du refus :
                             </p>
-                            <p className="italic text-red-300/90">"{doc.rejection_reason}"</p>
+                            <p className="italic text-red-300/90">&quot;{doc.rejection_reason}&quot;</p>
                           </div>
                         )}
 
@@ -626,7 +626,7 @@ export default function MesDocumentsPage() {
                             <p className="font-bold flex items-center gap-1.5 mb-1.5">
                               <WarningCircle weight="light" className="w-3.5 h-3.5" /> Motif du refus :
                             </p>
-                            <p className="italic text-red-300/90">"{doc.rejection_reason}"</p>
+                            <p className="italic text-red-300/90">&quot;{doc.rejection_reason}&quot;</p>
                           </div>
                         )}
 

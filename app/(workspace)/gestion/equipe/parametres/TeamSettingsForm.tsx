@@ -103,7 +103,7 @@ export function TeamSettingsForm({ team }: TeamSettingsFormProps) {
               )}
               required
             >
-              Nom de l'équipe
+              Nom de l&apos;équipe
             </Label>
             <Input
               value={formData.name}
@@ -325,7 +325,7 @@ export function TeamSettingsForm({ team }: TeamSettingsFormProps) {
                 isDark ? "text-slate-300" : "text-gray-700"
               )}
             >
-              Jour d'échéance par défaut
+              Jour d&apos;échéance par défaut
             </label>
             <Input
               type="number"

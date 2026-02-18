@@ -18,7 +18,7 @@ export async function getTenantMessages() {
         return { messages: [], leaseId: null, ownerName: null, ownerId: null };
     }
 
-    const supabase = await createClient();
+    const _supabase = await createClient();
 
     // Get the lease with owner info using service role to bypass RLS
     const { createClient: createAdminClient } = await import("@supabase/supabase-js");

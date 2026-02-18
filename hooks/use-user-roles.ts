@@ -141,7 +141,7 @@ export function useUserRoles(userId: string | null) {
               table: "user_roles",
               filter: `user_id=eq.${userId}`,
             },
-            (payload) => {
+            (_payload) => {
               // Rafraîchir les rôles quand un changement est détecté
               fetchRoles();
             }

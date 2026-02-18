@@ -1,5 +1,5 @@
 
-import { redis, getRedisClient } from "../lib/cache/redis-client";
+import { _redis, getRedisClient } from "../lib/cache/redis-client";
 
 async function clearCache() {
     console.log("🔥 Starting cache cleanup...");

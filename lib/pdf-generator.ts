@@ -292,7 +292,7 @@ async function addContractContent(
           height: Math.min(scaledDims.height, sigHeight),
         });
       }
-    } catch (e) {
+    } catch (_e) {
       console.warn("Pas de signature locataire chargée");
     }
   }
@@ -485,7 +485,7 @@ function drawPartiesGrid(
 }
 
 /** Helper simple pour footer temporaire (avant override final) */
-function drawFooter(page: PDFPage, pageNum: number, width: number, font: PDFFont) {
+function drawFooter(_page: PDFPage, _pageNum: number, _width: number, _font: PDFFont) {
   // Vide intentionnellement ou simple placeholder, le vrai est fait à la fin
 }
 
@@ -624,7 +624,7 @@ export async function uploadPDFToStorage(
   supabaseClient: any
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
-    const { data, error } = await supabaseClient.storage
+    const { _data, error } = await supabaseClient.storage
       .from('lease-contracts') // Bucket privé
       .upload(filename, pdfBytes, {
         contentType: 'application/pdf',

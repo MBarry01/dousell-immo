@@ -80,7 +80,7 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minD
                         onClick={handleToday}
                         className="text-xs transition-colors hover:text-primary text-muted-foreground"
                     >
-                        Aujourd'hui
+                        Aujourd&apos;hui
                     </button>
                 )}
             </div>

@@ -28,10 +28,10 @@ export default async function AccessControlPage() {
     <div className="container max-w-7xl mx-auto py-8 px-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">
-          Contrôle d'Accès Temporaire
+          Contrôle d&apos;Accès Temporaire
         </h1>
         <p className="text-zinc-400">
-          Gérez les demandes d'accès et les permissions temporaires de votre équipe
+          Gérez les demandes d&apos;accès et les permissions temporaires de votre équipe
         </p>
       </div>
 

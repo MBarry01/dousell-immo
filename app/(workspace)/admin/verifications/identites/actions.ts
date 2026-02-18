@@ -309,7 +309,7 @@ export async function getPendingIdentityDocuments() {
             };
         }
 
-        const { data: profiles, error: profilesError } = await supabase
+        const { data: profiles, error: _profilesError } = await supabase
             .from("profiles")
             .select("id, full_name, phone, is_identity_verified, created_at")
             .in("id", userIds);

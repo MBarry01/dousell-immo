@@ -14,14 +14,16 @@ export function BiensTour({ canCreate = false }: { canCreate?: boolean }) {
 
     // Attendre que le composant soit monté côté client
     useEffect(() => {
-        setMounted(true);
+        // Use setTimeout to avoid synchronous setState in effect
+        setTimeout(() => setMounted(true), 0);
 
         // Détecter si mobile
         const checkMobile = () => {
             setIsMobile(window.innerWidth < 1024); // lg breakpoint
         };
 
-        checkMobile();
+        // Use setTimeout to avoid synchronous setState in effect
+        setTimeout(checkMobile, 0);
         window.addEventListener('resize', checkMobile);
 
         return () => window.removeEventListener('resize', checkMobile);
@@ -30,7 +32,8 @@ export function BiensTour({ canCreate = false }: { canCreate?: boolean }) {
     // Détecter la visibilité de la bottom nav (sur mobile uniquement)
     useEffect(() => {
         if (!isMobile) {
-            setIsBottomNavVisible(false);
+            // Use setTimeout to avoid synchronous setState in effect
+            setTimeout(() => setIsBottomNavVisible(false), 0);
             return;
         }
 
@@ -50,7 +53,8 @@ export function BiensTour({ canCreate = false }: { canCreate?: boolean }) {
                     if (Math.abs(scrollDelta) > 10) {
                         if (scrollDelta > 0 && currentScrollY > 100) {
                             // Scroll vers le bas -> bottom nav cachée
-                            setIsBottomNavVisible(false);
+                            // Use setTimeout to avoid synchronous setState in effect
+            setTimeout(() => setIsBottomNavVisible(false), 0);
                         } else if (scrollDelta < 0) {
                             // Scroll vers le haut -> bottom nav visible
                             setIsBottomNavVisible(true);

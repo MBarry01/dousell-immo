@@ -29,7 +29,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
   },
 });
 
-const getSearchQuery = (title: string, description: string, type?: string): string => {
+const getSearchQuery = (title: string, description: string, _type?: string): string => {
   const text = `${title} ${description}`.toLowerCase();
   
   if (text.includes("terrain") || text.includes("land")) {
@@ -69,7 +69,7 @@ async function checkImageExists(url: string): Promise<boolean> {
       return true;
     }
     return false;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
@@ -96,7 +96,7 @@ async function fetchPexelsImages(query: string, count: number = 3): Promise<stri
     }).filter((url: string | null): url is string => url !== null && url.length > 0) || [];
     
     return images;
-  } catch (error) {
+  } catch (_error) {
     return [];
   }
 }

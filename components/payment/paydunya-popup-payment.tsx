@@ -205,7 +205,7 @@ export default function PayDunyaPopupPayment({
                         </span>
                     </div>
                     <p className="text-xs text-center text-gray-500">
-                        Complétez votre paiement dans la fenêtre qui s'est ouverte.
+                        Complétez votre paiement dans la fenêtre qui s&apos;est ouverte.
                         <br />
                         Cette page se mettra à jour automatiquement.
                     </p>
@@ -238,7 +238,7 @@ export default function PayDunyaPopupPayment({
                     </Button>
 
                     <p className="text-xs text-center text-muted-foreground">
-                        Une fenêtre s'ouvrira pour le paiement sécurisé via PayDunya
+                        Une fenêtre s&apos;ouvrira pour le paiement sécurisé via PayDunya
                     </p>
                 </>
             )}

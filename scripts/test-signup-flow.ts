@@ -132,7 +132,7 @@ async function testSignupFlow() {
 
   try {
     const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
-    const { data: healthCheck, error: healthError } = await supabase.from("properties").select("id").limit(1);
+    const { data: _healthCheck, error: healthError } = await supabase.from("properties").select("id").limit(1);
 
     logTest(
       "Connexion Supabase",

@@ -1,6 +1,7 @@
 "use client";
 
 import { AddressAutocomplete } from "@/components/forms/address-autocomplete";
+import { toast } from "sonner";
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -116,11 +117,11 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
   // Publication options
-  const [publishMode, setPublishMode] = useState<PublishMode>("publish");
+  const [publishMode, _setPublishMode] = useState<PublishMode>("publish");
   const [scheduledDate, setScheduledDate] = useState("");
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [statsSummary, setStatsSummary] = useState({ properties: 0, leases: 0 });
+  const [_statsSummary, _setStatsSummary] = useState({ properties: 0, leases: 0 });
 
   const updateField = (field: string, value: string | number | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -150,7 +151,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
 
   const processImageFiles = async (fileArray: File[]) => {
     if (formData.images.length + fileArray.length > 10) {
-      setError("Maximum 10 photos autorisées");
+      toast.error("Maximum 10 photos autorisées");
       return;
     }
 
@@ -160,35 +161,54 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
     try {
       const supabase = createClient();
       const uploadedUrls: string[] = [];
+      let hasError = false;
 
       for (const file of fileArray) {
         if (file.size > 5 * 1024 * 1024) {
-          setError(`Le fichier ${file.name} dépasse 5MB`);
+          toast.error(`Le fichier ${file.name} dépasse 5MB`);
+          hasError = true;
           continue;
         }
 
         const fileExt = file.name.split(".").pop()?.toLowerCase();
         if (!["jpg", "jpeg", "png", "webp"].includes(fileExt || "")) {
-          setError(`Format non supporté: ${fileExt}`);
+          toast.error(`Format non supporté: ${fileExt}`);
+          hasError = true;
           continue;
         }
 
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const filePath = `team-properties/${teamId}/${fileName}`;
+        try {
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const filePath = `team-properties/${teamId}/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from("properties")
-          .upload(filePath, file, { cacheControl: "3600", upsert: false });
+          const { error: uploadError } = await supabase.storage
+            .from("properties")
+            .upload(filePath, file, { cacheControl: "3600", upsert: false });
 
-        if (uploadError) throw new Error(`Erreur upload: ${uploadError.message}`);
+          if (uploadError) throw new Error(`Erreur upload: ${uploadError.message}`);
 
-        const { data: { publicUrl } } = supabase.storage.from("properties").getPublicUrl(filePath);
-        uploadedUrls.push(publicUrl);
+          const { data: { publicUrl } } = supabase.storage.from("properties").getPublicUrl(filePath);
+          uploadedUrls.push(publicUrl);
+        } catch (e) {
+          console.error(e);
+          toast.error(`Erreur lors de l'upload de ${file.name}`);
+          hasError = true;
+        }
       }
 
-      setFormData((prev) => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
+      if (uploadedUrls.length > 0) {
+        setFormData((prev) => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
+        toast.success(`${uploadedUrls.length} photo(s) ajoutée(s)`);
+      }
+
+      if (hasError) {
+        setError("Certains fichiers n'ont pas pu être uploadés");
+      }
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur lors de l'upload");
+      console.error(err);
+      toast.error("Erreur critique lors de l'upload");
+      setError("Erreur lors de l'upload");
     } finally {
       setUploadingImages(false);
     }
@@ -482,7 +502,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
 
               {/* Title */}
               <div>
-                <Label className="text-sm text-muted-foreground mb-2 block" required>Titre de l'annonce</Label>
+                <Label className="text-sm text-muted-foreground mb-2 block" required>Titre de l&apos;annonce</Label>
                 <input
                   type="text"
                   value={formData.title}
@@ -684,7 +704,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                     ) : (
                       <Sparkles className="w-3.5 h-3.5" />
                     )}
-                    Améliorer avec l'IA
+                    Améliorer avec l&apos;IA
                   </button>
                 </div>
                 <textarea
@@ -819,7 +839,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
             <DialogHeader>
               <DialogTitle>Programmer la publication</DialogTitle>
               <DialogDescription>
-                Choisissez la date et l'heure à laquelle le bien sera visible publiquement.
+                Choisissez la date et l&apos;heure à laquelle le bien sera visible publiquement.
               </DialogDescription>
             </DialogHeader>
             <div className="py-6">

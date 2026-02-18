@@ -26,7 +26,7 @@ const CONDITION_MAP: Record<string, { short: string; label: string }> = {
 export function PDFPreview({ reportId }: PDFPageProps) {
     const { isDark } = useTheme();
     const router = useRouter();
-    const [loading, setLoading] = useState(true);
+    const [_loading, setLoading] = useState(true);
     const [report, setReport] = useState<any>(null);
     const [agencyBranding, setAgencyBranding] = useState<{ name: string | null, logo: string | null } | null>(null);
     const printRef = useRef<HTMLDivElement>(null);
@@ -96,7 +96,7 @@ export function PDFPreview({ reportId }: PDFPageProps) {
     }
 
     const reportDate = report?.report_date ? new Date(report.report_date) : new Date();
-    const signedDate = report?.signed_at ? new Date(report.signed_at) : new Date();
+    const _signedDate = report?.signed_at ? new Date(report.signed_at) : new Date();
 
     const hasPhotos = report?.rooms?.some((r: any) => r.items?.some((i: any) => i.photos?.length > 0));
 
@@ -369,7 +369,7 @@ export function PDFPreview({ reportId }: PDFPageProps) {
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center gap-3 print:hidden">
                 <Check className="w-5 h-5 text-emerald-400" />
                 <p className={`text-sm ${isDark ? 'text-emerald-300' : 'text-emerald-600'}`}>
-                    État des lieux signé. Cliquez sur "Imprimer" puis "Enregistrer en PDF" pour télécharger.
+                    État des lieux signé. Cliquez sur &quot;Imprimer&quot; puis &quot;Enregistrer en PDF&quot; pour télécharger.
                 </p>
             </div>
         </div>

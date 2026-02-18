@@ -26,7 +26,7 @@ async function main() {
 
   // 1. Vérifier si la table user_documents existe
   console.log("1️⃣ Vérification de la table 'user_documents'...");
-  const { data: tableData, error: tableError } = await supabase
+  const { data: _tableData, error: tableError } = await supabase
     .from("user_documents")
     .select("*", { count: "exact", head: true });
 
@@ -95,7 +95,7 @@ async function main() {
 
   // 4. Vérifier les documents de certification (ad_verifications)
   console.log("\n4️⃣ Vérification de la table 'ad_verifications'...");
-  const { data: verifications, error: verificationsError } = await supabase
+  const { data: _verifications, error: verificationsError } = await supabase
     .from("ad_verifications")
     .select("*", { count: "exact", head: true });
 

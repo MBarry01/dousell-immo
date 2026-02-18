@@ -333,7 +333,7 @@ export const QuittancePDF: React.FC<{ data: QuittanceData }> = ({ data }) => {
 };
 
 // Ancienne version (gardée pour compatibilité)
-const QuittancePDFOld: React.FC<{ data: QuittanceData }> = ({ data }) => {
+const _QuittancePDFOld: React.FC<{ data: QuittanceData }> = ({ data }) => {
   const today = new Date().toLocaleDateString('fr-FR');
 
   return (

@@ -116,7 +116,7 @@ export function LegalPageClient({ stats, alerts, leases, userEmail, profile }: L
                                         <tr>
                                             <th className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">Locataire & Bien</th>
                                             <th className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">Échéance</th>
-                                            <th className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">Type d'alerte</th>
+                                            <th className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">Type d&apos;alerte</th>
                                             <th className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">Statut</th>
                                             <th className="px-4 md:px-6 py-3 md:py-4 text-right whitespace-nowrap">Action</th>
                                         </tr>

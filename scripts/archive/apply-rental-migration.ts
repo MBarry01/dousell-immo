@@ -22,7 +22,7 @@ if (!supabaseUrl || !supabaseKey) {
     process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const _supabase = createClient(supabaseUrl, supabaseKey);
 
 async function applyMigration() {
     console.log('\n🔧 APPLICATION DE LA MIGRATION - Nouveaux champs rental_transactions\n');

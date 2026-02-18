@@ -54,7 +54,7 @@ export function GestionTour() {
         initVisibility();
 
         // 2. Check retardé pour la restauration du scroll navigateur
-        const timeoutId = setTimeout(initVisibility, 100);
+        const _timeoutId = setTimeout(initVisibility, 100);
 
         let ticking = false;
 

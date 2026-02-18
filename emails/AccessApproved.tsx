@@ -51,7 +51,7 @@ export function AccessApproved({
     <Html>
       <Head />
       <Preview>
-        Votre demande d'accès temporaire a été approuvée ✅
+        Votre demande d&apos;accès temporaire a été approuvée ✅
       </Preview>
       <Body style={main}>
         <Container style={container}>
@@ -62,7 +62,7 @@ export function AccessApproved({
           </Text>
 
           <Text style={text}>
-            Bonne nouvelle ! Votre demande d'accès temporaire a été{" "}
+            Bonne nouvelle ! Votre demande d&apos;accès temporaire a été{" "}
             <strong style={{ color: "#10b981" }}>approuvée</strong> par{" "}
             {reviewerName}.
           </Text>
@@ -79,7 +79,7 @@ export function AccessApproved({
           </Section>
 
           <Section style={infoBox}>
-            <Text style={infoLabel}>⏰ Date d'expiration</Text>
+            <Text style={infoLabel}>⏰ Date d&apos;expiration</Text>
             <Text style={infoValue}>{formattedDate}</Text>
           </Section>
 
@@ -93,8 +93,8 @@ export function AccessApproved({
           <Hr style={hr} />
 
           <Text style={text}>
-            Vous pouvez maintenant utiliser cette fonctionnalité jusqu'à la date
-            d'expiration. Après cette date, l'accès sera automatiquement révoqué.
+            Vous pouvez maintenant utiliser cette fonctionnalité jusqu&apos;à la date
+            d&apos;expiration. Après cette date, l&apos;accès sera automatiquement révoqué.
           </Text>
 
           <Section style={buttonContainer}>
@@ -106,8 +106,8 @@ export function AccessApproved({
           <Section style={warningBox}>
             <Text style={warningText}>
               ⚠️ <strong>Important :</strong> Cet accès est temporaire et expire
-              automatiquement. Si vous avez besoin d'un accès prolongé, contactez
-              votre responsable d'équipe.
+              automatiquement. Si vous avez besoin d&apos;un accès prolongé, contactez
+              votre responsable d&apos;équipe.
             </Text>
           </Section>
 

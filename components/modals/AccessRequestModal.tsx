@@ -119,7 +119,7 @@ export function AccessRequestModal({
               errorMessage
             ) : (
               <>
-                Vous n'avez pas la permission{" "}
+                Vous n&apos;avez pas la permission{" "}
                 <span className="font-semibold text-foreground">
                   {permissionLabel || permission}
                 </span>

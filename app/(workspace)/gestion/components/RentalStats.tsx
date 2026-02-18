@@ -9,7 +9,7 @@ interface RentalStatsProps {
 }
 
 export function RentalStats({ stats }: RentalStatsProps) {
-    const cards = [
+    const _cards = [
         { title: "Collecté ce mois", value: stats.collected, color: "text-green-500", icon: Wallet, bg: "bg-green-500/10" },
         { title: "En attente", value: stats.pending, color: "text-yellow-500", icon: Clock, bg: "bg-yellow-500/10" },
         { title: "Retards / Impayés", value: stats.overdue, color: "text-red-500", icon: AlertCircle, bg: "bg-red-500/10" },

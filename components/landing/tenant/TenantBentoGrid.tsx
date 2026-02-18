@@ -270,7 +270,7 @@ export default function TenantBentoGrid() {
                     className="flex justify-end"
                   >
                     <div className="bg-[#F4C430] rounded-2xl rounded-br-md px-4 py-2 max-w-[85%]">
-                      <p className="text-black text-sm">Fuite d'eau dans la salle de bain</p>
+                      <p className="text-black text-sm">Fuite d&apos;eau dans la salle de bain</p>
                     </div>
                   </motion.div>
 
@@ -283,7 +283,7 @@ export default function TenantBentoGrid() {
                     className="flex justify-start"
                   >
                     <div className="bg-zinc-800 rounded-2xl rounded-bl-md px-4 py-2 max-w-[85%] border border-white/5">
-                      <p className="text-white text-sm">J'envoie un plombier demain matin</p>
+                      <p className="text-white text-sm">J&apos;envoie un plombier demain matin</p>
                     </div>
                   </motion.div>
 

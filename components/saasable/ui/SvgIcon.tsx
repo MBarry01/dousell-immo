@@ -15,7 +15,7 @@ const icons: Record<string, any> = {
 };
 
 export default function SvgIcon({ name, size = 24, type = IconType.STROKE, color, stroke, twoToneColor }: { name: string, size?: number, type?: IconType, color?: string, stroke?: number, twoToneColor?: string }) {
-    const theme = useTheme();
+    const _theme = useTheme();
 
     const Icon = icons[name];
 

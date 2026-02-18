@@ -132,7 +132,7 @@ async function debugReminders() {
 
     // 4. Test the actual query used by the service
     console.log("\n4️⃣ Testing exact service query...");
-    const { data: serviceQuery, error: serviceError } = await supabase
+    const { data: serviceQuery, error: _serviceError } = await supabase
         .from("rental_transactions")
         .select(`
             id,

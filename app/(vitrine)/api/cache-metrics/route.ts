@@ -20,7 +20,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { CacheMetrics } from '@/lib/cache/advanced-patterns';
 import { createClient } from '@/utils/supabase/server';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // SÉCURITÉ : Vérifier que c'est un admin
     // À décommenter en production
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
 /**
  * POST : Reset des métriques (dev/testing only)
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     // SÉCURITÉ : Bloquer en production
     if (process.env.NODE_ENV === 'production') {

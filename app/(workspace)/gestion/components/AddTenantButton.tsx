@@ -563,7 +563,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
 
 // --- ONBOARDING WIZARD COMPONENT ---
 
-function TenantOnboardingWizard({ open, onOpenChange, leaseData, profile, onComplete }: any) {
+function TenantOnboardingWizard({ open, _onOpenChange, leaseData, _profile, onComplete }: any) {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [contractGenerated, setContractGenerated] = useState(false);
@@ -1127,7 +1127,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                 } else {
                     importErrors.push(`${tenant.nom}: ${result.error}`);
                 }
-            } catch (err) {
+            } catch (_err) {
                 importErrors.push(`${tenant.nom}: Erreur inattendue`);
             }
 

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { storeDocumentInGED } from '@/lib/ged-utils';
 import { generateLeasePDF } from '@/lib/pdf-generator';
-import ReactPDF, { renderToStream } from '@react-pdf/renderer';
+import _ReactPDF, { renderToStream } from '@react-pdf/renderer';
 import { createQuittanceDocument } from '@/components/pdf/QuittancePDF_v2';
 
 export async function POST(req: Request) {

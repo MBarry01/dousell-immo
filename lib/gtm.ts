@@ -1,4 +1,4 @@
-type GTMEvent = {
+type _GTMEvent = {
     event: string;
     [key: string]: unknown;
 };

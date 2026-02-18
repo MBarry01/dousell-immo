@@ -97,32 +97,3 @@ export async function verifyKKiaPayTransaction(
  * Valider la signature du webhook KKiaPay
  * KKiaPay envoie un header 'x-kkiapay-signature' avec HMAC-SHA256
  */
-export function validateKKiaPayWebhook(
-  signature: string,
-  payload: string
-): boolean {
-  try {
-    const config = getKKiaPayConfig();
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const crypto = require("crypto");
-
-    // Calculer le HMAC-SHA256 avec le secret
-    const expectedSignature = crypto
-      .createHmac("sha256", config.secret)
-      .update(payload)
-      .digest("hex");
-
-    // Comparaison sécurisée
-    if (signature.length !== expectedSignature.length) {
-      return false;
-    }
-
-    return crypto.timingSafeEqual(
-      Buffer.from(signature, "hex"),
-      Buffer.from(expectedSignature, "hex")
-    );
-  } catch (error) {
-    console.error("Erreur lors de la validation de la signature:", error);
-    return false;
-  }
-}

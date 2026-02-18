@@ -52,7 +52,7 @@ export default function TrustSection() {
 
           <p className="text-gray-400 text-base md:text-lg max-w-2xl mx-auto">
             Contrairement aux courtiers informels, chaque annonce et chaque propriétaire
-            sur Dousell est vérifié. Votre tranquillité d'esprit est notre priorité.
+            sur Dousell est vérifié. Votre tranquillité d&apos;esprit est notre priorité.
           </p>
         </motion.div>
 
@@ -86,7 +86,7 @@ export default function TrustSection() {
 
                 {/* Highlights */}
                 <div className="space-y-3 pt-6 border-t border-white/5">
-                  {feature.highlights.map((highlight, idx) => (
+                  {feature.highlights.map((highlight, _idx) => (
                     <div
                       key={highlight}
                       className="flex items-center gap-2.5"

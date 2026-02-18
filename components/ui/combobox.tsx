@@ -133,7 +133,7 @@ export function Combobox({
                     onClick={() => handleSelect(searchQuery)}
                     className="block w-full mt-2 px-3 py-2 bg-zinc-800 rounded-lg text-white hover:bg-zinc-700 transition-colors"
                   >
-                    Ajouter "{searchQuery}"
+                    Ajouter &quot;{searchQuery}&quot;
                   </button>
                 )}
               </div>

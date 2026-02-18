@@ -81,7 +81,7 @@ export async function uploadLogo(file: File) {
     const fileName = `teams/${teamId}/logo_${Date.now()}.${fileExt}`;
 
     // Upload vers le bucket 'branding'
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { data: _uploadData, error: uploadError } = await supabase.storage
         .from('branding')
         .upload(fileName, file, { upsert: true });
 
@@ -119,7 +119,7 @@ export async function uploadSignature(file: File) {
     const fileExt = file.name.split('.').pop();
     const fileName = `teams/${teamId}/signature_${Date.now()}.${fileExt}`;
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { data: _uploadData, error: uploadError } = await supabase.storage
         .from('branding')
         .upload(fileName, file, { upsert: true });
 
@@ -165,7 +165,7 @@ export async function getPremiumBranding() {
         };
 
         return { success: true, data };
-    } catch (err) {
+    } catch (_err) {
         return { success: false, data: null };
     }
 }
@@ -176,7 +176,7 @@ export async function sendTestEmail(profileData: any) {
     // ✅ CORRECTION SÉCURITÉ: Vérification de permission renforcée
     // Seuls les membres avec permission team.settings.edit peuvent envoyer des emails de test
     const { teamId, user } = await requireTeamPermission("team.settings.edit");
-    const supabase = await createClient();
+    const _supabase = await createClient();
 
     if (!N8N_WEBHOOK_URL) {
         console.warn('N8N_WEBHOOK_URL non configuré');

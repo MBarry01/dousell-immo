@@ -170,8 +170,8 @@ export function AcceptInvitationClient({
           {/* Message personnalisé */}
           {invitation.message && (
             <div className="p-4 rounded-lg bg-slate-800/50 border-l-4 border-primary">
-              <p className="text-xs text-slate-500 mb-1">Message de l'équipe</p>
-              <p className="text-sm text-slate-300 italic">"{invitation.message}"</p>
+              <p className="text-xs text-slate-500 mb-1">Message de l&apos;équipe</p>
+              <p className="text-sm text-slate-300 italic">&quot;{invitation.message}&quot;</p>
             </div>
           )}
 
@@ -207,7 +207,7 @@ export function AcceptInvitationClient({
             ) : (
               <>
                 <CheckCircle2 className="h-4 w-4 mr-2" />
-                Accepter l'invitation
+                Accepter l&apos;invitation
               </>
             )}
           </Button>

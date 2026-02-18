@@ -295,7 +295,7 @@ export async function getChartData(): Promise<ChartDataPoint[]> {
     for (let i = 5; i >= 0; i--) {
       const date = new Date();
       date.setMonth(date.getMonth() - i);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const _monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       const monthName = monthNames[date.getMonth()];
       
       // Compter les leads de ce mois

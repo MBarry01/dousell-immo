@@ -67,7 +67,7 @@ export default async function AuditPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">Historique d'activité</h1>
+          <h1 className="text-2xl font-bold text-white">Historique d&apos;activité</h1>
           <p className="text-sm text-slate-400">
             {logs.length} action{logs.length !== 1 ? "s" : ""} enregistrée
             {logs.length !== 1 ? "s" : ""}
@@ -83,7 +83,7 @@ export default async function AuditPage() {
             Aucune activité
           </p>
           <p className="text-sm text-slate-500">
-            L'historique des actions apparaîtra ici
+            L&apos;historique des actions apparaîtra ici
           </p>
         </div>
       ) : (

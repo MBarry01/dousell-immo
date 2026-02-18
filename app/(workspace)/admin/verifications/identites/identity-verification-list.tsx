@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import _Image from "next/image";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {

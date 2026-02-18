@@ -85,7 +85,7 @@ async function getCoordinates(query: string, retries: number = 2): Promise<{ lat
       }
 
       return null;
-    } catch (error) {
+    } catch (_error) {
       if (attempt < retries) {
         await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
         continue;

@@ -58,7 +58,7 @@ export default async function TeamSettingsPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">Paramètres de l'équipe</h1>
+          <h1 className="text-2xl font-bold text-white">Paramètres de l&apos;équipe</h1>
           <p className="text-sm text-slate-400">
             Modifiez les informations de votre équipe
           </p>

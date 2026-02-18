@@ -191,7 +191,7 @@ export async function getAIRateLimitStatus(teamId: string): Promise<{
     const { maxRequests } = AI_RATE_LIMIT_CONFIG;
 
     try {
-        const client = getRedisClient();
+        const client = await getRedisClient();
         if (!client) {
             return {
                 count: 0,

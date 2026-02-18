@@ -11,7 +11,7 @@ function VerifyRecoveryContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [error, setError] = useState<string | null>(null);
-    const [isProcessing, setIsProcessing] = useState(true);
+    const [_isProcessing, setIsProcessing] = useState(true);
 
     useEffect(() => {
         const exchangeCode = async () => {

@@ -93,7 +93,7 @@ async function verifyState() {
 
     console.log(`Grace Period Limit: ${gracePeriodLimitIso}\n`);
 
-    const { data: serviceQuery, error: sqError } = await supabase
+    const { data: serviceQuery, error: _sqError } = await supabase
         .from("rental_transactions")
         .select(`
             id,

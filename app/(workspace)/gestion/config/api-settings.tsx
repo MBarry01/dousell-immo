@@ -26,7 +26,7 @@ export function ApiSettings({ profile }: ApiSettingsProps) {
             } else {
                 toast.error(result.error || "Erreur lors de l'envoi");
             }
-        } catch (e) {
+        } catch (_e) {
             toast.error("Erreur technique");
         } finally {
             setTesting(false);

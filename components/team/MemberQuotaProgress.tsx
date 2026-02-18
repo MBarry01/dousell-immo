@@ -100,7 +100,7 @@ export function MemberQuotaProgress({
         <div className="flex items-center gap-2">
           <Icon size={20} className={color} />
           <span className="text-sm font-medium text-zinc-200">
-            Membres de l'équipe
+            Membres de l&apos;équipe
           </span>
         </div>
         <span className={cn("text-sm font-bold", color)}>
@@ -132,7 +132,7 @@ export function MemberQuotaProgress({
                 <div>
                   <p className="font-medium">Limite atteinte</p>
                   <p className="text-zinc-500">
-                    Les équipes en période d'essai sont limitées à {limit} membres.{" "}
+                    Les équipes en période d&apos;essai sont limitées à {limit} membres.{" "}
                     <a
                       href="/gestion/abonnement"
                       className="text-blue-400 hover:underline"

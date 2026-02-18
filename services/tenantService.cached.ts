@@ -10,13 +10,12 @@
  */
 
 import { getOrSetCache } from "@/lib/cache/cache-aside";
-import { redirect } from "next/navigation";
 
 /**
  * 🏠 Récupérer les données du dashboard locataire (avec cache)
  *
  * TTL : 2 minutes (statut paiement change fréquemment)
- * Cache key : `tenant_dashboard:{email}`
+ * Cache key : `tenant_dashboard:${email}`
  */
 export async function getTenantDashboardData(userEmail: string) {
   return getOrSetCache(
@@ -68,13 +67,9 @@ export async function getTenantDashboardData(userEmail: string) {
       }
 
       // Calculs financiers
-      const currentMonthStart = new Date();
-      currentMonthStart.setDate(1);
-      currentMonthStart.setHours(0, 0, 0, 0);
-
-      const payments = lease.payments || [];
+      const payments = (lease.payments || []) as { period_start: string; status: string }[];
       payments.sort(
-        (a: any, b: any) =>
+        (a, b) =>
           new Date(b.period_start).getTime() -
           new Date(a.period_start).getTime()
       );

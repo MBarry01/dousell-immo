@@ -15,7 +15,7 @@ type RedisClient = any; // On typage plus tard
 /**
  * Factory qui retourne le bon client selon l'environnement
  */
-function createRedisClient(): RedisClient {
+async function createRedisClient(): Promise<RedisClient | null> {
   // 🛡️ Browser safety check - prevent Node.js modules from being resolved/called in browser
   if (typeof window !== 'undefined') {
     return null;
@@ -33,11 +33,7 @@ function createRedisClient(): RedisClient {
   // --- CAS 1 : Vercel (Serverless) ---
   if (isVercel || process.env.UPSTASH_REDIS_REST_URL) {
     console.log('🚀 Using Upstash Redis (HTTP Serverless)');
-
-    // Lazy import (évite l'erreur si package pas installé)
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { Redis } = require('@upstash/redis');
-
+    const { Redis } = await import('@upstash/redis');
     return new Redis({
       url: process.env.UPSTASH_REDIS_REST_URL!,
       token: process.env.UPSTASH_REDIS_REST_TOKEN!,
@@ -47,9 +43,7 @@ function createRedisClient(): RedisClient {
   // --- CAS 2 : Serveur Dédié (Valkey/Redis classique) ---
   if (process.env.REDIS_URL) {
     console.log('🏗️ Using Valkey/Redis (TCP Connection)');
-
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const IORedis = require('ioredis');
+    const { default: IORedis } = await import('ioredis');
     return new IORedis(process.env.REDIS_URL, {
       maxRetriesPerRequest: 3,
       retryStrategy(times: number) {
@@ -62,9 +56,7 @@ function createRedisClient(): RedisClient {
   // --- CAS 3 : Dev Local (Docker Valkey) ---
   if (!isProduction) {
     console.log('💻 Using Local Valkey (Docker)');
-
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const IORedis = require('ioredis');
+    const { default: IORedis } = await import('ioredis');
     return new IORedis('redis://localhost:6379', {
       lazyConnect: true, // Ne plante pas si Redis absent en dev
     });
@@ -76,7 +68,7 @@ function createRedisClient(): RedisClient {
 }
 
 // Singleton global (évite 50 connexions en dev)
-let redisClient: RedisClient | null = null;
+let redisClientPromise: Promise<RedisClient | null> | null = null;
 
 // Circuit breaker pour les erreurs de quota
 let redisDisabledUntil: number = 0;
@@ -109,16 +101,22 @@ function isQuotaExceededError(error: unknown): boolean {
   }
 }
 
-export function getRedisClient(): RedisClient | null {
+export async function getRedisClient(): Promise<RedisClient | null> {
   // Si Redis est temporairement désactivé, retourner null
   if (isRedisTemporarilyDisabled()) {
     return null;
   }
 
-  if (!redisClient) {
-    redisClient = createRedisClient();
+  if (!redisClientPromise) {
+    redisClientPromise = createRedisClient();
   }
-  return redisClient;
+
+  try {
+    return await redisClientPromise;
+  } catch (e) {
+    console.error('Failed to initialize Redis client', e);
+    return null;
+  }
 }
 
 /**
@@ -126,7 +124,7 @@ export function getRedisClient(): RedisClient | null {
  */
 export const redis = {
   async get(key: string): Promise<string | null> {
-    const client = getRedisClient();
+    const client = await getRedisClient();
     if (!client) return null;
 
     try {
@@ -144,7 +142,7 @@ export const redis = {
   },
 
   async set(key: string, value: string, ttl?: number): Promise<void> {
-    const client = getRedisClient();
+    const client = await getRedisClient();
     if (!client) return;
 
     try {
@@ -172,7 +170,7 @@ export const redis = {
   },
 
   async del(key: string | string[]): Promise<void> {
-    const client = getRedisClient();
+    const client = await getRedisClient();
     if (!client) return;
 
     try {
@@ -196,7 +194,7 @@ export const redis = {
   },
 
   async exists(key: string): Promise<boolean> {
-    const client = getRedisClient();
+    const client = await getRedisClient();
     if (!client) return false;
 
     try {
@@ -213,7 +211,7 @@ export const redis = {
    * @returns true if key was set, false if key already exists
    */
   async setnx(key: string, value: string, ttl?: number): Promise<boolean> {
-    const client = getRedisClient();
+    const client = await getRedisClient();
     if (!client) return false;
 
     try {

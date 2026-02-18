@@ -538,11 +538,10 @@ export async function initializeRentalPayment(
  * PayDunya envoie un hash SHA-512 de la MasterKey dans le payload
  * Documentation: https://developers.paydunya.com/doc/FR/http_json
  */
-export function validatePayDunyaWebhook(receivedHash: string): boolean {
+export async function validatePayDunyaWebhook(receivedHash: string): Promise<boolean> {
   try {
     const config = getPayDunyaConfig();
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const crypto = require("crypto");
+    const crypto = await import("crypto");
 
     // Calculer le hash SHA-512 de la MasterKey
     const expectedHash = crypto

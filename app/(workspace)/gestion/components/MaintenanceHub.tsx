@@ -180,7 +180,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                 const fileExt = quoteFile.name.split('.').pop();
                 const fileName = `maintenance/quote_${Date.now()}.${fileExt}`;
 
-                const { data: uploadData, error: uploadError } = await supabase.storage
+                const { data: _uploadData, error: uploadError } = await supabase.storage
                     .from('properties')
                     .upload(fileName, quoteFile);
 
@@ -237,7 +237,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
             } else {
                 toast.error(result.error || "Erreur lors de l'acceptation du report");
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error("Erreur de connexion");
         } finally {
             setProcessingId(null);

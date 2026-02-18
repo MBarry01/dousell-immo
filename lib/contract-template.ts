@@ -123,8 +123,8 @@ export function generateContractText(data: ContractData, forPdf = false, include
   const rentFormatted = lease.monthlyRent.toLocaleString('fr-SN');
   const depositFormatted = lease.securityDeposit.toLocaleString('fr-SN');
 
-  const landlordName = landlord.companyName || `${landlord.firstName} ${landlord.lastName}`;
-  const tenantName = `${tenant.firstName} ${tenant.lastName}`;
+  const _landlordName = landlord.companyName || `${landlord.firstName} ${landlord.lastName}`;
+  const _tenantName = `${tenant.firstName} ${tenant.lastName}`;
 
   let text = '';
 

@@ -26,7 +26,7 @@ async function diagnose(token?: string) {
 
     // 1. Vérifier les colonnes
     console.log("\n1️⃣ Vérification des colonnes...");
-    const { data: sampleProfile, error: colError } = await supabase
+    const { data: _sampleProfile, error: colError } = await supabase
         .from("profiles")
         .select("id, email_verification_token, email_verification_expires")
         .limit(1);

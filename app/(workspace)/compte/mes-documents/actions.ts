@@ -12,6 +12,38 @@ type DocumentType =
   | "attestation"
   | "autre";
 
+export interface UserDocument {
+  id: string;
+  user_id: string;
+  file_name: string;
+  file_path: string;
+  file_type: string;
+  file_size: number;
+  mime_type: string;
+  source: string;
+  certification_scope: string | null;
+  property_id: string | null;
+  lease_id: string | null;
+  category: string | null;
+  created_at: string;
+  updated_at: string;
+  is_certified?: boolean;
+  description?: string;
+  entity_type?: string;
+  entity_id?: string;
+}
+
+export interface GEDDocument extends UserDocument {
+  name: string;
+  url: string;
+  property_title: string;
+  tenant_name: string | null;
+  uploaded_at: string | null;
+  is_virtual?: boolean;
+  virtual_type?: string;
+  virtual_data?: Record<string, any>;
+}
+
 /**
  * Upload un document dans le coffre-fort personnel de l'utilisateur
  */
@@ -555,7 +587,7 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     // Supabase : .or(`user_id.eq.${user.id},leases.owner_id.eq.${user.id}`) ne marche pas direct avec des joins imbriqués facilement.
     // On va faire 2 appels manuels si besoin, mais essayons la jointure.
 
-    const manualsQuery = supabase
+    const _manualsQuery = supabase
       .from("user_documents")
       .select(`
         *,
@@ -579,10 +611,10 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     // LIMITATION: Si bcp de docs, inefficace. Mieux vaut 2 queries.
 
     // Query A: Mes uploads
-    const qA = supabase.from("user_documents").select('id').eq("user_id", user.id);
+    const _qA = supabase.from("user_documents").select('id').eq("user_id", user.id);
 
     // Query B: Uploads liés à mes baux
-    const qB = supabase.from("user_documents").select('id, leases!inner(owner_id)').eq("leases.owner_id", user.id);
+    const _qB = supabase.from("user_documents").select('id, leases!inner(owner_id)').eq("leases.owner_id", user.id);
 
     // On va fusionner dans la query principale en utilisant 'or' si possible, ou une logique de filtre post-fetch si le volume est faible.
     // Vu la complexité de OR avec relation inner/outer, on va utiliser le filtre "user_documents" général et filter cote serveur (ou modifier la query pour utiliser des IDs).
@@ -640,10 +672,10 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     ]);
 
     // Fusionner et dédupliquer les résultats
-    const allUserDocs = [...(userDocsRes.data || []), ...((teamDocsRes as any).data || [])];
+    const allUserDocs = [...(userDocsRes.data || []), ...((teamDocsRes as { data: UserDocument[] | null; error: any }).data || [])];
     const manualsOwnerRes = {
       data: Array.from(new Map(allUserDocs.map(d => [d.id, d])).values()),
-      error: userDocsRes.error || (teamDocsRes as any).error
+      error: userDocsRes.error || (teamDocsRes as { data: any; error: any }).error
     };
     console.log("[GED] Total documents found:", manualsOwnerRes.data?.length || 0);
 
@@ -789,7 +821,7 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
 
     // --- Indexation des documents GED pour lookup rapide ---
     // Maintenant docsWithUrls contient les URLs signées
-    const gedIndex = new Map<string, any>(); // Key: "type:id" -> Document
+    const gedIndex = new Map<string, GEDDocument>(); // Key: "type:id" -> Document
     docsWithUrls.forEach(doc => {
       if (doc.entity_type && doc.entity_id) {
         gedIndex.set(`${doc.entity_type}:${doc.entity_id}`, doc);
@@ -812,10 +844,10 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     });
 
     // --- Traitement Quittances ---
-    const validReceipts = (receiptsRes.data || []).filter(r => true);
+    const validReceipts = (receiptsRes.data || []).filter(_r => true);
 
     const receiptDocs = validReceipts.map(r => {
-      const lease = r.leases as any;
+      const lease = r.leases as unknown as { id: string; tenant_name: string; property_address: string };
       const dateStr = new Date(r.period_year, r.period_month - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
       // Chercher un document GED existant pour cette transaction
@@ -829,7 +861,7 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
         name: existingDoc?.name || `Quittance - ${dateStr}`,
         type: "quittance",
         category: "quittance",
-        size: existingDoc?.size || 0,
+        file_size: existingDoc?.file_size || 0,
         url: docUrl, // Priorité au document stocké
         uploaded_at: r.paid_at || new Date().toISOString(),
         property_id: null,
@@ -848,14 +880,14 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
 
     // --- Traitement États des Lieux ---
     const inventoryDocs = (inventoryRes.data || []).map(r => {
-      const lease = r.leases as any;
+      const lease = r.leases as unknown as { id: string; tenant_name: string; property_address: string };
       // TODO: Vérifier si un EDL stocké existe (entity_type='inventory'?)
       return {
         id: `inventory-${r.id}`,
         name: `État des lieux (${r.report_type === 'entry' ? 'Entrée' : 'Sortie'})`,
         type: "etat_lieux",
         category: "etat_lieux",
-        size: 0,
+        file_size: 0,
         url: `/gestion/etats-lieux/${r.id}/pdf`,
         uploaded_at: r.updated_at || r.date,
         property_id: null,
@@ -879,7 +911,7 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
         name: existingDoc?.name || `Contrat de Bail - ${l.tenant_name}`,
         type: "bail",
         category: "bail",
-        size: existingDoc?.size || 0,
+        file_size: existingDoc?.file_size || 0,
         url: docUrl,
         uploaded_at: l.created_at,
         property_id: null,
@@ -896,7 +928,7 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
     const maintenanceDocs = await Promise.all((maintenanceRes.data || [])
       .filter(m => !!m.quote_url)
       .map(async (m) => {
-        const lease = m.leases as any;
+        const lease = m.leases as unknown as { id: string; tenant_name: string; property_address: string };
         const isCompleted = m.status === 'completed';
 
         let finalUrl = m.quote_url || `/gestion`;
@@ -922,7 +954,7 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
           name: isCompleted ? `Facture: ${m.description.substring(0, 30)}...` : `Devis: ${m.description.substring(0, 30)}...`,
           type: isCompleted ? "facture_travaux" : "devis",
           category: isCompleted ? "facture_travaux" : "devis",
-          size: 0,
+          file_size: 0,
           url: finalUrl,
           uploaded_at: m.created_at,
           property_id: null,

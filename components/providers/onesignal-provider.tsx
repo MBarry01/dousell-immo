@@ -93,7 +93,7 @@ export const loginOneSignal = async (userId: string) => {
 };
 
 export default function OneSignalProvider({ userId }: { userId?: string }) {
-    const lastUserId = useRef<string | undefined>(userId);
+    const _lastUserId = useRef<string | undefined>(userId);
 
     useEffect(() => {
         // Initial init on mount

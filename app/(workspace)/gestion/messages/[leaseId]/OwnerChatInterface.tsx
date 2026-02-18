@@ -123,7 +123,7 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
     };
 
     // Helper to group messages
-    const groupedMessages = messages.reduce((groups, msg, index) => {
+    const groupedMessages = messages.reduce((groups, msg, _index) => {
         const date = new Date(msg.created_at);
         const dateKey = format(date, 'yyyy-MM-dd');
 

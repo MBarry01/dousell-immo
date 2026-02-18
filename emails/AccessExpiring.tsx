@@ -73,7 +73,7 @@ export function AccessExpiring({
           <Hr style={hr} />
 
           <Text style={text}>
-            Après l'expiration, vous ne pourrez plus utiliser cette
+            Après l&apos;expiration, vous ne pourrez plus utiliser cette
             fonctionnalité. Pensez à terminer vos tâches en cours avant la
             date limite.
           </Text>
@@ -81,14 +81,14 @@ export function AccessExpiring({
           <Section style={warningBox}>
             <Text style={warningText}>
               ⚠️ <strong>Important :</strong> Sauvegardez votre travail en
-              cours. L'accès sera automatiquement révoqué après l'expiration.
+              cours. L&apos;accès sera automatiquement révoqué après l&apos;expiration.
             </Text>
           </Section>
 
           {requestUrl && (
             <>
               <Text style={text}>
-                Si vous avez besoin d'un accès prolongé, vous pouvez faire une
+                Si vous avez besoin d&apos;un accès prolongé, vous pouvez faire une
                 nouvelle demande :
               </Text>
 
@@ -102,10 +102,10 @@ export function AccessExpiring({
 
           <Section style={infoBox}>
             <Text style={infoText}>
-              💡 <strong>Besoin d'un accès permanent ?</strong>
+              💡 <strong>Besoin d&apos;un accès permanent ?</strong>
               <br />
               Si vous avez régulièrement besoin de cette fonctionnalité,
-              contactez votre responsable d'équipe pour ajuster votre rôle de
+              contactez votre responsable d&apos;équipe pour ajuster votre rôle de
               manière permanente.
             </Text>
           </Section>

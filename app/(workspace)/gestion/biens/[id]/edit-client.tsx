@@ -69,7 +69,7 @@ type EditBienClientProps = {
 };
 
 export function EditBienClient({ teamId, teamName, property }: EditBienClientProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTogglingPublication, setIsTogglingPublication] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -530,7 +530,7 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
                       ) : (
                         <>
                           <Sparkles className="w-4 h-4" />
-                          Régénérer avec l'IA
+                          Régénérer avec l&apos;IA
                         </>
                       )}
                     </button>
@@ -542,7 +542,7 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
                     className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    L'IA génère une description optimisée SEO basée sur les caractéristiques du bien.
+                    L&apos;IA génère une description optimisée SEO basée sur les caractéristiques du bien.
                   </p>
                 </div>
                 <div>

@@ -24,7 +24,7 @@ export async function loginAsTestUser(page: Page) {
             return;
         }
 
-        const result = await loginResponse.json();
+        const _result = await loginResponse.json();
         console.log('✅ Login API réussi');
 
         // 2. Naviguer vers le dashboard (la session devrait être établie)
@@ -35,7 +35,7 @@ export async function loginAsTestUser(page: Page) {
         }
         await page.waitForTimeout(2000);
 
-    } catch (error) {
+    } catch (_error) {
         console.log('⚠️ API login error, essai manuel...');
         await loginManuallyWithRetry(page);
     }
@@ -78,7 +78,7 @@ async function loginManuallyWithRetry(page: Page, maxRetries = 3) {
                     await bypassBtn.click({ force: true });
                     await page.waitForTimeout(800);
                 }
-            } catch (e) {
+            } catch (_e) {
                 // Ignorer si le bouton n'existe pas
             }
 

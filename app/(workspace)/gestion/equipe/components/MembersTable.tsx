@@ -146,7 +146,7 @@ export function MembersTable({
           <div className="md:hidden space-y-3">
             {invitations.map((inv) => {
               const roleConfig = TEAM_ROLE_CONFIG[inv.role as TeamRole];
-              const isExpired = new Date(inv.expires_at) < new Date();
+              const _isExpired = new Date(inv.expires_at) < new Date();
 
               return (
                 <div
@@ -406,7 +406,7 @@ export function MembersTable({
                           onClick={() => handleRemoveMember(member.id)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Retirer de l'équipe
+                          Retirer de l&apos;équipe
                         </DropdownMenuItem>
                       </>
                     )}
@@ -418,7 +418,7 @@ export function MembersTable({
                         onClick={handleLeaveTeam}
                       >
                         <LogOut className="h-4 w-4 mr-2" />
-                        Quitter l'équipe
+                        Quitter l&apos;équipe
                       </DropdownMenuItem>
                     )}
 
@@ -551,7 +551,7 @@ export function MembersTable({
                                 onClick={() => handleRemoveMember(member.id)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Retirer de l'équipe
+                                Retirer de l&apos;équipe
                               </DropdownMenuItem>
                             </>
                           )}
@@ -563,7 +563,7 @@ export function MembersTable({
                               onClick={handleLeaveTeam}
                             >
                               <LogOut className="h-4 w-4 mr-2" />
-                              Quitter l'équipe
+                              Quitter l&apos;équipe
                             </DropdownMenuItem>
                           )}
 

@@ -9,7 +9,6 @@ import { createClient as createServerClient } from '@/utils/supabase/server';
 // import { getCurrentUser } from '@/lib/auth'; // Deprecated in Server Actions
 import { generateLeasePDF, uploadPDFToStorage } from '@/lib/pdf-generator';
 import { ContractData } from '@/lib/contract-template';
-import { ContractCustomTexts } from '@/lib/contract-defaults';
 import { z, ZodError } from 'zod'; // Import ZodError
 import { revalidatePath } from 'next/cache';
 import { differenceInMonths, addDays } from 'date-fns';
@@ -274,21 +273,8 @@ export async function generateLeaseContract(
 
     if (docError) {
       console.error('❌ Erreur insertion user_documents:', docError);
-      // Log to file for easier access
-      try {
-        const fs = require('fs');
-        const logMessage = `[${new Date().toISOString()}] ERROR: ${JSON.stringify(docError)}\nDATA: ${JSON.stringify(docData)}\n\n`;
-        fs.appendFileSync('debug-log.txt', logMessage);
-      } catch (e) {
-        console.error('Failed to write to debug log', e);
-      }
     } else {
       console.log('✅ Contrat enregistré dans la GED');
-      try {
-        const fs = require('fs');
-        const logMessage = `[${new Date().toISOString()}] SUCCESS: Contract saved to user_documents\n`;
-        fs.appendFileSync('debug-log.txt', logMessage);
-      } catch (e) { }
     }
 
     // 10. Revalidation

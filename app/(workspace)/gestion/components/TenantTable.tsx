@@ -86,7 +86,7 @@ export function TenantTable({
     onReactivate,
     onInvite
 }: TenantTableProps) {
-    const router = useRouter();
+    const _router = useRouter();
     const [sortField, setSortField] = useState<SortField>('name');
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 

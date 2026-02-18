@@ -89,7 +89,7 @@ export function ChangeRoleDialog({
           </DialogTitle>
           <DialogDescription>
             Modifier le rôle de {member.user?.full_name || "ce membre"} dans
-            l'équipe
+            l&apos;équipe
           </DialogDescription>
         </DialogHeader>
 

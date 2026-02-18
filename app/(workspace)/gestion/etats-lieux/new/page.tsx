@@ -145,7 +145,7 @@ export default function NewInventoryReportPage() {
                     2. Type de bien
                 </h2>
                 <p className={`text-xs -mt-2 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-                    Le formulaire s'adapte automatiquement au type de bien
+                    Le formulaire s&apos;adapte automatiquement au type de bien
                 </p>
 
                 <div className="grid grid-cols-3 gap-2">
@@ -169,7 +169,7 @@ export default function NewInventoryReportPage() {
 
             {/* Step 3: Select Entry/Exit Type */}
             <div className={`border rounded-xl p-5 space-y-4 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}>
-                <h2 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>3. Type d'état des lieux</h2>
+                <h2 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>3. Type d&apos;état des lieux</h2>
 
                 <div className="grid grid-cols-2 gap-3">
                     <button
@@ -225,7 +225,7 @@ export default function NewInventoryReportPage() {
                     </>
                 ) : (
                     <>
-                        Commencer l'état des lieux
+                        Commencer l&apos;état des lieux
                         <ArrowRight className="w-4 h-4 ml-2" />
                     </>
                 )}

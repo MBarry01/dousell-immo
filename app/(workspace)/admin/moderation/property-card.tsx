@@ -230,7 +230,7 @@ export function PropertyModerationCard({
                   toast.success("Référence copiée", {
                     description: property.payment_ref,
                   });
-                } catch (error) {
+                } catch (_error) {
                   toast.error("Erreur lors de la copie");
                 }
               }}

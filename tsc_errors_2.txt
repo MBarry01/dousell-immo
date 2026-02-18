@@ -1,0 +1,17 @@
+app/(workspace)/compte/mes-documents/actions.ts(864,28): error TS2339: Property 'size' does not exist on type 'GEDDocument'.
+app/(workspace)/compte/mes-documents/actions.ts(914,28): error TS2339: Property 'size' does not exist on type 'GEDDocument'.
+components/workspace/workspace-bottom-nav.tsx(64,37): error TS2304: Cannot find name 'useState'.
+components/workspace/workspace-bottom-nav.tsx(65,33): error TS2304: Cannot find name 'useState'.
+components/workspace/workspace-bottom-nav.tsx(66,23): error TS2552: Cannot find name 'useRef'. Did you mean 'User'?
+components/workspace/workspace-bottom-nav.tsx(67,19): error TS2552: Cannot find name 'useRef'. Did you mean 'User'?
+components/workspace/workspace-bottom-nav.tsx(68,30): error TS2552: Cannot find name 'useRef'. Did you mean 'User'?
+components/workspace/workspace-bottom-nav.tsx(69,28): error TS2304: Cannot find name 'useRef'.
+components/workspace/workspace-bottom-nav.tsx(70,31): error TS2304: Cannot find name 'useState'.
+components/workspace/workspace-bottom-nav.tsx(71,31): error TS2304: Cannot find name 'useState'.
+components/workspace/workspace-bottom-nav.tsx(73,3): error TS2304: Cannot find name 'useEffect'.
+components/workspace/workspace-bottom-nav.tsx(97,20): error TS2304: Cannot find name 'useMemo'.
+components/workspace/workspace-bottom-nav.tsx(104,3): error TS2304: Cannot find name 'useEffect'.
+components/workspace/workspace-bottom-nav.tsx(168,3): error TS2304: Cannot find name 'useEffect'.
+components/workspace/workspace-bottom-nav.tsx(188,24): error TS7006: Parameter 'item' implicitly has an 'any' type.
+lib/rate-limit/ai-limiter.ts(207,26): error TS2339: Property 'zremrangebyscore' does not exist on type 'Promise<any>'.
+lib/rate-limit/ai-limiter.ts(208,40): error TS2339: Property 'zcard' does not exist on type 'Promise<any>'.

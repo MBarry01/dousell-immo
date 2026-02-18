@@ -31,7 +31,7 @@ async function applyMigration() {
 
     try {
         // Vérifier si les colonnes existent déjà
-        const { data: columns, error: checkError } = await supabase
+        const { data: _columns, error: _checkError } = await supabase
             .from("profiles")
             .select("*")
             .limit(0);

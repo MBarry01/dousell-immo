@@ -23,7 +23,7 @@ const appointmentSchema = z.object({
 export type AppointmentFormValues = z.infer<typeof appointmentSchema>;
 
 // Lien Zoom de réunion permanente Dousell (à configurer dans les variables d'environnement)
-const ZOOM_MEETING_URL = process.env.ZOOM_MEETING_URL || "https://zoom.us/j/dousellimmo";
+const _ZOOM_MEETING_URL = process.env.ZOOM_MEETING_URL || "https://zoom.us/j/dousellimmo";
 
 // Alias pour compatibilité
 export async function submitLead(values: VisitRequestFormValues, turnstileToken?: string) {

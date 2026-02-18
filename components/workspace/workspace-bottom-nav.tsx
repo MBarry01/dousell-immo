@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useOwnerUnreadCounts } from "@/hooks/use-unread-counts";
 import { createClient } from "@/utils/supabase/client";
 import {
@@ -112,12 +112,14 @@ export function WorkspaceBottomNav() {
 
         // Initialisation
         const initVisibility = () => {
-          if (scrollContainer.scrollTop > 100) {
-            setIsVisible(false);
+          const currentScroll = scrollContainer.scrollTop;
+          lastScrollY.current = currentScroll;
+
+          if (currentScroll > 100) {
+            setTimeout(() => setIsVisible(false), 0);
           } else {
-            setIsVisible(true);
+            setTimeout(() => setIsVisible(true), 0);
           }
-          lastScrollY.current = scrollContainer.scrollTop;
         };
 
         initVisibility();
@@ -148,7 +150,7 @@ export function WorkspaceBottomNav() {
         // Stocker la ref pour le cleanup
         scrollContainerRef.current = scrollContainer;
         scrollHandlerRef.current = handleScroll;
-      } catch (err) {
+      } catch (_err) {
         // Silently ignore DOM errors on mobile navigation
       }
     }, 150);
@@ -165,7 +167,7 @@ export function WorkspaceBottomNav() {
 
   // Toujours visible au changement de page
   useEffect(() => {
-    setIsVisible(true);
+    setTimeout(() => setIsVisible(true), 0);
     lastScrollY.current = 0;
   }, [pathname]);
 

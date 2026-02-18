@@ -105,7 +105,7 @@ export function EtatsLieuxContent({ reports, error }: { reports: any[]; error: s
                     />
                 ) : (
                     <div className="grid gap-3">
-                        {reports.map((report, index) => {
+                        {reports.map((report, _index) => {
                             const status = statusConfig[report.status] || statusConfig['draft'];
                             const StatusIcon = status.icon;
 

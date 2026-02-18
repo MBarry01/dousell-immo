@@ -144,22 +144,49 @@ function DeposerPageContent() {
     try {
       const supabase = createClient();
       const uploadedUrls: string[] = [];
+      let hasError = false;
+
       for (const file of fileArray) {
-        if (file.size > 5 * 1024 * 1024) continue;
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`Le fichier ${file.name} est trop volumineux (Max 5MB)`);
+          hasError = true;
+          continue;
+        }
         const fileExt = file.name.split(".").pop()?.toLowerCase();
-        if (!["jpg", "jpeg", "png", "webp"].includes(fileExt || "")) continue;
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from("properties")
-          .upload(fileName, file, { cacheControl: "3600", upsert: false });
-        if (uploadError) throw uploadError;
-        const { data: { publicUrl } } = supabase.storage.from("properties").getPublicUrl(fileName);
-        uploadedUrls.push(publicUrl);
+        if (!["jpg", "jpeg", "png", "webp"].includes(fileExt || "")) {
+          toast.error(`Format non supporté pour ${file.name}`);
+          hasError = true;
+          continue;
+        }
+
+        try {
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const { error: uploadError } = await supabase.storage
+            .from("properties")
+            .upload(fileName, file, { cacheControl: "3600", upsert: false });
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage.from("properties").getPublicUrl(fileName);
+          uploadedUrls.push(publicUrl);
+        } catch (e) {
+          console.error(e);
+          toast.error(`Erreur lors de l'upload de ${file.name}`);
+          hasError = true;
+        }
       }
-      setFormData((prev) => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
-      toast.success(`${uploadedUrls.length} photo(s) ajoutée(s)`);
-    } catch (err) {
-      setError("Erreur lors de l'upload");
+
+      if (uploadedUrls.length > 0) {
+        setFormData((prev) => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
+        toast.success(`${uploadedUrls.length} photo(s) ajoutée(s)`);
+      }
+
+      if (hasError) {
+        setError("Certains fichiers n'ont pas pu être uploadés");
+      }
+    } catch (_err) {
+      setError("Erreur critique lors de l'upload");
+      toast.error("Erreur critique lors de l'upload");
     } finally {
       setUploadingImages(false);
     }
@@ -221,12 +248,8 @@ function DeposerPageContent() {
         }
         return true;
       case 2:
-        if (!formData.city) {
-          setError("La ville est requise");
-          return false;
-        }
-        if (!formData.district) {
-          setError("Le quartier est requis");
+        if (!formData.address) {
+          setError("L'adresse est requise");
           return false;
         }
         return true;
@@ -247,10 +270,10 @@ function DeposerPageContent() {
 
   const nextStep = async () => {
     if (validateStep(currentStep)) {
-      // Auto-generate description when going to step 4
-      if (currentStep === 3 && (!formData.description || formData.description.length < 10)) {
-        await handleGenerateAI();
-      }
+      // Auto-generate description removed as per request
+      // if (currentStep === 3 && (!formData.description || formData.description.length < 10)) {
+      //   await handleGenerateAI();
+      // }
       setCurrentStep((prev) => Math.min(prev + 1, 5));
       scrollToTop();
     }
@@ -449,7 +472,7 @@ function DeposerPageContent() {
 
               {/* Title */}
               <div>
-                <label className="text-sm text-zinc-400 mb-2 block">Titre de l'annonce</label>
+                <label className="text-sm text-zinc-400 mb-2 block">Titre de l&apos;annonce</label>
                 <input
                   type="text"
                   value={formData.title}
@@ -480,57 +503,20 @@ function DeposerPageContent() {
 
           {/* Step 2: Localisation */}
           {currentStep === 2 && (
-            <div className="space-y-8 animate-in fade-in duration-300">
-              {/* Location */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-zinc-400 mb-2 block">Ville / Région</label>
-                  <input
-                    type="text"
-                    value={formData.city}
-                    onChange={(e) => updateField("city", e.target.value)}
-                    placeholder="Dakar"
-                    className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-zinc-400 mb-2 block">Quartier</label>
-                  <input
-                    type="text"
-                    value={formData.district}
-                    onChange={(e) => updateField("district", e.target.value)}
-                    placeholder="Almadies"
-                    className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* Address */}
+            <div className="space-y-6 animate-in fade-in duration-300">
               <div>
-                <label className="text-sm text-zinc-400 mb-2 block">
-                  Adresse précise <span className="text-zinc-600">(optionnel)</span>
-                </label>
+                <label className="text-sm text-zinc-400 mb-3 block">Adresse complète du bien</label>
                 <AddressAutocomplete
                   defaultValue={formData.address}
                   onAddressSelect={(details) => {
-                    updateField("address", details.display_name);
-                    if (details.state) updateField("city", details.state);
-                    const quartier = details.suburb || details.city || details.road;
-                    if (quartier) updateField("district", quartier);
+                    setFormData(prev => ({
+                      ...prev,
+                      address: details.display_name,
+                      city: details.city || details.state || "",
+                      district: details.suburb || details.city || details.road || "",
+                    }));
                   }}
                   className="w-full"
-                />
-              </div>
-
-              {/* Landmark */}
-              <div>
-                <label className="text-sm text-zinc-400 mb-2 block">Point de repère <span className="text-zinc-600">(optionnel)</span></label>
-                <input
-                  type="text"
-                  value={formData.landmark}
-                  onChange={(e) => updateField("landmark", e.target.value)}
-                  placeholder="Près de l'école..."
-                  className="w-full bg-zinc-800/30 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#F4C430]/50 transition-colors"
                 />
               </div>
             </div>
@@ -662,7 +648,7 @@ function DeposerPageContent() {
                     className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-[#F4C430] transition-colors disabled:opacity-50"
                   >
                     {isGeneratingAI ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                    Générer avec l'IA
+                    Générer avec l&apos;IA
                   </button>
                 </div>
                 <textarea

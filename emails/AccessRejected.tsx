@@ -38,20 +38,20 @@ export function AccessRejected({
     <Html>
       <Head />
       <Preview>
-        Votre demande d'accès temporaire a été refusée
+        Votre demande d&apos;accès temporaire a été refusée
       </Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>Demande d'accès refusée</Heading>
+          <Heading style={h1}>Demande d&apos;accès refusée</Heading>
 
           <Text style={text}>
             Bonjour {userName},
           </Text>
 
           <Text style={text}>
-            Votre demande d'accès temporaire à la fonctionnalité{" "}
+            Votre demande d&apos;accès temporaire à la fonctionnalité{" "}
             <strong>{permissionLabel || permission}</strong> a été examinée par{" "}
-            {reviewerName} et n'a pas pu être approuvée pour le moment.
+            {reviewerName} et n&apos;a pas pu être approuvée pour le moment.
           </Text>
 
           {reviewNotes && (
@@ -65,15 +65,15 @@ export function AccessRejected({
 
           <Text style={text}>
             Si vous pensez avoir besoin de cet accès de manière permanente,
-            nous vous recommandons de discuter avec votre responsable d'équipe
+            nous vous recommandons de discuter avec votre responsable d&apos;équipe
             pour éventuellement ajuster votre rôle.
           </Text>
 
           <Section style={infoBox}>
             <Text style={infoText}>
-              💡 <strong>Besoin d'aide ?</strong>
+              💡 <strong>Besoin d&apos;aide ?</strong>
               <br />
-              Contactez votre responsable d'équipe pour en savoir plus sur
+              Contactez votre responsable d&apos;équipe pour en savoir plus sur
               les raisons du refus ou pour demander un ajustement de vos
               permissions permanentes.
             </Text>

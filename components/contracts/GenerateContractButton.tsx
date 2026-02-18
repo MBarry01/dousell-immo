@@ -50,7 +50,7 @@ export function GenerateContractButton({
           description: result.error || 'Le fichier semble inaccessible',
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast.dismiss(loadingToast);
       toast.error('Erreur technique', { description: 'Impossible de contacter le serveur' });
     }

@@ -130,7 +130,7 @@ export const submitAccessRequest = safeAction(
  */
 export async function getAccessRequestsAction(teamId: string, status?: AccessRequestStatus) {
     try {
-        const context = await requireTeamPermission("team.members.view");
+        const _context = await requireTeamPermission("team.members.view");
         const adminSupabase = createAdminClient();
 
         // Récupérer les demandes
@@ -455,7 +455,7 @@ export async function revokeTemporaryPermissionAction(permissionId: string) {
  */
 export async function getTemporaryPermissionsAction(teamId: string) {
     try {
-        const context = await requireTeamPermission("team.members.view");
+        const _context = await requireTeamPermission("team.members.view");
         const adminSupabase = createAdminClient();
 
         const { data: permissions, error } = await adminSupabase

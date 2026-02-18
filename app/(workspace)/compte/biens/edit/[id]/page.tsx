@@ -16,7 +16,7 @@ import { createClient } from "@/utils/supabase/client";
 import { propertySchema, type PropertyFormValues } from "@/lib/schemas/propertySchema";
 import { updateUserProperty } from "./actions";
 
-const quartiers = [
+const _quartiers = [
   "Almadies",
   "Plateau",
   "Mermoz",

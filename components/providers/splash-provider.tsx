@@ -84,8 +84,10 @@ export const SplashProvider = ({
     }
 
     // PWA + première visite → activer le splash
-    setShowSplash(true);
-    setIsPWASplashActive(true);
+    setTimeout(() => {
+      setShowSplash(true);
+      setIsPWASplashActive(true);
+    }, 0);
     document.body.style.overflow = "hidden";
 
     // Timer pour la durée minimale (effet visuel)
@@ -108,8 +110,10 @@ export const SplashProvider = ({
   // Sortie du splash synchronisée (PWA uniquement)
   useEffect(() => {
     if (isPWASplashActive && !authLoading && minDurationPassed) {
-      setShowSplash(false);
-      setIsPWASplashActive(false);
+      setTimeout(() => {
+        setShowSplash(false);
+        setIsPWASplashActive(false);
+      }, 0);
       removeSplashBlocker();
       document.body.style.overflow = "";
 

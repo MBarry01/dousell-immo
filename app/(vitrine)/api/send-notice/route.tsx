@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       ? `⚠️ Préavis de Congé - Échéance ${new Date(data.endDate).toLocaleDateString('fr-FR')}`
       : `📅 Notification de Reconduction Tacite - ${new Date(data.endDate).toLocaleDateString('fr-FR')}`;
 
-    const title = isJ180
+    const _title = isJ180
       ? 'Préavis de Congé pour Reprise'
       : 'Notification de Reconduction Tacite';
 

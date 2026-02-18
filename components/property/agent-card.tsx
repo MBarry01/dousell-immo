@@ -22,7 +22,7 @@ type AgentCardProps = {
 };
 
 // Informations de l'agent Mohamadou Barry (agent1) - Côté technique
-const AGENT1_INFO = {
+const _AGENT1_INFO = {
   name: "Mohamadou Barry",
   photo: "/agent1.png",
   description: "Co-fondateur spécialisé dans l'aspect technique et technologique de l'immobilier. Expert en plateformes digitales et solutions innovantes pour faciliter vos transactions.",

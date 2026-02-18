@@ -90,7 +90,7 @@ export function ShareButton({
     try {
       window.open(whatsappUrl, "_blank");
       toast.success("Ouverture de WhatsApp...");
-    } catch (error) {
+    } catch (_error) {
       // Fallback final : copier le texte
       handleCopy();
     }

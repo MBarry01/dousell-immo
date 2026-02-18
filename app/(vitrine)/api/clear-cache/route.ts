@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { redis } from '@/lib/cache/redis-client';
 import { createClient } from '@/utils/supabase/server';
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(_request: NextRequest) {
   try {
     // Vérifier l'authentification
     const supabase = await createClient();
@@ -65,7 +65,7 @@ export async function DELETE(request: NextRequest) {
 /**
  * POST : Vider TOUT le cache rentals (admin only)
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     // Vérifier l'authentification admin
     const supabase = await createClient();

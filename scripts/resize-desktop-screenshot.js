@@ -28,7 +28,7 @@ async function resizeScreenshot() {
     let sharp;
     try {
       sharp = require('sharp');
-    } catch (error) {
+    } catch (_error) {
       console.error('❌ Erreur: Le package "sharp" n\'est pas installé.');
       console.error('\n📦 Installation requise:');
       console.error('   npm install sharp --save-dev');

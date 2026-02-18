@@ -158,7 +158,7 @@ export function GenerateContractModal({ leaseId, tenantName, onSuccess, children
                                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0" /></svg>
                             </div>
                             <div className="text-xs text-muted-foreground min-w-0 break-words">
-                                <span className="font-semibold text-primary">Option Avancée :</span> Vous avez besoin d'ajouter une clause spécifique (piscine, jardin) ou de modifier un article ? Passez en mode personnalisation.
+                                <span className="font-semibold text-primary">Option Avancée :</span> Vous avez besoin d&apos;ajouter une clause spécifique (piscine, jardin) ou de modifier un article ? Passez en mode personnalisation.
                             </div>
                         </div>
                     </div>

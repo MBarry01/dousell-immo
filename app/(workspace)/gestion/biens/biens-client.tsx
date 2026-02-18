@@ -62,7 +62,7 @@ export function BiensClient({
   initialProperties,
   error,
 }: BiensClientProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const [properties, setProperties] = useState(initialProperties);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<"all" | "vente" | "location">("all");

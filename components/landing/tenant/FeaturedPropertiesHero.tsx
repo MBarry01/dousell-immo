@@ -9,7 +9,7 @@ import { Property } from "@/types/property";
 
 export default function FeaturedPropertiesHero() {
   const [properties, setProperties] = useState<Partial<Property>[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isDemo, setIsDemo] = useState(true);
 
@@ -79,7 +79,7 @@ export default function FeaturedPropertiesHero() {
           </h2>
 
           <p className="text-gray-400 text-[clamp(0.875rem,1.5vw,1.125rem)] max-w-xs md:max-w-xl mx-auto">
-            Une sélection exclusive de propriétés d'exception.
+            Une sélection exclusive de propriétés d&apos;exception.
           </p>
         </motion.div>
 

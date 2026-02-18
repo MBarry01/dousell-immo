@@ -94,7 +94,7 @@ export default function BlankPDFPage() {
                 <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
                     <p className="text-sm text-blue-400">
                         <FileText className="w-4 h-4 inline mr-2" />
-                        Le formulaire ci-dessous s'adapte automatiquement au type de bien sélectionné ({PROPERTY_TYPE_LABELS[selectedType]}).
+                        Le formulaire ci-dessous s&apos;adapte automatiquement au type de bien sélectionné ({PROPERTY_TYPE_LABELS[selectedType]}).
                     </p>
                 </div>
             </div>
@@ -160,7 +160,7 @@ export default function BlankPDFPage() {
                         </span>
                     </p>
                     <p>
-                        <strong>Date de l'état des lieux :</strong>{' '}
+                        <strong>Date de l&apos;état des lieux :</strong>{' '}
                         <span className="border-b border-black inline-block" style={{ minWidth: '150px' }}>
                             &nbsp;
                         </span>

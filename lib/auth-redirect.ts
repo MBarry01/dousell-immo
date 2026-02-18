@@ -4,8 +4,8 @@ import { createClient } from "@/utils/supabase/server";
 import { trackServerEvent, EVENTS } from "@/lib/analytics";
 
 // Allowed redirect paths for validation
-const ALLOWED_PATHS = ["/", "/gestion", "/compte", "/bienvenue", "/recherche", "/pro", "/planifier-visite"];
-const ALLOWED_PREFIXES = ["/gestion/", "/compte/", "/annonces/", "/recherche/"];
+const _ALLOWED_PATHS = ["/", "/gestion", "/compte", "/bienvenue", "/recherche", "/pro", "/planifier-visite"];
+const _ALLOWED_PREFIXES = ["/gestion/", "/compte/", "/annonces/", "/recherche/"];
 
 /**
  * Validate that a redirect path is safe

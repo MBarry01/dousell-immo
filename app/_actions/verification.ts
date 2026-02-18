@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 import { uploadListingProof } from "./upload-proof";
 
-const verificationSchema = z.object({
+const _verificationSchema = z.object({
   propertyId: z.string().min(1, "ID du bien requis"),
   proofDocumentUrl: z.string().min(1, "URL du document requise"),
 });

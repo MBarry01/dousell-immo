@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import { slugify } from '../lib/slugs';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 
 dotenv.config({ path: '.env.local' });
 

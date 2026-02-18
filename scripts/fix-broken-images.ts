@@ -36,7 +36,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 });
 
 // Mots-clés de recherche Pexels basés sur le type de bien
-const getSearchQuery = (title: string, description: string, type?: string): string => {
+const getSearchQuery = (title: string, description: string, _type?: string): string => {
   const text = `${title} ${description}`.toLowerCase();
   
   if (text.includes("terrain") || text.includes("land")) {
@@ -95,7 +95,7 @@ async function checkImageExists(url: string): Promise<boolean> {
     }
     
     return false;
-  } catch (error) {
+  } catch (_error) {
     // Si c'est une erreur de timeout ou réseau, considérer comme cassé
     return false;
   }
@@ -172,7 +172,7 @@ async function fixBrokenImages() {
 
     // Vérifier chaque image
     const brokenIndices: number[] = [];
-    const imageChecks = await Promise.all(
+    const _imageChecks = await Promise.all(
       images.map(async (img, index) => {
         if (!img || typeof img !== "string" || img.length === 0) {
           brokenIndices.push(index);

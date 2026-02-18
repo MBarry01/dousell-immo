@@ -1,5 +1,5 @@
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 import { glob } from 'glob'; // Assurez-vous d'avoir 'glob' (npm i glob)
 
 const FORBIDDEN_PATTERNS = [

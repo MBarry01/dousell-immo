@@ -364,7 +364,7 @@ export function WorkspaceSidebar({
   const badgeCounts = useOwnerUnreadCounts(userId, currentTeamId || null);
 
   // Hook pour gérer la modale de demande d'accès
-  const { open: openAccessModal, Modal: AccessModal, isOpen: isAccessModalOpen } = useAccessRequestModal();
+  const { open: openAccessModal, Modal: AccessModal, isOpen: _isAccessModalOpen } = useAccessRequestModal();
 
   // Callback pour demander un accès temporaire
   const handleRequestAccess = useCallback((permission: TeamPermissionKey, label: string) => {

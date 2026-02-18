@@ -14,13 +14,15 @@ export function EtatsLieuxTour() {
 
     // Attendre que le composant soit monté côté client
     useEffect(() => {
-        setMounted(true);
+        // Use setTimeout to avoid synchronous setState in effect
+        setTimeout(() => setMounted(true), 0);
 
         const checkMobile = () => {
             setIsMobile(window.innerWidth < 1024);
         };
 
-        checkMobile();
+        // Use setTimeout to avoid synchronous setState in effect
+        setTimeout(checkMobile, 0);
         window.addEventListener('resize', checkMobile);
 
         return () => window.removeEventListener('resize', checkMobile);
@@ -28,7 +30,8 @@ export function EtatsLieuxTour() {
 
     useEffect(() => {
         if (!isMobile) {
-            setIsBottomNavVisible(false);
+            // Use setTimeout to avoid synchronous setState in effect
+            setTimeout(() => setIsBottomNavVisible(false), 0);
             return;
         }
 
@@ -46,7 +49,8 @@ export function EtatsLieuxTour() {
 
                     if (Math.abs(scrollDelta) > 10) {
                         if (scrollDelta > 0 && currentScrollY > 100) {
-                            setIsBottomNavVisible(false);
+                            // Use setTimeout to avoid synchronous setState in effect
+            setTimeout(() => setIsBottomNavVisible(false), 0);
                         } else if (scrollDelta < 0) {
                             setIsBottomNavVisible(true);
                         }

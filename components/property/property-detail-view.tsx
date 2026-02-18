@@ -369,7 +369,7 @@ export const PropertyDetailView = ({
               // - Si on a les données du propriétaire (owner + téléphone) -> Afficher le propriétaire
               // - Sinon -> Afficher l'agence par défaut
 
-              const isPaidService = property.service_type === "boost_visibilite";
+              const _isPaidService = property.service_type === "boost_visibilite";
 
               // Données de l'agence (Agent 2 par défaut)
               const agencyName = "Agence Dousell";

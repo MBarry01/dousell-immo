@@ -50,7 +50,7 @@ export default function TenantTestimonials() {
                                     />
                                 ))}
                             </div>
-                            <p className="text-gray-300 italic mb-6">"{t.text}"</p>
+                            <p className="text-gray-300 italic mb-6">&quot;{t.text}&quot;</p>
                             <div>
                                 <div className="font-bold text-white">{t.name}</div>
                                 <div className="text-sm text-gray-500">{t.role}</div>

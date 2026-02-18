@@ -13,7 +13,7 @@ interface ProfitabilityTableProps {
 export function ProfitabilityTable({ year }: ProfitabilityTableProps) {
     const { isDark } = useTheme();
     const [data, setData] = useState<PropertyProfitability[]>([]);
-    const [debugInfo, setDebugInfo] = useState<any>(null);
+    const [_debugInfo, setDebugInfo] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

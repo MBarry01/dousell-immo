@@ -33,7 +33,7 @@ export default async function DebugPage() {
                         🛠️ Créer/Réparer le Profil Manquant
                     </button>
                     <p className="mt-2 text-zinc-400 text-xs">
-                        Cliquez ici si "profile" est null ci-dessus. Cela créera l'entrée manquante dans la base de données.
+                        Cliquez ici si &quot;profile&quot; est null ci-dessus. Cela créera l&apos;entrée manquante dans la base de données.
                     </p>
                 </form>
             </div>

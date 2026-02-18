@@ -77,7 +77,7 @@ async function runMigration() {
     // Test de lecture
     console.log('🔍 Vérification des tables...');
 
-    const { data: profiles, error: pErr } = await supabase
+    const { data: _profiles, error: pErr } = await supabase
         .from('profiles')
         .select('id, company_name, logo_url')
         .limit(1);
@@ -88,7 +88,7 @@ async function runMigration() {
         console.log('   ✅ Table profiles OK');
     }
 
-    const { data: leases, error: lErr } = await supabase
+    const { data: _leases, error: lErr } = await supabase
         .from('leases')
         .select('id, property_address, tenant_email')
         .limit(1);

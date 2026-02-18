@@ -91,7 +91,7 @@ export function ActivationRequestsList({ requests }: { requests: Request[] }) {
             <div className="text-center py-16 bg-zinc-900/50 rounded-xl border border-dashed border-zinc-800">
                 <Clock className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
                 <p className="text-zinc-400 font-medium">Aucune demande</p>
-                <p className="text-sm text-zinc-500 mt-1">Les demandes d'activation apparaîtront ici.</p>
+                <p className="text-sm text-zinc-500 mt-1">Les demandes d&apos;activation apparaîtront ici.</p>
             </div>
         );
     }
@@ -138,7 +138,7 @@ export function ActivationRequestsList({ requests }: { requests: Request[] }) {
                                     className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-lg text-sm text-zinc-300 hover:bg-zinc-700 transition-colors"
                                 >
                                     <FileText className="w-4 h-4" />
-                                    Pièce d'identité
+                                    Pièce d&apos;identité
                                     <ExternalLink className="w-3 h-3" />
                                 </a>
                             )}
@@ -223,7 +223,7 @@ export function ActivationRequestsList({ requests }: { requests: Request[] }) {
                     <DialogHeader>
                         <DialogTitle>Rejeter la demande</DialogTitle>
                         <DialogDescription>
-                            Indiquez la raison du rejet. L'utilisateur sera notifié.
+                            Indiquez la raison du rejet. L&apos;utilisateur sera notifié.
                         </DialogDescription>
                     </DialogHeader>
                     <Textarea

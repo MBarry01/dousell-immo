@@ -3,7 +3,7 @@
 import { useState, useTransition, Suspense, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import Image from "next/image";
+import _Image from "next/image";
 import { Lock, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

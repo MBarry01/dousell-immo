@@ -16,7 +16,7 @@ export function AdminTopbar() {
     const breadcrumbs = [{ label: "Admin", href: "/admin" }];
 
     if (paths.length > 1) {
-      const currentPath = paths.slice(1).join("/");
+      const _currentPath = paths.slice(1).join("/");
       const pathLabels: Record<string, string> = {
         biens: "Biens",
         users: "Utilisateurs",

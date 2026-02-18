@@ -209,7 +209,7 @@ async function checkSignupIssues() {
     } else {
       log(`   ✅ Pas de template personnalisé (Supabase gère les emails via SMTP)`, "green");
     }
-  } catch (error) {
+  } catch (_error) {
     // Ignorer, ce n'est pas critique
   }
 

@@ -39,7 +39,7 @@ export function InterventionsPageClient({ requests }: InterventionsPageClientPro
                         Interventions & Maintenance
                     </h1>
                     <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                        Gérez les demandes d'intervention de vos locataires
+                        Gérez les demandes d&apos;intervention de vos locataires
                     </p>
                 </div>
             </div>

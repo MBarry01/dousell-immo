@@ -38,7 +38,7 @@ if (regex.test(content)) {
         // The definition is: const logoBase64 = "...";
 
         // Let's just replace the whole block with a clean version.
-        const newBlock = `
+        const _newBlock = `
       // Embed Base64 Logo directly to avoid file path issues in production/serverless
       // const logoBase64 is imported from ./logo
       `;

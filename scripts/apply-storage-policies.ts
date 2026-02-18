@@ -21,11 +21,11 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-async function applySQLMigration(sqlContent: string) {
+async function _applySQLMigration(sqlContent: string) {
   // L'API Supabase JavaScript ne permet pas d'exécuter du SQL arbitraire
   // On doit utiliser l'API REST de Supabase (postgres-meta)
 
-  const { data, error } = await supabase.rpc('exec_sql', {
+  const { _data, error } = await supabase.rpc('exec_sql', {
     sql: sqlContent
   });
 

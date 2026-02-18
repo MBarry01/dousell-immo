@@ -69,7 +69,7 @@ const MapCenter = ({ center, zoom }: { center: LatLngExpression; zoom: number })
 };
 
 // Composant de clustering pour les marqueurs
-const MarkerCluster = ({ children }: { children: React.ReactNode }) => {
+const _MarkerCluster = ({ children }: { children: React.ReactNode }) => {
     const map = useMap();
 
     useEffect(() => {

@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation'
 
 export default function CheckEmailContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
+  const _router = useRouter()
   const email = searchParams.get('email') || ''
   const [isResending, setIsResending] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
@@ -84,7 +84,7 @@ export default function CheckEmailContent() {
           description: "Vérifiez votre boîte de réception pour le nouveau code.",
         })
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error("Une erreur s'est produite")
     } finally {
       setIsResending(false)
@@ -130,7 +130,7 @@ export default function CheckEmailContent() {
               maxLength={8}
               autoComplete="one-time-code"
               disabled={isVerifying}
-              onChange={(e) => {
+              onChange={(_e) => {
                 // Auto-verify if 6 or 8 digits could be nice, but explicit button is safer for user experience with variable length
               }}
               onKeyDown={(e) => {

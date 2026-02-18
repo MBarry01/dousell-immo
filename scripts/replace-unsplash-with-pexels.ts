@@ -43,7 +43,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 });
 
 // Mots-clés de recherche Pexels basés sur le type de bien
-const getSearchQuery = (title: string, description: string, type?: string): string => {
+const getSearchQuery = (title: string, description: string, _type?: string): string => {
   const text = `${title} ${description}`.toLowerCase();
   
   if (text.includes("terrain") || text.includes("land")) {

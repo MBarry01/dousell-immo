@@ -239,7 +239,7 @@ export async function getPendingPropertyDocuments() {
 
         // Fetch profiles for owners
         const uniqueOwnerIds = [...new Set(properties.map(p => p.owner_id).filter(Boolean))];
-        const { data: profiles, error: profilesError } = await supabase
+        const { data: profiles, error: _profilesError } = await supabase
             .from("profiles")
             .select("id, full_name, phone, is_identity_verified")
             .in("id", uniqueOwnerIds);

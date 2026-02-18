@@ -143,7 +143,7 @@ function InvitationCard({
 
             {invitation.message && (
               <p className="text-sm text-slate-400 mt-2 line-clamp-2">
-                "{invitation.message}"
+                &quot;{invitation.message}&quot;
               </p>
             )}
 

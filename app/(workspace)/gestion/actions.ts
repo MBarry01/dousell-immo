@@ -458,7 +458,7 @@ export async function createNewLease(formData: Record<string, unknown>) {
     }
 
     // 1.5 Vérifier que le profil utilisateur existe (Contrainte FK leases_owner_id_fkey)
-    const { data: userProfile, error: profileError } = await supabase
+    const { data: userProfile, error: _profileError } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', user.id)
@@ -690,7 +690,7 @@ export async function sendWelcomePack(leaseId: string) {
     const supabase = await createClient();
 
     // 1. Récupérer les détails du bail et du bien (filtré par teamId pour sécu)
-    const { data: lease, error: fetchError } = await supabase
+    const { data: lease, error: _fetchError } = await supabase
         .from('leases')
         .select(`
             *,
@@ -972,7 +972,7 @@ export async function sendWelcomePack(leaseId: string) {
 
     // 6. Envoyer l'email via Nodemailer (lib/mail.ts)
     try {
-        const result = await sendEmail({
+        const _result = await sendEmail({
             to: lease.tenant_email,
             subject: `🏠 Bienvenue ${lease.tenant_name} - Votre Pack Locataire`,
             html: emailHtml,
@@ -2328,7 +2328,7 @@ export async function sendReceiptToN8N(data: Record<string, unknown>) {
             result = JSON.parse(responseText);
             console.log("✅ Réponse Pipedream:", result);
             return { success: true, data: result };
-        } catch (parseError) {
+        } catch (_parseError) {
             // Si ce n'est pas du JSON, c'est probablement du HTML d'erreur
             console.warn("⚠️ Réponse non-JSON reçue:", responseText.substring(0, 200));
 

@@ -231,7 +231,7 @@ export default function FeaturesBento() {
                         Tout ce dont vous avez besoin pour <span className="gradient-text-animated">piloter</span> votre immobilier
                     </h2>
                     <p className="text-gray-400 max-w-xl mx-auto text-sm md:text-base">
-                        Une suite complète d'outils pour automatiser, sécuriser et rentabiliser vos biens, accessible 24/7.
+                        Une suite complète d&apos;outils pour automatiser, sécuriser et rentabiliser vos biens, accessible 24/7.
                     </p>
                 </motion.div>
 

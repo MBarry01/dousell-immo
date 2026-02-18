@@ -37,8 +37,8 @@ export default function ProgrammaticPageTemplate({
     nearbyCities = []
 }: ProgrammaticPageTemplateProps) {
     const isRental = mode === 'location';
-    const actionText = isRental ? "Louer" : "Acheter";
-    const connector = isRental ? "à" : "à"; // Grammaire simple
+    const _actionText = isRental ? "Louer" : "Acheter";
+    const _connector = isRental ? "à" : "à"; // Grammaire simple
 
     // SEO Title Logic
     const mainTitle = type
@@ -62,8 +62,8 @@ export default function ProgrammaticPageTemplate({
                     Pas encore de {type ? displayType : "bien"} en {isRental ? "location" : "vente"} à {displayCity}
                 </h1>
                 <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-                    Nous n'avons pas d'annonce correspondant à ces critères pour le moment.
-                    Mais nous avons d'autres opportunités !
+                    Nous n&apos;avons pas d&apos;annonce correspondant à ces critères pour le moment.
+                    Mais nous avons d&apos;autres opportunités !
                 </p>
 
                 {/* Fallback Similar Listings if main list is empty */}

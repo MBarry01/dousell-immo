@@ -82,7 +82,7 @@ export async function notifyUser({
           console.log("✅ Notification créée via RPC avec succès:", rpcData);
           finalNotificationId = rpcData;
           // Continuer vers l'envoi du push au lieu de retourner
-        } catch (rpcErr) {
+        } catch (_rpcErr) {
           // Si RPC échoue aussi, relancer l'erreur originale
           throw error;
         }
