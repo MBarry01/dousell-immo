@@ -5,6 +5,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
+  Aperture,
+  Landmark,
+  Heart,
+  Building,
   Building2,
   ClipboardList,
   Wrench,
@@ -50,8 +54,8 @@ interface NavItem {
 
 // Navigation pour propriétaires (/gestion) avec permissions
 const gestionNavItems: NavItem[] = [
-  { href: "/gestion", icon: LayoutDashboard, label: "Dashboard" }, // Accessible à tous
-  { href: "/gestion/biens", icon: Home, label: "Biens", requiredPermission: "properties.view" },
+  { href: "/gestion", icon: Aperture, label: "Dashboard" }, // Accessible à tous
+  { href: "/gestion/biens", icon: Landmark, label: "Biens", requiredPermission: "properties.view" },
   { href: "/gestion/etats-lieux", icon: ClipboardList, label: "États des Lieux", requiredPermission: "inventory.view" },
   { href: "/gestion/interventions", icon: Wrench, label: "Interventions", requiredPermission: "maintenance.view", requiredTier: 'pro' },
   { href: "/gestion/documents", icon: FolderOpen, label: "Documents", requiredPermission: "documents.view" },
@@ -81,8 +85,8 @@ const adminNavItems: NavItem[] = [
 // Navigation pour compte (/compte)
 const compteNavItems: NavItem[] = [
   { href: "/compte", icon: User, label: "Mon Profil" },
-  { href: "/compte/mes-biens", icon: Building2, label: "Mes Biens" },
-  { href: "/compte/favoris", icon: Home, label: "Favoris" },
+  { href: "/compte/mes-biens", icon: Landmark, label: "Mes Biens" },
+  { href: "/compte/favoris", icon: Heart, label: "Favoris" },
   { href: "/compte/alertes", icon: Bell, label: "Alertes" },
   { href: "/compte/parametres", icon: Settings, label: "Paramètres" },
 ];
