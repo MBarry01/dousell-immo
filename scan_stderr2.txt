@@ -1,0 +1,68 @@
+❌ [DESIGN VIOLATION] dans app\layout.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\pro\pro-client.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+⚠️  [DESIGN WARNING] dans app\pro\pro-client.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\loading.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\layout.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(webapp)\layout.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\paiements\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\paiement-succes\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\maintenance\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\documents\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\components\RentPaymentModal.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\components\PaymentForm.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\components\ThemedComponents.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(webapp)\documents-legaux\LegalPageClient.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(vitrine)\register\register-client.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(vitrine)\planifier-visite\planifier-visite-client.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\planifier-visite\actions.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+⚠️  [DESIGN WARNING] dans app\(vitrine)\login\login-client.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(vitrine)\contact\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\paiements\[id]\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\messages\components\ChatInterface.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\locataire\maintenance\components\MaintenanceForm.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\messages\MessagesPageClient.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\documents-legaux\LegalPageClient.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\documents\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\config\config-form.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\config\config-form.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\comptabilite\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\comptabilite\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\components\TenantCard.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\components\RevenueChart.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\components\ReceiptPreview.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\components\ReceiptModal.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\components\DashboardTabs.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\components\DashboardStats.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\components\AddTenantButton.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+⚠️  [DESIGN WARNING] dans app\(webapp)\etats-lieux\new\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(webapp)\etats-lieux\formulaire-vierge\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(webapp)\etats-lieux\components\SignaturePage.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(webapp)\etats-lieux\components\InventoryEditor.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(webapp)\documents-legaux\components\DecisionModal.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(webapp)\documents-legaux\components\CreateReceiptDialog.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(webapp)\documents-legaux\components\CreateContractDialog.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\messages\[leaseId]\OwnerChatInterface.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\etats-lieux\formulaire-vierge\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\etats-lieux\new\page.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\etats-lieux\components\SignaturePage.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\etats-lieux\components\InventoryEditor.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\equipe\parametres\TeamSettingsForm.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\equipe\components\TeamPageClient.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\equipe\components\RolePermissionsTable.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\equipe\components\MembersTable.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\equipe\components\MemberCard.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\equipe\components\InvitationCard.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\equipe\components\CreateTeamPrompt.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\equipe\components\AccessControlTab.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\documents-legaux\components\DecisionModal.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\documents-legaux\components\CreateReceiptDialog.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\documents-legaux\components\CreateContractDialog.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\comptabilite\components\ProfitabilityTable.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\comptabilite\components\FinancialReportPDF.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\comptabilite\components\ExpenseList.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\comptabilite\components\ConnectStripeButton.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\comptabilite\components\AddExpenseDialog.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(webapp)\etats-lieux\[id]\pdf\PDFPreview.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(vitrine)\biens\ext\[id]\loading.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).
+⚠️  [DESIGN WARNING] dans app\(workspace)\gestion\etats-lieux\[id]\pdf\PDFPreview.tsx: ⚠️ 'bg-white' détecté. Préférez les tokens Tailwind (bg-background, bg-card, etc).

@@ -311,7 +311,7 @@ export default function AProposContent() {
             <Button
               variant="outline"
               size="lg"
-              className="h-[50px] rounded-full border-2 border-white/30 bg-white/10 px-8 text-white backdrop-blur-sm hover:bg-white/20"
+              className="h-[50px] rounded-full border-2 border-white/30 bg-white/10 px-8 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white"
               asChild
             >
               <Link href="/recherche">

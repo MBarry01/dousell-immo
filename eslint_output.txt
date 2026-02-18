@@ -1,0 +1,4 @@
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[BABEL] Note: The code generator has deoptimised the styling of C:\Users\Barry\Downloads\Doussel_immo\lib\logo.ts as it exceeds the max of 500KB.
+The compact formatter is no longer part of core ESLint. Install it manually with `npm install -D eslint-formatter-compact`
+DONE_EXIT=2

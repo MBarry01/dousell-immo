@@ -88,7 +88,7 @@ export const HeroSection = () => {
               asChild
               variant="outline"
               size="lg"
-              className="h-[50px] rounded-full border border-white/20 bg-white/10 px-8 text-white hover:bg-white/20"
+              className="h-[50px] rounded-full border border-white/20 bg-white/10 px-8 text-white hover:bg-white/20 hover:text-white"
             >
               <Link href="/planifier-visite">Planifier une visite</Link>
             </Button>
@@ -126,7 +126,7 @@ export const HeroSection = () => {
                 asChild
                 variant="outline"
                 size="lg"
-                className="h-[46px] lg:h-[50px] rounded-full border border-white/20 bg-white/5 px-6 lg:px-8 text-white hover:bg-white/10 text-[clamp(0.875rem,1.2vw,1rem)]"
+                className="h-[46px] lg:h-[50px] rounded-full border border-white/20 bg-white/5 px-6 lg:px-8 text-white hover:bg-white/10 hover:text-white text-[clamp(0.875rem,1.2vw,1rem)]"
               >
                 <Link href="/planifier-visite">Planifier une visite</Link>
               </Button>

@@ -1,0 +1,124 @@
+❌ [DESIGN VIOLATION] dans app\layout.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\pro\pro-client.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\pro\pro-client.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\locataire\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\locataire\loading.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\locataire\layout.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\workspace-layout-client.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(webapp)\layout.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(webapp)\layout.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(vitrine)\layout.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\pro\syndic\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\pro\investissement\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\pro\signup\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\pro\carrieres\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\pro\blog\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\pro\a-propos\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\locataire\paiements\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\locataire\paiement-succes\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\locataire\expired\expired-client.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\locataire\maintenance\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\locataire\documents\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\locataire\components\RentPaymentModal.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\locataire\components\RentPaymentModal.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\locataire\components\PaymentForm.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\auth\accept-invitation\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\auth\accept-invitation\AcceptInvitationClient.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\components\ThemedComponents.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(webapp)\documents-legaux\LegalPageClient.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(vitrine)\syndic\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\reset-password\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\register\register-client.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(vitrine)\register\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\planifier-visite\planifier-visite-client.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\planifier-visite\planifier-visite-client.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(vitrine)\planifier-visite\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\planifier-visite\actions.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\login\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\login\login-client.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(vitrine)\investissement\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\contact\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\contact\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(vitrine)\carrieres\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\blog\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\locataire\paiements\[id]\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\locataire\messages\components\ChatInterface.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\locataire\maintenance\components\MaintenanceForm.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\messages\MessagesPageClient.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\documents-legaux\LegalPageClient.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\documents\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\config\config-form.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\config\config-form.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\components\ThemedContent.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\components\TenantCard.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\components\RevenueChart.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\components\ReceiptPreview.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\components\ReceiptModal.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\components\DashboardTabs.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\components\DashboardStats.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\components\AddTenantButton.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\comptabilite\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\comptabilite\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\compte\upgrade\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\compte\mes-documents\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\compte\mes-biens\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\compte\deposer\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\compte\alertes\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(webapp)\etats-lieux\new\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(webapp)\etats-lieux\new\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(webapp)\etats-lieux\formulaire-vierge\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(webapp)\etats-lieux\formulaire-vierge\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(webapp)\etats-lieux\components\SignaturePage.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(webapp)\etats-lieux\components\SignaturePage.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(webapp)\etats-lieux\components\InventoryEditor.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(webapp)\etats-lieux\components\InventoryEditor.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(webapp)\documents-legaux\components\DecisionModal.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(webapp)\documents-legaux\components\DecisionModal.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(webapp)\documents-legaux\components\CreateReceiptDialog.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(webapp)\documents-legaux\components\CreateContractDialog.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(vitrine)\auth\verify-recovery\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\messages\[leaseId]\OwnerChatInterface.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\messages\[leaseId]\OwnerChatInterface.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\locataires\[id]\PaymentHistory.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\etats-lieux\new\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\etats-lieux\new\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\etats-lieux\formulaire-vierge\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\etats-lieux\formulaire-vierge\page.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\etats-lieux\components\SignaturePage.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\etats-lieux\components\SignaturePage.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\etats-lieux\components\InventoryEditor.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\etats-lieux\components\InventoryEditor.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\parametres\TeamSettingsForm.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\TeamPageClient.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\TeamHeader.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\RolePermissionsTable.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\MembersTable.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\MembersList.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\MemberCard.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\MemberCard.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\InvitationCard.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\CreateTeamPrompt.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\CreateTeamPrompt.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\ChangeRoleDialog.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\equipe\components\AccessControlTab.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\documents-legaux\components\DecisionModal.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\documents-legaux\components\CreateReceiptDialog.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\documents-legaux\components\CreateContractDialog.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\biens\nouveau\nouveau-client.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\comptabilite\components\ProfitabilityTable.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\comptabilite\components\FinancialReportPDF.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\comptabilite\components\ExpenseList.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\comptabilite\components\ConnectStripeButton.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\comptabilite\components\AddExpenseDialog.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\admin\verifications\identites\verified-list.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\admin\verifications\identites\identity-verification-tabs.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\admin\verifications\biens\property-verification-list.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\admin\biens\[id]\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\admin\biens\nouveau\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(webapp)\etats-lieux\[id]\pdf\PDFPreview.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(webapp)\etats-lieux\[id]\pdf\PDFPreview.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(vitrine)\biens\ext\[id]\loading.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(vitrine)\biens\ext\[id]\loading.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\etats-lieux\[id]\pdf\PDFPreview.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
+❌ [DESIGN VIOLATION] dans app\(workspace)\gestion\etats-lieux\[id]\pdf\PDFPreview.tsx: ⚠️ 'bg-white' détecté. Dousell est Dark Mode only.
+❌ [DESIGN VIOLATION] dans app\(workspace)\compte\biens\edit\[id]\page.tsx: ⚠️ Couleur Hex brute détectée. Utilisez les variables Tailwind (bg-primary, etc).
