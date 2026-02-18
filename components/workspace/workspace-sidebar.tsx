@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -101,6 +102,7 @@ interface SidebarContentProps {
   onSwitchTeam?: (teamId: string) => Promise<void>;
   onRequestAccess?: (permission: TeamPermissionKey, label: string) => void;
   badgeCounts?: { unreadMessages: number; pendingMaintenance: number };
+  user?: SupabaseUser | null;
 }
 
 function SidebarContent({
@@ -113,6 +115,7 @@ function SidebarContent({
   onSwitchTeam,
   onRequestAccess,
   badgeCounts = { unreadMessages: 0, pendingMaintenance: 0 },
+  user,
 }: SidebarContentProps) {
   const pathname = usePathname();
   const isGestionRoute = pathname?.startsWith("/gestion");
@@ -123,9 +126,10 @@ function SidebarContent({
   // Déterminer le contexte et les items de navigation
   const { navItems, title } = useMemo(() => {
     if (pathname?.startsWith("/gestion")) {
-      // Utiliser le nom de l'équipe/agence si disponible, sinon fallback
-      const teamName = currentTeam?.name || "Gestion Locative";
-      return { navItems: gestionNavItems, title: teamName };
+      const hour = new Date().getHours();
+      const greeting = hour < 18 ? "Bonjour" : "Bonsoir";
+      const userName = user?.user_metadata?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || "Propriétaire";
+      return { navItems: gestionNavItems, title: `${greeting} ${userName}` };
     }
     if (pathname?.startsWith("/locataire")) {
       return { navItems: locataireNavItems, title: "Espace Locataire" };
@@ -134,7 +138,7 @@ function SidebarContent({
       return { navItems: adminNavItems, title: "Administration" };
     }
     return { navItems: compteNavItems, title: "Mon Compte" };
-  }, [pathname, currentTeam]);
+  }, [pathname, user]);
 
   return (
     <div className="flex flex-col h-full">
@@ -344,6 +348,7 @@ interface WorkspaceSidebarProps {
   onSwitchTeam?: (teamId: string) => Promise<void>;
   isMobileOpen?: boolean;
   onMobileOpenChange?: (open: boolean) => void;
+  user?: SupabaseUser | null;
 }
 
 export function WorkspaceSidebar({
@@ -352,6 +357,7 @@ export function WorkspaceSidebar({
   onSwitchTeam,
   isMobileOpen = false,
   onMobileOpenChange,
+  user,
 }: WorkspaceSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -418,6 +424,7 @@ export function WorkspaceSidebar({
             onSwitchTeam={onSwitchTeam}
             onRequestAccess={handleRequestAccess}
             badgeCounts={badgeCounts}
+            user={user}
           />
         </SheetContent>
       </Sheet>
@@ -445,6 +452,7 @@ export function WorkspaceSidebar({
             onSwitchTeam={onSwitchTeam}
             onRequestAccess={handleRequestAccess}
             badgeCounts={badgeCounts}
+            user={user}
           />
         </aside>
       </div>

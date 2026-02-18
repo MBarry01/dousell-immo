@@ -61,6 +61,7 @@ export function WorkspaceLayoutClient({
         {/* Sidebar Desktop */}
         <Suspense fallback={<div className="hidden lg:block w-16 bg-background border-r border-border" />}>
           <WorkspaceSidebar
+            user={user}
             teams={teams}
             currentTeamId={currentTeamId || undefined}
             onSwitchTeam={switchTeam}
