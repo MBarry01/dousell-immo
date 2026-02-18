@@ -20,6 +20,7 @@ interface TeamSwitcherProps {
   onSwitchTeam?: (teamId: string) => Promise<void>;
   isCollapsed?: boolean;
   className?: string;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function TeamSwitcher({
@@ -28,10 +29,17 @@ export function TeamSwitcher({
   onSwitchTeam,
   isCollapsed = false,
   className,
+  onOpenChange,
 }: TeamSwitcherProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Notifier le parent (Sidebar) quand l'état d'ouverture change
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    onOpenChange?.(open);
+  };
 
   const currentTeam = teams.find((t) => t.id === currentTeamId);
 
@@ -124,7 +132,7 @@ export function TeamSwitcher({
       value={currentTeamId}
       onValueChange={handleSwitch}
       open={isOpen}
-      onOpenChange={setIsOpen}
+      onOpenChange={handleOpenChange}
       disabled={isPending}
     >
       <SelectTrigger
@@ -163,7 +171,14 @@ export function TeamSwitcher({
         </div>
       </SelectTrigger>
 
-      <SelectContent align="start" className="w-[--radix-select-trigger-width] min-w-[220px]">
+      <SelectContent
+        align="start"
+        className="w-[--radix-select-trigger-width] min-w-[220px]"
+        onMouseEnter={() => {
+          // Empêcher le repli si on entre dans le menu (qui est hors du DOM sidebar)
+          onOpenChange?.(true);
+        }}
+      >
         <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
           Mes Espaces
         </div>

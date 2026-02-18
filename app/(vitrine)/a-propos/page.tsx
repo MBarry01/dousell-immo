@@ -303,8 +303,8 @@ export default function AProposPage() {
               className="h-[50px] rounded-full bg-primary px-8 text-black hover:bg-primary/90"
               asChild
             >
-              <Link href="/planifier-visite">
-                Planifier une visite
+              <Link href="/compte/deposer">
+                Publier une annonce
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>

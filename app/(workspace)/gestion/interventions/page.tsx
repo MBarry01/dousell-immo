@@ -28,6 +28,22 @@ export default async function InterventionsPage() {
         );
     }
 
+    // ✅ CHECK PERMISSION: Maintenance.view
+    const { requireTeamPermission } = await import("@/lib/team-permissions.server");
+    const permissionCheck = await requireTeamPermission(teamId, "maintenance.view");
+
+    if (!permissionCheck.success) {
+        const { PermissionDeniedState } = await import("@/components/gestion/PermissionDeniedState");
+        return (
+            <PermissionDeniedState
+                teamId={teamId}
+                permission="maintenance.view"
+                permissionLabel="Voir maintenance"
+                title="Accès aux Interventions"
+            />
+        );
+    }
+
     // Récupérer les demandes de maintenance (avec infos artisan, bien et locataire)
     const { data: maintenanceData, error: maintenanceError } = await supabase
         .from('maintenance_requests')

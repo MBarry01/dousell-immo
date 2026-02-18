@@ -32,6 +32,7 @@ type SubmitListingData = {
   location?: {
     city: string;
     district: string;
+    region?: string; // Added
     address: string;
     landmark?: string;
     coords: {
@@ -41,6 +42,10 @@ type SubmitListingData = {
   };
   proof_document_url?: string;
   virtual_tour_url?: string;
+  // Added optional fields for form sync
+  region?: string;
+  lat?: number | null;
+  lon?: number | null;
 };
 
 // Fonction de nettoyage et conversion de l'URL de visite virtuelle
@@ -143,22 +148,36 @@ export async function submitUserListing(data: SubmitListingData) {
     if (teamId) {
       console.log("🏢 Mode Business détecté, Team ID:", teamId);
 
-      // 1. Vérifier les quotas de l'équipe
-      const access = await checkFeatureAccess(teamId, "add_property");
-      if (!access.allowed) {
-        console.warn("⚠️ Quota atteint pour l'équipe:", teamId);
-        return {
-          error: access.message,
-          upgradeRequired: access.upgradeRequired,
-          reason: access.reason
-        };
-      }
+      // 0. CHECK PERMISSIONS
+      // Sécurité : Vérifier que l'utilisateur a le droit de créer des biens pour cette équipe
+      const { hasTeamPermission } = await import("@/lib/team-permissions.server");
+      const canCreate = await hasTeamPermission(teamId, "properties.create");
 
-      // 2. Bypass de modération pour les comptes business
-      validationStatus = "approved";
-      verificationStatus = "verified"; // Auto-vérifié si compte business
-      isAgencyListing = true;
-      console.log("🚀 Bypass modération activé pour compte business");
+      if (!canCreate) {
+        console.warn(`⚠️ User ${user.email} (Team ${teamId}) lacks 'properties.create'. Fallback to PERSONAL listing.`);
+        // Fallback: On force le mode personnel
+        // teamId = undefined; // On ne peut pas réassigner const, on va gérer ça plus bas
+        validationStatus = "pending";
+        verificationStatus = data.proof_document_url ? "pending" : null;
+        isAgencyListing = false;
+      } else {
+        // 1. Vérifier les quotas de l'équipe
+        const access = await checkFeatureAccess(teamId, "add_property");
+        if (!access.allowed) {
+          console.warn("⚠️ Quota atteint pour l'équipe:", teamId);
+          return {
+            error: access.message,
+            upgradeRequired: access.upgradeRequired,
+            reason: access.reason
+          };
+        }
+
+        // 2. Bypass de modération pour les comptes business
+        validationStatus = "approved";
+        verificationStatus = "verified"; // Auto-vérifié si compte business
+        isAgencyListing = true;
+        console.log("🚀 Bypass modération activé pour compte business");
+      }
     }
 
     // Déterminer si c'est un terrain
@@ -198,7 +217,7 @@ export async function submitUserListing(data: SubmitListingData) {
       category: data.category,
       status: "disponible",
       owner_id: user.id,
-      team_id: teamId || null,
+      team_id: (teamId && isAgencyListing) ? teamId : null,
       is_agency_listing: isAgencyListing,
       validation_status: validationStatus,
       service_type: "mandat_confort", // 100% gratuit
@@ -206,9 +225,13 @@ export async function submitUserListing(data: SubmitListingData) {
       location: data.location || {
         city: data.city,
         district: data.district,
+        region: data.region || "", // Added
         address: data.address || "",
         landmark: data.landmark || "",
-        coords: { lat: 0, lng: 0 },
+        coords: {
+          lat: data.lat || 0,
+          lng: data.lon || 0
+        },
       },
       specs,
       features: {},

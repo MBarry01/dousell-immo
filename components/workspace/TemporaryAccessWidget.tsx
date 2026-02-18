@@ -36,7 +36,13 @@ interface TemporaryPermission {
 /**
  * Widget des permissions temporaires pour la sidebar
  */
-export function TemporaryAccessWidget({ collapsed = false }: { collapsed?: boolean }) {
+export function TemporaryAccessWidget({
+  collapsed = false,
+  teamId
+}: {
+  collapsed?: boolean;
+  teamId?: string;
+}) {
   const [permissions, setPermissions] = useState<TemporaryPermission[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,22 +59,28 @@ export function TemporaryAccessWidget({ collapsed = false }: { collapsed?: boole
           return;
         }
 
-        // Récupérer le team_id de l'utilisateur
-        const { data: teamMember } = await supabase
-          .from("team_members")
-          .select("team_id")
-          .eq("user_id", user.id)
-          .eq("status", "active")
-          .maybeSingle();
+        let targetTeamId = teamId;
 
-        if (!teamMember?.team_id) {
+        // Si pas de teamId fourni, essayer de le deviner (comportement legacy)
+        if (!targetTeamId) {
+          const { data: teamMember } = await supabase
+            .from("team_members")
+            .select("team_id")
+            .eq("user_id", user.id)
+            .eq("status", "active")
+            .maybeSingle();
+
+          targetTeamId = teamMember?.team_id;
+        }
+
+        if (!targetTeamId) {
           setIsLoading(false);
           return;
         }
 
         // Récupérer les permissions temporaires
         const { data } = await supabase.rpc("get_active_temporary_permissions", {
-          p_team_id: teamMember.team_id,
+          p_team_id: targetTeamId,
           p_user_id: user.id,
         });
 

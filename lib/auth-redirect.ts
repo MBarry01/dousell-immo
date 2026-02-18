@@ -58,147 +58,118 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
             return "/";
         }
 
-        // ===== 1. CHECK TEAM SUBSCRIPTION (PRIMARY - NEW ARCHITECTURE) =====
+        // ===== 1. CHECK TEAM SUBSCRIPTION & USAGE (SMART REDIRECT) =====
 
         // Récupérer le contexte d'équipe avec subscription (optimisé, 1 seul appel DB)
         const { getUserTeamContext, createPersonalTeam } = await import("@/lib/team-permissions.server");
-        const teamContext = await getUserTeamContext();
+        let teamContext = await getUserTeamContext();
 
-        if (teamContext) {
-            // Vérifier le statut d'abonnement de l'équipe
-            const subscriptionStatus = teamContext.subscription_status;
-
-            if (subscriptionStatus === 'trialing' || subscriptionStatus === 'active') {
-                console.log("✅ Team has active subscription:", subscriptionStatus, "→ /gestion");
-                trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
-                    from: "login",
-                    to: "/gestion",
-                    reason: "team_subscription_active",
-                    subscription_status: subscriptionStatus,
-                });
-                return "/gestion";
-            }
-
-            // Équipe expirée → modal upgrade
-            if (subscriptionStatus === 'past_due' || subscriptionStatus === 'canceled') {
-                console.log("⚠️ Team subscription expired/canceled → /gestion?upgrade=required");
-                trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
-                    from: "login",
-                    to: "/gestion?upgrade=required",
-                    reason: "team_subscription_expired",
-                    subscription_status: subscriptionStatus,
-                });
-                return "/gestion?upgrade=required";
-            }
-        }
-
-        // ===== 1b. AUTO-CREATE TEAM FOR EXPLICIT PLAN SIGNUP =====
-        // Si l'utilisateur a un selected_plan dans ses métadonnées (signup classique avec plan),
-        // créer automatiquement une équipe avec trial. Les users Google OAuth sans plan
-        // seront redirigés vers /bienvenue pour choisir leur parcours.
+        // 1b. Auto-create team if needed (signup flow)
         if (!teamContext && user.user_metadata?.selected_plan) {
             console.log("🆕 User has selected_plan but no team, creating team...", {
                 plan: user.user_metadata.selected_plan,
                 userId: user.id,
             });
-            const newTeam = await createPersonalTeam(
+            teamContext = await createPersonalTeam(
                 user.id,
                 user.email || "Utilisateur",
                 user.user_metadata
             );
-            if (newTeam) {
+        }
+
+        if (teamContext) {
+            const { subscription_status, subscription_tier, team_id } = teamContext;
+
+            // A. PAID PLANS -> ALWAYS GESTION
+            // Si l'utilisateur paie pour un plan Pro/Business, il veut probablement voir son dashboard SaaS
+            // (Même s'il n'a pas encore de données, il a payé pour les outils)
+            if (['pro', 'business', 'agency'].includes(subscription_tier || '')) {
+                console.log("✅ Paid Plan User (Tier: " + subscription_tier + ") → /gestion");
                 trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
                     from: "login",
                     to: "/gestion",
-                    reason: "auto_team_created_with_plan",
-                    subscription_status: "trial",
+                    reason: "paid_plan_user",
+                    subscription_tier,
                 });
                 return "/gestion";
             }
+
+            // A-bis. EXPIRED PLANS -> GESTION (To renew)
+            if (subscription_status === 'past_due' || subscription_status === 'canceled') {
+                return "/gestion?upgrade=required";
+            }
+
+            // B. FREE / STARTER / TRIAL PLANS -> CHECK USAGE
+            // Ici on sépare les "Gestionnaires" des "Simples Annonceurs"
+
+            // 1. Check for Leases (Gestionnaire Indicator)
+            const { count: leasesCount } = await supabase
+                .from("leases")
+                .select("*", { count: 'exact', head: true })
+                .eq("team_id", team_id);
+
+            if (leasesCount && leasesCount > 0) {
+                console.log("✅ User has Leases (" + leasesCount + ") → /gestion (Gestionnaire)");
+                trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
+                    from: "login",
+                    to: "/gestion",
+                    reason: "has_leases_gestionnaire",
+                });
+                return "/gestion";
+            }
+
+            // 2. Check for Properties (Annonceur Indicator)
+            // On vérifie team_id OU owner_id pour être sûr de tout capter
+            const { count: propertiesCount } = await supabase
+                .from("properties")
+                .select("*", { count: 'exact', head: true })
+                .or(`team_id.eq.${team_id},owner_id.eq.${user.id}`);
+
+
+            if (propertiesCount && propertiesCount > 0) {
+                console.log("✅ User has Properties (" + propertiesCount + ") but NO leases → /compte/mes-biens (Annonceur)");
+                trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
+                    from: "login",
+                    to: "/compte/mes-biens",
+                    reason: "simple_advertiser",
+                });
+                return "/compte/mes-biens";
+            }
+
+            // 3. New User / No Data
+            // Si ni baux ni propriétés, on l'oriente vers le dépôt d'annonce (Onboarding Annonceur)
+            // Sauf si c'est la toute première visite (Welcome Modal)
+
+            // Legacy check (to be removed eventually)
+            /*
+            if (profile?.first_login) {
+                return "/?welcome=true";
+            }
+            */
+
+            console.log("🆕 Empty Account → /compte/deposer (Promote Ad Creation)");
+            trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
+                from: "login",
+                to: "/compte/deposer",
+                reason: "new_user_empty_account",
+            });
+            return "/compte/deposer";
         }
 
-        // ===== 2. FALLBACK: CHECK PRO STATUS (LEGACY - BACKWARD COMPATIBILITY) =====
+        // ===== 2. FALLBACK (NO TEAM) =====
+        // Should rarely happen if auto-create works, but just in case
+        // If they have no team, they are likely a simple user/visitor.
 
+        // Check legacy profile just in case
         const { data: profile } = await supabase
             .from("profiles")
-            .select("pro_status, pro_trial_ends_at, first_login, gestion_locative_enabled")
+            .select("pro_status")
             .eq("id", user.id)
             .single();
 
-        if (profile?.pro_status === "trial" || profile?.pro_status === "active") {
-            console.log("⚠️ [LEGACY] User has pro_status:", profile.pro_status, "→ /gestion");
-            trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
-                from: "login",
-                to: "/gestion",
-                reason: "pro_status_active_legacy",
-                pro_status: profile.pro_status,
-            });
-            return "/gestion";
-        }
+        if (profile?.pro_status === "active") return "/gestion";
 
-        // Pro expired (legacy)
-        if (profile?.pro_status === "expired") {
-            console.log("⚠️ [LEGACY] User pro_status is expired → /gestion?upgrade=required");
-            trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
-                from: "login",
-                to: "/gestion?upgrade=required",
-                reason: "pro_expired_legacy",
-                pro_status: "expired",
-            });
-            return "/gestion?upgrade=required";
-        }
-
-        // ===== 3. FALLBACK: CHECK TEAM MEMBERSHIP =====
-
-        const { data: teamMembership } = await supabase
-            .from("team_members")
-            .select("id")
-            .eq("user_id", user.id)
-            .eq("status", "active")
-            .limit(1)
-            .maybeSingle();
-
-        if (teamMembership) {
-            console.log("✅ User is a team member → /gestion");
-            trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
-                from: "login",
-                to: "/gestion",
-                reason: "team_member",
-            });
-            return "/gestion";
-        }
-
-        // ===== 4. FALLBACK: CHECK LEGACY gestion_locative_enabled =====
-
-        if (profile?.gestion_locative_enabled) {
-            console.log("✅ User has gestion_locative_enabled → /gestion");
-            trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
-                from: "login",
-                to: "/gestion",
-                reason: "legacy_gestion_enabled",
-            });
-            return "/gestion";
-        }
-
-        // ===== 5. FIRST LOGIN PROSPECT → modal bienvenue sur la vitrine =====
-
-        if (profile?.first_login) {
-            console.log("✅ First login, showing welcome modal on vitrine");
-            trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
-                from: "login",
-                to: "/?welcome=true",
-                reason: "first_login",
-            });
-            return "/?welcome=true";
-        }
-
-        // ===== 6. FALLBACK: Visitor → vitrine =====
-        console.log("ℹ️ Regular visitor → /");
-        trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
-            from: "login",
-            to: "/",
-            reason: "prospect_fallback",
-        });
+        console.log("ℹ️ No Team Context → / (Visitor Fallback)");
         return "/";
 
     } catch (error) {

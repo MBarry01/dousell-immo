@@ -68,24 +68,30 @@ export function LockedSidebarItem({
   badgeCount = 0,
 }: LockedSidebarItemProps) {
   const [hasAccess, setHasAccess] = useState(true); // Par défaut autorisé
-  const [isLoading, setIsLoading] = useState(!!requiredPermission);
+  const [isLoading, setIsLoading] = useState(!!requiredPermission || !!requiredTier);
+  const [lockReason, setLockReason] = useState<'tier' | 'permission' | null>(null);
 
   useEffect(() => {
     // 0. Vérification du statut d'abonnement (bloqué = lecture seule)
     const BLOCKED_STATUSES = ['past_due', 'canceled', 'unpaid', 'incomplete'];
     if (currentTeamStatus && BLOCKED_STATUSES.includes(currentTeamStatus) && requiredTier) {
       setHasAccess(false);
+      setLockReason('tier');
       setIsLoading(false);
       return;
     }
 
     // 1. Vérification du Tier
-    if (requiredTier) {
+    // Si en essai ('trial' ou 'trialing'), on considère comme Pro minimum
+    const isTrialing = currentTeamStatus === 'trial' || currentTeamStatus === 'trialing';
+
+    if (requiredTier && !isTrialing) {
       const currentLevel = TIER_LEVELS[currentTeamTier || 'starter'] || 0;
       const requiredLevel = TIER_LEVELS[requiredTier] || 1;
 
       if (currentLevel < requiredLevel) {
         setHasAccess(false);
+        setLockReason('tier');
         setIsLoading(false);
         return;
       }
@@ -94,6 +100,7 @@ export function LockedSidebarItem({
     // 2. Si pas de permission requise, accès autorisé (si tier OK)
     if (!requiredPermission) {
       setHasAccess(true);
+      setLockReason(null);
       setIsLoading(false);
       return;
     }
@@ -106,6 +113,7 @@ export function LockedSidebarItem({
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           setHasAccess(false);
+          setLockReason('permission');
           setIsLoading(false);
           return;
         }
@@ -126,6 +134,7 @@ export function LockedSidebarItem({
 
         if (!teamMember) {
           setHasAccess(false);
+          setLockReason('permission');
           setIsLoading(false);
           return;
         }
@@ -137,6 +146,7 @@ export function LockedSidebarItem({
 
         if (hasRolePermission) {
           setHasAccess(true);
+          setLockReason(null);
           setIsLoading(false);
           return;
         }
@@ -151,10 +161,13 @@ export function LockedSidebarItem({
           }
         );
 
-        setHasAccess(!!tempPermission);
+        const hasTempAccess = !!tempPermission;
+        setHasAccess(hasTempAccess);
+        setLockReason(hasTempAccess ? null : 'permission');
       } catch (error) {
         console.error("[LockedSidebarItem] Permission check error:", error);
         setHasAccess(false);
+        setLockReason('permission');
       } finally {
         setIsLoading(false);
       }
@@ -231,12 +244,12 @@ export function LockedSidebarItem({
     <button
       onClick={() => {
         // Si c'est un problème de Tier, on redirige vers la config pour upgrade
-        if (requiredTier) {
-          window.location.href = '/gestion/config';
+        if (lockReason === 'tier') {
+          window.location.href = '/gestion/config?tab=subscription';
           return;
         }
         // Sinon c'est une permission manquante
-        if (requiredPermission && onRequestAccess) {
+        if (lockReason === 'permission' && onRequestAccess && requiredPermission) {
           onRequestAccess(requiredPermission, label);
         }
       }}

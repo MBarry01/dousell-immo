@@ -1,4 +1,4 @@
-# 🗺️ MAP DES COMPOSANTS (229)
+# 🗺️ MAP DES COMPOSANTS (230)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -32,6 +32,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<FeatureLockedState />** (Path: `components\gestion\FeatureLockedState.tsx`)
 - **<GestionTour />** (Path: `components\gestion\GestionTour.tsx`)
 - **<OwnerSelector />** (Path: `components\gestion\OwnerSelector.tsx`)
+- **<PermissionDeniedState />** (Path: `components\gestion\PermissionDeniedState.tsx`)
 - **<SubscriptionManager />** (Path: `components\gestion\SubscriptionManager.tsx`)
 - **<TeamPropertyCard />** (Path: `components\gestion\TeamPropertyCard.tsx`)
 - **<TenantSelector />** (Path: `components\gestion\TenantSelector.tsx`)

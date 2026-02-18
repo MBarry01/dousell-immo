@@ -43,6 +43,7 @@ const STORAGE_KEYS = {
 const PROPERTY_TYPES = [
   { value: "villa", label: "Villa", icon: Home },
   { value: "appartement", label: "Appartement", icon: Building },
+  { value: "studio", label: "Studio", icon: Store }, // Icon temporaire, Store est utilisé pour Magasin, on peut garder ou changer
   { value: "terrain", label: "Terrain", icon: TreePine },
   { value: "immeuble", label: "Immeuble", icon: Building2 },
   { value: "magasin", label: "Magasin", icon: Store },
@@ -75,8 +76,11 @@ function DeposerPageContent() {
     price: "",
     city: "",
     district: "",
+    region: "", // Added
     address: "",
     landmark: "",
+    lat: null as number | null, // Added
+    lon: null as number | null, // Added
     surface: "",
     rooms: "",
     bedrooms: "",
@@ -316,10 +320,18 @@ function DeposerPageContent() {
         location: {
           city: formData.city,
           district: formData.district,
+          region: formData.region,
           address: formData.address,
           landmark: formData.landmark,
-          coords: coordinates,
+          coords: {
+            lat: formData.lat || coordinates.lat,
+            lng: formData.lon || coordinates.lng
+          },
         },
+        // Pass flat fields as well for action completeness
+        region: formData.region,
+        lat: formData.lat || coordinates.lat,
+        lon: formData.lon || coordinates.lng,
       });
 
       if (result?.error) {
@@ -514,6 +526,9 @@ function DeposerPageContent() {
                       address: details.display_name,
                       city: details.city || details.state || "",
                       district: details.suburb || details.city || details.road || "",
+                      region: details.state || "",
+                      lat: details.lat ? parseFloat(details.lat) : null,
+                      lon: details.lon ? parseFloat(details.lon) : null,
                     }));
                   }}
                   className="w-full"

@@ -241,7 +241,33 @@ export async function getTeamMembership(
         userId = user.id;
     }
 
-    // Essayer d'abord avec la fonction RPC (bypass RLS)
+    // 1. Essayer d'abord la requête directe pour avoir role AND custom_permissions
+    // RLS devrait permettre à un utilisateur de lire son propre membership
+    const { data, error } = await supabase
+        .from("team_members")
+        .select("role, custom_permissions, status")
+        .eq("team_id", teamId)
+        .eq("user_id", userId)
+        .maybeSingle();
+
+    if (!error && data && data.status === "active") {
+        const role = data.role as TeamRole;
+        // Calculer les permissions effectives
+        const permissions = Object.entries(TEAM_PERMISSIONS)
+            .filter(([, roles]) => (roles as readonly string[]).includes(role))
+            .map(([key]) => key as TeamPermissionKey);
+
+        return {
+            role,
+            permissions,
+            customPermissions: (data.custom_permissions as Record<string, boolean>) || {},
+        };
+    }
+
+    // 2. Fallback: RPC (Bypass RLS) si la requête directe échoue
+    // ATTENTION: Cette méthode ne retourne PAS les custom_permissions actuelles
+    console.warn("getTeamMembership: Direct query failed, falling back to RPC (Custom permissions may be lost)");
+
     const { data: roleData, error: rpcError } = await supabase.rpc("get_user_role_in_team", {
         p_team_id: teamId,
         p_user_id: userId,
@@ -258,35 +284,11 @@ export async function getTeamMembership(
         return {
             role,
             permissions,
-            customPermissions: {},
+            customPermissions: {}, // Limitation connue du RPC actuel
         };
     }
 
-    // Fallback: requête directe (peut échouer avec RLS strict)
-    const { data, error } = await supabase
-        .from("team_members")
-        .select("role, custom_permissions, status")
-        .eq("team_id", teamId)
-        .eq("user_id", userId)
-        .single();
-
-    if (error || !data || data.status !== "active") {
-        console.log("getTeamMembership fallback failed:", error?.message || "No data");
-        return null;
-    }
-
-    const role = data.role as TeamRole;
-
-    // Calculer les permissions effectives
-    const permissions = Object.entries(TEAM_PERMISSIONS)
-        .filter(([, roles]) => (roles as readonly string[]).includes(role))
-        .map(([key]) => key as TeamPermissionKey);
-
-    return {
-        role,
-        permissions,
-        customPermissions: (data.custom_permissions as Record<string, boolean>) || {},
-    };
+    return null;
 }
 
 // =====================================================
@@ -300,7 +302,13 @@ export async function hasTeamPermission(
     teamId: string,
     permission: TeamPermissionKey
 ): Promise<boolean> {
-    const membership = await getTeamMembership(teamId);
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return false;
+
+    // 1. Vérifier le membership standard (Rôle + Custom)
+    const membership = await getTeamMembership(teamId, user.id);
     if (!membership) return false;
 
     // Vérifier permissions custom d'abord
@@ -308,7 +316,23 @@ export async function hasTeamPermission(
         return membership.customPermissions[permission];
     }
 
-    return membership.permissions.includes(permission);
+    // Vérifier permissions du rôle
+    if (membership.permissions.includes(permission)) {
+        return true;
+    }
+
+    // 2. Vérifier les permissions temporaires actives
+    // On utilise RPC pour récupérer les permissions valides
+    const { data: tempPerms } = await supabase.rpc("get_active_temporary_permissions", {
+        p_team_id: teamId,
+        p_user_id: user.id,
+    });
+
+    if (tempPerms && tempPerms.some((p: any) => p.permission === permission)) {
+        return true;
+    }
+
+    return false;
 }
 
 /**
