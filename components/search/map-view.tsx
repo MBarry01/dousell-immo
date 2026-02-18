@@ -68,10 +68,13 @@ const MapCenter = ({ center, zoom }: { center: LatLngExpression; zoom: number })
     return null;
 };
 
-// Composant de clustering pour les marqueurs
+// Composant de clustering pour les marqueurs (préfixé _ = désactivé temporairement)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _MarkerCluster = ({ children }: { children: React.ReactNode }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const map = useMap();
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         if (!L || !MarkerClusterGroup) return;
 
@@ -226,6 +229,7 @@ const PriceMarker = memo(({
         prevProps.property.verification_status === nextProps.property.verification_status
     );
 });
+PriceMarker.displayName = "PriceMarker";
 
 export const MapView = ({ properties, showCarousel = true, onClose, searchQuery = "", onSearchChange, embedded = false }: MapViewProps) => {
     const router = useRouter();

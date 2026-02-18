@@ -375,16 +375,16 @@ function LandingPageContent() {
 
         {/* Hero Content - Two column layout on desktop */}
         <div className={cn(
-          "relative z-10 min-h-[100svh] px-4 sm:px-6 md:px-8 pt-20 pb-safe-nav md:pt-28 md:pb-16",
+          "relative z-10 min-h-[100svh] px-4 sm:px-8 md:px-8 pt-20 pb-safe-nav md:pt-28 md:pb-16",
           "flex flex-col md:flex-row items-center justify-center md:justify-between max-w-7xl mx-auto gap-6 md:gap-8 lg:gap-12"
         )}>
           {/* Left side - Text content */}
           <div className={cn(
-            "pointer-events-none md:flex-1 text-center md:text-left max-w-2xl md:max-w-xl w-full pt-16 md:pt-0"
+            "pointer-events-none md:flex-1 text-center md:text-left w-full max-w-xl sm:max-w-2xl md:max-w-xl pt-12 sm:pt-14 md:pt-0"
           )}>
             {/* ========== TABS: Je suis Propriétaire / Je cherche un bien ========== */}
             {/* MOBILE: Big tactile buttons side by side */}
-            <div className="animate-fade-in-up delay-100 mb-15 pointer-events-auto flex md:hidden w-full gap-2.5">
+            <div className="animate-fade-in-up delay-100 mb-6 sm:mb-8 pointer-events-auto flex md:hidden w-full gap-2.5">
               <button
                 onClick={() => handleModeChange("owner")}
                 className={cn(
@@ -516,7 +516,7 @@ function LandingPageContent() {
             </div>
 
             {/* Main Title - Optimized typography */}
-            <h1 className="animate-fade-in-up delay-200 mb-4 md:mb-6 font-bold leading-[1.1] text-white will-change-transform text-[clamp(1.875rem,5vw,3.75rem)] max-w-lg lg:max-w-xl">
+            <h1 className="animate-fade-in-up delay-200 mb-4 md:mb-6 font-bold leading-[1.1] text-white will-change-transform text-[clamp(2rem,6vw,3.75rem)] w-full mx-auto md:mx-0 max-w-lg">
               <span className="font-display text-white/90 block">{currentContent.h1Line1}</span>
               <span className="font-display gradient-text-animated gold-glow-text block mt-1 md:mt-2">
                 {currentContent.h1Highlight}
@@ -529,15 +529,15 @@ function LandingPageContent() {
             </h1>
 
             {/* Description - Better readability */}
-            <p className="animate-fade-in-up delay-300 mb-12 md:mb-10 text-white/70 md:text-white/60 font-light leading-relaxed text-[clamp(0.9375rem,1.5vw,1.125rem)] max-w-[320px] sm:max-w-md md:max-w-lg mx-auto md:mx-0">
+            <p className="animate-fade-in-up delay-300 mb-10 text-white/70 md:text-white/60 font-light leading-relaxed text-[clamp(0.9375rem,2vw,1.125rem)] max-w-sm sm:max-w-lg md:max-w-lg mx-auto md:mx-0">
               {currentContent.desc}
             </p>
 
             {/* CTAs - Enhanced interaction */}
-            <div className="animate-fade-in-up delay-400 flex flex-col gap-3 sm:flex-row pointer-events-auto justify-center md:justify-start">
+            <div className="animate-fade-in-up delay-400 flex flex-col gap-3 sm:flex-row pointer-events-auto justify-center md:justify-start items-center sm:items-start">
               <Link
                 href={currentContent.ctaPrimary.href}
-                className="btn-shimmer rounded-full w-full sm:w-auto px-8 sm:px-10 py-4 font-semibold text-black transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] gold-glow text-[clamp(0.875rem,1.2vw,1rem)] text-center whitespace-nowrap"
+                className="btn-shimmer rounded-full w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 font-semibold text-black transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] gold-glow text-[clamp(0.9375rem,2vw,1rem)] text-center whitespace-nowrap"
               >
                 {currentContent.ctaPrimary.text}
               </Link>
@@ -549,7 +549,7 @@ function LandingPageContent() {
                     setIsVideoOpen(true);
                   }
                 }}
-                className="group rounded-full w-full sm:w-auto border border-white/20 bg-white/5 px-8 sm:px-10 py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-[#F4C430]/40 active:scale-[0.97] text-[clamp(0.875rem,1.2vw,1rem)] cursor-pointer whitespace-nowrap"
+                className="group rounded-full w-full sm:w-auto border border-white/20 bg-white/5 px-8 sm:px-10 py-3.5 sm:py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-[#F4C430]/40 active:scale-[0.97] text-[clamp(0.9375rem,2vw,1rem)] cursor-pointer whitespace-nowrap"
               >
                 <span className="flex items-center justify-center gap-2">
                   {currentContent.ctaSecondary.text}
@@ -576,7 +576,7 @@ function LandingPageContent() {
             )}
 
             {/* Trust indicators - Inline on mobile */}
-            <div className="animate-fade-in-up delay-500 mt-8 md:mt-14 flex flex-row items-center justify-center md:justify-start gap-4 sm:gap-6 text-white/50 text-[11px] sm:text-sm relative z-20">
+            <div className="animate-fade-in-up delay-500 mt-6 md:mt-14 flex flex-row items-center justify-center md:justify-start gap-4 sm:gap-6 text-white/50 text-[clamp(0.75rem,1.5vw,0.875rem)] relative z-20">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
                 <span>100+ Propriétaires</span>

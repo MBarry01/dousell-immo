@@ -44,7 +44,6 @@ export function LazyAnalytics({ gaId, clarityId, gtmId }: LazyAnalyticsProps) {
     // Ne charger que côté client
     if (typeof window === 'undefined') return;
 
-    let timeout: NodeJS.Timeout;
     let isLoaded = false;
 
     const loadAnalytics = () => {
@@ -61,7 +60,7 @@ export function LazyAnalytics({ gaId, clarityId, gtmId }: LazyAnalyticsProps) {
     };
 
     // Stratégie 1: Charger après 3s d'inactivité
-    timeout = setTimeout(loadAnalytics, 3000);
+    const timeout = setTimeout(loadAnalytics, 3000);
 
     // Stratégie 2: Charger dès la première interaction
     window.addEventListener('scroll', loadAnalytics, { once: true, passive: true });

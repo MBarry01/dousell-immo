@@ -27,35 +27,33 @@ export function LazySpeedInsights() {
     // Ne charger que côté client
     if (typeof window === 'undefined') return;
 
-    let timeout: NodeJS.Timeout;
     let isLoaded = false;
+
+    const onScroll = () => load();
+    const onClick = () => load();
+
+    const cleanup = (timeoutId: NodeJS.Timeout) => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('click', onClick);
+    };
 
     const load = () => {
       if (isLoaded) return;
       isLoaded = true;
       setLoaded(true);
-      cleanup();
+      cleanup(timeout);
     };
 
     // Trigger 1: Après 3 secondes d'idle
-    timeout = setTimeout(load, 3000);
+    const timeout = setTimeout(load, 3000);
 
     // Trigger 2: Premier scroll
-    const onScroll = () => load();
-
     // Trigger 3: Premier click
-    const onClick = () => load();
-
     window.addEventListener('scroll', onScroll, { once: true, passive: true });
     window.addEventListener('click', onClick, { once: true, passive: true });
 
-    const cleanup = () => {
-      clearTimeout(timeout);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('click', onClick);
-    };
-
-    return cleanup;
+    return () => cleanup(timeout);
   }, []);
 
   // Ne rien afficher tant que pas chargé

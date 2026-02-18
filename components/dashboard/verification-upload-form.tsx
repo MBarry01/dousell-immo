@@ -29,14 +29,15 @@ export function VerificationUploadForm({
   proofDocumentUrl,
   onSuccess,
 }: VerificationUploadFormProps) {
-  // Si déjà vérifié, ne rien afficher
-  if (currentStatus === 'verified') {
-    return null;
-  }
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+
+  // Si déjà vérifié, ne rien afficher (après les hooks pour respecter les règles React)
+  if (currentStatus === 'verified') {
+    return null;
+  }
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();

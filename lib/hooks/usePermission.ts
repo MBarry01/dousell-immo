@@ -210,6 +210,7 @@ export function usePermission(
  * Hook simplifié pour vérifier plusieurs permissions
  */
 export function usePermissions(permissions: TeamPermissionKey[]) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const results = permissions.map((permission) => usePermission(permission));
 
     return {

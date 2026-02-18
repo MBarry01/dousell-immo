@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -12,16 +12,12 @@ export default function VerifyEmailContent() {
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
 
-    const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-    const [errorMessage, setErrorMessage] = useState<string>("");
-
-    // Si pas de token, afficher une erreur
-    useEffect(() => {
-        if (!token) {
-            setStatus("error");
-            setErrorMessage("Lien de vérification invalide. Le token est manquant.");
-        }
-    }, [token]);
+    const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
+        token ? "idle" : "error"
+    );
+    const [errorMessage, setErrorMessage] = useState<string>(
+        token ? "" : "Lien de vérification invalide. Le token est manquant."
+    );
 
     const handleVerify = async () => {
         if (!token) return;
