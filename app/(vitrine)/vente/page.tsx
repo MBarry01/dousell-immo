@@ -99,7 +99,7 @@ export default async function SaleRootPage() {
                     <div className="text-center py-20">
                         <h3 className="text-xl font-medium mb-4">Aucune vente disponible pour le moment</h3>
                         <Button asChild>
-                            <Link href="/">Retour à l'accueil</Link>
+                            <Link href="/">Retour à l&apos;accueil</Link>
                         </Button>
                     </div>
                 )}

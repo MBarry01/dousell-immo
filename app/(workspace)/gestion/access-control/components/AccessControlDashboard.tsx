@@ -9,7 +9,7 @@
  * - Historique des demandes
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -53,7 +53,7 @@ export function AccessControlDashboard({ teamId }: AccessControlDashboardProps) 
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("pending");
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
 
     try {
@@ -83,7 +83,7 @@ export function AccessControlDashboard({ teamId }: AccessControlDashboardProps) 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [teamId]);
 
   useEffect(() => {
     loadData();
@@ -262,7 +262,7 @@ function PendingRequestCard({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-zinc-800">
           <div>
             <Label htmlFor={`duration-${request.id}`} className="text-zinc-300 text-sm">
-              Durée de l'accès
+              Durée de l&apos;accès
             </Label>
             <Select value={durationHours} onValueChange={setDurationHours}>
               <SelectTrigger id={`duration-${request.id}`} className="mt-1 bg-zinc-800 border-zinc-700">

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 export default async function LocationRootPage() {
     // Récupérer toutes les villes actives via notre RPC (Uniquement LOCATION)
-    const { data: combinations, error } = await supabase
+    const { data: combinations } = await supabase
         .rpc('get_active_cities_and_types', { min_count: 1, target_transaction_type: 'location' });
 
     const citiesMap = new Map<string, number>();
@@ -48,7 +48,7 @@ export default async function LocationRootPage() {
                 <div className="container mx-auto px-4 py-10">
 
                     <h1 className="text-3xl md:text-5xl font-display font-bold mb-4">
-                        Nos zones d'intervention
+                        Nos zones d&apos;intervention
                     </h1>
                     <p className="text-muted-foreground text-lg max-w-2xl">
                         Retrouvez toutes nos annonces de location par ville.

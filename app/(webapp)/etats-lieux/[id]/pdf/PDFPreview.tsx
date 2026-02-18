@@ -169,7 +169,7 @@ export function PDFPreview({ reportId }: PDFPageProps) {
                         </p>
                         <div className="inline-block border border-gray-400 px-3 py-1 mt-1">
                             <p className="font-bold text-sm uppercase">
-                                {report?.type === 'entry' ? "État des Lieux d'Entrée" : "État des Lieux de Sortie"}
+                                {report?.type === 'entry' ? "État des Lieux d&apos;Entrée" : "État des Lieux de Sortie"}
                             </p>
                         </div>
                     </div>
@@ -178,7 +178,7 @@ export function PDFPreview({ reportId }: PDFPageProps) {
                 {/* Document Subtitle (Replaces old Title Header) */}
                 <div className="bg-gray-100 text-center py-2 mb-6 border-y border-gray-300">
                     <h2 className="font-bold uppercase tracking-wide text-xs">
-                        Constat contradictoire de l'état du logement
+                        Constat contradictoire de l&apos;état du logement
                     </h2>
                 </div>
 
@@ -332,7 +332,7 @@ export function PDFPreview({ reportId }: PDFPageProps) {
                 {hasPhotos && (
                     <div className="break-before-page mt-8">
                         <h2 className="text-sm font-bold uppercase border-b border-black pb-2 mb-4">
-                            Annexe : Photos de l'État des Lieux
+                            Annexe : Photos de l&apos;État des Lieux
                         </h2>
                         <div className="grid grid-cols-2 gap-4">
                             {report?.rooms?.map((room: any) =>

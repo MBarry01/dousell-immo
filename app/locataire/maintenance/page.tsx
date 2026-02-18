@@ -49,7 +49,7 @@ const statusConfig: Record<string, { label: string; bgColor: string; textColor: 
         icon: Clock
     },
     'open': {
-        label: 'Recherche d artisan',
+        label: 'Recherche d&apos;artisan',
         bgColor: 'bg-amber-50',
         textColor: 'text-amber-700',
         icon: Clock
@@ -173,7 +173,7 @@ export default function MaintenanceListPage() {
             {/* Header */}
             <div>
                 <h1 className="text-xl font-bold text-zinc-900">Mes Signalements</h1>
-                <p className="text-sm text-zinc-500 mt-0.5">Suivez vos demandes d'intervention</p>
+                <p className="text-sm text-zinc-500 mt-0.5">Suivez vos demandes d&apos;intervention</p>
             </div>
 
             {/* List */}
@@ -184,7 +184,7 @@ export default function MaintenanceListPage() {
                     </div>
                     <h3 className="text-lg font-semibold text-zinc-900">Aucun signalement</h3>
                     <p className="max-w-xs mt-2 text-sm text-zinc-500">
-                        Vous n'avez pas encore signalé de problème.
+                        Vous n&apos;avez pas encore signalé de problème.
                     </p>
                     <Link href="/locataire/maintenance/new">
                         <Button className="mt-6 bg-zinc-900 hover:bg-zinc-800 text-white">

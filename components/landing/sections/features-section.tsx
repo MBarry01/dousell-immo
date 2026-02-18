@@ -56,7 +56,7 @@ const features = [
     icon: MessageSquare,
     title: "Messagerie centralisée",
     description:
-      "Communiquez avec vos locataires, suivez les demandes d'intervention et l'historique des échanges en un seul endroit.",
+      "Communiquez avec vos locataires, suivez les demandes d&apos;intervention et l&apos;historique des échanges en un seul endroit.",
     category: "gestion",
   },
   {
@@ -70,7 +70,7 @@ const features = [
     icon: Wrench,
     title: "Suivi des interventions",
     description:
-      "Gérez les demandes de maintenance, suivez l'état d'avancement et gardez l'historique complet des travaux effectués.",
+      "Gérez les demandes de maintenance, suivez l&apos;état d&apos;avancement et gardez l&apos;historique complet des travaux effectués.",
     category: "gestion",
   },
   {
@@ -139,11 +139,10 @@ export default function FeaturesSection() {
               {/* Category Badge */}
               <div className="absolute top-4 right-4">
                 <span
-                  className={`text-xs px-2 py-1 rounded-full ${
-                    feature.category === "vitrine"
-                      ? "bg-blue-500/10 text-blue-400 border border-blue-500/30"
-                      : "bg-[#F4C430]/10 text-[#F4C430] border border-[#F4C430]/30"
-                  }`}
+                  className={`text-xs px-2 py-1 rounded-full ${feature.category === "vitrine"
+                    ? "bg-blue-500/10 text-blue-400 border border-blue-500/30"
+                    : "bg-[#F4C430]/10 text-[#F4C430] border border-[#F4C430]/30"
+                    }`}
                 >
                   {feature.category === "vitrine" ? "Vitrine" : "Gestion"}
                 </span>

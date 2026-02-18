@@ -8,6 +8,17 @@ import { DecisionModal } from "./components/DecisionModal";
 import { CreateContractDialog } from "./components/CreateContractDialog";
 import { CreateReceiptDialog } from "./components/CreateReceiptDialog";
 import { useTheme } from "@/components/theme-provider";
+import type { LeaseAlert } from "./actions";
+
+interface Lease {
+    id: string;
+    tenant_name: string;
+    tenant_email?: string;
+    tenant_phone?: string;
+    property_address: string;
+    monthly_amount: number;
+    lease_pdf_url?: string | null;
+}
 
 interface LegalPageClientProps {
     stats: {
@@ -15,8 +26,8 @@ interface LegalPageClientProps {
         upcomingRenewals: number;
         legalRisks: number;
     };
-    alerts: any[];
-    leases: any[];
+    alerts: LeaseAlert[];
+    leases: Lease[];
     userEmail?: string;
     profile: any;
 }
@@ -35,7 +46,7 @@ export function LegalPageClient({ stats, alerts, leases, userEmail, profile }: L
                             Assistant Juridique
                         </h1>
                         <p className={`mt-1 ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                            Conformité Loi 2014 & COCC Sénégal 🇸🇳
+                            Conformité Loi 2014 &amp; COCC Sénégal 🇸🇳
                         </p>
                     </div>
                 </div>
@@ -114,7 +125,7 @@ export function LegalPageClient({ stats, alerts, leases, userEmail, profile }: L
                                         <tr>
                                             <th className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">Locataire & Bien</th>
                                             <th className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">Échéance</th>
-                                            <th className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">Type d'alerte</th>
+                                            <th className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">Type d&apos;alerte</th>
                                             <th className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">Statut</th>
                                             <th className="px-4 md:px-6 py-3 md:py-4 text-right whitespace-nowrap">Action</th>
                                         </tr>

@@ -26,9 +26,9 @@ const features = [
         image: "/images/Paiement.webp",     // Updated
         title: "Encaissez sans courir après personne",
         paragraphs: [
-            "Ne perdez plus votre énergie à relancer les retardataires. Dousell envoie automatiquement les rappels de paiement par SMS et email avant et après l'échéance.",
-            "Vos locataires règlent leur loyer via leur méthode préférée (Wave, Orange Money, Carte Bancaire) directement depuis leur espace. L'argent est tracé, sécurisé.",
-            "Dès validation du paiement, la quittance est générée et envoyée instantanément au locataire. Plus besoin de rédiger, d'imprimer ou de se déplacer pour remettre un papier."
+            "Ne perdez plus votre énergie à relancer les retardataires. Dousell envoie automatiquement les rappels de paiement par SMS et email avant et après l&apos;échéance.",
+            "Vos locataires règlent leur loyer via leur méthode préférée (Wave, Orange Money, Carte Bancaire) directement depuis leur espace. L&apos;argent est tracé, sécurisé.",
+            "Dès validation du paiement, la quittance est générée et envoyée instantanément au locataire. Plus besoin de rédiger, d&apos;imprimer ou de se déplacer pour remettre un papier."
         ],
         icon: Wallet,
         iconColor: "text-[#F4C430]",
@@ -42,7 +42,7 @@ const features = [
         paragraphs: [
             "Utilisez des modèles de baux 100% conformes à la législation sénégalaise. Protégez-vous avec des contrats solides, relus par des experts juridiques.",
             "Idéal pour la diaspora : signez et faites signer vos locataires électroniquement depuis n'importe où dans le monde. Plus besoin d'envoyer un cousin avec le stylo.",
-            "Fini les baux égarés ou abîmés par l'humidité. Retrouvez n'importe quel contrat en 3 clics dans votre coffre-fort numérique, même 5 ans après le départ du locataire."
+            "Fini les baux égarés ou abîmés par l&apos;humidité. Retrouvez n&apos;importe quel contrat en 3 clics dans votre coffre-fort numérique, même 5 ans après le départ du locataire."
         ],
         icon: FileText,
         iconColor: "text-[#F4C430]",
@@ -52,9 +52,9 @@ const features = [
     {
         id: 4,
         image: "/images/Etat_Lieux.webp",  // Updated
-        title: "L'État des Lieux Incontestable",
+        title: "L&apos;État des Lieux Incontestable",
         paragraphs: [
-            "Prenez des photos datées et géolocalisées directement via l'application. Figez l'état réel du bien à l'entrée pour éviter tout litige à la sortie.",
+            "Prenez des photos datées et géolocalisées directement via l&apos;application. Figez l&apos;état réel du bien à l&apos;entrée pour éviter tout litige à la sortie.",
             "Ne ratez aucun détail : notre outil vous guide pièce par pièce (prises, peinture, robinetterie) pour un constat exhaustif et professionnel.",
             "Le jour du départ, la comparaison est automatique. Le calcul des retenues sur caution devient factuel, transparent et apaisé pour tout le monde."
         ],
@@ -68,7 +68,7 @@ const features = [
         image: "/images/alerte.webp",       // Updated
         title: "Votre Assistant Personnel 24/7",
         paragraphs: [
-            "Laissez Dousell gérer votre agenda mental. Fin de bail, révision de loyer annuelle, régularisation de charges... l'application pense à tout pour vous.",
+            "Laissez Dousell gérer votre agenda mental. Fin de bail, révision de loyer annuelle, régularisation de charges... l&apos;application pense à tout pour vous.",
             "Dormez sur vos deux oreilles. Vous ne raterez plus jamais une date importante ou une échéance légale qui pourrait vous coûter cher.",
             "Montrez à vos locataires que vous gérez votre bien avec sérieux. Une communication fluide, moderne et proactive renforce la confiance et fidélise les bons payeurs."
         ],

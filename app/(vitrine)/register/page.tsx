@@ -86,7 +86,7 @@ function RegisterContent() {
             >
               <Link href="/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </Link>
             </Button>
           </div>
@@ -332,7 +332,7 @@ function RegisterContent() {
                       Inscription...
                     </div>
                   ) : (
-                    "S'inscrire gratuitement"
+                    "S&apos;inscrire gratuitement"
                   )}
                 </Button>
               </form>
@@ -380,7 +380,7 @@ function RegisterContent() {
           </h2>
 
           <p className="text-xl text-white/50 max-w-lg mb-16 leading-relaxed">
-            Rejoignez plus de 500 utilisateurs satisfaits et commencez votre voyage immobilier dès aujourd'hui.
+            Rejoignez plus de 500 utilisateurs satisfaits et commencez votre voyage immobilier dès aujourd&apos;hui.
           </p>
 
           <div className="grid grid-cols-2 gap-8 w-full max-w-md">

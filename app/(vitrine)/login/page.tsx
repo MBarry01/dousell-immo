@@ -62,7 +62,7 @@ function LoginPageContent() {
             >
               <Link href="/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </Link>
             </Button>
           </div>
@@ -241,7 +241,7 @@ function LoginPageContent() {
                     href="/register"
                     className="font-bold text-primary hover:text-primary/80 transition-colors underline-offset-4 hover:underline"
                   >
-                    S'inscrire
+                    S&apos;inscrire
                   </Link>
                 </p>
               </div>

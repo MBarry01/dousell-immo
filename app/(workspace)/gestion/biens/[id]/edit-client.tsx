@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -583,10 +584,11 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
                 <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
                   {formData.images.map((image, index) => (
                     <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-border">
-                      <img
+                      <Image
                         src={image}
                         alt={`Photo ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                       <button
                         type="button"
