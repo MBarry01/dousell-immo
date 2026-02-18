@@ -91,28 +91,48 @@ export async function updateSession(request: NextRequest) {
   // issues with users being randomly logged out.
 
   let user = null;
-  try {
-    const {
-      data: { user: authUser },
-      error: authError
-    } = await supabase.auth.getUser();
+  let retryCount = 0;
+  const maxRetries = 2;
 
-    if (authError) {
-      // Silence common session expiration errors to keep the console clean
-      const isSessionExpired = authError.message?.includes("refresh_token_not_found") ||
-        authError.status === 400 ||
-        authError.message?.includes("Refresh Token Not Found");
+  while (retryCount <= maxRetries) {
+    try {
+      const {
+        data: { user: authUser },
+        error: authError
+      } = await supabase.auth.getUser();
 
-      if (!isSessionExpired) {
-        console.warn("Middleware: Auth error:", authError.message);
+      if (authError) {
+        // Silence common session expiration errors and generic fetch failures
+        const isSessionExpired = authError.message?.includes("refresh_token_not_found") ||
+          authError.status === 400 ||
+          authError.message?.includes("Refresh Token Not Found");
+
+        const isFetchFailed = authError.message?.toLowerCase().includes("fetch failed");
+
+        if (!isSessionExpired && !isFetchFailed) {
+          console.warn(`Middleware: Auth error (attempt ${retryCount + 1}):`, authError.message);
+        }
+
+        if (isFetchFailed && retryCount < maxRetries) {
+          retryCount++;
+          // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, retryCount)));
+          continue;
+        }
       }
-    }
 
-    user = authUser;
-  } catch (error) {
-    // If Supabase is not available or credentials are invalid, continue without auth
-    // This allows the app to work even if Supabase is not configured yet
-    console.debug("Middleware: Unexpected error getting user:", error);
+      user = authUser;
+      break; // Success or non-retryable error
+    } catch (error: any) {
+      const isFetchFailed = error.message?.toLowerCase().includes("fetch failed");
+      if (isFetchFailed && retryCount < maxRetries) {
+        retryCount++;
+        await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, retryCount)));
+        continue;
+      }
+      console.debug("Middleware: Unexpected error getting user:", error);
+      break;
+    }
   }
 
   // ============================================

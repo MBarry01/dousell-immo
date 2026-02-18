@@ -1,4 +1,25 @@
-import { AsyncLocalStorage } from 'async_hooks';
+// Safe type for AsyncLocalStorage
+interface IAsyncLocalStorage<T> {
+    run<R>(store: T, callback: () => R): R;
+    getStore(): T | undefined;
+}
+
+// Safe import for AsyncLocalStorage that works in both Node.js and Edge Runtime
+let AsyncLocalStorageClass: any;
+try {
+    // Try global first (Edge Runtime / Recent Node.js)
+    AsyncLocalStorageClass = (globalThis as any).AsyncLocalStorage;
+    if (!AsyncLocalStorageClass) {
+        // Fallback to import (Node.js)
+        AsyncLocalStorageClass = require('async_hooks').AsyncLocalStorage;
+    }
+} catch (e) {
+    // Fallback if unavailable
+    AsyncLocalStorageClass = class {
+        run(_: any, callback: any) { return callback(); }
+        getStore() { return undefined; }
+    };
+}
 
 export type RequestContext = {
     requestId: string;
@@ -8,7 +29,7 @@ export type RequestContext = {
     action?: string;
 };
 
-export const contextStorage = new AsyncLocalStorage<RequestContext>();
+export const contextStorage: IAsyncLocalStorage<RequestContext> = new AsyncLocalStorageClass();
 
 /**
  * Returns the current request context or an empty object if called outside of a request.

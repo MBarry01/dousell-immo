@@ -5,6 +5,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { invalidateCacheBatch } from '@/lib/cache/cache-aside';
 import { invalidateRentalCaches } from '@/lib/cache/invalidation';
 import { revalidatePath } from 'next/cache';
+import { fetchWithRetry } from '@/lib/utils';
 import { validateTenantCreation } from '@/lib/finance';
 import { sendEmail } from '@/lib/mail';
 import { getUserTeamContext } from "@/lib/team-context";
@@ -295,7 +296,7 @@ async function triggerN8N(webhookPath: string, payload: Record<string, unknown>)
     }
 
     try {
-        const response = await fetch(`${N8N_URL}/${webhookPath}`, {
+        const response = await fetchWithRetry(`${N8N_URL}/${webhookPath}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -762,7 +763,7 @@ export async function sendWelcomePack(leaseId: string) {
     if (freshLease?.lease_pdf_url) {
         try {
             console.log("[sendWelcomePack] Fetching contract PDF from:", freshLease.lease_pdf_url);
-            const pdfResponse = await fetch(freshLease.lease_pdf_url);
+            const pdfResponse = await fetchWithRetry(freshLease.lease_pdf_url);
             if (pdfResponse.ok) {
                 const pdfArrayBuffer = await pdfResponse.arrayBuffer();
                 attachments.push({
