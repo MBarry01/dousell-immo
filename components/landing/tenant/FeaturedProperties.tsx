@@ -22,12 +22,12 @@ export default function FeaturedProperties({ properties }: FeaturedPropertiesPro
                     <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
                         Sélection Exclusive
                     </span>
-                    <h2 className="font-display text-4xl md:text-5xl text-white mb-4">
+                    <h2 className="font-display text-[clamp(2rem,4.5vw,3rem)] text-white mb-4">
                         Nos biens <span className="gradient-text-animated">en vedette</span>
                     </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {properties.map((property, index) => {
                         const isExternal = property.isExternal;
                         const href = isExternal ? `/biens/ext/${property.id}` : `/biens/${property.id}`;

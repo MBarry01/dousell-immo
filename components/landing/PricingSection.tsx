@@ -156,7 +156,7 @@ export default function PricingSection() {
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white"
+            className="font-display text-[clamp(2rem,5vw,3.75rem)] font-bold mb-4 text-white"
           >
             Simple et{" "}
             <span className="gradient-text-animated">transparent</span>

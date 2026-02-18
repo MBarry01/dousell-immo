@@ -25,7 +25,7 @@ export default function TenantBentoGrid() {
             </span>
           </div>
 
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl text-white mb-4">
+          <h2 className="font-display text-[clamp(1.875rem,4vw,3rem)] text-white mb-4">
             Tout votre logement{" "}
             <span className="gradient-text-animated">dans votre poche</span>
           </h2>

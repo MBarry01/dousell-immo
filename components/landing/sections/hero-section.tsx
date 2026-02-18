@@ -77,15 +77,15 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-1">2K+</div>
+              <div className="text-[clamp(1.875rem,3.5vw,2.25rem)] font-bold text-white mb-1">2K+</div>
               <div className="text-sm text-gray-400">Utilisateurs actifs</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-1">8K+</div>
+              <div className="text-[clamp(1.875rem,3.5vw,2.25rem)] font-bold text-white mb-1">8K+</div>
               <div className="text-sm text-gray-400">Biens gérés</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#F4C430] mb-1">4.9/5</div>
+              <div className="text-[clamp(1.875rem,3.5vw,2.25rem)] font-bold text-[#F4C430] mb-1">4.9/5</div>
               <div className="text-sm text-gray-400">Satisfaction client</div>
             </div>
           </motion.div>

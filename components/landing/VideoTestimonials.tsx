@@ -133,7 +133,7 @@ export default function VideoTestimonials({ mode = "owner" }: VideoTestimonialsP
                         <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
                             Témoignages
                         </span>
-                        <h2 className="font-display text-4xl md:text-5xl text-white">
+                        <h2 className="font-display text-[clamp(2rem,4.5vw,3rem)] text-white">
                             Ils ont <span className="gradient-text-animated">transformé</span><br />
                             leur gestion
                         </h2>

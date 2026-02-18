@@ -227,7 +227,7 @@ export default function FeaturesBento() {
                     <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
                         Fonctionnalités
                     </span>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl text-white max-w-2xl mx-auto">
+                    <h2 className="font-display text-[clamp(1.875rem,4vw,3rem)] text-white max-w-2xl mx-auto">
                         Tout ce dont vous avez besoin pour <span className="gradient-text-animated">piloter</span> votre immobilier
                     </h2>
                     <p className="text-gray-400 max-w-xl mx-auto text-sm md:text-base">

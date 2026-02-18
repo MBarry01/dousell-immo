@@ -16,19 +16,19 @@ type CategoryData = {
 
 const CATEGORY_CONFIG: Record<string, { colSpan: string; fallbackImage: string }> = {
     villas: {
-        colSpan: "md:col-span-2",
+        colSpan: "sm:col-span-2 lg:col-span-2",
         fallbackImage: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
     },
     appartements: {
-        colSpan: "md:col-span-1",
+        colSpan: "sm:col-span-1 lg:col-span-1",
         fallbackImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
     },
     terrains: {
-        colSpan: "md:col-span-1",
+        colSpan: "sm:col-span-1 lg:col-span-1",
         fallbackImage: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80",
     },
     commercial: {
-        colSpan: "md:col-span-2",
+        colSpan: "sm:col-span-2 lg:col-span-2",
         fallbackImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
     },
 };
@@ -61,8 +61,8 @@ export default function PropertyCategories() {
             <div className="container mx-auto px-6">
                 <div className="flex justify-between items-end mb-12">
                     <div>
-                        <h2 className="text-3xl font-bold text-white mb-2">Parcourir par catégorie</h2>
-                        <p className="text-gray-400">Trouvez le type de bien qui correspond à votre style de vie.</p>
+                        <h2 className="text-[clamp(1.5rem,3.5vw,1.875rem)] font-bold text-white mb-2">Parcourir par catégorie</h2>
+                        <p className="text-gray-400 text-[clamp(0.875rem,1.5vw,1rem)]">Trouvez le type de bien qui correspond à votre style de vie.</p>
                     </div>
                     <Link
                         href="/recherche"
@@ -72,20 +72,20 @@ export default function PropertyCategories() {
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {loading ? (
                         // Skeleton loading
                         [...Array(4)].map((_, index) => (
                             <div
                                 key={index}
-                                className={`relative h-64 rounded-2xl overflow-hidden bg-zinc-800 animate-pulse ${index === 0 || index === 3 ? "md:col-span-2" : "md:col-span-1"
+                                className={`relative h-64 rounded-2xl overflow-hidden bg-zinc-800 animate-pulse ${index === 0 || index === 3 ? "sm:col-span-2 lg:col-span-2" : "sm:col-span-1 lg:col-span-1"
                                     }`}
                             />
                         ))
                     ) : (
                         categories.map((cat, index) => {
                             const config = CATEGORY_CONFIG[cat.id] || {
-                                colSpan: "md:col-span-1",
+                                colSpan: "sm:col-span-1 lg:col-span-1",
                                 fallbackImage: "",
                             };
                             const imageUrl = cat.image || config.fallbackImage;

@@ -68,11 +68,11 @@ export const HeroSection = () => {
         */}
         <div className="relative z-20 flex min-h-[100svh] h-full flex-col justify-end px-4 sm:px-6 pb-2 mr-0 pb-safe-nav pt-20">
           <div className="space-y-4">
-            <h1 className="text-4xl font-semibold leading-tight text-white">
+            <h1 className="text-[clamp(1.75rem,7vw,2.25rem)] font-semibold leading-tight text-white">
               Immobilier au Sénégal
               <span className="sr-only"> : Achat, location et gestion locative</span>
             </h1>
-            <p className="text-lg text-white/90 max-w-xl">
+            <p className="text-[clamp(1rem,3.5vw,1.125rem)] text-white/90 max-w-xl">
               Plus de 500 biens vérifiés à Dakar et sur la Petite Côte.
             </p>
           </div>
@@ -97,17 +97,17 @@ export const HeroSection = () => {
       </section>
 
       {/* Desktop Layout - Style actuel */}
-      <section className="hidden md:flex relative overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-[#0d101b] via-[#05080c] to-[#05080c] p-10 min-h-[500px] items-center text-white shadow-[0_20px_120px_rgba(5,8,12,0.45)]" suppressHydrationWarning>
-        <div className="relative z-10 max-w-2xl space-y-6">
-          <div className="space-y-4">
+      <section className="hidden md:flex relative overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-[#0d101b] via-[#05080c] to-[#05080c] p-6 lg:p-10 min-h-[420px] lg:min-h-[500px] items-center text-white shadow-[0_20px_120px_rgba(5,8,12,0.45)]" suppressHydrationWarning>
+        <div className="relative z-10 max-w-[55%] lg:max-w-2xl space-y-5 lg:space-y-6">
+          <div className="space-y-3 lg:space-y-4">
             <FadeIn delay={0}>
-              <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
+              <h1 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold leading-tight">
                 Immobilier au Sénégal
                 <span className="sr-only sm:not-sr-only"> : Achète ou investis en toute confiance</span>
               </h1>
             </FadeIn>
             <FadeIn delay={0.1}>
-              <p className="text-lg text-white/70 sm:text-xl">
+              <p className="text-[clamp(0.9375rem,1.5vw,1.25rem)] text-white/70">
                 <span className="md:hidden">Plus de 500 biens vérifiés à Dakar et sur la Petite Côte.</span>
                 <span className="hidden md:inline">Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte, Dousell Immo s&apos;impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l&apos;achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.</span>
               </p>
@@ -118,7 +118,7 @@ export const HeroSection = () => {
               <Button
                 asChild
                 size="lg"
-                className="h-[50px] rounded-full px-8"
+                className="h-[46px] lg:h-[50px] rounded-full px-6 lg:px-8 text-[clamp(0.875rem,1.2vw,1rem)]"
               >
                 <Link href="/recherche">Découvrir les biens</Link>
               </Button>
@@ -126,7 +126,7 @@ export const HeroSection = () => {
                 asChild
                 variant="outline"
                 size="lg"
-                className="h-[50px] rounded-full border border-white/20 bg-white/5 px-8 text-white hover:bg-white/10"
+                className="h-[46px] lg:h-[50px] rounded-full border border-white/20 bg-white/5 px-6 lg:px-8 text-white hover:bg-white/10 text-[clamp(0.875rem,1.2vw,1rem)]"
               >
                 <Link href="/planifier-visite">Planifier une visite</Link>
               </Button>
@@ -143,7 +143,7 @@ export const HeroSection = () => {
           suppressHydrationWarning
         >
           {/* Conteneur qui pousse l'image à droite */}
-          <div className="absolute right-0 bottom-0 h-full w-full md:w-3/4 lg:w-2/3" suppressHydrationWarning>
+          <div className="absolute right-0 bottom-0 h-full w-full md:w-1/2 lg:w-2/3" suppressHydrationWarning>
             <Image
               src="/monument.png"
               alt="Monument Renaissance Africaine"

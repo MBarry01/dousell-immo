@@ -115,10 +115,10 @@ export default function FeaturesSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+          <h2 className="text-[clamp(1.875rem,4vw,3rem)] font-bold text-white mb-4">
             Tout ce dont vous avez besoin
           </h2>
-          <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto">
+          <p className="text-[clamp(1rem,1.5vw,1.25rem)] text-gray-400 max-w-3xl mx-auto">
             Une suite complète d'outils pour optimiser la gestion de vos biens immobiliers au
             Sénégal. De la vitrine publique à la gestion locative.
           </p>

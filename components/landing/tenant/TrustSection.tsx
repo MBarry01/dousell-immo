@@ -45,7 +45,7 @@ export default function TrustSection() {
             </span>
           </div>
 
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl text-white mb-4">
+          <h2 className="font-display text-[clamp(1.875rem,4vw,3rem)] text-white mb-4">
             Louez sans crainte,{" "}
             <span className="text-[#F4C430]">vivez sereinement</span>
           </h2>
@@ -57,7 +57,7 @@ export default function TrustSection() {
         </motion.div>
 
         {/* Trust Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {trustFeatures.map((feature, index) => (
             <motion.div
               key={feature.title}

@@ -74,17 +74,17 @@ export default function FeaturedPropertiesHero() {
             Sélection
           </span>
 
-          <h2 className="font-display text-2xl md:text-4xl lg:text-5xl text-white mb-3 md:mb-4">
+          <h2 className="font-display text-[clamp(1.5rem,4vw,3rem)] text-white mb-3 md:mb-4">
             Ces biens <span className="gradient-text-animated">vous attendent</span>
           </h2>
 
-          <p className="text-gray-400 text-sm md:text-lg max-w-xs md:max-w-xl mx-auto">
+          <p className="text-gray-400 text-[clamp(0.875rem,1.5vw,1.125rem)] max-w-xs md:max-w-xl mx-auto">
             Une sélection exclusive de propriétés d'exception.
           </p>
         </motion.div>
 
         {/* Grille des biens */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
           {properties.map((property, index) => {
             const isExternal = property.isExternal;
             const targetUrl = isExternal

@@ -34,14 +34,14 @@ export default function CTASection() {
           </motion.div>
 
           {/* Heading */}
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+          <h2 className="text-[clamp(1.875rem,4vw,3rem)] font-bold text-white mb-6">
             Prêt à transformer votre{" "}
             <span className="bg-gradient-to-r from-[#F4C430] to-[#FFD700] bg-clip-text text-transparent">
               gestion immobilière ?
             </span>
           </h2>
 
-          <p className="text-lg md:text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+          <p className="text-[clamp(1rem,1.5vw,1.25rem)] text-gray-400 mb-8 max-w-2xl mx-auto">
             Rejoignez des milliers de propriétaires satisfaits au Sénégal. Essai gratuit de 14
             jours sans engagement.
           </p>

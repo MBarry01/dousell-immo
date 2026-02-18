@@ -42,7 +42,7 @@ export default function CompareSection() {
           <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-2">
             Comparaison
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+          <h2 className="text-[clamp(1.875rem,4.5vw,3rem)] font-bold tracking-tight text-white">
             La Révolution{" "}
             <span className="gradient-text-animated">Avant / Après</span>
           </h2>

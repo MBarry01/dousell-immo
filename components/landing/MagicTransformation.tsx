@@ -61,7 +61,7 @@ export default function MagicTransformation() {
           <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
             De la donnée à la vitrine
           </span>
-          <h2 className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-6">
+          <h2 className="font-display text-[clamp(1.875rem,5vw,3.75rem)] text-white mb-6">
             Remplissez un formulaire,<br />
             <span className="gradient-text-animated">obtenez une annonce premium</span>
           </h2>

@@ -375,12 +375,12 @@ function LandingPageContent() {
 
         {/* Hero Content - Two column layout on desktop */}
         <div className={cn(
-          "relative z-10 min-h-[100svh] px-4 sm:px-6 lg:px-8 pt-20 pb-safe-nav lg:pt-28 lg:pb-16",
-          "flex flex-col lg:flex-row items-center justify-center lg:justify-between max-w-7xl mx-auto gap-6 lg:gap-12"
+          "relative z-10 min-h-[100svh] px-4 sm:px-6 md:px-8 pt-20 pb-safe-nav md:pt-28 md:pb-16",
+          "flex flex-col md:flex-row items-center justify-center md:justify-between max-w-7xl mx-auto gap-6 md:gap-8 lg:gap-12"
         )}>
           {/* Left side - Text content */}
           <div className={cn(
-            "pointer-events-none lg:flex-1 text-center lg:text-left max-w-2xl lg:max-w-xl w-full pt-16 lg:pt-0"
+            "pointer-events-none md:flex-1 text-center md:text-left max-w-2xl md:max-w-xl w-full pt-16 md:pt-0"
           )}>
             {/* ========== TABS: Je suis Propriétaire / Je cherche un bien ========== */}
             {/* MOBILE: Big tactile buttons side by side */}
@@ -448,7 +448,7 @@ function LandingPageContent() {
             </div>
 
             {/* DESKTOP: Original pill toggle with animation */}
-            <div className="animate-fade-in-up delay-100 mb-8 pointer-events-auto hidden md:flex justify-center lg:justify-start">
+            <div className="animate-fade-in-up delay-100 mb-8 pointer-events-auto hidden md:flex justify-center md:justify-start">
               <div className="relative inline-flex items-center">
                 {/* Glow effect behind tabs */}
                 <div className="absolute inset-0 bg-[#F4C430]/10 blur-2xl rounded-full scale-110 opacity-50" />
@@ -516,28 +516,28 @@ function LandingPageContent() {
             </div>
 
             {/* Main Title - Optimized typography */}
-            <h1 className="animate-fade-in-up delay-200 mb-4 md:mb-6 font-bold leading-[1.1] text-white will-change-transform text-3xl sm:text-4xl md:text-5xl lg:text-6xl max-w-lg lg:max-w-xl">
+            <h1 className="animate-fade-in-up delay-200 mb-4 md:mb-6 font-bold leading-[1.1] text-white will-change-transform text-[clamp(1.875rem,5vw,3.75rem)] max-w-lg lg:max-w-xl">
               <span className="font-display text-white/90 block">{currentContent.h1Line1}</span>
               <span className="font-display gradient-text-animated gold-glow-text block mt-1 md:mt-2">
                 {currentContent.h1Highlight}
               </span>
               {currentContent.h1Line2 && (
-                <span className="block mt-2 md:mt-3 font-light tracking-wide text-white/70 text-xl sm:text-2xl md:text-3xl">
+                <span className="block mt-2 md:mt-3 font-light tracking-wide text-white/70 text-[clamp(1.25rem,2.5vw,1.875rem)]">
                   {currentContent.h1Line2}
                 </span>
               )}
             </h1>
 
             {/* Description - Better readability */}
-            <p className="animate-fade-in-up delay-300 mb-12 md:mb-10 text-white/70 md:text-white/60 font-light leading-relaxed text-[15px] md:text-lg max-w-[320px] sm:max-w-md lg:max-w-lg mx-auto lg:mx-0">
+            <p className="animate-fade-in-up delay-300 mb-12 md:mb-10 text-white/70 md:text-white/60 font-light leading-relaxed text-[clamp(0.9375rem,1.5vw,1.125rem)] max-w-[320px] sm:max-w-md md:max-w-lg mx-auto md:mx-0">
               {currentContent.desc}
             </p>
 
             {/* CTAs - Enhanced interaction */}
-            <div className="animate-fade-in-up delay-400 flex flex-col gap-3 sm:flex-row pointer-events-auto justify-center lg:justify-start">
+            <div className="animate-fade-in-up delay-400 flex flex-col gap-3 sm:flex-row pointer-events-auto justify-center md:justify-start">
               <Link
                 href={currentContent.ctaPrimary.href}
-                className="btn-shimmer rounded-full w-full sm:w-auto px-8 sm:px-10 py-4 font-semibold text-black transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] gold-glow text-[15px] sm:text-base text-center"
+                className="btn-shimmer rounded-full w-full sm:w-auto px-8 sm:px-10 py-4 font-semibold text-black transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] gold-glow text-[clamp(0.875rem,1.2vw,1rem)] text-center whitespace-nowrap"
               >
                 {currentContent.ctaPrimary.text}
               </Link>
@@ -549,7 +549,7 @@ function LandingPageContent() {
                     setIsVideoOpen(true);
                   }
                 }}
-                className="group rounded-full w-full sm:w-auto border border-white/20 bg-white/5 px-8 sm:px-10 py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-[#F4C430]/40 active:scale-[0.97] text-[15px] sm:text-base cursor-pointer"
+                className="group rounded-full w-full sm:w-auto border border-white/20 bg-white/5 px-8 sm:px-10 py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-[#F4C430]/40 active:scale-[0.97] text-[clamp(0.875rem,1.2vw,1rem)] cursor-pointer whitespace-nowrap"
               >
                 <span className="flex items-center justify-center gap-2">
                   {currentContent.ctaSecondary.text}
@@ -562,7 +562,7 @@ function LandingPageContent() {
 
             {/* Lien connexion pour utilisateurs existants (mode propriétaire uniquement, non-connectés) */}
             {userMode === "owner" && !isLoggedIn && (
-              <div className="animate-fade-in-up delay-450 mt-2 text-center lg:text-left pointer-events-auto">
+              <div className="animate-fade-in-up delay-450 mt-2 text-center md:text-left pointer-events-auto">
                 <span className="text-white/50 text-sm">
                   Déjà un compte gestion ?{" "}
                   <Link
@@ -576,7 +576,7 @@ function LandingPageContent() {
             )}
 
             {/* Trust indicators - Inline on mobile */}
-            <div className="animate-fade-in-up delay-500 mt-8 md:mt-14 flex flex-row items-center justify-center lg:justify-start gap-4 sm:gap-6 text-white/50 text-[11px] sm:text-sm relative z-20">
+            <div className="animate-fade-in-up delay-500 mt-8 md:mt-14 flex flex-row items-center justify-center md:justify-start gap-4 sm:gap-6 text-white/50 text-[11px] sm:text-sm relative z-20">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
                 <span>100+ Propriétaires</span>
@@ -595,7 +595,7 @@ function LandingPageContent() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="hidden lg:flex flex-1 items-center justify-center max-w-md xl:max-w-[580px]"
+            className="hidden md:flex flex-1 items-center justify-center max-w-sm lg:max-w-md xl:max-w-[580px]"
           >
             {userMode === "tenant" ? <HeroIllustration /> : <HeroOwnerIllustration />}
           </motion.div>
@@ -628,10 +628,10 @@ function LandingPageContent() {
               <span className="inline-block text-[#F4C430] text-[11px] md:text-sm font-medium tracking-widest uppercase mb-2 md:mb-4">
                 Je suis locataire
               </span>
-              <h2 className="font-display text-2xl md:text-4xl lg:text-5xl text-white mb-3 md:mb-4">
+              <h2 className="font-display text-[clamp(1.5rem,4vw,3rem)] text-white mb-3 md:mb-4">
                 Trouvez votre <span className="gradient-text-animated">prochain chez-vous</span>
               </h2>
-              <p className="text-gray-400 text-sm md:text-lg max-w-xs md:max-w-xl mx-auto">
+              <p className="text-gray-400 text-[clamp(0.875rem,1.5vw,1.125rem)] max-w-xs md:max-w-xl mx-auto">
                 Appartements, villas, studios... Des biens vérifiés à Dakar et Saly.
               </p>
             </div>
@@ -708,7 +708,7 @@ function LandingPageContent() {
                 <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
                   Tout en un seul endroit
                 </span>
-                <h2 className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-6">
+                <h2 className="font-display text-[clamp(1.875rem,5vw,3.75rem)] text-white mb-6">
                   Pilotez tout depuis{" "}
                   <span className="gradient-text-animated">un seul écran</span>
                 </h2>
@@ -863,7 +863,7 @@ function LandingPageContent() {
 
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-white mb-6">
+            <h2 className="font-display text-[clamp(2rem,5vw,3.75rem)] text-white mb-6">
               Prêt à{" "}
               <span className="gradient-text-animated">transformer</span>
               <br />
@@ -875,7 +875,7 @@ function LandingPageContent() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/pro/signup"
-                className="btn-shimmer rounded-full px-12 py-5 font-semibold text-black text-lg transition-all duration-300 hover:scale-105 gold-glow animate-pulse-gold"
+                className="btn-shimmer rounded-full px-8 sm:px-12 py-4 sm:py-5 font-semibold text-black text-[clamp(0.9375rem,1.5vw,1.125rem)] transition-all duration-300 hover:scale-105 gold-glow animate-pulse-gold whitespace-nowrap"
               >
                 Commencer maintenant
               </Link>
@@ -895,7 +895,7 @@ function LandingPageContent() {
             <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
               Contact
             </span>
-            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-white mb-6">
+            <h2 className="font-display text-[clamp(2rem,5vw,3.75rem)] text-white mb-6">
               Nous <span className="gradient-text-animated">contacter</span>
             </h2>
             <div className="gold-divider w-24 mx-auto mb-6" />

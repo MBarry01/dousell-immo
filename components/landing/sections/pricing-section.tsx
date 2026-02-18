@@ -72,10 +72,10 @@ export default function PricingSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+          <h2 className="text-[clamp(1.875rem,4vw,3rem)] font-bold text-white mb-4">
             Tarifs transparents et adaptés
           </h2>
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-8">
+          <p className="text-[clamp(1rem,1.5vw,1.25rem)] text-gray-400 max-w-2xl mx-auto mb-8">
             Choisissez le plan qui correspond à vos besoins. Tous les plans incluent 14 jours
             d&apos;essai gratuit.
           </p>
@@ -126,7 +126,7 @@ export default function PricingSection() {
         </motion.div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}

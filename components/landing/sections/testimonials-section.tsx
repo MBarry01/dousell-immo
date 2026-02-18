@@ -72,10 +72,10 @@ export default function TestimonialsSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+          <h2 className="text-[clamp(1.875rem,4vw,3rem)] font-bold text-white mb-4">
             Ce que disent nos clients
           </h2>
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
+          <p className="text-[clamp(1rem,1.5vw,1.25rem)] text-gray-400 max-w-2xl mx-auto">
             Rejoignez des milliers de propriétaires satisfaits qui ont simplifié leur gestion
             immobilière
           </p>
@@ -128,7 +128,7 @@ export default function TestimonialsSection() {
 
         {/* Bottom Stats */}
         <motion.div
-          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
+          className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

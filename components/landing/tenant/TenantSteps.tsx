@@ -41,12 +41,12 @@ export default function TenantSteps() {
                     <span className="inline-block text-[#F4C430] text-sm font-medium tracking-widest uppercase mb-4">
                         Comment ça marche
                     </span>
-                    <h2 className="font-display text-3xl md:text-4xl text-white">
+                    <h2 className="font-display text-[clamp(1.875rem,3.5vw,2.25rem)] text-white">
                         Votre prochain chez-vous en <span className="text-[#F4C430]">3 étapes</span>
                     </h2>
                 </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 relative">
                     {/* Connector Line (Desktop) */}
                     <div className="hidden md:block absolute top-[2.5rem] left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent border-t border-dashed border-zinc-800 z-0" />
 

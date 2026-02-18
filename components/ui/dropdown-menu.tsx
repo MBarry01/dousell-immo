@@ -92,9 +92,7 @@ const DropdownMenuItem = React.forwardRef<
     )}
     {...props}
   >
-    <div className="flex-1 min-w-0">
-      {children}
-    </div>
+    {children}
   </DropdownMenuPrimitive.Item>
 ))
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName
@@ -119,9 +117,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
         <Check className="h-4 w-4" />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
-    <div className="flex-1 min-w-0">
-      {children}
-    </div>
+    {children}
   </DropdownMenuPrimitive.CheckboxItem>
 ))
 DropdownMenuCheckboxItem.displayName =
@@ -146,9 +142,7 @@ const DropdownMenuRadioItem = React.forwardRef<
         <Circle className="h-2 w-2 fill-current" />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
-    <div className="flex-1 min-w-0">
-      {children}
-    </div>
+    {children}
   </DropdownMenuPrimitive.RadioItem>
 ))
 DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName
