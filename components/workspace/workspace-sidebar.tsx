@@ -101,6 +101,7 @@ interface SidebarContentProps {
   currentTeamId?: string;
   onSwitchTeam?: (teamId: string) => Promise<void>;
   onRequestAccess?: (permission: TeamPermissionKey, label: string) => void;
+  onMenuOpenChange?: (isOpen: boolean) => void;
   badgeCounts?: { unreadMessages: number; pendingMaintenance: number };
   user?: SupabaseUser | null;
 }
@@ -114,6 +115,7 @@ function SidebarContent({
   currentTeamId,
   onSwitchTeam,
   onRequestAccess,
+  onMenuOpenChange,
   badgeCounts = { unreadMessages: 0, pendingMaintenance: 0 },
   user,
 }: SidebarContentProps) {
@@ -165,8 +167,8 @@ function SidebarContent({
 
         {isMobile && (
           <SheetClose asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-foreground">
-              <X className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-foreground touch-target">
+              <X className="h-5 w-5" />
             </Button>
           </SheetClose>
         )}
@@ -175,11 +177,11 @@ function SidebarContent({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0 text-foreground"
+            className="h-11 w-11 shrink-0 text-foreground touch-target"
             onClick={onCollapse}
           >
             <ChevronLeft className={cn(
-              "h-4 w-4 transition-transform",
+              "h-5 w-5 transition-transform",
               isCollapsed && "rotate-180"
             )} />
           </Button>
@@ -197,6 +199,7 @@ function SidebarContent({
             currentTeamId={currentTeamId || teams[0]?.id}
             isCollapsed={isCollapsed && !isMobile}
             onSwitchTeam={onSwitchTeam}
+            onOpenChange={onMenuOpenChange}
           />
         </div>
       )}
@@ -248,11 +251,11 @@ function SidebarContent({
               prefetch={false} // Disable prefetch to prevent stale RSC cache
               onClick={() => isMobile && onMobileNavigate?.()}
               className={cn(
-                "flex items-center rounded-lg transition-all duration-200 group h-11",
+                "flex items-center rounded-lg transition-all duration-200 group h-11 no-select active:scale-[0.98]",
                 "px-[14px]",
                 isActive
                   ? "bg-[#0F172A] text-white shadow-md font-medium dark:bg-primary/10 dark:text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent"
               )}
               title={isCollapsed && !isMobile ? item.label : undefined}
             >
@@ -290,7 +293,10 @@ function SidebarContent({
       {/* Widget Permissions Temporaires (Uniquement pour /gestion) */}
       {pathname?.startsWith("/gestion") && (
         <div className="shrink-0">
-          <TemporaryAccessWidget collapsed={isCollapsed && !isMobile} />
+          <TemporaryAccessWidget
+            collapsed={isCollapsed && !isMobile}
+            teamId={currentTeamId}
+          />
         </div>
       )}
 
@@ -335,8 +341,8 @@ function SidebarContent({
             href="/gestion"
             onClick={() => isMobile && onMobileNavigate?.()}
             className={cn(
-              "flex items-center rounded-lg transition-all px-[14px] h-11",
-              "bg-primary/10 text-primary hover:bg-primary/20"
+              "flex items-center rounded-lg transition-all px-[14px] h-11 no-select active:scale-[0.98]",
+              "bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/25"
             )}
             title={isCollapsed && !isMobile ? "Gestion Locative" : undefined}
           >
@@ -396,8 +402,17 @@ export function WorkspaceSidebar({
     });
   }, [currentTeamId, openAccessModal]);
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isMenuOpenRef = useRef(false);
+
+  const handleMenuOpenChange = useCallback((open: boolean) => {
+    setIsMenuOpen(open);
+    isMenuOpenRef.current = open;
+  }, []);
+
   // Gestion du hover avec délai pour éviter les bugs de flickering
   const handleMouseEnter = useCallback(() => {
+    // console.log('[Sidebar] Mouse Enter');
     // Annuler tout timer de fermeture en cours
     if (collapseTimeoutRef.current) {
       clearTimeout(collapseTimeoutRef.current);
@@ -407,11 +422,33 @@ export function WorkspaceSidebar({
   }, []);
 
   const handleMouseLeave = useCallback(() => {
+    // console.log('[Sidebar] Mouse Leave, isMenuOpen:', isMenuOpen);
+    // Ne pas replier si un menu est ouvert (dropdown, popover...)
+    if (isMenuOpenRef.current) return;
+
     // Délai avant de replier pour éviter les fermetures accidentelles
     collapseTimeoutRef.current = setTimeout(() => {
+      //   console.log('[Sidebar] Collapsing now...');
       setIsCollapsed(true);
     }, 200); // 200ms de délai
-  }, []);
+  }, [isMenuOpen]);
+
+  // Si le menu se ferme et que la souris n'est pas dessus (on ne peut pas facilement le savoir ici),
+  // on pourrait vouloir replier, mais c'est risqué. 
+  // On laisse l'utilisateur sortir de la sidebar pour déclencher le repli.
+
+  // Effet pour forcer l'ouverture si le menu est ouvert
+  useEffect(() => {
+    // console.log('[Sidebar] isMenuOpen changed:', isMenuOpen);
+    if (isMenuOpen) {
+      if (collapseTimeoutRef.current) {
+        clearTimeout(collapseTimeoutRef.current);
+        collapseTimeoutRef.current = null;
+      }
+      setIsCollapsed(false);
+    }
+  }, [isMenuOpen]);
+
 
   return (
     <>
@@ -432,6 +469,7 @@ export function WorkspaceSidebar({
             currentTeamId={currentTeamId}
             onSwitchTeam={onSwitchTeam}
             onRequestAccess={handleRequestAccess}
+            onMenuOpenChange={handleMenuOpenChange}
             badgeCounts={badgeCounts}
             user={user}
           />
@@ -460,6 +498,7 @@ export function WorkspaceSidebar({
             currentTeamId={currentTeamId}
             onSwitchTeam={onSwitchTeam}
             onRequestAccess={handleRequestAccess}
+            onMenuOpenChange={handleMenuOpenChange}
             badgeCounts={badgeCounts}
             user={user}
           />

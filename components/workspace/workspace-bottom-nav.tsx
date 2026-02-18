@@ -209,7 +209,7 @@ export function WorkspaceBottomNav() {
               key={item.href}
               href={item.href}
               prefetch={false} // Disable prefetch to prevent stale RSC cache
-              className="flex flex-1 flex-col items-center justify-center gap-1 min-w-0"
+              className="flex flex-1 flex-col items-center justify-center gap-1 min-w-0 no-select active:scale-95 transition-transform duration-100"
             >
               <span
                 className={cn(

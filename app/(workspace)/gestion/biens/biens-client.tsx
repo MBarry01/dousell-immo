@@ -217,7 +217,7 @@ export function BiensClient({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher un bien..."
-              className="w-full bg-card border border-border rounded-lg pl-10 pr-4 py-2.5 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
+              className="w-full bg-card border border-border rounded-lg pl-10 pr-4 h-11 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-base"
             />
           </form>
 
@@ -225,27 +225,27 @@ export function BiensClient({
           <div className="bg-muted p-1 rounded-lg inline-flex">
             <button
               onClick={() => setCategoryFilter("all")}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${categoryFilter === "all"
+              className={`px-4 h-11 flex items-center justify-center rounded-md text-sm font-medium transition-all active:scale-95 ${categoryFilter === "all"
                 ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                 }`}
             >
               Tous
             </button>
             <button
               onClick={() => setCategoryFilter("vente")}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${categoryFilter === "vente"
+              className={`px-4 h-11 flex items-center justify-center rounded-md text-sm font-medium transition-all active:scale-95 ${categoryFilter === "vente"
                 ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                 }`}
             >
               Vente
             </button>
             <button
               onClick={() => setCategoryFilter("location")}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${categoryFilter === "location"
+              className={`px-4 h-11 flex items-center justify-center rounded-md text-sm font-medium transition-all active:scale-95 ${categoryFilter === "location"
                 ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                 }`}
             >
               Location
@@ -259,30 +259,30 @@ export function BiensClient({
           <div className="flex gap-2">
             <button
               onClick={() => setStatusFilter("published")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${statusFilter === "published"
+              className={`flex items-center gap-2 px-3 h-11 rounded-full text-xs font-medium transition-all active:scale-95 ${statusFilter === "published"
                 ? "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/50"
                 : "border border-border hover:border-muted-foreground text-muted-foreground"
                 }`}
             >
-              <Eye className="w-3.5 h-3.5" /> En ligne
+              <Eye className="w-4 h-4" /> En ligne
             </button>
             <button
               onClick={() => setStatusFilter("draft")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${statusFilter === "draft"
+              className={`flex items-center gap-2 px-3 h-11 rounded-full text-xs font-medium transition-all active:scale-95 ${statusFilter === "draft"
                 ? "bg-muted text-foreground border border-muted-foreground/50"
                 : "border border-border hover:border-muted-foreground text-muted-foreground"
                 }`}
             >
-              <EyeOff className="w-3.5 h-3.5" /> Brouillon
+              <EyeOff className="w-4 h-4" /> Brouillon
             </button>
             <button
               onClick={() => setStatusFilter("scheduled")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${statusFilter === "scheduled"
+              className={`flex items-center gap-2 px-3 h-11 rounded-full text-xs font-medium transition-all active:scale-95 ${statusFilter === "scheduled"
                 ? "bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/50"
                 : "border border-border hover:border-muted-foreground text-muted-foreground"
                 }`}
             >
-              <Clock className="w-3.5 h-3.5" /> Programmé
+              <Clock className="w-4 h-4" /> Programmé
             </button>
           </div>
 
@@ -290,14 +290,14 @@ export function BiensClient({
           <div className="flex gap-1 bg-muted border border-border rounded-lg p-1">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-md transition-colors ${viewMode === "grid" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              className={`h-11 w-11 flex items-center justify-center rounded-md transition-all active:scale-95 ${viewMode === "grid" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               <Grid className="w-5 h-5" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 rounded-md transition-colors ${viewMode === "list" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              className={`h-11 w-11 flex items-center justify-center rounded-md transition-all active:scale-95 ${viewMode === "list" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               <List className="w-5 h-5" />

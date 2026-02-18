@@ -801,6 +801,28 @@
   opacity: 0;
 }
 
+/* PWA Native Standards Utilities */
+.no-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Active state feedback for touch interactions */
+.active-press:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+  transition: transform 0.1s ease-out;
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
