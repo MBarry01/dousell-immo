@@ -1,5 +1,5 @@
 import { validatePayDunyaWebhook, type PayDunyaWebhookPayload } from "@/lib/paydunya";
-import { createClient } from "@/utils/supabase/server";
+// import { createClient } from "@/utils/supabase/server"; // Remacé par Admin Client
 import { sendEmail } from "@/lib/mail";
 import { invalidateRentalCaches } from "@/lib/cache/invalidation";
 import { invalidateCacheBatch } from "@/lib/cache/cache-aside";
@@ -53,7 +53,12 @@ export async function POST(request: Request) {
 
     // Gérer les différents statuts de paiement
     if (payload.invoice.status === "completed") {
-      const supabase = await createClient();
+      const { createClient: createSupabaseAdmin } = await import('@supabase/supabase-js');
+      const supabaseAdmin = createSupabaseAdmin(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+      const supabase = supabaseAdmin;
       const customData = payload.custom_data as {
         type?: string;
         property_id?: string;

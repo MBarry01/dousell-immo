@@ -67,7 +67,7 @@ Object.keys(fixesByFile).forEach(relPath => {
         return;
     }
 
-    let fileContent = fs.readFileSync(absPath, 'utf8');
+    const fileContent = fs.readFileSync(absPath, 'utf8');
     const fileLines = fileContent.split(/\r?\n/);
     let modified = false;
 

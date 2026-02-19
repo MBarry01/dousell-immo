@@ -19,8 +19,8 @@ data.forEach(fileResult => {
 Object.keys(fileFixes).forEach(filePath => {
     if (!fs.existsSync(filePath)) return;
 
-    let content = fs.readFileSync(filePath, 'utf8');
-    let lines = content.split('\n');
+    const content = fs.readFileSync(filePath, 'utf8');
+    const lines = content.split('\n');
 
     // Sort errors for this file in descending order (line and then column)
     const errors = fileFixes[filePath].sort((a, b) => {

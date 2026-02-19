@@ -46,11 +46,11 @@ export function PermissionDeniedState({
                         permissionDescription: `Accès requis pour : ${title}`
                     })}
                 >
-                    Demander l'accès
+                    Demander l&apos;accès
                 </Button>
 
                 <p className="text-sm text-muted-foreground">
-                    Une demande sera envoyée au propriétaire de l'équipe.
+                    Une demande sera envoyée au propriétaire de l&apos;équipe.
                 </p>
             </div>
 

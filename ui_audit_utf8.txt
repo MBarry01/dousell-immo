@@ -1,0 +1,5 @@
+﻿
+> dousell-immo@0.1.0 scan:ui
+> tsx scripts/scan-ui.ts
+
+Ô£à Design System Check: PASSED (Warnings allowed)
