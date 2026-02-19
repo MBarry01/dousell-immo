@@ -40,7 +40,6 @@ export async function sendOneSignalNotification({
     const payload: Record<string, unknown> = {
         app_id: ONESIGNAL_APP_ID,
         // Targets
-        include_external_user_ids: cleanUserIds,
         include_aliases: {
             external_id: cleanUserIds
         },

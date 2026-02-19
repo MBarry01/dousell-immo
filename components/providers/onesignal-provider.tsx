@@ -31,7 +31,7 @@ export const initOneSignal = async () => {
                         prompts: [
                             {
                                 type: "push",
-                                autoPrompt: false,
+                                autoPrompt: true,
                                 text: {
                                     actionMessage: "Activez les notifications pour être alerté des paiements, messages et mises à jour de vos biens. Désactivable à tout moment.",
                                     acceptButton: "Activer",
@@ -39,7 +39,7 @@ export const initOneSignal = async () => {
                                 },
                                 delay: {
                                     pageViews: 1,
-                                    timeDelay: 5,
+                                    timeDelay: 2,
                                 }
                             }
                         ]
