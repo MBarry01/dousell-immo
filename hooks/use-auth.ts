@@ -10,79 +10,40 @@ export function useAuth() {
 
   useEffect(() => {
     let mounted = true;
-    let subscription: { unsubscribe: () => void } | null = null;
+    const supabase = createClient();
 
-    const initAuth = async () => {
-      // Timeout de sécurité pour éviter un chargement infini
-      const timeoutId = setTimeout(() => {
-        if (mounted) {
-          console.warn("[useAuth] Timeout - Force loading à false");
-          setLoading(false);
-          setUser(null);
-        }
-      }, 10000); // 10 secondes max
+    const handleAuth = (session: any) => {
+      if (!mounted) return;
+      const newUser = session?.user ?? null;
 
-      try {
-        const supabase = createClient();
+      setUser(prev => {
+        // Identity check to avoid redundant re-renders
+        if (prev?.id === newUser?.id) return prev;
+        return newUser;
+      });
 
-        // Get initial session (getSession() est plus silencieux que getUser() pour les utilisateurs non connectés)
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        clearTimeout(timeoutId);
-        
-        if (mounted) {
-          if (sessionError) {
-            // Log seulement les vraies erreurs (pas les sessions manquantes)
-            const isSessionMissing = sessionError.message?.includes("session") || 
-                                     sessionError.name === "AuthSessionMissingError";
-            if (!isSessionMissing) {
-              console.error("Error getting session:", sessionError);
-            }
-            setUser(null);
-          } else {
-            setUser(session?.user ?? null);
-          }
-          setLoading(false);
-        }
-
-        // Listen for auth changes
-        const {
-          data: { subscription: authSubscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-          if (mounted) {
-            setUser(session?.user ?? null);
-            setLoading(false);
-          }
-        });
-
-        subscription = authSubscription;
-      } catch (error) {
-        clearTimeout(timeoutId);
-        
-        // Ignorer silencieusement les erreurs de session manquante
-        const isSessionMissing = (error as Error)?.message?.includes("session") ||
-                                 (error as { name?: string })?.name === "AuthSessionMissingError";
-        
-        if (!isSessionMissing) {
-          // Log seulement les vraies erreurs (problème de configuration, réseau, etc.)
-          console.error("Error initializing auth:", error);
-        }
-        
-        // Toujours définir loading à false pour éviter un chargement infini
-        if (mounted) {
-          setUser(null);
-          setLoading(false);
-        }
-      }
+      setLoading(false);
     };
 
-    initAuth();
+    // 1. Initial State Check
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        const isMissing = error.message?.includes("session") || error.name === "AuthSessionMissingError";
+        if (!isMissing) console.error("Session check error:", error);
+        handleAuth(null);
+      } else {
+        handleAuth(session);
+      }
+    }).catch(() => handleAuth(null));
+
+    // 2. Continuous Listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleAuth(session);
+    });
 
     return () => {
       mounted = false;
-      if (subscription) {
-        subscription.unsubscribe();
-      }
+      subscription.unsubscribe();
     };
   }, []);
 

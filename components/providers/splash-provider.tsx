@@ -143,19 +143,12 @@ export const SplashProvider = ({
     return () => clearTimeout(forceExitTimer);
   }, [showSplash, isPWASplashActive, showEveryVisit]);
 
-  // En mode navigateur : rendu direct sans wrapper de masquage
-  if (!showSplash && !isPWASplashActive) {
-    return <>{children}</>;
-  }
-
-  // En mode PWA avec splash actif : wrapper avec masquage + animation
+  // Rendu unifié pour éviter l'unmount/remount des children (source de boucles infinies)
   return (
     <>
-      {showSplash && (
-        <AnimatePresence mode="wait">
-          <SplashScreen key="splash-screen" />
-        </AnimatePresence>
-      )}
+      <AnimatePresence mode="wait">
+        {showSplash && <SplashScreen key="splash-screen" />}
+      </AnimatePresence>
 
       <div
         key="main-content"
