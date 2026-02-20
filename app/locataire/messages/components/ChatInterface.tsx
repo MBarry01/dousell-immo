@@ -146,9 +146,13 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
     }, {} as Record<string, Message[]>);
 
     return (
-        <div className="flex flex-col flex-1 min-h-[calc(100svh-13rem-env(safe-area-inset-bottom))] bg-slate-50 w-full overflow-hidden">
-            {/* Header */}
-            <div className="bg-white border-b border-slate-200 px-4 py-3 pb-3 flex items-center gap-3 shadow-sm shrink-0">
+        <div className={cn(
+            "fixed inset-x-0 z-30 flex flex-col overflow-hidden bg-slate-50",
+            "top-[calc(4rem+env(safe-area-inset-top))] md:top-16",
+            "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0"
+        )}>
+            {/* Header Chat - Fixe en haut */}
+            <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm shrink-0 z-20">
                 <Link href="/locataire" className="p-2 -ml-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
                     <ChevronLeft className="w-5 h-5" />
                 </Link>
@@ -157,8 +161,8 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                         {ownerName?.[0]?.toUpperCase() || 'P'}
                     </div>
                     <div>
-                        <h2 className="font-semibold text-slate-900 leading-tight">{ownerName || 'Propriétaire'}</h2>
-                        <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                        <h2 className="font-semibold text-slate-900 leading-tight text-sm">{ownerName || 'Propriétaire'}</h2>
+                        <p className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                             En ligne
                         </p>
@@ -232,8 +236,8 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
-            <div className="bg-white/90 backdrop-blur-md border-t border-slate-200 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shrink-0">
+            {/* Input - Fixe en bas du container */}
+            <div className="bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shrink-0 z-20">
                 <form onSubmit={handleSend} className="flex items-center gap-2 max-w-lg mx-auto">
                     <input
                         type="text"
@@ -247,7 +251,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                         disabled={!newMessage.trim() || isSending}
                         className="w-11 h-11 rounded-full bg-slate-900 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 transition-all active:scale-95 shrink-0"
                     >
-                        <Send className="w-5 h-5" />
+                        <Send className="w-5 h-5 mx-auto" />
                     </button>
                 </form>
             </div>

@@ -135,22 +135,34 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
     }, {} as Record<string, Message[]>);
 
     return (
-        <div className={`flex flex-col flex-1 min-h-[calc(100svh-10rem-env(safe-area-inset-bottom))] lg:h-[calc(100vh-8rem)] ${isDark ? 'bg-[#0B1120]' : 'bg-gray-50'}`}>
-            {/* Header */}
-            <div className={`border-b px-4 py-3 pb-3 flex items-center gap-3 shadow-sm shrink-0 ${isDark ? 'bg-card border-border' : 'bg-white border-gray-200'
-                }`}>
-                <Link href="/gestion/messages" className={`p-2 -ml-2 rounded-full transition-colors ${isDark ? 'text-slate-400 hover:bg-slate-800' : 'text-gray-500 hover:bg-gray-100'
-                    }`}>
+        <div className={cn(
+            "fixed inset-x-0 z-30 flex flex-col overflow-hidden",
+            "top-[calc(3.5rem+env(safe-area-inset-top))] md:top-[calc(3.5rem)]",
+            "bottom-[calc(4rem+env(safe-area-inset-bottom))] lg:bottom-0",
+            "lg:left-16", // Offset pour la sidebar desktop
+            isDark ? 'bg-[#0B1120]' : 'bg-gray-50'
+        )}>
+            {/* Header Chat - Fixe en haut du container */}
+            <div className={cn(
+                "border-b px-4 py-3 flex items-center gap-3 shadow-sm shrink-0 z-20",
+                isDark ? 'bg-card/95 border-border backdrop-blur-md' : 'bg-white/95 border-gray-200 backdrop-blur-md'
+            )}>
+                <Link href="/gestion/messages" className={cn(
+                    "p-2 -ml-2 rounded-full transition-colors",
+                    isDark ? "text-slate-400 hover:bg-slate-800" : "text-gray-500 hover:bg-gray-100"
+                )}>
                     <ChevronLeft className="w-5 h-5" />
                 </Link>
                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => (window.location.href = `/gestion/locations/${leaseId}`)}>
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold border ${isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-gray-100 text-gray-600 border-gray-200'
-                        }`}>
+                    <div className={cn(
+                        "w-9 h-9 rounded-full flex items-center justify-center font-bold border",
+                        isDark ? "bg-slate-800 text-slate-300 border-slate-700" : "bg-gray-100 text-gray-600 border-gray-200"
+                    )}>
                         {tenantName?.[0] || 'L'}
                     </div>
                     <div>
-                        <h2 className={`font-semibold leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>{tenantName || 'Locataire'}</h2>
-                        <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>Détails du bail</p>
+                        <h2 className={cn("font-semibold leading-tight text-sm", isDark ? "text-white" : "text-gray-900")}>{tenantName || 'Locataire'}</h2>
+                        <p className={cn("text-[10px]", isDark ? "text-slate-500" : "text-gray-500")}>Détails du bail</p>
                     </div>
                 </div>
             </div>
@@ -223,9 +235,11 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
-            <div className={`border-t px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shrink-0 bg-background/80 backdrop-blur-md ${isDark ? 'border-slate-800' : 'border-gray-200'
-                }`}>
+            {/* Input - Fixe en bas du container */}
+            <div className={cn(
+                "border-t px-4 py-3 shrink-0 z-20",
+                isDark ? "bg-card/95 border-border backdrop-blur-md" : "bg-white/95 border-gray-200 backdrop-blur-md"
+            )}>
                 <form onSubmit={handleSend} className="flex items-center gap-2 w-full mx-auto max-w-4xl">
                     <input
                         type="text"
