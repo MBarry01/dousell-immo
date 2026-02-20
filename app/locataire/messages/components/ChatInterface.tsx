@@ -102,7 +102,8 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
     };
 
     useEffect(() => {
-        scrollToBottom();
+        const timer = setTimeout(scrollToBottom, 100);
+        return () => clearTimeout(timer);
     }, [messages]);
 
     const handleSend = async (e: React.FormEvent) => {

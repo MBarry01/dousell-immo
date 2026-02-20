@@ -92,7 +92,8 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
     }, [leaseId, currentUserId]);
 
     useEffect(() => {
-        scrollToBottom();
+        const timer = setTimeout(scrollToBottom, 100);
+        return () => clearTimeout(timer);
     }, [messages]);
 
     const handleSend = async (e: React.FormEvent) => {
