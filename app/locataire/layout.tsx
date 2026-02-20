@@ -181,7 +181,7 @@ export default function LocataireLayout({
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col light">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 pwa-header-safe">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo - DousellLoc branding */}
           <Link href="/locataire" className="flex items-center gap-2">

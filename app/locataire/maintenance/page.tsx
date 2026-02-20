@@ -430,7 +430,7 @@ export default function MaintenanceListPage() {
             {requests.length > 0 && (
                 <Link
                     href="/locataire/maintenance/new"
-                    className="fixed bottom-24 right-4 w-14 h-14 bg-zinc-900 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-zinc-800 transition-colors z-20"
+                    className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 w-14 h-14 bg-zinc-900 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-zinc-800 transition-colors z-20"
                 >
                     <Plus className="w-7 h-7" />
                 </Link>

@@ -146,7 +146,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
     }, {} as Record<string, Message[]>);
 
     return (
-        <div className="flex flex-col h-[calc(100dvh-64px)] lg:h-[calc(100dvh-64px)] h-[calc(100dvh-64px-var(--mobile-nav-height))] bg-slate-50">
+        <div className="flex flex-col h-[calc(100dvh-9rem-env(safe-area-inset-bottom))] lg:h-[calc(100dvh-5.5rem)] bg-slate-50">
             {/* Header */}
             <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm z-10 shrink-0">
                 <Link href="/locataire" className="p-2 -ml-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
