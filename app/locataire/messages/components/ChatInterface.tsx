@@ -170,8 +170,8 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                 </div>
             </div>
 
-            {/* Zone Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent pb-4">
+            {/* Zone Messages - Scrollable avec comportement natif */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent pb-4 overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {Object.entries(groupedMessages).map(([dateKey, msgs]) => (
                     <div key={dateKey} className="space-y-4">
                         {/* Date Header */}
@@ -244,7 +244,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Écrivez un message..."
-                        className="flex-1 bg-slate-100 border-none rounded-full px-4 h-11 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-300 outline-none transition-all"
+                        className="flex-1 bg-slate-100 border-none rounded-full px-4 h-11 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-300 outline-none transition-all text-base"
                     />
                     <button
                         type="submit"

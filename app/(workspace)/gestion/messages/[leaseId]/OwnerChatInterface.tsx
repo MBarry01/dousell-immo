@@ -167,14 +167,16 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
                 </div>
             </div>
 
-            {/* Zone Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent pb-4">
+            {/* Zone Messages - Scrollable avec comportement natif */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent pb-4 overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {Object.entries(groupedMessages).map(([dateKey, msgs]) => (
                     <div key={dateKey} className="space-y-4">
                         {/* Date Header */}
                         <div className="flex justify-center sticky top-0 z-10 py-2">
-                            <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full border shadow-sm backdrop-blur-sm ${isDark ? 'text-slate-500 bg-slate-900/80 border-slate-800' : 'text-gray-500 bg-white/80 border-gray-200'
-                                }`}>
+                            <span className={cn(
+                                "text-[10px] uppercase font-bold px-2 py-1 rounded-full border shadow-sm backdrop-blur-sm",
+                                isDark ? "text-slate-500 bg-slate-900/80 border-slate-800" : "text-gray-500 bg-white/80 border-gray-200"
+                            )}>
                                 {format(new Date(dateKey), 'd MMMM yyyy', { locale: fr })}
                             </span>
                         </div>
@@ -246,10 +248,12 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Écrire un message..."
-                        className={`flex-1 rounded-full px-4 h-11 focus:ring-2 focus:ring-primary outline-none transition-all border ${isDark
-                            ? 'bg-slate-900 border-slate-800 text-white placeholder:text-slate-500'
-                            : 'bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-400'
-                            }`}
+                        className={cn(
+                            "flex-1 rounded-full px-4 h-11 focus:ring-2 focus:ring-primary outline-none transition-all border text-base",
+                            isDark
+                                ? 'bg-slate-900 border-slate-800 text-white placeholder:text-slate-500'
+                                : 'bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-400'
+                        )}
                     />
                     <button
                         type="submit"
