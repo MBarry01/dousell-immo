@@ -135,7 +135,7 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
     }, {} as Record<string, Message[]>);
 
     return (
-        <div className={`fixed inset-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:static lg:h-[calc(100dvh-5.5rem)] flex flex-col z-50 ${isDark ? 'bg-[#0B1120]' : 'bg-gray-50'}`}>
+        <div className={`flex flex-col flex-1 min-h-[calc(100svh-10rem-env(safe-area-inset-bottom))] lg:h-[calc(100vh-8rem)] ${isDark ? 'bg-[#0B1120]' : 'bg-gray-50'}`}>
             {/* Header */}
             <div className={`border-b px-4 py-3 pb-3 flex items-center gap-3 shadow-sm shrink-0 ${isDark ? 'bg-card border-border' : 'bg-white border-gray-200'
                 }`}>
