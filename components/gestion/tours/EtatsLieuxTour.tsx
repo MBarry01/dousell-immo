@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -12,7 +12,7 @@ export function EtatsLieuxTour() {
     const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
 
-    // Attendre que le composant soit monté côté client
+    // Attendre que le composant soit montÃ© cÃ´tÃ© client
     useEffect(() => {
         // Use setTimeout to avoid synchronous setState in effect
         setTimeout(() => setMounted(true), 0);
@@ -74,21 +74,21 @@ export function EtatsLieuxTour() {
         {
             targetId: 'tour-edl-list',
             title: 'Historique des rapports',
-            description: 'Retrouvez ici tous vos états des lieux d\'entrée et de sortie, classés par date. Suivez leur statut (brouillon, complété, signé) en un coup d\'œil.',
+            description: 'Retrouvez ici tous vos Ã©tats des lieux d\'entrÃ©e et de sortie, classÃ©s par date. Suivez leur statut (brouillon, complÃ©tÃ©, signÃ©) en un coup d\'Å“il.',
             imageSrc: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Liste des états des lieux'
+            imageAlt: 'Liste des Ã©tats des lieux'
         },
         {
             targetId: 'tour-edl-new',
             title: 'Nouveau constat',
-            description: 'Lancez un nouvel état des lieux numérique. Notre assistant vous guidera pièce par pièce pour tout documenter avec photos.',
+            description: 'Lancez un nouvel Ã©tat des lieux numÃ©rique. Notre assistant vous guidera piÃ¨ce par piÃ¨ce pour tout documenter avec photos.',
             imageSrc: 'https://images.unsplash.com/photo-1626178793926-22b28830aa30?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Nouvel état des lieux'
+            imageAlt: 'Nouvel Ã©tat des lieux'
         },
         {
             targetId: 'tour-edl-pdf',
-            title: 'Modèle PDF Vierge',
-            description: 'Besoin d\'une version papier ? Téléchargez un modèle d\'état des lieux vierge conforme à la loi ALUR pour le remplir manuellement.',
+            title: 'ModÃ¨le PDF Vierge',
+            description: 'Besoin d\'une version papier ? TÃ©lÃ©chargez un modÃ¨le d\'Ã©tat des lieux vierge conforme Ã  la loi ALUR pour le remplir manuellement.',
             imageSrc: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'PDF Vierge'
         }
@@ -106,9 +106,9 @@ export function EtatsLieuxTour() {
     const floatingButton = mounted ? createPortal(
         <button
             onClick={resetTour}
-            className="fixed right-6 z-[100000] p-3 rounded-full shadow-lg backdrop-blur-sm"
+            className="fixed right-6 z-\[9990\] p-3 rounded-full shadow-lg backdrop-blur-sm"
             style={{
-                bottom: getButtonPosition() === 'bottom-20' ? '5rem' : '1.5rem',
+                bottom: getButtonPosition() === 'bottom-20' ? 'calc(5rem + env(safe-area-inset-bottom, 0px))' : 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
                 backgroundColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
                 borderColor: `${accentColor}33`,
                 borderWidth: '1px',
@@ -117,7 +117,7 @@ export function EtatsLieuxTour() {
                 transition: 'bottom 0.3s ease-out, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease'
             }}
             title="Relancer le tutoriel"
-            aria-label="Relancer le tutoriel des états des lieux"
+            aria-label="Relancer le tutoriel des Ã©tats des lieux"
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -70,21 +70,21 @@ export function MessagesTour() {
         {
             targetId: 'tour-msg-header',
             title: 'Votre Messagerie',
-            description: 'Gardez le lien avec vos locataires. Centralisez tous les échanges concernant la gestion, les paiements ou les interventions.',
+            description: 'Gardez le lien avec vos locataires. Centralisez tous les Ã©changes concernant la gestion, les paiements ou les interventions.',
             imageSrc: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Messagerie'
         },
         {
             targetId: 'tour-msg-new',
             title: 'Nouvelle conversation',
-            description: 'Démarrez une discussion avec un locataire pour lui envoyer une notification ou une quittance.',
+            description: 'DÃ©marrez une discussion avec un locataire pour lui envoyer une notification ou une quittance.',
             imageSrc: 'https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Nouveau message'
         },
         {
             targetId: 'tour-msg-list',
-            title: 'Vos échanges',
-            description: 'Retrouvez ici l\'historique de vos conversations, triées par locataire et par bien.',
+            title: 'Vos Ã©changes',
+            description: 'Retrouvez ici l\'historique de vos conversations, triÃ©es par locataire et par bien.',
             imageSrc: 'https://images.unsplash.com/photo-1555421689-d68471e189f2?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Liste conversations'
         }
@@ -102,9 +102,9 @@ export function MessagesTour() {
     const floatingButton = mounted ? createPortal(
         <button
             onClick={resetTour}
-            className="fixed right-6 z-[100000] p-3 rounded-full shadow-lg backdrop-blur-sm"
+            className="fixed right-6 z-\[9990\] p-3 rounded-full shadow-lg backdrop-blur-sm"
             style={{
-                bottom: getButtonPosition() === 'bottom-20' ? '5rem' : '1.5rem',
+                bottom: getButtonPosition() === 'bottom-20' ? 'calc(5rem + env(safe-area-inset-bottom, 0px))' : 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
                 backgroundColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
                 borderColor: `${accentColor}33`,
                 borderWidth: '1px',

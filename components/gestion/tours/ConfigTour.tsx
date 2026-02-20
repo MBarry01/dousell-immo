@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -69,7 +69,7 @@ export function ConfigTour() {
     const tourSteps: TourStep[] = useMemo(() => [
         {
             targetId: 'tour-config-tabs',
-            title: 'Paramètres avancés',
+            title: 'ParamÃ¨tres avancÃ©s',
             description: 'Configurez votre espace de travail. Personnalisez votre profil et votre image de marque (logo, couleurs) pour vos documents.',
             imageSrc: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Config Tabs'
@@ -77,13 +77,13 @@ export function ConfigTour() {
         {
             targetId: 'tour-config-subscription', // Will need to add this ID if possible, or just guide generally
             title: 'Votre Abonnement',
-            description: 'Gérez votre offre (Starter, Pro, Business), consultez vos factures et mettez à jour votre méthode de paiement.',
+            description: 'GÃ©rez votre offre (Starter, Pro, Business), consultez vos factures et mettez Ã  jour votre mÃ©thode de paiement.',
             imageSrc: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Abonnement'
         },
         {
             targetId: 'tour-config-api', // Will need to add this ID if possible
-            title: 'Intégrations API',
+            title: 'IntÃ©grations API',
             description: 'Connectez vos outils externes via notre API pour automatiser vos processus de gestion.',
             imageSrc: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'API'
@@ -102,9 +102,9 @@ export function ConfigTour() {
     const floatingButton = mounted ? createPortal(
         <button
             onClick={resetTour}
-            className="fixed right-6 z-[100000] p-3 rounded-full shadow-lg backdrop-blur-sm"
+            className="fixed right-6 z-\[9990\] p-3 rounded-full shadow-lg backdrop-blur-sm"
             style={{
-                bottom: getButtonPosition() === 'bottom-20' ? '5rem' : '1.5rem',
+                bottom: getButtonPosition() === 'bottom-20' ? 'calc(5rem + env(safe-area-inset-bottom, 0px))' : 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
                 backgroundColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
                 borderColor: `${accentColor}33`,
                 borderWidth: '1px',

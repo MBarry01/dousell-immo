@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -70,14 +70,14 @@ export function EquipeTour() {
         {
             targetId: 'tour-team-header',
             title: 'Espace Collaboratif',
-            description: 'Gérez votre équipe, définissez les rôles et collaborez efficacement sur la gestion de votre parc immobilier.',
+            description: 'GÃ©rez votre Ã©quipe, dÃ©finissez les rÃ´les et collaborez efficacement sur la gestion de votre parc immobilier.',
             imageSrc: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'EquipeHeader'
         },
         {
             targetId: 'tour-team-stats',
             title: ' Vue d\'ensemble',
-            description: 'Suivez le nombre de membres actifs, les invitations en attente et les baux gérés par votre équipe.',
+            description: 'Suivez le nombre de membres actifs, les invitations en attente et les baux gÃ©rÃ©s par votre Ã©quipe.',
             imageSrc: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'StatsEquipe'
         },
@@ -90,8 +90,8 @@ export function EquipeTour() {
         },
         {
             targetId: 'tour-team-tabs',
-            title: 'Contrôle des Accès',
-            description: 'Naviguez entre la liste des membres et la gestion fine des permissions pour sécuriser vos données.',
+            title: 'ContrÃ´le des AccÃ¨s',
+            description: 'Naviguez entre la liste des membres et la gestion fine des permissions pour sÃ©curiser vos donnÃ©es.',
             imageSrc: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Permissions'
         }
@@ -109,9 +109,9 @@ export function EquipeTour() {
     const floatingButton = mounted ? createPortal(
         <button
             onClick={resetTour}
-            className="fixed right-6 z-[100000] p-3 rounded-full shadow-lg backdrop-blur-sm"
+            className="fixed right-6 z-\[9990\] p-3 rounded-full shadow-lg backdrop-blur-sm"
             style={{
-                bottom: getButtonPosition() === 'bottom-20' ? '5rem' : '1.5rem',
+                bottom: getButtonPosition() === 'bottom-20' ? 'calc(5rem + env(safe-area-inset-bottom, 0px))' : 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
                 backgroundColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
                 borderColor: `${accentColor}33`,
                 borderWidth: '1px',
@@ -120,7 +120,7 @@ export function EquipeTour() {
                 transition: 'bottom 0.3s ease-out, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease'
             }}
             title="Relancer le tutoriel"
-            aria-label="Relancer le tutoriel équipe"
+            aria-label="Relancer le tutoriel Ã©quipe"
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -12,12 +12,12 @@ export function BiensTour({ canCreate = false }: { canCreate?: boolean }) {
     const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
 
-    // Attendre que le composant soit monté côté client
+    // Attendre que le composant soit montÃ© cÃ´tÃ© client
     useEffect(() => {
         // Use setTimeout to avoid synchronous setState in effect
         setTimeout(() => setMounted(true), 0);
 
-        // Détecter si mobile
+        // DÃ©tecter si mobile
         const checkMobile = () => {
             setIsMobile(window.innerWidth < 1024); // lg breakpoint
         };
@@ -29,7 +29,7 @@ export function BiensTour({ canCreate = false }: { canCreate?: boolean }) {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Détecter la visibilité de la bottom nav (sur mobile uniquement)
+    // DÃ©tecter la visibilitÃ© de la bottom nav (sur mobile uniquement)
     useEffect(() => {
         if (!isMobile) {
             // Use setTimeout to avoid synchronous setState in effect
@@ -49,10 +49,10 @@ export function BiensTour({ canCreate = false }: { canCreate?: boolean }) {
                     const currentScrollY = scrollContainer.scrollTop;
                     const scrollDelta = currentScrollY - lastScrollY;
 
-                    // Même logique que la bottom nav
+                    // MÃªme logique que la bottom nav
                     if (Math.abs(scrollDelta) > 10) {
                         if (scrollDelta > 0 && currentScrollY > 100) {
-                            // Scroll vers le bas -> bottom nav cachée
+                            // Scroll vers le bas -> bottom nav cachÃ©e
                             // Use setTimeout to avoid synchronous setState in effect
             setTimeout(() => setIsBottomNavVisible(false), 0);
                         } else if (scrollDelta < 0) {
@@ -75,7 +75,7 @@ export function BiensTour({ canCreate = false }: { canCreate?: boolean }) {
         };
     }, [isMobile]);
 
-    // Étapes du tour pour la page Biens
+    // Ã‰tapes du tour pour la page Biens
     const tourSteps: TourStep[] = useMemo(() => {
         const steps = [
             {
@@ -83,12 +83,12 @@ export function BiensTour({ canCreate = false }: { canCreate?: boolean }) {
                 title: 'Gestion de vos biens',
                 description: 'Retrouvez ici l\'ensemble de votre parc immobilier, avec une vue d\'ensemble sur les biens en vente, en location et leur statut de publication.',
                 imageSrc: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=600',
-                imageAlt: 'Propriété immobilière'
+                imageAlt: 'PropriÃ©tÃ© immobiliÃ¨re'
             },
             {
                 targetId: 'tour-biens-stats',
-                title: 'Indicateurs clés',
-                description: 'Suivez en un coup d\'œil le nombre de biens en ligne, en attente ou brouillon, ainsi que la répartition vente/location.',
+                title: 'Indicateurs clÃ©s',
+                description: 'Suivez en un coup d\'Å“il le nombre de biens en ligne, en attente ou brouillon, ainsi que la rÃ©partition vente/location.',
                 imageSrc: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=600',
                 imageAlt: 'Statistiques'
             },
@@ -105,7 +105,7 @@ export function BiensTour({ canCreate = false }: { canCreate?: boolean }) {
             steps.push({
                 targetId: 'tour-biens-add-button',
                 title: 'Ajouter un nouveau bien',
-                description: 'Créez une nouvelle fiche bien en quelques étapes simples pour commencer à le commercialiser ou le gérer.',
+                description: 'CrÃ©ez une nouvelle fiche bien en quelques Ã©tapes simples pour commencer Ã  le commercialiser ou le gÃ©rer.',
                 imageSrc: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600',
                 imageAlt: 'Nouveau bien'
             });
@@ -125,13 +125,13 @@ export function BiensTour({ canCreate = false }: { canCreate?: boolean }) {
     // Couleur accent adaptative
     const accentColor = isDark ? '#F4C430' : '#7891A8';
 
-    // Bouton flottant à rendre dans un Portal - adaptatif light/dark
+    // Bouton flottant Ã  rendre dans un Portal - adaptatif light/dark
     const floatingButton = mounted ? createPortal(
         <button
             onClick={resetTour}
-            className="fixed right-6 z-[100000] p-3 rounded-full shadow-lg backdrop-blur-sm"
+            className="fixed right-6 z-\[9990\] p-3 rounded-full shadow-lg backdrop-blur-sm"
             style={{
-                bottom: getButtonPosition() === 'bottom-20' ? '5rem' : '1.5rem',
+                bottom: getButtonPosition() === 'bottom-20' ? 'calc(5rem + env(safe-area-inset-bottom, 0px))' : 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
                 backgroundColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
                 borderColor: `${accentColor}33`,
                 borderWidth: '1px',

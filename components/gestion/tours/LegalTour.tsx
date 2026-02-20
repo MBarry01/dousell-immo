@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -69,31 +69,31 @@ export function LegalTour() {
     const tourSteps: TourStep[] = useMemo(() => [
         {
             targetId: 'tour-legal-kpi',
-            title: 'Santé Juridique',
-            description: 'Analysez en un clin d\'œil la conformité de votre parc : baux actifs, renouvellements à venir et niveau de risque calculé.',
+            title: 'SantÃ© Juridique',
+            description: 'Analysez en un clin d\'Å“il la conformitÃ© de votre parc : baux actifs, renouvellements Ã  venir et niveau de risque calculÃ©.',
             imageSrc: 'https://images.unsplash.com/photo-1479142506502-19b3a3b7ff33?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'KPI Juridique'
         },
         {
             targetId: 'tour-legal-alerts',
-            title: 'Radar des Échéances',
-            description: 'Ne manquez jamais une date clé. Notre système vous alerte automatiquement pour les préavis et renouvellements selon la loi sénégalaise.',
+            title: 'Radar des Ã‰chÃ©ances',
+            description: 'Ne manquez jamais une date clÃ©. Notre systÃ¨me vous alerte automatiquement pour les prÃ©avis et renouvellements selon la loi sÃ©nÃ©galaise.',
             imageSrc: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Radar Echéances'
+            imageAlt: 'Radar EchÃ©ances'
         },
         {
             targetId: 'tour-legal-tools',
-            title: 'Générateur Intelligent',
-            description: 'Créez des documents juridiques conformes (Contrats, Quittances, Mises en demeure) pré-remplis avec vos données en quelques secondes.',
+            title: 'GÃ©nÃ©rateur Intelligent',
+            description: 'CrÃ©ez des documents juridiques conformes (Contrats, Quittances, Mises en demeure) prÃ©-remplis avec vos donnÃ©es en quelques secondes.',
             imageSrc: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Générateur Documents'
+            imageAlt: 'GÃ©nÃ©rateur Documents'
         },
         {
             targetId: 'tour-legal-reference',
-            title: 'Cadre Légal',
-            description: 'Accédez rapidement aux textes de référence (COCC, Loi 2014) et aux délais légaux applicables pour vos actions de gestion.',
+            title: 'Cadre LÃ©gal',
+            description: 'AccÃ©dez rapidement aux textes de rÃ©fÃ©rence (COCC, Loi 2014) et aux dÃ©lais lÃ©gaux applicables pour vos actions de gestion.',
             imageSrc: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&q=80&w=600',
-            imageAlt: 'Référence Légale'
+            imageAlt: 'RÃ©fÃ©rence LÃ©gale'
         }
     ], []);
 
@@ -109,9 +109,9 @@ export function LegalTour() {
     const floatingButton = mounted ? createPortal(
         <button
             onClick={resetTour}
-            className="fixed right-6 z-[100000] p-3 rounded-full shadow-lg backdrop-blur-sm"
+            className="fixed right-6 z-\[9990\] p-3 rounded-full shadow-lg backdrop-blur-sm"
             style={{
-                bottom: getButtonPosition() === 'bottom-20' ? '5rem' : '1.5rem',
+                bottom: getButtonPosition() === 'bottom-20' ? 'calc(5rem + env(safe-area-inset-bottom, 0px))' : 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
                 backgroundColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
                 borderColor: `${accentColor}33`,
                 borderWidth: '1px',

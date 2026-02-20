@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -12,11 +12,11 @@ export function GestionTour() {
     const [isBottomNavVisible, setIsBottomNavVisible] = useState(false); // Initialize as false
     const [isMobile, setIsMobile] = useState(false);
 
-    // Attendre que le composant soit monté côté client
+    // Attendre que le composant soit montÃ© cÃ´tÃ© client
     useEffect(() => {
         setMounted(true);
 
-        // Détecter si mobile
+        // DÃ©tecter si mobile
         const checkMobile = () => {
             setIsMobile(window.innerWidth < 1024); // lg breakpoint
         };
@@ -27,7 +27,7 @@ export function GestionTour() {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Détecter la visibilité de la bottom nav (sur mobile uniquement)
+    // DÃ©tecter la visibilitÃ© de la bottom nav (sur mobile uniquement)
     useEffect(() => {
         if (!isMobile) {
             setIsBottomNavVisible(false);
@@ -39,21 +39,21 @@ export function GestionTour() {
 
         let lastScrollY = scrollContainer.scrollTop;
 
-        // Initialisation immédiate
+        // Initialisation immÃ©diate
         const initVisibility = () => {
             if (scrollContainer.scrollTop > 100) {
                 setIsBottomNavVisible(false);
             } else {
                 setIsBottomNavVisible(true);
             }
-            // On met à jour lastScrollY pour éviter des sauts
+            // On met Ã  jour lastScrollY pour Ã©viter des sauts
             lastScrollY = scrollContainer.scrollTop;
         };
 
-        // 1. Check immédiat
+        // 1. Check immÃ©diat
         initVisibility();
 
-        // 2. Check retardé pour la restauration du scroll navigateur
+        // 2. Check retardÃ© pour la restauration du scroll navigateur
         const _timeoutId = setTimeout(initVisibility, 100);
 
         let ticking = false;
@@ -64,10 +64,10 @@ export function GestionTour() {
                     const currentScrollY = scrollContainer.scrollTop;
                     const scrollDelta = currentScrollY - lastScrollY;
 
-                    // Seuil de 10px pour éviter les micro-mouvements
+                    // Seuil de 10px pour Ã©viter les micro-mouvements
                     if (Math.abs(scrollDelta) > 10) {
                         if (scrollDelta > 0 && currentScrollY > 100) {
-                            // Scroll vers le bas -> bottom nav cachée
+                            // Scroll vers le bas -> bottom nav cachÃ©e
                             setIsBottomNavVisible(false);
                         } else if (scrollDelta < 0) {
                             // Scroll vers le haut -> bottom nav visible
@@ -89,33 +89,33 @@ export function GestionTour() {
         };
     }, [isMobile]);
 
-    // Étapes du tour pour la page Gestion Locative
+    // Ã‰tapes du tour pour la page Gestion Locative
     const tourSteps: TourStep[] = useMemo(() => [
         {
             targetId: 'tour-gestion-table',
             title: 'Gestion des baux',
-            description: 'Visualisez tous vos baux actifs, suivez les paiements, envoyez des relances et gérez vos locataires.',
+            description: 'Visualisez tous vos baux actifs, suivez les paiements, envoyez des relances et gÃ©rez vos locataires.',
             imageSrc: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Tableau de gestion'
         },
         {
             targetId: 'tour-gestion-actions',
             title: 'Actions rapides',
-            description: 'Générez vos documents (contrats, quittances, états des lieux) et ajoutez de nouveaux locataires en quelques clics.',
+            description: 'GÃ©nÃ©rez vos documents (contrats, quittances, Ã©tats des lieux) et ajoutez de nouveaux locataires en quelques clics.',
             imageSrc: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Actions de gestion'
         },
         {
             targetId: 'tour-gestion-kpi-cards',
-            title: 'Statistiques en temps réel',
-            description: 'Suivez vos indicateurs clés : taux d\'occupation, délais de paiement, taux d\'impayés et revenu moyen par bien.',
+            title: 'Statistiques en temps rÃ©el',
+            description: 'Suivez vos indicateurs clÃ©s : taux d\'occupation, dÃ©lais de paiement, taux d\'impayÃ©s et revenu moyen par bien.',
             imageSrc: 'https://images.unsplash.com/photo-1543286386-713df548e617?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Statistiques de gestion'
         },
         {
             targetId: 'tour-gestion-revenue-chart',
             title: 'Historique des revenus',
-            description: 'Analysez vos revenus collectés et attendus sur les 12 derniers mois pour mieux piloter votre activité.',
+            description: 'Analysez vos revenus collectÃ©s et attendus sur les 12 derniers mois pour mieux piloter votre activitÃ©.',
             imageSrc: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Graphique des revenus'
         }
@@ -129,16 +129,16 @@ export function GestionTour() {
         return isBottomNavVisible ? 'bottom-20' : 'bottom-6'; // Mobile : adaptatif
     };
 
-    // Couleur accent adaptative : Doré en dark, Bleu nuit grisé en light
+    // Couleur accent adaptative : DorÃ© en dark, Bleu nuit grisÃ© en light
     const accentColor = isDark ? '#F4C430' : '#7891A8';
 
-    // Bouton flottant à rendre dans un Portal - adaptatif light/dark
+    // Bouton flottant Ã  rendre dans un Portal - adaptatif light/dark
     const floatingButton = mounted ? createPortal(
         <button
             onClick={resetTour}
-            className="fixed right-6 z-[100000] p-3 rounded-full shadow-lg backdrop-blur-sm"
+            className="fixed right-6 z-\[9990\] p-3 rounded-full shadow-lg backdrop-blur-sm"
             style={{
-                bottom: getButtonPosition() === 'bottom-20' ? '5rem' : '1.5rem',
+                bottom: getButtonPosition() === 'bottom-20' ? 'calc(5rem + env(safe-area-inset-bottom, 0px))' : 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
                 backgroundColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
                 borderColor: `${accentColor}33`, // 20% opacity
                 borderWidth: '1px',
@@ -158,12 +158,12 @@ export function GestionTour() {
         document.body
     ) : null;
 
-    // Callback pour changer de tab selon l'étape du tour
+    // Callback pour changer de tab selon l'Ã©tape du tour
     const handleStepChange = (index: number) => {
         const step = tourSteps[index];
         if (!step) return;
 
-        // Switch de tab basé sur le targetId
+        // Switch de tab basÃ© sur le targetId
         if (step.targetId === 'tour-gestion-kpi-cards' || step.targetId === 'tour-gestion-revenue-chart') {
             window.dispatchEvent(new CustomEvent('dousell-tour-switch-tab', { detail: 'performance' }));
         } else if (step.targetId === 'tour-gestion-table' || step.targetId === 'tour-gestion-actions') {
@@ -183,7 +183,7 @@ export function GestionTour() {
                 onStepChange={handleStepChange}
             />
 
-            {/* Bouton flottant monté directement dans le body via Portal, caché pendant le tour */}
+            {/* Bouton flottant montÃ© directement dans le body via Portal, cachÃ© pendant le tour */}
             {!showTour && floatingButton}
         </>
     );

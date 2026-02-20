@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -69,7 +69,7 @@ export function DocumentsTour() {
     const tourSteps: TourStep[] = useMemo(() => [
         {
             targetId: 'tour-ged-header',
-            title: 'Votre GED complète',
+            title: 'Votre GED complÃ¨te',
             description: 'Centralisez ici tous les documents de votre gestion locative : baux, quittances, factures, assurances, etc.',
             imageSrc: 'https://images.unsplash.com/photo-1568218123281-54c7943d7890?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'GED Documents'
@@ -77,21 +77,21 @@ export function DocumentsTour() {
         {
             targetId: 'tour-ged-upload',
             title: 'Ajout rapide',
-            description: 'Téléversez un nouveau document en quelques secondes et liez-le automatiquement à une propriété ou un locataire.',
+            description: 'TÃ©lÃ©versez un nouveau document en quelques secondes et liez-le automatiquement Ã  une propriÃ©tÃ© ou un locataire.',
             imageSrc: 'https://images.unsplash.com/photo-1618044733300-9472054094ee?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Upload document'
         },
         {
             targetId: 'tour-ged-search',
             title: 'Recherche intelligente',
-            description: 'Retrouvez instantanément un fichier par mot-clé ou filtrez par locataire spécifique pour gagner du temps.',
+            description: 'Retrouvez instantanÃ©ment un fichier par mot-clÃ© ou filtrez par locataire spÃ©cifique pour gagner du temps.',
             imageSrc: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Recherche documents'
         },
         {
             targetId: 'tour-ged-list',
             title: 'Gestion des fichiers',
-            description: 'Consultez, téléchargez ou supprimez vos documents. Visualisez les types de fichiers (PDF, Images) en un coup d\'œil.',
+            description: 'Consultez, tÃ©lÃ©chargez ou supprimez vos documents. Visualisez les types de fichiers (PDF, Images) en un coup d\'Å“il.',
             imageSrc: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&q=80&w=600',
             imageAlt: 'Liste fichiers'
         }
@@ -109,9 +109,9 @@ export function DocumentsTour() {
     const floatingButton = mounted ? createPortal(
         <button
             onClick={resetTour}
-            className="fixed right-6 z-[100000] p-3 rounded-full shadow-lg backdrop-blur-sm"
+            className="fixed right-6 z-\[9990\] p-3 rounded-full shadow-lg backdrop-blur-sm"
             style={{
-                bottom: getButtonPosition() === 'bottom-20' ? '5rem' : '1.5rem',
+                bottom: getButtonPosition() === 'bottom-20' ? 'calc(5rem + env(safe-area-inset-bottom, 0px))' : 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
                 backgroundColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
                 borderColor: `${accentColor}33`,
                 borderWidth: '1px',
