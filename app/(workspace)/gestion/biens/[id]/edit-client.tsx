@@ -122,6 +122,9 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
       const supabase = createClient();
       const uploadedUrls: string[] = [];
 
+      const imageCompressionModule = await import('browser-image-compression');
+      const imageCompression = imageCompressionModule.default || imageCompressionModule;
+
       for (const file of fileArray) {
         if (file.size > 5 * 1024 * 1024) {
           setError(`Le fichier ${file.name} dépasse 5MB`);
@@ -134,17 +137,58 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
           continue;
         }
 
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        // --- SECTION OPTIMISATION ---
+        let fileToUpload: File | Blob = file;
+        let thumbToUpload: File | Blob | null = null;
+        let finalExt = fileExt;
+
+        try {
+          const mainOptions = {
+            maxSizeMB: 0.4,
+            maxWidthOrHeight: 1600,
+            useWebWorker: true,
+            initialQuality: 0.8,
+            fileType: 'image/webp'
+          };
+
+          const thumbOptions = {
+            maxSizeMB: 0.05,
+            maxWidthOrHeight: 400,
+            useWebWorker: true,
+            initialQuality: 0.6,
+            fileType: 'image/webp'
+          };
+
+          // Exécution séquentielle pour préserver la RAM
+          fileToUpload = await imageCompression(file, mainOptions);
+          thumbToUpload = await imageCompression(file, thumbOptions);
+          finalExt = "webp";
+        } catch (compressionError) {
+          console.warn("Échec de la compression client, fallback sur le fichier original", compressionError);
+          // En cas d'échec du client, on utilise le Fallback automatique (l'image d'origine et son ext.)
+        }
+
+        // --- UPLOAD PRINCIPAL ---
+        const baseName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+        const fileName = `${baseName}.${finalExt}`;
         const filePath = `team-properties/${teamId}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from("properties")
-          .upload(filePath, file, { cacheControl: "3600", upsert: false });
+          .upload(filePath, fileToUpload, { cacheControl: "3600", upsert: false });
 
-        if (uploadError) throw new Error(`Erreur upload: ${uploadError.message}`);
+        if (uploadError) throw new Error(`Erreur upload principale: ${uploadError.message}`);
 
         const { data: { publicUrl } } = supabase.storage.from("properties").getPublicUrl(filePath);
         uploadedUrls.push(publicUrl);
+
+        // --- UPLOAD MINIATURE SILENCIEUX ---
+        if (thumbToUpload) {
+          const thumbPath = `team-properties/${teamId}/${baseName}-thumb.${finalExt}`;
+          await supabase.storage
+            .from("properties")
+            .upload(thumbPath, thumbToUpload, { cacheControl: "31536000", upsert: false });
+        }
       }
 
       setFormData((prev) => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));

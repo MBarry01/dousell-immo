@@ -162,24 +162,42 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
             const imageCompressionModule = await import('browser-image-compression');
             const imageCompression = imageCompressionModule.default || imageCompressionModule;
 
-            // Compression
-            const options = {
-                maxSizeMB: 0.5,
-                maxWidthOrHeight: 1920,
-                useWebWorker: true
-            };
-            const compressedFile = await imageCompression(file, options);
+            let fileToProcess: File | Blob = file;
+            let finalName = file.name;
 
-            // Création de l'aperçu local instantané sans charge serveur
-            const localPreviewUrl = URL.createObjectURL(compressedFile);
+            try {
+                // Compression optimisée (WebP, 1600px max)
+                const options = {
+                    maxSizeMB: 0.4,
+                    maxWidthOrHeight: 1600,
+                    useWebWorker: true,
+                    initialQuality: 0.8,
+                    fileType: 'image/webp'
+                };
+
+                toast.loading(`Optimisation photo...`, { id: 'compressing' });
+                const compressedBlob = await imageCompression(file, options);
+                toast.dismiss('compressing');
+
+                // Forcer l'extension webp pour le backend (qui parse file.name)
+                finalName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
+                fileToProcess = new File([compressedBlob], finalName, {
+                    type: "image/webp",
+                    lastModified: Date.now(),
+                });
+            } catch (compressionError) {
+                console.warn("Échec compression client, fallback sur fichier original", compressionError);
+                toast.dismiss('compressing');
+            }
+
+            // Création de l'aperçu local instantané
+            const localPreviewUrl = URL.createObjectURL(fileToProcess);
 
             const newRooms = [...rooms];
             const currentItem = newRooms[roomIndex].items[itemIndex];
 
-            // Ajout du fichier à la file d'attente
-            currentItem.localFiles = [...(currentItem.localFiles || []), compressedFile];
-
-            // Ajout de l'URL éphémère à l'aperçu 
+            // Ajout du fichier optimisé ou original à la file d'attente
+            currentItem.localFiles = [...(currentItem.localFiles || []), fileToProcess as File];
             currentItem.photos = [...(currentItem.photos || []), localPreviewUrl];
 
             setRooms(newRooms);

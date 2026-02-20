@@ -197,13 +197,13 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                                         )}
 
                                         <div className={cn(
-                                            "max-w-[75%] px-4 py-2.5 text-sm shadow-sm break-words relative",
+                                            "max-w-[85%] sm:max-w-[75%] min-w-0 px-4 py-2.5 text-sm shadow-sm relative overflow-hidden",
                                             isMe
                                                 ? "bg-slate-900 text-white rounded-2xl rounded-br-none"
                                                 : "bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-bl-none",
                                             !isLastFromSender && (isMe ? "rounded-br-2xl mb-0.5" : "rounded-bl-2xl mb-0.5")
                                         )}>
-                                            <p className="leading-relaxed">{msg.content}</p>
+                                            <p className="leading-relaxed whitespace-pre-wrap break-words" style={{ wordBreak: 'break-word' }}>{msg.content}</p>
                                             <p className={cn(
                                                 "text-[9px] mt-1 text-right ml-2 opacity-70",
                                                 isMe ? "text-slate-300" : "text-slate-400"

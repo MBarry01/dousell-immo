@@ -188,7 +188,7 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
                                         )}
 
                                         <div className={cn(
-                                            "max-w-[75%] px-4 py-2 text-sm shadow-sm break-words relative",
+                                            "max-w-[85%] sm:max-w-[75%] min-w-0 px-4 py-2 text-sm shadow-sm relative overflow-hidden",
                                             isMe
                                                 ? "bg-primary text-primary-foreground rounded-2xl rounded-br-none"
                                                 : isDark
@@ -196,7 +196,7 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
                                                     : "bg-white border border-gray-200 text-gray-900 rounded-2xl rounded-bl-none",
                                             !isLastFromSender && (isMe ? "rounded-br-2xl mb-0.5" : "rounded-bl-2xl mb-0.5")
                                         )}>
-                                            <p>{msg.content}</p>
+                                            <p className="whitespace-pre-wrap break-words" style={{ wordBreak: 'break-word' }}>{msg.content}</p>
                                             <p className={cn(
                                                 "text-[9px] mt-1 text-right opacity-70",
                                                 isMe ? "text-primary-foreground/70" : "text-slate-400"

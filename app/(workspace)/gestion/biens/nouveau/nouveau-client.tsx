@@ -163,6 +163,9 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
       const uploadedUrls: string[] = [];
       let hasError = false;
 
+      const imageCompressionModule = await import('browser-image-compression');
+      const imageCompression = imageCompressionModule.default || imageCompressionModule;
+
       for (const file of fileArray) {
         if (file.size > 5 * 1024 * 1024) {
           toast.error(`Le fichier ${file.name} dépasse 5MB`);
@@ -178,20 +181,71 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
         }
 
         try {
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          // Résolution de la compression avec Fallback d'urgence
+          let fileToUpload: File | Blob = file;
+          let thumbToUpload: File | Blob | null = null;
+          let finalExt = fileExt;
+
+          try {
+            // Options pour l'image HD (Affichage fiche)
+            const mainOptions = {
+              maxSizeMB: 0.4,
+              maxWidthOrHeight: 1600,
+              useWebWorker: true,
+              initialQuality: 0.8,
+              fileType: 'image/webp'
+            };
+
+            // Options pour la miniature (Affichage listes)
+            const thumbOptions = {
+              maxSizeMB: 0.05,
+              maxWidthOrHeight: 400,
+              useWebWorker: true,
+              initialQuality: 0.6,
+              fileType: 'image/webp'
+            };
+
+            toast.loading(`Optimisation de ${file.name}...`, { id: 'compressing' });
+
+            // Exécution séquentielle pour préserver la RAM Mobile
+            fileToUpload = await imageCompression(file, mainOptions);
+            thumbToUpload = await imageCompression(file, thumbOptions);
+            finalExt = "webp";
+
+            toast.dismiss('compressing');
+          } catch (compressionError) {
+            console.warn("Échec de la compression client, fallback sur le fichier original", compressionError);
+            toast.dismiss('compressing');
+            // En cas d'échec, fileToUpload reste = file (l'original), finalExt reste fileExt
+          }
+
+          // Upload de l'image principale
+          const baseName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+          const fileName = `${baseName}.${finalExt}`;
           const filePath = `team-properties/${teamId}/${fileName}`;
 
           const { error: uploadError } = await supabase.storage
             .from("properties")
-            .upload(filePath, file, { cacheControl: "3600", upsert: false });
+            .upload(filePath, fileToUpload, { cacheControl: "3600", upsert: false });
 
-          if (uploadError) throw new Error(`Erreur upload: ${uploadError.message}`);
+          if (uploadError) throw new Error(`Erreur upload principale: ${uploadError.message}`);
 
           const { data: { publicUrl } } = supabase.storage.from("properties").getPublicUrl(filePath);
           uploadedUrls.push(publicUrl);
+
+          // Upload silencieux de la miniature (utilisation de la même String d'origine complétée plus tard)
+          if (thumbToUpload) {
+            const thumbPath = `team-properties/${teamId}/${baseName}-thumb.${finalExt}`;
+            // On lance l'upload de manière asynchrone non-bloquante pour la perfo, ou bloquante si on veut être sûr
+            await supabase.storage
+              .from("properties")
+              .upload(thumbPath, thumbToUpload, { cacheControl: "31536000", upsert: false });
+          }
+
         } catch (e) {
           console.error(e);
-          toast.error(`Erreur lors de l'upload de ${file.name}`);
+          toast.dismiss('compressing');
+          toast.error(`Erreur lors du traitement de ${file.name}`);
           hasError = true;
         }
       }

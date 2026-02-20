@@ -69,25 +69,81 @@ export function MaintenanceForm() {
         const supabase = createClient();
         const uploadedUrls: string[] = [];
 
+        const imageCompressionModule = await import('browser-image-compression');
+        const imageCompression = imageCompressionModule.default || imageCompressionModule;
+
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            const fileExt = file.name.split('.').pop();
-            const fileName = `maintenance/${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExt}`;
 
-            const { error: uploadError } = await supabase.storage
-                .from('properties')
-                .upload(fileName, file);
+            try {
+                // Initialisation avec le fichier d'origine en cas de fallback nécessaire
+                let fileToUpload: File | Blob = file;
+                let thumbToUpload: File | Blob | null = null;
+                const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+                let finalExt = fileExt;
 
-            if (uploadError) {
-                console.error('Upload error:', uploadError);
-                throw new Error(`Erreur upload image ${i + 1}`);
+                try {
+                    // Compression optimisée (WebP, 1600px max)
+                    const mainOptions = {
+                        maxSizeMB: 0.4,
+                        maxWidthOrHeight: 1600,
+                        useWebWorker: true,
+                        initialQuality: 0.8,
+                        fileType: 'image/webp'
+                    };
+
+                    const thumbOptions = {
+                        maxSizeMB: 0.05,
+                        maxWidthOrHeight: 400,
+                        useWebWorker: true,
+                        initialQuality: 0.6,
+                        fileType: 'image/webp'
+                    };
+
+                    toast.loading(`Compression image ${i + 1}/${files.length}...`, { id: 'compressing' });
+
+                    // Exécution séquentielle
+                    fileToUpload = await imageCompression(file, mainOptions);
+                    thumbToUpload = await imageCompression(file, thumbOptions);
+                    finalExt = "webp";
+
+                    toast.dismiss('compressing');
+                } catch (compressionError) {
+                    console.warn("Échec de la compression client, fallback sur le fichier original", compressionError);
+                    toast.dismiss('compressing');
+                }
+
+                const baseName = `maintenance/${Date.now()}_${Math.random().toString(36).slice(2)}`;
+                const fileName = `${baseName}.${finalExt}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from('properties')
+                    .upload(fileName, fileToUpload);
+
+                if (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    throw new Error(`Erreur upload image ${i + 1}`);
+                }
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('properties')
+                    .getPublicUrl(fileName);
+
+                uploadedUrls.push(publicUrl);
+
+                // Upload du thumbnail asynchrone (nom avec -thumb)
+                if (thumbToUpload) {
+                    const thumbName = `${baseName}-thumb.${finalExt}`;
+                    await supabase.storage
+                        .from('properties')
+                        .upload(thumbName, thumbToUpload, { cacheControl: '31536000' });
+                }
+
+            } catch (err) {
+                toast.dismiss('compressing');
+                console.error("Erreur traitement photo:", err);
+                throw new Error(`Erreur lors du traitement de l'image ${i + 1}`);
             }
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('properties')
-                .getPublicUrl(fileName);
-
-            uploadedUrls.push(publicUrl);
         }
         return uploadedUrls;
     };
@@ -130,11 +186,10 @@ export function MaintenanceForm() {
                             key={cat.value}
                             type="button"
                             onClick={() => handleCategorySelect(cat.value)}
-                            className={`p-3 rounded-xl border text-center transition-all ${
-                                selectedCategory === cat.value
-                                    ? 'bg-zinc-900 border-zinc-900 text-white'
-                                    : 'bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
-                            }`}
+                            className={`p-3 rounded-xl border text-center transition-all ${selectedCategory === cat.value
+                                ? 'bg-zinc-900 border-zinc-900 text-white'
+                                : 'bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
+                                }`}
                         >
                             <span className="text-xl block mb-1">{cat.emoji}</span>
                             <span className="text-xs font-medium">{cat.label}</span>
