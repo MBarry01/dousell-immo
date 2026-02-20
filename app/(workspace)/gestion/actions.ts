@@ -1565,10 +1565,12 @@ export async function createMaintenanceRequest(data: {
     let status = 'open';
 
     // 2. APPEL DU WEBHOOK MAKE (Recherche Artisan)
+    // On priorise MAKE_WEBHOOK_URL, fallback sur N8N_WEBHOOK_URL
     const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL;
 
     if (MAKE_WEBHOOK_URL) {
         try {
+            console.log(`[createMaintenanceRequest] Appel webhook: ${MAKE_WEBHOOK_URL}`);
             const response = await fetch(MAKE_WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1584,20 +1586,29 @@ export async function createMaintenanceRequest(data: {
             });
 
             if (response.ok) {
-                const result = await response.json();
-                if (result.artisan_name) {
-                    artisanData = {
-                        name: result.artisan_name,
-                        phone: result.artisan_phone,
-                        rating: parseFloat(result.rating) || undefined,
-                        address: result.address
-                    };
-                    status = 'artisan_found'; // Nouveau statut clair
+                const responseText = await response.text();
+                try {
+                    const result = JSON.parse(responseText);
+                    if (result.artisan_name) {
+                        artisanData = {
+                            name: result.artisan_name,
+                            phone: result.artisan_phone,
+                            rating: parseFloat(result.rating) || undefined,
+                            address: result.address
+                        };
+                        status = 'artisan_found';
+                    }
+                } catch (parseError) {
+                    console.error("[createMaintenanceRequest] Erreur parsing JSON webhook:", parseError, "Réponse:", responseText.slice(0, 100));
                 }
+            } else {
+                console.error(`[createMaintenanceRequest] Erreur HTTP webhook: ${response.status}`, await response.text().catch(() => "N/A"));
             }
         } catch (e) {
-            console.error("Erreur Webhook Make:", e);
+            console.error("[createMaintenanceRequest] Exception Webhook Make:", e);
         }
+    } else {
+        console.warn("[createMaintenanceRequest] MAKE_WEBHOOK_URL non configuré.");
     }
 
     // 3. ENREGISTRER EN BASE
@@ -1631,7 +1642,9 @@ export async function createMaintenanceRequest(data: {
         id: request.id,
         artisanFound: status === 'artisan_found',
         artisan: artisanData.name ? artisanData : null,
-        message: status === 'artisan_found' ? "Artisan trouvé !" : "Demande enregistrée."
+        message: status === 'artisan_found'
+            ? "Artisan trouvé !"
+            : (MAKE_WEBHOOK_URL ? "Demande enregistrée, recherche d'artisan lancée..." : "Demande enregistrée.")
     };
 }
 
@@ -1837,7 +1850,7 @@ export async function validateMaintenanceRequest(requestId: string) {
 
     const lease = Array.isArray(request.leases) ? request.leases[0] : request.leases;
 
-    // 2. Tenter de trouver un artisan via Webhook (comme lors de la création directe par owner)
+    // 2. Tenter de trouver un artisan via Webhook
     let artisanData: {
         name?: string;
         phone?: string;
@@ -1850,6 +1863,7 @@ export async function validateMaintenanceRequest(requestId: string) {
 
     if (MAKE_WEBHOOK_URL) {
         try {
+            console.log(`[validateMaintenanceRequest] Appel webhook: ${MAKE_WEBHOOK_URL}`);
             const response = await fetch(MAKE_WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1865,20 +1879,29 @@ export async function validateMaintenanceRequest(requestId: string) {
             });
 
             if (response.ok) {
-                const result = await response.json();
-                if (result.artisan_name) {
-                    artisanData = {
-                        name: result.artisan_name,
-                        phone: result.artisan_phone,
-                        rating: parseFloat(result.rating) || undefined,
-                        address: result.address
-                    };
-                    newStatus = 'artisan_found';
+                const responseText = await response.text();
+                try {
+                    const result = JSON.parse(responseText);
+                    if (result.artisan_name) {
+                        artisanData = {
+                            name: result.artisan_name,
+                            phone: result.artisan_phone,
+                            rating: parseFloat(result.rating) || undefined,
+                            address: result.address
+                        };
+                        newStatus = 'artisan_found';
+                    }
+                } catch (parseError) {
+                    console.error("[validateMaintenanceRequest] Erreur parsing JSON webhook:", parseError, "Réponse:", responseText.slice(0, 100));
                 }
+            } else {
+                console.error(`[validateMaintenanceRequest] Erreur HTTP webhook: ${response.status}`, await response.text().catch(() => "N/A"));
             }
         } catch (e) {
-            console.error("Erreur Webhook validation:", e);
+            console.error("[validateMaintenanceRequest] Exception Webhook validation:", e);
         }
+    } else {
+        console.warn("[validateMaintenanceRequest] MAKE_WEBHOOK_URL non configuré.");
     }
 
     // 3. Mettre à jour la demande
@@ -1900,7 +1923,9 @@ export async function validateMaintenanceRequest(requestId: string) {
     revalidatePath('/gestion');
     return {
         success: true,
-        message: newStatus === 'artisan_found' ? "Intervention validée et artisan trouvé !" : "Intervention validée, recherche d'artisan en cours..."
+        message: newStatus === 'artisan_found'
+            ? "Intervention validée et artisan trouvé !"
+            : (MAKE_WEBHOOK_URL ? "Intervention validée, recherche d'artisan lancée..." : "Intervention validée (Webhook non configuré)")
     };
 }
 

@@ -585,6 +585,23 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                         </>
                                     )}
 
+                                    {/* Recherche en cours sans artisan -> Possibilité de retenter */}
+                                    {req.status === 'open' && !req.artisan_name && (
+                                        <Button
+                                            onClick={(e) => { e.stopPropagation(); handleValidateRequest(req.id); }}
+                                            disabled={processingId === req.id}
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-xs h-8 border-primary/50 text-primary hover:bg-primary/5"
+                                        >
+                                            {processingId === req.id ? (
+                                                <Loader2 className="w-3 h-3 animate-spin" />
+                                            ) : (
+                                                <>Retenter la recherche d&apos;artisan</>
+                                            )}
+                                        </Button>
+                                    )}
+
                                     {/* Artisan trouvé → Saisir devis */}
                                     {req.status === 'artisan_found' && (
                                         <Button
