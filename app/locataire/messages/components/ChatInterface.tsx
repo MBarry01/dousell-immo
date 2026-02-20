@@ -147,11 +147,12 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
 
     return (
         <div className={cn(
-            "flex flex-col w-full h-[calc(100svh-9rem-env(safe-area-inset-bottom))] lg:h-[calc(100vh-6rem)]",
-            "bg-slate-50/50 backdrop-blur-sm overflow-hidden shadow-sm border border-slate-200/50 px-4 md:px-6 rounded-xl",
+            "fixed inset-x-0 z-30 flex flex-col overflow-hidden bg-slate-50",
+            "top-[calc(4rem+env(safe-area-inset-top))] md:top-16", // TenantHeader
+            "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0", // Au-dessus de BottomNav
         )}>
             {/* Header Chat - Fixe */}
-            <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center gap-3 shadow-sm shrink-0 z-10 rounded-t-xl">
+            <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm shrink-0 z-20">
                 <Link href="/locataire" className="p-2 -ml-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
                     <ChevronLeft className="w-5 h-5" />
                 </Link>
@@ -236,7 +237,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
             </div>
 
             {/* Input - Fixe en bas du container */}
-            <div className="bg-white/95 backdrop-blur-md border-t border-slate-200 px-6 py-4 shrink-0 z-20 rounded-b-xl">
+            <div className="bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shrink-0 z-20">
                 <form onSubmit={handleSend} className="flex items-center gap-2 max-w-lg mx-auto">
                     <input
                         type="text"

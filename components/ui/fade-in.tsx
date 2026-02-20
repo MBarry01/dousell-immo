@@ -7,11 +7,13 @@ import { useEffect, useState } from "react";
 export function FadeIn({
     children,
     className,
-    delay = 0
+    delay = 0,
+    noTransform = false
 }: {
     children: React.ReactNode,
     className?: string,
-    delay?: number
+    delay?: number,
+    noTransform?: boolean
 }) {
     const { mounted } = useTheme();
     const [isVisible, setIsVisible] = useState(false);
@@ -31,8 +33,8 @@ export function FadeIn({
             className={cn(
                 "duration-500 ease-out transition-all",
                 isVisible
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4",
+                    ? cn("opacity-100", !noTransform && "translate-y-0")
+                    : cn("opacity-0", !noTransform && "translate-y-4"),
                 className
             )}
         >

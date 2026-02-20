@@ -292,7 +292,7 @@ export default function LocataireLayout({
       {/* Note: OneSignal is initialized in RootLayout. 
           Login is triggered in the useEffect above when leaseId is fetched. */}
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 px-2 py-2 flex justify-around items-center z-50 md:hidden safe-area-pb">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 px-2 h-16 flex justify-around items-center z-50 md:hidden safe-area-pb">
         {mobileNavItems.map((item) => (
           <Link
             key={item.href}

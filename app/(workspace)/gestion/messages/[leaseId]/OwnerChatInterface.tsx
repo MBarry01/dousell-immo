@@ -136,14 +136,15 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
 
     return (
         <div className={cn(
-            "flex flex-col w-full h-[calc(100svh-9rem-env(safe-area-inset-bottom))] lg:h-[calc(100vh-8.5rem)]",
-            "overflow-hidden px-4 md:px-6", // Marges de côté normales
-            "border border-border/10 bg-background/50 backdrop-blur-sm shadow-sm rounded-xl"
+            "fixed inset-x-0 z-30 flex flex-col overflow-hidden bg-background",
+            "top-16", // WorkspaceHeader h-16
+            "bottom-[calc(4rem+env(safe-area-inset-bottom))] lg:bottom-0", // Au-dessus de BottomNav
+            "lg:left-16 lg:right-0 lg:top-16 lg:bottom-0 lg:static lg:flex-1 lg:h-full lg:max-w-none lg:mx-0", // Reset Desktop
         )}>
             {/* Header Chat - Fixe */}
             <div className={cn(
-                "border-b px-4 py-3 flex items-center justify-between shadow-sm shrink-0 z-10 rounded-t-xl",
-                isDark ? 'bg-card border-border' : 'bg-white border-gray-200'
+                "border-b px-4 py-3 flex items-center justify-between shadow-sm shrink-0 z-20",
+                isDark ? 'bg-card/95 border-border backdrop-blur-md' : 'bg-white/95 border-gray-200 backdrop-blur-md'
             )}>
                 <div className="flex items-center gap-3">
                     <Link href="/gestion/messages" className={cn(
@@ -239,8 +240,8 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
 
             {/* Input - Fixe en bas du container */}
             <div className={cn(
-                "border-t px-6 py-4 shrink-0 z-20 rounded-b-xl",
-                isDark ? "bg-card border-border" : "bg-white border-gray-200"
+                "border-t px-4 py-3 shrink-0 z-20",
+                isDark ? "bg-card/95 border-border backdrop-blur-md" : "bg-white/95 border-gray-200 backdrop-blur-md"
             )}>
                 <form onSubmit={handleSend} className="flex items-center gap-2 w-full mx-auto max-w-4xl">
                     <input

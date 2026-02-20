@@ -77,8 +77,8 @@ export function WorkspaceLayoutClient({
           className="flex-1 overflow-y-auto pb-safe-nav lg:pb-0 overscroll-contain bg-background"
         >
           <Suspense fallback={<div className="p-6 animate-pulse bg-muted/20" />}>
-            <div className="w-full py-4 md:py-6">
-              <FadeIn delay={100}>
+            <div className="w-full h-full flex flex-col">
+              <FadeIn delay={100} noTransform={pathname?.includes("/messages")} className="flex-1 flex flex-col">
                 {children}
               </FadeIn>
             </div>
