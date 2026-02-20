@@ -25,7 +25,7 @@ export function CookieConsent() {
           stiffness: 300,
           damping: 30,
         }}
-        className="fixed bottom-0 left-0 right-0 z-[100] w-full border-t border-white/10 bg-black/90 p-4 backdrop-blur-md md:p-6"
+        className="fixed bottom-0 left-0 right-0 z-[100] w-full border-t border-white/10 bg-black/90 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md md:p-6 md:pb-[max(1.5rem,env(safe-area-inset-bottom))]"
       >
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

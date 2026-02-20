@@ -82,12 +82,15 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#05080c" },
+    { media: "(prefers-color-scheme: dark)", color: "#05080c" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#05080c",
 };
 
 export default async function RootLayout({
@@ -146,7 +149,7 @@ export default async function RootLayout({
                     blocker.style.position = 'fixed';
                     blocker.style.inset = '0';
                     blocker.style.zIndex = '9999';
-                    blocker.style.backgroundColor = isDark ? '#05080c' : '#f8fafc';
+                    blocker.style.backgroundColor = '#05080c';
                     document.documentElement.appendChild(blocker);
                   }
                 } catch (e) {}

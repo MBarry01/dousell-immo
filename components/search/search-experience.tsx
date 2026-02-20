@@ -357,7 +357,7 @@ export const SearchExperience = ({
 
       <Button
         type="button"
-        className="fixed bottom-28 right-6 z-30 rounded-full px-5 py-3 shadow-xl md:bottom-8"
+        className="fixed bottom-[calc(7rem+env(safe-area-inset-bottom))] right-6 z-30 rounded-full px-5 py-3 shadow-xl md:bottom-8"
         onClick={() => setView((prev) => (prev === "list" ? "map" : "list"))}
       >
         {view === "list" ? (

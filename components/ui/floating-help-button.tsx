@@ -13,15 +13,23 @@ export function FloatingHelpButton({ onClick }: FloatingHelpButtonProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // Attendre que le splash screen soit complètement retiré
+    const checkSplash = setInterval(() => {
+      if (document.getElementById("splash-blocker") === null) {
+        setMounted(true);
+        clearInterval(checkSplash);
+      }
+    }, 200);
+
+    return () => clearInterval(checkSplash);
   }, []);
 
   const button = (
     <button
       onClick={onClick}
-      className={`fixed bottom-20 lg:bottom-4 right-4 z-[9999] p-2.5 rounded-full transition-all duration-200 shadow-lg ${isDark
-          ? "bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600"
-          : "bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300"
+      className={`fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] lg:bottom-4 right-4 z-[9999] p-2.5 rounded-full transition-all duration-200 shadow-lg ${isDark
+        ? "bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600"
+        : "bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300"
         }`}
       title="Relancer le tutoriel"
     >
