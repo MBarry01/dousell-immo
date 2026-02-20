@@ -136,14 +136,14 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
 
     return (
         <div className={cn(
-            "flex flex-col w-full h-[calc(100svh-12rem)] md:h-[calc(100vh-10rem)] max-w-5xl mx-auto",
-            "bg-card rounded-2xl overflow-hidden shadow-2xl border border-border/50 transition-all",
-            isDark ? 'bg-slate-900/80' : 'bg-white/80'
+            "flex flex-col w-full h-[calc(100svh-13rem-env(safe-area-inset-bottom))] lg:h-[calc(100vh-8.5rem)]",
+            "overflow-hidden px-4 md:px-6", // Marges de côté rétablies
+            "border border-border/10 bg-background/50 backdrop-blur-sm shadow-sm rounded-xl"
         )}>
             {/* Header Chat - Fixe */}
             <div className={cn(
-                "border-b px-4 py-3 flex items-center justify-between shadow-sm shrink-0 z-10",
-                isDark ? 'bg-card' : 'bg-white'
+                "border-b px-4 py-3 flex items-center justify-between shadow-sm shrink-0 z-10 rounded-t-xl",
+                isDark ? 'bg-card border-border' : 'bg-white border-gray-200'
             )}>
                 <div className="flex items-center gap-3">
                     <Link href="/gestion/messages" className={cn(
@@ -239,8 +239,8 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
 
             {/* Input - Fixe en bas du container */}
             <div className={cn(
-                "border-t px-6 py-4 shrink-0 z-20",
-                isDark ? "bg-card/95 border-border" : "bg-white/95 border-gray-200"
+                "border-t px-6 py-4 shrink-0 z-20 rounded-b-xl",
+                isDark ? "bg-card border-border" : "bg-white border-gray-200"
             )}>
                 <form onSubmit={handleSend} className="flex items-center gap-2 w-full mx-auto max-w-4xl">
                     <input
