@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, Share2, Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
 
@@ -115,11 +116,19 @@ export const GalleryGrid = ({
 
   // Desktop: Bento Grid
   const desktopView = (
-    <div className="relative hidden h-[400px] w-full overflow-hidden rounded-2xl md:grid md:grid-cols-4 md:grid-rows-2 md:gap-2">
+    <div
+      className={cn(
+        "relative hidden w-full overflow-hidden rounded-2xl md:grid md:gap-2",
+        images.length === 1 ? "h-[500px] grid-cols-1" : "h-[400px] grid-cols-4 grid-rows-2"
+      )}
+    >
       {/* Image 1 - Grande à gauche */}
       {images[0] && (
         <div
-          className="relative col-span-2 row-span-2 overflow-hidden rounded-l-2xl cursor-pointer hover:opacity-95 transition-opacity"
+          className={cn(
+            "relative overflow-hidden cursor-pointer hover:opacity-95 transition-opacity",
+            images.length === 1 ? "col-span-1 rounded-2xl" : "col-span-2 row-span-2 rounded-l-2xl"
+          )}
           onClick={() => openLightbox(0)}
         >
           <Image
@@ -127,32 +136,53 @@ export const GalleryGrid = ({
             alt={`${title} - Photo principale`}
             fill
             priority
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            quality={75}
+            className="object-cover transition-transform duration-700 hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 75vw"
+            quality={85}
           />
         </div>
       )}
 
       {/* Images 2-5 */}
-      {images.slice(1, 5).map((src, index) => {
+      {images.length > 1 && images.slice(1, 5).map((src, index) => {
+        const isSingleSide = images.length === 2;
+        const isThreeImages = images.length === 3;
+
         const positions = [
-          { rounded: "rounded-tr-2xl" }, // Image 2
-          {}, // Image 3
-          {}, // Image 4
-          { rounded: "rounded-br-2xl" }, // Image 5
+          {
+            rounded: images.length === 2 ? "rounded-r-2xl" : "rounded-tr-2xl",
+            className: cn(
+              isSingleSide ? "col-span-2 row-span-2" :
+                isThreeImages ? "col-span-2 row-span-1" : "col-span-1 row-span-1"
+            )
+          }, // Image 2
+          {
+            className: isThreeImages ? "col-span-2 row-span-1" : "col-span-1 row-span-1"
+          }, // Image 3
+          {
+            className: "col-span-1 row-span-1"
+          }, // Image 4
+          {
+            rounded: "rounded-br-2xl",
+            className: "col-span-1 row-span-1"
+          }, // Image 5
         ];
+
         return (
           <div
             key={`grid-${index + 1}`}
-            className={`relative overflow-hidden cursor-pointer hover:opacity-95 transition-opacity ${positions[index]?.rounded || ""}`}
+            className={cn(
+              "relative overflow-hidden cursor-pointer hover:opacity-95 transition-opacity",
+              positions[index]?.rounded || "",
+              positions[index]?.className || ""
+            )}
             onClick={() => openLightbox(index + 1)}
           >
             <Image
               src={src}
               alt={`${title} - Photo ${index + 2}`}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-700 hover:scale-110"
               sizes="(max-width: 768px) 100vw, 25vw"
               quality={75}
             />

@@ -546,6 +546,19 @@
   .slide-out-to-left-1\/2 {
     --tw-exit-translate-x: -50%;
   }
+
+  /* PWA/Native Utils */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+
+  .active-press {
+    background-color: var(--muted) !important;
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
 }
 
 /* Animations smooth pour les menus */
@@ -1093,9 +1106,35 @@ iframe[src*="google.com/gen_204"] {
   display: none !important;
   visibility: hidden !important;
 }
+
 /* PWA Touch & Interaction Utilities */
-.no-select { user-select: none; -webkit-user-select: none; }
-.touch-target { position: relative; }
-.touch-target::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; min-width: 44px; min-height: 44px; z-index: -1; }
-.active-press:active { transform: scale(0.96); transition: transform 0.1s; }
-  .safe-area-pb { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.touch-target {
+  position: relative;
+}
+
+.touch-target::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  min-width: 44px;
+  min-height: 44px;
+  z-index: -1;
+}
+
+.active-press:active {
+  transform: scale(0.96);
+  transition: transform 0.1s;
+}
+
+.safe-area-pb {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}

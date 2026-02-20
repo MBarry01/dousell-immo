@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { Star, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { hapticFeedback } from "@/lib/haptic";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,7 +42,7 @@ export const ReviewForm = ({ propertyId, onReviewSubmitted }: ReviewFormProps) =
     }
 
     setIsSubmitting(true);
-    
+
     startTransition(async () => {
       const result = await createReviewAction(propertyId, rating, comment);
 
@@ -53,7 +55,7 @@ export const ReviewForm = ({ propertyId, onReviewSubmitted }: ReviewFormProps) =
       } else {
         toast.error(result.error || "Erreur lors de l'ajout de l'avis");
       }
-      
+
       setIsSubmitting(false);
     });
   };
@@ -86,22 +88,25 @@ export const ReviewForm = ({ propertyId, onReviewSubmitted }: ReviewFormProps) =
         </Label>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((star) => (
-            <button
+            <motion.button
               key={star}
               type="button"
-              onClick={() => setRating(star)}
+              onClick={() => {
+                setRating(star);
+                hapticFeedback.light();
+              }}
               onMouseEnter={() => setHoveredRating(star)}
               onMouseLeave={() => setHoveredRating(0)}
-              className="transition-transform hover:scale-110"
+              whileTap={{ scale: 0.8 }}
+              className="transition-transform no-select"
             >
               <Star
-                className={`h-8 w-8 ${
-                  star <= (hoveredRating || rating)
+                className={`h-10 w-10 ${star <= (hoveredRating || rating)
                     ? "fill-amber-400 text-amber-400"
                     : "fill-gray-300 text-gray-300 dark:fill-gray-600 dark:text-gray-600"
-                }`}
+                  }`}
               />
-            </button>
+            </motion.button>
           ))}
         </div>
         {rating > 0 && (

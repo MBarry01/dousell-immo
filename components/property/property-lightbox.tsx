@@ -110,7 +110,7 @@ export function PropertyLightbox({
                     }}
                 >
                     {/* Top Controls */}
-                    <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 md:p-6 text-white bg-gradient-to-b from-black/50 to-transparent pointer-events-none">
+                    <div className="absolute top-[calc(env(safe-area-inset-top,0px))] left-0 right-0 z-20 flex items-center justify-between p-4 md:p-6 text-white bg-gradient-to-b from-black/50 to-transparent pointer-events-none">
                         <div className="text-sm font-medium tracking-wide bg-black/40 px-3 py-1 rounded-full backdrop-blur-md pointer-events-auto">
                             {currentIndex + 1} / {images.length}
                         </div>
@@ -118,9 +118,9 @@ export function PropertyLightbox({
                             variant="ghost"
                             size="icon"
                             onClick={onClose}
-                            className="text-white hover:bg-white/20 rounded-full w-10 h-10 pointer-events-auto"
+                            className="text-white hover:bg-white/20 rounded-full w-12 h-12 pointer-events-auto active:scale-90 transition-transform"
                         >
-                            <X className="w-6 h-6" />
+                            <X className="w-8 h-8" />
                             <span className="sr-only">Fermer</span>
                         </Button>
                     </div>
@@ -180,7 +180,7 @@ export function PropertyLightbox({
                     </div>
 
                     {/* Thumbnails Strip */}
-                    <div className="w-full h-20 md:h-24 bg-black/80 flex items-center z-20 shrink-0">
+                    <div className="w-full h-24 md:h-28 bg-black/80 flex items-center z-20 shrink-0 pb-[env(safe-area-inset-bottom,0px)]">
                         <div className="w-full max-w-5xl mx-auto px-4 overflow-hidden" ref={emblaThumbsRef}>
                             <div className="flex gap-2">
                                 {images.map((src, index) => (
@@ -188,9 +188,9 @@ export function PropertyLightbox({
                                         key={`thumb-${src}-${index}`}
                                         onClick={() => onThumbClick(index)}
                                         className={cn(
-                                            "relative flex-[0_0_60px] md:flex-[0_0_100px] h-14 md:h-20 rounded-lg overflow-hidden transition-all duration-200 border-2",
+                                            "relative flex-[0_0_64px] md:flex-[0_0_100px] h-16 md:h-20 rounded-xl overflow-hidden transition-all duration-200 border-2 no-select",
                                             index === currentIndex
-                                                ? "border-white opacity-100 ring-2 ring-white/20"
+                                                ? "border-primary opacity-100 ring-2 ring-primary/20"
                                                 : "border-transparent opacity-50 hover:opacity-80"
                                         )}
                                     >

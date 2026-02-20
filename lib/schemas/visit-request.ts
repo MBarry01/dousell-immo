@@ -12,8 +12,9 @@ export const visitRequestSchema = z.object({
   projectType: z.enum(["achat", "location"]),
   availability: z.enum(["semaine-matin", "semaine-apres-midi", "weekend"]),
   message: z.string().min(10, "Décrivez brièvement votre recherche."),
+  // Optionnel : identifiant du bien concerné (passé via l'URL)
+  propertyId: z.string().uuid().optional(),
+  propertyTitle: z.string().optional(),
 });
 
 export type VisitRequestFormValues = z.infer<typeof visitRequestSchema>;
-
-

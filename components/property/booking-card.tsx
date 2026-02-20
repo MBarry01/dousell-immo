@@ -18,6 +18,7 @@ import {
 import { CostSimulator } from "@/components/property/cost-simulator";
 import { formatCurrency } from "@/lib/utils";
 import type { Property } from "@/types/property";
+import { AGENCY_PHONE } from "@/lib/constants";
 
 type BookingCardProps = {
   property: Property;
@@ -27,16 +28,12 @@ export const BookingCard = ({ property }: BookingCardProps) => {
   const router = useRouter();
   const { user } = useAuth();
 
-  // Logique de contact selon les règles métier :
-  // - Annonce PAYANTE (boost_visibilite) -> Afficher le numéro du propriétaire (contact_phone ou owner.phone)
-  // - Annonce GRATUITE (mandat_confort) -> Afficher le numéro de l'agence
-  const isPaidService = property.service_type === "boost_visibilite";
-  const agencyPhone = "+221781385281"; // Agent 2
-
-  // Si payant, on cherche d'abord le contact_phone spécifique à l'annonce, sinon le téléphone du profil
-  const ownerPhone = property.contact_phone || property.owner?.phone;
-
-  const targetPhone = (isPaidService && ownerPhone) ? ownerPhone : agencyPhone;
+  // Résolution du numéro de contact : équipe > contact_phone > owner > agent > fallback
+  const targetPhone = property.team?.company_phone
+    || property.contact_phone
+    || property.owner?.phone
+    || property.agent?.phone
+    || AGENCY_PHONE;
 
   const whatsappUrl = `https://wa.me/${targetPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
     `Bonjour, je suis intéressé par le bien ${property.title} (${property.id}) à ${property.location.city}.`
@@ -85,9 +82,9 @@ export const BookingCard = ({ property }: BookingCardProps) => {
       transition={{ duration: 0.5 }}
       className="sticky top-24 hidden lg:block"
     >
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xl dark:border-white/10 dark:bg-white/5">
+      <div className="rounded-3xl border border-gray-200 bg-white/70 p-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] backdrop-blur-xl dark:border-white/10 dark:bg-[#0b0f18]/80">
         {/* Prix */}
-        <div className="mb-6">
+        <div className="mb-8">
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold text-gray-900 dark:text-white">
               {formatCurrency(property.price)}
@@ -121,7 +118,7 @@ export const BookingCard = ({ property }: BookingCardProps) => {
         <div className="space-y-3">
           <Button
             asChild
-            className="w-full rounded-xl bg-[#25D366] py-6 text-base font-semibold text-white hover:bg-[#20ba58]"
+            className="w-full rounded-2xl bg-[#25D366] py-7 text-base font-bold text-white shadow-[0_8px_20px_-4px_rgba(37,211,102,0.4)] transition-all hover:bg-[#25D366] hover:-translate-y-1 hover:shadow-[0_12px_24px_-4px_rgba(37,211,102,0.5)] active:scale-95"
             onClick={handleWhatsAppClick}
           >
             <a href={whatsappUrl} target="_blank" rel="noreferrer">
@@ -132,9 +129,8 @@ export const BookingCard = ({ property }: BookingCardProps) => {
 
           {/* CTA Secondaire */}
           <Button
-            variant="outline"
             onClick={handleRequestVisit}
-            className="w-full rounded-xl border-2 border-gray-300 py-6 text-base font-semibold text-gray-900 hover:bg-gray-50 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
+            className="w-full rounded-2xl border border-white/20 bg-white/10 py-7 text-base font-bold text-white transition-all hover:bg-white/10 hover:-translate-y-1 hover:shadow-md active:scale-95"
           >
             <Calendar className="mr-2 h-5 w-5" />
             Demander une visite

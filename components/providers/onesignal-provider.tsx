@@ -19,6 +19,12 @@ export const initOneSignal = async () => {
 
     initializationPromise = (async () => {
         try {
+            // Attendre que le Service Worker soit prêt pour éviter les erreurs "Could not get ServiceWorkerRegistration"
+            if ("serviceWorker" in navigator) {
+                console.log("⏳ OneSignal: Waiting for Service Worker to be ready...");
+                await navigator.serviceWorker.ready;
+            }
+
             await OneSignal.init({
                 appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "",
                 allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",

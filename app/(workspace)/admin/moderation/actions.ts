@@ -22,7 +22,7 @@ export async function moderateProperty(
   // Récupérer les infos du bien avant modification
   const { data: property } = await supabase
     .from("properties")
-    .select("title, owner_id, service_type, price, payment_ref, payment_amount, service_name, category, location, details")
+    .select("title, owner_id, price, payment_ref, payment_amount, service_name, category, location, details")
     .eq("id", propertyId)
     .single();
 
@@ -52,7 +52,7 @@ export async function moderateProperty(
           // GESTION DE LA FACTURE POUR LES ANNONCES PAYANTES
           let invoiceBuffer: Buffer | null = null;
           let invoiceNumber: string | undefined = undefined;
-          const isPaid = property.service_type === "boost_visibilite";
+          const isPaid = !!property.payment_ref && !!property.payment_amount;
 
           if (isPaid) {
             try {

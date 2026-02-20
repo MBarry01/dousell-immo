@@ -83,8 +83,16 @@ function PlanifierVisitePageContent() {
     meetLink?: string | null;
   } | null>(null);
 
+  // Infos du publieur (équipe ou propriétaire) — chargées dynamiquement
+  const [publisher, setPublisher] = useState<{
+    name: string;
+    avatar: string | null;
+  }>({ name: "Équipe Dousell", avatar: "/icons/icon-192.png" });
+
   const projectTypeParam = searchParams?.get("projectType");
   const messageParam = searchParams?.get("message");
+  const propertyIdParam = searchParams?.get("propertyId");
+  const propertyTitleParam = searchParams?.get("propertyTitle");
 
   const form = useForm<VisitRequestFormValues>({
     resolver: zodResolver(visitRequestSchema),
@@ -107,6 +115,20 @@ function PlanifierVisitePageContent() {
     }
   }, [messageParam, projectTypeParam, form]);
 
+  // Charger les infos du publieur depuis l'API
+  useEffect(() => {
+    if (!propertyIdParam) return;
+    fetch(`/api/publisher-info?propertyId=${propertyIdParam}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setPublisher({
+          name: data.name || "Équipe Dousell",
+          avatar: data.avatar || "/icons/icon-192.png",
+        });
+      })
+      .catch(() => { /* garder le fallback */ });
+  }, [propertyIdParam]);
+
   const onSubmit = async (values: VisitRequestFormValues) => {
     if (!captchaToken) {
       toast.error("Veuillez compléter la vérification anti-robot");
@@ -115,7 +137,14 @@ function PlanifierVisitePageContent() {
 
     try {
       setIsSubmitting(true);
-      const result = await createVisitRequest(values, captchaToken);
+      const result = await createVisitRequest(
+        {
+          ...values,
+          propertyId: propertyIdParam || undefined,
+          propertyTitle: propertyTitleParam || undefined,
+        },
+        captchaToken
+      );
 
       if (!result.success) {
         toast.error(result.error || "Impossible d'envoyer la demande.");
@@ -499,8 +528,8 @@ function PlanifierVisitePageContent() {
 
           <div className="flex justify-center px-4">
             <AppointmentScheduler
-              userName="Équipe Dousell"
-              userAvatar="/icons/icon-192.png"
+              userName={publisher.name}
+              userAvatar={publisher.avatar || "/icons/icon-192.png"}
               meetingTitle={selectedMeetingType === "visite" ? "Visite Immobilière" : "Consultation"}
               meetingType={selectedMeetingMode === "in_person" ? "En personne" : "Visioconférence Zoom"}
               duration="30 Minutes"
@@ -509,7 +538,7 @@ function PlanifierVisitePageContent() {
               timeSlots={timeSlots}
               onConfirm={handleSchedulerConfirm}
               isSubmitting={isSchedulerSubmitting}
-              brandName="Dousell Agenda"
+              brandName={publisher.name}
             />
           </div>
 

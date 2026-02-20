@@ -23,6 +23,7 @@ import {
   Lock,
 } from "lucide-react";
 import Image from "next/image";
+import { hapticFeedback } from "@/lib/haptic";
 
 import { GalleryGrid } from "@/components/property/gallery-grid";
 import { BookingCard } from "@/components/property/booking-card";
@@ -39,6 +40,7 @@ import { useFavoritesStore } from "@/store/use-store";
 import { useMounted } from "@/hooks/use-mounted";
 import { useAuth } from "@/hooks/use-auth";
 import { formatCurrency } from "@/lib/utils";
+import { AGENCY_PHONE_DISPLAY } from "@/lib/constants";
 import { incrementView } from "@/services/propertyService";
 import type { Property } from "@/types/property";
 import type { Review, ReviewStats } from "@/services/reviewService";
@@ -72,7 +74,7 @@ export const PropertyDetailView = ({
   }, [property.id, property.title]);
 
   const breadcrumbItems = useMemo(() => {
-    const transaction = property.transaction ?? "vente";
+    const transaction = property.transaction || (property.price < 5000000 ? "location" : "vente");
     const categoryLabel = transaction === "location" ? "Louer" : "Acheter";
     const city = property.location.city || property.location.district || property.location.region || "Sénégal";
 
@@ -150,9 +152,11 @@ export const PropertyDetailView = ({
 
     if (favorite) {
       removeFavorite(property.id);
+      hapticFeedback.light();
       toast.success("Retiré des favoris", { description: property.title });
     } else {
       addFavorite(property);
+      hapticFeedback.medium();
       toast.success("Ajouté aux favoris ✨", { description: property.title });
     }
   };
@@ -205,19 +209,23 @@ export const PropertyDetailView = ({
           images={property.images}
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
-        <div className="absolute left-4 right-4 top-4 z-20 flex items-center justify-between">
+        <div className="absolute left-4 right-4 top-[calc(env(safe-area-inset-top,0px)+1rem)] z-20 flex items-center justify-between">
           <Button
             variant="secondary"
             size="icon"
-            className="pointer-events-auto h-12 w-12 rounded-full bg-black/50 text-white backdrop-blur-md"
+            asChild
+            className="pointer-events-auto h-12 w-12 rounded-full bg-black/50 text-white backdrop-blur-md transition-transform active:scale-95 no-select"
             onClick={() => router.back()}
           >
-            <ArrowLeft className="h-5 w-5" />
+            <motion.button whileTap={{ scale: 0.92 }}>
+              <ArrowLeft className="h-5 w-5" />
+            </motion.button>
           </Button>
           <div className="flex gap-2">
             <motion.button
               onClick={toggleFavorite}
-              className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md"
+              whileTap={{ scale: 0.9 }}
+              className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md no-select"
               animate={{ scale: favorite ? [1, 1.2, 1] : 1 }}
             >
               <Heart className={`h-5 w-5 ${favorite ? "fill-white" : ""}`} />
@@ -226,7 +234,7 @@ export const PropertyDetailView = ({
               property={property}
               shareUrl={shareUrl}
               variant="icon"
-              className="h-12 w-12 rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-black/70"
+              className="h-12 w-12 rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-black/70 active:scale-95 transition-transform no-select"
             />
           </div>
         </div>
@@ -358,55 +366,48 @@ export const PropertyDetailView = ({
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {property.specs.bathrooms}
               </p>
-              <p className="text-xs text-gray-600 dark:text-white/60">Salles d&apos;eau</p>
+              <p className="text-xs text-gray-600 dark:text-white/60">
+                {property.specs.bathrooms > 1 ? "Salles d'eau" : "Salle d'eau"}
+              </p>
             </div>
           </div>
 
-          {/* Infos Agent (Hôte) */}
+          {/* Infos publieur (Hôte) */}
           <div className="mb-8 flex items-center gap-4 border-b border-gray-200 pb-6 dark:border-white/10">
             {(() => {
-              // Logique d'affichage selon les règles métier :
-              // - Si on a les données du propriétaire (owner + téléphone) -> Afficher le propriétaire
-              // - Sinon -> Afficher l'agence par défaut
+              // Priorité : équipe > owner > contact_phone > fallback
+              const hasTeam = !!property.team?.name;
+              const hasOwner = !!property.owner && !!(property.owner.full_name || property.owner.phone);
 
-              const _isPaidService = property.service_type === "boost_visibilite";
+              const resolvedPhone = property.team?.company_phone
+                || property.owner?.phone
+                || property.contact_phone
+                || AGENCY_PHONE_DISPLAY;
 
-              // Données de l'agence (Agent 2 par défaut)
-              const agencyName = "Agence Dousell";
-              const agencyPhoto = "/agent2.png";
-              const agencyPhone = "+221781385281";
+              const displayName = property.team?.name
+                || property.owner?.full_name
+                || (property.contact_phone ? "Propriétaire" : "Propriétaire");
 
-              // Téléphone : contact_phone spécifique à l'annonce, sinon téléphone du profil
-              const ownerPhone = property.contact_phone || property.owner?.phone;
-
-              // Afficher le propriétaire si on a ses données ET un téléphone
-              // (même si service_type n'est pas défini)
-              const showOwner = property.owner && ownerPhone;
-
-              const displayName = showOwner && property.owner?.full_name
-                ? property.owner.full_name
-                : agencyName;
-              // Photo : Si propriétaire -> avatar du propriétaire (ou null pour initiales)
-              //         Sinon -> photo de l'agence
-              const displayPhoto = showOwner
-                ? property.owner?.avatar_url || null  // null déclenche l'affichage des initiales
-                : agencyPhoto;
-              const displayPhone = showOwner ? ownerPhone : agencyPhone;
+              const displayPhoto = (hasTeam && property.team?.logo_url)
+                ? property.team.logo_url
+                : (hasOwner && property.owner?.avatar_url)
+                  ? property.owner.avatar_url
+                  : null;
 
               return (
                 <>
-                  <div className="relative h-16 w-16 overflow-hidden rounded-full">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
                     {displayPhoto ? (
                       <Image
                         src={displayPhoto}
-                        alt={displayName || "Agent"}
+                        alt={displayName}
                         fill
                         className="object-cover"
                         sizes="64px"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gray-200 text-xl font-bold text-gray-600 dark:bg-white/20 dark:text-white/80">
-                        {(displayName || "A").charAt(0).toUpperCase()}
+                      <div className="flex h-full w-full items-center justify-center text-xl font-bold text-gray-600 dark:text-white/70">
+                        {(displayName).charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
@@ -418,15 +419,15 @@ export const PropertyDetailView = ({
                       <p className="font-semibold text-gray-900 dark:text-white">
                         {displayName}
                       </p>
-                      {showOwner && property.owner?.is_identity_verified && (
+                      {property.owner?.is_identity_verified && (
                         <div className="flex items-center" title="Identité vérifiée">
                           <BadgeCheck className="h-4 w-4 text-white fill-blue-500" />
                         </div>
                       )}
                     </div>
-                    {displayPhone && (
+                    {resolvedPhone && (
                       <p className="text-sm text-gray-500 dark:text-white/50">
-                        {displayPhone}
+                        {resolvedPhone}
                       </p>
                     )}
                   </div>
@@ -460,19 +461,19 @@ export const PropertyDetailView = ({
           )}
 
           {/* Description */}
-          <div className="mb-8">
-            <h2 className="mb-3 text-xl font-semibold text-gray-900 dark:text-white">
+          <div className="mb-12 md:mb-20">
+            <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
               À propos de ce logement
             </h2>
-            <p className="text-gray-700 dark:text-white/80 leading-relaxed">
+            <p className="text-lg text-gray-700 dark:text-white/80 leading-relaxed max-w-3xl">
               {property.description}
             </p>
           </div>
 
           {/* Visite Virtuelle 360° */}
           {property.virtual_tour_url && (
-            <div className="mb-8 scroll-mt-20" id="visite-virtuelle">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+            <div className="mb-12 md:mb-20 scroll-mt-20" id="visite-virtuelle">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900 dark:text-white">
                 <span className="text-2xl">👀</span> Visite Virtuelle
               </h2>
 
@@ -496,8 +497,8 @@ export const PropertyDetailView = ({
 
           {/* Détails techniques */}
           {(property.details.year || property.details.heating || property.details.charges || property.details.parking) && (
-            <div className="mb-8 rounded-xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/5">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+            <div className="mb-12 md:mb-20 rounded-2xl border border-gray-200 bg-gray-50/50 p-8 dark:border-white/10 dark:bg-white/5">
+              <h2 className="mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
                 Détails techniques
               </h2>
               <dl className="grid gap-4 sm:grid-cols-2">

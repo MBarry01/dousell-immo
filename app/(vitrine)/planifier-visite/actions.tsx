@@ -56,9 +56,49 @@ export async function createVisitRequest(values: VisitRequestFormValues, turnsti
     };
   }
 
-  // Utiliser le client admin pour bypasser RLS (formulaire public, sécurisé par Turnstile)
   const supabase = createAdminClient();
   const payload = parsed.data;
+
+  // --- Résolution du publieur (équipe ou propriétaire) ---
+  let publisherEmail: string | null = null;
+  let publisherName: string | null = null;
+
+  if (payload.propertyId) {
+    try {
+      const { data: prop } = await supabase
+        .from("properties")
+        .select("team_id, owner_id")
+        .eq("id", payload.propertyId)
+        .single();
+
+      if (prop?.team_id) {
+        // Cas équipe : envoyer au company_email de l'équipe
+        const { data: team } = await supabase
+          .from("teams")
+          .select("name, company_email")
+          .eq("id", prop.team_id)
+          .single();
+        if (team?.company_email) {
+          publisherEmail = team.company_email;
+          publisherName = team.name || "l'agence";
+        }
+      } else if (prop?.owner_id) {
+        // Cas propriétaire individuel : récupérer l'email depuis auth.users
+        const { data: authUser } = await supabase.auth.admin.getUserById(prop.owner_id);
+        if (authUser?.user?.email) {
+          publisherEmail = authUser.user.email;
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", prop.owner_id)
+            .single();
+          publisherName = profile?.full_name || "le propriétaire";
+        }
+      }
+    } catch (err) {
+      console.warn("[createVisitRequest] Impossible de résoudre le publieur:", err);
+    }
+  }
 
   // Insérer dans la table visit_requests
   const { data, error } = await supabase.from("visit_requests").insert({
@@ -67,47 +107,82 @@ export async function createVisitRequest(values: VisitRequestFormValues, turnsti
     project_type: payload.projectType,
     availability: payload.availability,
     message: payload.message,
+    property_id: payload.propertyId || null,
     status: "nouveau",
   }).select().single();
 
   if (error) {
-    console.error("❌ Error inserting visit request:", error);
-    return {
-      success: false,
-      error: "Impossible d'enregistrer la demande. Réessayez plus tard.",
-    };
-  }
-
-  // Envoyer l'email à l'admin
-  const adminEmail = getAdminEmail();
-  if (!adminEmail) {
-    console.warn("⚠️ Admin email non configuré, notification ignorée");
-    return { success: true };
-  }
-
-  try {
-    await sendEmail({
-      to: adminEmail,
-      subject: "Nouvelle demande de visite · Dousell Immo",
-      react: (
-        <VisitRequestEmail
-          fullName={payload.fullName}
-          phone={payload.phone}
-          projectType={payload.projectType}
-          availability={
-            payload.availability === "semaine-matin"
-              ? "En semaine (Matin)"
-              : payload.availability === "semaine-apres-midi"
-                ? "En semaine (Après-midi)"
-                : "Le week-end"
-          }
-          message={payload.message}
-        />
-      ),
+    // Tentative sans property_id si colonne non existante
+    const { error: error2 } = await supabase.from("visit_requests").insert({
+      full_name: payload.fullName,
+      phone: payload.phone,
+      project_type: payload.projectType,
+      availability: payload.availability,
+      message: payload.message,
+      status: "nouveau",
     });
-  } catch (emailError) {
-    console.error("⚠️ Erreur lors de l'envoi de l'email:", emailError);
-    // Ne pas bloquer le processus si l'email échoue
+    if (error2) {
+      console.error("❌ Error inserting visit request:", error2);
+      return {
+        success: false,
+        error: "Impossible d'enregistrer la demande. Réessayez plus tard.",
+      };
+    }
+  }
+
+  const availabilityLabel =
+    payload.availability === "semaine-matin"
+      ? "En semaine (Matin)"
+      : payload.availability === "semaine-apres-midi"
+        ? "En semaine (Après-midi)"
+        : "Le week-end";
+
+  const propertyInfo = payload.propertyTitle
+    ? `\n\n📍 Bien concerné : ${payload.propertyTitle}${payload.propertyId ? ` (ID: ${payload.propertyId})` : ""}`
+    : "";
+
+  // --- Envoi email au publieur (équipe ou propriétaire) ---
+  if (publisherEmail) {
+    try {
+      await sendEmail({
+        to: publisherEmail,
+        subject: `📩 Nouvelle demande de visite — ${payload.propertyTitle || "votre bien"} · Dousell Immo`,
+        react: (
+          <VisitRequestEmail
+            fullName={payload.fullName}
+            phone={payload.phone}
+            projectType={payload.projectType}
+            availability={availabilityLabel}
+            message={payload.message + propertyInfo}
+          />
+        ),
+      });
+      console.log(`[createVisitRequest] Email envoyé à ${publisherName} (${publisherEmail})`);
+    } catch (emailError) {
+      console.error("⚠️ Erreur email publieur:", emailError);
+    }
+  }
+
+  // --- Envoi email à l'admin (copie systématique) ---
+  const adminEmail = getAdminEmail();
+  if (adminEmail) {
+    try {
+      await sendEmail({
+        to: adminEmail,
+        subject: `Nouvelle demande de visite · Dousell Immo${publisherEmail ? ` (copie — publieur notifié)` : ""}`,
+        react: (
+          <VisitRequestEmail
+            fullName={payload.fullName}
+            phone={payload.phone}
+            projectType={payload.projectType}
+            availability={availabilityLabel}
+            message={payload.message + propertyInfo}
+          />
+        ),
+      });
+    } catch (emailError) {
+      console.error("⚠️ Erreur lors de l'envoi de l'email admin:", emailError);
+    }
   }
 
   // Notifier tous les admins et modérateurs
@@ -116,12 +191,11 @@ export async function createVisitRequest(values: VisitRequestFormValues, turnsti
     await notifyModeratorsAndAdmins({
       type: "info",
       title: "Nouveau lead",
-      message: `${payload.fullName} (${payload.phone}) a fait une demande de visite pour ${payload.projectType}`,
+      message: `${payload.fullName} (${payload.phone}) a fait une demande de visite${payload.propertyTitle ? ` pour "${payload.propertyTitle}"` : ""} → ${publisherName || "admin"}`,
       resourcePath: "/admin/leads",
     });
   } catch (error) {
     console.error("⚠️ Erreur lors de la notification des modérateurs:", error);
-    // Ne pas bloquer le processus si la notification échoue
   }
 
   return { success: true };

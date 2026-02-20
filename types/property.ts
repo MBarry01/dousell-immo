@@ -52,12 +52,18 @@ export type Property = {
     is_identity_verified?: boolean;
     updated_at?: string;
   };
+  team?: {
+    id?: string;
+    name?: string;
+    logo_url?: string;
+    company_phone?: string;
+    company_email?: string;
+  };
   proximites?: {
     transports: string[];
     ecoles: string[];
     commerces: string[];
   };
-  service_type?: "mandat_confort" | "boost_visibilite";
   contact_phone?: string;
   virtual_tour_url?: string; // Lien d'intégration (Embed SRC) Google Maps ou YouTube 360
   view_count?: number; // Compteur incrémental des vues (optimisé)

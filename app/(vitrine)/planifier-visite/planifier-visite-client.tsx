@@ -85,6 +85,8 @@ export default function PlanifierVisitePageContent() {
 
   const projectTypeParam = searchParams?.get("projectType");
   const messageParam = searchParams?.get("message");
+  const propertyIdParam = searchParams?.get("propertyId");
+  const propertyTitleParam = searchParams?.get("propertyTitle");
 
   const form = useForm<VisitRequestFormValues>({
     resolver: zodResolver(visitRequestSchema),
@@ -115,7 +117,14 @@ export default function PlanifierVisitePageContent() {
 
     try {
       setIsSubmitting(true);
-      const result = await createVisitRequest(values, captchaToken);
+      const result = await createVisitRequest(
+        {
+          ...values,
+          propertyId: propertyIdParam || undefined,
+          propertyTitle: propertyTitleParam || undefined,
+        },
+        captchaToken
+      );
 
       if (!result.success) {
         toast.error(result.error || "Impossible d'envoyer la demande.");

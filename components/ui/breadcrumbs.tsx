@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -46,12 +47,14 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
                 {item.label}
               </span>
             ) : (
-              <Link
-                href={item.href}
-                className="max-w-[120px] truncate text-muted-foreground transition-colors hover:text-white sm:max-w-[180px]"
-              >
-                {item.label}
-              </Link>
+              <motion.div whileTap={{ scale: 0.95 }} className="inline-flex">
+                <Link
+                  href={item.href}
+                  className="max-w-[120px] truncate text-muted-foreground transition-colors hover:text-white sm:max-w-[180px]"
+                >
+                  {item.label}
+                </Link>
+              </motion.div>
             )}
           </div>
         );

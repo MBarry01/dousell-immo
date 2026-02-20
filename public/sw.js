@@ -1,8 +1,16 @@
 // Service Worker for Dousell Immo PWA + OneSignal Push
-// Import OneSignal SW SDK so this worker can handle push events
+
+// 1. Listeners must be added at the VERY TOP for initial evaluation
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
+// 2. Import OneSignal SW SDK
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-const CACHE_NAME = "dousell-immo-v12";
+const CACHE_NAME = "dousell-immo-v13"; // Increment version
 const STATIC_ASSETS = [
   "/gestion",
   "/manifest.json",
@@ -14,13 +22,6 @@ const STATIC_ASSETS = [
   "/icons/apple-touch-icon.png",
   "/offline.html",
 ];
-
-// Allow the app to trigger skipWaiting on update (helps PWA update reliability)
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
-});
 
 // Install event - cache static assets
 self.addEventListener("install", (event) => {

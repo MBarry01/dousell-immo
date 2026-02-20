@@ -1,15 +1,7 @@
-/**
- * Version cachée de propertyService.ts avec Redis
- *
- * Pattern utilisé : Cache-Aside (Lazy Loading)
- * - Lecture : Cache → DB si MISS → Remplir cache
- * - TTL adapté selon la fréquence de changement
- *
- * @see REDIS_CACHE_STRATEGY.md
- */
-
 import { getOrSetCache } from "@/lib/cache/cache-aside";
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { mapProperty } from "@/services/propertyService";
 import type { Property } from "@/types/property";
 import type { PropertyFilters } from "./propertyService";
 export type { PropertyFilters };
@@ -28,29 +20,62 @@ export async function getPropertyById(id: string): Promise<Property | null> {
 
       const { data, error } = await supabase
         .from("properties")
-        .select(`
-          *,
-          owner:profiles!properties_owner_id_fkey(
-            id,
-            full_name,
-            avatar_url,
-            role,
-            phone,
-            is_identity_verified
-          )
-        `)
+        .select("*")
         .eq("id", id)
         .single();
 
       if (error) {
-        if (error.code === "PGRST116") {
-          // Not found
-          return null;
-        }
+        if (error.code === "PGRST116") return null;
         throw error;
       }
 
-      return data as Property;
+      if (!data) return null;
+
+      // Utiliser l'admin client pour bypasser les RLS sur les tables profiles et teams
+      const adminClient = createAdminClient();
+
+      // Récupérer le profil du propriétaire
+      if (data.owner_id) {
+        try {
+          const { data: profileData } = await adminClient
+            .from("profiles")
+            .select("id, full_name, avatar_url, role, phone, is_identity_verified, updated_at")
+            .eq("id", data.owner_id)
+            .single();
+
+          if (profileData) {
+            // Si pas de téléphone dans le profil, utiliser contact_phone
+            if (!profileData.phone && data.contact_phone) {
+              profileData.phone = data.contact_phone;
+            }
+            console.log("[getPropertyById cached] owner:", {
+              full_name: profileData.full_name,
+              phone: profileData.phone,
+              role: profileData.role,
+            });
+            data.owner = profileData;
+          }
+        } catch { /* profil non trouvé, continuer */ }
+      }
+
+      // Récupérer les données de l'équipe
+      if (data.team_id) {
+        try {
+          const { data: teamData } = await adminClient
+            .from("teams")
+            .select("id, name, logo_url, company_phone, company_email")
+            .eq("id", data.team_id)
+            .single();
+
+          if (teamData) {
+            console.log("[getPropertyById cached] team:", { name: teamData.name });
+            data.team = teamData;
+          }
+        } catch { /* équipe non trouvée, continuer */ }
+      }
+
+      // Mapper via la fonction standard
+      return mapProperty(data);
     },
     {
       ttl: 3600, // 1 heure

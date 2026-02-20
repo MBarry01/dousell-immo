@@ -28,7 +28,6 @@ type PropertyModerationCardProps = {
     images: string[];
     location: { city: string; district: string };
     validation_status: string;
-    service_type: string;
     payment_ref: string | null;
     owner_id: string;
     created_at?: string;
@@ -131,14 +130,6 @@ export function PropertyModerationCard({
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4 text-muted-foreground/70" />
               <span>{formatDate(property.created_at)}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <CreditCard className="h-4 w-4 text-muted-foreground/70" />
-              <span>
-                {property.service_type === "mandat_confort"
-                  ? "Mandat Agence"
-                  : "Diffusion Simple"}
-              </span>
             </div>
             {property.payment_ref && (
               <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">

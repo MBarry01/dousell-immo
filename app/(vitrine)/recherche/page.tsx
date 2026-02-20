@@ -71,6 +71,11 @@ const recordToFilters = (
     filters.hasWaterTank = true;
   }
 
+  // Publieur (owner) : filtrer les biens d'un même vendeur/agence
+  if (params.owner && typeof params.owner === "string") {
+    filters.ownerId = params.owner;
+  }
+
   return filters;
 };
 

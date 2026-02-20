@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { createAdminClient } from "@/utils/supabase/admin";
 import type { Property } from "@/types/property";
 import { slugify } from "@/lib/slugs";
 
@@ -19,6 +20,7 @@ export type PropertyFilters = {
   type?: Property["details"]["type"];
   types?: Property["details"]["type"][]; // Support pour sélection multiple
   limit?: number;
+  ownerId?: string; // Filtrer par publieur (owner_id)
 };
 
 type SupabasePropertyRow = {
@@ -62,7 +64,6 @@ type SupabasePropertyRow = {
     phone?: string;
     whatsapp?: string;
   };
-  service_type?: "mandat_confort" | "boost_visibilite";
   contact_phone?: string;
   view_count?: number;
   verification_status?: Property["verification_status"];
@@ -98,7 +99,7 @@ type SupabasePropertyRow = {
   };
 };
 
-const mapProperty = (row: SupabasePropertyRow): Property => {
+export const mapProperty = (row: SupabasePropertyRow): Property => {
   const agent = row.agent || {};
   const features = row.features || {};
   const details = row.details || {};
@@ -177,17 +178,29 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
       phone: agent.phone ?? "",
       whatsapp: agent.whatsapp,
     },
-    owner: owner && (owner.phone || owner.full_name || owner.id)
+    owner: owner && (owner.phone || owner.full_name || owner.id || (row as any).contact_phone)
       ? {
         id: owner.id as string,
-        full_name: owner.full_name as string,
-        avatar_url: owner.avatar_url as string,
+        full_name: (owner.full_name as string) || undefined,
+        avatar_url: (owner.avatar_url as string) || undefined,
         role: (owner.role as "particulier" | "agent" | "admin") || "particulier",
-        phone: owner.phone as string,
+        // Si le profil n'a pas de téléphone, on utilise contact_phone de l'annonce
+        phone: (owner.phone as string) || (row as any).contact_phone || undefined,
         is_identity_verified: (owner.is_identity_verified as boolean) || false,
-        updated_at: owner.updated_at as string,
+        updated_at: (owner.updated_at as string) || undefined,
       }
-      : undefined,
+      : (row as any).contact_phone
+        // Cas particulier : pas de profil lié mais un numéro de contact saisi
+        ? {
+          id: undefined,
+          full_name: undefined,
+          avatar_url: undefined,
+          role: "particulier" as const,
+          phone: (row as any).contact_phone as string,
+          is_identity_verified: false,
+          updated_at: undefined,
+        }
+        : undefined,
     disponibilite: row.disponibilite ?? "Immédiate",
     proximites: proximites && (
       proximites.transports?.length ||
@@ -195,6 +208,16 @@ const mapProperty = (row: SupabasePropertyRow): Property => {
       proximites.commerces?.length
     ) ? proximites as Property["proximites"] : undefined,
     contact_phone: row.contact_phone,
+    team_id: (row as any).team_id,
+    team: (row as any).team && ((row as any).team.name || (row as any).team.company_phone)
+      ? {
+        id: (row as any).team.id,
+        name: (row as any).team.name,
+        logo_url: (row as any).team.logo_url,
+        company_phone: (row as any).team.company_phone,
+        company_email: (row as any).team.company_email,
+      }
+      : undefined,
     view_count: row.view_count,
     verification_status: row.verification_status,
     proof_document_url: row.proof_document_url,
@@ -301,6 +324,10 @@ export const getProperties = async (filters: PropertyFilters = {}) => {
       query = query.or(
         `details->>type.ilike.%${filters.type}%`
       );
+    }
+
+    if (filters.ownerId) {
+      query = query.eq("owner_id", filters.ownerId);
     }
 
     query = query.order("created_at", {
@@ -448,31 +475,52 @@ export const getPropertyById = async (id: string) => {
     }
 
     // Si on a des données et un owner_id, récupérer le profil séparément
+    // Utiliser l'admin client pour bypasser les RLS (page publique)
     if (data.owner_id) {
       try {
-        const { data: profileData, error: profileError } = await supabase
+        const adminClient = createAdminClient();
+        const { data: profileData, error: profileError } = await adminClient
           .from("profiles")
           .select("id, full_name, avatar_url, role, phone, is_identity_verified, updated_at")
           .eq("id", data.owner_id)
           .single();
 
         if (!profileError && profileData) {
-          data.owner = profileData;
-        } else if (profileError) {
-          // Si la table profiles n'existe pas encore ou le profil n'existe pas, c'est normal
-          // On ne log que les erreurs inattendues (pas les 404 ou "does not exist")
-          if (profileError.code !== "PGRST116" && !profileError.message?.includes("does not exist")) {
-            // Seulement logger les vraies erreurs (permissions, etc.)
-            console.warn("getPropertyById: Erreur lors de la récupération du profil", {
-              code: profileError.code,
-              message: profileError.message,
-              owner_id: data.owner_id,
-            });
+          if (!profileData.full_name && data.contact_phone) {
+            profileData.phone = profileData.phone || data.contact_phone;
           }
-          // Sinon, on ignore silencieusement (profil non trouvé ou table inexistante)
+          console.log("[getPropertyById] owner profile:", {
+            id: profileData.id,
+            full_name: profileData.full_name,
+            phone: profileData.phone,
+            role: profileData.role,
+            has_avatar: !!profileData.avatar_url,
+          });
+          data.owner = profileData;
         }
       } catch (profileError) {
-        console.warn("getPropertyById: Exception lors de la récupération du profil", profileError);
+        console.warn("[getPropertyById] Erreur profil owner:", profileError);
+      }
+    }
+
+    // Si on a un team_id, récupérer les données de l'équipe (admin client pour bypasser RLS)
+    if (data.team_id) {
+      try {
+        const adminClient = createAdminClient();
+        const { data: teamData, error: teamError } = await adminClient
+          .from("teams")
+          .select("id, name, logo_url, company_phone, company_email")
+          .eq("id", data.team_id)
+          .single();
+
+        if (!teamError && teamData) {
+          console.log("[getPropertyById] team:", { id: teamData.id, name: teamData.name });
+          data.team = teamData;
+        } else if (teamError) {
+          console.warn("[getPropertyById] Erreur team:", teamError.message);
+        }
+      } catch (teamError) {
+        console.warn("[getPropertyById] Exception team:", teamError);
       }
     }
 

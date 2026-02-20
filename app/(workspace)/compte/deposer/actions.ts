@@ -220,7 +220,6 @@ export async function submitUserListing(data: SubmitListingData) {
       team_id: (teamId && isAgencyListing) ? teamId : null,
       is_agency_listing: isAgencyListing,
       validation_status: validationStatus,
-      service_type: "mandat_confort", // 100% gratuit
       contact_phone: data.contact_phone || null,
       location: data.location || {
         city: data.city,
