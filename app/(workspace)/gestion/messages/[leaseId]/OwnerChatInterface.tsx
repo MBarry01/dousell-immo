@@ -135,9 +135,9 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
     }, {} as Record<string, Message[]>);
 
     return (
-        <div className={`flex flex-col h-[calc(100dvh-9rem-env(safe-area-inset-bottom))] lg:h-[calc(100dvh-5.5rem)] ${isDark ? 'bg-[#0B1120]' : 'bg-gray-50'}`}>
+        <div className={`fixed inset-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:static lg:h-[calc(100dvh-5.5rem)] flex flex-col z-50 ${isDark ? 'bg-[#0B1120]' : 'bg-gray-50'}`}>
             {/* Header */}
-            <div className={`border-b px-4 py-3 flex items-center gap-3 shadow-sm z-10 shrink-0 ${isDark ? 'bg-card border-border' : 'bg-white border-gray-200'
+            <div className={`border-b px-4 py-3 pb-3 flex items-center gap-3 shadow-sm shrink-0 ${isDark ? 'bg-card border-border' : 'bg-white border-gray-200'
                 }`}>
                 <Link href="/gestion/messages" className={`p-2 -ml-2 rounded-full transition-colors ${isDark ? 'text-slate-400 hover:bg-slate-800' : 'text-gray-500 hover:bg-gray-100'
                     }`}>
@@ -224,7 +224,7 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
             </div>
 
             {/* Input */}
-            <div className={`border-t px-4 py-3 z-10 shrink-0 ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-gray-200'
+            <div className={`border-t px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shrink-0 bg-background/80 backdrop-blur-md ${isDark ? 'border-slate-800' : 'border-gray-200'
                 }`}>
                 <form onSubmit={handleSend} className="flex items-center gap-2 w-full mx-auto max-w-4xl">
                     <input

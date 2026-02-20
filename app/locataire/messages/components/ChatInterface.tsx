@@ -146,9 +146,9 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
     }, {} as Record<string, Message[]>);
 
     return (
-        <div className="flex flex-col h-[calc(100dvh-9rem-env(safe-area-inset-bottom))] lg:h-[calc(100dvh-5.5rem)] bg-slate-50">
+        <div className="fixed inset-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:static lg:h-[calc(100dvh-5.5rem)] flex flex-col z-50 bg-slate-50">
             {/* Header */}
-            <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm z-10 shrink-0">
+            <div className="bg-white border-b border-slate-200 px-4 py-3 pb-3 flex items-center gap-3 shadow-sm shrink-0">
                 <Link href="/locataire" className="p-2 -ml-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
                     <ChevronLeft className="w-5 h-5" />
                 </Link>
@@ -233,7 +233,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
             </div>
 
             {/* Input */}
-            <div className="bg-white border-t border-slate-200 px-4 py-3 z-10 shrink-0">
+            <div className="bg-white/90 backdrop-blur-md border-t border-slate-200 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shrink-0">
                 <form onSubmit={handleSend} className="flex items-center gap-2 max-w-lg mx-auto">
                     <input
                         type="text"

@@ -20,9 +20,7 @@ type Lease = {
 const PROPERTY_ICONS: Record<PropertyType, string> = {
     'chambre': '🛏️',
     'studio': '🏠',
-    'f2': '🏢',
-    'f3': '🏢',
-    'f4': '🏢',
+    'appartement': '🏢',
     'villa': '🏡',
     'custom': '⚙️',
 };
@@ -36,7 +34,8 @@ export default function NewInventoryReportPage() {
 
     const [selectedLeaseId, setSelectedLeaseId] = useState<string>('');
     const [reportType, setReportType] = useState<'entry' | 'exit'>('entry');
-    const [propertyType, setPropertyType] = useState<PropertyType>('studio');
+    const [propertyType, setPropertyType] = useState<PropertyType>('appartement');
+    const [roomsCount, setRoomsCount] = useState(1);
 
     useEffect(() => {
         const loadLeases = async () => {
@@ -62,7 +61,8 @@ export default function NewInventoryReportPage() {
         const result = await createInventoryReport({
             leaseId: selectedLeaseId,
             type: reportType,
-            propertyType: propertyType
+            propertyType: propertyType,
+            roomsCount: roomsCount
         });
 
         if (result.error) {
@@ -142,23 +142,47 @@ export default function NewInventoryReportPage() {
                     Le formulaire s&apos;adapte automatiquement au type de bien
                 </p>
 
-                <div className="grid grid-cols-3 gap-2">
-                    {(['chambre', 'studio', 'f2', 'f3', 'villa'] as PropertyType[]).map((type) => (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {(['chambre', 'studio', 'appartement', 'villa'] as PropertyType[]).map((type) => (
                         <button
                             key={type}
-                            onClick={() => setPropertyType(type)}
-                            className={`p-3 rounded-lg border text-center transition-all ${propertyType === type
-                                ? 'bg-purple-500/20 border-purple-500 text-white'
+                            onClick={() => {
+                                setPropertyType(type);
+                                if (type !== 'appartement' && type !== 'villa') setRoomsCount(1);
+                            }}
+                            className={`p-3 rounded-xl border text-center transition-all shadow-sm ${propertyType === type
+                                ? 'bg-primary border-primary text-primary-foreground font-semibold ring-2 ring-primary/20 ring-offset-2 ring-offset-background'
                                 : isDark
-                                    ? 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'
-                                    : 'bg-gray-50 border-gray-300 text-gray-600 hover:border-gray-400'
+                                    ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:border-slate-500'
+                                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
                                 }`}
                         >
-                            <span className="text-xl block mb-1">{PROPERTY_ICONS[type]}</span>
-                            <span className="text-xs font-medium">{PROPERTY_TYPE_LABELS[type]}</span>
+                            <span className="text-2xl block mb-1.5">{PROPERTY_ICONS[type]}</span>
+                            <span className="text-xs">{PROPERTY_TYPE_LABELS[type]}</span>
                         </button>
                     ))}
                 </div>
+
+                {/* Number of rooms selector (only for adaptable types) */}
+                {(propertyType === 'appartement' || propertyType === 'villa') && (
+                    <div className={`mt-4 p-4 rounded-xl border flex items-center justify-between ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
+                        <div>
+                            <h3 className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>Nombre de chambres</h3>
+                            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>Pièces générées dans l'état des lieux</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setRoomsCount(Math.max(1, roomsCount - 1))}
+                                className={`w-8 h-8 rounded-full flex items-center justify-center border font-bold ${isDark ? 'border-slate-600 hover:bg-slate-700 text-white' : 'border-gray-300 hover:bg-gray-200 text-gray-700'}`}
+                            >-</button>
+                            <span className={`w-4 text-center font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{roomsCount}</span>
+                            <button
+                                onClick={() => setRoomsCount(Math.min(10, roomsCount + 1))}
+                                className={`w-8 h-8 rounded-full flex items-center justify-center border font-bold ${isDark ? 'border-slate-600 hover:bg-slate-700 text-white' : 'border-gray-300 hover:bg-gray-200 text-gray-700'}`}
+                            >+</button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Step 3: Select Entry/Exit Type */}
@@ -168,30 +192,30 @@ export default function NewInventoryReportPage() {
                 <div className="grid grid-cols-2 gap-3">
                     <button
                         onClick={() => setReportType('entry')}
-                        className={`p-4 rounded-xl border text-center transition-all ${reportType === 'entry'
-                            ? 'bg-blue-500/20 border-blue-500 text-white'
+                        className={`p-4 rounded-xl border text-center transition-all shadow-sm ${reportType === 'entry'
+                            ? 'bg-primary border-primary text-primary-foreground font-semibold ring-2 ring-primary/20 ring-offset-2 ring-offset-background'
                             : isDark
-                                ? 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'
-                                : 'bg-gray-50 border-gray-300 text-gray-600 hover:border-gray-400'
+                                ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:border-slate-500'
+                                : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
                             }`}
                     >
-                        <span className="text-2xl block mb-2">🔑</span>
+                        <span className="text-3xl block mb-2">🔑</span>
                         <span className="font-medium">Entrée</span>
-                        <p className="text-xs mt-1 opacity-70">Remise des clés</p>
+                        <p className={`text-xs mt-1 transition-colors ${reportType === 'entry' ? 'text-primary-foreground/80' : isDark ? 'text-slate-500' : 'text-gray-500'}`}>Remise des clés</p>
                     </button>
 
                     <button
                         onClick={() => setReportType('exit')}
-                        className={`p-4 rounded-xl border text-center transition-all ${reportType === 'exit'
-                            ? 'bg-orange-500/20 border-orange-500 text-white'
+                        className={`p-4 rounded-xl border text-center transition-all shadow-sm ${reportType === 'exit'
+                            ? 'bg-primary border-primary text-primary-foreground font-semibold ring-2 ring-primary/20 ring-offset-2 ring-offset-background'
                             : isDark
-                                ? 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'
-                                : 'bg-gray-50 border-gray-300 text-gray-600 hover:border-gray-400'
+                                ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:border-slate-500'
+                                : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
                             }`}
                     >
-                        <span className="text-2xl block mb-2">🚪</span>
+                        <span className="text-3xl block mb-2">🚪</span>
                         <span className="font-medium">Sortie</span>
-                        <p className="text-xs mt-1 opacity-70">Départ du locataire</p>
+                        <p className={`text-xs mt-1 transition-colors ${reportType === 'exit' ? 'text-primary-foreground/80' : isDark ? 'text-slate-500' : 'text-gray-500'}`}>Départ du locataire</p>
                     </button>
                 </div>
             </div>

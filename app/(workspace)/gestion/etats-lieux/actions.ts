@@ -110,12 +110,13 @@ export async function getInventoryReportById(id: string) {
 }
 
 /**
- * Create a new inventory report
+ * Create a new inventory report with intelligent templating
  */
 export async function createInventoryReport(data: {
     leaseId: string;
     type: 'entry' | 'exit';
     propertyType?: PropertyType;
+    roomsCount?: number;
 }) {
     const { teamId, user } = await getUserTeamContext();
     await requireTeamPermission('leases.edit'); // Permission for inventory reports linked to leases
@@ -137,9 +138,9 @@ export async function createInventoryReport(data: {
         return { error: 'Bail non trouvé' };
     }
 
-    // Use intelligent template if property type is provided, otherwise fallback to default (F2)
+    // Use intelligent template if property type is provided, otherwise fallback to default
     const initialRooms = data.propertyType
-        ? getRoomsForPropertyType(data.propertyType)
+        ? getRoomsForPropertyType(data.propertyType, data.roomsCount)
         : DEFAULT_ROOMS;
 
     // Note: We don't insert team_id as the column doesn't exist
@@ -397,7 +398,8 @@ export async function uploadInventoryPhoto(file: File, reportId: string) {
         return { error: 'Non autorisé' };
     }
 
-    const fileExt = file.name.split('.').pop();
+    const originalExt = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() : '';
+    const fileExt = originalExt && ['jpg', 'jpeg', 'png', 'webp'].includes(originalExt) ? originalExt : 'jpg';
     const fileName = `teams/${teamId}/inventory/${reportId}/${Date.now()}_${Math.random().toString(36).substring(2, 11)}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage

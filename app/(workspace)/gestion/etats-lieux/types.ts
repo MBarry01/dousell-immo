@@ -41,14 +41,12 @@ export interface InventoryReport {
 }
 
 // Property types for intelligent templates
-export type PropertyType = 'chambre' | 'studio' | 'f2' | 'f3' | 'f4' | 'villa' | 'custom';
+export type PropertyType = 'chambre' | 'studio' | 'appartement' | 'villa' | 'custom';
 
 export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
     'chambre': 'Chambre meublée',
     'studio': 'Studio',
-    'f2': 'Appartement F2',
-    'f3': 'Appartement F3/F4',
-    'f4': 'Appartement F4+',
+    'appartement': 'Appartement',
     'villa': 'Villa / Maison',
     'custom': 'Personnalisé'
 };
@@ -171,32 +169,11 @@ export const PROPERTY_TEMPLATES: Record<PropertyType, Room[]> = {
         ROOM_SDB,
     ],
 
-    // F2 - Salon + 1 Chambre + Cuisine + SDB
-    'f2': [
-        ROOM_ENTREE,
-        ROOM_SALON,
-        { ...ROOM_CHAMBRE, name: 'Chambre' },
-        ROOM_CUISINE,
-        ROOM_SDB,
-    ],
-
-    // F3 - Salon + 2 Chambres + Cuisine + SDB
-    'f3': [
+    // Appartement générique (la fonction dynamisera les chambres)
+    'appartement': [
         ROOM_ENTREE,
         ROOM_SALON,
         { ...ROOM_CHAMBRE, name: 'Chambre 1' },
-        { ...ROOM_CHAMBRE, name: 'Chambre 2' },
-        ROOM_CUISINE,
-        ROOM_SDB,
-    ],
-
-    // F4+ - Salon + 3 Chambres + Cuisine + SDB
-    'f4': [
-        ROOM_ENTREE,
-        ROOM_SALON,
-        { ...ROOM_CHAMBRE, name: 'Chambre 1' },
-        { ...ROOM_CHAMBRE, name: 'Chambre 2' },
-        { ...ROOM_CHAMBRE, name: 'Chambre 3' },
         ROOM_CUISINE,
         ROOM_SDB,
     ],
@@ -213,7 +190,7 @@ export const PROPERTY_TEMPLATES: Record<PropertyType, Room[]> = {
         ROOM_EXTERIEUR,
     ],
 
-    // Custom - same as F2 for flexibility
+    // Custom - same as default appartement for flexibility
     'custom': [
         ROOM_ENTREE,
         ROOM_SALON,
@@ -223,10 +200,31 @@ export const PROPERTY_TEMPLATES: Record<PropertyType, Room[]> = {
     ],
 };
 
-// Helper function to get rooms for a property type
-export function getRoomsForPropertyType(type: PropertyType): Room[] {
-    return JSON.parse(JSON.stringify(PROPERTY_TEMPLATES[type] || PROPERTY_TEMPLATES['f2']));
+// Helper function to get rooms for a property type, configurable target for 'appartement'
+export function getRoomsForPropertyType(type: PropertyType, roomsCount: number = 1): Room[] {
+    const baseTemplate = PROPERTY_TEMPLATES[type] || PROPERTY_TEMPLATES['appartement'];
+    let finalTemplate = JSON.parse(JSON.stringify(baseTemplate)) as Room[];
+
+    // Dynamisation pour l'appartement : on génère le bon nombre de chambres
+    if (type === 'appartement') {
+        finalTemplate = [
+            ROOM_ENTREE,
+            ROOM_SALON,
+            ROOM_CUISINE,
+            ROOM_SDB
+        ];
+
+        // On insère le nombre de chambres demandées juste après le salon
+        const chambres = Array.from({ length: Math.max(1, roomsCount) }, (_, i) => ({
+            ...ROOM_CHAMBRE,
+            name: roomsCount === 1 ? 'Chambre' : `Chambre ${i + 1}`
+        }));
+
+        finalTemplate.splice(2, 0, ...chambres);
+    }
+
+    return finalTemplate;
 }
 
 // Default rooms (for backward compatibility)
-export const DEFAULT_ROOMS: Room[] = PROPERTY_TEMPLATES['f2'];
+export const DEFAULT_ROOMS: Room[] = PROPERTY_TEMPLATES['appartement'];

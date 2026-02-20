@@ -10,16 +10,14 @@ import { getAgencyBranding } from '../actions';
 const PROPERTY_ICONS: Record<PropertyType, string> = {
     'chambre': '🛏️',
     'studio': '🏠',
-    'f2': '🏢',
-    'f3': '🏢',
-    'f4': '🏢',
+    'appartement': '🏢',
     'villa': '🏡',
     'custom': '⚙️',
 };
 
 // Map items to string for the blank form
 const getRoomItems = (type: PropertyType) => {
-    const rooms = PROPERTY_TEMPLATES[type] || PROPERTY_TEMPLATES['f2'];
+    const rooms = PROPERTY_TEMPLATES[type] || PROPERTY_TEMPLATES['appartement'];
     return rooms.map(room => ({
         name: room.name,
         items: room.items.map(item => item.name)
@@ -28,7 +26,7 @@ const getRoomItems = (type: PropertyType) => {
 
 export default function BlankPDFPage() {
     const printRef = useRef<HTMLDivElement>(null);
-    const [selectedType, setSelectedType] = useState<PropertyType>('f2');
+    const [selectedType, setSelectedType] = useState<PropertyType>('appartement');
     const [agencyBranding, setAgencyBranding] = useState<{ name: string | null, logo: string | null } | null>(null);
 
     useEffect(() => {

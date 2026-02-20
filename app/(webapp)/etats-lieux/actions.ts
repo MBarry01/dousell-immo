@@ -82,12 +82,13 @@ export async function getInventoryReportById(id: string) {
 }
 
 /**
- * Create a new inventory report
+ * Create a new inventory report with intelligent templating
  */
 export async function createInventoryReport(data: {
     leaseId: string;
     type: 'entry' | 'exit';
     propertyType?: PropertyType;
+    roomsCount?: number;
 }) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -96,7 +97,7 @@ export async function createInventoryReport(data: {
         return { error: 'Non autorisé' };
     }
 
-    // Verify lease belongs to user
+    // Verify lease ownership
     const { data: lease, error: leaseError } = await supabase
         .from('leases')
         .select('id')
@@ -108,9 +109,9 @@ export async function createInventoryReport(data: {
         return { error: 'Bail non trouvé' };
     }
 
-    // Use intelligent template if property type is provided, otherwise fallback to default (F2)
+    // Use intelligent template if property type is provided, otherwise fallback to default
     const initialRooms = data.propertyType
-        ? getRoomsForPropertyType(data.propertyType)
+        ? getRoomsForPropertyType(data.propertyType, data.roomsCount)
         : DEFAULT_ROOMS;
 
     const { data: report, error } = await supabase
@@ -336,8 +337,9 @@ export async function uploadInventoryPhoto(file: File, reportId: string) {
         return { error: 'Non autorisé' };
     }
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${reportId}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+    const originalExt = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() : '';
+    const fileExt = originalExt && ['jpg', 'jpeg', 'png', 'webp'].includes(originalExt) ? originalExt : 'jpg';
+    const fileName = `${user.id}/${reportId}/${Date.now()}_${Math.random().toString(36).substring(2, 11)}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
         .from('inventory')
