@@ -148,7 +148,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
     return (
         <div className={cn(
             "fixed inset-x-0 z-30 flex flex-col overflow-hidden bg-slate-50",
-            "top-[calc(4rem+env(safe-area-inset-top))] md:top-16", // TenantHeader
+            "top-[calc(4rem+env(safe-area-inset-top))] md:top-16", // TenantHeader (h-16)
             "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0", // Au-dessus de BottomNav
         )}>
             {/* Header Chat - Fixe */}
