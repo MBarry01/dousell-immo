@@ -4,6 +4,7 @@ export interface RoomItem {
     condition: 'bon' | 'moyen' | 'mauvais' | 'absent' | '';
     comment: string;
     photos: string[];
+    localFiles?: File[];
 }
 
 export interface Room {

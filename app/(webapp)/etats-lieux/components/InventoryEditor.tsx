@@ -58,25 +58,91 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
     };
 
     const handleSave = async (markComplete = false) => {
-        setSaving(true);
+        if (markComplete) {
+            // Validation métier : Justification obligatoire pour état mauvais
+            for (const room of rooms) {
+                for (const item of room.items) {
+                    if (item.condition === 'mauvais') {
+                        const hasComment = item.comment && item.comment.trim().length > 0;
+                        const hasPhotos = (item.photos && item.photos.length > 0) || (item.localFiles && item.localFiles.length > 0);
 
-        const result = await updateInventoryReport(reportId, {
-            rooms,
-            meter_readings: meterReadings,
-            general_comments: generalComments,
-            status: markComplete ? 'completed' : 'draft'
-        });
-
-        if (result.error) {
-            toast.error(result.error);
-        } else {
-            toast.success(markComplete ? 'État des lieux complété !' : 'Enregistré');
-            if (markComplete) {
-                router.push('/etats-lieux');
+                        if (!hasComment && !hasPhotos) {
+                            toast.error(`Justification requise pour l'élément "${item.name}" dans "${room.name}" (Photo ou commentaire obligatoire vu l'état mauvais)`);
+                            return;
+                        }
+                    }
+                }
             }
         }
 
-        setSaving(false);
+        setSaving(true);
+        let updatedRooms = [...rooms];
+        let hasUploadErrors = false;
+
+        try {
+            // Étape 1 : Batch Upload des photos locales en attente
+            toast.info("Préparation de l'enregistrement...");
+
+            for (let r = 0; r < updatedRooms.length; r++) {
+                const room = updatedRooms[r];
+                for (let i = 0; i < room.items.length; i++) {
+                    const item = room.items[i];
+
+                    if (item.localFiles && item.localFiles.length > 0) {
+                        toast.loading(`Envoi des photos : ${room.name} (${i + 1}/${room.items.length})`, { id: 'uploading' });
+
+                        const newUploadedUrls: string[] = [];
+                        for (const file of item.localFiles) {
+                            const result = await uploadInventoryPhoto(file, reportId);
+                            if (result.error || !result.url) {
+                                console.error("Erreur upload batch:", result.error);
+                                hasUploadErrors = true;
+                            } else {
+                                newUploadedUrls.push(result.url);
+                            }
+                        }
+
+                        // Nettoyage de l'item préparé pour la DB
+                        const finalPhotos = item.photos.filter(p => !p.startsWith('blob:')).concat(newUploadedUrls);
+
+                        // Libération de la mémoire
+                        item.photos.filter(p => p.startsWith('blob:')).forEach(p => URL.revokeObjectURL(p));
+
+                        item.photos = finalPhotos;
+                        item.localFiles = []; // On vide la file d'attente
+                    }
+                }
+            }
+            toast.dismiss('uploading');
+
+            if (hasUploadErrors) {
+                toast.warning("Certaines photos n'ont pas pu être envoyées. Vérifiez votre connexion.");
+            }
+
+            // Étape 2 : Sauvegarde finale en base
+            const result = await updateInventoryReport(reportId, {
+                rooms: updatedRooms,
+                meter_readings: meterReadings,
+                general_comments: generalComments,
+                status: markComplete ? 'completed' : 'draft'
+            });
+
+            if (result.error) {
+                toast.error(result.error);
+            } else {
+                setRooms(updatedRooms);
+                toast.success(markComplete ? 'État des lieux complété !' : 'Enregistré avec succès');
+                if (markComplete) {
+                    router.push('/etats-lieux');
+                }
+            }
+        } catch (error) {
+            console.error("Erreur générale de sauvegarde:", error);
+            toast.dismiss('uploading');
+            toast.error("Une erreur s'est produite lors de la sauvegarde.");
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handlePhotoClick = (roomIndex: number, itemIndex: number) => {
@@ -92,23 +158,36 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
         const { roomIndex, itemIndex } = uploadTarget;
 
         try {
-            const formData = new FormData();
-            formData.append('file', file);
+            // Import dnamique pour réduire le poids initial du bundle
+            const imageCompressionModule = await import('browser-image-compression');
+            const imageCompression = imageCompressionModule.default || imageCompressionModule;
 
-            const result = await uploadInventoryPhoto(file, reportId);
+            // Compression
+            const options = {
+                maxSizeMB: 0.5,
+                maxWidthOrHeight: 1920,
+                useWebWorker: true
+            };
+            const compressedFile = await imageCompression(file, options);
 
-            if (result.error || !result.url) {
-                toast.error(result.error || "Erreur upload");
-            } else {
-                const newRooms = [...rooms];
-                const currentPhotos = newRooms[roomIndex].items[itemIndex].photos || [];
-                newRooms[roomIndex].items[itemIndex].photos = [...currentPhotos, result.url];
-                setRooms(newRooms);
-                toast.success("Photo ajoutée");
-            }
+            // Création de l'aperçu local instantané sans charge serveur
+            const localPreviewUrl = URL.createObjectURL(compressedFile);
+
+            const newRooms = [...rooms];
+            const currentItem = newRooms[roomIndex].items[itemIndex];
+
+            // Ajout du fichier à la file d'attente
+            currentItem.localFiles = [...(currentItem.localFiles || []), compressedFile];
+
+            // Ajout de l'URL éphémère à l'aperçu 
+            currentItem.photos = [...(currentItem.photos || []), localPreviewUrl];
+
+            setRooms(newRooms);
+            toast.success("Photo ajoutée (Non sauvegardée)");
+
         } catch (error) {
-            console.error(error);
-            toast.error("Erreur technique lors de l'upload");
+            console.error('Erreur de compression:', error);
+            toast.error("Erreur lors de l'ajout de la photo");
         } finally {
             setUploadingPhoto(false);
             setUploadTarget(null);
@@ -118,9 +197,35 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
 
     const removePhoto = (roomIndex: number, itemIndex: number, photoIndex: number) => {
         const newRooms = [...rooms];
-        const photos = [...(newRooms[roomIndex].items[itemIndex].photos || [])];
+        const currentItem = newRooms[roomIndex].items[itemIndex];
+
+        const photoUrl = currentItem.photos[photoIndex];
+
+        // Remove from photos preview
+        const photos = [...(currentItem.photos || [])];
         photos.splice(photoIndex, 1);
-        newRooms[roomIndex].items[itemIndex].photos = photos;
+        currentItem.photos = photos;
+
+        // Si c'est un lien local (blob:), libérer la mémoire RAM et l'enlever de la liste d'upload
+        if (photoUrl?.startsWith('blob:')) {
+            URL.revokeObjectURL(photoUrl);
+
+            const localFiles = [...(currentItem.localFiles || [])];
+            // On retire le même index car localFiles suit le même ordre que les nouveaux ajouts locaux
+            // Pour être précis on doit savoir quel localFile correspond à quel photo. 
+            // Vu notre implémentation, on pourrait reconstruire ou filtrer, mais comme les index peuvent différer si on a mixé blob et url cloud, on va filtrer par nom si possible, 
+            // mais on n'a que le File. On va utiliser une heuristique simple : retirer du File array l'élément correspondant si c'est un ajout récent.
+
+            // L'index dans localFiles est (photoIndex - nombre_de_photos_déjà_uploadées)
+            const numUploadées = currentItem.photos.filter(p => !p.startsWith('blob:')).length;
+            const indexInLocalFiles = photoIndex - numUploadées;
+
+            if (indexInLocalFiles >= 0 && indexInLocalFiles < localFiles.length) {
+                localFiles.splice(indexInLocalFiles, 1);
+                currentItem.localFiles = localFiles;
+            }
+        }
+
         setRooms(newRooms);
     };
 
