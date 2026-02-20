@@ -136,8 +136,8 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
 
     return (
         <div className={cn(
-            "flex flex-col w-full h-[calc(100svh-13rem-env(safe-area-inset-bottom))] lg:h-[calc(100vh-8.5rem)]",
-            "overflow-hidden px-4 md:px-6", // Marges de côté rétablies
+            "flex flex-col w-full h-[calc(100svh-9rem-env(safe-area-inset-bottom))] lg:h-[calc(100vh-8.5rem)]",
+            "overflow-hidden px-4 md:px-6", // Marges de côté normales
             "border border-border/10 bg-background/50 backdrop-blur-sm shadow-sm rounded-xl"
         )}>
             {/* Header Chat - Fixe */}

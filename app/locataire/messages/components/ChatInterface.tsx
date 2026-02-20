@@ -147,7 +147,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
 
     return (
         <div className={cn(
-            "flex flex-col w-full h-[calc(100svh-14rem-env(safe-area-inset-bottom))] lg:h-[calc(100vh-6rem)]",
+            "flex flex-col w-full h-[calc(100svh-9rem-env(safe-area-inset-bottom))] lg:h-[calc(100vh-6rem)]",
             "bg-slate-50/50 backdrop-blur-sm overflow-hidden shadow-sm border border-slate-200/50 px-4 md:px-6 rounded-xl",
         )}>
             {/* Header Chat - Fixe */}
