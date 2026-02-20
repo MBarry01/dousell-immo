@@ -136,33 +136,33 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
 
     return (
         <div className={cn(
-            "fixed inset-x-0 z-30 flex flex-col overflow-hidden",
-            "top-[calc(3.5rem+env(safe-area-inset-top))] md:top-[calc(3.5rem)]",
-            "bottom-[calc(4rem+env(safe-area-inset-bottom))] lg:bottom-0",
-            "lg:left-16", // Offset pour la sidebar desktop
-            isDark ? 'bg-[#0B1120]' : 'bg-gray-50'
+            "flex flex-col w-full h-[calc(100svh-12rem)] md:h-[calc(100vh-10rem)] max-w-5xl mx-auto",
+            "bg-card rounded-2xl overflow-hidden shadow-2xl border border-border/50 transition-all",
+            isDark ? 'bg-slate-900/80' : 'bg-white/80'
         )}>
-            {/* Header Chat - Fixe en haut du container */}
+            {/* Header Chat - Fixe */}
             <div className={cn(
-                "border-b px-4 py-3 flex items-center gap-3 shadow-sm shrink-0 z-20",
-                isDark ? 'bg-card/95 border-border backdrop-blur-md' : 'bg-white/95 border-gray-200 backdrop-blur-md'
+                "border-b px-4 py-3 flex items-center justify-between shadow-sm shrink-0 z-10",
+                isDark ? 'bg-card' : 'bg-white'
             )}>
-                <Link href="/gestion/messages" className={cn(
-                    "p-2 -ml-2 rounded-full transition-colors",
-                    isDark ? "text-slate-400 hover:bg-slate-800" : "text-gray-500 hover:bg-gray-100"
-                )}>
-                    <ChevronLeft className="w-5 h-5" />
-                </Link>
-                <div className="flex items-center gap-3 cursor-pointer" onClick={() => (window.location.href = `/gestion/locations/${leaseId}`)}>
-                    <div className={cn(
-                        "w-9 h-9 rounded-full flex items-center justify-center font-bold border",
-                        isDark ? "bg-slate-800 text-slate-300 border-slate-700" : "bg-gray-100 text-gray-600 border-gray-200"
+                <div className="flex items-center gap-3">
+                    <Link href="/gestion/messages" className={cn(
+                        "p-2 -ml-2 rounded-full transition-colors",
+                        isDark ? "text-slate-400 hover:bg-slate-800" : "text-gray-500 hover:bg-gray-100"
                     )}>
-                        {tenantName?.[0] || 'L'}
-                    </div>
-                    <div>
-                        <h2 className={cn("font-semibold leading-tight text-sm", isDark ? "text-white" : "text-gray-900")}>{tenantName || 'Locataire'}</h2>
-                        <p className={cn("text-[10px]", isDark ? "text-slate-500" : "text-gray-500")}>Détails du bail</p>
+                        <ChevronLeft className="w-5 h-5" />
+                    </Link>
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => (window.location.href = `/gestion/locations/${leaseId}`)}>
+                        <div className={cn(
+                            "w-9 h-9 rounded-full flex items-center justify-center font-bold border",
+                            isDark ? "bg-slate-800 text-slate-300 border-slate-700" : "bg-gray-100 text-gray-600 border-gray-200"
+                        )}>
+                            {tenantName?.[0] || 'L'}
+                        </div>
+                        <div>
+                            <h2 className={cn("font-semibold leading-tight text-sm", isDark ? "text-white" : "text-gray-900")}>{tenantName || 'Locataire'}</h2>
+                            <p className={cn("text-[10px]", isDark ? "text-slate-500" : "text-gray-500")}>Détails du bail</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -239,8 +239,8 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
 
             {/* Input - Fixe en bas du container */}
             <div className={cn(
-                "border-t px-4 py-3 shrink-0 z-20",
-                isDark ? "bg-card/95 border-border backdrop-blur-md" : "bg-white/95 border-gray-200 backdrop-blur-md"
+                "border-t px-6 py-4 shrink-0 z-20",
+                isDark ? "bg-card/95 border-border" : "bg-white/95 border-gray-200"
             )}>
                 <form onSubmit={handleSend} className="flex items-center gap-2 w-full mx-auto max-w-4xl">
                     <input

@@ -147,12 +147,11 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
 
     return (
         <div className={cn(
-            "fixed inset-x-0 z-30 flex flex-col overflow-hidden bg-slate-50",
-            "top-[calc(4rem+env(safe-area-inset-top))] md:top-16",
-            "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0"
+            "flex flex-col w-full h-[calc(100svh-12rem)] md:h-[calc(100vh-8rem)] max-w-4xl mx-auto",
+            "bg-slate-50 rounded-2xl overflow-hidden shadow-2xl border border-slate-200 transition-all",
         )}>
-            {/* Header Chat - Fixe en haut */}
-            <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm shrink-0 z-20">
+            {/* Header Chat - Fixe */}
+            <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center gap-3 shadow-sm shrink-0 z-10">
                 <Link href="/locataire" className="p-2 -ml-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
                     <ChevronLeft className="w-5 h-5" />
                 </Link>
@@ -237,7 +236,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
             </div>
 
             {/* Input - Fixe en bas du container */}
-            <div className="bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shrink-0 z-20">
+            <div className="bg-white/95 backdrop-blur-md border-t border-slate-200 px-6 py-4 shrink-0 z-20">
                 <form onSubmit={handleSend} className="flex items-center gap-2 max-w-lg mx-auto">
                     <input
                         type="text"
@@ -249,7 +248,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                     <button
                         type="submit"
                         disabled={!newMessage.trim() || isSending}
-                        className="w-11 h-11 rounded-full bg-slate-900 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 transition-all active:scale-95 shrink-0"
+                        className="w-11 h-11 rounded-full bg-slate-900 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 transition-all active:scale-95 shrink-0 shadow-sm"
                     >
                         <Send className="w-5 h-5 mx-auto" />
                     </button>
