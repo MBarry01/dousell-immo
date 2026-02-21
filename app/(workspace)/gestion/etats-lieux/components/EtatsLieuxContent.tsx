@@ -47,7 +47,7 @@ export function EtatsLieuxContent({ reports, error }: { reports: any[]; error: s
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
                     <div className="min-w-0">
-                        <ThemedText as="h1" variant="primary" className="text-lg sm:text-2xl font-semibold truncate">
+                        <ThemedText as="h1" variant="primary" className="text-lg sm:text-2xl font-black tracking-tighter truncate">
                             États des Lieux
                         </ThemedText>
                         <ThemedText as="p" variant="muted" className="text-sm">
@@ -137,7 +137,7 @@ export function EtatsLieuxContent({ reports, error }: { reports: any[]; error: s
                                                 </ThemedBadge>
                                             </div>
 
-                                            <ThemedText as="h3" variant="primary" className="font-medium truncate max-w-[200px] sm:max-w-none">
+                                            <ThemedText as="h3" variant="primary" className="font-black tracking-tighter truncate max-w-[200px] sm:max-w-none">
                                                 {report.lease?.property_address || 'Adresse non renseignée'}
                                             </ThemedText>
                                             <ThemedText as="p" variant="muted" className="text-sm">

@@ -237,7 +237,7 @@ export function TenantCard({
                 {/* Info */}
                 <div className="flex-1 min-w-0 pr-8">
                     <div className="block group/link">
-                        <h3 className="font-semibold text-base truncate mb-1 group-hover/link:text-primary transition-colors text-foreground"
+                        <h3 className="font-black text-base truncate mb-1 group-hover/link:text-primary transition-colors text-slate-900 dark:text-white tracking-tighter"
                             title={tenant.name}
                         >
                             {tenant.name}
@@ -278,10 +278,10 @@ export function TenantCard({
                 </div>
 
                 <div className="text-right">
-                    <span className="text-lg font-bold font-mono text-foreground">
+                    <span className="text-lg font-black font-mono text-slate-900 dark:text-white tracking-tighter">
                         {formatAmount(tenant.rentAmount)}
                     </span>
-                    <span className="text-xs ml-1 text-muted-foreground">FCFA</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest ml-1 text-slate-400">FCFA</span>
                 </div>
             </div>
 

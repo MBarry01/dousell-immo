@@ -5,13 +5,14 @@ import {
     UserPlus,
     FileText,
     Download,
-    Bell,
+    Megaphone,
     Wrench,
     MessageSquare,
     ChevronRight
 } from 'lucide-react';
 
 import Link from 'next/link';
+import { useTheme } from '@/components/theme-provider';
 import { AddTenantButton } from './AddTenantButton';
 
 interface QuickActionsProps {
@@ -33,6 +34,7 @@ export function QuickActions({
     ownerId,
     profile
 }: QuickActionsProps) {
+    const { isDark } = useTheme();
 
     const actions = [
         {
@@ -46,7 +48,7 @@ export function QuickActions({
             id: 'send-reminders',
             label: 'Envoyer Relances',
             shortLabel: 'Relances',
-            icon: Bell,
+            icon: Megaphone,
             onClick: onSendReminders,
             type: 'button' as const,
             badge: overdueCount > 0 ? overdueCount : undefined,
@@ -97,12 +99,12 @@ export function QuickActions({
                 ">
                     <Icon className="w-4 h-4 text-foreground" />
                 </div>
-                <span className="
-                    text-xs font-medium text-muted-foreground
+                <span className={`
+                    text-[10px] font-black uppercase tracking-wider
                     hidden sm:inline
                     transition-colors duration-200
-                    group-hover:text-foreground
-                ">
+                    ${isDark ? 'text-slate-500 group-hover:text-foreground' : 'text-slate-600 group-hover:text-slate-900'}
+                `}>
                     {action.label}
                 </span>
                 {/* Texte masqué sur mobile pour n'afficher que les icônes (alignement icônes uniquement) */}
@@ -130,7 +132,7 @@ export function QuickActions({
         <div id="tour-quick-actions" className="mb-6">
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
                     Actions Rapides
                 </span>
                 <div className="flex-1 h-px bg-border"></div>

@@ -17,6 +17,7 @@ const MONTHS_FR = [
 ];
 
 export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minDate }: MonthSelectorProps) {
+    const { isDark } = useTheme();
 
     const handlePrevious = () => {
         if (selectedMonth === 1) {
@@ -64,7 +65,7 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minD
                 size="sm"
                 onClick={handlePrevious}
                 disabled={isPastLimit()}
-                className={`h-8 w-8 p-0 hover:bg-accent ${isPastLimit() ? 'opacity-30 cursor-not-allowed' : ''}`}
+                className={`h-8 w-8 p-0 hover:bg-accent hover:text-accent-foreground ${isPastLimit() ? 'opacity-30 cursor-not-allowed' : ''}`}
                 title="Mois précédent"
             >
                 <ChevronLeft className="w-4 h-4 text-muted-foreground" />
@@ -78,9 +79,9 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minD
                 {!isCurrentMonth() && (
                     <button
                         onClick={handleToday}
-                        className="text-xs transition-colors hover:text-primary text-muted-foreground"
+                        className={`text-xs transition-colors hover:text-primary ${isDark ? 'text-slate-400' : 'text-slate-600'}`}
                     >
-                        Aujourd&apos;hui
+                        Aujourd'hui
                     </button>
                 )}
             </div>
@@ -91,11 +92,11 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minD
                 size="sm"
                 onClick={handleNext}
                 disabled={isCurrentMonth()}
-                className={`h-8 w-8 p-0 hover:bg-accent ${isCurrentMonth() ? 'opacity-30 cursor-not-allowed' : ''}`}
+                className={`h-8 w-8 p-0 hover:bg-accent hover:text-accent-foreground ${isCurrentMonth() ? 'opacity-30 cursor-not-allowed' : ''}`}
                 title="Mois suivant"
             >
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </Button>
-        </div>
+        </div >
     );
 }

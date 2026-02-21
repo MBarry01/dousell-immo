@@ -52,14 +52,14 @@ export default async function TeamSettingsPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-slate-400 hover:text-white hover:bg-slate-800"
+            className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">Paramètres de l&apos;équipe</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-2xl font-bold text-foreground">Paramètres de l&apos;équipe</h1>
+          <p className="text-sm text-muted-foreground">
             Modifiez les informations de votre équipe
           </p>
         </div>

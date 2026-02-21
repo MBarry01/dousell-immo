@@ -33,7 +33,7 @@ export function LegalPageClient({ stats, alerts, leases, userEmail, profile }: L
                 {/* SECTION 1 : EN-TÊTE */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        <h1 className={`text-3xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>
                             Assistant Juridique
                         </h1>
                         <p className={`mt-1 ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
@@ -101,7 +101,7 @@ export function LegalPageClient({ stats, alerts, leases, userEmail, profile }: L
 
                 {/* SECTION 3 : LE RADAR DES ÉCHÉANCES */}
                 <div id="tour-legal-alerts" className="space-y-4">
-                    <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    <h2 className={`text-xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         Radar des Échéances
                     </h2>
                     <div className={`rounded-lg border overflow-hidden ${isDark ? 'border-slate-800 bg-black/50' : 'border-gray-200 bg-white'
@@ -192,7 +192,7 @@ export function LegalPageClient({ stats, alerts, leases, userEmail, profile }: L
                 {/* Référence juridique */}
                 <div id="tour-legal-reference" className={`p-6 rounded-lg border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'
                     }`}>
-                    <h2 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'
+                    <h2 className={`text-lg font-black tracking-tighter mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'
                         }`}>
                         <BookOpen className="w-5 h-5 text-green-500" />
                         Cadre Juridique de Référence

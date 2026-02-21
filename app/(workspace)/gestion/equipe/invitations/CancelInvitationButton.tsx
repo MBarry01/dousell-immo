@@ -49,14 +49,14 @@ export function CancelInvitationButton({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-500/10"
+          className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
         >
           <X className="w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-slate-700">
+      <DialogContent className="bg-popover border-border">
         <DialogHeader>
-          <DialogTitle className="text-white">
+          <DialogTitle className="text-foreground">
             Annuler l&apos;invitation ?
           </DialogTitle>
           <DialogDescription>
@@ -67,7 +67,7 @@ export function CancelInvitationButton({
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
-            className="border-slate-700 text-slate-300"
+            className="border-border text-foreground"
           >
             Non, garder
           </Button>

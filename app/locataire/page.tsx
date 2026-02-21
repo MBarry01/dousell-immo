@@ -83,23 +83,26 @@ export default async function TenantPortalPage({ searchParams }: PageProps) {
   const property = lease.property;
 
   return (
-    <>
-      {/* Migrate cookie path on page load for API access */}
-      <CookieMigrator />
-      <PaymentForm
-        leaseId={lease.id}
-        monthlyAmount={lease.monthly_amount || 0}
-        tenantName={data.tenantName || lease.tenant_name}
-        tenantEmail={lease.tenant_email || ""}
-        propertyAddress={property?.location?.address || lease.property_address}
-        leaseStartDate={lease.start_date}
-        leaseEndDate={lease.end_date}
-        leaseType={property?.details?.type || "Appartement"}
-        leaseStatus={lease.status}
-        billingDay={lease.billing_day || 5}
-        ownerName={(lease.owner as any)?.full_name || undefined}
-        recentPayments={lease.payments || []}
-      />
-    </>
+    <main className="min-h-[calc(100vh-64px)] bg-zinc-50/50 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 animate-fade-in-up">
+        <CookieMigrator />
+
+        {/* Dashboard Grid Container */}
+        <PaymentForm
+          leaseId={lease.id}
+          monthlyAmount={lease.monthly_amount || 0}
+          tenantName={data.tenantName || lease.tenant_name}
+          tenantEmail={lease.tenant_email || ""}
+          propertyAddress={property?.location?.address || lease.property_address}
+          leaseStartDate={lease.start_date}
+          leaseEndDate={lease.end_date}
+          leaseType={property?.details?.type || "Appartement"}
+          leaseStatus={lease.status}
+          billingDay={lease.billing_day || 5}
+          ownerName={(lease.owner as any)?.full_name || undefined}
+          recentPayments={lease.payments || []}
+        />
+      </div>
+    </main>
   );
 }

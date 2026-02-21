@@ -49,14 +49,14 @@ export default async function InvitationsPage() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-slate-400 hover:text-white hover:bg-slate-800"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-white">Invitations</h1>
-            <p className="text-sm text-slate-400">
+            <h1 className="text-2xl font-bold text-foreground">Invitations</h1>
+            <p className="text-sm text-muted-foreground">
               {invitations.length} invitation
               {invitations.length !== 1 ? "s" : ""} en attente
             </p>
@@ -68,12 +68,12 @@ export default async function InvitationsPage() {
 
       {/* Liste des invitations */}
       {invitations.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 rounded-2xl border-2 border-dashed border-slate-800">
-          <Mail className="w-12 h-12 text-slate-600 mb-4" />
-          <p className="text-lg font-medium text-slate-400 mb-1">
+        <div className="flex flex-col items-center justify-center py-16 rounded-2xl border-2 border-dashed border-border">
+          <Mail className="w-12 h-12 text-muted-foreground/50 mb-4" />
+          <p className="text-lg font-medium text-muted-foreground mb-1">
             Aucune invitation en attente
           </p>
-          <p className="text-sm text-slate-500 mb-6">
+          <p className="text-sm text-muted-foreground/70 mb-6">
             Invitez des collaborateurs pour agrandir votre équipe
           </p>
           {canInvite && <InviteMemberDialog teamId={membership.team_id} />}
@@ -119,39 +119,38 @@ function InvitationCard({
   );
 
   return (
-    <div className="p-4 rounded-xl border border-slate-800 bg-slate-900 hover:border-slate-700 transition-colors">
+    <div className="p-4 rounded-xl border border-border bg-card hover:border-border/80 transition-colors">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4 min-w-0">
           {/* Icon */}
-          <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
-            <UserPlus className="w-5 h-5 text-slate-400" />
+          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+            <UserPlus className="w-5 h-5 text-muted-foreground" />
           </div>
 
           {/* Info */}
           <div className="min-w-0">
-            <p className="font-medium text-white truncate">{invitation.email}</p>
+            <p className="font-medium text-foreground truncate">{invitation.email}</p>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               <span
                 className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${roleConfig.bgColor} ${roleConfig.textColor}`}
               >
                 {roleConfig.label}
               </span>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted-foreground">
                 Invité le {createdAt}
               </span>
             </div>
 
             {invitation.message && (
-              <p className="text-sm text-slate-400 mt-2 line-clamp-2">
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                 &quot;{invitation.message}&quot;
               </p>
             )}
 
             {/* Expiration */}
             <div
-              className={`flex items-center gap-1.5 mt-2 text-xs ${
-                isExpiringSoon ? "text-amber-500" : "text-slate-500"
-              }`}
+              className={`flex items-center gap-1.5 mt-2 text-xs ${isExpiringSoon ? "text-amber-500" : "text-muted-foreground"
+                }`}
             >
               <Clock className="w-3.5 h-3.5" />
               <span>

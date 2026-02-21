@@ -2,7 +2,7 @@
 
 import { createClient } from '@/utils/supabase/client';
 import { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle, ChevronLeft } from 'lucide-react';
+import { Send, MessageCircle, ChevronLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { sendTenantMessage, markTenantMessagesAsRead } from '../actions';
 import { cn } from '@/lib/utils';
@@ -149,52 +149,52 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
     return (
         <div className={cn(
             "fixed inset-x-0 z-30 flex flex-col overflow-hidden bg-slate-50",
-            "top-[calc(4rem+env(safe-area-inset-top))] md:top-16", // TenantHeader (h-16)
-            "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0", // Au-dessus de BottomNav
+            "top-[calc(4rem+env(safe-area-inset-top))] md:top-16",
+            "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0",
         )}>
             {/* Header Chat - Fixe */}
-            <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm shrink-0 z-20">
-                <Link href="/locataire" className="p-2 -ml-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
-                    <ChevronLeft className="w-5 h-5" />
+            <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center gap-4 shadow-sm shrink-0 z-20">
+                <Link href="/locataire" className="p-2 -ml-2 rounded-2xl text-slate-500 hover:bg-slate-100 transition-all hover:scale-105 active:scale-95">
+                    <ChevronLeft className="w-6 h-6" />
                 </Link>
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold border border-slate-200">
+                <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-2xl bg-[#0F172A] flex items-center justify-center text-white font-black border-2 border-slate-100 shadow-sm uppercase tracking-tighter">
                         {ownerName?.[0]?.toUpperCase() || 'P'}
                     </div>
                     <div>
-                        <h2 className="font-semibold text-slate-900 leading-tight text-sm">{ownerName || 'Propriétaire'}</h2>
-                        <p className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <h2 className="font-black text-[#0F172A] tracking-tight text-sm leading-none mb-1 uppercase">{ownerName || 'Propriétaire'}</h2>
+                        <p className="text-[9px] text-emerald-600 font-bold flex items-center gap-1.5 uppercase tracking-widest">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             En ligne
                         </p>
                     </div>
                 </div>
             </div>
 
-            {/* Zone Messages - Scrollable avec comportement natif */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent pb-4 overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {/* Zone Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-8 scrollbar-hide pb-8 overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {Object.entries(groupedMessages).map(([dateKey, msgs]) => (
-                    <div key={dateKey} className="space-y-4">
+                    <div key={dateKey} className="space-y-6">
                         {/* Date Header */}
-                        <div className="flex justify-center sticky top-0 z-10 py-2">
-                            <span className="text-[10px] uppercase font-bold px-2 py-1 rounded-full border shadow-sm backdrop-blur-sm text-slate-500 bg-white/80 border-gray-200">
+                        <div className="flex justify-center sticky top-2 z-10">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border border-slate-200/50 shadow-sm backdrop-blur-md text-slate-400 bg-white/80">
                                 {format(new Date(dateKey), 'd MMMM yyyy', { locale: fr })}
                             </span>
                         </div>
 
                         {/* Messages */}
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                             {msgs.map((msg, index) => {
                                 const isMe = isFromTenant(msg);
                                 const showAvatar = !isMe && (index === 0 || isFromTenant(msgs[index - 1]));
                                 const isLastFromSender = index === msgs.length - 1 || isFromTenant(msgs[index + 1]) !== isMe;
 
                                 return (
-                                    <div key={msg.id} className={cn("flex w-full items-end gap-2", isMe ? "justify-end" : "justify-start")}>
+                                    <div key={msg.id} className={cn("flex w-full items-end gap-3", isMe ? "justify-end" : "justify-start")}>
                                         {!isMe && (
-                                            <div className="w-6 h-6 shrink-0">
+                                            <div className="w-8 h-8 shrink-0 mb-1">
                                                 {showAvatar && (
-                                                    <div className="w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center text-[10px] font-bold text-slate-600">
+                                                    <div className="w-8 h-8 rounded-xl bg-[#F4C430] flex items-center justify-center text-[11px] font-black text-[#0F172A] shadow-sm border border-[#F4C430]/20 uppercase">
                                                         {ownerName?.[0]?.toUpperCase() || 'P'}
                                                     </div>
                                                 )}
@@ -202,16 +202,16 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                                         )}
 
                                         <div className={cn(
-                                            "max-w-[85%] sm:max-w-[75%] min-w-0 px-4 py-2.5 text-sm shadow-sm relative overflow-hidden",
+                                            "max-w-[85%] sm:max-w-[75%] min-w-0 px-5 py-3.5 shadow-sm relative overflow-hidden transition-all",
                                             isMe
-                                                ? "bg-slate-900 text-white rounded-2xl rounded-br-none"
-                                                : "bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-bl-none",
-                                            !isLastFromSender && (isMe ? "rounded-br-2xl mb-0.5" : "rounded-bl-2xl mb-0.5")
+                                                ? "bg-[#0F172A] text-white rounded-[2rem] rounded-br-none font-medium"
+                                                : "bg-white border border-slate-200 text-[#0F172A] rounded-[2rem] rounded-bl-none font-medium",
+                                            !isLastFromSender && (isMe ? "rounded-br-[2rem] mb-1" : "rounded-bl-[2rem] mb-1")
                                         )}>
-                                            <p className="leading-relaxed whitespace-pre-wrap break-words" style={{ wordBreak: 'break-word' }}>{msg.content}</p>
+                                            <p className="leading-relaxed whitespace-pre-wrap break-words text-[13px] tracking-tight" style={{ wordBreak: 'break-word' }}>{msg.content}</p>
                                             <p className={cn(
-                                                "text-[9px] mt-1 text-right ml-2 opacity-70",
-                                                isMe ? "text-slate-300" : "text-slate-400"
+                                                "text-[9px] font-black uppercase tracking-widest mt-2 flex justify-end opacity-40",
+                                                isMe ? "text-slate-300" : "text-slate-500"
                                             )}>
                                                 {format(new Date(msg.created_at), 'HH:mm')}
                                             </p>
@@ -224,13 +224,13 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
                 ))}
 
                 {messages.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                            <MessageCircle className="w-8 h-8 text-slate-400" />
+                    <div className="bg-slate-50/50 rounded-[2.5rem] border border-dashed border-slate-200 py-24 px-6 text-center mx-2">
+                        <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mx-auto mb-6 shadow-sm">
+                            <MessageCircle className="w-10 h-10 text-slate-300" />
                         </div>
-                        <h3 className="text-lg font-semibold text-slate-900">Nouvelle conversation</h3>
-                        <p className="max-w-xs mt-2 text-sm text-slate-500">
-                            Envoyez un message à votre propriétaire
+                        <h3 className="text-xl font-black text-[#0F172A] tracking-tight">Démarrer la discussion</h3>
+                        <p className="max-w-xs mx-auto mt-2 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] opacity-60">
+                            Prenez contact avec votre gestionnaire
                         </p>
                     </div>
                 )}
@@ -238,21 +238,27 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
             </div>
 
             {/* Input - Fixe en bas du container */}
-            <div className="bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shrink-0 z-20">
-                <form onSubmit={handleSend} className="flex items-center gap-2 max-w-lg mx-auto">
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Écrivez un message..."
-                        className="flex-1 bg-slate-100 border-none rounded-full px-4 h-11 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-300 outline-none transition-all text-base"
-                    />
+            <div className="bg-white/95 backdrop-blur-md border-t border-slate-200 px-6 py-5 shrink-0 z-20">
+                <form onSubmit={handleSend} className="flex items-center gap-3 max-w-lg mx-auto">
+                    <div className="flex-1 relative group">
+                        <input
+                            type="text"
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            placeholder="Éscrivez votre message..."
+                            className="w-full bg-slate-50 border border-slate-200 rounded-3xl px-6 h-14 text-[#0F172A] placeholder:text-slate-400 focus:border-[#0F172A] focus:bg-white focus:ring-0 outline-none transition-all text-sm font-medium shadow-inner"
+                        />
+                    </div>
                     <button
                         type="submit"
                         disabled={!newMessage.trim() || isSending}
-                        className="w-11 h-11 rounded-full bg-slate-900 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 transition-all active:scale-95 shrink-0 shadow-sm"
+                        className="w-14 h-14 rounded-3xl bg-[#0F172A] text-white flex items-center justify-center disabled:opacity-30 disabled:grayscale disabled:scale-95 transition-all hover:bg-[#1e293b] active:scale-90 shrink-0 shadow-lg shadow-slate-900/10 group active-press"
                     >
-                        <Send className="w-5 h-5 mx-auto" />
+                        {isSending ? (
+                            <Loader2 className="w-6 h-6 animate-spin" />
+                        ) : (
+                            <Send className="w-6 h-6 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        )}
                     </button>
                 </form>
             </div>

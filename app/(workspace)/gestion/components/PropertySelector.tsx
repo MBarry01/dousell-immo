@@ -190,7 +190,7 @@ export function PropertySelector({
                                                 key={property.id}
                                                 value={property.title}
                                                 onSelect={() => handleSelect(property)}
-                                                className="flex items-center gap-3 cursor-pointer text-foreground hover:bg-accent aria-selected:bg-accent"
+                                                className="flex items-center gap-3 cursor-pointer text-foreground hover:bg-accent hover:text-accent-foreground aria-selected:bg-accent aria-selected:text-accent-foreground"
                                             >
                                                 <Check
                                                     className={cn(
@@ -221,7 +221,7 @@ export function PropertySelector({
                                     <CommandItem
                                         value="__create_new_property__"
                                         onSelect={handleCreateMode}
-                                        className="flex items-center gap-2 cursor-pointer text-primary hover:bg-accent aria-selected:bg-accent"
+                                        className="flex items-center gap-2 cursor-pointer text-primary hover:bg-accent hover:text-accent-foreground aria-selected:bg-accent aria-selected:text-accent-foreground"
                                     >
                                         <Plus className="h-4 w-4" />
                                         <span className="font-medium">Créer un nouveau bien...</span>

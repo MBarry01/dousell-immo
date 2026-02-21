@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { PageHeaderSkeleton, ListSkeleton } from '../components/TenantSkeletons';
 import { toast } from 'sonner';
 import { getTenantMaintenanceRequests, cancelMaintenanceRequest, respondToMaintenanceSlot } from './actions';
 
@@ -162,39 +163,40 @@ export default function MaintenanceListPage() {
 
     if (loading) {
         return (
-            <div className="min-h-[60vh] flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-zinc-400 animate-spin" />
+            <div className="w-full max-w-lg mx-auto px-4 py-8 pb-32 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <PageHeaderSkeleton />
+                <ListSkeleton count={3} />
             </div>
         );
     }
 
     return (
-        <div className="w-full max-w-lg mx-auto px-4 py-6 pb-24 space-y-6">
+        <div className="w-full max-w-lg mx-auto px-4 py-8 pb-32 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header */}
-            <div>
-                <h1 className="text-xl font-bold text-zinc-900">Mes Signalements</h1>
-                <p className="text-sm text-zinc-500 mt-0.5">Suivez vos demandes d&apos;intervention</p>
+            <div className="space-y-1">
+                <h1 className="text-3xl font-black text-[#0F172A] tracking-tighter">Mes Signalements</h1>
+                <p className="text-sm font-black text-slate-500 uppercase tracking-widest opacity-70">Suivi en temps réel de vos interventions</p>
             </div>
 
             {/* List */}
             {requests.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mb-4">
-                        <Wrench className="w-8 h-8 text-zinc-400" />
+                <div className="bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200 py-20 px-6 text-center">
+                    <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <Wrench className="w-10 h-10 text-[#0F172A]/20" />
                     </div>
-                    <h3 className="text-lg font-semibold text-zinc-900">Aucun signalement</h3>
-                    <p className="max-w-xs mt-2 text-sm text-zinc-500">
-                        Vous n&apos;avez pas encore signalé de problème.
+                    <h3 className="text-xl font-black text-[#0F172A] tracking-tight">Aucun signalement</h3>
+                    <p className="max-w-xs mx-auto mt-2 text-sm font-black text-slate-500 uppercase tracking-widest opacity-60">
+                        Tout semble en ordre dans votre logement
                     </p>
                     <Link href="/locataire/maintenance/new">
-                        <Button className="mt-6 bg-zinc-900 hover:bg-zinc-800 text-white">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Nouveau signalement
+                        <Button className="mt-8 bg-[#0F172A] hover:bg-[#1e293b] text-white rounded-2xl px-8 h-12 font-black uppercase tracking-wider shadow-lg active-press transition-all">
+                            <Plus className="w-5 h-5 mr-2" />
+                            Signaler un problème
                         </Button>
                     </Link>
                 </div>
             ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {requests.map((req) => {
                         const status = statusConfig[req.status] || statusConfig['submitted'];
                         const StatusIcon = status.icon;
@@ -204,200 +206,159 @@ export default function MaintenanceListPage() {
                         return (
                             <div
                                 key={req.id}
-                                className="bg-white rounded-xl border border-zinc-200 overflow-hidden"
+                                className={`group bg-white rounded-[2rem] border transition-all duration-300 shadow-sm ${isExpanded ? 'border-[#0F172A] shadow-xl shadow-slate-900/5' : 'border-slate-200 hover:border-slate-400'
+                                    } overflow-hidden`}
                             >
                                 {/* Main Row */}
                                 <button
                                     onClick={() => toggleExpand(req.id)}
-                                    className="w-full p-4 text-left"
+                                    className="w-full p-6 text-left"
                                 >
-                                    <div className="flex items-start justify-between mb-2">
-                                        <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
                                             {req.category || 'Autre'}
                                         </span>
-                                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${status.bgColor} ${status.textColor}`}>
+                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${status.bgColor} ${status.textColor} border border-current opacity-80`}>
                                             <StatusIcon className="w-3 h-3" />
                                             {status.label}
                                         </span>
                                     </div>
 
-                                    <p className="text-zinc-900 font-medium line-clamp-2 mb-3 text-sm">
+                                    <p className={`font-black tracking-tight mb-4 text-base ${isExpanded ? 'text-[#0F172A]' : 'text-slate-800'} line-clamp-2 transition-colors`}>
                                         {req.description}
                                     </p>
 
-                                    <div className="flex items-center justify-between text-xs text-zinc-400">
-                                        <span>{format(new Date(req.created_at), 'd MMM yyyy', { locale: fr })}</span>
-                                        <div className="flex items-center gap-1">
-                                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                    <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                        <div className="flex items-center gap-2">
+                                            <Calendar className="w-3.5 h-3.5" />
+                                            <span>{format(new Date(req.created_at), 'd MMM yyyy', { locale: fr })}</span>
+                                        </div>
+                                        <div className={`w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center transition-transform ${isExpanded ? 'rotate-180 bg-[#0F172A] text-white' : 'group-hover:bg-slate-100'}`}>
+                                            <ChevronDown className="w-4 h-4" />
                                         </div>
                                     </div>
                                 </button>
 
                                 {/* Expanded Details */}
                                 {isExpanded && (
-                                    <div className="px-4 pb-4 pt-0 border-t border-zinc-100 space-y-3">
+                                    <div className="px-6 pb-6 pt-0 space-y-6 animate-in slide-in-from-top-2 duration-300">
+                                        <div className="h-px bg-slate-100 w-full" />
+
                                         {/* Photos */}
                                         {req.photo_urls && req.photo_urls.length > 0 && (
-                                            <div className="flex gap-2 pt-3 overflow-x-auto">
-                                                {req.photo_urls.map((url, i) => (
-                                                    <img
-                                                        key={i}
-                                                        src={url}
-                                                        alt={`Photo ${i + 1}`}
-                                                        className="w-20 h-20 rounded-lg object-cover flex-shrink-0 border border-zinc-200"
-                                                    />
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        {/* Rejection Reason */}
-                                        {req.status === 'rejected' && req.rejection_reason && (
-                                            <div className="py-2 px-3 bg-red-50 text-red-700 rounded-lg text-xs font-medium flex items-start gap-2 border border-red-100">
-                                                <AlertTriangle className="w-4 h-4 mt-0.5" />
-                                                <div>
-                                                    <p className="font-bold uppercase text-[9px]">Motif du rejet :</p>
-                                                    <p>{req.rejection_reason}</p>
+                                            <div className="space-y-3">
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Photos jointes</p>
+                                                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                                                    {req.photo_urls.map((url, i) => (
+                                                        <img
+                                                            key={i}
+                                                            src={url}
+                                                            alt={`Photo ${i + 1}`}
+                                                            className="w-24 h-24 rounded-2xl object-cover flex-shrink-0 border-2 border-slate-100 hover:border-[#0F172A] transition-colors cursor-pointer"
+                                                        />
+                                                    ))}
                                                 </div>
                                             </div>
                                         )}
 
-                                        {/* Coordination Flow (Confirm/Reschedule) */}
+                                        {/* Coordination Flow */}
                                         {req.status === 'approved' && req.intervention_date && !req.tenant_response && (
-                                            <div className="py-3 border-b border-zinc-100">
-                                                <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
-                                                    <p className="text-[11px] font-semibold text-amber-800 uppercase tracking-tight mb-2 flex items-center gap-1">
-                                                        <Calendar className="w-3 h-3" /> Confirmation requise
-                                                    </p>
-                                                    <p className="text-xs text-amber-700 leading-relaxed mb-3">
-                                                        L&apos;intervention est prévue pour le <strong>{format(new Date(req.intervention_date), 'd MMMM', { locale: fr })}</strong>. Êtes-vous disponible ?
-                                                    </p>
+                                            <div className="bg-amber-50 rounded-2xl p-5 border border-amber-200 space-y-4">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-8 rounded-lg bg-amber-200 flex items-center justify-center text-amber-800">
+                                                        <Calendar className="w-4 h-4" />
+                                                    </div>
+                                                    <p className="text-xs font-black text-amber-900 uppercase tracking-widest">Confirmation requise</p>
+                                                </div>
+                                                <p className="text-sm font-medium text-amber-800 leading-relaxed">
+                                                    Intervention prévue le <strong>{format(new Date(req.intervention_date), 'd MMMM', { locale: fr })}</strong>.
+                                                </p>
 
-                                                    {showReschedule === req.id ? (
-                                                        <div className="space-y-2">
-                                                            <input
-                                                                type="datetime-local"
-                                                                className="w-full rounded border-zinc-200 text-xs p-2"
-                                                                value={suggestedDate}
-                                                                onChange={(e) => setSuggestedDate(e.target.value)}
-                                                            />
-                                                            <div className="flex gap-2">
-                                                                <Button
-                                                                    size="sm"
-                                                                    onClick={() => handleRescheduleSlot(req.id)}
-                                                                    disabled={processingResponseId === req.id}
-                                                                    className="flex-1 text-xs bg-zinc-900 h-8"
-                                                                >
-                                                                    {processingResponseId === req.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Envoyer"}
-                                                                </Button>
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                    onClick={() => setShowReschedule(null)}
-                                                                    className="text-xs h-8"
-                                                                >
-                                                                    Annuler
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
+                                                {showReschedule === req.id ? (
+                                                    <div className="space-y-3">
+                                                        <input
+                                                            type="datetime-local"
+                                                            className="w-full rounded-xl border-amber-200 bg-white text-sm p-3 focus:ring-2 focus:ring-amber-500 font-medium"
+                                                            value={suggestedDate}
+                                                            onChange={(e) => setSuggestedDate(e.target.value)}
+                                                        />
                                                         <div className="flex gap-2">
                                                             <Button
                                                                 size="sm"
-                                                                onClick={() => handleConfirmSlot(req.id)}
+                                                                onClick={() => handleRescheduleSlot(req.id)}
                                                                 disabled={processingResponseId === req.id}
-                                                                className="flex-1 text-xs bg-emerald-600 hover:bg-emerald-700 h-8"
+                                                                className="flex-1 bg-[#0F172A] text-white font-black uppercase tracking-wider text-[10px] h-10 rounded-xl"
                                                             >
-                                                                {processingResponseId === req.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Check className="w-3 h-3 mr-1" /> Je confirme</>}
+                                                                {processingResponseId === req.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Envoyer"}
                                                             </Button>
                                                             <Button
                                                                 size="sm"
-                                                                variant="outline"
-                                                                onClick={() => setShowReschedule(req.id)}
-                                                                className="flex-1 text-xs h-8"
+                                                                variant="ghost"
+                                                                onClick={() => setShowReschedule(null)}
+                                                                className="flex-1 text-amber-800 font-black uppercase tracking-wider text-[10px] h-10"
                                                             >
-                                                                Reporter
+                                                                Annuler
                                                             </Button>
                                                         </div>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex gap-3">
+                                                        <Button
+                                                            size="sm"
+                                                            onClick={() => handleConfirmSlot(req.id)}
+                                                            disabled={processingResponseId === req.id}
+                                                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-wider text-[10px] h-10 rounded-xl shadow-lg shadow-emerald-600/20"
+                                                        >
+                                                            {processingResponseId === req.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4 mr-2" /> Je confirme</>}
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => setShowReschedule(req.id)}
+                                                            className="flex-1 bg-white border-amber-200 text-amber-800 font-black uppercase tracking-wider text-[10px] h-10 rounded-xl"
+                                                        >
+                                                            Reporter
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
 
-                                        {/* Feedback confirmed status */}
+                                        {/* Status Feedbacks */}
                                         {req.tenant_response === 'confirmed' && (
-                                            <div className="py-2 px-3 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-medium flex items-center gap-2">
-                                                <CheckCircle2 className="w-4 h-4" /> Présence confirmée pour le {format(new Date(req.intervention_date!), 'd MMMM', { locale: fr })}
-                                            </div>
-                                        )}
-
-                                        {/* Feedback reschedule_requested status */}
-                                        {req.tenant_response === 'reschedule_requested' && (
-                                            <div className="py-2 px-3 bg-amber-50 text-amber-700 rounded-lg text-xs font-medium flex items-center gap-2 border border-amber-100">
-                                                <Clock className="w-4 h-4" /> Report demandé pour le {req.tenant_suggested_date ? format(new Date(req.tenant_suggested_date), 'd MMMM à HH:mm', { locale: fr }) : 'à venir'}
+                                            <div className="p-4 bg-emerald-50 text-emerald-800 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 border border-emerald-100">
+                                                <CheckCircle2 className="w-5 h-5" /> Présence validée ({format(new Date(req.intervention_date!), 'd MMM', { locale: fr })})
                                             </div>
                                         )}
 
                                         {/* Artisan Info */}
                                         {req.artisan_name && (
-                                            <div className="rounded-lg bg-zinc-50 p-3 space-y-2">
-                                                <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">
-                                                    Artisan assigné
-                                                </p>
+                                            <div className="rounded-2xl bg-slate-50 p-5 border border-slate-100 space-y-4">
+                                                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-black">Expert assigné</p>
                                                 <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <p className="text-zinc-900 font-medium">{req.artisan_name}</p>
-                                                        {req.artisan_rating && (
-                                                            <p className="text-xs text-amber-600">⭐ {req.artisan_rating.toFixed(1)}</p>
-                                                        )}
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#0F172A] shadow-sm font-black border border-slate-100 uppercase">
+                                                            {req.artisan_name.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[#0F172A] font-black tracking-tight">{req.artisan_name}</p>
+                                                            {req.artisan_rating && (
+                                                                <div className="flex items-center gap-1 mt-0.5">
+                                                                    <span className="text-amber-500">★</span>
+                                                                    <span className="text-xs font-black text-slate-500">{req.artisan_rating.toFixed(1)}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     {req.artisan_phone && (
                                                         <a
                                                             href={`tel:${req.artisan_phone}`}
-                                                            className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
+                                                            className="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center hover:bg-emerald-600 hover:scale-110 active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
                                                         >
-                                                            <Phone className="w-5 h-5 text-white" />
+                                                            <Phone className="w-5 h-5" />
                                                         </a>
                                                     )}
                                                 </div>
-                                            </div>
-                                        )}
-
-                                        {/* Quote & Date */}
-                                        {(req.quoted_price || req.intervention_date) && (
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {req.quoted_price && (
-                                                    <div className="rounded-lg bg-zinc-50 p-3">
-                                                        <p className="text-[10px] text-zinc-500 flex items-center gap-1 uppercase tracking-wider font-medium">
-                                                            <CircleDollarSign className="w-3 h-3" /> Devis
-                                                        </p>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <p className="text-zinc-900 font-semibold">
-                                                                {req.quoted_price.toLocaleString('fr-FR')} F
-                                                            </p>
-                                                            {req.quote_url && (
-                                                                <a
-                                                                    href={req.quote_url}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="text-[10px] bg-zinc-200 hover:bg-zinc-300 text-zinc-700 px-2 py-0.5 rounded flex items-center gap-1 transition-colors"
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                >
-                                                                    PDF ↗
-                                                                </a>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                {req.intervention_date && (
-                                                    <div className="rounded-lg bg-zinc-50 p-3 text-left">
-                                                        <p className="text-[10px] text-zinc-500 flex items-center gap-1 uppercase tracking-wider font-medium">
-                                                            <Calendar className="w-3 h-3" /> Intervention
-                                                        </p>
-                                                        <p className="text-zinc-900 font-semibold mt-1">
-                                                            {format(new Date(req.intervention_date), 'd MMM', { locale: fr })}
-                                                        </p>
-                                                    </div>
-                                                )}
                                             </div>
                                         )}
 
@@ -408,14 +369,14 @@ export default function MaintenanceListPage() {
                                                 size="sm"
                                                 onClick={() => handleCancel(req.id)}
                                                 disabled={cancellingId === req.id}
-                                                className="w-full text-zinc-500 hover:text-red-600 hover:bg-red-50 text-xs"
+                                                className="w-full text-slate-400 hover:text-red-600 hover:bg-red-50 text-[10px] font-black uppercase tracking-[0.2em] pt-4"
                                             >
                                                 {cancellingId === req.id ? (
                                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                                 ) : (
                                                     <X className="w-4 h-4 mr-2" />
                                                 )}
-                                                Annuler ce signalement
+                                                Annuler la demande
                                             </Button>
                                         )}
                                     </div>
@@ -430,9 +391,9 @@ export default function MaintenanceListPage() {
             {requests.length > 0 && (
                 <Link
                     href="/locataire/maintenance/new"
-                    className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 w-14 h-14 bg-zinc-900 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-zinc-800 transition-colors z-20"
+                    className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-6 w-16 h-16 bg-[#0F172A] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-90 transition-all z-30 group"
                 >
-                    <Plus className="w-7 h-7" />
+                    <Plus className="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" />
                 </Link>
             )}
         </div>

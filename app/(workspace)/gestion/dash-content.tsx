@@ -10,6 +10,7 @@ import { DashboardTabs } from "./components/DashboardTabs";
 import { OrphanLeasesAlert } from "./components/OrphanLeasesAlert";
 import { ExpiredBanner } from "./components/ExpiredBanner";
 import { QuotaBanner } from "./components/QuotaBanner";
+import { ListSkeleton } from "./components/PremiumSkeletons";
 import { GestionTour } from "@/components/gestion/GestionTour";
 import { createClient } from "@/utils/supabase/server";
 import {
@@ -311,7 +312,7 @@ export default async function DashboardContent({
                         <>
                             {/* Table des locataires */}
                             <div id="tour-gestion-table">
-                                <Suspense fallback={<div className="h-64 w-full bg-muted/20 animate-pulse rounded-xl" />}>
+                                <Suspense fallback={<ListSkeleton count={5} className="mt-4" />}>
                                     <GestionLocativeClient
                                         leases={filteredLeases || []}
                                         transactions={transactions || []}
@@ -339,7 +340,7 @@ export default async function DashboardContent({
             ) : (
                 /* Mode résiliés : afficher directement la table sans onglets */
                 <div id="tour-gestion-table" className="mb-6">
-                    <Suspense fallback={<div className="h-64 w-full bg-muted/20 animate-pulse rounded-xl" />}>
+                    <Suspense fallback={<ListSkeleton count={5} className="mt-4" />}>
                         <GestionLocativeClient
                             leases={filteredLeases || []}
                             transactions={transactions || []}

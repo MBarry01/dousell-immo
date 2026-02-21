@@ -17,40 +17,40 @@ export function ThemedContent({ isViewingTerminated, children, filterSection }: 
         <div className={`min-h-full print:hidden ${isDark ? 'bg-slate-950' : 'bg-gray-50'
             }`}>
             {/* Sub-header avec filtres Actifs/Résiliés */}
-            <div className={`border-b ${isDark
+            <div className={`border-b pwa-header-safe ${isDark
                 ? 'border-slate-800 bg-slate-900/50'
                 : 'border-gray-200 bg-white/50'
                 }`}>
-                <div className="w-full mx-auto px-4 md:px-6 lg:px-8 py-3">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className={`flex items-center gap-2 px-3 py-1 border rounded-lg ${isDark
+                <div className="w-full mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3">
+                    <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+                        <div className={`flex items-center gap-1 px-1 sm:px-2 py-1 border rounded-xl no-select shrink-0 ${isDark
                             ? 'bg-slate-900 border-slate-800'
-                            : 'bg-white border-gray-200'
+                            : 'bg-white border-slate-200'
                             }`}>
                             <Link
                                 href="/gestion"
-                                className={`px-3 py-1 text-xs font-medium rounded transition-all ${!isViewingTerminated
-                                    ? 'bg-green-500/10 text-green-400'
+                                style={!isViewingTerminated ? { backgroundColor: '#0f172a', color: '#ffffff' } : undefined}
+                                className={`px-3 sm:px-5 h-8 sm:h-10 flex items-center text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-lg transition-all active:scale-95 ${!isViewingTerminated
+                                    ? 'shadow-lg'
                                     : isDark
                                         ? 'text-slate-400 hover:text-white'
-                                        : 'text-gray-500 hover:text-gray-900'
+                                        : 'text-slate-600 hover:text-slate-900'
                                     }`}
                             >
                                 Actifs
                             </Link>
                             <Link
                                 href="/gestion?view=terminated"
-                                className={`px-3 py-1 text-xs font-medium rounded transition-all ${isViewingTerminated
-                                    ? 'bg-brand/10 text-brand'
-                                    : isDark
-                                        ? 'text-slate-400 hover:text-white'
-                                        : 'text-gray-500 hover:text-gray-900'
+                                style={isViewingTerminated ? { backgroundColor: '#dc2626', color: '#ffffff' } : undefined}
+                                className={`px-3 sm:px-5 h-8 sm:h-10 flex items-center text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-lg transition-all active:scale-95 ${isViewingTerminated
+                                    ? 'shadow-lg'
+                                    : 'text-red-400 hover:text-red-600'
                                     }`}
                             >
                                 Résiliés
                             </Link>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                             {filterSection}
                         </div>
                     </div>
@@ -84,7 +84,7 @@ export function ThemedWidget({
             : 'bg-white border-gray-200'
             }`}>
             <div className="flex items-center justify-between mb-4">
-                <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'
+                <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-200' : 'text-slate-900'
                     }`}>
                     {title}
                 </h3>

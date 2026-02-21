@@ -42,6 +42,7 @@ import { AddExpenseDialog } from './components/AddExpenseDialog';
 import { ExpenseList } from './components/ExpenseList';
 import { ProfitabilityTable } from './components/ProfitabilityTable';
 import { FeatureLockedState } from '@/components/gestion/FeatureLockedState';
+import { KPICardSkeleton, ChartSkeleton } from "../components/PremiumSkeletons";
 import { ComptabiliteTour } from '@/components/gestion/tours/ComptabiliteTour';
 
 interface _MonthlyData {
@@ -204,14 +205,24 @@ export default function ComptabilitePage() {
 
     if (authLoading || loading) {
         return (
-            <div className="p-6 space-y-6">
-                <Skeleton className={`h-10 w-64 ${isDark ? 'bg-slate-800' : 'bg-gray-200'}`} />
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {[...Array(4)].map((_, i) => (
-                        <Skeleton key={i} className={`h-32 rounded-xl ${isDark ? 'bg-slate-800' : 'bg-gray-200'}`} />
-                    ))}
+            <div className="p-6 space-y-8">
+                <div className="space-y-2">
+                    <Skeleton className={`h-10 w-64 rounded-xl ${isDark ? 'bg-slate-900/50' : 'bg-gray-200'}`} />
+                    <Skeleton className={`h-4 w-96 rounded-lg ${isDark ? 'bg-slate-900/50' : 'bg-gray-200'}`} />
                 </div>
-                <Skeleton className={`h-80 rounded-xl ${isDark ? 'bg-slate-800' : 'bg-gray-200'}`} />
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <KPICardSkeleton />
+                    <KPICardSkeleton />
+                    <KPICardSkeleton />
+                    <KPICardSkeleton />
+                </div>
+
+                <ChartSkeleton className="h-96" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Skeleton className={`h-64 rounded-2xl ${isDark ? 'bg-slate-900/50' : 'bg-gray-200'}`} />
+                    <Skeleton className={`h-64 rounded-2xl ${isDark ? 'bg-slate-900/50' : 'bg-gray-200'}`} />
+                </div>
             </div>
         );
     }
@@ -240,8 +251,8 @@ export default function ComptabilitePage() {
             {/* Header */}
             <div className="flex flex-col gap-4">
                 <div>
-                    <p className={`text-xs uppercase tracking-[0.3em] ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>Gestion Locative</p>
-                    <h1 className={`text-xl md:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Dashboard Financier</h1>
+                    <p className={`text-[10px] uppercase font-black tracking-[0.3em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Gestion Locative</p>
+                    <h1 className={`text-2xl md:text-5xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>Dashboard Financier</h1>
                 </div>
 
                 {/* Year Selector + Actions */}
@@ -287,7 +298,7 @@ export default function ComptabilitePage() {
                         <span className="hidden md:inline">Revenus (Loyers)</span>
                         <span className="md:hidden">Revenus</span>
                     </TabsTrigger>
-                    <TabsTrigger value="depenses" className={`text-xs md:text-sm flex-1 md:flex-none ${isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}`}>
+                    <TabsTrigger value="depenses" className={`text-xs md:text-sm flex-1 md:flex-none text-red-500 ${isDark ? 'data-[state=active]:bg-red-600 data-[state=active]:text-white' : 'data-[state=active]:bg-red-600 data-[state=active]:text-white'}`}>
                         Dépenses
                     </TabsTrigger>
                     <TabsTrigger value="rentabilite" className={`text-xs md:text-sm flex-1 md:flex-none ${isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}`}>
@@ -305,11 +316,11 @@ export default function ComptabilitePage() {
                                 <div className={`p-1.5 md:p-2 rounded-md ${isDark ? 'bg-blue-900/20 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
                                     <Wallet className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 </div>
-                                <span className={`text-[10px] md:text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Attendu</span>
+                                <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Attendu</span>
                             </div>
                             <div className="flex items-baseline gap-1">
-                                <span className={`text-xl md:text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.expected)}</span>
-                                <span className={`text-[10px] md:text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
+                                <span className={`text-2xl md:text-4xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>{formatAmount(totals.expected)}</span>
+                                <span className={`text-[10px] md:text-xs font-black uppercase tracking-widest ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>FCFA</span>
                             </div>
                         </div>
 
@@ -319,15 +330,15 @@ export default function ComptabilitePage() {
                                 <div className={`p-1.5 md:p-2 rounded-md ${isDark ? 'bg-green-900/20 text-green-400' : 'bg-green-100 text-green-600'}`}>
                                     <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 </div>
-                                <span className={`text-[10px] md:text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Encaissé</span>
+                                <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Encaissé</span>
                             </div>
                             <div className="flex items-baseline gap-1">
-                                <span className={`text-xl md:text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.collected)}</span>
-                                <span className={`text-[10px] md:text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
+                                <span className={`text-2xl md:text-4xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>{formatAmount(totals.collected)}</span>
+                                <span className={`text-[10px] md:text-xs font-black uppercase tracking-widest ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>FCFA</span>
                             </div>
-                            <p className="text-[10px] md:text-xs text-green-500 mt-1.5 md:mt-2 flex items-center gap-1">
+                            <p className="text-[10px] font-black uppercase tracking-wider text-green-500 mt-2 flex items-center gap-1">
                                 <ArrowUpRight className="w-3 h-3" />
-                                <span className="truncate">{totals.collectionRate}% taux de recouvrement</span>
+                                <span className="truncate">{totals.collectionRate}% de recouvrement</span>
                             </p>
                         </div>
 
@@ -337,11 +348,11 @@ export default function ComptabilitePage() {
                                 <div className={`p-1.5 md:p-2 rounded-md ${isDark ? 'bg-amber-900/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}>
                                     <DollarSign className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 </div>
-                                <span className={`text-[10px] md:text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>En attente</span>
+                                <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>En attente</span>
                             </div>
                             <div className="flex items-baseline gap-1">
-                                <span className={`text-xl md:text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.pending)}</span>
-                                <span className={`text-[10px] md:text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
+                                <span className={`text-2xl md:text-4xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>{formatAmount(totals.pending)}</span>
+                                <span className={`text-[10px] md:text-xs font-black uppercase tracking-widest ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>FCFA</span>
                             </div>
                         </div>
 
@@ -351,11 +362,11 @@ export default function ComptabilitePage() {
                                 <div className={`p-1.5 md:p-2 rounded-md ${isDark ? 'bg-red-900/20 text-red-400' : 'bg-red-100 text-red-600'}`}>
                                     <AlertTriangle className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 </div>
-                                <span className={`text-[10px] md:text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Retards</span>
+                                <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Retards</span>
                             </div>
                             <div className="flex items-baseline gap-1">
-                                <span className={`text-xl md:text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.overdue)}</span>
-                                <span className={`text-[10px] md:text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>FCFA</span>
+                                <span className={`text-2xl md:text-4xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatAmount(totals.overdue)}</span>
+                                <span className={`text-[10px] md:text-xs font-black uppercase tracking-widest ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>FCFA</span>
                             </div>
                             {totals.overdue > 0 && (
                                 <Link
@@ -373,7 +384,7 @@ export default function ComptabilitePage() {
                         {/* Bar Chart - Monthly Revenue */}
                         <div className={`lg:col-span-2 p-5 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'
                             }`}>
-                            <h3 className={`text-sm font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Revenus Mensuels {selectedYear}</h3>
+                            <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-6 ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Revenus Mensuels {selectedYear}</h3>
                             <div className="h-72">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
@@ -401,7 +412,7 @@ export default function ComptabilitePage() {
                         {/* Pie Chart - Distribution */}
                         <div className={`p-5 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'
                             }`}>
-                            <h3 className={`text-sm font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Répartition des Paiements</h3>
+                            <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-6 ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Répartition des Paiements</h3>
                             <div className="h-72">
                                 {pieData.length > 0 ? (
                                     <ResponsiveContainer width="100%" height="100%">
@@ -447,7 +458,7 @@ export default function ComptabilitePage() {
                     {/* Collection Rate Line Chart */}
                     <div className={`p-5 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'
                         }`}>
-                        <h3 className={`text-sm font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Taux de Recouvrement Mensuel</h3>
+                        <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-6 ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Taux de Recouvrement Mensuel</h3>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>

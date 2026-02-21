@@ -83,8 +83,12 @@ export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialo
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="sm">
-                    <Plus className="w-4 h-4" />
+                <Button
+                    style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
+                    className="hover:opacity-90 gap-2"
+                    size="sm"
+                >
+                    <Plus className="w-4 h-4" style={{ color: '#ffffff' }} />
                     <span className="hidden md:inline">Dépense</span>
                 </Button>
             </DialogTrigger>

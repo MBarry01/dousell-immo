@@ -3,22 +3,11 @@ import DashboardContent from "./dash-content";
 import { getUserTeamContext } from "@/lib/team-context";
 import { redirect } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingClient } from "./LoadingClient";
 
 // Force dynamic rendering to prevent stale RSC cache on navigation
 export const dynamic = "force-dynamic";
 
-function DashboardSkeleton() {
-    return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-24 rounded-lg" variant="luxury" />
-                ))}
-            </div>
-            <Skeleton className="h-[400px] rounded-xl" variant="luxury" />
-        </div>
-    );
-}
 
 function _DashboardError({ error }: { error: string }) {
     return (
@@ -62,7 +51,7 @@ export default async function GestionLocativePage({
     }
 
     return (
-        <Suspense fallback={<DashboardSkeleton />}>
+        <Suspense fallback={<LoadingClient />}>
             <DashboardContent context={context} searchParams={searchParams} />
         </Suspense>
     );

@@ -25,14 +25,14 @@ export default async function TenantMessagesPage() {
 
     if (!data.leaseId) {
         return (
-            <div className="w-full max-w-lg mx-auto px-4 py-6">
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                        <MessageCircle className="w-8 h-8 text-slate-400" />
+            <div className="w-full max-w-lg mx-auto px-4 py-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200 py-20 px-6 text-center">
+                    <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <MessageCircle className="w-10 h-10 text-[#0F172A]/20" />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900">Aucune conversation</h3>
-                    <p className="max-w-xs mt-2 text-sm text-slate-500">
-                        La messagerie sera disponible une fois votre bail actif.
+                    <h3 className="text-xl font-black text-[#0F172A] tracking-tight">Aucune conversation</h3>
+                    <p className="max-w-xs mx-auto mt-2 text-sm font-black text-slate-500 uppercase tracking-widest opacity-60">
+                        La messagerie sera disponible dès que votre bail sera validé
                     </p>
                 </div>
             </div>

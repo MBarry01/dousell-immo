@@ -155,11 +155,11 @@ export function BiensClient({
         {/* Header */}
         <div id="tour-biens-header" className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8 text-left">
           <div className="flex flex-col items-start">
-            <h1 className="text-2xl md:text-3xl font-bold flex items-center justify-start gap-3">
-              <Building2 className="w-7 h-7 md:w-8 md:h-8 text-primary" />
+            <h1 className="text-2xl md:text-4xl font-black tracking-tighter flex items-center justify-start gap-3">
+              <Building2 className="w-8 h-8 md:w-10 h-10 text-primary" />
               Biens de {teamName}
             </h1>
-            <p className="text-muted-foreground mt-1 text-sm md:text-base">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-2">
               {stats.total} bien{stats.total > 1 ? "s" : ""} • {stats.published} en ligne
             </p>
           </div>
@@ -172,7 +172,7 @@ export function BiensClient({
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-lg w-full md:w-auto text-base"
               >
                 <Plus className="w-5 h-5" />
-                Ajouter un bien
+                <span className="text-[12px] font-black uppercase tracking-wider">Ajouter un bien</span>
               </Link>
             </div>
           )}
@@ -180,24 +180,24 @@ export function BiensClient({
 
         {/* Stats Cards */}
         <div id="tour-biens-stats" className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-            <div className="text-3xl font-bold">{stats.total}</div>
-            <div className="text-sm text-muted-foreground">Total biens</div>
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <div className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Total biens</div>
+            <div className="text-3xl font-black tracking-tighter">{(stats.total).toString().padStart(2, '0')}</div>
           </div>
-          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <div className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-2">En ligne</div>
             <div className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-green-500" />
-              <span className="text-3xl font-bold">{stats.published}</span>
+              <Eye className="w-5 h-5 text-[#F4C430]" />
+              <span className="text-3xl font-black tracking-tighter">{(stats.published).toString().padStart(2, '0')}</span>
             </div>
-            <div className="text-sm text-muted-foreground">En ligne</div>
           </div>
-          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-            <div className="text-3xl font-bold">{stats.vente}</div>
-            <div className="text-sm text-muted-foreground">Ventes</div>
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <div className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Ventes</div>
+            <div className="text-3xl font-black tracking-tighter">{(stats.vente).toString().padStart(2, '0')}</div>
           </div>
-          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-            <div className="text-3xl font-bold">{stats.location}</div>
-            <div className="text-sm text-muted-foreground">Locations</div>
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <div className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Locations</div>
+            <div className="text-3xl font-black tracking-tighter">{(stats.location).toString().padStart(2, '0')}</div>
           </div>
         </div>
 

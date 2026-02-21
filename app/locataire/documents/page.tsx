@@ -52,114 +52,107 @@ export default async function TenantDocumentsPage() {
     };
 
     return (
-        <div className="w-full max-w-lg mx-auto px-4 py-6 space-y-6">
+        <div className="w-full max-w-lg mx-auto px-4 py-8 pb-24 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header */}
-            <div>
-                <h1 className="text-xl font-bold text-zinc-900">Mes Documents</h1>
-                <p className="text-sm text-zinc-500 mt-0.5">Contrats, quittances et attestations</p>
+            <div className="space-y-1">
+                <h1 className="text-3xl font-black text-[#0F172A] tracking-tighter">Mes Documents</h1>
+                <p className="text-sm font-black text-slate-500 uppercase tracking-widest opacity-70">Contrats, quittances et attestations</p>
             </div>
 
             {/* Contrat de Bail */}
-            <section className="space-y-3">
-                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                    Contrat
+            <section className="space-y-4">
+                <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+                    Contrat officiel
                 </h2>
                 {lease.lease_pdf_url ? (
-                    <a href={lease.lease_pdf_url} target="_blank" rel="noopener noreferrer" className="block bg-white rounded-xl border border-zinc-200 overflow-hidden hover:bg-zinc-50 transition-colors">
-                        <div className="flex items-center justify-between p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                                    <FileText className="w-5 h-5 text-blue-600" />
+                    <a href={lease.lease_pdf_url} target="_blank" rel="noopener noreferrer" className="group block bg-white rounded-[2rem] border border-slate-200 overflow-hidden hover:border-[#0F172A] hover:shadow-xl hover:shadow-slate-900/5 hover:scale-[1.02] transition-all duration-300 active-press shadow-sm">
+                        <div className="flex items-center justify-between p-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-[#0F172A] group-hover:text-white transition-all duration-300 shadow-inner group-hover:rotate-12">
+                                    <FileText className="w-7 h-7 text-[#0F172A] group-hover:text-white" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-zinc-900">Contrat de Bail</p>
-                                    <p className="text-xs text-zinc-500">
+                                    <p className="font-black text-[#0F172A] text-base tracking-tight mb-0.5">Contrat de Bail</p>
+                                    <p className="text-xs font-black text-slate-500 uppercase tracking-wide opacity-80">
                                         {lease.created_at
                                             ? `Signé le ${format(new Date(lease.created_at), 'dd MMMM yyyy', { locale: fr })}`
                                             : 'Date de signature non disponible'}
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                                <Download className="w-4 h-4 text-zinc-500" />
-                                <ChevronRight className="w-4 h-4 text-zinc-400" />
+                            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#0F172A]/10 transition-colors">
+                                <Download className="w-5 h-5 text-slate-500 group-hover:text-[#0F172A]" />
                             </div>
                         </div>
                     </a>
                 ) : (
-                    <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
-                        <div className="flex items-center justify-between p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                                    <FileText className="w-5 h-5 text-blue-600" />
-                                </div>
-                                <div>
-                                    <p className="font-medium text-zinc-900">Contrat de Bail</p>
-                                    <p className="text-xs text-zinc-500">Non disponible</p>
-                                </div>
-                            </div>
+                    <div className="bg-slate-50 rounded-[2rem] border border-slate-200 border-dashed p-6 flex items-center gap-4 opacity-70">
+                        <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-[#0F172A]">
+                            <FileText className="w-7 h-7" />
+                        </div>
+                        <div>
+                            <p className="font-black text-slate-400 text-base tracking-tight">Contrat de Bail</p>
+                            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Génération en cours</p>
                         </div>
                     </div>
                 )}
             </section>
 
             {/* Assurance */}
-            <section className="space-y-3">
-                <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                    Assurance
+            <section className="space-y-4">
+                <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+                    Couverture
                 </h2>
-                <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
-                    <div className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                                <ShieldCheck className="w-5 h-5 text-indigo-600" />
-                            </div>
-                            <div>
-                                <p className="font-medium text-zinc-900">Assurance Habitation</p>
-                                <p className="text-xs text-zinc-500">Document obligatoire</p>
-                            </div>
+                <div className="bg-white rounded-[2rem] border border-slate-200 p-6 flex items-center justify-between shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-[#F4C430] opacity-30"></div>
+                    <div className="flex items-center gap-4 relative">
+                        <div className="w-14 h-14 rounded-2xl bg-[#F4C430]/10 flex items-center justify-center text-[#967919] group-hover:rotate-6 transition-transform">
+                            <ShieldCheck className="w-7 h-7" />
                         </div>
-                        <InsuranceUpload leaseId={lease.id} existingUrl={lease.insurance_url} />
+                        <div>
+                            <p className="font-black text-[#0F172A] text-base tracking-tight mb-0.5">Assurance Habitation</p>
+                            <p className="text-xs font-black text-slate-500 uppercase tracking-widest opacity-80">Document obligatoire</p>
+                        </div>
                     </div>
+                    <InsuranceUpload leaseId={lease.id} existingUrl={lease.insurance_url} />
                 </div>
             </section>
 
             {/* Quittances */}
-            <section className="space-y-3">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+            <section className="space-y-4">
+                <div className="flex items-center justify-between px-1">
+                    <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                         Quittances de loyer
                     </h2>
                     {paidPayments.length > 0 && (
-                        <span className="text-xs text-zinc-400">
+                        <span className="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-widest">
                             {paidPayments.length} document{paidPayments.length > 1 ? 's' : ''}
                         </span>
                     )}
                 </div>
 
                 {paidPayments.length > 0 ? (
-                    <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden divide-y divide-zinc-100">
+                    <div className="space-y-3">
                         {paidPayments.map((payment: any) => {
                             const period = formatPeriod(payment.period_month, payment.period_year);
                             const receiptUrl = payment.receipt_url || `/api/tenant/receipt/${payment.id}`;
 
                             return (
-                                <a key={payment.id} href={receiptUrl} target="_blank" rel="noopener noreferrer">
-                                    <div className="flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors cursor-pointer">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-                                                <FileText className="w-5 h-5 text-emerald-600" />
+                                <a key={payment.id} href={receiptUrl} target="_blank" rel="noopener noreferrer" className="group block bg-white rounded-3xl border border-slate-200 hover:border-[#0F172A] hover:shadow-xl hover:shadow-slate-900/5 hover:scale-[1.01] transition-all duration-300 active-press shadow-sm">
+                                    <div className="flex items-center justify-between p-5">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-[#0F172A] group-hover:bg-[#0F172A] group-hover:text-white transition-all duration-300 group-hover:rotate-6 shadow-sm">
+                                                <FileText className="w-6 h-6 text-[#F4C430] group-hover:text-white" />
                                             </div>
                                             <div>
-                                                <p className="font-medium text-zinc-900">Quittance {period}</p>
-                                                <p className="text-xs text-zinc-500">
-                                                    {payment.amount_due?.toLocaleString('fr-FR')} FCFA
+                                                <p className="font-black text-[#0F172A] text-sm tracking-tight mb-0.5 group-hover:translate-x-1 transition-transform">Quittance {period}</p>
+                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:translate-x-1 transition-transform delay-75">
+                                                    {payment.amount_due?.toLocaleString('fr-FR')} FCFA · Validée
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                            <Download className="w-4 h-4 text-zinc-500" />
-                                            <ChevronRight className="w-4 h-4 text-zinc-400" />
+                                        <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#0F172A]/10 transition-colors">
+                                            <Download className="w-4 h-4 text-slate-400 group-hover:text-[#0F172A]" />
                                         </div>
                                     </div>
                                 </a>
@@ -167,11 +160,13 @@ export default async function TenantDocumentsPage() {
                         })}
                     </div>
                 ) : (
-                    <div className="bg-zinc-50 rounded-xl border border-dashed border-zinc-200 py-12 px-4 text-center">
-                        <FolderOpen className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
-                        <p className="text-sm font-medium text-zinc-600">Aucune quittance disponible</p>
-                        <p className="text-xs text-zinc-400 mt-1">
-                            Vos quittances apparaîtront ici après chaque paiement validé
+                    <div className="bg-slate-50 rounded-[2rem] border border-dashed border-slate-200 py-16 px-6 text-center">
+                        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4 text-[#0F172A]/30">
+                            <FolderOpen className="w-8 h-8" />
+                        </div>
+                        <p className="text-base font-black text-[#0F172A] tracking-tight">Aucune quittance</p>
+                        <p className="text-xs font-black text-slate-500 uppercase tracking-widest mt-1 opacity-70">
+                            Elles apparaîtront après vos paiements
                         </p>
                     </div>
                 )}
@@ -179,40 +174,41 @@ export default async function TenantDocumentsPage() {
 
             {/* Documents partagés */}
             {sharedDocs && sharedDocs.length > 0 && (
-                <section className="space-y-3">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                <section className="space-y-4 pt-4">
+                    <div className="flex items-center justify-between px-1">
+                        <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                             Documents partagés
                         </h2>
-                        <span className="text-xs text-zinc-400">
-                            {sharedDocs.length} document{sharedDocs.length > 1 ? 's' : ''}
+                        <span className="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-widest">
+                            {sharedDocs.length} fichier{sharedDocs.length > 1 ? 's' : ''}
                         </span>
                     </div>
 
-                    <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden divide-y divide-zinc-100">
+                    <div className="space-y-3">
                         {sharedDocs.map((doc: any) => (
                             <a
                                 key={doc.id}
                                 href={doc.file_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors cursor-pointer"
+                                className="group block bg-white rounded-3xl border border-slate-200 hover:border-violet-500 hover:shadow-xl hover:shadow-violet-900/5 hover:scale-[1.01] transition-all duration-300 active-press shadow-sm"
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-violet-50 flex items-center justify-center">
-                                        <Share2 className="w-5 h-5 text-violet-600" />
+                                <div className="flex items-center justify-between p-5">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-all duration-300 group-hover:rotate-6 shadow-sm">
+                                            <Share2 className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <p className="font-black text-[#0F172A] text-sm tracking-tight mb-0.5 group-hover:translate-x-1 transition-transform">{doc.title}</p>
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:translate-x-1 transition-transform delay-75">
+                                                {CATEGORY_LABELS[doc.category] || 'Document'}
+                                                {doc.created_at && ` · ${format(new Date(doc.created_at), 'dd MMM yyyy', { locale: fr })}`}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-medium text-zinc-900">{doc.title}</p>
-                                        <p className="text-xs text-zinc-500">
-                                            {CATEGORY_LABELS[doc.category] || 'Document'}
-                                            {doc.created_at && ` · ${format(new Date(doc.created_at), 'dd MMM yyyy', { locale: fr })}`}
-                                        </p>
+                                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-violet-100 transition-colors">
+                                        <Download className="w-4 h-4 text-slate-400 group-hover:text-violet-600" />
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <Download className="w-4 h-4 text-zinc-500" />
-                                    <ChevronRight className="w-4 h-4 text-zinc-400" />
                                 </div>
                             </a>
                         ))}

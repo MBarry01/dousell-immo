@@ -28,8 +28,8 @@ export function LegalAlertsWidget({ alerts }: LegalAlertsWidgetProps) {
                             <Scale className="h-5 w-5 text-foreground" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-sm text-foreground">Conformité Juridique</h3>
-                            <p className="text-xs text-muted-foreground">Statut des échéances légales</p>
+                            <h3 className="font-black text-sm text-foreground uppercase tracking-wider">Conformité Juridique</h3>
+                            <p className="text-[9px] font-black uppercase tracking-wider text-slate-500">Statut des échéances légales</p>
                         </div>
                     </div>
 
@@ -57,8 +57,8 @@ export function LegalAlertsWidget({ alerts }: LegalAlertsWidgetProps) {
                                 <Scale className="h-5 w-5 text-foreground" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-sm text-foreground">Conformité Juridique</h3>
-                                <p className="text-xs text-muted-foreground">Échéances à surveiller</p>
+                                <h3 className="font-black text-sm text-foreground uppercase tracking-wider">Conformité Juridique</h3>
+                                <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">Échéances à surveiller</p>
                             </div>
                         </div>
 
@@ -81,11 +81,11 @@ export function LegalAlertsWidget({ alerts }: LegalAlertsWidgetProps) {
                                         <AlertTriangle className="h-4 w-4 text-foreground" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-foreground">Congé Reprise</p>
-                                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">J-180 • 6 mois</p>
+                                        <p className="text-sm font-black text-foreground tracking-tighter">Congé Reprise</p>
+                                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">J-180 • 6 mois</p>
                                     </div>
                                 </div>
-                                <span className="text-lg font-bold text-foreground">{j180Count}</span>
+                                <span className="text-lg font-black text-foreground tracking-tighter">{j180Count}</span>
                             </div>
                         )}
 
@@ -96,11 +96,11 @@ export function LegalAlertsWidget({ alerts }: LegalAlertsWidgetProps) {
                                         <Clock className="h-4 w-4 text-foreground" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-foreground">Reconduction</p>
-                                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">J-90 • 3 mois</p>
+                                        <p className="text-sm font-black text-foreground tracking-tighter">Reconduction</p>
+                                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">J-90 • 3 mois</p>
                                     </div>
                                 </div>
-                                <span className="text-lg font-bold text-foreground">{j90Count}</span>
+                                <span className="text-lg font-black text-foreground tracking-tighter">{j90Count}</span>
                             </div>
                         )}
                     </div>

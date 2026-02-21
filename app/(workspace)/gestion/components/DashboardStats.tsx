@@ -96,7 +96,7 @@ export function DashboardStats({ stats, onFilterChange, activeFilter = 'all' }: 
                             <div className={`p-2 rounded-md ${card.colorClass}`}>
                                 <Icon className="w-4 h-4" />
                             </div>
-                            <h3 className={`text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-500'
+                            <h3 className={`text-[9px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-500'
                                 }`}>
                                 {card.title}
                             </h3>
@@ -104,13 +104,13 @@ export function DashboardStats({ stats, onFilterChange, activeFilter = 'all' }: 
 
                         <div className="flex items-baseline gap-1">
                             {/* Chiffre : Toujours Neutre (Slate-900 / White) */}
-                            <span className={`text-3xl font-semibold tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'
+                            <span className={`text-3xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'
                                 }`}>
                                 {card.value}
                             </span>
                             {/* Unité : Discrète */}
                             {card.suffix && (
-                                <span className={`text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-500'
+                                <span className={`text-[10px] font-black uppercase tracking-wider ${isDark ? 'text-slate-600' : 'text-slate-400'
                                     }`}>
                                     {card.suffix}
                                 </span>
@@ -119,7 +119,7 @@ export function DashboardStats({ stats, onFilterChange, activeFilter = 'all' }: 
 
                         {/* Description subtile en bas */}
                         {card.description && (
-                            <div className={`mt-2 text-xs flex items-center gap-1 ${isDark ? 'text-gray-500' : 'text-gray-500'
+                            <div className={`mt-2 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${isDark ? 'text-slate-600' : 'text-slate-400'
                                 }`}>
                                 {card.trend === "up" && (
                                     <TrendingUp className="w-3 h-3 text-green-500" />

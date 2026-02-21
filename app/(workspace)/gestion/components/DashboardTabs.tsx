@@ -3,6 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { useTheme } from "@/components/theme-provider";
 import { Users, TrendingUp } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 type TabId = 'overview' | 'performance';
 
@@ -55,7 +56,7 @@ export function DashboardTabs({
     return (
         <div>
             {/* Tab Navigation */}
-            <div className={`flex items-center gap-1 p-1 rounded-lg mb-6 w-fit ${isDark ? 'bg-slate-900/80' : 'bg-gray-100'
+            <div className={`flex items-center gap-1 p-1 rounded-lg mb-6 w-fit no-select ${isDark ? 'bg-slate-900/80' : 'bg-gray-100'
                 }`}>
                 {tabs.map((tab) => {
                     const Icon = tab.icon;
@@ -65,21 +66,20 @@ export function DashboardTabs({
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
+                            style={isActive ? { backgroundColor: '#0f172a', color: '#ffffff' } : undefined}
                             className={`
-                                flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium
-                                transition-all duration-200
+                                flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 h-9 sm:h-11 rounded-lg text-[8px] sm:text-[10px] font-black uppercase tracking-[0.12em] sm:tracking-[0.2em]
+                                transition-all duration-300 active:scale-95
                                 ${isActive
-                                    ? isDark
-                                        ? 'bg-slate-800 text-white shadow-sm'
-                                        : 'bg-white text-gray-900 shadow-sm'
+                                    ? 'shadow-lg'
                                     : isDark
-                                        ? 'text-slate-400 hover:text-slate-200'
-                                        : 'text-gray-500 hover:text-gray-700'
+                                        ? 'text-slate-500 hover:text-slate-200'
+                                        : 'text-slate-600 hover:text-slate-900'
                                 }
                             `}
                         >
-                            <Icon className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">{tab.label}</span>
+                            <Icon className={cn("w-3.5 h-3.5", isActive ? "" : "text-slate-400")} style={isActive ? { color: '#ffffff' } : undefined} />
+                            <span>{tab.label}</span>
                         </button>
                     );
                 })}

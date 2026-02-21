@@ -166,7 +166,7 @@ export function GestionLocativeClient({
 
     // DEBUG: Mobile Crash Investigation
     useEffect(() => {
-         
+
         console.log("[GestionLocativeClient] Component Mounted", {
             leasesCount: leases?.length,
             transactionsCount: transactions?.length,

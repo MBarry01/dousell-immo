@@ -20,6 +20,7 @@ import {
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/theme-provider";
 import type { LucideIcon } from "lucide-react";
 
 interface NavItem {
@@ -70,6 +71,9 @@ export function WorkspaceBottomNav() {
   const scrollHandlerRef = useRef<(() => void) | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [teamId, setTeamId] = useState<string | null>(null);
+
+  // Theme-aware styling
+  const { isDark } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -173,16 +177,24 @@ export function WorkspaceBottomNav() {
 
   if (!mounted) return null;
 
+  // Theme-aware colors
+  const activeColor = isDark ? '#F4C430' : '#0f172a'; // Gold in dark, Slate-900 in light
+  const activeBg = isDark ? 'rgba(244, 196, 48, 0.1)' : 'rgba(15, 23, 42, 0.08)';
+  const inactiveColor = isDark ? '#9da7b9' : '#64748b';
+  const navBg = isDark ? 'rgba(5, 8, 12, 0.85)' : 'rgba(255, 255, 255, 0.9)';
+  const navBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.1)';
+
   return (
     <nav
-
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/80 backdrop-blur-lg lg:hidden print:hidden",
+        "fixed inset-x-0 bottom-0 z-40 backdrop-blur-lg lg:hidden print:hidden",
         "transition-transform duration-300 ease-out",
         !isVisible && "translate-y-full"
       )}
       style={{
         paddingBottom: "env(safe-area-inset-bottom)",
+        backgroundColor: navBg,
+        borderTop: `1px solid ${navBorder}`,
       }}
     >
       <div className="flex h-16 items-center justify-between px-4">
@@ -212,12 +224,11 @@ export function WorkspaceBottomNav() {
               className="flex flex-1 flex-col items-center justify-center gap-1 min-w-0 no-select active:scale-95 transition-transform duration-100"
             >
               <span
-                className={cn(
-                  "relative inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
-                  isActive
-                    ? "text-[#F4C430] bg-[#F4C430]/10"
-                    : "text-muted-foreground"
-                )}
+                className="relative inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-all duration-200"
+                style={{
+                  color: isActive ? activeColor : inactiveColor,
+                  backgroundColor: isActive ? activeBg : 'transparent',
+                }}
               >
                 <Icon
                   className="h-5 w-5"
@@ -230,10 +241,11 @@ export function WorkspaceBottomNav() {
                 )}
               </span>
               <span
-                className={cn(
-                  "truncate w-full text-center text-[10px] font-medium transition-colors duration-200",
-                  isActive ? "text-[#F4C430] font-semibold" : "text-muted-foreground"
-                )}
+                className="truncate w-full text-center text-[10px] transition-colors duration-200"
+                style={{
+                  color: isActive ? activeColor : inactiveColor,
+                  fontWeight: isActive ? 600 : 500,
+                }}
               >
                 {item.label}
               </span>

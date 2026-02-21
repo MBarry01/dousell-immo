@@ -290,8 +290,8 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                             <Wrench className="w-5 h-5 text-foreground" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-sm text-foreground">Interventions</h3>
-                            <p className="text-xs text-muted-foreground">Maintenance & travaux</p>
+                            <h3 className="font-black text-sm text-foreground uppercase tracking-wider">Interventions</h3>
+                            <p className="text-[9px] font-black uppercase tracking-wider text-slate-500">Maintenance & travaux</p>
                         </div>
                     </div>
                     <div id="tour-intervention-signaler">
@@ -384,13 +384,13 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h4 className="font-bold text-sm text-foreground">{req.description}</h4>
+                                            <h4 className="font-black text-sm text-foreground tracking-tighter">{req.description}</h4>
                                             {req.photo_urls && req.photo_urls.length > 0 && (
                                                 <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" />
                                             )}
                                         </div>
                                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                                            <p className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium bg-muted/50 px-1.5 py-0.5 rounded uppercase">
+                                            <p className="text-[9px] text-slate-500 flex items-center gap-1 font-black bg-slate-900/5 dark:bg-slate-100/5 px-2 py-0.5 rounded uppercase tracking-wider">
                                                 {req.category}
                                             </p>
                                             {req.property_title && (

@@ -91,7 +91,7 @@ export function TeamPageClient({
             <div>
               <div className="flex items-center gap-3">
                 <h1 className={cn(
-                  "text-lg md:text-xl font-bold line-clamp-1",
+                  "text-lg md:text-xl font-black tracking-tighter line-clamp-1",
                   isDark ? "text-white" : "text-slate-900"
                 )}>
                   {team.name}
@@ -163,30 +163,30 @@ export function TeamPageClient({
         <TabsList className="w-full justify-start md:justify-center bg-transparent p-1 gap-1 md:gap-2 border border-slate-200 dark:border-slate-800 rounded-xl md:rounded-full overflow-x-auto overflow-y-hidden scrollbar-none">
           <TabsTrigger
             value="members"
-            className="group rounded-full border border-transparent data-[state=active]:bg-slate-200 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-slate-900 dark:data-[state=active]:text-slate-100 data-[state=active]:shadow-none text-muted-foreground hover:bg-muted/50 transition-all flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 text-sm"
+            className="group rounded-full border border-transparent data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-white dark:data-[state=active]:text-white data-[state=active]:shadow-none text-muted-foreground hover:bg-muted/50 transition-all flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 text-[10px] font-black uppercase tracking-[0.2em]"
           >
             <Users className="h-4 w-4 transition-colors" />
-            <span className="font-medium transition-colors">Membres</span>
+            <span className="transition-colors">Membres</span>
             {(members.length + invitations.length) > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs bg-slate-100/80 text-slate-500 dark:bg-slate-900/80 dark:text-slate-400 border-none">
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[9px] font-black leading-none bg-slate-100/80 text-slate-500 dark:bg-slate-900/80 dark:text-slate-400 border-none">
                 {members.length + invitations.length}
               </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger
             value="permissions"
-            className="group rounded-full border border-transparent data-[state=active]:bg-slate-200 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-slate-900 dark:data-[state=active]:text-slate-100 data-[state=active]:shadow-none text-muted-foreground hover:bg-muted/50 transition-all flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 text-sm"
+            className="group rounded-full border border-transparent data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-white dark:data-[state=active]:text-white data-[state=active]:shadow-none text-muted-foreground hover:bg-muted/50 transition-all flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 text-[10px] font-black uppercase tracking-[0.2em]"
           >
             <Shield className="h-4 w-4 transition-colors" />
-            <span className="font-medium transition-colors">Rôles & Permissions</span>
+            <span className="transition-colors">Rôles & Permissions</span>
           </TabsTrigger>
           {canInvite && (
             <TabsTrigger
               value="access-control"
-              className="group rounded-full border border-transparent data-[state=active]:bg-slate-200 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-slate-900 dark:data-[state=active]:text-slate-100 data-[state=active]:shadow-none text-muted-foreground hover:bg-muted/50 transition-all flex items-center gap-2 px-4 py-2"
+              className="group rounded-full border border-transparent data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-white dark:data-[state=active]:text-white data-[state=active]:shadow-none text-muted-foreground hover:bg-muted/50 transition-all flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em]"
             >
               <KeyRound className="h-4 w-4 transition-colors" />
-              <span className="font-medium transition-colors">Accès Temporaire</span>
+              <span className="transition-colors">Accès Temporaire</span>
             </TabsTrigger>
           )}
         </TabsList>
@@ -238,7 +238,7 @@ function StatBadge({ icon, value, label, variant = "default", isDark, href, onCl
     )}>
       {icon}
       <div className="flex items-center gap-1.5 ml-1 whitespace-nowrap">
-        <span className="text-sm font-semibold leading-none">{value}</span>
+        <span className="text-sm font-black tracking-tighter leading-none">{value}</span>
         <span className="text-xs opacity-70 font-medium">{label}</span>
       </div>
     </div>

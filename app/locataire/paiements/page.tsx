@@ -9,11 +9,14 @@ import {
     AlertTriangle,
     Loader2,
     Filter,
-    ChevronRight
+    ChevronRight,
+    Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RentPaymentModal } from '../components/RentPaymentModal';
 import { getTenantPayments } from './actions';
+import { PageHeaderSkeleton, ListSkeleton } from '../components/TenantSkeletons';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type Payment = {
     id: string;
@@ -83,22 +86,29 @@ export default function TenantPaymentsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-[60vh] flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-zinc-400 animate-spin" />
+            <div className="w-full max-w-lg mx-auto px-4 py-8 pb-32 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <PageHeaderSkeleton />
+                <Skeleton className="w-full h-32 rounded-[2.5rem]" variant="luxury" />
+                <div className="flex gap-3 mb-6">
+                    {[1, 2, 3].map(i => <Skeleton key={i} className="w-20 h-10 rounded-2xl" variant="default" />)}
+                </div>
+                <ListSkeleton count={4} />
             </div>
         );
     }
 
     if (!data || data.payments.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-                <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mb-4">
-                    <Clock className="w-8 h-8 text-zinc-400" />
+            <div className="w-full max-w-lg mx-auto px-4 py-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200 py-20 px-6 text-center">
+                    <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <Clock className="w-10 h-10 text-[#0F172A]/20" />
+                    </div>
+                    <h3 className="text-xl font-black text-[#0F172A] tracking-tight">Aucun paiement</h3>
+                    <p className="max-w-xs mx-auto mt-2 text-sm font-black text-slate-500 uppercase tracking-widest opacity-60">
+                        Votre historique de paiements apparaîtra ici dès le premier mois
+                    </p>
                 </div>
-                <h3 className="text-lg font-semibold text-zinc-900">Aucun paiement</h3>
-                <p className="max-w-xs mt-2 text-sm text-zinc-500">
-                    Votre historique de paiements apparaîtra ici.
-                </p>
             </div>
         );
     }
@@ -114,53 +124,51 @@ export default function TenantPaymentsPage() {
     });
 
     return (
-        <div className="w-full max-w-lg mx-auto px-4 py-6 space-y-6">
+        <div className="w-full max-w-lg mx-auto px-4 py-8 pb-32 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header */}
-            <div>
-                <h1 className="text-xl font-bold text-zinc-900">Mes Paiements</h1>
-                <p className="text-sm text-zinc-500 mt-0.5">Historique et suivi de vos loyers</p>
+            <div className="space-y-1">
+                <h1 className="text-3xl font-black text-[#0F172A] tracking-tighter uppercase">Mes Paiements</h1>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest opacity-70">Historique et suivi de vos loyers</p>
             </div>
 
-            {/* Balance Card */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800 p-6 text-white">
-                <div className="absolute inset-0 opacity-5">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
-                </div>
+            {/* Balance Card - Premium Design */}
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-[#0F172A] p-8 text-white shadow-2xl shadow-slate-900/20 group">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-[#F4C430]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[#F4C430]/20 transition-colors duration-700" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-slate-800/50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
-                <div className="relative">
-                    <div className="flex items-center justify-between mb-4">
+                <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-8">
                         <div>
-                            <p className="text-zinc-400 text-xs uppercase tracking-widest mb-1">
-                                {isUpToDate ? 'Solde actuel' : 'Montant à payer'}
+                            <p className="text-[#F4C430] text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+                                {isUpToDate ? 'Solde actuel' : 'Montant total dû'}
                             </p>
                             <div className="flex items-baseline gap-2">
-                                <span className="text-3xl font-bold tracking-tight">
+                                <span className="text-4xl font-black tracking-tighter tabular-nums">
                                     {formatCurrency(currentBalance)}
                                 </span>
-                                <span className="text-zinc-400">FCFA</span>
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">FCFA</span>
                             </div>
                         </div>
                         {isUpToDate && (
-                            <div className="flex items-center gap-1.5 text-emerald-400">
-                                <CheckCircle2 className="w-5 h-5" />
-                                <span className="text-sm font-medium">À jour</span>
+                            <div className="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2 text-white animate-in zoom-in duration-500">
+                                <CheckCircle2 className="w-4 h-4 text-[#F4C430]" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-[9px]">À jour</span>
                             </div>
                         )}
                     </div>
 
                     <Button
                         onClick={() => setIsModalOpen(true)}
-                        className="w-full h-11 bg-white hover:bg-zinc-100 text-zinc-900 font-semibold rounded-xl"
+                        className="w-full h-14 bg-white hover:bg-slate-100 text-[#0F172A] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-black/20 group active-press transition-all"
                     >
-                        {isUpToDate ? 'Effectuer un paiement' : `Payer ${formatCurrency(currentBalance)} FCFA`}
-                        <ArrowRight className="w-4 h-4 ml-2" />
+                        {isUpToDate ? 'Paiement Anticipé' : `Régler ${formatCurrency(currentBalance)} F`}
+                        <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
                     </Button>
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-zinc-400" />
+            {/* Filters - Pill Style */}
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {[
                     { key: 'all', label: 'Tous' },
                     { key: 'paid', label: 'Payés' },
@@ -169,21 +177,19 @@ export default function TenantPaymentsPage() {
                     <button
                         key={key}
                         onClick={() => setFilter(key as typeof filter)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                            filter === key
-                                ? 'bg-zinc-900 text-white'
-                                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
-                        }`}
+                        className={`px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filter === key
+                            ? 'bg-[#0F172A] text-white shadow-lg shadow-slate-900/10'
+                            : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-400'
+                            }`}
                     >
                         {label}
                     </button>
                 ))}
             </div>
 
-            {/* Payments List with Year Separators */}
-            <div className="space-y-4">
+            {/* Payments List */}
+            <div className="space-y-8">
                 {(() => {
-                    // Group payments by year
                     const byYear = filteredPayments.reduce<Record<number, Payment[]>>((acc, p) => {
                         const year = p.period_year;
                         if (!acc[year]) acc[year] = [];
@@ -195,99 +201,97 @@ export default function TenantPaymentsPage() {
 
                     if (years.length === 0) {
                         return (
-                            <div className="bg-white rounded-xl border border-zinc-200 py-12 text-center">
-                                <p className="text-sm text-zinc-500">Aucun paiement dans cette catégorie</p>
+                            <div className="bg-slate-50 rounded-[2rem] border border-dashed border-slate-200 py-16 text-center">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aucun paiement trouvé</p>
                             </div>
                         );
                     }
 
                     return years.map(year => (
-                        <div key={year}>
-                            <div className="sticky top-16 z-10 bg-slate-50/95 backdrop-blur px-1 py-2">
-                                <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{year}</h3>
+                        <div key={year} className="space-y-4">
+                            <div className="flex items-center gap-4 px-2">
+                                <div className="h-px flex-1 bg-slate-100" />
+                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">{year}</h3>
+                                <div className="h-px flex-1 bg-slate-100" />
                             </div>
-                            <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
-                                <div className="divide-y divide-zinc-100">
-                                    {byYear[year].map((payment) => {
-                                        const isPaid = payment.status === 'paid';
-                                        const isOverdue = payment.status === 'overdue';
-                                        const period = formatPeriod(payment.period_month, payment.period_year);
-                                        const paidDate = formatPaidDate(payment.paid_at);
-                                        const methodLabel = payment.payment_method === 'stripe' ? 'Carte' :
-                                                           payment.payment_method === 'kkiapay' ? 'Mobile' :
-                                                           payment.payment_method || null;
 
-                                        return (
+                            <div className="grid gap-3">
+                                {byYear[year].map((payment) => {
+                                    const isPaid = payment.status === 'paid';
+                                    const isOverdue = payment.status === 'overdue';
+                                    const period = formatPeriod(payment.period_month, payment.period_year);
+                                    const paidDate = formatPaidDate(payment.paid_at);
+                                    const methodLabel = payment.payment_method === 'stripe' ? 'STRIPE' :
+                                        payment.payment_method === 'kkiapay' ? 'MOBILE' :
+                                            payment.payment_method?.toUpperCase() || null;
+
+                                    return (
+                                        <div key={payment.id} className="group relative">
                                             <button
-                                                key={payment.id}
                                                 onClick={() => isPaid ? router.push(`/locataire/paiements/${payment.id}`) : undefined}
-                                                className={`w-full flex items-center justify-between px-4 py-4 hover:bg-zinc-50 transition-colors text-left ${
-                                                    isPaid ? 'cursor-pointer' : 'cursor-default'
-                                                }`}
+                                                className={`w-full bg-white rounded-[2rem] border border-slate-200 p-5 flex items-center justify-between text-left transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/50 hover:border-slate-300 ${isPaid ? 'cursor-pointer active:scale-[0.98]' : 'cursor-default'}`}
                                             >
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                                        isPaid
-                                                            ? 'bg-emerald-50 text-emerald-600'
-                                                            : isOverdue
-                                                                ? 'bg-red-50 text-red-600'
-                                                                : 'bg-amber-50 text-amber-600'
-                                                    }`}>
+                                                <div className="flex items-center gap-5">
+                                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-500 ${isPaid
+                                                        ? 'bg-slate-50 text-[#0F172A]'
+                                                        : isOverdue
+                                                            ? 'bg-red-50 text-red-600'
+                                                            : 'bg-amber-50 text-amber-600'
+                                                        }`}>
                                                         {isPaid
-                                                            ? <CheckCircle2 className="w-5 h-5" />
+                                                            ? <CheckCircle2 className="w-6 h-6 text-[#F4C430]" />
                                                             : isOverdue
-                                                                ? <AlertTriangle className="w-5 h-5" />
-                                                                : <Clock className="w-5 h-5" />
+                                                                ? <AlertTriangle className="w-6 h-6" />
+                                                                : <Clock className="w-6 h-6" />
                                                         }
                                                     </div>
                                                     <div>
-                                                        <p className="font-medium text-zinc-900">
-                                                            Loyer {period}
+                                                        <p className="text-sm font-black text-[#0F172A] tracking-tighter uppercase mb-1">
+                                                            {period}
                                                         </p>
-                                                        <p className="text-xs text-zinc-500">
-                                                            {isPaid && paidDate
-                                                                ? `Payé le ${paidDate}`
-                                                                : isOverdue
-                                                                    ? 'Paiement en retard'
-                                                                    : 'En attente de paiement'
-                                                            }
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    <div className="text-right">
-                                                        <p className={`font-semibold tabular-nums ${
-                                                            isPaid ? 'text-zinc-900' : isOverdue ? 'text-red-600' : 'text-amber-600'
-                                                        }`}>
-                                                            {formatCurrency(payment.amount_paid || payment.amount_due)}
-                                                            <span className="text-xs font-normal text-zinc-400 ml-1">F</span>
-                                                        </p>
-                                                        <div className="flex items-center gap-1 justify-end">
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest opacity-80">
+                                                                {isPaid && paidDate
+                                                                    ? `Payé le ${paidDate}`
+                                                                    : isOverdue
+                                                                        ? 'Paiement en retard'
+                                                                        : 'Attente règlement'
+                                                                }
+                                                            </p>
                                                             {isPaid && methodLabel && (
-                                                                <span className="text-[9px] font-medium text-zinc-400 bg-zinc-100 px-1 py-0.5 rounded">
+                                                                <span className="text-[8px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md uppercase tracking-tight">
                                                                     {methodLabel}
                                                                 </span>
                                                             )}
-                                                            <span className={`inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                                                                isPaid
-                                                                    ? 'bg-emerald-50 text-emerald-700'
-                                                                    : isOverdue
-                                                                        ? 'bg-red-50 text-red-700'
-                                                                        : 'bg-amber-50 text-amber-700'
-                                                            }`}>
-                                                                {isPaid ? 'Payé' : isOverdue ? 'En retard' : 'En attente'}
-                                                            </span>
                                                         </div>
                                                     </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-right">
+                                                        <div className="flex items-center gap-1 justify-end mb-1">
+                                                            <span className={`text-[12px] font-black tracking-tight tabular-nums ${isPaid ? 'text-[#0F172A]' : isOverdue ? 'text-red-500' : 'text-amber-500'}`}>
+                                                                {formatCurrency(payment.amount_paid || payment.amount_due)}
+                                                            </span>
+                                                            <span className="text-[8px] font-black text-slate-400 uppercase">F</span>
+                                                        </div>
+                                                        <span className={`inline-flex text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${isPaid
+                                                            ? 'bg-slate-100 text-[#0F172A]'
+                                                            : isOverdue
+                                                                ? 'bg-red-50 text-red-700'
+                                                                : 'bg-amber-50 text-amber-700'
+                                                            }`}>
+                                                            {isPaid ? 'VALIDE' : isOverdue ? 'RETARD' : 'ATTENTE'}
+                                                        </span>
+                                                    </div>
                                                     {isPaid && (
-                                                        <ChevronRight className="w-4 h-4 text-zinc-400" />
+                                                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#0F172A] transition-colors" />
                                                     )}
                                                 </div>
                                             </button>
-                                        );
-                                    })}
-                                </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     ));

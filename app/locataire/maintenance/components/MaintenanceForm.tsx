@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, Camera } from 'lucide-react';
+import { Loader2, Camera, ArrowLeft, Wrench } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -176,58 +176,72 @@ export function MaintenanceForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             {/* Category Selection */}
-            <div className="space-y-3">
-                <Label className="text-zinc-700 font-medium">Type de problème</Label>
-                <div className="grid grid-cols-3 gap-2">
+            <div className="space-y-4">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+                    Type de problème
+                </Label>
+                <div className="grid grid-cols-3 gap-3">
                     {CATEGORIES.map((cat) => (
                         <button
                             key={cat.value}
                             type="button"
                             onClick={() => handleCategorySelect(cat.value)}
-                            className={`p-3 rounded-xl border text-center transition-all ${selectedCategory === cat.value
-                                ? 'bg-zinc-900 border-zinc-900 text-white'
-                                : 'bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
+                            className={`p-4 rounded-2xl border text-center transition-all duration-300 group relative overflow-hidden ${selectedCategory === cat.value
+                                ? 'bg-[#0F172A] border-[#0F172A] text-white shadow-xl shadow-slate-900/20'
+                                : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-400 hover:bg-white'
                                 }`}
                         >
-                            <span className="text-xl block mb-1">{cat.emoji}</span>
-                            <span className="text-xs font-medium">{cat.label}</span>
+                            <span className="text-2xl block mb-2 group-hover:scale-125 transition-transform duration-300">{cat.emoji}</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">{cat.label}</span>
+                            {selectedCategory === cat.value && (
+                                <div className="absolute top-1 right-1">
+                                    <div className="w-2 h-2 rounded-full bg-[#F4C430]"></div>
+                                </div>
+                            )}
                         </button>
                     ))}
                 </div>
                 {errors.category && (
-                    <p className="text-sm text-red-600">{errors.category.message}</p>
+                    <p className="text-xs font-black text-red-500 uppercase tracking-tight px-1">{errors.category.message}</p>
                 )}
             </div>
 
             {/* Description */}
-            <div className="space-y-3">
-                <Label className="text-zinc-700 font-medium">Description détaillée</Label>
+            <div className="space-y-4">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+                    Description détaillée
+                </Label>
                 <Textarea
                     placeholder="Décrivez le problème, sa localisation et depuis quand..."
-                    className="min-h-[120px] bg-white border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-zinc-200 rounded-xl"
+                    className="min-h-[140px] bg-slate-50 border-slate-200 text-[#0F172A] placeholder:text-slate-400 focus:border-[#0F172A] focus:ring-slate-900/5 rounded-2xl p-4 font-medium transition-all"
                     {...register('description')}
                 />
                 {errors.description && (
-                    <p className="text-sm text-red-600">{errors.description.message}</p>
+                    <p className="text-xs font-black text-red-500 uppercase tracking-tight px-1">{errors.description.message}</p>
                 )}
             </div>
 
             {/* Photos */}
-            <div className="space-y-3">
-                <Label className="text-zinc-700 font-medium">Photos (Obligatoire)</Label>
+            <div className="space-y-4">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+                    Photos (Obligatoire)
+                </Label>
 
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-3">
                     {imagePreviews.map((src, i) => (
-                        <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-zinc-200">
-                            <Image src={src} alt="Preview" fill className="object-cover" />
+                        <div key={i} className="relative aspect-square rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm group">
+                            <Image src={src} alt="Preview" fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <Camera className="w-5 h-5 text-white" />
+                            </div>
                         </div>
                     ))}
 
-                    <label className="flex flex-col items-center justify-center aspect-square rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 cursor-pointer hover:border-zinc-400 hover:bg-zinc-100 transition-colors">
-                        <Camera className="w-6 h-6 text-zinc-400 mb-1" />
-                        <span className="text-[10px] text-zinc-500 font-medium">Ajouter</span>
+                    <label className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 cursor-pointer hover:border-[#0F172A] hover:bg-white transition-all group">
+                        <Camera className="w-7 h-7 text-slate-400 mb-1 group-hover:text-[#0F172A] group-hover:scale-110 transition-all duration-300" />
+                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest group-hover:text-[#0F172A]">Ajouter</span>
                         <input
                             type="file"
                             accept="image/*"
@@ -239,18 +253,18 @@ export function MaintenanceForm() {
                 </div>
 
                 {errors.photos && (
-                    <p className="text-sm text-red-600">{errors.photos.message as string}</p>
+                    <p className="text-xs font-black text-red-500 uppercase tracking-tight px-1">{errors.photos.message as string}</p>
                 )}
             </div>
 
             <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full h-12 text-base bg-zinc-900 hover:bg-zinc-800 text-white font-semibold rounded-xl"
+                className="w-full h-14 text-sm bg-[#0F172A] hover:bg-[#1e293b] text-white font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-slate-900/10 active-press transition-all"
             >
                 {isSubmitting ? (
                     <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-3 h-5 w-5 animate-spin" />
                         Envoi en cours...
                     </>
                 ) : (

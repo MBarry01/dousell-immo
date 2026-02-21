@@ -45,6 +45,7 @@ import { useTheme } from "@/components/theme-provider";
 import { uploadDocument, deleteDocument, getMyDocuments, getRentalDocuments } from "@/app/(workspace)/compte/mes-documents/actions";
 import { getProperties, getLeasesByOwner } from "../actions";
 import { DocumentsTour } from "@/components/gestion/tours/DocumentsTour";
+import { DocumentGridSkeleton } from "../components/PremiumSkeletons";
 
 // Types
 type RentalDocument = {
@@ -202,7 +203,7 @@ export default function RentalDocumentsPage() {
                 <div id="tour-ged-header" className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <DocumentsTour />
                     <div>
-                        <h1 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        <h1 className={`text-2xl font-black tracking-tighter flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                             <Folder className="text-brand" weight="duotone" />
                             GED & Documents
                         </h1>
@@ -330,7 +331,7 @@ export default function RentalDocumentsPage() {
                 {/* Content */}
                 <div id="tour-ged-list">
                     {loading ? (
-                        <div className={`text-center py-12 ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>Chargement de vos documents...</div>
+                        <DocumentGridSkeleton count={6} />
                     ) : filteredDocuments.length === 0 ? (
                         <EmptyState
                             title="Aucun document trouvé"
@@ -400,10 +401,10 @@ export default function RentalDocumentsPage() {
                                     </div>
 
                                     <div className="space-y-1">
-                                        <h3 className={`font-medium truncate ${isDark ? 'text-slate-200' : 'text-gray-900'}`} title={doc.name}>
+                                        <h3 className={`font-black tracking-tighter truncate ${isDark ? 'text-slate-200' : 'text-gray-900'}`} title={doc.name}>
                                             {doc.name}
                                         </h3>
-                                        <p className={`text-xs uppercase tracking-wider font-semibold ${isDark ? 'text-brand' : 'text-slate-500'}`}>
+                                        <p className={`text-[9px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-brand' : 'text-slate-500'}`}>
                                             {DOCUMENT_CATEGORIES.find(c => c.value === doc.category)?.label || doc.category}
                                         </p>
                                     </div>

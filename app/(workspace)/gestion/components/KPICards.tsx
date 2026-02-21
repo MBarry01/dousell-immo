@@ -52,7 +52,7 @@ export function KPICards({ stats }: KPICardsProps) {
             case "good": return "bg-emerald-500";
             case "warning": return "bg-amber-500";
             case "bad": return "bg-red-500";
-            default: return "bg-muted-foreground/30";
+            default: return "bg-slate-300";
         }
     };
 
@@ -64,20 +64,20 @@ export function KPICards({ stats }: KPICardsProps) {
                 return (
                     <div
                         key={index}
-                        className="px-3 py-2 rounded-lg border border-border bg-card shadow-sm transition-colors"
+                        className="px-4 py-3 rounded-xl border border-border bg-card shadow-sm transition-all active:scale-[0.98] active-press"
                     >
-                        <div className="flex items-center gap-2 mb-0.5">
-                            <Icon className="w-3 h-3 text-muted-foreground/60" />
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground/80">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Icon className="w-3.5 h-3.5 text-slate-400" />
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
                                 {kpi.label}
                             </span>
                             <span className={`w-1.5 h-1.5 rounded-full ml-auto ${getStatusColor(kpi.status)}`} />
                         </div>
                         <div className="flex items-baseline gap-1.5">
-                            <span className="text-lg font-semibold text-foreground">
+                            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">
                                 {kpi.value}
                             </span>
-                            <span className="text-[10px] text-muted-foreground/60">
+                            <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                                 {kpi.subtext}
                             </span>
                         </div>

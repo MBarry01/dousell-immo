@@ -47,11 +47,11 @@ export function InterventionsPageClient({ requests }: InterventionsPageClientPro
                     }`}
             >
                 <div className="w-full mx-auto px-4 md:px-6 py-6 text-left">
-                    <h1 className={`text-2xl md:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Interventions & Maintenance
+                    <h1 className={`text-2xl md:text-5xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        Interventions
                     </h1>
-                    <p className={`text-sm md:text-base mt-2 ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                        Gérez les demandes d&apos;intervention de vos locataires
+                    <p className={`text-[10px] font-black uppercase tracking-[0.2em] mt-3 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                        Maintenance & Suivi technique
                     </p>
                 </div>
             </div>

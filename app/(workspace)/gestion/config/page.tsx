@@ -81,7 +81,7 @@ export default async function ConfigPremiumPage() {
                     <Settings className="w-6 h-6 animate-pulse-slow" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Configuration</h1>
+                    <h1 className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white">Configuration</h1>
                     <p className="text-slate-500 dark:text-gray-400 text-sm italic">Gérez votre identité visuelle et votre abonnement</p>
                 </div>
             </div>

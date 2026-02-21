@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { confirmPayment, terminateLease, reactivateLease } from '../actions';
 import { toast } from 'sonner';
+import { useTheme } from "@/components/theme-provider";
 
 interface Tenant {
     id: string;
@@ -86,6 +87,7 @@ export function TenantTable({
     onReactivate,
     onInvite
 }: TenantTableProps) {
+    const { isDark } = useTheme();
     const _router = useRouter();
     const [sortField, setSortField] = useState<SortField>('name');
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
@@ -186,13 +188,13 @@ export function TenantTable({
             <div className="border border-border rounded-lg overflow-hidden w-full transition-colors bg-card">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm min-w-max sm:min-w-0">
-                        <thead className="border-b border-border bg-muted/30 sticky top-0">
+                        <thead className={`border-b border-border sticky top-0 ${isDark ? 'bg-slate-900/50' : 'bg-gray-100/80'}`}>
                             <tr>
                                 {/* Locataire - Always visible */}
                                 <th className="py-3 px-2 sm:px-4">
                                     <button
                                         onClick={() => handleSort('name')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
+                                        className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] transition-colors text-slate-500 hover:text-foreground"
                                     >
                                         Locataire
                                         <SortIcon field="name" />
@@ -203,7 +205,7 @@ export function TenantTable({
                                 <th className="py-3 px-4 hidden xl:table-cell">
                                     <button
                                         onClick={() => handleSort('property')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
+                                        className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] transition-colors text-slate-500 hover:text-foreground"
                                     >
                                         Bien
                                         <SortIcon field="property" />
@@ -214,7 +216,7 @@ export function TenantTable({
                                 <th className="py-3 px-4 hidden md:table-cell">
                                     <button
                                         onClick={() => handleSort('period')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
+                                        className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] transition-colors text-slate-500 hover:text-foreground"
                                     >
                                         Période
                                         <SortIcon field="period" />
@@ -225,7 +227,7 @@ export function TenantTable({
                                 <th className="py-3 px-2 sm:px-4">
                                     <button
                                         onClick={() => handleSort('status')}
-                                        className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider transition-colors text-muted-foreground hover:text-foreground"
+                                        className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] transition-colors text-slate-500 hover:text-foreground"
                                     >
                                         Statut
                                         <SortIcon field="status" />
@@ -265,7 +267,7 @@ export function TenantTable({
                                                 </div>
                                                 <div className="min-w-0 flex-1">
                                                     <Link href={`/gestion/locataires/${tenant.id}`} className="block group/link">
-                                                        <div className="font-medium text-xs sm:text-sm truncate transition-colors text-foreground group-hover/link:text-primary">
+                                                        <div className="font-black text-xs sm:text-sm truncate transition-colors text-slate-900 dark:text-white group-hover/link:text-primary tracking-tighter">
                                                             {tenant.name}
                                                         </div>
                                                     </Link>
@@ -295,8 +297,8 @@ export function TenantTable({
 
                                         {/* Montant */}
                                         <td className="py-3 px-2 sm:px-4 text-right">
-                                            <div className="font-mono font-medium text-xs sm:text-sm text-foreground">{formatAmount(tenant.rentAmount)}</div>
-                                            <div className="text-xs text-muted-foreground/60 hidden sm:block">FCFA</div>
+                                            <div className="font-mono font-black text-xs sm:text-sm text-slate-900 dark:text-white tracking-tighter">{formatAmount(tenant.rentAmount)}</div>
+                                            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 hidden sm:block">FCFA</div>
                                         </td>
 
                                         {/* Actions */}

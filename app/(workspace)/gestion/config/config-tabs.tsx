@@ -36,7 +36,7 @@ export function ConfigTabs({ brandingData }: ConfigTabsProps) {
             <TabsList id="tour-config-tabs" className="bg-slate-100 dark:bg-gray-900/40 p-1 rounded-2xl border border-slate-200 dark:border-gray-800 h-14 w-full md:w-auto overflow-x-auto">
                 <TabsTrigger
                     value="branding"
-                    className="flex items-center gap-2 px-6 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-full transition-all hover:bg-slate-200 dark:hover:bg-gray-800 hover:text-slate-900 dark:hover:text-white data-[state=active]:hover:bg-primary/90 data-[state=active]:hover:text-primary-foreground"
+                    className="flex items-center gap-2 px-6 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-white dark:data-[state=active]:text-white h-full transition-all hover:bg-slate-200 dark:hover:bg-gray-800 hover:text-slate-900 dark:hover:text-white data-[state=active]:hover:bg-primary/90 data-[state=active]:hover:text-primary-foreground"
                 >
                     <User className="w-4 h-4" />
                     Profil & Branding
@@ -44,7 +44,7 @@ export function ConfigTabs({ brandingData }: ConfigTabsProps) {
                 <TabsTrigger
                     id="tour-config-subscription"
                     value="subscription"
-                    className="flex items-center gap-2 px-6 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-full transition-all hover:bg-slate-200 dark:hover:bg-gray-800 hover:text-slate-900 dark:hover:text-white data-[state=active]:hover:bg-primary/90 data-[state=active]:hover:text-primary-foreground"
+                    className="flex items-center gap-2 px-6 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-white dark:data-[state=active]:text-white h-full transition-all hover:bg-slate-200 dark:hover:bg-gray-800 hover:text-slate-900 dark:hover:text-white data-[state=active]:hover:bg-primary/90 data-[state=active]:hover:text-primary-foreground"
                 >
                     <CreditCard className="w-4 h-4" />
                     Abonnement
@@ -52,7 +52,7 @@ export function ConfigTabs({ brandingData }: ConfigTabsProps) {
                 <TabsTrigger
                     id="tour-config-api"
                     value="api"
-                    className="flex items-center gap-2 px-6 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-full transition-all hover:bg-slate-200 dark:hover:bg-gray-800 hover:text-slate-900 dark:hover:text-white data-[state=active]:hover:bg-primary/90 data-[state=active]:hover:text-primary-foreground"
+                    className="flex items-center gap-2 px-6 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-white dark:data-[state=active]:text-white h-full transition-all hover:bg-slate-200 dark:hover:bg-gray-800 hover:text-slate-900 dark:hover:text-white data-[state=active]:hover:bg-primary/90 data-[state=active]:hover:text-primary-foreground"
                 >
                     <Code className="w-4 h-4" />
                     API & Intégrations

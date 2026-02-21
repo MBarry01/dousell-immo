@@ -210,7 +210,7 @@ export function EditTenantDialog({ isOpen, onClose, tenant }: EditTenantDialogPr
                             type="button"
                             variant="ghost"
                             onClick={onClose}
-                            className="hover:bg-accent text-accent-foreground"
+                            className="hover:bg-accent hover:text-accent-foreground text-accent-foreground"
                         >
                             Annuler
                         </Button>

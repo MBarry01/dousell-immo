@@ -554,9 +554,8 @@
     user-select: none;
   }
 
-  .active-press {
-    background-color: var(--muted) !important;
-    transform: scale(0.98);
+  .active-press:active {
+    transform: scale(0.96);
     transition: transform 0.1s ease;
   }
 }

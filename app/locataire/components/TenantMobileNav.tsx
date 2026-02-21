@@ -42,22 +42,34 @@ export function TenantMobileNav() {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 px-4 py-2 flex justify-between items-center z-50 md:hidden">
-            {navItems.map((item) => (
-                <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                        "flex flex-col items-center gap-1 p-2 rounded-lg transition-colors min-w-[64px]",
-                        item.isActive
-                            ? "text-orange-400"
-                            : "text-slate-400 hover:text-white"
-                    )}
-                >
-                    <item.icon className={cn("h-6 w-6", item.isActive && "fill-current")} />
-                    <span className="text-[10px] font-medium">{item.label}</span>
-                </Link>
-            ))}
+        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden p-4 safe-area-pb">
+            <div className="mx-auto max-w-sm bg-[#0F172A]/95 backdrop-blur-xl rounded-[32px] border border-white/10 shadow-2xl flex justify-between items-center px-6 py-3 ring-1 ring-black/5">
+                {navItems.map((item) => (
+                    <Link
+                        key={item.href}
+                        href={item.href}
+                        className={cn(
+                            "flex flex-col items-center gap-1.5 transition-all active-press",
+                            item.isActive
+                                ? "text-white"
+                                : "text-zinc-500 hover:text-zinc-400"
+                        )}
+                    >
+                        <div className={cn(
+                            "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+                            item.isActive && "bg-white/10 text-white"
+                        )}>
+                            <item.icon className={cn("h-5 w-5", item.isActive && "fill-current")} />
+                        </div>
+                        <span className={cn(
+                            "text-[9px] font-bold uppercase tracking-widest",
+                            item.isActive ? "text-white" : "text-zinc-500"
+                        )}>
+                            {item.label}
+                        </span>
+                    </Link>
+                ))}
+            </div>
         </div>
     );
 }

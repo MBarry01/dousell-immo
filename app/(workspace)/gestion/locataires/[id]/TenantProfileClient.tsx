@@ -61,15 +61,15 @@ export function TenantProfileClient({
                     </Link>
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold flex items-center gap-2 text-foreground">
+                    <h1 className="text-2xl md:text-5xl font-black tracking-tighter flex items-center gap-3 text-foreground">
                         {lease.tenant_name}
                         {lease.status === "active" ? (
-                            <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-xs border border-green-500/20">Actif</span>
+                            <span className="px-2 py-0.5 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-[9px] font-black uppercase tracking-widest">Actif</span>
                         ) : (
-                            <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 text-xs border border-red-500/20">Résilié</span>
+                            <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[9px] font-black uppercase tracking-widest">Résilié</span>
                         )}
                     </h1>
-                    <p className="text-sm flex items-center gap-1 text-muted-foreground">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-1 text-slate-500 mt-2">
                         <MapPin className="w-3 h-3" /> {lease.property_address}
                     </p>
                 </div>
@@ -116,7 +116,7 @@ export function TenantProfileClient({
                                     <Mail className="w-4 h-4 mr-2" /> Message
                                 </Link>
                             </Button>
-                            <Button variant="outline" className="w-full border-border hover:bg-accent text-foreground shadow-sm" size="sm" asChild>
+                            <Button variant="outline" className="w-full border-border hover:bg-accent hover:text-accent-foreground text-foreground shadow-sm" size="sm" asChild>
                                 <a href={`tel:${lease.tenant_phone}`}>
                                     <Phone className="w-4 h-4 mr-2" /> Appeler
                                 </a>
@@ -126,13 +126,13 @@ export function TenantProfileClient({
 
                     {/* Quick Stats */}
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="border rounded-xl p-4 bg-card border-border">
-                            <p className="text-xs mb-1 text-muted-foreground">Loyer mensuel</p>
-                            <p className="text-lg font-bold text-foreground">{formatMoney(lease.monthly_amount)}</p>
+                        <div className="border rounded-xl p-5 bg-card border-border">
+                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Loyer mensuel</p>
+                            <p className="text-2xl font-black tracking-tighter text-foreground">{formatMoney(lease.monthly_amount)}</p>
                         </div>
-                        <div className="border rounded-xl p-4 bg-card border-border">
-                            <p className="text-xs mb-1 text-muted-foreground">Jour de paiement</p>
-                            <p className="text-lg font-bold text-foreground">Le {lease.billing_day}</p>
+                        <div className="border rounded-xl p-5 bg-card border-border">
+                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Jour de paiement</p>
+                            <p className="text-2xl font-black tracking-tighter text-foreground">Le {lease.billing_day}</p>
                         </div>
                     </div>
                 </div>
@@ -156,10 +156,10 @@ export function TenantProfileClient({
                                         <div className="p-2 rounded-md bg-green-500/10 text-green-600 dark:text-green-400">
                                             <CheckCircle className="w-4 h-4" />
                                         </div>
-                                        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Versé</span>
+                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Total Versé</span>
                                     </div>
                                     <div>
-                                        <span className="text-3xl font-semibold tracking-tighter text-foreground">{formatMoney(totalPaid)}</span>
+                                        <span className="text-2xl md:text-3xl font-black tracking-tighter text-foreground">{formatMoney(totalPaid)}</span>
                                     </div>
                                 </div>
 
@@ -169,10 +169,10 @@ export function TenantProfileClient({
                                         <div className="p-2 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
                                             <Clock className="w-4 h-4" />
                                         </div>
-                                        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">En attente</span>
+                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">En attente</span>
                                     </div>
                                     <div>
-                                        <span className="text-3xl font-semibold tracking-tighter text-foreground">{formatMoney(pendingAmount)}</span>
+                                        <span className="text-2xl md:text-3xl font-black tracking-tighter text-foreground">{formatMoney(pendingAmount)}</span>
                                     </div>
                                 </div>
 
@@ -182,11 +182,11 @@ export function TenantProfileClient({
                                         <div className="p-2 rounded-md bg-red-500/10 text-red-600 dark:text-red-400">
                                             <AlertTriangle className="w-4 h-4" />
                                         </div>
-                                        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Retards</span>
+                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Retards</span>
                                     </div>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-semibold tracking-tighter text-foreground">{overdueCount}</span>
-                                        <span className="text-sm font-normal text-muted-foreground">mois</span>
+                                        <span className="text-2xl md:text-3xl font-black tracking-tighter text-foreground">{overdueCount}</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">mois</span>
                                     </div>
                                 </div>
                             </div>

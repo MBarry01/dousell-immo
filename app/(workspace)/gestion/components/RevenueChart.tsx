@@ -104,18 +104,18 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                     <div className="text-center">
-                        <p className="font-mono font-bold text-green-600 dark:text-green-500">
+                        <p className="font-mono font-black text-green-600 dark:text-green-500 tracking-tighter">
                             {totalCollected.toLocaleString('fr-FR')}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-[9px] font-black uppercase tracking-wider text-slate-500">
                             Encaissé
                         </p>
                     </div>
                     <div className="text-center">
-                        <p className={`font-bold ${collectionRate >= 90 ? "text-green-500" : collectionRate >= 70 ? "text-yellow-500" : "text-red-500"}`}>
+                        <p className={`font-black tracking-tighter ${collectionRate >= 90 ? "text-green-500" : collectionRate >= 70 ? "text-yellow-500" : "text-red-500"}`}>
                             {collectionRate}%
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-[9px] font-black uppercase tracking-wider text-slate-500">
                             Taux
                         </p>
                     </div>
