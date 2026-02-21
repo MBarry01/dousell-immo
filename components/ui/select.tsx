@@ -119,7 +119,7 @@ const SelectItem = React.forwardRef<
     <SelectPrimitive.Item
       ref={ref}
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-lg py-1.5 pl-8 pr-2 text-sm outline-none transition-all duration-200 hover:bg-white/10 focus:bg-white/10 focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 overflow-hidden",
+        "relative flex w-full cursor-default select-none items-center rounded-lg py-1.5 pl-8 pr-2 text-sm outline-none transition-all duration-200 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 overflow-hidden",
         // Force all children to inherit text color and full opacity on focus
         "focus:[&_span]:text-current focus:[&_p]:text-current focus:[&_div]:text-current focus:[&_*]:opacity-100",
         className
