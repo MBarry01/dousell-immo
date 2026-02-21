@@ -613,6 +613,21 @@
   animation: smooth-fade-out 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Force hover/highlighted colors on Radix menu items (bypass Tailwind v4 specificity) */
+[role="menuitem"][data-highlighted],
+[role="menuitemcheckbox"][data-highlighted],
+[role="menuitemradio"][data-highlighted],
+[role="option"][data-highlighted] {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
+[role="menuitem"]:hover,
+[role="option"]:hover {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
 /* Header safe area - toujours appliquer pour les appareils avec notch/barre d'Ã©tat */
 .pwa-header-safe {
   padding-top: env(safe-area-inset-top, 0px);
