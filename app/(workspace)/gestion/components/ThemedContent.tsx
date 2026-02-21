@@ -17,7 +17,7 @@ export function ThemedContent({ isViewingTerminated, children, filterSection }: 
         <div className={`min-h-full print:hidden ${isDark ? 'bg-slate-950' : 'bg-gray-50'
             }`}>
             {/* Sub-header avec filtres Actifs/Résiliés */}
-            <div className={`border-b pwa-header-safe ${isDark
+            <div className={`border-b ${isDark
                 ? 'border-slate-800 bg-slate-900/50'
                 : 'border-gray-200 bg-white/50'
                 }`}>

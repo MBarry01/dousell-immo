@@ -417,7 +417,7 @@
   @media (max-width: 1024px) {
     :root {
       /* 4rem (64px) + safe-area (pour la bottom nav) */
-      --mobile-nav-height: calc(4rem + env(safe-area-inset-bottom));
+      --mobile-nav-height: calc(5.5rem + env(safe-area-inset-bottom));
     }
   }
 
@@ -649,7 +649,7 @@
 
   /* Renforcer le padding bottom de la bottom nav en PWA */
   .pb-safe-nav {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 7rem) !important;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 6rem) !important;
   }
 }
 
