@@ -290,20 +290,8 @@
   }
 
   /* Standardisation des hovers "bleu grisÃ©" */
-  .hover\:bg-accent:hover,
-  .hover\:bg-slate-100:hover,
-  .ghost:hover {
-    background-color: #f1f5f9 !important;
-    /* Slate 100 */
-  }
 
-  /* Mode sombre pour les hovers */
-  .dark .hover\:bg-accent:hover,
-  .dark .hover\:bg-slate-100:hover,
-  .dark .ghost:hover {
-    background-color: #1e293b !important;
-    /* Slate 800 */
-  }
+
 
   /* Custom Scrollbar - Modern, Slim & Theme-aware */
   * {
