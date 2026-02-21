@@ -138,9 +138,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
         */
     }, []);
 
-    const handleTriggerClick = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
+    const handleTriggerClick = async (_e?: React.MouseEvent) => {
 
         // 1. Check if profile has minimal information (just company name is enough) via props (optimistic)
         const isProfileComplete = profile && (profile.full_name || profile.company_name);
