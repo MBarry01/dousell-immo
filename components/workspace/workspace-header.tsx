@@ -72,7 +72,7 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden h-9 w-9 -ml-1 text-foreground"
+            className="lg:hidden h-9 w-9 -ml-1 text-foreground transition-transform duration-200 hover:scale-110 active:scale-95"
             onClick={onMenuClick}
           >
             <Menu className="h-5 w-5" />
@@ -118,7 +118,7 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-foreground transition-transform duration-200 active:scale-95 hover:bg-accent hover:text-accent-foreground group"
+            className="h-9 w-9 text-foreground transition-all duration-200 active:scale-95 hover:scale-110 hover:text-primary group"
             onClick={toggleTheme}
           >
             {isDark ? (
@@ -133,7 +133,7 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
           {/* Notifications component - handles dropdown & realtime */}
           <NotificationBell
             userId={user?.id || null}
-            className="hover:bg-accent hover:text-accent-foreground [&_svg]:transition-colors"
+            className="hover:scale-110 hover:text-primary transition-all duration-200 [&_svg]:transition-colors"
           />
 
           {/* User Menu */}

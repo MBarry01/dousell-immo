@@ -65,7 +65,7 @@ export function TeamSwitcher({
       <div
         className={cn(
           "flex items-center justify-center p-2 rounded-lg cursor-pointer",
-          "bg-primary/5 hover:bg-primary/10 transition-colors",
+          "bg-primary/5 hover:scale-110 transition-transform",
           className
         )}
         title={currentTeam?.name || "Mon équipe"}
@@ -137,7 +137,7 @@ export function TeamSwitcher({
     >
       <SelectTrigger
         className={cn(
-          "w-full h-auto p-2 border-none bg-transparent hover:bg-primary/5 transition-colors",
+          "w-full h-auto p-2 border-none bg-transparent hover:scale-[1.02] transition-transform",
           "focus:ring-0 focus:ring-offset-0",
           isPending && "opacity-50 cursor-wait",
           className

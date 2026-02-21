@@ -91,8 +91,8 @@ export function AccessControlDashboard({ teamId }: AccessControlDashboardProps) 
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 bg-zinc-900">
-        <TabsTrigger value="pending" className="data-[state=active]:bg-zinc-800">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="pending">
           <ClockCounterClockwise size={16} className="mr-2" />
           En attente
           {pendingRequests.length > 0 && (
@@ -101,7 +101,7 @@ export function AccessControlDashboard({ teamId }: AccessControlDashboardProps) 
             </Badge>
           )}
         </TabsTrigger>
-        <TabsTrigger value="active" className="data-[state=active]:bg-zinc-800">
+        <TabsTrigger value="active">
           <LockKey size={16} className="mr-2" />
           Permissions actives
           {activePermissions.length > 0 && (
@@ -110,7 +110,7 @@ export function AccessControlDashboard({ teamId }: AccessControlDashboardProps) 
             </Badge>
           )}
         </TabsTrigger>
-        <TabsTrigger value="history" className="data-[state=active]:bg-zinc-800">
+        <TabsTrigger value="history">
           <Calendar size={16} className="mr-2" />
           Historique
         </TabsTrigger>

@@ -39,7 +39,8 @@
   --background: #f8fafc;
   --foreground: #0f172a;
   --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --muted-foreground: #475569;
+  /* Slate 600 instead of 500 for better contrast */
   --card: #ffffff;
   --card-foreground: #0f172a;
   --popover: #ffffff;
@@ -63,7 +64,8 @@
   --background: #05080c;
   --foreground: #f7f8fb;
   --muted: #0f121b;
-  --muted-foreground: #9da7b9;
+  --muted-foreground: #cbd5e1;
+  /* Slate 300 instead of 400 for better visibility in dark mode */
   --card: #0b0f18;
   --card-foreground: #fafbfd;
   --popover: #0b0f18;
@@ -198,6 +200,19 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Global Lucide Icon Visibility */
+  svg.lucide {
+    stroke-width: 2px !important;
+    opacity: 0.9 !important;
+    color: currentColor;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  /* Inactive items should still be legible */
+  .text-muted-foreground {
+    opacity: 0.85 !important;
   }
 
   /* Pour les titres, on rÃ©duit l'espacement des lettres pour faire plus "compact/pro" */
@@ -373,14 +388,6 @@
 
   .bg-muted {
     background-color: var(--muted) !important;
-  }
-
-  .hover\:bg-muted:hover {
-    background-color: var(--muted) !important;
-  }
-
-  .hover\:bg-accent:hover {
-    background-color: var(--accent) !important;
   }
 
   .border-border {
@@ -599,21 +606,6 @@
 [data-state="closed"][data-radix-dropdown-menu-content],
 [data-state="closed"][data-radix-popover-content] {
   animation: smooth-fade-out 150ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Force hover/highlighted colors on Radix menu items (bypass Tailwind v4 specificity) */
-[role="menuitem"][data-highlighted],
-[role="menuitemcheckbox"][data-highlighted],
-[role="menuitemradio"][data-highlighted],
-[role="option"][data-highlighted] {
-  background-color: var(--accent) !important;
-  color: var(--accent-foreground) !important;
-}
-
-[role="menuitem"]:hover,
-[role="option"]:hover {
-  background-color: var(--accent) !important;
-  color: var(--accent-foreground) !important;
 }
 
 /* Header safe area - toujours appliquer pour les appareils avec notch/barre d'Ã©tat */

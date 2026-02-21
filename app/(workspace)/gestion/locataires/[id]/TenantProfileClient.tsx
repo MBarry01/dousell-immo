@@ -140,10 +140,10 @@ export function TenantProfileClient({
                 {/* Right Column: Tabs & Content */}
                 <div className="lg:col-span-2 space-y-6">
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                        <TabsList className="w-full justify-start p-1 h-auto bg-muted border border-border">
-                            <TabsTrigger value="overview" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Vue d&apos;ensemble</TabsTrigger>
-                            <TabsTrigger value="payments" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Paiements</TabsTrigger>
-                            <TabsTrigger value="documents" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Documents</TabsTrigger>
+                        <TabsList className="w-full justify-start md:w-auto">
+                            <TabsTrigger value="overview">Vue d&apos;ensemble</TabsTrigger>
+                            <TabsTrigger value="payments">Paiements</TabsTrigger>
+                            <TabsTrigger value="documents">Documents</TabsTrigger>
                         </TabsList>
 
                         {/* TAB: OVERVIEW */}

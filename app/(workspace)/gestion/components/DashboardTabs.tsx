@@ -56,7 +56,7 @@ export function DashboardTabs({
     return (
         <div>
             {/* Tab Navigation */}
-            <div className={`flex items-center gap-1 p-1 rounded-lg mb-6 w-fit no-select ${isDark ? 'bg-slate-900/80' : 'bg-gray-100'
+            <div className={`flex items-center gap-1 p-1 rounded-xl mb-6 w-fit no-select border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-gray-100 border-gray-200'
                 }`}>
                 {tabs.map((tab) => {
                     const Icon = tab.icon;
@@ -66,19 +66,20 @@ export function DashboardTabs({
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            style={isActive ? { backgroundColor: '#0f172a', color: '#ffffff' } : undefined}
                             className={`
                                 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 h-9 sm:h-11 rounded-lg text-[8px] sm:text-[10px] font-black uppercase tracking-[0.12em] sm:tracking-[0.2em]
                                 transition-all duration-300 active:scale-95
                                 ${isActive
-                                    ? 'shadow-lg'
+                                    ? isDark
+                                        ? 'bg-slate-700 text-white shadow-lg'
+                                        : 'bg-white text-slate-900 shadow-sm border border-gray-200/50'
                                     : isDark
                                         ? 'text-slate-500 hover:text-slate-200'
                                         : 'text-slate-600 hover:text-slate-900'
                                 }
                             `}
                         >
-                            <Icon className={cn("w-3.5 h-3.5", isActive ? "" : "text-slate-400")} style={isActive ? { color: '#ffffff' } : undefined} />
+                            <Icon className={cn("w-3.5 h-3.5", isActive ? "text-white dark:text-white" : "text-slate-400")} />
                             <span>{tab.label}</span>
                         </button>
                     );

@@ -205,8 +205,8 @@ export function LockedSidebarItem({
           "flex items-center rounded-lg transition-all duration-200 group h-11",
           "px-[14px]",
           isActive
-            ? "bg-[#0F172A] text-white shadow-md font-medium dark:bg-primary/10 dark:text-primary"
-            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            ? "bg-[#0F172A] text-white shadow-md font-medium dark:bg-primary/20 dark:text-primary"
+            : "text-slate-600 dark:text-slate-300 hover:translate-x-1 hover:scale-[1.01]"
         )}
         title={isCollapsed && !isMobile ? label : undefined}
       >
@@ -216,7 +216,7 @@ export function LockedSidebarItem({
               "h-5 w-5 transition-all",
               isActive
                 ? "text-white dark:text-primary"
-                : "text-muted-foreground group-hover:text-foreground"
+                : "text-slate-600 dark:text-slate-300 group-hover:text-foreground"
             )}
           />
           {badgeCount > 0 && isCollapsed && !isMobile && (
@@ -256,14 +256,14 @@ export function LockedSidebarItem({
       className={cn(
         "w-full flex items-center justify-between rounded-lg transition-all duration-200 group h-11 relative",
         "px-[14px]",
-        "text-muted-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer"
+        "text-slate-600 dark:text-slate-300 hover:scale-[1.02] cursor-pointer"
       )}
       title={isCollapsed && !isMobile ? `${label} (Verrouillé)` : undefined}
     >
       <div className="flex items-center">
-        <Icon className="h-5 w-5 shrink-0 opacity-50" />
+        <Icon className="h-5 w-5 shrink-0 opacity-70" />
         {(!isCollapsed || isMobile) && (
-          <span className="text-sm truncate ml-3 opacity-50">{label}</span>
+          <span className="text-sm truncate ml-3 opacity-70">{label}</span>
         )}
       </div>
       {/* Cadenas en mode étendu */}

@@ -24,16 +24,17 @@ export function ThemedContent({ isViewingTerminated, children, filterSection }: 
                 <div className="w-full mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3">
                     <div className="flex items-center justify-between gap-1.5 sm:gap-2">
                         <div className={`flex items-center gap-1 px-1 sm:px-2 py-1 border rounded-xl no-select shrink-0 ${isDark
-                            ? 'bg-slate-900 border-slate-800'
-                            : 'bg-white border-slate-200'
+                            ? 'bg-slate-900/50 border-slate-800'
+                            : 'bg-gray-100 border-gray-200'
                             }`}>
                             <Link
                                 href="/gestion"
-                                style={!isViewingTerminated ? { backgroundColor: '#0f172a', color: '#ffffff' } : undefined}
                                 className={`px-3 sm:px-5 h-8 sm:h-10 flex items-center text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-lg transition-all active:scale-95 ${!isViewingTerminated
-                                    ? 'shadow-lg'
+                                    ? isDark
+                                        ? 'bg-slate-700 text-white shadow-lg'
+                                        : 'bg-white text-slate-900 shadow-sm'
                                     : isDark
-                                        ? 'text-slate-400 hover:text-white'
+                                        ? 'text-slate-500 hover:text-white'
                                         : 'text-slate-600 hover:text-slate-900'
                                     }`}
                             >
@@ -41,9 +42,8 @@ export function ThemedContent({ isViewingTerminated, children, filterSection }: 
                             </Link>
                             <Link
                                 href="/gestion?view=terminated"
-                                style={isViewingTerminated ? { backgroundColor: '#dc2626', color: '#ffffff' } : undefined}
                                 className={`px-3 sm:px-5 h-8 sm:h-10 flex items-center text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-lg transition-all active:scale-95 ${isViewingTerminated
-                                    ? 'shadow-lg'
+                                    ? 'bg-red-600 text-white shadow-lg'
                                     : 'text-red-400 hover:text-red-600'
                                     }`}
                             >

@@ -21,7 +21,7 @@ export const buttonVariants = cva(
         outline:
           "border border-input bg-background text-foreground hover:shadow-md hover:scale-[1.02] transition-all duration-200 ease-out",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground hover:scale-[1.02] transition-all duration-200 ease-out",
+          "hover:text-primary hover:scale-[1.02] transition-all duration-200 ease-out",
       },
       size: {
         default: "h-11 px-5",

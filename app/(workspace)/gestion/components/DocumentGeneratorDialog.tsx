@@ -127,11 +127,11 @@ export function DocumentGeneratorDialog({ leases, userEmail, profile, trigger }:
                                 {/* Type Selector */}
                                 <div className="w-full">
                                     <Tabs value={docType} onValueChange={(v) => setDocType(v as 'receipt' | 'contract')} className="w-full">
-                                        <TabsList className="grid w-full grid-cols-2 bg-muted">
-                                            <TabsTrigger value="receipt" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                                        <TabsList className="grid w-full grid-cols-2">
+                                            <TabsTrigger value="receipt">
                                                 quittance de Loyer
                                             </TabsTrigger>
-                                            <TabsTrigger value="contract" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                                            <TabsTrigger value="contract">
                                                 Contrat de Bail
                                             </TabsTrigger>
                                         </TabsList>

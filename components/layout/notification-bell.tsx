@@ -123,7 +123,7 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
     return (
       <button
         className={cn(
-          "relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 text-foreground group",
+          "relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:scale-110 hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring/20 text-foreground group",
           className
         )}
         aria-label="Notifications"
@@ -141,7 +141,7 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
   const bellButton = (
     <button
       className={cn(
-        "relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 text-foreground group",
+        "relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:scale-110 hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring/20 text-foreground group",
         className
       )}
       aria-label="Notifications"
@@ -200,7 +200,7 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     className={cn(
-                      "flex gap-4 p-4 transition-colors hover:bg-muted/50 cursor-pointer relative",
+                      "flex gap-4 p-4 transition-all hover:scale-[1.01] cursor-pointer relative",
                       !notification.is_read && "bg-muted/30"
                     )}
                     onClick={() => handleNotificationClick(notification)}

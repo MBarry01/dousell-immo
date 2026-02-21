@@ -188,11 +188,11 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
-                        style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
-                        className="hover:opacity-90 active:scale-95 rounded-xl h-9 sm:h-11 px-3 sm:px-6 font-bold text-xs sm:text-sm transition-all shadow-md no-select"
+                        variant="primary"
+                        className="active:scale-95 rounded-xl h-9 sm:h-11 px-3 sm:px-6 font-bold text-xs sm:text-sm transition-all shadow-md no-select"
                     >
-                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 sm:mr-1.5" style={{ color: '#ffffff' }} /> <span className="hidden sm:inline">Ajouter</span>
-                        <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5 sm:ml-2 opacity-70" style={{ color: '#ffffff' }} />
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 sm:mr-1.5" /> <span className="hidden sm:inline">Ajouter</span>
+                        <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5 sm:ml-2 opacity-70" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-popover border-border min-w-[200px] p-1 shadow-lg">

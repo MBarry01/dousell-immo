@@ -14,6 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Captcha } from "@/components/ui/captcha";
 import { AppointmentScheduler } from "@/components/ui/appointment-scheduler";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { sendGTMEvent } from "@/lib/gtm";
 import {
   visitRequestSchema,
@@ -365,22 +372,22 @@ function PlanifierVisitePageContent() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm text-white/70">Type de projet</label>
-                <select
-                  className="h-12 w-full rounded-2xl border border-white/10 bg-background/5 px-4 text-white outline-none transition focus:border-white/30 appearance-none bg-no-repeat bg-right pr-10"
-                  style={{
-                    backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
-                    backgroundPosition: "right 0.75rem center",
-                    backgroundSize: "1.5em 1.5em"
-                  }}
-                  {...form.register("projectType")}
+                <Select
+                  value={form.watch("projectType")}
+                  onValueChange={(v) => form.setValue("projectType", v as any)}
                 >
-                  <option value="achat" className="bg-[#121212] text-white py-2">
-                    Achat
-                  </option>
-                  <option value="location" className="bg-[#121212] text-white py-2">
-                    Location
-                  </option>
-                </select>
+                  <SelectTrigger className="h-12 w-full rounded-2xl border border-white/10 bg-background/5 px-4 text-white outline-none transition focus:border-white/30">
+                    <SelectValue placeholder="Sélectionnez un type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="achat">
+                      Achat
+                    </SelectItem>
+                    <SelectItem value="location">
+                      Location
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
                 {form.formState.errors.projectType && (
                   <p className="text-sm text-amber-300">
                     {form.formState.errors.projectType.message}
@@ -389,25 +396,21 @@ function PlanifierVisitePageContent() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm text-white/70">Disponibilité</label>
-                <select
-                  className="h-12 w-full rounded-2xl border border-white/10 bg-background/5 px-4 text-white outline-none transition focus:border-white/30 appearance-none bg-no-repeat bg-right pr-10"
-                  style={{
-                    backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
-                    backgroundPosition: "right 0.75rem center",
-                    backgroundSize: "1.5em 1.5em"
-                  }}
-                  {...form.register("availability")}
+                <Select
+                  value={form.watch("availability")}
+                  onValueChange={(v) => form.setValue("availability", v as any)}
                 >
-                  {Object.entries(availabilityLabels).map(([value, label]) => (
-                    <option
-                      key={value}
-                      value={value}
-                      className="bg-[#121212] text-white py-2"
-                    >
-                      {label}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="h-12 w-full rounded-2xl border border-white/10 bg-background/5 px-4 text-white outline-none transition focus:border-white/30">
+                    <SelectValue placeholder="Vos disponibilités" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(availabilityLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {form.formState.errors.availability && (
                   <p className="text-sm text-amber-300">
                     {form.formState.errors.availability.message}

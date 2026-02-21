@@ -292,16 +292,16 @@ export default function ComptabilitePage() {
             </div>
 
             {/* Tabs for Revenue vs Expenses vs Profitability */}
-            <Tabs id="tour-compta-tabs" value={activeTab} onValueChange={(v) => setActiveTab(v as 'revenus' | 'depenses' | 'rentabilite')} className="w-full">
-                <TabsList className={`w-full md:w-auto ${isDark ? 'bg-slate-900 border border-slate-800' : 'bg-gray-100 border border-gray-200'}`}>
-                    <TabsTrigger value="revenus" className={`text-xs md:text-sm flex-1 md:flex-none ${isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}`}>
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'revenus' | 'depenses' | 'rentabilite')} className="w-full">
+                <TabsList id="tour-compta-tabs" className="w-full md:w-auto">
+                    <TabsTrigger value="revenus" className="text-xs md:text-sm flex-1 md:flex-none">
                         <span className="hidden md:inline">Revenus (Loyers)</span>
                         <span className="md:hidden">Revenus</span>
                     </TabsTrigger>
-                    <TabsTrigger value="depenses" className={`text-xs md:text-sm flex-1 md:flex-none text-red-500 ${isDark ? 'data-[state=active]:bg-red-600 data-[state=active]:text-white' : 'data-[state=active]:bg-red-600 data-[state=active]:text-white'}`}>
+                    <TabsTrigger value="depenses" className="text-xs md:text-sm flex-1 md:flex-none text-red-600 dark:text-red-400 data-[state=active]:bg-red-600 data-[state=active]:text-white">
                         Dépenses
                     </TabsTrigger>
-                    <TabsTrigger value="rentabilite" className={`text-xs md:text-sm flex-1 md:flex-none ${isDark ? 'data-[state=active]:bg-slate-700 data-[state=active]:text-white' : 'data-[state=active]:bg-white data-[state=active]:text-gray-900'}`}>
+                    <TabsTrigger value="rentabilite" className="text-xs md:text-sm flex-1 md:flex-none">
                         Rentabilité
                     </TabsTrigger>
                 </TabsList>
@@ -382,8 +382,7 @@ export default function ComptabilitePage() {
                     {/* Charts Grid */}
                     <div id="tour-compta-chart" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Bar Chart - Monthly Revenue */}
-                        <div className={`lg:col-span-2 p-5 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'
-                            }`}>
+                        <div className={`lg:col-span-2 p-5 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'}`}>
                             <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-6 ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Revenus Mensuels {selectedYear}</h3>
                             <div className="h-72">
                                 <ResponsiveContainer width="100%" height="100%">
@@ -410,8 +409,7 @@ export default function ComptabilitePage() {
                         </div>
 
                         {/* Pie Chart - Distribution */}
-                        <div className={`p-5 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'
-                            }`}>
+                        <div className={`p-5 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'}`}>
                             <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-6 ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Répartition des Paiements</h3>
                             <div className="h-72">
                                 {pieData.length > 0 ? (
@@ -446,8 +444,7 @@ export default function ComptabilitePage() {
                                         </PieChart>
                                     </ResponsiveContainer>
                                 ) : (
-                                    <div className={`h-full flex items-center justify-center text-sm ${isDark ? 'text-slate-500' : 'text-gray-500'
-                                        }`}>
+                                    <div className={`h-full flex items-center justify-center text-sm ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
                                         Aucune donnée disponible
                                     </div>
                                 )}
@@ -456,8 +453,7 @@ export default function ComptabilitePage() {
                     </div>
 
                     {/* Collection Rate Line Chart */}
-                    <div className={`p-5 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'
-                        }`}>
+                    <div className={`p-5 rounded-xl border ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'}`}>
                         <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-6 ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Taux de Recouvrement Mensuel</h3>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
@@ -499,6 +495,6 @@ export default function ComptabilitePage() {
                     <ProfitabilityTable year={selectedYear} />
                 </TabsContent>
             </Tabs>
-        </div>
+        </div >
     );
 }

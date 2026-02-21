@@ -254,8 +254,8 @@ function SidebarContent({
                 "flex items-center rounded-lg transition-all duration-200 group h-11 no-select active:scale-[0.98]",
                 "px-[14px]",
                 isActive
-                  ? "bg-[#0F172A] text-white shadow-md font-medium dark:bg-primary/10 dark:text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent"
+                  ? "bg-[#0F172A] text-white shadow-md font-medium dark:bg-primary/20 dark:text-primary"
+                  : "text-slate-600 dark:text-slate-300 hover:translate-x-1 hover:scale-[1.01]"
               )}
               title={isCollapsed && !isMobile ? item.label : undefined}
             >
@@ -265,7 +265,7 @@ function SidebarContent({
                   <span className="relative shrink-0">
                     <Icon className={cn(
                       "h-5 w-5 transition-all",
-                      isActive ? "text-white dark:text-primary" : "text-muted-foreground group-hover:text-foreground"
+                      isActive ? "text-white dark:text-primary" : "text-slate-600 dark:text-slate-300 group-hover:text-foreground"
                     )} />
                     {badgeCount > 0 && isCollapsed && !isMobile && (
                       <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white">
@@ -342,7 +342,7 @@ function SidebarContent({
             onClick={() => isMobile && onMobileNavigate?.()}
             className={cn(
               "flex items-center rounded-lg transition-all px-[14px] h-11 no-select active:scale-[0.98]",
-              "bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/25"
+              "bg-primary/10 text-primary hover:scale-[1.02] active:bg-primary/25"
             )}
             title={isCollapsed && !isMobile ? "Gestion Locative" : undefined}
           >

@@ -15,7 +15,7 @@ const Command = React.forwardRef<
   <CommandPrimitive
     ref={ref}
     className={cn(
-      "flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground",
+      "flex h-full w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-popover/80 backdrop-blur-xl text-popover-foreground shadow-2xl ring-1 ring-white/5 data-[state=open]:duration-200 data-[state=closed]:duration-150",
       className
     )}
     {...props}
@@ -118,7 +118,9 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 aria-selected:bg-accent aria-selected:text-accent-foreground aria-selected:[&_*]:text-accent-foreground",
+      "relative flex cursor-pointer select-none items-center rounded-lg px-2 py-1.5 text-sm outline-none transition-all duration-200 ease-out aria-selected:bg-accent/50 aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 aria-selected:translate-x-0.5 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-200 overflow-hidden",
+      // Force all children to inherit text color and full opacity on focus
+      "aria-selected:[&_span]:text-current aria-selected:[&_p]:text-current aria-selected:[&_div]:text-current aria-selected:[&_*]:opacity-100",
       className
     )}
     {...props}

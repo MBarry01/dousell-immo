@@ -108,7 +108,7 @@ export function TemporaryAccessWidget({
     return (
       <div className="px-2 py-2">
         <div
-          className="relative flex items-center justify-center w-full h-10 rounded-lg bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 transition-colors cursor-pointer"
+          className="relative flex items-center justify-center w-full h-10 rounded-lg bg-amber-100 hover:scale-110 dark:bg-amber-500/10 transition-transform cursor-pointer"
           title={`${permissions.length} permission(s) temporaire(s)`}
         >
           <KeyRound size={20} className="text-amber-700 dark:text-amber-400" />
@@ -125,7 +125,7 @@ export function TemporaryAccessWidget({
     <div className="px-3 py-2">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-2 rounded-lg bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 transition-colors"
+        className="w-full flex items-center justify-between p-2 rounded-lg bg-amber-100 hover:scale-[1.02] dark:bg-amber-500/10 transition-transform"
       >
         <div className="flex items-center gap-2">
           <KeyRound size={18} className="text-amber-700 dark:text-amber-400" />

@@ -102,7 +102,7 @@ export function DecisionModal({ alert }: DecisionModalProps) {
                 </DialogHeader>
 
                 <Tabs defaultValue="renew" className="w-full mt-4">
-                    <TabsList className={`grid w-full grid-cols-2 ${isDark ? 'bg-slate-800' : 'bg-gray-100'}`}>
+                    <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger
                             value="renew"
                             className="data-[state=active]:bg-green-600 data-[state=active]:text-white"
