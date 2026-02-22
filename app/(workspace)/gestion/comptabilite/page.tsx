@@ -44,6 +44,7 @@ import { ProfitabilityTable } from './components/ProfitabilityTable';
 import { FeatureLockedState } from '@/components/gestion/FeatureLockedState';
 import { KPICardSkeleton, ChartSkeleton } from "../components/PremiumSkeletons";
 import { ComptabiliteTour } from '@/components/gestion/tours/ComptabiliteTour';
+import { ActivationInlineNoticeClient } from '@/components/activation/ActivationInlineNoticeClient';
 
 interface _MonthlyData {
     month: string;
@@ -246,6 +247,14 @@ export default function ComptabilitePage() {
     }
 
     return (
+        <>
+        <ActivationInlineNoticeClient
+            moduleLabel="la Comptabilité"
+            requiredAction="configurez d'abord un bail"
+            ctaLabel="Configurer maintenant →"
+            ctaHref="/gestion/biens"
+            requiredStage={4}
+        />
         <div className={`p-4 md:p-6 space-y-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             <ComptabiliteTour />
             {/* Header */}
@@ -496,5 +505,6 @@ export default function ComptabilitePage() {
                 </TabsContent>
             </Tabs>
         </div >
+        </>
     );
 }

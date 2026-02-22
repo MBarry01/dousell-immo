@@ -5,6 +5,8 @@ import { getUserTeamContext } from "@/lib/team-context";
 import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
 import { FeatureLockedState } from "@/components/gestion/FeatureLockedState";
 import { markMaintenanceAsViewed } from "@/lib/unread-counts";
+import { getActivationData } from "@/lib/activation/get-activation-stage";
+import { ActivationInlineNotice } from "@/components/activation/ActivationInlineNotice";
 
 export default async function InterventionsPage() {
     const supabase = await createClient();
@@ -115,6 +117,26 @@ export default async function InterventionsPage() {
     // Mark maintenance as viewed AFTER query (so is_new reflects pre-view state)
     markMaintenanceAsViewed();
 
-    return <InterventionsPageClient requests={formattedRequests} />;
+    const activation = await getActivationData(teamId);
+    const isLocked = activation.stage < 3;
+    const ctaHref = activation.firstPropertyId
+        ? `/gestion/biens/${activation.firstPropertyId}`
+        : "/gestion/biens";
+
+    return (
+        <>
+            {isLocked && (
+                <ActivationInlineNotice
+                    moduleLabel="les Interventions"
+                    requiredAction="ajoutez d'abord un locataire"
+                    ctaLabel="Ajouter un locataire →"
+                    ctaHref={ctaHref}
+                />
+            )}
+            <div className={isLocked ? "pointer-events-none opacity-40" : ""}>
+                <InterventionsPageClient requests={formattedRequests} />
+            </div>
+        </>
+    );
 }
 
