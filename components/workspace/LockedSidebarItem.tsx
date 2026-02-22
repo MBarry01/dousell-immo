@@ -31,6 +31,10 @@ interface LockedSidebarItemProps {
   onNavigate?: () => void;
   onRequestAccess?: (permission: TeamPermissionKey, label: string) => void;
   badgeCount?: number;
+  /** Soft-lock badge 🔒 — navigation non bloquée, indicateur visuel activation */
+  activationLock?: boolean;
+  /** Avertissement ⚠ — ex: configuration incomplète */
+  showWarning?: boolean;
 }
 
 /**
@@ -66,6 +70,8 @@ export function LockedSidebarItem({
   onNavigate,
   onRequestAccess,
   badgeCount = 0,
+  activationLock = false,
+  showWarning = false,
 }: LockedSidebarItemProps) {
   const [hasAccess, setHasAccess] = useState(true); // Par défaut autorisé
   const [isLoading, setIsLoading] = useState(!!requiredPermission || !!requiredTier);
@@ -232,6 +238,12 @@ export function LockedSidebarItem({
               <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white ml-auto">
                 {badgeCount > 9 ? "9+" : badgeCount}
               </span>
+            )}
+            {activationLock && !badgeCount && (
+              <span className="ml-auto text-[11px] text-white/30" title="Disponible après configuration du bail">🔒</span>
+            )}
+            {showWarning && !badgeCount && !activationLock && (
+              <span className="ml-auto text-[11px] text-amber-400/70" title="Configuration incomplète">⚠</span>
             )}
           </>
         )}

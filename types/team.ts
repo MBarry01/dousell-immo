@@ -161,6 +161,7 @@ export interface WorkspaceTeamData {
   role: string;
   subscription_tier?: string;
   subscription_status?: string;
+  company_name?: string | null;
 }
 
 export interface UserTeamContext {

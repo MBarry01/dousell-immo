@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { useOwnerUnreadCounts } from "@/hooks/use-unread-counts";
+import { useActivationStage } from "@/hooks/use-activation-stage";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet";
@@ -51,18 +52,19 @@ interface NavItem {
   label: string;
   requiredPermission?: TeamPermissionKey; // Permission requise pour accéder
   requiredTier?: 'pro' | 'enterprise'; // Tier minimum requis
+  requiredStage?: number; // Activation stage minimum (soft-lock badge only)
 }
 
 // Navigation pour propriétaires (/gestion) avec permissions
 const gestionNavItems: NavItem[] = [
-  { href: "/gestion", icon: LayoutGrid, label: "Dashboard" }, // Accessible à tous
+  { href: "/gestion", icon: LayoutGrid, label: "Dashboard" },
   { href: "/gestion/biens", icon: Key, label: "Biens", requiredPermission: "properties.view" },
-  { href: "/gestion/etats-lieux", icon: ClipboardList, label: "États des Lieux", requiredPermission: "inventory.view" },
-  { href: "/gestion/interventions", icon: Wrench, label: "Interventions", requiredPermission: "maintenance.view", requiredTier: 'pro' },
+  { href: "/gestion/etats-lieux", icon: ClipboardList, label: "États des Lieux", requiredPermission: "inventory.view", requiredStage: 3 },
+  { href: "/gestion/interventions", icon: Wrench, label: "Interventions", requiredPermission: "maintenance.view", requiredTier: 'pro', requiredStage: 3 },
   { href: "/gestion/documents", icon: FolderOpen, label: "Documents", requiredPermission: "documents.view" },
-  { href: "/gestion/messages", icon: MessageSquare, label: "Messagerie" }, // Accessible à tous
-  { href: "/gestion/documents-legaux", icon: Scale, label: "Juridique", requiredPermission: "documents.generate" },
-  { href: "/gestion/comptabilite", icon: Wallet, label: "Comptabilité", requiredPermission: "payments.view", requiredTier: 'pro' },
+  { href: "/gestion/messages", icon: MessageSquare, label: "Messagerie" },
+  { href: "/gestion/documents-legaux", icon: Scale, label: "Juridique", requiredPermission: "documents.generate", requiredStage: 4 },
+  { href: "/gestion/comptabilite", icon: Wallet, label: "Comptabilité", requiredPermission: "payments.view", requiredTier: 'pro', requiredStage: 4 },
 ];
 
 // Navigation pour locataires (/locataire)
@@ -121,6 +123,11 @@ function SidebarContent({
 }: SidebarContentProps) {
   const pathname = usePathname();
   const isGestionRoute = pathname?.startsWith("/gestion");
+  const activationStage = useActivationStage();
+
+  // Config badge: show ⚠ if current team has no company_name set
+  const currentTeamForConfig = teams.find((t) => t.id === currentTeamId);
+  const isConfigComplete = !!currentTeamForConfig?.company_name;
 
   // Trouver l'équipe courante pour afficher son nom
   const currentTeam = teams.find((t) => t.id === currentTeamId);
@@ -220,6 +227,13 @@ function SidebarContent({
               item.href !== "/compte" &&
               pathname?.startsWith(`${item.href}/`));
 
+          // Soft-lock badge (🔒) — navigation non bloquée, indicateur visuel uniquement
+          const showActivationLock =
+            isGestionRoute &&
+            item.requiredStage != null &&
+            activationStage != null &&
+            activationStage < item.requiredStage;
+
           // Utiliser LockedSidebarItem pour les items avec permission requise OU tier requis
           if ((item.requiredPermission || item.requiredTier) && isGestionRoute) {
             return (
@@ -239,6 +253,7 @@ function SidebarContent({
                 onNavigate={() => isMobile && onMobileNavigate?.()}
                 onRequestAccess={onRequestAccess}
                 badgeCount={badgeCount}
+                activationLock={showActivationLock}
               />
             );
           }
@@ -330,6 +345,7 @@ function SidebarContent({
             currentTeamStatus={currentTeam?.subscription_status}
             onNavigate={() => isMobile && onMobileNavigate?.()}
             onRequestAccess={onRequestAccess}
+            showWarning={isGestionRoute && !isConfigComplete}
           />
         </div>
       )}
