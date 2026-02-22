@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -108,6 +108,7 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
   const [isPublished, setIsPublished] = useState(property.validation_status === "approved");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processImageFiles = async (fileArray: File[]) => {
     if (formData.images.length + fileArray.length > 20) {
@@ -643,21 +644,25 @@ export function EditBienClient({ teamId, teamName, property }: EditBienClientPro
                       </button>
                     </div>
                   ))}
-                  <label className={`aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors ${uploadingImages ? "opacity-50 pointer-events-none" : ""}`}>
+                  <input
+                    id="edit-photo-upload"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImages}
+                  />
+                  <label
+                    htmlFor="edit-photo-upload"
+                    className={`aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors ${uploadingImages ? "opacity-50 pointer-events-none" : ""}`}
+                  >
                     {uploadingImages ? (
                       <Loader2 className="w-6 h-6 text-primary animate-spin" />
                     ) : (
                       <Plus className="w-6 h-6 text-muted-foreground" />
                     )}
                     <span className="text-xs text-muted-foreground mt-1">{uploadingImages ? "Upload..." : "Ajouter"}</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="hidden"
-                      onChange={handleImageUpload}
-                      disabled={uploadingImages}
-                    />
                   </label>
                 </div>
               </div>

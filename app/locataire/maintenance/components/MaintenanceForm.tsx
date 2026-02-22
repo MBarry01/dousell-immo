@@ -246,7 +246,7 @@ export function MaintenanceForm() {
                             type="file"
                             accept="image/*"
                             multiple
-                            className="hidden"
+                            className="sr-only"
                             onChange={handleImageChange}
                         />
                     </label>

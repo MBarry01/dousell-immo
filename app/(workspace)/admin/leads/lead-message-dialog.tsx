@@ -35,7 +35,7 @@ export function LeadMessageDialog({
           size="sm"
           className="h-auto p-2 text-left hover:bg-white/5 rounded-lg group flex items-start gap-2 w-full"
         >
-          <p className="truncate text-white/70 text-xs group-hover:text-white/90 cursor-pointer transition-colors flex-1">
+          <p className="truncate text-white/70 text-xs group-hover:text-white/90 transition-colors flex-1">
             {message}
           </p>
           <Eye className="h-3.5 w-3.5 text-white/40 group-hover:text-primary transition-colors flex-shrink-0 mt-0.5" />
@@ -48,7 +48,7 @@ export function LeadMessageDialog({
             Message de {fullName}
           </DialogTitle>
           <DialogDescription className="text-white/60">
-            Type: <span className="capitalize text-white/80">{projectType}</span> · 
+            Type: <span className="capitalize text-white/80">{projectType}</span> ·
             Disponibilité: <span className="text-white/80">{availability}</span>
           </DialogDescription>
         </DialogHeader>

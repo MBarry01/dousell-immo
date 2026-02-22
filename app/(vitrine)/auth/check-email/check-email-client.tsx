@@ -45,8 +45,8 @@ export default function CheckEmailContent() {
           // Attendre un peu pour que les cookies soient bien persistés
           await new Promise(resolve => setTimeout(resolve, 500))
 
-          // Forcer un rechargement complet
-          window.location.href = '/'
+          // Forcer un rechargement complet avec le modal de bienvenue
+          window.location.href = '/?welcome=true'
         } else {
           console.error('❌ Session non trouvée après verifyOtp')
           toast.error("Erreur de session", {

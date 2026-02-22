@@ -84,7 +84,16 @@
       "Bash(echo:*)",
       "Bash(cmd /c \"cd /d C:\\\\Users\\\\Barry\\\\Downloads\\\\Doussel_immo && npm run build 2>&1\")",
       "Bash({ npx tsx scripts/scan-ui.ts)",
-      "Bash(})"
+      "Bash(})",
+      "Bash(git -C \"C:/Users/Barry/Downloads/Doussel_immo\" status --short)",
+      "Bash(git --no-pager show:*)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_wait_for",
+      "mcp__plugin_playwright_playwright__browser_fill_form",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "Bash(python3:*)"
     ]
   }
 }

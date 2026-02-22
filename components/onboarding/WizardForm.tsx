@@ -541,7 +541,7 @@ function StepAgency({ data, updateData }: { data: WizardData; updateData: any })
                                     </>
                                 )}
                             </div>
-                            <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], "logo")} disabled={uploadingLogo} />
+                            <input type="file" accept="image/*" className="sr-only" onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], "logo")} disabled={uploadingLogo} />
                         </label>
                         {data.logoUrl && (
                             <Button variant="ghost" size="sm" className="mt-2 text-red-400 text-xs" onClick={() => updateData("logoUrl", "")}>
@@ -577,7 +577,7 @@ function StepAgency({ data, updateData }: { data: WizardData; updateData: any })
                                         </>
                                     )}
                                 </div>
-                                <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], "signature")} disabled={uploadingSignature} />
+                                <input type="file" accept="image/*" className="sr-only" onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], "signature")} disabled={uploadingSignature} />
                             </label>
                         ) : (
                             <div className="space-y-2">

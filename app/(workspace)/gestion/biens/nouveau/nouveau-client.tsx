@@ -2,7 +2,7 @@
 
 import { AddressAutocomplete } from "@/components/forms/address-autocomplete";
 import { toast } from "sonner";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -112,6 +112,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
   // Image upload state
   const [uploadingImages, setUploadingImages] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // AI generation state
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
@@ -682,12 +683,13 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                 <label className="text-sm text-muted-foreground mb-3 block">
                   Photos ({formData.images.length}/10)
                 </label>
-                <div
+                <label
+                  htmlFor="nouveau-photo-upload"
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
                   onDrop={handleDrop}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${dragActive
+                  className={`block cursor-pointer border-2 border-dashed rounded-xl p-8 text-center transition-all ${dragActive
                     ? "border-primary bg-primary/5"
                     : "border-border hover:border-muted-foreground/50"
                     }`}
@@ -704,20 +706,23 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                         <p className="text-foreground">Glissez vos photos ici</p>
                         <p className="text-sm text-muted-foreground mt-1">ou</p>
                       </div>
-                      <label className="cursor-pointer px-4 py-2 bg-muted hover:bg-muted/80 text-foreground text-sm rounded-lg transition-colors border border-border">
+                      <input
+                        id="nouveau-photo-upload"
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <span
+                        className="inline-block px-4 py-2 bg-muted hover:bg-muted/80 text-foreground text-sm rounded-lg transition-colors border border-border"
+                      >
                         Parcourir
-                        <input
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="hidden"
-                        />
-                      </label>
+                      </span>
                       <p className="text-xs text-muted-foreground/60">JPG, PNG, WebP • Max 5MB par photo</p>
                     </div>
                   )}
-                </div>
+                </label>
 
                 {/* Image Preview Grid */}
                 {formData.images.length > 0 && (

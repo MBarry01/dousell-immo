@@ -52,7 +52,28 @@ export async function approveProperty(propertyId: string, docId: string) {
             console.log("⚠️ Could not update document (may not exist in user_documents):", docError);
         }
 
-        // 3. Revalidate paths
+        // 3. Notify the property owner
+        const { data: property } = await supabase
+            .from("properties")
+            .select("owner_id, title")
+            .eq("id", propertyId)
+            .single();
+
+        if (property?.owner_id) {
+            try {
+                await notifyUser({
+                    userId: property.owner_id,
+                    type: "success",
+                    title: "Bien certifié !",
+                    message: `Votre bien "${property.title}" a été vérifié et certifié. Le badge de certification est maintenant visible sur votre annonce.`,
+                    resourcePath: `/compte/mes-biens`
+                });
+            } catch (err) {
+                console.error("Error notifying user of approval:", err);
+            }
+        }
+
+        // 4. Revalidate paths
         revalidatePath("/admin/verifications/biens");
         revalidatePath("/admin/moderation");
         revalidatePath(`/biens/${propertyId}`);
@@ -183,6 +204,27 @@ export async function revokePropertyCertification(propertyId: string, reason: st
                     })
                     .eq("id", property.proof_document_url);
                 console.log("✅ Document uncertified with reason");
+            }
+        }
+
+        // Notify the property owner of the revocation
+        const { data: propertyWithOwner } = await supabase
+            .from("properties")
+            .select("owner_id, title")
+            .eq("id", propertyId)
+            .single();
+
+        if (propertyWithOwner?.owner_id) {
+            try {
+                await notifyUser({
+                    userId: propertyWithOwner.owner_id,
+                    type: "warning",
+                    title: "Certification révoquée",
+                    message: `La certification de votre bien "${propertyWithOwner.title}" a été révoquée. Motif : ${reason}.`,
+                    resourcePath: `/compte/mes-biens`
+                });
+            } catch (err) {
+                console.error("Error notifying user of revocation:", err);
             }
         }
 

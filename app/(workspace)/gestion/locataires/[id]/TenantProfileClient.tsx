@@ -300,7 +300,7 @@ export function TenantProfileClient({
                                 )}
 
                                 {/* Placeholder for other documents */}
-                                <div className="border border-dashed rounded-xl p-5 flex flex-col items-center justify-center text-center transition-colors cursor-pointer h-full min-h-[160px] border-border hover:bg-accent text-muted-foreground hover:text-foreground">
+                                <div className="border border-dashed rounded-xl p-5 flex flex-col items-center justify-center text-center transition-colors h-full min-h-[160px] border-border hover:bg-accent text-muted-foreground hover:text-foreground">
                                     <FileText className="w-8 h-8 mb-2 opacity-50" />
                                     <span className="font-medium text-sm">Ajouter un document</span>
                                     <span className="text-xs opacity-70">État des lieux, Assurance, Identité...</span>

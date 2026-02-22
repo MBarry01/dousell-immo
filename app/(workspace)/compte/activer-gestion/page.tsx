@@ -176,14 +176,14 @@ export default function ActiverGestionPage() {
                                         type="file"
                                         ref={identityRef}
                                         accept="image/*,.pdf"
-                                        className="hidden"
+                                        className="sr-only"
                                         onChange={(e) => setIdentityDoc(e.target.files?.[0] || null)}
                                     />
                                     <div
                                         onClick={() => identityRef.current?.click()}
                                         className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${identityDoc
-                                                ? 'border-green-500/50 bg-green-500/10'
-                                                : 'border-zinc-700 hover:border-zinc-600'
+                                            ? 'border-green-500/50 bg-green-500/10'
+                                            : 'border-zinc-700 hover:border-zinc-600'
                                             }`}
                                     >
                                         {identityDoc ? (
@@ -209,14 +209,14 @@ export default function ActiverGestionPage() {
                                         type="file"
                                         ref={propertyRef}
                                         accept="image/*,.pdf"
-                                        className="hidden"
+                                        className="sr-only"
                                         onChange={(e) => setPropertyDoc(e.target.files?.[0] || null)}
                                     />
                                     <div
                                         onClick={() => propertyRef.current?.click()}
                                         className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${propertyDoc
-                                                ? 'border-green-500/50 bg-green-500/10'
-                                                : 'border-zinc-700 hover:border-zinc-600'
+                                            ? 'border-green-500/50 bg-green-500/10'
+                                            : 'border-zinc-700 hover:border-zinc-600'
                                             }`}
                                     >
                                         {propertyDoc ? (

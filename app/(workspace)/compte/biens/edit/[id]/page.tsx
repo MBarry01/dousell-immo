@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,8 +13,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/utils/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { propertySchema, type PropertyFormValues } from "@/lib/schemas/propertySchema";
 import { updateUserProperty } from "./actions";
+import { Controller } from "react-hook-form";
 
 const _quartiers = [
   "Almadies",
@@ -40,7 +43,7 @@ export default function EditPropertyPage() {
   const propertyId = params.id as string;
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, startTransition] = useTransition();
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
 
@@ -51,12 +54,15 @@ export default function EditPropertyPage() {
     watch,
     reset,
     formState: { errors },
+    control,
   } = useForm<PropertyFormValues>({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       type: "appartement",
       category: "vente",
       juridique: "titre-foncier",
+      contact_phone: "",
+      virtual_tour_url: "",
     },
   });
 
@@ -83,51 +89,60 @@ export default function EditPropertyPage() {
         return;
       }
 
-      // Mapper les données Supabase vers le formulaire
-      const location = (data.location as { city?: string; district?: string; address?: string; landmark?: string }) || {};
-      const specs = (data.specs as { surface?: number; rooms?: number; bedrooms?: number; bathrooms?: number }) || {};
-      const features = (data.features as { hasGenerator?: boolean; hasWaterTank?: boolean; security?: boolean; pool?: boolean }) || {};
-      const details = (data.details as { type?: string; juridique?: string }) || {};
+      const specs = data.specs || {};
+      const features = data.features || {};
+      const details = data.details || {};
+      const location = data.location || {};
 
-      // Déterminer le type
       let formType: PropertyFormValues["type"] = "appartement";
-      if (details?.type === "Terrain" || data.type === "terrain") {
+      const dbType = String(data.type || data.property_type || "").toLowerCase();
+
+      if (dbType.includes("terrain") || details.type === "Terrain") {
         formType = "terrain";
-      } else if (data.type === "villa" || details?.type === "Maison") {
+      } else if (dbType.includes("villa") || dbType.includes("maison") || details.type === "Maison") {
         formType = "villa";
-      } else if (data.type === "immeuble") {
+      } else if (dbType.includes("immeuble") || dbType.includes("commercial")) {
         formType = "immeuble";
+      } else if (dbType.includes("studio") || details.type === "Studio") {
+        formType = "studio";
+      } else if (dbType.includes("bureau") || details.type === "Bureau") {
+        formType = "bureau";
       }
 
+      const defaultJuridique = formType === "terrain" ? "titre-foncier" : undefined;
+
       reset({
-        title: data.title,
-        description: data.description,
-        price: data.price,
-        category: data.category as "vente" | "location",
+        title: data.title || "",
+        description: data.description || "",
+        price: data.price || 0,
+        category: (data.category as "vente" | "location") || "vente",
         type: formType,
-        city: location?.city || "",
-        district: location?.district || "",
-        address: location?.address || "",
-        landmark: location?.landmark || "",
-        surface: specs?.surface,
-        surfaceTotale: specs?.surface, // Pour les terrains
-        rooms: specs?.rooms,
-        bedrooms: specs?.bedrooms,
-        bathrooms: specs?.bathrooms,
-        juridique: (details?.juridique as "titre-foncier" | "bail" | "deliberation" | "nicad") || "titre-foncier",
-        hasGenerator: features?.hasGenerator || false,
-        hasWaterTank: features?.hasWaterTank || false,
-        security: features?.security || false,
-        pool: features?.pool || false,
+        city: location.city || "",
+        district: location.district || "",
+        address: location.address || "",
+        landmark: location.landmark || "",
+        // Force number fields to undefined if 0/null, or parse them to avoid NaN
+        surface: formType !== "terrain" ? (specs.surface ? Number(specs.surface) : undefined) : undefined,
+        surfaceTotale: formType === "terrain" ? (specs.surface ? Number(specs.surface) : undefined) : undefined,
+        rooms: formType !== "terrain" ? (specs.rooms ? Number(specs.rooms) : undefined) : undefined,
+        bedrooms: formType !== "terrain" ? (specs.bedrooms !== undefined ? Number(specs.bedrooms) : undefined) : undefined,
+        bathrooms: formType !== "terrain" ? (specs.bathrooms !== undefined ? Number(specs.bathrooms) : undefined) : undefined,
+        juridique: details.juridique || defaultJuridique,
+
+        hasGenerator: Boolean(features.hasGenerator),
+        hasWaterTank: Boolean(features.hasWaterTank),
+        security: Boolean(features.security),
+        pool: Boolean(features.pool),
+
+        contact_phone: data.contact_phone || "",
+        virtual_tour_url: data.virtual_tour_url || "",
       });
 
       setImageUrls(data.images || []);
       setLoading(false);
     };
 
-    if (user) {
-      loadProperty();
-    }
+    loadProperty();
   }, [user, propertyId, router, reset]);
 
   const handleUpload = async (files: File[]) => {
@@ -139,7 +154,7 @@ export default function EditPropertyPage() {
     try {
       const uploadPromises = files.map(async (file) => {
         const fileExt = file.name.split(".").pop();
-        const fileName = `${Math.random()}.${fileExt}`;
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `properties/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
@@ -148,10 +163,7 @@ export default function EditPropertyPage() {
 
         if (uploadError) throw uploadError;
 
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("properties").getPublicUrl(filePath);
-
+        const { data: { publicUrl } } = supabase.storage.from("properties").getPublicUrl(filePath);
         return publicUrl;
       });
 
@@ -171,33 +183,33 @@ export default function EditPropertyPage() {
   };
 
   const onSubmit = async (values: PropertyFormValues) => {
-    setSubmitting(true);
-    try {
-      const result = await updateUserProperty(propertyId, {
-        ...values,
-        images: imageUrls,
-      });
-
-      if (result.error) {
-        toast.error("Erreur", { description: result.error });
-      } else {
-        toast.success("Annonce mise à jour avec succès !", {
-          description: "Votre annonce est en attente de nouvelle validation.",
+    startTransition(async () => {
+      try {
+        const result = await updateUserProperty(propertyId, {
+          ...values,
+          images: imageUrls,
         });
-        router.push("/compte/mes-biens");
+
+        if (result.error) {
+          toast.error("Erreur", { description: result.error });
+        } else {
+          toast.success("Annonce mise à jour avec succès !", {
+            description: "Vos modifications ont été enregistrées.",
+          });
+          router.push("/compte/mes-biens");
+          router.refresh();
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Erreur lors de la mise à jour");
       }
-    } catch (error) {
-      console.error(error);
-      toast.error("Erreur lors de la mise à jour");
-    } finally {
-      setSubmitting(false);
-    }
+    });
   };
 
   if (authLoading || loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="text-white/70">Chargement...</div>
+        <div className="text-muted-foreground">Chargement...</div>
       </div>
     );
   }
@@ -205,7 +217,7 @@ export default function EditPropertyPage() {
   if (!user) {
     return (
       <div className="space-y-6 py-6 text-center">
-        <h1 className="text-2xl font-semibold text-white">Connexion requise</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Connexion requise</h1>
         <Button asChild>
           <a href="/login">Se connecter</a>
         </Button>
@@ -217,18 +229,18 @@ export default function EditPropertyPage() {
     category === "location" ? "Loyer Mensuel (FCFA)" : "Prix de Vente (FCFA)";
 
   return (
-    <div className="space-y-6 py-6 text-white">
+    <div className="max-w-4xl mx-auto space-y-6 py-6 text-foreground">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => router.back()}
-          className="rounded-full"
+          className="rounded-full hover:-translate-y-1 hover:shadow-md transition-all duration-200"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-white/40">
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             Édition
           </p>
           <h1 className="text-3xl font-semibold">Modifier mon annonce</h1>
@@ -237,77 +249,94 @@ export default function EditPropertyPage() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-8 rounded-[32px] border border-white/10 bg-white/5 p-4 sm:p-6"
+        className="space-y-8 rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm"
       >
         {/* Informations principales */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold">Informations principales</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="text-sm text-white/70">Catégorie</label>
-              <select
-                {...register("category")}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white appearance-none bg-no-repeat bg-right pr-10"
-                style={{
-                  colorScheme: "dark",
-                  backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
-                  backgroundPosition: "right 0.75rem center",
-                  backgroundSize: "1.5em 1.5em"
-                }}
-              >
-                <option value="vente" className="bg-[#121212] text-white py-2">Vente</option>
-                <option value="location" className="bg-[#121212] text-white py-2">Location</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-sm text-white/70">Type de bien</label>
-              <select
-                {...register("type")}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white appearance-none bg-no-repeat bg-right pr-10"
-                style={{
-                  colorScheme: "dark",
-                  backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
-                  backgroundPosition: "right 0.75rem center",
-                  backgroundSize: "1.5em 1.5em"
-                }}
-              >
-                <option value="appartement" className="bg-[#121212] text-white py-2">Appartement</option>
-                <option value="villa" className="bg-[#121212] text-white py-2">Villa</option>
-                <option value="terrain" className="bg-[#121212] text-white py-2">Terrain</option>
-                <option value="immeuble" className="bg-[#121212] text-white py-2">Immeuble / Commercial</option>
-              </select>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className="text-sm text-white/70">Titre</label>
-              <Input {...register("title")} className="mt-2" />
-              {errors.title && (
-                <p className="mt-1 text-sm text-amber-300">{errors.title.message}</p>
-              )}
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className="text-sm text-white/70">{priceLabel}</label>
-              <Input
-                type="number"
-                {...register("price", { valueAsNumber: true })}
-                className="mt-2"
+        <section className="space-y-6">
+          <h2 className="text-xl font-semibold">
+            Informations principales
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Catégorie</label>
+              <Controller
+                name="category"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="h-12 rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all">
+                      <SelectValue placeholder="Choisir une catégorie" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="vente">Vente</SelectItem>
+                      <SelectItem value="location">Location</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Type de bien</label>
+              <Controller
+                name="type"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="h-12 rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all">
+                      <SelectValue placeholder="Choisir un type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="appartement">Appartement</SelectItem>
+                      <SelectItem value="villa">Villa</SelectItem>
+                      <SelectItem value="studio">Studio</SelectItem>
+                      <SelectItem value="terrain">Terrain</SelectItem>
+                      <SelectItem value="immeuble">Immeuble / Commercial</SelectItem>
+                      <SelectItem value="bureau">Bureau</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+
+            <div className="sm:col-span-2 space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Titre</label>
+              <Input
+                {...register("title")}
+                className="h-12 rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                placeholder="Ex: Superbe Villa aux Almadies"
+              />
+              {errors.title && (
+                <p className="mt-1 text-sm text-destructive">{errors.title.message}</p>
+              )}
+            </div>
+
+            <div className="sm:col-span-2 space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">{priceLabel}</label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  {...register("price", { valueAsNumber: true })}
+                  className="h-12 rounded-lg border-border bg-background pl-4 pr-16 focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground/60">
+                  FCFA
+                </span>
+              </div>
               {errors.price && (
-                <p className="mt-1 text-sm text-amber-300">{errors.price.message}</p>
+                <p className="mt-1 text-sm text-destructive">{errors.price.message}</p>
               )}
             </div>
 
             <div className="sm:col-span-2">
-              <label className="text-sm text-white/70">Description</label>
+              <label className="text-sm font-medium text-muted-foreground">Description</label>
               <Textarea
                 {...register("description")}
-                className="mt-2 min-h-[120px]"
+                className="mt-2 min-h-[120px] rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                 rows={5}
               />
               {errors.description && (
-                <p className="mt-1 text-sm text-amber-300">
+                <p className="mt-1 text-sm text-destructive">
                   {errors.description.message}
                 </p>
               )}
@@ -320,34 +349,34 @@ export default function EditPropertyPage() {
           <h2 className="text-xl font-semibold">Localisation</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-sm text-white/70">Ville</label>
-              <Input {...register("city")} className="mt-2" />
+              <label className="text-sm font-medium text-muted-foreground">Ville</label>
+              <Input {...register("city")} className="mt-2 h-12 rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all" />
               {errors.city && (
-                <p className="mt-1 text-sm text-amber-300">{errors.city.message}</p>
+                <p className="mt-1 text-sm text-destructive">{errors.city.message}</p>
               )}
             </div>
 
             <div>
-              <label className="text-sm text-white/70">Quartier</label>
-              <Input {...register("district")} className="mt-2" placeholder="Ex: Mbour 1, Quartier Som" />
+              <label className="text-sm font-medium text-muted-foreground">Quartier</label>
+              <Input {...register("district")} className="mt-2 h-12 rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all" placeholder="Ex: Mbour 1, Quartier Som" />
               {errors.district && (
-                <p className="mt-1 text-sm text-amber-300">{errors.district.message}</p>
+                <p className="mt-1 text-sm text-destructive">{errors.district.message}</p>
               )}
             </div>
 
             <div className="sm:col-span-2">
-              <label className="text-sm text-white/70">Adresse</label>
-              <Input {...register("address")} className="mt-2" />
+              <label className="text-sm font-medium text-muted-foreground">Adresse</label>
+              <Input {...register("address")} className="mt-2 h-12 rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all" />
               {errors.address && (
-                <p className="mt-1 text-sm text-amber-300">{errors.address.message}</p>
+                <p className="mt-1 text-sm text-destructive">{errors.address.message}</p>
               )}
             </div>
 
             <div className="sm:col-span-2">
-              <label className="text-sm text-white/70">Point de repère <span className="text-white/40">(optionnel)</span></label>
-              <Input {...register("landmark")} className="mt-2" />
+              <label className="text-sm font-medium text-muted-foreground">Point de repère <span className="text-muted-foreground/60">(optionnel)</span></label>
+              <Input {...register("landmark")} className="mt-2 h-12 rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all" />
               {errors.landmark && (
-                <p className="mt-1 text-sm text-amber-300">{errors.landmark.message}</p>
+                <p className="mt-1 text-sm text-destructive">{errors.landmark.message}</p>
               )}
             </div>
           </div>
@@ -365,16 +394,16 @@ export default function EditPropertyPage() {
                 { label: "Salles de bain", key: "bathrooms" },
               ].map((field) => (
                 <div key={field.key}>
-                  <label className="text-sm text-white/70">{field.label}</label>
+                  <label className="text-sm font-medium text-muted-foreground">{field.label}</label>
                   <Input
                     type="number"
                     {...register(field.key as keyof PropertyFormValues, {
                       valueAsNumber: true,
                     })}
-                    className="mt-2"
+                    className="mt-2 h-12 rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                   />
                   {errors[field.key as keyof PropertyFormValues] && (
-                    <p className="mt-1 text-sm text-amber-300">
+                    <p className="mt-1 text-sm text-destructive">
                       {errors[field.key as keyof PropertyFormValues]?.message}
                     </p>
                   )}
@@ -390,7 +419,7 @@ export default function EditPropertyPage() {
               ].map((feature) => (
                 <label
                   key={feature.key}
-                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80"
+                  className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground transition-all duration-200"
                 >
                   {feature.label}
                   <Switch
@@ -407,42 +436,44 @@ export default function EditPropertyPage() {
 
         {/* Terrain spécifique */}
         {isTerrain && (
-          <section className="space-y-4">
+          <section className="space-y-6">
             <h2 className="text-xl font-semibold">Informations Terrain</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="text-sm text-white/70">Surface Totale (m²)</label>
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Surface Totale (m²)</label>
                 <Input
                   type="number"
                   {...register("surfaceTotale", { valueAsNumber: true })}
-                  className="mt-2"
+                  className="h-12 rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                 />
                 {errors.surfaceTotale && (
-                  <p className="mt-1 text-sm text-amber-300">
+                  <p className="mt-1 text-sm text-destructive">
                     {errors.surfaceTotale.message}
                   </p>
                 )}
               </div>
-              <div>
-                <label className="text-sm text-white/70">Situation Juridique</label>
-                <select
-                  {...register("juridique")}
-                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white appearance-none bg-no-repeat bg-right pr-10"
-                  style={{
-                    colorScheme: "dark",
-                    backgroundImage: "url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27rgba(255,255,255,0.4)%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')",
-                    backgroundPosition: "right 0.75rem center",
-                    backgroundSize: "1.5em 1.5em"
-                  }}
-                >
-                  {situationsJuridiques.map((sj) => (
-                    <option key={sj.value} value={sj.value} className="bg-[#121212] text-white py-2">
-                      {sj.label}
-                    </option>
-                  ))}
-                </select>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Situation Juridique</label>
+                <Controller
+                  name="juridique"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="h-12 rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all">
+                        <SelectValue placeholder="Choisir une situation" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {situationsJuridiques.map((sj) => (
+                          <SelectItem key={sj.value} value={sj.value}>
+                            {sj.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
                 {errors.juridique && (
-                  <p className="mt-1 text-sm text-amber-300">
+                  <p className="mt-1 text-sm text-destructive">
                     {errors.juridique.message}
                   </p>
                 )}
@@ -451,6 +482,42 @@ export default function EditPropertyPage() {
           </section>
         )}
 
+        {/* Contact et Multimédia */}
+        <section className="space-y-6">
+          <h2 className="text-xl font-semibold">
+            Contact & Multimédia
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Téléphone de contact (optionnel)</label>
+              <Controller
+                name="contact_phone"
+                control={control}
+                render={({ field }) => (
+                  <PhoneInput
+                    value={field.value as any}
+                    onChange={field.onChange}
+                    defaultCountry="SN"
+                    className="h-12 border-border"
+                  />
+                )}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">URL Visite Virtuelle (optionnel)</label>
+              <Input
+                {...register("virtual_tour_url")}
+                placeholder="Lien YouTube, Matterport..."
+                className="h-12 rounded-lg border-border bg-background focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
+              />
+              {errors.virtual_tour_url && (
+                <p className="mt-1 text-sm text-destructive">{errors.virtual_tour_url.message}</p>
+              )}
+            </div>
+          </div>
+        </section>
+
         {/* Photos */}
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">
@@ -458,7 +525,7 @@ export default function EditPropertyPage() {
           </h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
             {imageUrls.map((url, index) => (
-              <div key={index} className="relative aspect-square overflow-hidden rounded-xl">
+              <div key={index} className="relative aspect-square overflow-hidden rounded-xl border border-border">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={url}
@@ -468,16 +535,20 @@ export default function EditPropertyPage() {
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
-                  className="absolute right-2 top-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600"
+                  className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80 transition-colors"
                 >
                   <X className="h-3 w-3" />
                 </button>
               </div>
             ))}
-            <label className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/20 bg-white/5 transition-colors hover:border-white/40 hover:bg-white/10">
-              <Upload className="mb-2 h-8 w-8 text-white/60" />
-              <span className="text-xs text-white/60">Ajouter</span>
+            <label
+              htmlFor="compte-edit-photo-upload"
+              className="relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-background transition-colors hover:border-muted-foreground/30 hover:bg-muted/50"
+            >
+              <Upload className="mb-2 h-8 w-8 text-muted-foreground/60" />
+              <span className="text-xs text-muted-foreground">Ajouter</span>
               <input
+                id="compte-edit-photo-upload"
                 type="file"
                 multiple
                 accept="image/*"
@@ -487,6 +558,7 @@ export default function EditPropertyPage() {
                   if (files.length > 0) {
                     handleUpload(files);
                   }
+                  e.target.value = '';
                 }}
                 disabled={uploading}
               />
@@ -495,19 +567,19 @@ export default function EditPropertyPage() {
         </section>
 
         {/* Actions */}
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end gap-4 pt-4">
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             onClick={() => router.back()}
-            className="rounded-full"
+            className="rounded-full hover:-translate-y-1 hover:shadow-md transition-all duration-200"
           >
             Annuler
           </Button>
           <Button
             type="submit"
             disabled={submitting}
-            className="rounded-full bg-background text-foreground hover:bg-background/90"
+            className="rounded-full bg-primary text-primary-foreground hover:-translate-y-1 hover:shadow-md transition-all duration-200"
           >
             {submitting ? "Enregistrement..." : "Enregistrer les modifications"}
           </Button>

@@ -39,7 +39,11 @@ export async function GET(request: Request) {
 
       if (data.session) {
         console.log("✅ Session créée avec succès via code");
-        const redirectUrl = next ? `${origin}${next}` : `${origin}/?verified=true`;
+        const isSignup = type === "signup" || type === "email";
+        const basePath = next ?? "/";
+        const redirectUrl = isSignup
+          ? `${origin}${basePath}${basePath.includes("?") ? "&" : "?"}welcome=true`
+          : `${origin}/?verified=true`;
         return NextResponse.redirect(redirectUrl);
       }
     }
@@ -70,8 +74,12 @@ export async function GET(request: Request) {
       }
 
       console.log("✅ Email vérifié avec succès via token_hash - Session active:", session.user.email);
-      // Redirection
-      const redirectUrl = next ? `${origin}${next}` : `${origin}/`;
+      // Redirection — ajoute ?welcome=true pour les nouveaux comptes (type signup/email)
+      const isSignup = type === "signup" || type === "email";
+      const basePath = next ?? "/";
+      const redirectUrl = isSignup
+        ? `${origin}${basePath}${basePath.includes("?") ? "&" : "?"}welcome=true`
+        : `${origin}${basePath}`;
       return NextResponse.redirect(redirectUrl);
     }
 

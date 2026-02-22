@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { Upload, X, FileText, Loader2, ShieldCheck } from "lucide-react";
 import {
@@ -33,9 +33,9 @@ export function VerificationUploadForm({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Si déjà vérifié, ne rien afficher (après les hooks pour respecter les règles React)
-  if (currentStatus === 'verified') {
+  if (currentStatus === "verified") {
     return null;
   }
 
@@ -52,35 +52,31 @@ export function VerificationUploadForm({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    if (e.dataTransfer.files?.[0]) {
       validateAndSetFile(e.dataTransfer.files[0]);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files?.[0]) {
       validateAndSetFile(e.target.files[0]);
     }
   };
 
   const validateAndSetFile = (file: File) => {
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
-
     if (!allowedTypes.includes(file.type)) {
       toast.error("Format non supporté", {
-        description: "Veuillez utiliser un fichier PDF, JPG ou PNG."
+        description: "Veuillez utiliser un fichier PDF, JPG ou PNG.",
       });
       return;
     }
-
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Fichier trop volumineux", {
-        description: "La taille maximale est de 5Mo."
+        description: "La taille maximale est de 5 Mo.",
       });
       return;
     }
-
     setSelectedFile(file);
   };
 
@@ -95,12 +91,11 @@ export function VerificationUploadForm({
 
     try {
       const result = await uploadVerificationDoc(formData);
-
       if (result.error) {
         toast.error("Erreur d'envoi", { description: result.error });
       } else {
         toast.success("Document envoyé !", {
-          description: "Votre demande de certification est en cours d'examen."
+          description: "Votre demande de certification est en cours d'examen.",
         });
         setIsOpen(false);
         setSelectedFile(null);
@@ -126,41 +121,54 @@ export function VerificationUploadForm({
           Certifier ce bien
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-zinc-950 border-white/10 text-white">
+
+      {/*
+        onFocusOutside + onInteractOutside : empêche Radix de fermer le dialog
+        ou de gérer le focus quand le file picker natif s'ouvre (vole le focus de la fenêtre)
+      */}
+      <DialogContent
+        className="sm:max-w-md bg-zinc-950 border-white/10 text-white"
+        onFocusOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-[#F4C430]">
             <ShieldCheck className="h-5 w-5" />
             Certification du bien
           </DialogTitle>
           <DialogDescription className="text-white/60">
-            Téléchargez votre titre de propriété ou tout document officiel prouvant que vous êtes le propriétaire.
-            Ce document restera confidentiel.
+            Téléchargez votre titre de propriété ou tout document officiel
+            prouvant que vous êtes le propriétaire. Ce document restera confidentiel.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           <div
-            className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all p-8
-              ${isDragOver
+            className={[
+              "relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all p-8",
+              isDragOver
                 ? "border-[#F4C430] bg-[#F4C430]/5"
-                : "border-white/10 bg-white/5 hover:bg-white/10"
-              }
-              ${selectedFile ? "border-[#F4C430]/50" : ""}
-            `}
+                : "border-white/10 bg-white/5 hover:bg-white/10",
+              selectedFile ? "border-[#F4C430]/50" : "",
+              isUploading ? "opacity-50 pointer-events-none" : "cursor-pointer",
+            ].join(" ")}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            onClick={() => !isUploading && !selectedFile && fileInputRef.current?.click()}
           >
+            {/* Input caché, déclenché programmatiquement depuis le onClick du container */}
             <input
+              ref={fileInputRef}
               type="file"
-              id="verification-file"
               accept=".pdf,.jpg,.jpeg,.png,.webp"
-              className="absolute inset-0 cursor-pointer opacity-0"
+              style={{ position: "absolute", opacity: 0, width: "1px", height: "1px", overflow: "hidden", pointerEvents: "none" }}
               onChange={handleFileChange}
-              disabled={isUploading}
+              tabIndex={-1}
             />
 
             {selectedFile ? (
+              /* ── Fichier sélectionné ── */
               <div className="flex flex-col items-center gap-2 text-center">
                 <div className="rounded-full bg-[#F4C430]/10 p-3">
                   <FileText className="h-8 w-8 text-[#F4C430]" />
@@ -176,17 +184,15 @@ export function VerificationUploadForm({
                   size="sm"
                   variant="ghost"
                   className="mt-2 h-8 text-red-400 hover:text-red-300 hover:bg-red-400/10"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent clicking input again
-                    setSelectedFile(null);
-                  }}
+                  onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
                 >
                   <X className="mr-2 h-3.5 w-3.5" />
                   Changer de fichier
                 </Button>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-2 text-center">
+              /* ── Zone de dépôt ── */
+              <div className="flex flex-col items-center gap-2 text-center pointer-events-none">
                 <div className="rounded-full bg-white/5 p-3">
                   <Upload className="h-6 w-6 text-white/40" />
                 </div>

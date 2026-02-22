@@ -308,13 +308,24 @@
 
 
 
-  /* Custom Scrollbar - Modern, Slim & Theme-aware */
-  * {
+  /* Masquer la scrollbar native du document (html/body) */
+  html,
+  body {
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom Scrollbar - Modern, Slim & Theme-aware (pour les conteneurs internes) */
+  *:not(html):not(body) {
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
   }
 
-  .dark * {
+  .dark *:not(html):not(body) {
     scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
   }
 

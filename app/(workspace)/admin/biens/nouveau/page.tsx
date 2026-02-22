@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, DragEvent, useEffect } from "react";
+import { useState, DragEvent, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -75,6 +75,7 @@ export default function NewPropertyPage() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [createdProperty, setCreatedProperty] = useState<any | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -149,7 +150,7 @@ export default function NewPropertyPage() {
     }, 250);
   };
 
-  const onDrop = async (event: DragEvent<HTMLDivElement>) => {
+  const onDrop = async (event: DragEvent<HTMLLabelElement>) => {
     event.preventDefault();
     const files = Array.from(event.dataTransfer.files);
     await handleUpload(files);
@@ -640,25 +641,29 @@ export default function NewPropertyPage() {
           <h2 className="text-xl font-semibold">
             {isTerrain ? "Photos du site" : "Photos"}
           </h2>
-          <div
-            className="rounded-3xl border border-dashed border-white/20 bg-white/5 p-6 text-center text-white/70"
+          <label
+            htmlFor="admin-nouveau-photo-upload"
+            className="block cursor-pointer rounded-3xl border border-dashed border-white/20 bg-white/5 p-6 text-center text-white/70"
             onDragOver={(event) => event.preventDefault()}
             onDrop={onDrop}
           >
             <p>Glisse-dépose tes images ici ou</p>
             <div className="mt-3">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm text-white">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(event) =>
-                    event.target.files && handleUpload(event.target.files)
-                  }
-                />
+              <input
+                id="admin-nouveau-photo-upload"
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={(event) =>
+                  event.target.files && handleUpload(event.target.files)
+                }
+              />
+              <span
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm text-white"
+              >
                 Choisir des fichiers
-              </label>
+              </span>
             </div>
             {uploading && <p className="mt-2 text-sm">Upload en cours...</p>}
             {imageUrls.length > 0 && (
@@ -678,7 +683,7 @@ export default function NewPropertyPage() {
                 ))}
               </div>
             )}
-          </div>
+          </label>
         </section>
 
         <Button

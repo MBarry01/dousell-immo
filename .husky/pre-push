@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# .husky/pre-push — Validation rapide avant chaque git push
+#
+# Exécute: lint + typecheck + build
+# Pour le boot complet (avec E2E): npm run pre-prod -- --e2e
+
+echo ""
+echo "🔒 pre-push: validation avant envoi..."
+echo ""
+
+npx tsx scripts/pre-prod.ts

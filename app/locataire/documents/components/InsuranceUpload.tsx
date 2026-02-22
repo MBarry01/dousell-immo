@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Upload, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -13,6 +13,7 @@ interface InsuranceUploadProps {
 
 export function InsuranceUpload({ leaseId, existingUrl }: InsuranceUploadProps) {
     const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Si un document existe déjà
     if (existingUrl) {
@@ -60,27 +61,25 @@ export function InsuranceUpload({ leaseId, existingUrl }: InsuranceUploadProps) 
     return (
         <div>
             <input
+                id="insurance-file-upload"
                 type="file"
-                id="insurance-upload"
                 accept=".pdf,.jpg,.jpeg,.png"
                 className="hidden"
                 onChange={handleFileChange}
                 disabled={isUploading}
             />
-            <label htmlFor="insurance-upload">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-9 cursor-pointer"
-                    asChild
-                    disabled={isUploading}
-                >
-                    <span>
-                        {isUploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                        {isUploading ? "Envoi..." : "Ajouter"}
-                    </span>
-                </Button>
-            </label>
+            <Button
+                variant="outline"
+                size="sm"
+                className="h-9 cursor-pointer"
+                disabled={isUploading}
+                asChild
+            >
+                <label htmlFor="insurance-file-upload" className="cursor-pointer">
+                    {isUploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                    {isUploading ? "Envoi..." : "Ajouter"}
+                </label>
+            </Button>
         </div>
     );
 }

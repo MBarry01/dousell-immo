@@ -6,6 +6,8 @@ import { PropertyFormValues } from "@/lib/schemas/propertySchema";
 
 type UpdatePropertyData = PropertyFormValues & {
   images: string[];
+  virtual_tour_url?: string;
+  contact_phone?: string;
 };
 
 import { smartGeocode } from "@/lib/geocoding";
@@ -62,10 +64,12 @@ export async function updateUserProperty(
   // Mapper le type pour details
   // Note: on essaie d'être cohérent avec les valeurs attendues par le front
   const typeMap: Record<string, string> = {
-    villa: "Maison",
+    villa: "Villa",
     appartement: "Appartement",
     immeuble: "Immeuble",
     terrain: "Terrain",
+    studio: "Studio",
+    bureau: "Bureau",
   };
 
   const features = isTerrain
@@ -92,30 +96,41 @@ export async function updateUserProperty(
       heating: "Climatisation",
     };
 
-  // Géocodage pour mettre à jour les coordonnées
-  const coords = await smartGeocode(data.address, data.district, data.city);
+  // Géocodage pour mettre à jour les coordonnées (seulement si l'adresse a changé ?)
+  // Pour la simulation, on le garde pour assurer la cohérence.
+  let coords = { lat: 0, lng: 0 };
+  try {
+    coords = await smartGeocode(data.address, data.district, data.city);
+  } catch (e) {
+    console.error("Geocoding error:", e);
+  }
 
-  const updatePayload = {
+  const updatePayload: any = {
     title: data.title,
     description: data.description,
     price: data.price,
     category: data.category,
-    property_type: data.type, // Mise à jour explicite du type (colonne property_type dans la DB)
+    property_type: data.type,
     location: {
       city: data.city,
       district: data.district,
       address: data.address,
       landmark: data.landmark || "",
-      coords: coords,
+      coords: coords.lat !== 0 ? coords : (property as any).location?.coords,
     },
     specs,
     features,
     details,
     images: data.images,
-    ...(property.validation_status === "rejected"
-      ? { validation_status: "pending", rejection_reason: null }
-      : {}),
+    contact_phone: data.contact_phone || null,
+    virtual_tour_url: data.virtual_tour_url || null,
   };
+
+  // Si l'annonce était rejetée, on la repasse en attente
+  if (property.validation_status === "rejected") {
+    updatePayload.validation_status = "pending";
+    updatePayload.rejection_reason = null;
+  }
 
   const { error } = await supabase
     .from("properties")
@@ -123,12 +138,13 @@ export async function updateUserProperty(
     .eq("id", propertyId);
 
   if (error) {
-    console.error("Error updating property:", error);
-    return { error: `Erreur DB: ${error.message} (${error.details || ''})` };
+    console.error("❌ Error updating property:", error);
+    return { error: `Erreur lors de la mise à jour: ${error.message}` };
   }
 
   revalidatePath("/compte/mes-biens");
   revalidatePath(`/biens/${propertyId}`);
+  revalidatePath(`/compte/biens/${propertyId}`);
 
   return { success: true };
 }

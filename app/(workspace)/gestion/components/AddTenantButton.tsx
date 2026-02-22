@@ -1162,7 +1162,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="z-[100] sm:max-w-2xl bg-card border-border text-foreground max-h-[90vh] overflow-y-auto shadow-2xl">
+            <DialogContent className="z-[100] sm:max-w-2xl bg-card border-border text-foreground max-h-[90vh] overflow-y-auto shadow-2xl" onFocusOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle className="text-foreground">
                         <FileSpreadsheet className="w-5 h-5 inline-block mr-2" />
@@ -1202,7 +1202,8 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
                             type="file"
                             accept=".csv,.xlsx,.xls"
                             onChange={handleFileSelect}
-                            className="hidden"
+                            style={{ position: "absolute", opacity: 0, width: "1px", height: "1px", overflow: "hidden", pointerEvents: "none" }}
+                            tabIndex={-1}
                         />
                     </div>
                 )}

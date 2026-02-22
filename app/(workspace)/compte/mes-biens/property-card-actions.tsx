@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { markPropertyAsSold, deleteUserProperty } from "./actions";
 import { AssociateTenantDialog } from "@/components/gestion/AssociateTenantDialog";
+import { UpsellManagementModal } from "@/components/ui/upsell-management-modal";
 
 type PropertyCardActionsProps = {
   propertyId: string;
@@ -42,17 +43,26 @@ export function PropertyCardActions({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isMarkingSold, setIsMarkingSold] = useState(false);
   const [isAssociateOpen, setIsAssociateOpen] = useState(false);
+  const [isUpsellOpen, setIsUpsellOpen] = useState(false);
 
   const handleEdit = () => {
     router.push(`/compte/biens/edit/${propertyId}`);
   };
 
-  const handleMarkAsSold = async () => {
+  const handleMarkAsSold = async (skipUpsell = false) => {
     // Si c'est une location et que l'utilisateur a un compte gestion, on ouvre la modale d'association
     if (category === "location" && teamId) {
       setIsAssociateOpen(true);
       return;
     }
+
+    // SI c'est une location et que c'est un particulier (pas de teamId), on affiche l'upsell
+    if (category === "location" && !teamId && !skipUpsell) {
+      setIsUpsellOpen(true);
+      return;
+    }
+
+    setIsUpsellOpen(false);
 
     if (!confirm(`Marquer ce bien comme ${category === "location" ? "loué" : "vendu"} ?`)) {
       return;
@@ -112,16 +122,16 @@ export function PropertyCardActions({
       <DropdownMenuContent align="end" className="w-56 bg-popover border-border">
         <DropdownMenuItem
           onClick={handleEdit}
-          className="cursor-pointer text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+          className="cursor-pointer text-white hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white"
         >
           <Edit className="mr-2 h-4 w-4" />
           {validationStatus === "rejected" ? "Ré-soumettre" : "Modifier"}
         </DropdownMenuItem>
         {status !== "vendu" && status !== "loué" && (
           <DropdownMenuItem
-            onClick={handleMarkAsSold}
+            onClick={() => handleMarkAsSold(false)}
             disabled={isMarkingSold}
-            className="cursor-pointer text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+            className="cursor-pointer text-white hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white"
           >
             <CheckCircle className="mr-2 h-4 w-4" />
             Marquer comme {category === "location" ? "Loué" : "Vendu"}
@@ -150,6 +160,13 @@ export function PropertyCardActions({
           teamId={teamId}
         />
       )}
+
+      {/* Modale d'Upsell Gestion (Mode Particulier) */}
+      <UpsellManagementModal
+        isOpen={isUpsellOpen}
+        onClose={() => setIsUpsellOpen(false)}
+        onProceed={() => handleMarkAsSold(true)}
+      />
     </DropdownMenu>
   );
 }

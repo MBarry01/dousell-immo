@@ -219,7 +219,7 @@ export default function RentalDocumentsPage() {
                                 Nouveau Document
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className={`${isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
+                        <DialogContent className={`${isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'}`} onFocusOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
                             <DialogHeader>
                                 <DialogTitle className={isDark ? 'text-white' : 'text-gray-900'}>Ajouter un document</DialogTitle>
                                 <DialogDescription className={isDark ? 'text-slate-400' : 'text-gray-600'}>

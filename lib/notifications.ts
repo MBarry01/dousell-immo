@@ -242,8 +242,19 @@ export async function notifyAdmin({
       return { success: false, error: error.message || "Erreur inconnue" };
     }
 
-    console.log("✅ Notification créée avec succès:", data?.[0]?.id);
-    return { success: true, notificationId: data?.[0]?.id };
+    const notificationId = data?.[0]?.id;
+    console.log("✅ Notification créée avec succès:", notificationId);
+
+    // Fire-and-forget push OneSignal vers l'admin
+    sendOneSignalNotification({
+      userIds: [adminUserId],
+      title,
+      content: message,
+      url: resourcePath || undefined,
+      data: { type, resourcePath: resourcePath || "" },
+    }).catch((err) => console.error("OneSignal admin push failed:", err));
+
+    return { success: true, notificationId };
   } catch (error) {
     console.error("❌ Erreur inattendue dans notifyAdmin:", error);
     return {

@@ -1,14 +1,23 @@
 import { updateSession } from "@/utils/supabase/middleware";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { contextStorage } from "./lib/context";
 
 export async function proxy(request: NextRequest) {
   const requestId = globalThis.crypto?.randomUUID() || Math.random().toString(36).substring(7);
   const pathname = request.nextUrl.pathname;
 
-  return await contextStorage.run({ requestId, route: pathname }, async () => {
+  const response = await contextStorage.run({ requestId, route: pathname }, async () => {
     return await updateSession(request);
   });
+
+  // Expose le pathname courant via header pour les Server Components (ex: workspace layout)
+  // Permet de détecter la route sans avoir accès à usePathname() côté serveur
+  if (response instanceof NextResponse) {
+    response.headers.set("x-pathname", pathname);
+  }
+
+  return response;
 }
 
 export const config = {

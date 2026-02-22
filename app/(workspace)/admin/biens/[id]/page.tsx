@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, DragEvent, useEffect } from "react";
+import { useState, DragEvent, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,6 +52,7 @@ export default function EditPropertyPage() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     register,
     handleSubmit,
@@ -84,7 +85,7 @@ export default function EditPropertyPage() {
   useEffect(() => {
     const loadProperty = async () => {
       if (!propertyId || authLoading) return;
-      
+
       try {
         const property = await getPropertyById(propertyId);
         if (!property) {
@@ -94,26 +95,37 @@ export default function EditPropertyPage() {
         }
 
         // Pré-remplir le formulaire
+        const dbType = property.details.type.toLowerCase();
+        let formType: "villa" | "appartement" | "terrain" | "immeuble" | "studio" | "bureau" = "appartement";
+
+        if (dbType.includes("terrain")) formType = "terrain";
+        else if (dbType.includes("villa") || dbType.includes("maison")) formType = "villa";
+        else if (dbType.includes("immeuble") || dbType.includes("commercial")) formType = "immeuble";
+        else if (dbType.includes("studio")) formType = "studio";
+        else if (dbType.includes("bureau")) formType = "bureau";
+
         reset({
-          title: property.title,
-          description: property.description,
-          price: property.price,
-          category: property.transaction,
-          type: property.details.type.toLowerCase() as "villa" | "appartement" | "terrain" | "immeuble",
-          city: property.location.city,
-          district: property.location.address,
-          address: property.location.address,
-          landmark: property.location.landmark,
-          surface: property.specs.surface,
-          surfaceTotale: property.specs.surface,
-          rooms: property.specs.rooms,
-          bedrooms: property.specs.bedrooms,
-          bathrooms: property.specs.bathrooms,
-          hasGenerator: property.details.hasBackupGenerator ?? false,
-          hasWaterTank: property.details.hasWaterTank ?? false,
-          security: property.details.security ?? false,
+          title: property.title || "",
+          description: property.description || "",
+          price: property.price || 0,
+          category: (property.transaction as "vente" | "location") || "vente",
+          type: formType,
+          city: property.location?.city || "",
+          district: property.location?.district || property.location?.address || "",
+          address: property.location?.address || "",
+          landmark: property.location?.landmark || "",
+          surface: formType !== "terrain" ? (property.specs?.surface !== undefined ? Number(property.specs.surface) : undefined) : undefined,
+          surfaceTotale: formType === "terrain" ? (property.specs?.surface !== undefined ? Number(property.specs.surface) : undefined) : undefined,
+          rooms: formType !== "terrain" ? (property.specs?.rooms !== undefined ? Number(property.specs.rooms) : undefined) : undefined,
+          bedrooms: formType !== "terrain" ? (property.specs?.bedrooms !== undefined ? Number(property.specs.bedrooms) : undefined) : undefined,
+          bathrooms: formType !== "terrain" ? (property.specs?.bathrooms !== undefined ? Number(property.specs.bathrooms) : undefined) : undefined,
+          hasGenerator: property.details?.hasBackupGenerator ?? false,
+          hasWaterTank: property.details?.hasWaterTank ?? false,
+          security: property.details?.security ?? false,
           pool: false,
-          juridique: undefined,
+          juridique: formType === "terrain" ? "titre-foncier" : undefined,
+          contact_phone: "",
+          virtual_tour_url: "",
         });
 
         setImageUrls(property.images ?? []);
@@ -142,7 +154,7 @@ export default function EditPropertyPage() {
     return null;
   }
 
-  const onDrop = async (event: DragEvent<HTMLDivElement>) => {
+  const onDrop = async (event: DragEvent<HTMLLabelElement>) => {
     event.preventDefault();
     const files = Array.from(event.dataTransfer.files);
     await handleUpload(files);
@@ -188,29 +200,29 @@ export default function EditPropertyPage() {
       // Préparer les specs selon le type
       const specs = isTerrain
         ? {
-            surface: values.surfaceTotale ?? 0,
-            rooms: 0,
-            bedrooms: 0,
-            bathrooms: 0,
-            dpe: "B" as const,
-          }
+          surface: values.surfaceTotale ?? 0,
+          rooms: 0,
+          bedrooms: 0,
+          bathrooms: 0,
+          dpe: "B" as const,
+        }
         : {
-            surface: values.surface ?? 0,
-            rooms: values.rooms ?? 0,
-            bedrooms: values.bedrooms ?? 0,
-            bathrooms: values.bathrooms ?? 0,
-            dpe: "B" as const,
-          };
+          surface: values.surface ?? 0,
+          rooms: values.rooms ?? 0,
+          bedrooms: values.bedrooms ?? 0,
+          bathrooms: values.bathrooms ?? 0,
+          dpe: "B" as const,
+        };
 
       // Préparer les features (masqués pour les terrains)
       const features = isTerrain
         ? {}
         : {
-            hasGenerator: values.hasGenerator ?? false,
-            hasWaterTank: values.hasWaterTank ?? false,
-            security: values.security ?? false,
-            pool: values.pool ?? false,
-          };
+          hasGenerator: values.hasGenerator ?? false,
+          hasWaterTank: values.hasWaterTank ?? false,
+          security: values.security ?? false,
+          pool: values.pool ?? false,
+        };
 
       // Mapper le type pour details
       const typeMap: Record<string, "Appartement" | "Maison" | "Studio"> = {
@@ -236,16 +248,16 @@ export default function EditPropertyPage() {
         features,
         details: isTerrain
           ? {
-              type: "Appartement" as const,
-              year: new Date().getFullYear(),
-              heating: "",
-              juridique: values.juridique,
-            }
+            type: "Appartement" as const,
+            year: new Date().getFullYear(),
+            heating: "",
+            juridique: values.juridique,
+          }
           : {
-              type: typeMap[values.type] ?? "Appartement",
-              year: new Date().getFullYear(),
-              heating: "Climatisation",
-            },
+            type: typeMap[values.type] ?? "Appartement",
+            year: new Date().getFullYear(),
+            heating: "Climatisation",
+          },
         images: imageUrls,
       };
 
@@ -551,23 +563,23 @@ export default function EditPropertyPage() {
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">Photos</h2>
-          <div
+          <label
+            htmlFor="admin-edit-photo-upload"
             onDrop={onDrop}
             onDragOver={(e) => e.preventDefault()}
-            className="rounded-2xl border-2 border-dashed border-white/20 bg-white/5 p-8 text-center"
+            className="block cursor-pointer rounded-2xl border-2 border-dashed border-white/20 bg-white/5 p-8 text-center"
           >
             <input
+              id="admin-edit-photo-upload"
               type="file"
               multiple
               accept="image/*"
               onChange={(e) => e.target.files && handleUpload(e.target.files)}
               className="hidden"
-              id="image-upload"
               disabled={uploading}
             />
-            <label
-              htmlFor="image-upload"
-              className="cursor-pointer text-white/70 hover:text-white"
+            <span
+              className="inline-block cursor-pointer text-white/70 hover:text-white"
             >
               {uploading ? (
                 "Upload en cours..."
@@ -580,8 +592,8 @@ export default function EditPropertyPage() {
                   </span>
                 </>
               )}
-            </label>
-          </div>
+            </span>
+          </label>
           {imageUrls.length > 0 && (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {imageUrls.map((url, index) => (

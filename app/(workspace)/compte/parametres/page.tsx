@@ -263,24 +263,24 @@ export default function ParametresPage() {
                       </div>
                     )}
                   </div>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 p-2 bg-primary rounded-full hover:bg-primary/90 transition-colors shadow-lg"
-                    disabled={isUploadingAvatar || isDeletingAvatar}
+                  <label
+                    htmlFor="settings-avatar-upload"
+                    className="absolute bottom-0 right-0 p-2 bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-colors shadow-lg"
                   >
                     <Camera className="h-4 w-4 text-primary-foreground" />
-                  </button>
+                  </label>
                 </div>
 
                 {/* Avatar Actions */}
                 <div className="flex-1 w-full space-y-4">
                   <div className="space-y-2 text-center sm:text-left">
                     <input
-                      ref={fileInputRef}
+                      id="settings-avatar-upload"
                       type="file"
                       accept="image/jpeg,image/jpg,image/png,image/webp"
                       onChange={handleFileChange}
                       className="hidden"
+                      disabled={isUploadingAvatar || isDeletingAvatar}
                     />
                     <p className="text-xs sm:text-sm text-muted-foreground">
                       JPG, PNG ou WebP. Max 5MB.
@@ -308,15 +308,13 @@ export default function ParametresPage() {
                     </div>
                   ) : (
                     <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-                      <Button
-                        onClick={() => fileInputRef.current?.click()}
-                        variant="outline"
-                        disabled={isUploadingAvatar || isDeletingAvatar}
-                        className="flex-1 sm:flex-none border-border bg-background text-foreground hover:bg-accent text-xs sm:text-sm"
+                      <label
+                        htmlFor="settings-avatar-upload"
+                        className="flex-1 sm:flex-none cursor-pointer flex items-center justify-center border border-border bg-background text-foreground hover:bg-accent text-xs sm:text-sm px-4 py-2 rounded-md"
                       >
                         <Upload className="h-4 w-4 mr-2" />
                         Choisir une photo
-                      </Button>
+                      </label>
                       {profile?.avatar_url && (
                         <Button
                           onClick={handleDeleteAvatar}

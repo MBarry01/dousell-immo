@@ -37,6 +37,7 @@ type PropertyToModerate = {
   owner_id: string;
   created_at?: string;
   proof_document_url?: string | null;
+  original_document_id?: string | null;
 };
 
 type SortOption = "date_asc" | "date_desc" | "price_asc" | "price_desc";
@@ -161,7 +162,8 @@ export default function ModerationPageContent() {
             ...p,
             location: p.location as { city: string; district: string },
             images: (p.images as string[]) || [],
-            proof_document_url: signedDocUrl
+            proof_document_url: signedDocUrl,
+            original_document_id: p.proof_document_url
           };
         })
       );
@@ -247,20 +249,21 @@ export default function ModerationPageContent() {
 
     setApprovingIds((prev) => new Set(prev).add(propertyId));
     try {
-      // Find the property to get its document ID
       const property = properties.find(p => p.id === propertyId);
-      const documentId = property?.proof_document_url || null;
+      const originalDocId = property?.original_document_id || null;
 
-      // Use certifyAdAndDocument if there's a document, otherwise use moderateProperty
-      const result = documentId
-        ? await certifyAdAndDocument(propertyId, documentId)
+      const isUuid = originalDocId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(originalDocId);
+
+      // Use certifyAdAndDocument if there's a document AND it's a UUID, otherwise use moderateProperty
+      const result = isUuid
+        ? await certifyAdAndDocument(propertyId, originalDocId)
         : await moderateProperty(propertyId, "approved");
 
       if (result.error) {
         toast.error("Erreur", { description: result.error });
       } else {
         toast.success("Annonce validée !", {
-          description: documentId
+          description: isUuid
             ? "L'annonce et le document ont été certifiés ✅"
             : "L'annonce est maintenant en ligne.",
         });

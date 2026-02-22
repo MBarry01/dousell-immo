@@ -104,18 +104,18 @@ export default function VitrineLayout({ children }: VitrineLayoutProps) {
 
   if (isDistractionFree) {
     return (
-      <div className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
+      <div suppressHydrationWarning className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
         <ScrollToTop />
-        <Suspense><WelcomeModal /></Suspense>
+        <Suspense fallback={null}><WelcomeModal /></Suspense>
         {children}
       </div>
     );
   }
 
   return (
-    <div className="dark min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
+    <div suppressHydrationWarning className="dark min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
       <ScrollToTop />
-      <Suspense><WelcomeModal /></Suspense>
+      <Suspense fallback={null}><WelcomeModal /></Suspense>
       <div className="px-4 md:px-6 print:hidden">
         <Header />
       </div>

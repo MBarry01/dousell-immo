@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Wrench, Clock, CheckCircle2, X, Plus, ChevronDown, ChevronUp, CircleDollarSign, Calendar, Loader2, Send, Star, Phone, MapPin, AlertTriangle, Image as ImageIcon, User, Home, FileText, Upload } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { format } from 'date-fns';
@@ -79,6 +79,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
     const [quotePrice, setQuotePrice] = useState('');
     const [quoteDate, setQuoteDate] = useState('');
     const [quoteFile, setQuoteFile] = useState<File | null>(null);
+    const quoteFileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -727,7 +728,7 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                 {/* Modal Saisie Devis */}
                 {/* Modal Saisie Devis */}
                 <Dialog open={showQuoteModal} onOpenChange={setShowQuoteModal}>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent className="sm:max-w-[425px]" onFocusOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
                         <DialogHeader>
                             <DialogTitle>Saisir le devis</DialogTitle>
                             <DialogDescription>
@@ -763,12 +764,17 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
                                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">
                                     Document (Devis/Facture PDF)
                                 </label>
-                                <div className="relative group">
+                                <div
+                                    className="relative group cursor-pointer"
+                                    onClick={() => quoteFileInputRef.current?.click()}
+                                >
                                     <input
+                                        ref={quoteFileInputRef}
                                         type="file"
                                         accept="application/pdf,image/*"
                                         onChange={(e) => setQuoteFile(e.target.files?.[0] || null)}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                        style={{ position: "absolute", opacity: 0, width: "1px", height: "1px", overflow: "hidden", pointerEvents: "none" }}
+                                        tabIndex={-1}
                                     />
                                     <div className={`w-full border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-colors ${quoteFile ? 'border-primary/50 bg-primary/5' : 'border-border group-hover:border-primary/20'}`}>
                                         {quoteFile ? (

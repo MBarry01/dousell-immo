@@ -486,7 +486,7 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
             <input
                 type="file"
                 ref={fileInputRef}
-                className="hidden"
+                className="sr-only"
                 accept="image/*"
                 onChange={handlePhotoFileChange}
             />

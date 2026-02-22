@@ -1,90 +1,66 @@
 "use client";
 
 import { useEffect } from "react";
+import { readStoredPreferences } from "@/hooks/use-cookie-consent";
 
 /**
- * Composant qui met à jour le consentement Google Analytics au chargement
+ * Construit les paramètres GA Consent Mode v2 à partir des préférences granulaires.
+ * - analytics → analytics_storage
+ * - marketing → ad_storage, ad_user_data, ad_personalization, personalization_storage
+ * - functionality_storage toujours granted (cookies nécessaires)
+ */
+function buildConsentParams(prefs: { marketing: boolean; analytics: boolean }) {
+  const g = "granted" as const;
+  const d = "denied" as const;
+  return {
+    analytics_storage: prefs.analytics ? g : d,
+    ad_storage: prefs.marketing ? g : d,
+    ad_user_data: prefs.marketing ? g : d,
+    ad_personalization: prefs.marketing ? g : d,
+    personalization_storage: prefs.marketing ? g : d,
+    functionality_storage: g,
+  };
+}
+
+/**
+ * Met à jour Google Analytics Consent Mode v2 au chargement de la page
  * si un consentement existe déjà dans localStorage.
- * 
- * Ce composant s'exécute de manière indépendante pour garantir la mise à jour
- * même si le timing n'est pas parfait.
  */
 export function UpdateConsentOnLoad() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Lire directement depuis localStorage (plus rapide que le hook)
-    const storedConsent = localStorage.getItem("cookie-consent");
-    if (!storedConsent || (storedConsent !== "granted" && storedConsent !== "denied")) {
-      return;
-    }
+    const prefs = readStoredPreferences();
+    if (!prefs) return; // Pas encore de choix effectué
 
-    const consentParams =
-      storedConsent === "granted"
-        ? {
-            ad_storage: "granted",
-            ad_user_data: "granted",
-            ad_personalization: "granted",
-            analytics_storage: "granted",
-            functionality_storage: "granted",
-            personalization_storage: "granted",
-          }
-        : {
-            ad_storage: "denied",
-            ad_user_data: "denied",
-            ad_personalization: "denied",
-            analytics_storage: "denied",
-            functionality_storage: "denied",
-            personalization_storage: "denied",
-          };
+    const consentParams = buildConsentParams(prefs);
 
-    // Fonction pour mettre à jour le consentement
     const updateConsent = () => {
       const dataLayer = (window as unknown as { dataLayer?: unknown[] }).dataLayer;
-      if (!dataLayer || !Array.isArray(dataLayer)) {
-        return false;
-      }
-
+      if (!dataLayer || !Array.isArray(dataLayer)) return false;
       try {
-        // Utiliser dataLayer.push directement
         dataLayer.push(["consent", "update", consentParams]);
-
-        // Si gtag existe, l'utiliser aussi
         if (typeof (window as unknown as { gtag?: unknown }).gtag === "function") {
-          const gtag = (window as unknown as { gtag: (...args: unknown[]) => void })
-            .gtag;
+          const gtag = (window as unknown as { gtag: (...args: unknown[]) => void }).gtag;
           gtag("consent", "update", consentParams);
         }
-
         return true;
       } catch (error) {
-        console.error("Erreur lors de la mise à jour du consentement:", error);
+        console.error("Erreur consentement GA:", error);
         return false;
       }
     };
 
-    // Essayer immédiatement, puis toutes les 200ms jusqu'à 10 secondes
+    if (updateConsent()) return;
+
     let attempts = 0;
-    const maxAttempts = 50; // 50 tentatives * 200ms = 10 secondes max
-
-    // Première tentative immédiate
-    if (updateConsent()) {
-      return;
-    }
-
-    // Puis essayer toutes les 200ms
     const interval = setInterval(() => {
       attempts++;
-      if (updateConsent() || attempts >= maxAttempts) {
-        clearInterval(interval);
-      }
+      if (updateConsent() || attempts >= 50) clearInterval(interval);
     }, 200);
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, []); // S'exécute une seule fois au montage
+    return () => clearInterval(interval);
+  }, []);
 
   return null;
 }
-

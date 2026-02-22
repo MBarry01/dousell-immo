@@ -10,27 +10,31 @@ export const propertySchema = z
     description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
     price: z.number().min(0, "Le prix doit être positif"),
     category: z.enum(["vente", "location"]),
-    type: z.enum(["villa", "appartement", "terrain", "immeuble"]),
+    type: z.enum(["villa", "appartement", "terrain", "immeuble", "studio", "bureau"]),
     city: z.string().min(1, "La ville est requise"),
     district: z.string().min(1, "Le quartier est requis"),
     address: z.string().min(3, "L'adresse doit contenir au moins 3 caractères"),
     landmark: z.string().optional().or(z.literal("")),
-    
+
     // Champs conditionnels pour les terrains
     surface: z.number().min(10, "La surface doit être d'au moins 10 m²").optional(),
     surfaceTotale: z.number().min(10, "La surface totale doit être d'au moins 10 m²").optional(),
     juridique: z.enum(["titre-foncier", "bail", "deliberation", "nicad"]).optional(),
-    
+
     // Champs conditionnels pour les biens construits
     rooms: z.number().min(1, "Le nombre de pièces doit être d'au moins 1").optional(),
     bedrooms: z.number().min(0, "Le nombre de chambres ne peut pas être négatif").optional(),
     bathrooms: z.number().min(0, "Le nombre de salles de bain ne peut pas être négatif").optional(),
-    
+
     // Features (optionnels, masqués pour les terrains)
     hasGenerator: z.boolean().optional(),
     hasWaterTank: z.boolean().optional(),
     security: z.boolean().optional(),
     pool: z.boolean().optional(),
+
+    // Nouveau : Contact et Visite virtuelle
+    contact_phone: z.string().optional().or(z.literal("")),
+    virtual_tour_url: z.string().url("Veuillez entrer une URL valide").optional().or(z.literal("")),
   })
   .superRefine((data, ctx) => {
     // Si c'est un terrain
@@ -43,7 +47,7 @@ export const propertySchema = z
           path: ["surfaceTotale"],
         });
       }
-      
+
       // Situation juridique est requise
       if (!data.juridique) {
         ctx.addIssue({
@@ -52,7 +56,7 @@ export const propertySchema = z
           path: ["juridique"],
         });
       }
-      
+
       // Les champs de construction ne doivent pas être remplis
       // (mais on ne bloque pas si ils sont vides, juste on les ignore)
     } else {
@@ -65,7 +69,7 @@ export const propertySchema = z
           path: ["surface"],
         });
       }
-      
+
       // Pièces est requis
       if (!data.rooms || data.rooms < 1) {
         ctx.addIssue({
@@ -74,7 +78,7 @@ export const propertySchema = z
           path: ["rooms"],
         });
       }
-      
+
       // Chambres est requis
       if (data.bedrooms === undefined || data.bedrooms < 0) {
         ctx.addIssue({
@@ -83,7 +87,7 @@ export const propertySchema = z
           path: ["bedrooms"],
         });
       }
-      
+
       // Salles de bain est requis
       if (data.bathrooms === undefined || data.bathrooms < 0) {
         ctx.addIssue({

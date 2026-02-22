@@ -222,7 +222,7 @@ export function PaymentForm({
                                     </div>
                                 )}
 
-                                <div className="flex items-center justify-center pt-1 opacity-40 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0 cursor-pointer">
+                                <div className="flex items-center justify-center pt-1 opacity-40 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0">
                                     <img
                                         src="/images/bouton-senegal.png"
                                         alt="Paiement sécurisé"

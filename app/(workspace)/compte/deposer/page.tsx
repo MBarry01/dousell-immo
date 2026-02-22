@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -68,6 +68,7 @@ function DeposerPageContent() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     type: "appartement",
@@ -603,12 +604,13 @@ function DeposerPageContent() {
               {/* Photos */}
               <div>
                 <label className="text-sm text-zinc-400 mb-3 block">Photos ({formData.images.length}/10)</label>
-                <div
+                <label
+                  htmlFor="deposer-file-upload"
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
                   onDrop={handleDrop}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${dragActive ? "border-[#F4C430] bg-[#F4C430]/5" : "border-zinc-700 hover:border-zinc-600"
+                  className={`block cursor-pointer border-2 border-dashed rounded-xl p-8 text-center transition-all ${dragActive ? "border-[#F4C430] bg-[#F4C430]/5" : "border-zinc-700 hover:border-zinc-600"
                     }`}
                 >
                   {uploadingImages ? (
@@ -620,14 +622,25 @@ function DeposerPageContent() {
                     <div className="flex flex-col items-center gap-3">
                       <Upload className="w-10 h-10 text-zinc-500" />
                       <p className="text-zinc-300">Glissez vos photos ici</p>
-                      <label className="cursor-pointer px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded-lg transition-colors">
+
+                      <input
+                        id="deposer-file-upload"
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <span
+                        className="inline-block px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded-lg transition-colors"
+                      >
                         Parcourir
-                        <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="hidden" />
-                      </label>
+                      </span>
+
                       <p className="text-xs text-zinc-600">JPG, PNG, WebP • Max 5MB</p>
                     </div>
                   )}
-                </div>
+                </label>
 
                 {formData.images.length > 0 && (
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mt-4">

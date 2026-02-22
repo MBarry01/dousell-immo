@@ -1,0 +1,19 @@
+[96mplaywright.e2e.config.ts[0m:[93m57[0m:[93m9[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  The last overload gave the following error.
+    Object literal may only specify known properties, and 'reducedMotion' does not exist in type 'UseOptions<PlaywrightTestOptions & CustomProperties<unknown>, PlaywrightWorkerOptions & CustomProperties<unknown>>'.
+
+[7m57[0m         reducedMotion: 'reduce',
+[7m  [0m [91m        ~~~~~~~~~~~~~[0m
+
+  [96mnode_modules/playwright/types/test.d.ts[0m:[93m915[0m:[93m3[0m
+    [7m915[0m   use?: UseOptions<TestArgs, WorkerArgs>;
+    [7m   [0m [96m  ~~~[0m
+    The expected type comes from property 'use' which is declared here on type 'PlaywrightTestConfig<unknown, unknown>'
+  [96mnode_modules/playwright/types/test.d.ts[0m:[93m8491[0m:[93m17[0m
+    [7m8491[0m export function defineConfig<T, W>(config: PlaywrightTestConfig<T, W>, ...configs: PlaywrightTestConfig<T, W>[]): PlaywrightTestConfig<T, W>;
+    [7m    [0m [96m                ~~~~~~~~~~~~[0m
+    The last overload is declared here.
+
+
+Found 1 error in playwright.e2e.config.ts[90m:57[0m
+

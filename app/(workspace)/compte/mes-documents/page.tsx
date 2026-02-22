@@ -365,7 +365,7 @@ export default function MesDocumentsPage() {
                 Ajouter un document
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-[#121212] border-primary/20">
+            <DialogContent className="bg-[#121212] border-primary/20" onFocusOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
               <DialogHeader>
                 <DialogTitle className="text-white">Ajouter un document</DialogTitle>
                 <DialogDescription className="text-white/60">

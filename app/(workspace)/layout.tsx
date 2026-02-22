@@ -1,7 +1,13 @@
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { WorkspaceLayoutClient } from "./workspace-layout-client";
+
+// Pages du workspace accessibles sans équipe (particuliers vitrine ET pros gestion)
+// Ces pages ont leur propre layout standalone — pas de sidebar workspace
+// Si l'utilisateur a une équipe, la page deposer/actions.ts sync automatiquement avec la gestion
+const TEAM_FREE_PATHS = ["/compte/deposer", "/compte/mes-biens"];
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +22,18 @@ export default async function WorkspaceLayout({
   // Protection côté serveur - redirection si non connecté
   if (!user) {
     redirect("/login");
+  }
+
+  // Check anticipé du pathname (avant toute requête DB)
+  // Le middleware expose x-pathname sur chaque request
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  const isTeamFreePath = TEAM_FREE_PATHS.some((p) => pathname.startsWith(p));
+
+  // Pages vitrine/gestion hybrides : accessibles à tous les users authentifiés
+  // sans nécessiter une équipe. La logique de sync gestion est dans actions.ts.
+  if (isTeamFreePath) {
+    return <>{children}</>;
   }
 
   // Récupérer les équipes de l'utilisateur pour le TeamSwitcher
@@ -64,7 +82,7 @@ export default async function WorkspaceLayout({
   // Si l'utilisateur n'a aucune équipe, le rediriger vers la vitrine
   // avec le modal de bienvenue pour choisir son parcours
   if (teams.length === 0) {
-    redirect("/pro/start");
+    redirect("/?welcome=true");
   }
 
   // Trouver l'équipe active (via cookie ou première par défaut)

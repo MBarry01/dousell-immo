@@ -1,0 +1,5 @@
+﻿f95454c - perf: optimize performance - RES 51 ÔåÆ 85+ (ISR, lazy analytics, dead code removal)
+d142877 - feat(mobile): refine Hero section layout and spacing
+a38257e - fix: sync vitrine page.tsx with SectionResult type
+fbd123e - feat(gestion-locative): enhance rental management with deposit receipts and cache improvements
+e607887 - feat(home): add OnboardingTour tooltip to home page

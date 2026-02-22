@@ -150,7 +150,7 @@ export function AdCertificationUpload({ className, onUploadSuccess }: AdCertific
                                     type="file"
                                     accept="application/pdf,image/*"
                                     onChange={handleFileSelect}
-                                    className="hidden"
+                                    className="sr-only"
                                 />
 
                                 {uploading ? (

@@ -35,6 +35,8 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [hasDrawn, setHasDrawn] = useState(false);
+    const logoInputRef = useRef<HTMLInputElement>(null);
+    const signatureInputRef = useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = useState({
         company_name: initialData?.company_name || '',
@@ -251,7 +253,10 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                             </div>
                         )}
                     </div>
-                    <label className="block">
+                    <label
+                        htmlFor="config-logo-upload"
+                        className="block w-full text-left"
+                    >
                         <div className={`h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${logoPreview
                             ? 'border-primary/50 bg-primary/5'
                             : 'border-slate-300 dark:border-gray-700 bg-slate-50 dark:bg-gray-900/20 hover:border-primary/50'
@@ -269,6 +274,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                             )}
                         </div>
                         <input
+                            id="config-logo-upload"
                             type="file"
                             accept="image/png,image/jpeg,image/webp"
                             className="hidden"
@@ -330,7 +336,10 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
 
                     {signatureMode === 'upload' ? (
                         /* Upload Mode */
-                        <label className="block">
+                        <label
+                            htmlFor="config-signature-upload"
+                            className="block w-full text-left"
+                        >
                             <div className={`h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${signaturePreview
                                 ? 'border-primary/50 bg-primary/5'
                                 : 'border-slate-300 dark:border-gray-700 bg-slate-50 dark:bg-gray-900/20 hover:border-primary/50'
@@ -348,6 +357,7 @@ export function ConfigForm({ initialData }: ConfigFormProps) {
                                 )}
                             </div>
                             <input
+                                id="config-signature-upload"
                                 type="file"
                                 accept="image/png,image/jpeg,image/webp"
                                 className="hidden"

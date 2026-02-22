@@ -1967,7 +1967,7 @@ export const Constants = {
 ---
 ## 2. UI COMPONENTS (Existing)
 Utilise ces composants pour construire l'interface.
-# 🗺️ MAP DES COMPOSANTS (230)
+# 🗺️ MAP DES COMPOSANTS (231)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -2188,6 +2188,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<toggle-group />** (Path: `components\ui\toggle-group.tsx`)
 - **<tooltip />** (Path: `components\ui\tooltip.tsx`)
 - **<touchable />** (Path: `components\ui\touchable.tsx`)
+- **<upsell-management-modal />** (Path: `components\ui\upsell-management-modal.tsx`)
 - **<verified-badge />** (Path: `components\ui\verified-badge.tsx`)
 - **<workspace-switch />** (Path: `components\ui\workspace-switch.tsx`)
 - **<welcome-modal-client />** (Path: `components\welcome-modal-client.tsx`)
