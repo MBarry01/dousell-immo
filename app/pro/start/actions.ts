@@ -172,6 +172,18 @@ export async function submitOnboarding(formData: OnboardingData, existingUserId?
         if (memberError) {
             console.error("Team Member Error:", memberError);
         }
+
+        // 6. Associer les biens existants de l'utilisateur à la nouvelle équipe
+        // Les biens créés avant l'activation pro ont team_id = NULL
+        const { error: propertiesError } = await supabase
+            .from('properties')
+            .update({ team_id: teamData.id })
+            .eq('owner_id', userId)
+            .is('team_id', null);
+
+        if (propertiesError) {
+            console.error("Properties Association Error:", propertiesError);
+        }
     }
 
     return {

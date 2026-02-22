@@ -174,7 +174,7 @@ export default function NewInventoryReportPage() {
                     <div className={`mt-4 p-4 rounded-xl border flex items-center justify-between ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
                         <div>
                             <h3 className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>Nombre de chambres</h3>
-                            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>Pièces générées dans l'état des lieux</p>
+                            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>Pièces générées dans l&apos;état des lieux</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <button

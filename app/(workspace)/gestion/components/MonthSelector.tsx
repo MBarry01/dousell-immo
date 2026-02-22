@@ -81,7 +81,7 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange, minD
                         onClick={handleToday}
                         className={`text-xs transition-colors hover:text-primary ${isDark ? 'text-slate-400' : 'text-slate-600'}`}
                     >
-                        Aujourd'hui
+                        Aujourd&apos;hui
                     </button>
                 )}
             </div>
