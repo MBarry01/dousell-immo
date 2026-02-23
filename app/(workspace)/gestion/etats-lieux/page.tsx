@@ -1,6 +1,6 @@
 import { getInventoryReports } from './actions';
 import { EtatsLieuxContent } from './components/EtatsLieuxContent';
-import { getUserTeamContext } from "@/lib/team-permissions.server";
+import { getUserTeamContext } from "@/lib/team-context";
 import { getActivationData } from "@/lib/activation/get-activation-stage";
 import { ActivationInlineNotice } from "@/components/activation/ActivationInlineNotice";
 

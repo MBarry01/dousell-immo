@@ -1,5 +1,6 @@
 import { redirect, notFound } from "next/navigation";
-import { getUserTeamContext, hasTeamPermission } from "@/lib/team-permissions.server";
+import { getUserTeamContext } from "@/lib/team-context";
+import { hasTeamPermission } from "@/lib/team-permissions.server";
 import { getTeamPropertyById } from "../../actions";
 import { EditBienClient } from "../edit-client";
 

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { getUserTeamContext } from "@/lib/team-context";
+import { type UserTeamContext } from "@/types/team";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -10,8 +11,9 @@ import { revalidatePath } from "next/cache";
  */
 export async function getOwnerUnreadCounts() {
   try {
-    const { teamId, user } = await getUserTeamContext();
-    if (!user) return { unreadMessages: 0, pendingMaintenance: 0 };
+    const context = await getUserTeamContext();
+    if (!context || !context.teamId || !context.user) return { unreadMessages: 0, pendingMaintenance: 0 };
+    const { teamId, user } = context as Required<Pick<UserTeamContext, 'teamId' | 'user'>>;
 
     const supabase = await createClient();
 
@@ -59,8 +61,9 @@ export async function getOwnerUnreadCounts() {
  */
 export async function markMaintenanceAsViewed() {
   try {
-    const { teamId, user } = await getUserTeamContext();
-    if (!user) return;
+    const context = await getUserTeamContext();
+    if (!context || !context.teamId || !context.user) return;
+    const { teamId, user } = context as Required<Pick<UserTeamContext, 'teamId' | 'user'>>;
 
     const supabase = await createClient();
 

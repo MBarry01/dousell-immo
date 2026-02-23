@@ -193,7 +193,7 @@ export default function EditPropertyPage() {
         if (result.error) {
           toast.error("Erreur", { description: result.error });
         } else {
-          toast.success("Annonce mise à jour avec succès !", {
+          toast.success("Bien mis à jour avec succès !", {
             description: "Vos modifications ont été enregistrées.",
           });
           router.push("/compte/mes-biens");
@@ -243,7 +243,7 @@ export default function EditPropertyPage() {
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             Édition
           </p>
-          <h1 className="text-3xl font-semibold">Modifier mon annonce</h1>
+          <h1 className="text-3xl font-semibold">Modifier mon bien</h1>
         </div>
       </div>
 

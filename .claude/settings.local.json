@@ -93,7 +93,10 @@
       "mcp__plugin_playwright_playwright__browser_wait_for",
       "mcp__plugin_playwright_playwright__browser_fill_form",
       "mcp__plugin_playwright_playwright__browser_take_screenshot",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(tail:*)",
+      "mcp__plugin_playwright_playwright__browser_install",
+      "Bash(npx playwright:*)"
     ]
   }
 }

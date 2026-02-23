@@ -34,7 +34,7 @@ export const reactivateSubscription = safeAction(
     const supabase = await createClient();
 
     // ✅ NOUVELLE ARCHITECTURE: Réactivation au niveau équipe
-    const { getUserTeamContext } = await import("@/lib/team-permissions.server");
+    const { getUserTeamContext } = await import("@/lib/team-context");
     const { activateTeamTrial } = await import("@/lib/subscription");
 
     const teamContext = await getUserTeamContext();
@@ -137,7 +137,7 @@ export async function getSubscriptionStatus() {
   }
 
   // ✅ NOUVELLE ARCHITECTURE: Récupérer depuis équipe
-  const { getUserTeamContext } = await import("@/lib/team-permissions.server");
+  const { getUserTeamContext } = await import("@/lib/team-context");
   const { getTeamSubscriptionStatus } = await import("@/lib/subscription");
 
   const teamContext = await getUserTeamContext();

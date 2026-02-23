@@ -6,7 +6,9 @@ import { getBaseUrl } from '@/lib/utils';
 
 export async function POST(_req: Request) {
     try {
-        const { teamId, team } = await getUserTeamContext();
+        const context = await getUserTeamContext();
+        if (!context) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+        const { teamId, team } = context;
         const supabase = await createClient();
 
         // 1. Check if team already has a Connect Account

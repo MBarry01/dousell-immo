@@ -3,7 +3,8 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireTeamPermission, getUserTeamContext } from "@/lib/team-permissions.server";
+import { getUserTeamContext } from "@/lib/team-context";
+import { requireTeamPermission } from "@/lib/team-permissions.server";
 import { invalidatePropertyCaches, invalidateRentalCaches } from "@/lib/cache/invalidation";
 import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
 

@@ -20,6 +20,10 @@ interface OnboardingData {
 
     // Goals
     teamSize?: string;
+
+    // Billing
+    plan?: string;
+    interval?: string;
 }
 
 export async function submitOnboarding(formData: OnboardingData, existingUserId?: string | null) {
@@ -146,11 +150,11 @@ export async function submitOnboarding(formData: OnboardingData, existingUserId?
             signature_url: formData.signatureUrl || null,
             created_by: userId,
             status: 'active',
-            // Subscription fields (STANDARD SAAS ONBOARDING: Always Start with Pro Trial)
-            subscription_tier: 'pro',
+            // Subscription fields (STANDARD SAAS ONBOARDING: Start with Trial based on chosen plan)
+            subscription_tier: formData.plan || 'pro',
             subscription_status: 'trialing',
             subscription_trial_ends_at: trialEndsAt.toISOString(),
-            intended_plan: formData.teamSize === '1-2' ? 'starter' : 'pro', // Simple heuristic or pass explicitly later
+            intended_plan: formData.plan || 'pro',
         })
         .select()
         .single();

@@ -49,8 +49,10 @@ export default function PricingSection() {
   }, []);
 
   const handleUpgrade = async (planId: string) => {
-    if (!isLoggedIn) {
-      router.push(`/register?plan=${planId}&interval=${isAnnual ? 'annual' : 'monthly'}`);
+    // Si l'utilisateur n'est pas connecté OU qu'il n'a pas encore de plan/équipe configuré
+    // on l'envoie vers le workflow d'onboarding (Wizard) avec les paramètres
+    if (!isLoggedIn || (!currentPlan && !subscriptionStatus)) {
+      router.push(`/pro/start?plan=${planId}&interval=${isAnnual ? 'annual' : 'monthly'}`);
       return;
     }
 
@@ -60,7 +62,7 @@ export default function PricingSection() {
       return;
     }
 
-    // Direct Stripe Checkout for logged-in users
+    // Direct Stripe Checkout for logged-in users WHO ALREADY HAVE A TEAM
     try {
       setLoadingPlanId(planId);
       const res = await fetch('/api/subscription/checkout', {
@@ -262,13 +264,26 @@ export default function PricingSection() {
               </div>
 
               {/* Description */}
-              <p className="text-sm text-gray-500 mb-8">{plan.description}</p>
+              <p className="text-sm text-gray-500 mb-6">{plan.description}</p>
+
+              {/* Free Trial Badge */}
+              {!plan.isEnterprise && (
+                <div className="mb-5 flex justify-center">
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border ${plan.popular
+                    ? 'bg-[#F4C430]/15 text-[#F4C430] border-[#F4C430]/30 shadow-[0_0_15px_rgba(244,196,48,0.15)]'
+                    : 'bg-white/5 text-gray-300 border-white/10'
+                    }`}>
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    14j d'essai (renouvelable)
+                  </span>
+                </div>
+              )}
 
               {/* CTA Button */}
               {plan.isEnterprise ? (
                 <Link
                   href="/contact?subject=enterprise"
-                  className="block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 bg-white/10 text-white hover:bg-white/20 border border-white/10"
+                  className="block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 bg-white/10 text-white hover:bg-white/20 border border-white/10 mt-auto"
                 >
                   {plan.cta}
                 </Link>
@@ -280,16 +295,19 @@ export default function PricingSection() {
                   Gérer l&apos;abonnement
                 </button>
               ) : (
-                <button
-                  onClick={() => handleUpgrade(plan.id)}
-                  disabled={loadingPlanId === plan.id}
-                  className={`block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 ${plan.popular
-                    ? "bg-[#F4C430] text-black hover:bg-[#FFD700] shadow-lg shadow-[#F4C430]/25 hover:shadow-[#F4C430]/40 hover:-translate-y-1"
-                    : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
-                    } ${loadingPlanId === plan.id ? 'opacity-70 cursor-wait' : ''}`}
-                >
-                  {loadingPlanId === plan.id ? 'Chargement...' : plan.cta}
-                </button>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => handleUpgrade(plan.id)}
+                    disabled={loadingPlanId === plan.id}
+                    className={`block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 ${plan.popular
+                      ? "bg-[#F4C430] text-black hover:bg-[#FFD700] shadow-lg shadow-[#F4C430]/25 hover:shadow-[#F4C430]/40 hover:-translate-y-1"
+                      : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
+                      } ${loadingPlanId === plan.id ? 'opacity-70 cursor-wait' : ''}`}
+                  >
+                    {loadingPlanId === plan.id ? 'Chargement...' : plan.cta}
+                  </button>
+                  <p className="text-[11px] text-center text-gray-500 font-medium uppercase tracking-wider">Sans engagement • Sans carte</p>
+                </div>
               )}
 
 

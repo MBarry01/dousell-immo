@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { TeamRole } from "@/types/team";
+import { TeamRole, UserTeamContext } from "@/types/team";
 
 /**
  * Récupère le contexte d'équipe de l'utilisateur connecté (Pattern Enterprise)
@@ -10,20 +10,16 @@ import { TeamRole } from "@/types/team";
  * L'utilisation de 'cache' de React garantit que la requête n'est exécutée 
  * qu'une seule fois par cycle de rendu (Request Memoization).
  */
-export const getUserTeamContext = cache(async () => {
+export const getUserTeamContext = cache(async (): Promise<UserTeamContext | null> => {
     const t0 = Date.now();
     const LOG = "[TeamContext]";
     const supabase = await createClient();
 
     // 1. Récupérer l'utilisateur
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError) {
-        console.error(LOG, "✗ Auth error:", authError.message, authError.status);
-        redirect("/auth/login");
-    }
-    if (!user) {
-        console.warn(LOG, "✗ Pas d'utilisateur authentifié");
-        redirect("/auth/login");
+    if (authError || !user) {
+        console.warn(LOG, "✗ Pas d'utilisateur authentifié:", authError?.message);
+        return null;
     }
     console.log(LOG, `✓ User récupéré en ${Date.now() - t0}ms:`, user.id.slice(0, 8), user.email);
 
@@ -83,23 +79,18 @@ export const getUserTeamContext = cache(async () => {
         }
     }
 
-    // 4. Auto-Healing: Si pas d'équipe (cas rare post-migration ou nouveau user essayant d'accéder à gestion)
-    // On redirige vers l'onboarding pro
+    // 4. Auto-Healing: Si pas d'équipe
     if (teamError || !memberData) {
-        console.warn(LOG, `✗ No active team for user ${user.id}`, {
-            teamError: teamError?.message,
-            membershipsCount: memberships?.length ?? 0,
-            memberData: !!memberData,
-        });
-        redirect("/pro/start");
+        console.warn(LOG, `✗ No active team for user ${user.id}`);
+        return null; // Return null instead of redirecting here, let the caller decide
     }
 
     // teams est renvoyé comme un objet simple
     const team = Array.isArray(memberData.teams) ? memberData.teams[0] : memberData.teams;
 
     if (!team) {
-        console.warn(LOG, `✗ Team data missing for user ${user.id}, memberData.teams:`, memberData.teams);
-        redirect("/pro/start");
+        console.warn(LOG, `✗ Team data missing for user ${user.id}`);
+        return null;
     }
 
     console.log(LOG, `✓ Contexte complet en ${Date.now() - t0}ms:`, {
@@ -115,7 +106,11 @@ export const getUserTeamContext = cache(async () => {
         user,
         team, // L'objet équipe complet
         teamId: memberData.team_id as string, // L'ID pour les requêtes (plus propre que team.id)
+        team_id: memberData.team_id as string, // Compatibilité avec UserTeamContext
+        team_name: team.name, // Compatibilité avec UserTeamContext
+        team_slug: team.slug, // Compatibilité avec UserTeamContext
         role: memberData.role as TeamRole, // Le rôle typé pour les permissions
+        user_role: memberData.role as TeamRole, // Compatibilité avec UserTeamContext
         subscription_status: team.subscription_status,
         subscription_trial_ends_at: team.subscription_trial_ends_at,
         subscription_tier: team.subscription_tier,

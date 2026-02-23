@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { submitOnboarding } from "@/app/pro/start/actions";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
 type _Step = "user" | "agency" | "goals" | "confirmation";
@@ -34,6 +35,10 @@ interface WizardData {
     // Goals Step
     propertyTypes: string[];
     teamSize: string;
+
+    // Plan & Billing
+    plan: string;
+    interval: string;
 }
 
 const STEPS = [
@@ -45,6 +50,7 @@ const STEPS = [
 
 export function WizardForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [currentStep, setCurrentStep] = useState<number>(0);
     const [direction, setDirection] = useState<number>(0);
     const [isPending, setIsPending] = useState(false);
@@ -64,6 +70,8 @@ export function WizardForm() {
         signatureUrl: "",
         propertyTypes: [],
         teamSize: "",
+        plan: searchParams.get("plan") || "pro",
+        interval: searchParams.get("interval") || "monthly",
     });
 
     // Detecter si l'utilisateur est deja connecte et pre-remplir

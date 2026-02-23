@@ -10,7 +10,6 @@ import { SplashProvider } from "@/components/providers/splash-provider";
 import { CookieConsent } from "@/components/ui/cookie-consent";
 import { LazyAnalytics } from "@/components/analytics/lazy-analytics";
 import { LazySpeedInsights } from "@/components/analytics/lazy-speed-insights";
-import { PhoneMissingDialog } from "@/components/auth/phone-missing-dialog";
 import { ThemeProvider } from "@/components/theme-provider";
 import OneSignalProvider from "@/components/providers/onesignal-provider";
 
@@ -248,7 +247,6 @@ export default async function RootLayout({
             <InstallPrompt />
             <Toaster position="top-center" richColors />
             <CookieConsent />
-            <PhoneMissingDialog />
             <OneSignalProvider userId={user?.id} />
           </SplashProvider>
           {/* Analytics lazy-loaded après interaction utilisateur (GA, Clarity, GTM) */}

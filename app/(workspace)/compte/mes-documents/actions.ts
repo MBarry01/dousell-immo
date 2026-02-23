@@ -569,9 +569,9 @@ export async function getRentalDocuments(filters?: { propertyId?: string; leaseI
 
   // Utiliser le contexte d'équipe pour supporter le mode SaaS
   const { getUserTeamContext } = await import("@/lib/team-context");
-  const { teamId, user } = await getUserTeamContext();
-
-  if (!user || !teamId) return { success: false, error: "Non autorisé" };
+  const context = await getUserTeamContext();
+  if (!context || !context.user || !context.teamId) return { success: false, error: "Non autorisé" };
+  const { teamId, user } = context;
 
   try {
     // 1. Documents manuels (Uploadés par owner OU locataire sur un bail du owner)

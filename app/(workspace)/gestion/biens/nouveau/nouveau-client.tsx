@@ -56,6 +56,9 @@ import { OwnerSelector } from "@/components/gestion/OwnerSelector";
 import { createTeamProperty, generateSEODescription, type TeamPropertyData } from "../actions";
 import { UpgradeModal } from "@/components/gestion/UpgradeModal";
 import { scrollToTop } from "@/lib/scroll-utils";
+import { useAuth } from "@/hooks/use-auth";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { isValidPhoneNumber } from "react-phone-number-input";
 
 type PublishMode = "publish" | "draft" | "schedule";
 
@@ -83,6 +86,7 @@ const STEPS = [
 
 export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,7 +111,10 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
     city: "",
     district: "",
     region: "",
+    userPhone: "", // Champ temporaire si manquant
   });
+
+  const hasExistingPhone = !!(user?.user_metadata?.phone);
 
   // Image upload state
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -324,6 +331,10 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
           setError("Le prix est requis");
           return false;
         }
+        if (!hasExistingPhone && (!formData.userPhone || !isValidPhoneNumber(formData.userPhone))) {
+          setError("Votre numéro de téléphone est requis pour publier");
+          return false;
+        }
         return true;
       case 2:
         if (!formData.address) {
@@ -397,6 +408,14 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
         region: formData.region
       } : undefined,
     };
+
+    // 0. Update User Phone if needed
+    if (!hasExistingPhone && formData.userPhone) {
+      const supabase = createClient();
+      await supabase.auth.updateUser({
+        data: { phone: formData.userPhone }
+      });
+    }
 
     const result = await createTeamProperty(
       teamId,
@@ -557,7 +576,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
 
               {/* Title */}
               <div>
-                <Label className="text-sm text-muted-foreground mb-2 block" required>Titre de l&apos;annonce</Label>
+                <Label className="text-sm text-muted-foreground mb-2 block" required>Titre du bien</Label>
                 <input
                   type="text"
                   value={formData.title}
@@ -585,6 +604,28 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                   </span>
                 </div>
               </div>
+
+              {/* Smart Phone Collection */}
+              {!hasExistingPhone && (
+                <div className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="flex items-center gap-2 text-primary font-semibold mb-2">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Finalisez votre profil</span>
+                  </div>
+                  <Label className="text-sm text-muted-foreground mb-2 block" required>
+                    Votre numéro WhatsApp (requis pour le contact)
+                  </Label>
+                  <PhoneInput
+                    value={formData.userPhone as any}
+                    onChange={(val) => updateField("userPhone", val || "")}
+                    defaultCountry="SN"
+                    className="h-12 bg-card"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Ce numéro sera utilisé pour que les locataires puissent vous contacter directement.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

@@ -82,7 +82,7 @@ export async function getRentalTransactions(leaseIds: string[], teamId?: string)
         const { data, error } = await supabase
           .from("rental_transactions")
           .select(
-            "id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end, payment_method, payment_ref"
+            "id, lease_id, period_month, period_year, status, amount_due, amount_paid, paid_at, period_start, period_end, payment_method, payment_ref"
           )
           .eq("team_id", teamId)
           .order("period_year", { ascending: false })
@@ -116,7 +116,7 @@ export async function getRentalTransactions(leaseIds: string[], teamId?: string)
       const { data, error } = await supabase
         .from("rental_transactions")
         .select(
-          "id, lease_id, period_month, period_year, status, amount_due, paid_at, period_start, period_end, payment_method, payment_ref"
+          "id, lease_id, period_month, period_year, status, amount_due, amount_paid, paid_at, period_start, period_end, payment_method, payment_ref"
         )
         .in("lease_id", leaseIds)
         .order("period_year", { ascending: false })
@@ -437,7 +437,7 @@ export async function getUserDashboardInfo(userId: string, email: string) {
           .from("profiles")
           .select("gestion_locative_status, gestion_locative_enabled")
           .eq("id", userId)
-          .single(),
+          .maybeSingle(),
       ]);
 
       return {

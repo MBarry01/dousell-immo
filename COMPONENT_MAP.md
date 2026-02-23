@@ -1,7 +1,11 @@
-# 🗺️ MAP DES COMPOSANTS (231)
+# 🗺️ MAP DES COMPOSANTS (235)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
+- **<ActivationBanner />** (Path: `components\activation\ActivationBanner.tsx`)
+- **<ActivationInlineNotice />** (Path: `components\activation\ActivationInlineNotice.tsx`)
+- **<ActivationInlineNoticeClient />** (Path: `components\activation\ActivationInlineNoticeClient.tsx`)
+- **<ActivationStep />** (Path: `components\activation\ActivationStep.tsx`)
 - **<admin-sidebar-client />** (Path: `components\admin\admin-sidebar-client.tsx`)
 - **<admin-sidebar />** (Path: `components\admin\admin-sidebar.tsx`)
 - **<admin-topbar />** (Path: `components\admin\admin-topbar.tsx`)

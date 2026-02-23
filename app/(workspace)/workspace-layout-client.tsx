@@ -49,7 +49,7 @@ export function WorkspaceLayoutClient({
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-background">
+    <div suppressHydrationWarning className="flex h-dvh flex-col overflow-hidden bg-background">
       {/* Header - Full Width Top */}
       <WorkspaceHeader
         user={user}

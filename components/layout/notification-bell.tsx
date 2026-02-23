@@ -12,7 +12,7 @@ import {
   MessageSquare,
   Wrench,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -72,6 +72,9 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
   const { notifications, unreadCount, loading, refetch } = useNotifications(userId);
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
+
+  const pathname = usePathname();
+  const isWorkspace = pathname?.startsWith("/gestion") || pathname?.startsWith("/admin") || pathname?.startsWith("/compte") || pathname?.startsWith("/locataire");
 
   const handleNotificationClick = async (notification: Notification) => {
     if (!notification.is_read) {
@@ -190,8 +193,8 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
           <div className="divide-y divide-border">
             <AnimatePresence mode="popLayout">
               {notifications.map((notification) => {
-                const Icon = notificationIcons[notification.type];
-                const iconClasses = notificationStyles[notification.type];
+                const Icon = notificationIcons[notification.type as NotificationType] || Info;
+                const iconClasses = notificationStyles[notification.type as NotificationType] || notificationStyles.info;
 
                 return (
                   <motion.div
@@ -247,7 +250,10 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetContent
             side="bottom"
-            className="rounded-t-2xl bg-background p-0 pb-safe"
+            className={cn(
+              "rounded-t-2xl p-0 pb-safe",
+              !isWorkspace ? "dark bg-[#05080c] text-white border-white/10" : "bg-background"
+            )}
             hideClose
           >
             <SheetTitle className="sr-only">Notifications</SheetTitle>
@@ -269,7 +275,12 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
         {bellButton}
       </PopoverTrigger>
       <PopoverContent
-        className="w-96 max-w-[90vw] p-0 rounded-2xl border border-border bg-popover text-popover-foreground shadow-2xl z-[100]"
+        className={cn(
+          "w-96 max-w-[90vw] p-0 rounded-2xl shadow-2xl z-[100]",
+          !isWorkspace
+            ? "dark bg-[#05080c] text-white border border-white/10"
+            : "border border-border bg-popover text-popover-foreground"
+        )}
         align="end"
         sideOffset={8}
       >

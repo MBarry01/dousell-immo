@@ -155,8 +155,7 @@ export function BiensClient({
         {/* Header */}
         <div id="tour-biens-header" className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8 text-left">
           <div className="flex flex-col items-start">
-            <h1 className="text-2xl md:text-4xl font-black tracking-tighter flex items-center justify-start gap-3">
-              <Building2 className="w-8 h-8 md:w-10 h-10 text-primary" />
+            <h1 className="text-2xl md:text-4xl font-black tracking-tighter">
               Biens de {teamName}
             </h1>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-2">

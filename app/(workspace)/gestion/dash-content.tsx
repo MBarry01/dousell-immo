@@ -140,9 +140,11 @@ export default async function DashboardContent({
     let occupancyBase = totalProperties || 0;
     if (occupancyBase === 0 && activeLeasesCount > 0) {
         const uniqueAddresses = new Set(
-            activeLeases.map((l: any) => l.property_address?.toLowerCase().trim())
+            activeLeases
+                .map((l: any) => l.property_address?.toLowerCase().trim())
+                .filter(Boolean) // Exclure les adresses NULL/vides
         );
-        occupancyBase = uniqueAddresses.size;
+        occupancyBase = uniqueAddresses.size || activeLeasesCount;
     }
     const occupancyRate = Math.min(
         occupancyBase > 0
@@ -214,12 +216,28 @@ export default async function DashboardContent({
         const entry = txByMonth.get(key) || { collected: 0, expected: 0 };
         const amount = Number(t.amount_due || 0);
         entry.expected += amount;
-        if (t.status === 'paid') entry.collected += amount;
+        if (t.status === 'paid') {
+            // Utiliser amount_paid si dispo (paiements partiels), sinon amount_due
+            entry.collected += (t.amount_paid != null) ? Number(t.amount_paid) : amount;
+        }
         txByMonth.set(key, entry);
     }
 
+    // Trouver le premier mois avec des données pour ne pas biaiser le graphique
     const revenueHistory = [];
-    for (let i = 11; i >= 0; i--) {
+    let startOffset = 11;
+    if (txByMonth.size > 0) {
+        for (let i = 11; i >= 0; i--) {
+            const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+            if (txByMonth.has(key)) {
+                startOffset = i;
+                break;
+            }
+        }
+    }
+
+    for (let i = startOffset; i >= 0; i--) {
         const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
         const monthNum = date.getMonth() + 1;
         const year = date.getFullYear();
@@ -264,7 +282,8 @@ export default async function DashboardContent({
         .filter((t: any) => leaseIdSet.has(t.lease_id))
         .map((t: any) => ({
             ...t,
-            amount_paid: (t.status?.toLowerCase() === 'paid') ? t.amount_due : 0
+            // Préserver amount_paid réel (paiements partiels), sinon fallback
+            amount_paid: t.amount_paid ?? ((t.status?.toLowerCase() === 'paid') ? t.amount_due : 0)
         }));
 
     return (

@@ -4,7 +4,7 @@ import { useTheme } from "@/components/theme-provider";
 import { KPICardSkeleton, ChartSkeleton, ListSkeleton } from "./components/PremiumSkeletons";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function LoadingClient() {
+export default function LoadingClient() {
     const { isDark } = useTheme();
 
     return (

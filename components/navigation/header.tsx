@@ -17,7 +17,7 @@ import { UserNav } from "@/components/layout/user-nav";
 
 const navLinks = [
   { href: "/", label: "Accueil" },
-  { href: "/recherche", label: "Annonce" },
+  { href: "/recherche", label: "Biens" },
   { href: "/pro", label: "À propos" },
   { href: "/planifier-visite", label: "Contact" },
 ];
@@ -112,7 +112,7 @@ export const Header = () => {
                   id="tour-home-add-mobile"
                   href="/compte/deposer"
                   className="relative flex items-center justify-center rounded-full p-2.5 transition-all active:scale-95 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-                  aria-label="Déposer une annonce"
+                  aria-label="Déposer un bien"
                 >
                   <Plus className="h-5 w-5 text-white" />
                 </Link>
@@ -209,7 +209,7 @@ export const Header = () => {
                   id="tour-home-add-desktop"
                   href="/compte/deposer"
                   className="relative flex items-center justify-center rounded-full p-2 transition-all active:scale-95 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-                  aria-label="Déposer une annonce"
+                  aria-label="Déposer un bien"
                   style={{ zIndex: 1 }}
                 >
                   <Plus className="h-4 w-4 text-white" />

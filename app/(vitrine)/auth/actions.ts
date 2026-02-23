@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/server";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { checkPasswordHIBPServer } from "@/app/(vitrine)/actions/check-hibp-server";
 import { getBaseUrl } from "@/lib/utils";
+import { getSmartRedirectPath } from "@/lib/auth-redirect";
 
 export async function signup(formData: FormData) {
   const supabase = await createClient();
@@ -37,9 +38,9 @@ export async function signup(formData: FormData) {
   }
 
   // Validation du mot de passe
-  if (password.length < 6) {
+  if (password.length < 8) {
     return {
-      error: "Le mot de passe doit contenir au moins 6 caractères",
+      error: "Le mot de passe doit contenir au moins 8 caractères",
     };
   }
 
@@ -154,15 +155,8 @@ export async function signup(formData: FormData) {
             }
           );
 
-          // Utiliser listUsers avec pagination limitée (max 1000 users)
-          const { data: usersData } = await supabaseAdmin.auth.admin.listUsers({
-            page: 1,
-            perPage: 1000,
-          });
-
-          const existingUser = usersData?.users?.find(
-            u => u.email?.toLowerCase() === email.trim().toLowerCase()
-          );
+          const { data: { users } } = await supabaseAdmin.auth.admin.listUsers();
+          const existingUser = users.find(u => u.email === email.trim().toLowerCase());
 
           if (existingUser?.app_metadata) {
             const providers = existingUser.app_metadata.providers as string[] | undefined;
@@ -326,66 +320,75 @@ export async function resendConfirmationEmail(email: string) {
 }
 
 export async function login(formData: FormData) {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const turnstileToken = formData.get("turnstileToken") as string;
 
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const turnstileToken = formData.get("turnstileToken") as string;
-
-  if (!email || !password) {
-    return {
-      error: "Email et mot de passe requis",
-    };
-  }
-
-  // Vérification Turnstile
-  if (!turnstileToken) {
-    return {
-      error: "Vérification anti-robot requise. Veuillez réessayer.",
-    };
-  }
-
-  const verification = await verifyTurnstileToken(turnstileToken);
-  if (!verification.success) {
-    return {
-      error: verification.error || "Vérification anti-robot échouée. Veuillez réessayer.",
-    };
-  }
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email: email.trim().toLowerCase(),
-    password,
-  });
-
-  if (error) {
-    console.error("Login error:", error);
-    let errorMessage = "Email ou mot de passe incorrect";
-
-    if (error.message.includes("Email not confirmed")) {
-      errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-    } else if (error.message.includes("Invalid login credentials")) {
-      errorMessage = "Email ou mot de passe incorrect";
-    } else if (
-      error.message.includes("rate limit") ||
-      error.message.includes("too many") ||
-      error.message.includes("rate_limit_exceeded") ||
-      error.code === "429"
-    ) {
-      errorMessage = "Trop de tentatives. Pour votre sécurité, veuillez attendre 5 minutes avant de réessayer.";
+    if (!email || !password) {
+      return { error: "Email et mot de passe requis" };
     }
 
+    const verification = await verifyTurnstileToken(turnstileToken);
+    if (!verification.success) {
+      return {
+        error: verification.error || "Vérification anti-robot échouée. Veuillez réessayer.",
+      };
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
+
+    if (error) {
+      console.error("[LoginAction] ✗ Supabase error:", error.message);
+      let errorMessage = "Email ou mot de passe incorrect";
+
+      if (error.message.includes("Email not confirmed")) {
+        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+      } else if (error.message.includes("Invalid login credentials")) {
+        errorMessage = "Email ou mot de passe incorrect";
+      } else if (
+        error.message.includes("rate limit") ||
+        error.message.includes("too many") ||
+        error.message.includes("rate_limit_exceeded") ||
+        error.code === "429"
+      ) {
+        errorMessage = "Trop de tentatives. Pour votre sécurité, veuillez attendre 5 minutes avant de réessayer.";
+      }
+
+      return {
+        error: errorMessage,
+      };
+    }
+
+    revalidatePath("/", "layout");
+
     return {
-      error: errorMessage,
+      success: true,
+    };
+  } catch (err: any) {
+    console.error("[LoginAction] Server error:", err);
+    return {
+      error: "Une erreur serveur est survenue. Veuillez réessayer.",
     };
   }
+}
 
-  revalidatePath("/", "layout");
-
-  // Retourner un succès au lieu de redirect() pour que le client puisse
-  // gérer le rafraîchissement de l'état d'authentification
-  return {
-    success: true,
-  };
+/**
+ * Version client-callable qui détermine la redirection après connexion.
+ * Déplacé ici pour éviter les problèmes de bundle
+ */
+export async function determinePostLoginRedirect(explicitNext?: string): Promise<{ redirectPath: string }> {
+  try {
+    const redirectPath = await getSmartRedirectPath(explicitNext);
+    return { redirectPath };
+  } catch (error) {
+    console.error("Error determining redirect:", error);
+    return { redirectPath: "/" };
+  }
 }
 
 export async function signInWithGoogle() {
@@ -472,9 +475,9 @@ export async function updatePassword(formData: FormData) {
   const password = formData.get("password") as string;
   const redirectPath = formData.get("redirect") as string || "/compte";
 
-  if (!password || password.length < 6) {
+  if (!password || password.length < 8) {
     return {
-      error: "Le mot de passe doit contenir au moins 6 caractères",
+      error: "Le mot de passe doit contenir au moins 8 caractères",
     };
   }
 

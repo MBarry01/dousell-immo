@@ -128,6 +128,14 @@ export function calculateFinancials(
     leases.forEach(lease => {
         if (lease.status === 'active') {
 
+            // Vérifier que le bail a démarré avant ou pendant le mois cible
+            if (lease.start_date) {
+                const leaseStart = parseISO(lease.start_date);
+                const leaseStartMonth = new Date(leaseStart.getFullYear(), leaseStart.getMonth(), 1);
+                const targetMonthStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+                if (targetMonthStart < leaseStartMonth) return; // Bail pas encore actif ce mois-là
+            }
+
             // Règle 1 : L'attendu vient du bail
             const monthlyRent = Number(lease.monthly_amount) || 0;
             totalExpected += monthlyRent;
@@ -164,11 +172,14 @@ export function calculateFinancials(
                     paidCount++;
                     // Calcul délai (si payé)
                     if (leaseTransaction.paid_at) {
-                        const paidDate = new Date(leaseTransaction.paid_at);
+                        // Normaliser à minuit pour éviter les erreurs dues à l'heure (Math.ceil 18.6j → 19j)
+                        const paidRaw = new Date(leaseTransaction.paid_at);
+                        const paidDate = new Date(paidRaw.getFullYear(), paidRaw.getMonth(), paidRaw.getDate());
+                        const dueDateNorm = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
                         // On ne compte que les RETARDS (diff > 0)
-                        if (paidDate > dueDate) {
-                            const diffTime = paidDate.getTime() - dueDate.getTime();
-                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        if (paidDate > dueDateNorm) {
+                            const diffTime = paidDate.getTime() - dueDateNorm.getTime();
+                            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
                             const safeDelay = Math.max(0, diffDays);
 
                             if (safeDelay > 0) {
@@ -345,9 +356,10 @@ export function calculateDisplayStatus(
         return 'paid';
     }
 
-    // Pour les transactions non payées, vérifier si en retard
+    // Même logique de grâce que calculateFinancials (5 jours)
+    const GRACE_PERIOD_DAYS = 5;
     const currentDay = new Date().getDate();
-    if (isCurrentMonth && currentDay > billingDay) {
+    if (isCurrentMonth && currentDay > billingDay + GRACE_PERIOD_DAYS) {
         return 'overdue';
     }
 

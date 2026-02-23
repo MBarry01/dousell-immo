@@ -26,7 +26,9 @@ export async function getVacantTeamProperties(): Promise<{
         const supabase = await createClient();
 
         // Récupérer le contexte équipe standardisé
-        const { teamId } = await getUserTeamContext();
+        const context = await getUserTeamContext();
+        if (!context) return { success: false, error: "Non autorisé" };
+        const { teamId } = context;
         await requireTeamPermission('properties.view');
 
         // Récupérer les biens de l'équipe qui sont disponibles (pas loués)
@@ -82,7 +84,9 @@ export async function getAllTeamProperties(): Promise<{
         const supabase = await createClient();
 
         // Récupérer le contexte équipe standardisé
-        const { teamId } = await getUserTeamContext();
+        const context = await getUserTeamContext();
+        if (!context) return { success: false, error: "Non autorisé" };
+        const { teamId } = context;
         await requireTeamPermission('properties.view');
 
         const { data: properties, error } = await supabase

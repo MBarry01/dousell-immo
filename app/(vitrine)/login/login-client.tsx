@@ -11,8 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Captcha } from "@/components/ui/captcha";
-import { login } from "@/app/(vitrine)/auth/actions";
-import { determinePostLoginRedirect } from "@/lib/auth-redirect";
+import { login, determinePostLoginRedirect } from "@/app/(vitrine)/auth/actions";
 
 export default function LoginPageContent() {
   const { user, loading } = useAuth();
@@ -26,7 +25,13 @@ export default function LoginPageContent() {
   useEffect(() => {
     if (!loading && user) {
       toast.success("Vous êtes déjà connecté");
-      router.push("/gestion");
+      if (explicitRedirect) {
+        router.push(explicitRedirect);
+      } else {
+        determinePostLoginRedirect().then(({ redirectPath }) => {
+          router.push(redirectPath);
+        });
+      }
     }
   }, [user, loading, router]);
 

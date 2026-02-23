@@ -60,12 +60,13 @@ export const SplashProvider = ({
   duration = MIN_SPLASH_DURATION,
 }: SplashProviderProps) => {
   const { loading: authLoading } = useAuth();
-  // Commencer avec splash désactivé → pas de flash en mode navigateur
+  const [mounted, setMounted] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
   const [isPWASplashActive, setIsPWASplashActive] = useState(false);
   const [minDurationPassed, setMinDurationPassed] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const isPWA = checkIsPWA();
 
     // Navigateur classique → rien à faire, children rendus normalement
@@ -84,10 +85,11 @@ export const SplashProvider = ({
     }
 
     // PWA + première visite → activer le splash
-    setTimeout(() => {
+    // Utiliser un microtask pour éviter le déclenchement immédiat pendant l'hydratation
+    Promise.resolve().then(() => {
       setShowSplash(true);
       setIsPWASplashActive(true);
-    }, 0);
+    });
     document.body.style.overflow = "hidden";
 
     // Timer pour la durée minimale (effet visuel)
@@ -143,21 +145,21 @@ export const SplashProvider = ({
     return () => clearTimeout(forceExitTimer);
   }, [showSplash, isPWASplashActive, showEveryVisit]);
 
-  // Rendu unifié pour éviter l'unmount/remount des children (source de boucles infinies)
+  // Rendu unifié avec root div stable pour éviter les erreurs d'hydratation
   return (
-    <>
+    <div className="h-full w-full">
       <AnimatePresence mode="wait">
-        {showSplash && <SplashScreen key="splash-screen" />}
+        {mounted && showSplash && <SplashScreen key="splash-screen" />}
       </AnimatePresence>
 
       <div
         key="main-content"
         className="will-change-[opacity]"
         style={{
-          opacity: showSplash ? 0 : 1,
-          pointerEvents: showSplash ? "none" : "auto",
+          opacity: (mounted && showSplash) ? 0 : 1,
+          pointerEvents: (mounted && showSplash) ? "none" : "auto",
           transition: "opacity 1s cubic-bezier(0.22, 1, 0.36, 1)",
-          visibility: showSplash ? "hidden" : "visible",
+          visibility: (mounted && showSplash) ? "hidden" : "visible",
           backgroundColor: "#05080c",
           position: "relative",
           zIndex: 1,
@@ -165,7 +167,7 @@ export const SplashProvider = ({
       >
         {children}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -162,13 +162,23 @@ export interface WorkspaceTeamData {
   subscription_tier?: string;
   subscription_status?: string;
   company_name?: string | null;
+  company_address?: string | null;
+  company_phone?: string | null;
 }
 
 export interface UserTeamContext {
+  // Core Objects (App Router integration)
+  user: any;
+  team: any;
+  teamId: string;
+  role: TeamRole;
+
+  // Legacy/Compatible fields
   team_id: string;
   team_name: string;
   team_slug: string;
   user_role: TeamRole;
+
   // 🆕 Subscription fields (optimisation: évite un appel DB séparé)
   subscription_status?: 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete';
   subscription_trial_ends_at?: string | null;

@@ -34,7 +34,9 @@ export interface LegalStats {
 }
 
 export async function getLegalStats(): Promise<LegalStats> {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { activeLeases: 0, upcomingRenewals: 0, legalRisks: 0, complianceScore: 100 };
+    const { teamId } = context;
     const supabase = await createClient();
 
     // Récupérer les baux actifs de l'équipe
@@ -81,7 +83,9 @@ export async function getLegalStats(): Promise<LegalStats> {
 }
 
 export async function getLeaseAlerts(): Promise<LeaseAlert[]> {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return [];
+    const { teamId } = context;
     const supabase = await createClient();
 
     // Récupérer les baux actifs avec date de fin pour l'équipe
@@ -146,7 +150,9 @@ export async function getLeaseAlerts(): Promise<LeaseAlert[]> {
  * Génère un préavis pour un bail donné
  */
 export async function generateNotice(formData: FormData) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('leases.terminate');
     const supabase = await createClient();
 
@@ -269,7 +275,9 @@ export async function generateNotice(formData: FormData) {
  * Récupère les transactions de loyer pour un bail donné
  */
 export async function getLeaseTransactions(leaseId: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) throw new Error("Non autorisé");
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) {
@@ -302,7 +310,9 @@ export async function getLeaseTransactions(leaseId: string) {
  * Renouveler un bail (Décision manuelle du propriétaire)
  */
 export async function renewLease(formData: FormData) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('leases.edit');
     const supabase = await createClient();
 
@@ -471,7 +481,9 @@ export async function renewLease(formData: FormData) {
  * Résilier un bail (Génère et envoie le préavis)
  */
 export async function terminateLease(formData: FormData) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('leases.terminate');
     const supabase = await createClient();
 
@@ -610,7 +622,9 @@ export async function terminateLease(formData: FormData) {
  * Récupère tous les baux actifs pour le générateur de documents
  */
 export async function getAllActiveLeases() {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return [];
+    const { teamId } = context;
     const supabase = await createClient();
 
     const { data: leases, error } = await supabase

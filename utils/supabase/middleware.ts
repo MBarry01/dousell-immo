@@ -226,8 +226,12 @@ export async function updateSession(request: NextRequest) {
   }
 
   // If the user is logged in and tries to access login/register, redirect to account (or intended redirect)
+  // CRITICAL: Skip this check if it's a Server Action (Next-Action header present)
+  // otherwise it breaks actions called from these pages (like determinePostLoginRedirect)
+  const isAction = request.headers.has('next-action');
+
   if (
-    user &&
+    user && !isAction &&
     (request.nextUrl.pathname.startsWith("/login") ||
       request.nextUrl.pathname.startsWith("/register"))
   ) {
@@ -258,8 +262,8 @@ export async function updateSession(request: NextRequest) {
 
     // Fallback: Check if user email is authorized for admin access
     // Full role checking is done in server pages for better performance
-    const authorizedAdminEmail = "barrymohamadou98@gmail.com";
-    const isAuthorizedEmail = user.email?.toLowerCase() === authorizedAdminEmail.toLowerCase();
+    const authorizedAdminEmail = process.env.ADMIN_EMAIL ?? "";
+    const isAuthorizedEmail = authorizedAdminEmail && user.email?.toLowerCase() === authorizedAdminEmail.toLowerCase();
 
     // If not authorized by email, let the server page handle role-based auth
     // This allows role-based access while maintaining email fallback

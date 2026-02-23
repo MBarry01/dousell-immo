@@ -117,7 +117,9 @@ export async function getCurrentUserTeam(): Promise<{
   error?: string;
 }> {
   try {
-    const { team, role } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { team, role } = context;
     return {
       success: true,
       team: team as unknown as Team,
@@ -1156,7 +1158,8 @@ export async function getUserTeams(): Promise<{
     }
 
     // Récupérer l'équipe active depuis le contexte
-    const { teamId: activeTeamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    const activeTeamId = context?.teamId;
 
     const teams = memberships.map((m) => {
       const team = m.team as unknown as { id: string; name: string; slug: string };
@@ -1230,7 +1233,9 @@ export async function switchActiveTeam(teamId: string): Promise<TeamActionResult
  */
 export async function leaveTeam(teamId: string): Promise<TeamActionResult> {
   try {
-    const { user, role } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { user, role } = context;
 
     if (role === "owner") {
       return { success: false, error: "Le propriétaire ne peut pas quitter l'équipe directement. Vous devez d'abord transférer la propriété ou supprimer l'équipe." };

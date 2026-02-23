@@ -4,6 +4,7 @@ import {
   type TeamPermissionKey,
   type TeamRole
 } from "./team-permissions";
+import { type UserTeamContext } from "@/types/team";
 import { createClient } from "@/utils/supabase/server";
 
 /**
@@ -42,7 +43,8 @@ async function hasTemporaryPermission(
 export async function hasTeamPermission(permission: TeamPermissionKey): Promise<boolean> {
   try {
     const context = await getUserTeamContext();
-    const { role, user, teamId } = context;
+    if (!context || !context.role || !context.user || !context.teamId) return false;
+    const { role, user, teamId } = context as Required<Pick<UserTeamContext, 'role' | 'user' | 'teamId'>>;
 
     // Vérifier d'abord les permissions du rôle
     const allowedRoles = TEAM_PERMISSIONS[permission] as readonly string[];
@@ -68,7 +70,10 @@ export async function hasTeamPermission(permission: TeamPermissionKey): Promise<
  */
 export async function requireTeamPermission(permission: TeamPermissionKey) {
   const context = await getUserTeamContext();
-  const { role, user, teamId } = context;
+  if (!context || !context.role || !context.user || !context.teamId) {
+    throw new Error("Unauthorized: Pas d'équipe active ou de droits suffisants");
+  }
+  const { role, user, teamId } = context as Required<Pick<UserTeamContext, 'role' | 'user' | 'teamId'>>;
 
   const allowedRoles = TEAM_PERMISSIONS[permission] as readonly string[];
   let hasPermission = allowedRoles.includes(role);
@@ -91,7 +96,8 @@ export async function requireTeamPermission(permission: TeamPermissionKey) {
  */
 export async function requireTeamRole(allowedRoles: TeamRole[]) {
   const context = await getUserTeamContext();
-  const { role } = context;
+  if (!context || !context.role) throw new Error("Unauthorized");
+  const { role } = context as Required<Pick<UserTeamContext, 'role'>>;
 
   if (!allowedRoles.includes(role)) {
     throw new Error(`⛔ Accès refusé : Cette action nécessite l'un des rôles suivants : ${allowedRoles.join(", ")}`);
@@ -116,7 +122,8 @@ export async function requireAllPermissions(permissions: TeamPermissionKey[]) {
  */
 export async function requireAnyPermission(permissions: TeamPermissionKey[]) {
   const context = await getUserTeamContext();
-  const { role } = context;
+  if (!context || !context.role) throw new Error("Unauthorized");
+  const { role } = context as Required<Pick<UserTeamContext, 'role'>>;
 
   const hasAny = permissions.some(perm => {
     const allowedRoles = TEAM_PERMISSIONS[perm] as readonly string[];
@@ -141,7 +148,8 @@ export type UserRole = "admin" | "superadmin" | "moderateur" | "user";
  */
 export async function requireAnyRole(allowedRoles: (TeamRole | UserRole)[] = ["owner", "manager"]) {
   const context = await getUserTeamContext();
-  const { role } = context;
+  if (!context || !context.role) throw new Error("Unauthorized");
+  const { role } = context as Required<Pick<UserTeamContext, 'role'>>;
 
   // Vérification via le système team
   if (allowedRoles.includes(role as TeamRole)) {
@@ -165,6 +173,7 @@ export async function requireAnyRole(allowedRoles: (TeamRole | UserRole)[] = ["o
 export async function getCurrentUserRoles(): Promise<{ role: TeamRole; teamId: string } | null> {
   try {
     const context = await getUserTeamContext();
+    if (!context || !context.role || !context.teamId) return null;
     return {
       role: context.role,
       teamId: context.teamId

@@ -12,8 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Captcha } from "@/components/ui/captcha";
-import { login } from "@/app/(vitrine)/auth/actions";
-import { determinePostLoginRedirect } from "@/lib/auth-redirect";
+import { login, determinePostLoginRedirect } from "@/app/(vitrine)/auth/actions";
 
 function LoginPageContent() {
   const { user, loading } = useAuth();
@@ -252,6 +251,20 @@ function LoginPageContent() {
 
       {/* Côté Droit : Panel Branding (Fixed Asset) */}
       <div className="hidden lg:relative lg:flex lg:w-1/2 h-full overflow-hidden bg-[#0A0F16]">
+        {/* Background Image - Faded Deco */}
+        <div className="absolute inset-0 z-0 opacity-[0.14] pointer-events-none overflow-hidden">
+          <Image
+            src="/images/assetSignup.png"
+            alt="Background Decoration"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+          {/* Blend Gradients */}
+          <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-[#0A0F16] to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-[#0A0F16] to-transparent" />
+        </div>
+
         {/* Background Decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -right-20 -bottom-20 h-[600px] w-[600px] rounded-full bg-accent/20 blur-[150px]" />

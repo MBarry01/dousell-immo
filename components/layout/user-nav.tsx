@@ -1,11 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { User, Home, Heart, LogOut, Calculator, Shield, Info, Menu, Building2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
 import { useUserRoles } from "@/hooks/use-user-roles";
+import { cn } from "@/lib/utils";
 // React hooks removed as unused
 
 import {
@@ -22,8 +23,11 @@ import { useAuth } from "@/hooks/use-auth";
 
 export function UserNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, loading } = useAuth();
   const { roles: userRoles, loading: loadingRoles } = useUserRoles(user?.id || null);
+
+  const isWorkspace = pathname?.startsWith("/gestion") || pathname?.startsWith("/admin") || pathname?.startsWith("/compte") || pathname?.startsWith("/locataire");
   // Avatar fetching logic removed as we use Menu icon now
 
   const handleSignOut = async () => {
@@ -102,7 +106,12 @@ export function UserNav() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-56 max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-[#05080c] text-white shadow-xl z-[100] md:z-[100]"
+        className={cn(
+          "w-56 max-w-[calc(100vw-2rem)] rounded-xl shadow-xl z-[100] md:z-[100]",
+          !isWorkspace
+            ? "dark border border-white/10 bg-[#05080c] text-white"
+            : "border border-border bg-popover text-popover-foreground"
+        )}
         align="end"
         sideOffset={8}
         side="bottom"
@@ -171,7 +180,7 @@ export function UserNav() {
               onClick={() => router.push("/compte/mes-biens")}
             >
               <Home className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-              Mes Annonces
+              Mes Biens
             </DropdownMenuItem>
           </motion.div>
 

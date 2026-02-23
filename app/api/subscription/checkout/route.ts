@@ -18,7 +18,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Plan invalide' }, { status: 400 });
         }
 
-        const { teamId, team } = await getUserTeamContext();
+        const context = await getUserTeamContext();
+        if (!context) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+        const { teamId, team } = context;
+        console.log('--- Checkout API Called ---');
+
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
 

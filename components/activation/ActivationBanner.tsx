@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, ChevronUp, X, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronUp, X, Sparkles, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ActivationStep } from "./ActivationStep";
 import { completeActivation } from "@/lib/activation/actions";
 import type { ActivationStage } from "@/lib/activation/get-activation-stage";
@@ -48,6 +49,7 @@ export function ActivationBanner({
   const [collapsed, setCollapsed] = useState(false);
   const [showCompleteCTA, setShowCompleteCTA] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const router = useRouter();
   const prevStageRef = useRef(stage);
 
   // Restore collapse preference + sync stage to localStorage for sidebar badges
@@ -85,10 +87,18 @@ export function ActivationBanner({
     localStorage.setItem(COLLAPSE_KEY, String(next));
   };
 
-  const handleDismissComplete = async () => {
+  const handleDismissComplete = async (redirectTo?: string) => {
     setCompleting(true);
-    await completeActivation(teamId);
-    // revalidatePath reloads the layout → banner disappears
+    try {
+      await completeActivation(teamId);
+      if (redirectTo) {
+        router.push(redirectTo);
+      }
+    } catch (error) {
+      console.error("Failed to complete activation:", error);
+    } finally {
+      setCompleting(false);
+    }
   };
 
   const progress = Math.round(((stage - 1) / 3) * 100);
@@ -115,26 +125,29 @@ export function ActivationBanner({
             </div>
           </div>
           <button
-            onClick={handleDismissComplete}
+            onClick={() => handleDismissComplete()}
             disabled={completing}
             className="shrink-0 rounded-full p-1 text-white/40 hover:text-white/80 disabled:opacity-50"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="mt-3 flex gap-2">
-          <a
-            href="/gestion/documents"
-            className="rounded-lg bg-green-500 px-3 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90"
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            onClick={() => handleDismissComplete("/gestion/documents")}
+            disabled={completing}
+            className="flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2.5 text-sm font-bold text-black transition-all hover:bg-green-400 active:scale-95 disabled:opacity-50"
           >
+            {completing && <Loader2 className="h-4 w-4 animate-spin" />}
             Générer un contrat
-          </a>
-          <a
-            href="/gestion/documents"
-            className="rounded-lg border border-green-500/40 bg-green-500/10 px-3 py-2 text-sm font-semibold text-green-300 transition-opacity hover:opacity-90"
+          </button>
+          <button
+            onClick={() => handleDismissComplete("/gestion/documents")}
+            disabled={completing}
+            className="flex items-center gap-2 rounded-lg border border-green-500/40 bg-green-500/10 px-4 py-2.5 text-sm font-bold text-green-300 transition-all hover:bg-green-500/20 active:scale-95 disabled:opacity-50"
           >
             Générer une quittance
-          </a>
+          </button>
         </div>
       </motion.div>
     );

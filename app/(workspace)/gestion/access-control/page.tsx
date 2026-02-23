@@ -14,7 +14,7 @@ export default async function AccessControlPage() {
   // Vérifier que l'utilisateur a les permissions
   const context = await getUserTeamContext();
 
-  if (!context) {
+  if (!context || !context.teamId) {
     redirect("/login");
   }
 

@@ -87,7 +87,7 @@ export function PropertyCardActions({
   const handleDelete = async () => {
     if (
       !confirm(
-        "Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est définitive."
+        "Êtes-vous sûr de vouloir supprimer ce bien ? Cette action est définitive."
       )
     ) {
       return;
@@ -99,7 +99,7 @@ export function PropertyCardActions({
       if (result.error) {
         toast.error("Erreur", { description: result.error });
       } else {
-        toast.success("Annonce supprimée");
+        toast.success("Bien supprimé");
       }
     } catch (error) {
       console.error(error);

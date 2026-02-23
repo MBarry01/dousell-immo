@@ -1,6 +1,6 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
+
 
 import { ReactNode, Suspense, useMemo } from "react";
 import { usePathname } from "next/navigation";
@@ -104,7 +104,7 @@ export default function VitrineLayout({ children }: VitrineLayoutProps) {
 
   if (isDistractionFree) {
     return (
-      <div suppressHydrationWarning className="min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
+      <div suppressHydrationWarning className="dark min-h-dvh bg-gradient-to-b from-[#05080c] via-[#05080c] to-[#040507] text-white overflow-x-hidden">
         <ScrollToTop />
         <Suspense fallback={null}><WelcomeModal /></Suspense>
         {children}

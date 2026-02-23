@@ -125,9 +125,9 @@ function SidebarContent({
   const isGestionRoute = pathname?.startsWith("/gestion");
   const activationStage = useActivationStage();
 
-  // Config badge: show ⚠ if current team has no company_name set
+  // Config badge: show ⚠ if current team lacks essential profile data (V5 migration fix)
   const currentTeamForConfig = teams.find((t) => t.id === currentTeamId);
-  const isConfigComplete = !!currentTeamForConfig?.company_name;
+  const isConfigComplete = !!currentTeamForConfig?.company_address && !!currentTeamForConfig?.company_phone;
 
   // Trouver l'équipe courante pour afficher son nom
   const currentTeam = teams.find((t) => t.id === currentTeamId);

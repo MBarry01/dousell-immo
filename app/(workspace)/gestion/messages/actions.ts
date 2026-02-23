@@ -8,7 +8,9 @@ import { requireTeamPermission } from "@/lib/permissions";
 import { notifyTenant } from "@/lib/notifications";
 
 export async function getOwnerMessages(leaseId: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { error: "Non autorisé" };
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) return { error: "Non authentifié" };
@@ -36,7 +38,9 @@ export async function getOwnerMessages(leaseId: string) {
  * Mark all tenant messages in a conversation as read by the owner.
  */
 export async function markConversationAsRead(leaseId: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return;
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) return;
@@ -53,7 +57,9 @@ export async function markConversationAsRead(leaseId: string) {
 }
 
 export async function sendOwnerMessage(leaseId: string, content: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('leases.view'); // Base permission for messaging
     const supabase = await createClient();
 

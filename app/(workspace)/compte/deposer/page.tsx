@@ -341,7 +341,7 @@ function DeposerPageContent() {
         return;
       }
 
-      toast.success("Annonce publiée avec succès !");
+      toast.success("Bien publié avec succès !");
       localStorage.removeItem(STORAGE_KEYS.formData);
       localStorage.removeItem(STORAGE_KEYS.step);
       setTimeout(() => {
@@ -386,7 +386,7 @@ function DeposerPageContent() {
               <ArrowLeft className="w-5 h-5 text-zinc-400" />
             </Link>
             <div>
-              <h1 className="text-lg font-semibold text-white">Déposer une annonce</h1>
+              <h1 className="text-lg font-semibold text-white">Ajouter un bien</h1>
               <p className="text-sm text-emerald-400">100% Gratuit</p>
             </div>
           </div>
@@ -485,7 +485,7 @@ function DeposerPageContent() {
 
               {/* Title */}
               <div>
-                <label className="text-sm text-zinc-400 mb-2 block">Titre de l&apos;annonce</label>
+                <label className="text-sm text-zinc-400 mb-2 block">Titre du bien</label>
                 <input
                   type="text"
                   value={formData.title}

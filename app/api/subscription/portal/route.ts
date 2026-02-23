@@ -6,11 +6,13 @@ import { getUserTeamContext } from '@/lib/team-context';
 
 export async function POST(_req: Request) {
     try {
-        const { teamId } = await getUserTeamContext();
+        const context = await getUserTeamContext();
+        if (!context) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+        const { teamId, team } = context;
         const supabase = await createClient();
 
         // Get customer ID
-        const { data: team } = await supabase
+        const { data: teamData } = await supabase
             .from('teams')
             .select('stripe_customer_id')
             .eq('id', teamId)

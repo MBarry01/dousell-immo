@@ -16,7 +16,11 @@ export default async function InterventionsPage() {
         redirect('/auth');
     }
 
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) {
+        redirect('/auth');
+    }
+    const { teamId } = context;
 
     // ✅ CHECK FEATURE: Interventions
     const access = await checkFeatureAccess(teamId, "manage_interventions");

@@ -24,7 +24,9 @@ import {
  * Récupérer les propriétés de l'équipe (pour les listes déroulantes)
  */
 export async function getProperties() {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId } = context;
     const supabase = await createClient();
 
     try {
@@ -46,7 +48,9 @@ export async function getProperties() {
  * Récupérer tous les baux de l'équipe (pour les listes déroulantes)
  */
 export async function getLeasesByOwner() {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId } = context;
     const supabase = await createClient();
 
     try {
@@ -68,7 +72,9 @@ export async function getLeasesByOwner() {
  * Calcule les statistiques financières en temps réel pour l'équipe
  */
 export async function getRentalStats() {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { collected: "0", pending: "0", overdue: "0" };
+    const { teamId } = context;
     const supabase = await createClient();
 
     const today = new Date();
@@ -130,7 +136,9 @@ export async function getRentalStats() {
  * OPTIMISÉ : Utilise des counts directs et limite le déchargement de données
  */
 export async function getAdvancedStats() {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { occupancyRate: 0, avgPaymentDelay: 0, unpaidRate: 0, avgRevenuePerProperty: 0, totalProperties: 0, activeLeases: 0 };
+    const { teamId } = context;
     const supabase = await createClient();
 
     // 1. Récupérer le nombre total de biens (COUNT uniquement)
@@ -230,7 +238,9 @@ export async function getAdvancedStats() {
  * OPTIMISÉ : 1 seule requête DB au lieu de N requêtes (boucle)
  */
 export async function getRevenueHistory(months: number = 12) {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return [];
+    const { teamId } = context;
     const supabase = await createClient();
 
     const today = new Date();
@@ -324,7 +334,9 @@ async function triggerN8N(webhookPath: string, payload: Record<string, unknown>)
  * - Liaison automatique bien-bail avec mise à jour du statut
  */
 export async function createNewLease(formData: Record<string, unknown>) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('leases.create');
 
     // ✅ CHECK FEATURE QUOTA (LEASE)
@@ -685,7 +697,9 @@ export async function createNewLease(formData: Record<string, unknown>) {
  */
 export async function sendWelcomePack(leaseId: string) {
     console.log("[sendWelcomePack] Start for lease:", leaseId);
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('documents.generate');
 
     const supabase = await createClient();
@@ -1060,7 +1074,9 @@ export async function sendWelcomePack(leaseId: string) {
  * Si pas d'ID de transaction, en crée une pour le mois courant
  */
 export async function confirmPayment(leaseId: string, transactionId?: string, month?: number, year?: number, silent: boolean = false) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('payments.confirm');
 
     const supabase = await createClient();
@@ -1293,7 +1309,9 @@ export async function updateLease(leaseId: string, data: {
     start_date?: string;
     end_date?: string;
 }) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('leases.edit');
 
     const supabase = await createClient();
@@ -1363,7 +1381,9 @@ export async function updateLease(leaseId: string, data: {
  * Utilisé après import en masse pour la réconciliation
  */
 export async function linkLeaseToProperty(leaseId: string, propertyId: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('leases.edit');
 
     const supabase = await createClient();
@@ -1429,7 +1449,9 @@ export async function linkLeaseToProperty(leaseId: string, propertyId: string) {
  * Change le statut à 'terminated' et enregistre la date de fin
  */
 export async function terminateLease(leaseId: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('leases.terminate');
 
     const supabase = await createClient();
@@ -1480,7 +1502,9 @@ export async function terminateLease(leaseId: string) {
  * Change le statut de 'terminated' à 'active'
  */
 export async function reactivateLease(leaseId: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('leases.edit');
 
     const supabase = await createClient();
@@ -1524,7 +1548,9 @@ export async function createMaintenanceRequest(data: {
     description: string;
     category?: string;
 }) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('maintenance.create');
 
     const supabase = await createClient();
@@ -2156,7 +2182,9 @@ export async function completeIntervention(requestId: string) {
  * Génère un lien magique (Magic Link) et l'envoie par email
  */
 export async function sendTenantInvitation(leaseId: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     if (!user) return { success: false, error: "Non autorisé" };
 
     const supabase = await createClient();
@@ -2249,7 +2277,9 @@ export async function sendTenantInvitation(leaseId: string) {
  * Récupérer les baux actifs (pour le select du formulaire de signalement)
  */
 export async function getActiveLeases() {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, data: [] };
+    const { teamId, user } = context;
 
     if (!user) {
         return { success: false, data: [] };
@@ -2388,7 +2418,9 @@ export async function sendReceiptToN8N(data: Record<string, unknown>) {
  * Supprime une transaction (pour nettoyer les doublons générés par erreur)
  */
 export async function deleteTransaction(transactionId: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) {
@@ -2427,7 +2459,9 @@ export async function deleteTransaction(transactionId: string) {
  * Supprime DÉFINITIVEMENT un bail (Fonction de nettoyage)
  */
 export async function deleteLease(leaseId: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) return { success: false, error: "Non autorisé" };

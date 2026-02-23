@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getUserTeamContext } from "@/lib/team-permissions.server";
+import { getUserTeamContext } from "@/lib/team-context";
 import { getTeamProperties } from "./actions";
 import { BiensClient } from "./biens-client";
 import Link from "next/link";

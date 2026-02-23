@@ -14,14 +14,27 @@ export default defineConfig({
     /* Opt out of parallel tests on CI. */
     workers: process.env.CI ? 1 : undefined,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: 'html',
+    reporter: [
+        ['html', { outputFolder: 'playwright-report' }],
+        ['list'],
+    ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/test-use-options. */
     use: {
         /* Base URL to use in actions like `await page.goto('/')`. */
         baseURL: 'http://localhost:3000',
 
+        /* Show browser window during tests */
+        headless: false,
+
         /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
         trace: 'on-first-retry',
+
+        /* Screenshot on failure */
+        screenshot: 'only-on-failure',
+
+        /* Action timeout */
+        actionTimeout: 15000,
+        navigationTimeout: 30000,
     },
 
     /* Configure projects for major browsers */
@@ -29,6 +42,15 @@ export default defineConfig({
         {
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] },
+        },
+        {
+            name: 'e2e-onboarding',
+            testDir: './__tests__/e2e',
+            use: {
+                ...devices['Desktop Chrome'],
+                screenshot: 'on',
+                video: 'retain-on-failure',
+            },
         },
     ],
 

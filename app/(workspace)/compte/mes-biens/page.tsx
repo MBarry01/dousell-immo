@@ -202,7 +202,7 @@ export default function MesBiensPage() {
         <Button className="rounded-full bg-[#0F172A] text-white hover:bg-[#0F172A]/90 dark:!bg-[#F4C430] dark:!text-black dark:hover:!bg-[#F4C430]/90" asChild>
           <Link href="/compte/deposer">
             <Plus className="mr-2 h-4 w-4" />
-            Déposer une annonce
+            Ajouter un bien
           </Link>
         </Button>
       </div>
@@ -304,9 +304,9 @@ export default function MesBiensPage() {
       {/* Properties Display */}
       {properties.length === 0 ? (
         <EmptyState
-          title="Vous n'avez pas encore déposé d'annonce"
-          description="Déposez votre premier bien et commencez à toucher des revenus."
-          actionLabel="Déposer mon bien"
+          title="Vous n'avez pas encore ajouté de bien"
+          description="Ajoutez votre premier bien et commencez à gérer vos locations ou à publier."
+          actionLabel="Ajouter mon bien"
           onAction={() => router.push("/compte/deposer")}
           icon={Package}
         />

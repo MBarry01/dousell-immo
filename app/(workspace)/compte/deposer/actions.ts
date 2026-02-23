@@ -3,13 +3,15 @@
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { sendEmail, getAdminNotificationEmails, getAdminEmail } from "@/lib/mail";
 import { ListingSubmittedEmail } from "@/emails/listing-submitted-email";
 import { getBaseUrl } from "@/lib/utils";
 import { invalidatePropertyCaches } from "@/lib/cache/invalidation";
-import { getUserTeamContext } from "@/lib/team-permissions.server";
+import { getUserTeamContext } from "@/lib/team-context";
 import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
 import { notifyUser } from "@/lib/notifications";
+import { checkAIRateLimit } from "@/lib/rate-limit";
 
 type SubmitListingData = {
   type: string;
@@ -87,6 +89,31 @@ function cleanVirtualTourUrl(rawUrl: string | undefined): string | null {
   return trimmedUrl;
 }
 
+const submitListingSchema = z.object({
+  type: z.enum(["villa", "appartement", "terrain", "immeuble", "studio", "bureau"]),
+  title: z.string().min(3, "Le titre doit contenir au moins 3 caractères"),
+  description: z.string().optional(),
+  price: z.number().positive("Le prix doit être positif"),
+  category: z.enum(["vente", "location"]),
+  city: z.string().min(1, "La ville est requise"),
+  district: z.string().min(1, "Le quartier est requis"),
+  address: z.string().optional(),
+  landmark: z.string().optional(),
+  surface: z.number().positive().optional(),
+  surfaceTotale: z.number().positive().optional(),
+  juridique: z.string().optional(),
+  rooms: z.number().int().min(0).optional(),
+  bedrooms: z.number().int().min(0).optional(),
+  bathrooms: z.number().int().min(0).optional(),
+  contact_phone: z.string().optional(),
+  images: z.array(z.string()).min(1, "Au moins une image est requise"),
+  proof_document_url: z.string().url().optional(),
+  virtual_tour_url: z.string().optional(),
+  region: z.string().optional(),
+  lat: z.number().nullable().optional(),
+  lon: z.number().nullable().optional(),
+});
+
 export async function submitUserListing(data: SubmitListingData) {
   try {
     const supabase = await createClient();
@@ -107,7 +134,12 @@ export async function submitUserListing(data: SubmitListingData) {
       return { error: "Vous devez être connecté pour déposer une annonce" };
     }
 
-    console.log("✅ Utilisateur récupéré:", { userId: user.id, email: user.email });
+    // Validation Zod des données d'entrée
+    const validation = submitListingSchema.safeParse(data);
+    if (!validation.success) {
+      const firstError = validation.error.issues[0];
+      return { error: firstError?.message || "Données invalides" };
+    }
 
     // Vérifier si le profil existe, sinon le créer automatiquement avec admin client
     const { data: existingProfile } = await supabase
@@ -385,6 +417,23 @@ export async function generateAIDescription(params: AIDescriptionParams): Promis
   error?: string
 }> {
   try {
+    // Rate limiting par utilisateur (20 appels/heure)
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: "Vous devez être connecté." };
+    }
+
+    const rateLimit = await checkAIRateLimit(user.id);
+    if (!rateLimit.allowed) {
+      const resetIn = Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 60000);
+      const minutes = resetIn > 1 ? `${resetIn} minutes` : `${resetIn} minute`;
+      return {
+        success: false,
+        error: `Limite d'appels IA atteinte (20/heure). Réessayez dans ${minutes}.`,
+      };
+    }
+
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
     if (!openaiApiKey) {

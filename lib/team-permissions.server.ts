@@ -13,139 +13,8 @@ import { TEAM_PERMISSIONS, TEAM_ROLE_CONFIG, type TeamPermissionKey } from "./te
 // FONCTIONS DE RÉCUPÉRATION
 // =====================================================
 
-/**
- * Récupère le contexte d'équipe de l'utilisateur connecté
- * Si l'utilisateur n'a pas d'équipe, en crée une personnelle automatiquement
- */
-export async function getUserTeamContext(preferredTeamId?: string): Promise<UserTeamContext | null> {
-    const supabase = await createClient();
-
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return null;
-
-    // 🆕 Vérifier la préférence d'équipe active (cookie)
-    if (!preferredTeamId) {
-        const { getActiveTeamId } = await import("@/lib/team-switching");
-        preferredTeamId = await getActiveTeamId() || undefined;
-    }
-
-    // Si une équipe préférée est définie, la récupérer en priorité
-    if (preferredTeamId) {
-        const { data: preferredMembership } = await supabase
-            .from("team_members")
-            .select(
-                `
-        team_id,
-        role,
-        team:teams(
-          name, 
-          slug,
-          subscription_status,
-          subscription_trial_ends_at,
-          subscription_tier
-        )
-      `
-            )
-            .eq("user_id", user.id)
-            .eq("team_id", preferredTeamId)
-            .eq("status", "active")
-            .maybeSingle();
-
-        if (preferredMembership?.team) {
-            const teamData = preferredMembership.team;
-            const team = (Array.isArray(teamData) ? teamData[0] : teamData) as {
-                name: string;
-                slug: string;
-                subscription_status?: string;
-                subscription_trial_ends_at?: string;
-                subscription_tier?: string;
-            };
-
-            if (team) {
-                return {
-                    team_id: preferredMembership.team_id,
-                    team_name: team.name,
-                    team_slug: team.slug,
-                    user_role: preferredMembership.role as TeamRole,
-                    subscription_status: team.subscription_status as any,
-                    subscription_trial_ends_at: team.subscription_trial_ends_at,
-                    subscription_tier: team.subscription_tier as any,
-                };
-            }
-        }
-    }
-
-    // Utiliser la fonction RPC pour bypass RLS si nécessaire
-    const { data, error } = await supabase.rpc("get_user_team", {
-        p_user_id: user.id,
-    });
-
-    if (error || !data || data.length === 0) {
-        // Fallback: requête directe avec subscription_status
-        const { data: membership } = await supabase
-            .from("team_members")
-            .select(
-                `
-        team_id,
-        role,
-        team:teams(
-          name, 
-          slug,
-          subscription_status,
-          subscription_trial_ends_at,
-          subscription_tier
-        )
-      `
-            )
-            .eq("user_id", user.id)
-            .eq("status", "active")
-            .maybeSingle();
-
-        if (!membership?.team) {
-            // Pas d'équipe trouvée - retourner null
-            // La création d'équipe se fait explicitement via createPersonalTeam()
-            // appelé depuis auth-redirect.ts quand l'utilisateur a un selected_plan
-            console.log(`[getUserTeamContext] No team for user ${user.id}, returning null`);
-            return null;
-        }
-
-        const teamData = membership.team;
-        // Handle potential array return from Supabase
-        const team = (Array.isArray(teamData) ? teamData[0] : teamData) as {
-            name: string;
-            slug: string;
-            subscription_status?: string;
-            subscription_trial_ends_at?: string;
-            subscription_tier?: string;
-        };
-
-        if (!team) return null;
-
-        return {
-            team_id: membership.team_id,
-            team_name: team.name,
-            team_slug: team.slug,
-            user_role: membership.role as TeamRole,
-            subscription_status: team.subscription_status as any,
-            subscription_trial_ends_at: team.subscription_trial_ends_at,
-            subscription_tier: team.subscription_tier as any,
-        };
-    }
-
-    // ✅ AMÉLIORATION: Inclure subscription dans le contexte (évite un appel DB supplémentaire)
-    return {
-        team_id: data[0].team_id,
-        team_name: data[0].team_name,
-        team_slug: data[0].team_slug,
-        user_role: data[0].user_role as TeamRole,
-        subscription_status: data[0].subscription_status as any,
-        subscription_trial_ends_at: data[0].subscription_trial_ends_at,
-        subscription_tier: data[0].subscription_tier as any,
-    };
-}
+// Note: getUserTeamContext a été déplacé dans lib/team-context.ts 
+// pour bénéficier du pattern Enterprise avec Request Memoization (cache).
 
 /**
  * Crée une équipe personnelle pour un utilisateur qui n'en a pas.
@@ -205,9 +74,13 @@ export async function createPersonalTeam(userId: string, userEmail: string, meta
         console.log(`[Auto-Team] Successfully created team "${teamName}" for user ${userId}`);
 
         return {
+            user: { id: userId, email: userEmail } as any,
+            team: newTeam as any,
+            teamId: newTeam.id,
             team_id: newTeam.id,
             team_name: newTeam.name,
             team_slug: newTeam.slug,
+            role: "owner" as TeamRole,
             user_role: "owner" as TeamRole,
             subscription_tier: newTeam.subscription_tier as any,
             subscription_status: newTeam.subscription_status as any,

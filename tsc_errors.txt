@@ -1,251 +1,191 @@
-app/(vitrine)/api/cache-metrics/route.ts(21,10): error TS2724: '"@/utils/supabase/server"' has no exported member named '_createClient'. Did you mean 'createClient'?
-app/(vitrine)/api/kkiapay/webhook/route.ts(2,10): error TS2724: '"@/utils/supabase/server"' has no exported member named '_createClient'. Did you mean 'createClient'?
-app/(vitrine)/api/paydunya/create-invoice/route.ts(71,7): error TS2552: Cannot find name '_customData'. Did you mean 'customData'?
-app/(vitrine)/auth/check-email/page.tsx(8,20): error TS2724: '"react"' has no exported member named '_useEffect'. Did you mean 'useEffect'?
-app/(vitrine)/carrieres/page.tsx(8,3): error TS2724: '"lucide-react"' has no exported member named '_Clock'. Did you mean 'Clock'?
-app/(vitrine)/contact/page.tsx(3,20): error TS2724: '"react"' has no exported member named '_useEffect'. Did you mean 'useEffect'?
-app/(vitrine)/investissement/page.tsx(11,3): error TS2724: '"lucide-react"' has no exported member named '_Percent'. Did you mean 'Percent'?
-app/(vitrine)/investissement/page.tsx(17,3): error TS2724: '"lucide-react"' has no exported member named '_FileText'. Did you mean 'FileText'?
-app/(vitrine)/investissement/page.tsx(18,3): error TS2724: '"lucide-react"' has no exported member named '_Star'. Did you mean 'Star'?
-app/(vitrine)/legal/page.tsx(4,56): error TS2724: '"@/components/ui/card"' has no exported member named '_CardContent'. Did you mean 'CardContent'?
-app/(vitrine)/login/login-client.tsx(7,33): error TS2724: '"lucide-react"' has no exported member named '_Loader2'. Did you mean 'Loader2'?
-app/(vitrine)/planifier-visite/actions.tsx(64,11): error TS2339: Property '_data' does not exist on type 'PostgrestSingleResponse<any>'.
-app/(vitrine)/register/page.tsx(19,10): error TS2724: '"libphonenumber-js"' has no exported member named '_parsePhoneNumber'. Did you mean 'parsePhoneNumber'?
-app/(vitrine)/register/register-client.tsx(56,32): error TS2339: Property '_callingCode' does not exist on type '{ Flag: null; callingCode: string; } | { Flag: EmbeddedFlag | undefined; callingCode: CountryCallingCode; }'.
-app/(vitrine)/vente/page.tsx(24,33): error TS2339: Property '_error' does not exist on type 'PostgrestSingleResponse<any>'.
-app/(webapp)/documents-legaux/components/CreateContractDialog.tsx(4,46): error TS2724: '"lucide-react"' has no exported member named '_Search'. Did you mean 'Search'?
-app/(webapp)/documents-legaux/components/CreateContractDialog.tsx(5,10): error TS2724: '"@/components/ui/button"' has no exported member named '_Button'. Did you mean 'Button'?
-app/(webapp)/documents-legaux/components/CreateContractDialog.tsx(22,10): error TS2305: Module '"@/lib/utils"' has no exported member '_cn'.
-app/(webapp)/documents-legaux/components/CreateReceiptDialog.tsx(4,20): error TS2724: '"lucide-react"' has no exported member named '_CheckCircle'. Did you mean 'CheckCircle'?
-app/(webapp)/documents-legaux/components/CreateReceiptDialog.tsx(4,34): error TS2724: '"lucide-react"' has no exported member named '_Search'. Did you mean 'Search'?
-app/(webapp)/documents-legaux/components/CreateReceiptDialog.tsx(22,10): error TS2305: Module '"@/lib/utils"' has no exported member '_cn'.
-app/(webapp)/documents-legaux/components/CreateReceiptDialog.tsx(23,10): error TS2724: '"@/utils/supabase/client"' has no exported member named '_createClient'. Did you mean 'createClient'?
-app/(workspace)/admin/biens/[id]/page.tsx(58,5): error TS2339: Property '_setValue' does not exist on type 'UseFormReturn<{ title: string; description: string; price: number; category: "location" | "vente"; type: "appartement" | "villa" | "terrain" | "immeuble"; city: string; district: string; address: string; ... 10 more ...; pool?: boolean | undefined; }, any, { ...; }>'.
-app/(workspace)/admin/biens/nouveau/page.tsx(10,18): error TS2724: '"framer-motion"' has no exported member named '_AnimatePresence'. Did you mean 'AnimatePresence'?
-app/(workspace)/admin/biens/nouveau/page.tsx(20,15): error TS2724: '"@/types/property"' has no exported member named '_Property'. Did you mean 'Property'?
-app/(workspace)/admin/biens/nouveau/page.tsx(81,5): error TS2339: Property '_handleSubmit' does not exist on type 'UseFormReturn<{ title: string; description: string; price: number; category: "location" | "vente"; type: "appartement" | "villa" | "terrain" | "immeuble"; city: string; district: string; address: string; ... 10 more ...; pool?: boolean | undefined; }, any, { ...; }>'.
-app/(workspace)/admin/leads/page.tsx(6,25): error TS2724: '"./actions"' has no exported member named '_LeadStatus'. Did you mean 'LeadStatus'?
-app/(workspace)/admin/roles/grant-role-action.ts(21,13): error TS2339: Property '_data' does not exist on type 'PostgrestSingleResponse<any>'.
-app/(workspace)/admin/verifications/biens/property-verification-list.tsx(13,5): error TS2724: '"lucide-react"' has no exported member named '_Phone'. Did you mean 'Phone'?
-app/(workspace)/admin/verifications/biens/property-verification-list.tsx(24,10): error TS2724: '"@/components/ui/badge"' has no exported member named '_Badge'. Did you mean 'Badge'?
-app/(workspace)/admin/verifications/identites/verified-list.tsx(3,20): error TS2724: '"react"' has no exported member named '_useEffect'. Did you mean 'useEffect'?
-app/(workspace)/admin/verifications/identites/verified-list.tsx(12,5): error TS2724: '"lucide-react"' has no exported member named '_Shield'. Did you mean 'Shield'?
-app/(workspace)/compte/activer-gestion/page.tsx(34,17): error TS2339: Property '_data' does not exist on type '{ data: { id: string; path: string; fullPath: string; }; error: null; } | { data: null; error: StorageError; }'.
-app/(workspace)/compte/alertes/page.tsx(6,18): error TS2724: '"framer-motion"' has no exported member named '_AnimatePresence'. Did you mean 'AnimatePresence'?
-app/(workspace)/compte/alertes/page.tsx(13,3): error TS2305: Module '"lucide-react"' has no exported member '_X'.
-app/(workspace)/compte/alertes/page.tsx(14,3): error TS2724: '"lucide-react"' has no exported member named '_MapPin'. Did you mean 'MapPin'?
-app/(workspace)/compte/alertes/page.tsx(15,3): error TS2724: '"lucide-react"' has no exported member named '_DollarSign'. Did you mean 'DollarSign'?
-app/(workspace)/compte/alertes/page.tsx(16,3): error TS2724: '"lucide-react"' has no exported member named '_Home'. Did you mean 'Home'?
-app/(workspace)/compte/alertes/page.tsx(19,3): error TS2724: '"lucide-react"' has no exported member named '_Check'. Did you mean 'Check'?
-app/(workspace)/compte/alertes/page.tsx(36,10): error TS2724: '"@/components/layout/notification-bell"' has no exported member named '_NotificationBell'. Did you mean 'NotificationBell'?
-app/(workspace)/compte/components/GestionLocativeWidget.tsx(1,10): error TS2724: '"lucide-react"' has no exported member named '_ArrowRight'. Did you mean 'ArrowRight'?
-app/(workspace)/compte/components/OwnerDashboard.tsx(18,5): error TS2724: '"lucide-react"' has no exported member named '_LayoutDashboard'. Did you mean 'LayoutDashboard'?
-app/(workspace)/compte/components/OwnerDashboard.tsx(19,5): error TS2724: '"lucide-react"' has no exported member named '_MessageSquare'. Did you mean 'MessageSquare'?
-app/(workspace)/compte/deposer/page.tsx(26,3): error TS2724: '"lucide-react"' has no exported member named '_ChevronDown'. Did you mean 'ChevronDown'?
-app/(workspace)/compte/mes-biens/page.tsx(16,3): error TS2724: '"lucide-react"' has no exported member named '_Filter'. Did you mean 'Filter'?
-app/(workspace)/compte/mes-biens/property-card-actions.tsx(14,10): error TS2724: '"@/components/ui/button"' has no exported member named '_Button'. Did you mean 'Button'?
-app/(workspace)/compte/mes-biens/PropertyCard.tsx(3,10): error TS2724: '"react"' has no exported member named '_useState'. Did you mean 'useState'?
-app/(workspace)/compte/mes-biens/PropertyCard.tsx(15,5): error TS2724: '"lucide-react"' has no exported member named '_MoreVertical'. Did you mean 'MoreVertical'?
-app/(workspace)/compte/mes-biens/PropertyCard.tsx(16,5): error TS2724: '"lucide-react"' has no exported member named '_Bed'. Did you mean 'Bed'?
-app/(workspace)/compte/mes-biens/PropertyCard.tsx(17,5): error TS2724: '"lucide-react"' has no exported member named '_Bath'. Did you mean 'Bath'?
-app/(workspace)/compte/mes-biens/PropertyCard.tsx(18,5): error TS2724: '"lucide-react"' has no exported member named '_Maximize'. Did you mean 'Maximize'?
-app/(workspace)/compte/mes-documents/actions.ts(864,28): error TS2339: Property 'size' does not exist on type 'GEDDocument'.
-app/(workspace)/compte/mes-documents/actions.ts(914,28): error TS2339: Property 'size' does not exist on type 'GEDDocument'.
-app/(workspace)/compte/mes-documents/page.tsx(18,3): error TS2724: '"@phosphor-icons/react"' has no exported member named '_MapPin'. Did you mean 'MapPin'?
-app/(workspace)/compte/parametres/page.tsx(5,10): error TS2724: '"framer-motion"' has no exported member named '_motion'. Did you mean 'motion'?
-app/(workspace)/compte/parametres/page.tsx(6,75): error TS2724: '"lucide-react"' has no exported member named '_Phone'. Did you mean 'Phone'?
-app/(workspace)/gestion/access-control/actions.ts(14,15): error TS2724: '"@/lib/team-permissions"' has no exported member named '_TeamPermissionKey'. Did you mean 'TeamPermissionKey'?
-app/(workspace)/gestion/access-control/components/AccessControlDashboard.tsx(43,15): error TS2724: '"../actions"' has no exported member named '_AccessRequestStatus'. Did you mean 'AccessRequestStatus'?
-app/(workspace)/gestion/actions.ts(14,10): error TS2724: '"@/lib/pdf-generator"' has no exported member named '_uploadPDFToStorage'. Did you mean 'uploadPDFToStorage'?
-app/(workspace)/gestion/actions.ts(1295,21): error TS2339: Property '_user' does not exist on type '{ user: User; team: { id: any; name: any; slug: any; subscription_status: any; subscription_trial_ends_at: any; subscription_tier: any; company_address: any; company_phone: any; company_email: any; ... 6 more ...; stripe_payouts_enabled: any; }; ... 4 more ...; subscription_tier: any; }'.
-app/(workspace)/gestion/actions.ts(1365,21): error TS2339: Property '_user' does not exist on type '{ user: User; team: { id: any; name: any; slug: any; subscription_status: any; subscription_trial_ends_at: any; subscription_tier: any; company_address: any; company_phone: any; company_email: any; ... 6 more ...; stripe_payouts_enabled: any; }; ... 4 more ...; subscription_tier: any; }'.
-app/(workspace)/gestion/actions.ts(1431,21): error TS2339: Property '_user' does not exist on type '{ user: User; team: { id: any; name: any; slug: any; subscription_status: any; subscription_trial_ends_at: any; subscription_tier: any; company_address: any; company_phone: any; company_email: any; ... 6 more ...; stripe_payouts_enabled: any; }; ... 4 more ...; subscription_tier: any; }'.
-app/(workspace)/gestion/actions.ts(1482,21): error TS2339: Property '_user' does not exist on type '{ user: User; team: { id: any; name: any; slug: any; subscription_status: any; subscription_trial_ends_at: any; subscription_tier: any; company_address: any; company_phone: any; company_email: any; ... 6 more ...; stripe_payouts_enabled: any; }; ... 4 more ...; subscription_tier: any; }'.
-app/(workspace)/gestion/actions.ts(1526,21): error TS2339: Property '_user' does not exist on type '{ user: User; team: { id: any; name: any; slug: any; subscription_status: any; subscription_trial_ends_at: any; subscription_tier: any; company_address: any; company_phone: any; company_email: any; ... 6 more ...; stripe_payouts_enabled: any; }; ... 4 more ...; subscription_tier: any; }'.
-app/(workspace)/gestion/biens/biens-client.tsx(5,35): error TS2724: '"lucide-react"' has no exported member named '_Filter'. Did you mean 'Filter'?
-app/(workspace)/gestion/biens/nouveau/nouveau-client.tsx(16,3): error TS2724: '"lucide-react"' has no exported member named '_FileText'. Did you mean 'FileText'?
-app/(workspace)/gestion/biens/nouveau/nouveau-client.tsx(18,3): error TS2724: '"lucide-react"' has no exported member named '_Plus'. Did you mean 'Plus'?
-app/(workspace)/gestion/biens/nouveau/nouveau-client.tsx(21,3): error TS2724: '"lucide-react"' has no exported member named '_Calendar'. Did you mean 'Calendar'?
-app/(workspace)/gestion/biens/nouveau/nouveau-client.tsx(26,3): error TS2724: '"lucide-react"' has no exported member named '_User'. Did you mean 'User'?
-app/(workspace)/gestion/biens/nouveau/nouveau-client.tsx(28,3): error TS2724: '"lucide-react"' has no exported member named '_Warehouse'. Did you mean 'Warehouse'?
-app/(workspace)/gestion/biens/nouveau/nouveau-client.tsx(51,10): error TS2724: '"date-fns"' has no exported member named '_format'. Did you mean 'format'?
-app/(workspace)/gestion/biens/nouveau/nouveau-client.tsx(52,10): error TS2305: Module '"date-fns/locale"' has no exported member '_fr'.
-app/(workspace)/gestion/biens/page.tsx(1,10): error TS2724: '"next/navigation"' has no exported member named '_redirect'. Did you mean 'redirect'?
-app/(workspace)/gestion/components/AddTenantButton.tsx(4,129): error TS2724: '"lucide-react"' has no exported member named '_ArrowRight'. Did you mean 'ArrowRight'?
-app/(workspace)/gestion/components/AddTenantButton.tsx(4,142): error TS2724: '"lucide-react"' has no exported member named '_MapPin'. Did you mean 'MapPin'?
-app/(workspace)/gestion/components/AddTenantButton.tsx(4,151): error TS2724: '"lucide-react"' has no exported member named '_Home'. Did you mean 'Home'?
-app/(workspace)/gestion/components/AddTenantButton.tsx(13,5): error TS2724: '"@/components/ui/dialog"' has no exported member named '_DialogTrigger'. Did you mean 'DialogTrigger'?
-app/(workspace)/gestion/components/DashboardStats.tsx(3,38): error TS2724: '"lucide-react"' has no exported member named '_Users'. Did you mean 'Users'?
-app/(workspace)/gestion/components/DocumentGeneratorDialog.tsx(4,46): error TS2724: '"lucide-react"' has no exported member named '_Search'. Did you mean 'Search'?
-app/(workspace)/gestion/components/DocumentGeneratorDialog.tsx(4,55): error TS2724: '"lucide-react"' has no exported member named '_Download'. Did you mean 'Download'?
-app/(workspace)/gestion/components/DocumentGeneratorDialog.tsx(24,10): error TS2305: Module '"@/lib/utils"' has no exported member '_cn'.
-app/(workspace)/gestion/components/EditTenantDialog.tsx(3,20): error TS2724: '"react"' has no exported member named '_useEffect'. Did you mean 'useEffect'?
-app/(workspace)/gestion/components/GestionLocativeClient.tsx(12,10): error TS2724: '"lucide-react"' has no exported member named '_Search'. Did you mean 'Search'?
-app/(workspace)/gestion/components/GestionLocativeClient.tsx(20,10): error TS2724: '"file-saver"' has no exported member named '_saveAs'. Did you mean 'saveAs'?
-app/(workspace)/gestion/components/MaintenanceHub.tsx(4,42): error TS2724: '"lucide-react"' has no exported member named '_Plus'. Did you mean 'Plus'?
-app/(workspace)/gestion/components/MonthSelector.tsx(3,37): error TS2724: '"lucide-react"' has no exported member named '_Calendar'. Did you mean 'Calendar'?
-app/(workspace)/gestion/components/MonthSelector.tsx(5,10): error TS2724: '"@/components/theme-provider"' has no exported member named '_useTheme'. Did you mean 'useTheme'?
-app/(workspace)/gestion/components/QuickActions.tsx(3,10): error TS2724: '"react"' has no exported member named '_useState'. Did you mean 'useState'?
-app/(workspace)/gestion/components/QuickActions.tsx(28,5): error TS2339: Property '_onAddTenant' does not exist on type 'QuickActionsProps'.
-app/(workspace)/gestion/components/QuickActions.tsx(31,5): error TS2339: Property '_pendingCount' does not exist on type 'QuickActionsProps'.
-app/(workspace)/gestion/components/RevenueChart.tsx(12,5): error TS2724: '"recharts"' has no exported member named '_Legend'. Did you mean 'Legend'?
-app/(workspace)/gestion/components/RevenueChartSafe.tsx(4,10): error TS2724: '"react"' has no exported member named '_Suspense'. Did you mean 'Suspense'?
-app/(workspace)/gestion/components/RevenueChartSafe.tsx(5,10): error TS2724: '"lucide-react"' has no exported member named '_Loader2'. Did you mean 'Loader2'?
-app/(workspace)/gestion/components/TenantCard.tsx(3,10): error TS2724: '"react"' has no exported member named '_useState'. Did you mean 'useState'?
-app/(workspace)/gestion/components/TenantCard.tsx(6,5): error TS2724: '"lucide-react"' has no exported member named '_User'. Did you mean 'User'?
-app/(workspace)/gestion/components/TenantCard.tsx(17,5): error TS2724: '"lucide-react"' has no exported member named '_FileText'. Did you mean 'FileText'?
-app/(workspace)/gestion/components/TenantTable.tsx(3,10): error TS2724: '"./ReceiptModal"' has no exported member named '_ReceiptModal'. Did you mean 'ReceiptModal'?
-app/(workspace)/gestion/components/TenantTable.tsx(7,103): error TS2724: '"lucide-react"' has no exported member named '_FileText'. Did you mean 'FileText'?
-app/(workspace)/gestion/components/TenantTable.tsx(9,10): error TS2724: '"@/components/contracts/GenerateContractButton"' has no exported member named '_GenerateContractButton'. Did you mean 'GenerateContractButton'?
-app/(workspace)/gestion/components/TenantTable.tsx(19,10): error TS2724: '"../actions"' has no exported member named '_confirmPayment'. Did you mean 'confirmPayment'?
-app/(workspace)/gestion/components/TenantTable.tsx(19,27): error TS2724: '"../actions"' has no exported member named '_terminateLease'. Did you mean 'terminateLease'?
-app/(workspace)/gestion/components/TenantTable.tsx(19,44): error TS2724: '"../actions"' has no exported member named '_reactivateLease'. Did you mean 'reactivateLease'?
-app/(workspace)/gestion/components/TenantTable.tsx(20,10): error TS2724: '"sonner"' has no exported member named '_toast'. Did you mean 'toast'?
-app/(workspace)/gestion/components/TenantTable.tsx(75,5): error TS2339: Property '_profile' does not exist on type 'TenantTableProps'.
-app/(workspace)/gestion/components/TenantTable.tsx(76,5): error TS2339: Property '_userEmail' does not exist on type 'TenantTableProps'.
-app/(workspace)/gestion/components/TenantTable.tsx(81,5): error TS2339: Property '_onDelete' does not exist on type 'TenantTableProps'.
-app/(workspace)/gestion/components/TenantTable.tsx(82,5): error TS2339: Property '_onDeleteLease' does not exist on type 'TenantTableProps'.
-app/(workspace)/gestion/comptabilite/components/DownloadReportButton.tsx(36,17): error TS2339: Property '_blob' does not exist on type 'BlobProviderParams'.
-app/(workspace)/gestion/comptabilite/components/DownloadReportButton.tsx(36,24): error TS2339: Property '_url' does not exist on type 'BlobProviderParams'.
-app/(workspace)/gestion/comptabilite/components/DownloadReportButton.tsx(36,39): error TS2339: Property '_error' does not exist on type 'BlobProviderParams'.
-app/(workspace)/gestion/comptabilite/components/ExpenseList.tsx(4,39): error TS2724: '"lucide-react"' has no exported member named '_Tag'. Did you mean 'Tag'?
-app/(workspace)/gestion/comptabilite/components/FinancialReportPDF.tsx(2,50): error TS2724: '"@react-pdf/renderer"' has no exported member named '_Font'. Did you mean 'Font'?
-app/(workspace)/gestion/comptabilite/components/FinancialReportPDF.tsx(2,57): error TS2724: '"@react-pdf/renderer"' has no exported member named '_Image'. Did you mean 'Image'?
-app/(workspace)/gestion/comptabilite/page.tsx(21,5): error TS2724: '"lucide-react"' has no exported member named '_TrendingDown'. Did you mean 'TrendingDown'?
-app/(workspace)/gestion/comptabilite/page.tsx(27,5): error TS2724: '"lucide-react"' has no exported member named '_ArrowDownRight'. Did you mean 'ArrowDownRight'?
-app/(workspace)/gestion/comptabilite/page.tsx(28,5): error TS2724: '"lucide-react"' has no exported member named '_Download'. Did you mean 'Download'?
-app/(workspace)/gestion/comptabilite/page.tsx(29,5): error TS2724: '"lucide-react"' has no exported member named '_RefreshCw'. Did you mean 'RefreshCw'?
-app/(workspace)/gestion/comptabilite/page.tsx(31,10): error TS2724: '"@/components/ui/button"' has no exported member named '_Button'. Did you mean 'Button'?
-app/(workspace)/gestion/comptabilite/page.tsx(39,29): error TS2724: '"./expenses-actions"' has no exported member named '_getExpensesSummary'. Did you mean 'getExpensesSummary'?
-app/(workspace)/gestion/config/actions.ts(5,10): error TS2724: '"@/lib/cache/cache-aside"' has no exported member named '_invalidateCache'. Did you mean 'invalidateCache'?
-app/(workspace)/gestion/config/actions.ts(178,13): error TS2339: Property '_teamId' does not exist on type '{ user: User; team: { id: any; name: any; slug: any; subscription_status: any; subscription_trial_ends_at: any; subscription_tier: any; company_address: any; company_phone: any; company_email: any; ... 6 more ...; stripe_payouts_enabled: any; }; ... 4 more ...; subscription_tier: any; }'.
-app/(workspace)/gestion/documents-legaux/components/CreateContractDialog.tsx(5,10): error TS2724: '"@/components/ui/button"' has no exported member named '_Button'. Did you mean 'Button'?
-app/(workspace)/gestion/documents-legaux/components/CreateReceiptDialog.tsx(4,20): error TS2724: '"lucide-react"' has no exported member named '_CheckCircle'. Did you mean 'CheckCircle'?
-app/(workspace)/gestion/documents-legaux/components/CreateReceiptDialog.tsx(4,34): error TS2724: '"lucide-react"' has no exported member named '_Search'. Did you mean 'Search'?
-app/(workspace)/gestion/documents-legaux/components/CreateReceiptDialog.tsx(22,10): error TS2305: Module '"@/lib/utils"' has no exported member '_cn'.
-app/(workspace)/gestion/documents-legaux/components/CreateReceiptDialog.tsx(23,10): error TS2724: '"@/utils/supabase/client"' has no exported member named '_createClient'. Did you mean 'createClient'?
-app/(workspace)/gestion/documents/page.tsx(45,42): error TS2724: '"@/app/(workspace)/compte/mes-documents/actions"' has no exported member named '_getMyDocuments'. Did you mean 'getMyDocuments'?
-app/(workspace)/gestion/equipe/actions.ts(12,33): error TS2724: '"@/lib/permissions"' has no exported member named '_requireTeamRole'. Did you mean 'requireTeamRole'?
-app/(workspace)/gestion/equipe/actions.ts(22,3): error TS2724: '"@/types/team"' has no exported member named '_InviteMemberResult'. Did you mean 'InviteMemberResult'?
-app/(workspace)/gestion/equipe/actions.ts(483,18): error TS2339: Property '_userId' does not exist on type '{ userId?: string | undefined; teamId?: string | undefined; requestId: string; }'.
-app/(workspace)/gestion/equipe/actions.ts(1003,18): error TS2339: Property '_userId' does not exist on type '{ userId?: string | undefined; teamId?: string | undefined; requestId: string; }'.
-app/(workspace)/gestion/equipe/actions.ts(1067,18): error TS2339: Property '_userId' does not exist on type '{ userId?: string | undefined; teamId?: string | undefined; requestId: string; }'.
-app/(workspace)/gestion/equipe/components/AccessControlTab.tsx(31,3): error TS2724: '"lucide-react"' has no exported member named '_AlertTriangle'. Did you mean 'AlertTriangle'?
-app/(workspace)/gestion/equipe/components/InvitationCard.tsx(4,43): error TS2724: '"lucide-react"' has no exported member named '_CheckCircle'. Did you mean 'CheckCircle'?
-app/(workspace)/gestion/equipe/components/MembersTable.tsx(5,34): error TS2724: '"@/components/ui/avatar"' has no exported member named '_AvatarImage'. Did you mean 'AvatarImage'?
-app/(workspace)/gestion/equipe/components/TeamPageClient.tsx(6,25): error TS2724: '"lucide-react"' has no exported member named '_Settings'. Did you mean 'Settings'?
-app/(workspace)/gestion/equipe/invitations/page.tsx(4,34): error TS2305: Module '"lucide-react"' has no exported member '_X'.
-app/(workspace)/gestion/equipe/invitations/page.tsx(6,30): error TS2724: '"../actions"' has no exported member named '_cancelInvitation'. Did you mean 'cancelInvitation'?
-app/(workspace)/gestion/etats-lieux/actions.ts(364,13): error TS2339: Property '_teamId' does not exist on type '{ user: User; team: { id: any; name: any; slug: any; subscription_status: any; subscription_trial_ends_at: any; subscription_tier: any; company_address: any; company_phone: any; company_email: any; ... 6 more ...; stripe_payouts_enabled: any; }; ... 4 more ...; subscription_tier: any; }'.
-app/(workspace)/gestion/locataires/[id]/PaymentHistory.tsx(3,10): error TS2724: '"react"' has no exported member named '_useState'. Did you mean 'useState'?
-app/(workspace)/gestion/locataires/[id]/PaymentHistory.tsx(17,63): error TS2339: Property '_user' does not exist on type 'PaymentHistoryProps'.
-app/(workspace)/gestion/messages/actions.ts(39,13): error TS2339: Property '_teamId' does not exist on type '{ user: User; team: { id: any; name: any; slug: any; subscription_status: any; subscription_trial_ends_at: any; subscription_tier: any; company_address: any; company_phone: any; company_email: any; ... 6 more ...; stripe_payouts_enabled: any; }; ... 4 more ...; subscription_tier: any; }'.
-app/(workspace)/workspace-layout-client.tsx(4,10): error TS2724: '"@/components/theme-provider"' has no exported member named '_ThemeProvider'. Did you mean 'ThemeProvider'?
-app/api/stripe/payment-intent/route.ts(4,10): error TS2724: '"@/utils/supabase/server"' has no exported member named '_createClient'. Did you mean 'createClient'?
-app/layout.tsx(12,10): error TS2724: '"@/components/analytics/lazy-speed-insights"' has no exported member named '_LazySpeedInsights'. Did you mean 'LazySpeedInsights'?
-app/locataire/components/RentPaymentModal.tsx(40,5): error TS2339: Property '_month' does not exist on type 'RentPaymentModalProps'.
-app/locataire/documents/components/InsuranceUpload.tsx(4,40): error TS2724: '"lucide-react"' has no exported member named '_AlertCircle'. Did you mean 'AlertCircle'?
-app/locataire/documents/page.tsx(5,10): error TS2724: '"@/components/ui/button"' has no exported member named '_Button'. Did you mean 'Button'?
-app/pro/carrieres/page.tsx(8,5): error TS2724: '"lucide-react"' has no exported member named '_Clock'. Did you mean 'Clock'?
-app/pro/investissement/page.tsx(11,5): error TS2724: '"lucide-react"' has no exported member named '_Percent'. Did you mean 'Percent'?
-app/pro/investissement/page.tsx(17,5): error TS2724: '"lucide-react"' has no exported member named '_FileText'. Did you mean 'FileText'?
-app/pro/investissement/page.tsx(18,5): error TS2724: '"lucide-react"' has no exported member named '_Star'. Did you mean 'Star'?
-app/pro/pro-client.tsx(20,10): error TS2724: '"@/components/ui/software-icon"' has no exported member named '_SoftwareIcon'. Did you mean 'SoftwareIcon'?
-app/pro/signup/page.tsx(16,5): error TS2724: '"lucide-react"' has no exported member named '_Sparkles'. Did you mean 'Sparkles'?
-components/admin/dashboard-view.tsx(48,3): error TS2339: Property '_stats' does not exist on type 'DashboardViewProps'.
-components/admin/verification-queue.tsx(27,10): error TS2724: '"@/components/dashboard/verification-status-badge"' has no exported member named '_VerificationStatusBadge'. Did you mean 'VerificationStatusBadge'?
-components/dashboard/verification-upload-form.tsx(29,3): error TS2339: Property '_proofDocumentUrl' does not exist on type 'VerificationUploadFormProps'.
-components/forms/address-autocomplete.tsx(6,10): error TS2724: '"@/hooks/use-debounce"' has no exported member named '_useDebounce'. Did you mean 'useDebounce'?
-components/forms/address-autocomplete.tsx(10,5): error TS2724: '"@/components/ui/command"' has no exported member named '_Command'. Did you mean 'Command'?
-components/forms/address-autocomplete.tsx(11,5): error TS2724: '"@/components/ui/command"' has no exported member named '_CommandEmpty'. Did you mean 'CommandEmpty'?
-components/forms/address-autocomplete.tsx(12,5): error TS2724: '"@/components/ui/command"' has no exported member named '_CommandGroup'. Did you mean 'CommandGroup'?
-components/forms/address-autocomplete.tsx(13,5): error TS2724: '"@/components/ui/command"' has no exported member named '_CommandItem'. Did you mean 'CommandItem'?
-components/forms/address-autocomplete.tsx(14,5): error TS2724: '"@/components/ui/command"' has no exported member named '_CommandList'. Did you mean 'CommandList'?
-components/gestion/SubscriptionManager.tsx(10,5): error TS2724: '"@phosphor-icons/react"' has no exported member named '_Buildings'. Did you mean 'Buildings'?
-components/gestion/TeamPropertyCard.tsx(5,122): error TS2724: '"lucide-react"' has no exported member named '_CheckCircle2'. Did you mean 'CheckCircle2'?
-components/gestion/TeamPropertyCard.tsx(5,137): error TS2724: '"lucide-react"' has no exported member named '_AlertCircle'. Did you mean 'AlertCircle'?
-components/gestion/TeamPropertyCard.tsx(5,151): error TS2724: '"lucide-react"' has no exported member named '_Plus'. Did you mean 'Plus'?
-components/gestion/TeamPropertyCard.tsx(63,3): error TS2339: Property '_isLoading' does not exist on type 'TeamPropertyCardProps'.
-components/gestion/TenantSelector.tsx(27,67): error TS2339: Property '_propertyId' does not exist on type 'TenantSelectorProps'.
-components/home/HomeTour.tsx(8,28): error TS2339: Property '_hasProperties' does not exist on type 'HomeTourProps'.
-components/KPICard.tsx(25,5): error TS2339: Property '_small' does not exist on type 'KPICardProps'.
-components/landing/ComparisonTable.tsx(12,10): error TS2305: Module '"@/lib/utils"' has no exported member '_cn'.
-components/landing/DousellNavbar.tsx(3,31): error TS2724: '"./DousellNavbarClient"' has no exported member named '_DousellNavbarClientProps'. Did you mean 'DousellNavbarClientProps'?
-components/landing/PricingCard.tsx(3,17): error TS2724: '"lucide-react"' has no exported member named '_Info'. Did you mean 'Info'?
-components/landing/PricingCard.tsx(5,29): error TS2724: '"@/components/ui/card"' has no exported member named '_CardFooter'. Did you mean 'CardFooter'?
-components/landing/tenant/FeaturedPropertiesHero.tsx(7,53): error TS2724: '"lucide-react"' has no exported member named '_Sparkles'. Did you mean 'Sparkles'?
-components/landing/tenant/TenantBentoGrid.tsx(5,10): error TS2724: '"lucide-react"' has no exported member named '_Smartphone'. Did you mean 'Smartphone'?
-components/landing/VideoTestimonials.tsx(4,10): error TS2724: '"framer-motion"' has no exported member named '_motion'. Did you mean 'motion'?
-components/landing/VideoTestimonials.tsx(4,19): error TS2724: '"framer-motion"' has no exported member named '_useScroll'. Did you mean 'useScroll'?
-components/landing/VideoTestimonials.tsx(4,31): error TS2724: '"framer-motion"' has no exported member named '_useTransform'. Did you mean 'useTransform'?
-components/landing/VideoTestimonials.tsx(5,33): error TS2724: '"lucide-react"' has no exported member named '_Play'. Did you mean 'Play'?
-components/landing/VideoTestimonials.tsx(5,40): error TS2724: '"lucide-react"' has no exported member named '_Award'. Did you mean 'Award'?
-components/landing/VideoTestimonials.tsx(5,48): error TS2724: '"lucide-react"' has no exported member named '_Building'. Did you mean 'Building'?
-components/landing/VideoTestimonials.tsx(5,59): error TS2724: '"lucide-react"' has no exported member named '_Wallet'. Did you mean 'Wallet'?
-components/landing/VideoTestimonials.tsx(5,68): error TS2724: '"lucide-react"' has no exported member named '_Shield'. Did you mean 'Shield'?
-components/onboarding/OnboardingTour.tsx(8,10): error TS2305: Module '"@/lib/utils"' has no exported member '_cn'.
-components/onboarding/WizardForm.tsx(10,10): error TS2724: '"@/components/ui/textarea"' has no exported member named '_Textarea'. Did you mean 'Textarea'?
-components/payment/PayDunyaRentButton.tsx(20,5): error TS2339: Property '_tenantName' does not exist on type 'PayDunyaRentButtonProps'.
-components/payment/PayDunyaRentButton.tsx(21,5): error TS2339: Property '_tenantEmail' does not exist on type 'PayDunyaRentButtonProps'.
-components/property/agent-card.tsx(5,39): error TS2724: '"lucide-react"' has no exported member named '_User'. Did you mean 'User'?
-components/property/external-property-teaser.tsx(3,10): error TS2724: '"react"' has no exported member named '_useMemo'. Did you mean 'useMemo'?
-components/property/external-property-teaser.tsx(4,10): error TS2724: '"next/navigation"' has no exported member named '_useRouter'. Did you mean 'useRouter'?
-components/property/property-card.tsx(13,10): error TS2724: '"@/components/ui/button"' has no exported member named '_Button'. Did you mean 'Button'?
-components/property/review-item.tsx(17,31): error TS2339: Property '_propertyId' does not exist on type 'ReviewItemProps'.
-components/property/static-map.tsx(4,10): error TS2724: '"lucide-react"' has no exported member named '_ExternalLink'. Did you mean 'ExternalLink'?
-components/saasable/SaasableSectionWrapper.tsx(3,10): error TS2724: '"react"' has no exported member named '_Suspense'. Did you mean 'Suspense'?
-components/saasable/ui/SvgIcon.tsx(17,91): error TS2339: Property '_twoToneColor' does not exist on type '{ name: string; size?: number | undefined; type?: IconType | undefined; color?: string | undefined; stroke?: number | undefined; twoToneColor?: string | undefined; }'.
-components/search/create-alert-dialog.tsx(5,16): error TS2305: Module '"lucide-react"' has no exported member '_X'.
-components/search/GlobalSearch.tsx(8,10): error TS2305: Module '"@/lib/utils"' has no exported member '_cn'.
-components/search/map-view.tsx(72,27): error TS2339: Property '_children' does not exist on type '{ children: ReactNode; }'.
-components/search/map-view.tsx(95,21): error TS2552: Cannot find name '_size'. Did you mean 'size'?
-components/search/map-view.tsx(122,5): error TS2339: Property '_onRedirect' does not exist on type '{ property: Property; isActive: boolean; onClick: () => void; onRedirect: () => void; }'.
-components/sections/home-seo-content.tsx(5,18): error TS2724: '"framer-motion"' has no exported member named '_AnimatePresence'. Did you mean 'AnimatePresence'?
-components/seo/ProgrammaticPageTemplate.tsx(3,10): error TS2724: '"react"' has no exported member named '_useEffect'. Did you mean 'useEffect'?
-components/seo/ProgrammaticPageTemplate.tsx(3,22): error TS2724: '"react"' has no exported member named '_useState'. Did you mean 'useState'?
-components/seo/ProgrammaticPageTemplate.tsx(3,33): error TS2724: '"react"' has no exported member named '_Fragment'. Did you mean 'Fragment'?
-components/seo/ProgrammaticPageTemplate.tsx(10,10): error TS2305: Module '"@/lib/utils"' has no exported member '_cn'.
-components/seo/ProgrammaticPageTemplate.tsx(16,10): error TS2724: '"@/components/property/OwnerCTA"' has no exported member named '_OwnerCTA'. Did you mean 'OwnerCTA'?
-components/seo/SimilarListingsSection.tsx(5,10): error TS2724: '"lucide-react"' has no exported member named '_Sparkles'. Did you mean 'Sparkles'?
-components/theme-provider.tsx(5,10): error TS2724: '"react"' has no exported member named '_createContext'. Did you mean 'createContext'?
-components/theme-provider.tsx(5,26): error TS2724: '"react"' has no exported member named '_useContext'. Did you mean 'useContext'?
-components/ui/display-cards.tsx(22,3): error TS2339: Property '_iconClassName' does not exist on type 'DisplayCardProps'.
-components/ui/testimonial-cards.tsx(4,18): error TS2724: '"framer-motion"' has no exported member named '_PanInfo'. Did you mean 'PanInfo'?
-components/workspace/TeamSwitcher.tsx(10,3): error TS2724: '"@/components/ui/select"' has no exported member named '_SelectValue'. Did you mean 'SelectValue'?
-components/workspace/TemporaryAccessWidget.tsx(13,10): error TS2724: '"next/navigation"' has no exported member named '_useRouter'. Did you mean 'useRouter'?
-components/workspace/TemporaryAccessWidget.tsx(20,3): error TS2724: '"lucide-react"' has no exported member named '_ExternalLink'. Did you mean 'ExternalLink'?
-components/workspace/workspace-bottom-nav.tsx(64,37): error TS2304: Cannot find name 'useState'.
-components/workspace/workspace-bottom-nav.tsx(65,33): error TS2304: Cannot find name 'useState'.
-components/workspace/workspace-bottom-nav.tsx(66,23): error TS2552: Cannot find name 'useRef'. Did you mean 'User'?
-components/workspace/workspace-bottom-nav.tsx(67,19): error TS2552: Cannot find name 'useRef'. Did you mean 'User'?
-components/workspace/workspace-bottom-nav.tsx(68,30): error TS2552: Cannot find name 'useRef'. Did you mean 'User'?
-components/workspace/workspace-bottom-nav.tsx(69,28): error TS2304: Cannot find name 'useRef'.
-components/workspace/workspace-bottom-nav.tsx(70,31): error TS2304: Cannot find name 'useState'.
-components/workspace/workspace-bottom-nav.tsx(71,31): error TS2304: Cannot find name 'useState'.
-components/workspace/workspace-bottom-nav.tsx(73,3): error TS2304: Cannot find name 'useEffect'.
-components/workspace/workspace-bottom-nav.tsx(97,20): error TS2304: Cannot find name 'useMemo'.
-components/workspace/workspace-bottom-nav.tsx(104,3): error TS2304: Cannot find name 'useEffect'.
-components/workspace/workspace-bottom-nav.tsx(168,3): error TS2304: Cannot find name 'useEffect'.
-components/workspace/workspace-bottom-nav.tsx(188,24): error TS7006: Parameter 'item' implicitly has an 'any' type.
-components/workspace/workspace-header.tsx(6,10): error TS2724: '"lucide-react"' has no exported member named '_Bell'. Did you mean 'Bell'?
-components/workspace/workspace-header.tsx(6,17): error TS2724: '"lucide-react"' has no exported member named '_Search'. Did you mean 'Search'?
-components/workspace/workspace-sidebar.tsx(25,3): error TS2724: '"lucide-react"' has no exported member named '_Menu'. Did you mean 'Menu'?
-components/workspace/workspace-sidebar.tsx(33,31): error TS2724: '"@/components/ui/sheet"' has no exported member named '_SheetTrigger'. Did you mean 'SheetTrigger'?
-components/workspace/workspace-sidebar.tsx(37,10): error TS2724: '"@/components/modals/AccessRequestModal"' has no exported member named '_AccessRequestModal'. Did you mean 'AccessRequestModal'?
-emails/verification-email.tsx(10,3): error TS2724: '"@react-email/components"' has no exported member named '_Img'. Did you mean 'Img'?
-lib/admin-auth.ts(2,10): error TS2724: '"next/navigation"' has no exported member named '_redirect'. Did you mean 'redirect'?
-lib/finance.ts(40,10): error TS2724: '"date-fns"' has no exported member named '_isSameMonth'. Did you mean 'isSameMonth'?
-lib/finance.ts(40,24): error TS2724: '"date-fns"' has no exported member named '_isWithinInterval'. Did you mean 'isWithinInterval'?
-lib/finance.ts(40,69): error TS2724: '"date-fns"' has no exported member named '_parseISO'. Did you mean 'parseISO'?
-lib/ged-utils.ts(30,17): error TS2339: Property '_teamId' does not exist on type 'StoreDocumentParams'.
-lib/hooks/use-favorites-sync.ts(50,22): error TS2339: Property '_addFavorite' does not exist on type 'FavoritesState'.
-lib/hooks/use-favorites-sync.ts(50,36): error TS2339: Property '_removeFavorite' does not exist on type 'FavoritesState'.
-lib/hooks/usePermission.ts(84,39): error TS2339: Property '_user' does not exist on type 'TeamContext'.
-lib/mail.ts(41,3): error TS2339: Property '_fromName' does not exist on type 'SendEmailOptions'.
-lib/mail.ts(42,3): error TS2339: Property '_user_id' does not exist on type 'SendEmailOptions'.
-lib/maintenance-pdf-generator.ts(1,52): error TS2724: '"pdf-lib"' has no exported member named '_PDFPage'. Did you mean 'PDFPage'?
-lib/pdf-generator.ts(13,10): error TS2724: '"./contract-template"' has no exported member named '_generateContractText'. Did you mean 'generateContractText'?
-lib/pdf-generator.ts(16,10): error TS2724: '"date-fns"' has no exported member named '_format'. Did you mean 'format'?
-lib/pdf-generator.ts(17,10): error TS2305: Module '"date-fns/locale"' has no exported member '_fr'.
-lib/rate-limit/ai-limiter.ts(207,26): error TS2339: Property 'zremrangebyscore' does not exist on type 'Promise<any>'.
-lib/rate-limit/ai-limiter.ts(208,40): error TS2339: Property 'zcard' does not exist on type 'Promise<any>'.
+﻿.next/dev/types/validator.ts(530,1): error TS2304: Cannot find name 'page'.
+.next/dev/types/validator.ts(532,52): error TS2344: Type '"/admin/roles"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(541,52): error TS2344: Type '"/admin/users"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(550,52): error TS2344: Type '"/admin/verifications/biens"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(559,52): error TS2344: Type '"/admin/verifications/identites"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(568,52): error TS2344: Type '"/admin/verifications"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(577,52): error TS2344: Type '"/compte/activer-gestion"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(586,52): error TS2344: Type '"/compte/alertes"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(595,52): error TS2344: Type '"/compte/biens/[id]"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(604,52): error TS2344: Type '"/compte/biens/edit/[id]"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(613,52): error TS2344: Type '"/compte/debug"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(622,52): error TS2344: Type '"/compte/deposer"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(631,52): error TS2344: Type '"/compte/favoris"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(640,52): error TS2344: Type '"/compte/gestion-locative"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(649,52): error TS2344: Type '"/compte/mes-biens"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(658,52): error TS2344: Type '"/compte/mes-documents"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(676,52): error TS2344: Type '"/compte/parametres"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(685,52): error TS2344: Type '"/compte/reset-password"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(694,52): error TS2344: Type '"/compte/upgrade"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(703,52): error TS2344: Type '"/gestion/abonnement"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(712,52): error TS2344: Type '"/gestion/access-control"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(721,52): error TS2344: Type '"/gestion/biens/[id]/edit"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(730,52): error TS2344: Type '"/gestion/biens/[id]"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(739,52): error TS2344: Type '"/gestion/biens/nouveau"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(748,52): error TS2344: Type '"/gestion/biens"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(757,52): error TS2344: Type '"/gestion/comptabilite"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(766,52): error TS2344: Type '"/gestion/config"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(775,52): error TS2344: Type '"/gestion/documents-legaux"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(784,52): error TS2344: Type '"/gestion/documents"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(793,52): error TS2344: Type '"/gestion/equipe/audit"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(802,52): error TS2344: Type '"/gestion/equipe/invitations/accept"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(811,52): error TS2344: Type '"/gestion/equipe/invitations"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(820,52): error TS2344: Type '"/gestion/equipe"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(829,52): error TS2344: Type '"/gestion/equipe/parametres"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(838,52): error TS2344: Type '"/gestion/etats-lieux/[id]"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(847,52): error TS2344: Type '"/gestion/etats-lieux/[id]/pdf"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(856,52): error TS2344: Type '"/gestion/etats-lieux/[id]/sign"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(865,52): error TS2344: Type '"/gestion/etats-lieux/formulaire-vierge"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(874,52): error TS2344: Type '"/gestion/etats-lieux/new"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(883,52): error TS2344: Type '"/gestion/etats-lieux"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(892,52): error TS2344: Type '"/gestion/interventions"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(901,52): error TS2344: Type '"/gestion/locataires/[id]"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(910,52): error TS2344: Type '"/gestion/messages/[leaseId]"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(919,52): error TS2344: Type '"/gestion/messages"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(964,52): error TS2344: Type '"/locataire/maintenance/new"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(1009,52): error TS2344: Type '"/locataire/paiements/[id]"' does not satisfy the constraint 'AppRoutes'.
+.next/dev/types/validator.ts(1108,57): error TS2344: Type '"/api/admin/performance"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1117,57): error TS2344: Type '"/api/auth/check-verification"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1126,57): error TS2344: Type '"/api/auth/verify-email"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1135,57): error TS2344: Type '"/api/cache-metrics"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1144,57): error TS2344: Type '"/api/clear-cache"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1153,57): error TS2344: Type '"/api/cron/generate-monthly-rentals"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1162,57): error TS2344: Type '"/api/cron/lease-expirations"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1171,57): error TS2344: Type '"/api/cron"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1180,57): error TS2344: Type '"/api/debug/documents"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1189,57): error TS2344: Type '"/api/debug/types"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1198,57): error TS2344: Type '"/api/documents/lease/[id]"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1200,31): error TS2344: Type 'typeof import("C:/Users/Barry/Downloads/Doussel_immo/app/(vitrine)/api/documents/lease/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/documents/lease/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: Promise<{ id: string; }>; }) => Promise<NextResponse<unknown>>' is not assignable to type '(request: NextRequest, context: { params: Promise<unknown>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<unknown>; }' is not assignable to type '{ params: Promise<{ id: string; }>; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<unknown>' is not assignable to type 'Promise<{ id: string; }>'.
+              Type 'unknown' is not assignable to type '{ id: string; }'.
+.next/dev/types/validator.ts(1207,57): error TS2344: Type '"/api/documents/receipt/[id]"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1209,31): error TS2344: Type 'typeof import("C:/Users/Barry/Downloads/Doussel_immo/app/(vitrine)/api/documents/receipt/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/documents/receipt/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: Promise<{ id: string; }>; }) => Promise<NextResponse<unknown>>' is not assignable to type '(request: NextRequest, context: { params: Promise<unknown>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<unknown>; }' is not assignable to type '{ params: Promise<{ id: string; }>; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<unknown>' is not assignable to type 'Promise<{ id: string; }>'.
+              Type 'unknown' is not assignable to type '{ id: string; }'.
+.next/dev/types/validator.ts(1216,57): error TS2344: Type '"/api/kkiapay/confirm"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1225,57): error TS2344: Type '"/api/paydunya-api"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1234,57): error TS2344: Type '"/api/paydunya/confirm"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1243,57): error TS2344: Type '"/api/paydunya/create-invoice"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1252,57): error TS2344: Type '"/api/paydunya/opr/charge"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1261,57): error TS2344: Type '"/api/paydunya/opr/create"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1270,57): error TS2344: Type '"/api/paydunya/webhook"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1279,57): error TS2344: Type '"/api/properties/categories"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1288,57): error TS2344: Type '"/api/properties/featured"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1297,57): error TS2344: Type '"/api/publisher-info"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1306,57): error TS2344: Type '"/api/reset-reminders"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1315,57): error TS2344: Type '"/api/save-receipt"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1324,57): error TS2344: Type '"/api/send-notice"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1333,57): error TS2344: Type '"/api/send-receipt"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1342,57): error TS2344: Type '"/api/test-reminders"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1351,57): error TS2344: Type '"/api/user/roles"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1360,57): error TS2344: Type '"/auth/callback"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1369,57): error TS2344: Type '"/auth/confirm"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1378,57): error TS2344: Type '"/auth/google"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1396,57): error TS2344: Type '"/auth/signout"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1405,57): error TS2344: Type '"/api/access-control/my-permissions"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1414,57): error TS2344: Type '"/api/admin/backfill-geocode"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1423,57): error TS2344: Type '"/api/admin/catch-up-ged"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1432,57): error TS2344: Type '"/api/branding/upload"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1441,57): error TS2344: Type '"/api/cron/send-expiring-notification"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1450,57): error TS2344: Type '"/api/search/suggestions"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1459,57): error TS2344: Type '"/api/stripe/connect/onboarding"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1468,57): error TS2344: Type '"/api/stripe/payment-intent"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1477,57): error TS2344: Type '"/api/stripe/rent-checkout"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1486,57): error TS2344: Type '"/api/stripe/webhook"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1495,57): error TS2344: Type '"/api/subscription/checkout"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1504,57): error TS2344: Type '"/api/subscription/portal"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1513,57): error TS2344: Type '"/api/tenant/logout"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1522,57): error TS2344: Type '"/api/tenant/receipt/[id]"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1524,31): error TS2344: Type 'typeof import("C:/Users/Barry/Downloads/Doussel_immo/app/api/tenant/receipt/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/tenant/receipt/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: Promise<{ id: string; }>; }) => Promise<NextResponse<unknown>>' is not assignable to type '(request: NextRequest, context: { params: Promise<unknown>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<unknown>; }' is not assignable to type '{ params: Promise<{ id: string; }>; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<unknown>' is not assignable to type 'Promise<{ id: string; }>'.
+              Type 'unknown' is not assignable to type '{ id: string; }'.
+.next/dev/types/validator.ts(1531,57): error TS2344: Type '"/api/tenant/session"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1540,57): error TS2344: Type '"/api/tenant/unread-counts"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1549,57): error TS2344: Type '"/api/webhooks/apify-sync"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1558,57): error TS2344: Type '"/api/webhooks/stripe/connect"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1567,57): error TS2344: Type '"/api/webhooks/stripe"' does not satisfy the constraint '"/auth"'.
+.next/dev/types/validator.ts(1616,51): error TS2344: Type '"/gestion/etats-lieux"' does not satisfy the constraint 'LayoutRoutes'.
+.next/types/validator.ts(25,44): error TS2344: Type 'Route' does not satisfy the constraint 'LayoutRoutes'.
+  Type 'import("C:/Users/Barry/Downloads/Doussel_immo/.next/types/routes").LayoutRoutes' is not assignable to type 'import("C:/Users/Barry/Downloads/Doussel_immo/.next/dev/types/routes").LayoutRoutes'.
+    Type '"/gestion/etats-lieux"' is not assignable to type 'LayoutRoutes'.
+.next/types/validator.ts(25,75): error TS2344: Type 'Route' does not satisfy the constraint 'LayoutRoutes'.
+  Type 'import("C:/Users/Barry/Downloads/Doussel_immo/.next/types/routes").LayoutRoutes' is not assignable to type 'import("C:/Users/Barry/Downloads/Doussel_immo/.next/dev/types/routes").LayoutRoutes'.
+    Type '"/gestion/etats-lieux"' is not assignable to type 'LayoutRoutes'.
+app/(workspace)/gestion/actions/property-selector.ts(29,17): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/actions/property-selector.ts(85,17): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/comptabilite/expenses-actions.ts(44,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/comptabilite/expenses-actions.ts(44,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/comptabilite/expenses-actions.ts(78,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/comptabilite/expenses-actions.ts(115,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/comptabilite/expenses-actions.ts(141,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/comptabilite/expenses-actions.ts(168,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/comptabilite/expenses-actions.ts(214,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/comptabilite/expenses-actions.ts(320,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/comptabilite/expenses-actions.ts(398,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/comptabilite/expenses-actions.ts(398,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/documents-legaux/actions.ts(37,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/documents-legaux/actions.ts(84,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/documents-legaux/actions.ts(149,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/documents-legaux/actions.ts(149,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/documents-legaux/actions.ts(272,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/documents-legaux/actions.ts(272,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/documents-legaux/actions.ts(305,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/documents-legaux/actions.ts(305,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/documents-legaux/actions.ts(474,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/documents-legaux/actions.ts(474,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/documents-legaux/actions.ts(613,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/equipe/actions.ts(120,13): error TS2339: Property 'team' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/equipe/actions.ts(120,19): error TS2339: Property 'role' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/equipe/actions.ts(1159,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/equipe/actions.ts(1233,13): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/equipe/actions.ts(1233,19): error TS2339: Property 'role' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(14,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(14,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(68,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(68,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(121,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(121,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(205,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(205,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(240,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(240,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(280,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(280,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(315,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(315,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(365,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(365,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(394,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/etats-lieux/actions.ts(394,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/interventions/page.tsx(19,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/messages/actions.ts(11,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/messages/actions.ts(11,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/messages/actions.ts(39,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/messages/actions.ts(39,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/messages/actions.ts(56,13): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/(workspace)/gestion/messages/actions.ts(56,21): error TS2339: Property 'user' does not exist on type 'UserTeamContext | null'.
+app/api/stripe/connect/onboarding/route.ts(9,17): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/api/stripe/connect/onboarding/route.ts(9,25): error TS2339: Property 'team' does not exist on type 'UserTeamContext | null'.
+app/api/stripe/payment-intent/route.ts(9,17): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/api/stripe/payment-intent/route.ts(9,25): error TS2339: Property 'team' does not exist on type 'UserTeamContext | null'.
+app/api/subscription/checkout/route.ts(21,17): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+app/api/subscription/checkout/route.ts(21,25): error TS2339: Property 'team' does not exist on type 'UserTeamContext | null'.
+app/api/subscription/portal/route.ts(9,17): error TS2339: Property 'teamId' does not exist on type 'UserTeamContext | null'.
+components/activation/ActivationBanner.tsx(128,13): error TS2322: Type '(redirectTo?: string) => Promise<void>' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+  Types of parameters 'redirectTo' and 'event' are incompatible.
+    Type 'MouseEvent<HTMLButtonElement, MouseEvent>' is not assignable to type 'string'.

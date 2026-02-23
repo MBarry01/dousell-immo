@@ -150,7 +150,9 @@ export async function uploadSignature(file: File) {
  */
 export async function getPremiumBranding() {
     try {
-        const { user, team } = await getUserTeamContext();
+        const context = await getUserTeamContext();
+        if (!context) return { success: false, data: null };
+        const { user, team } = context;
 
         // Mapper team -> Expected format (fallback to profile if needed)
         const data = {

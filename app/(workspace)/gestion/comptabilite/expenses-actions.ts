@@ -41,7 +41,9 @@ export interface AddExpenseInput {
 // ADD EXPENSE
 // ==========================================
 export async function addExpense(data: AddExpenseInput) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
     await requireTeamPermission('expenses.create');
 
     const supabase = await createClient();
@@ -75,7 +77,9 @@ export async function addExpense(data: AddExpenseInput) {
 // GET EXPENSES BY MONTH
 // ==========================================
 export async function getExpensesByMonth(month: number, year: number) {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé", expenses: [] };
+    const { teamId } = context;
     const supabase = await createClient();
 
     const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
@@ -112,7 +116,9 @@ export async function getExpensesByMonth(month: number, year: number) {
 // GET TOTAL EXPENSES BY YEAR
 // ==========================================
 export async function getExpensesByYear(year: number) {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé", expenses: [] };
+    const { teamId } = context;
     const supabase = await createClient();
 
     const startDate = `${year}-01-01`;
@@ -138,7 +144,9 @@ export async function getExpensesByYear(year: number) {
 // DELETE EXPENSE
 // ==========================================
 export async function deleteExpense(expenseId: string) {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId } = context;
     await requireTeamPermission('expenses.delete');
 
     const supabase = await createClient();
@@ -165,7 +173,9 @@ export async function updateExpense(
     expenseId: string,
     data: Partial<AddExpenseInput>
 ) {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId } = context;
     await requireTeamPermission('expenses.edit');
 
     const supabase = await createClient();
@@ -211,7 +221,9 @@ export async function getExpensesSummary(year: number): Promise<{
     error?: string;
     summary?: ExpensesSummary;
 }> {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId } = context;
     const supabase = await createClient();
 
     const { data: expenses, error } = await supabase
@@ -317,7 +329,9 @@ export async function getComptabiliteData(year: number): Promise<{
     data?: ComptabiliteData;
     upgradeRequired?: boolean;
 }> {
-    const { teamId } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId } = context;
 
     // ✅ CHECK FEATURE: Accounting Module Access
     const access = await checkFeatureAccess(teamId, "view_advanced_reports");
@@ -367,7 +381,7 @@ export async function getComptabiliteData(year: number): Promise<{
 
     const { data: txsData, error: txsError } = await supabase
         .from('rental_transactions')
-        .select('id, lease_id, amount_due, status, period_month, period_year, created_at')
+        .select('id, lease_id, amount_due, amount_paid, status, period_month, period_year, created_at')
         .eq('team_id', teamId)
         .eq('period_year', year);
 
@@ -378,7 +392,8 @@ export async function getComptabiliteData(year: number): Promise<{
 
     const transactions = (txsData || []).map(t => ({
         ...t,
-        amount_paid: (t.status?.toLowerCase() === 'paid') ? t.amount_due : 0
+        // Préserver amount_paid réel, fallback si absent
+        amount_paid: t.amount_paid ?? ((t.status?.toLowerCase() === 'paid') ? t.amount_due : 0)
     }));
 
     return {
@@ -394,7 +409,9 @@ export async function getProfitabilityByProperty(year: number): Promise<{
     debug?: any;
     upgradeRequired?: boolean;
 }> {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { success: false, error: "Non autorisé" };
+    const { teamId, user } = context;
 
     // ✅ CHECK FEATURE QUOTA (EXPORT)
     const access = await checkFeatureAccess(teamId, "export_data");
@@ -435,7 +452,7 @@ export async function getProfitabilityByProperty(year: number): Promise<{
     // Get all payments for the year (rent collected)
     const { data: payments, error: paymentsError } = await supabase
         .from('rental_transactions')
-        .select('lease_id, amount_due, status')
+        .select('lease_id, amount_due, amount_paid, status')
         .eq('status', 'paid')
         .eq('period_year', year)
         .eq('team_id', teamId);
@@ -455,9 +472,12 @@ export async function getProfitabilityByProperty(year: number): Promise<{
             propertyMap.set(address, { revenue: 0, expenses: 0 });
         }
 
-        // Sum payments for this lease
+        // Sum payments for this lease — utiliser amount_paid réel (paiements partiels)
         const leasePayments = (payments || []).filter(p => p.lease_id === lease.id);
-        const totalPayments = leasePayments.reduce((sum, p) => sum + (Number(p.amount_due) || 0), 0);
+        const totalPayments = leasePayments.reduce(
+            (sum, p) => sum + (p.amount_paid != null ? Number(p.amount_paid) : Number(p.amount_due) || 0),
+            0
+        );
 
         const prop = propertyMap.get(address)!;
         prop.revenue += totalPayments;

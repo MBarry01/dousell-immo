@@ -1,7 +1,8 @@
-"use server";
 
 import { createClient } from "@/utils/supabase/server";
 import { trackServerEvent, EVENTS } from "@/lib/analytics";
+import type { UserTeamContext } from "@/types/team";
+// import { getUserTeamContext, createPersonalTeam } from "@/lib/team-permissions.server";
 
 // Allowed redirect paths for validation
 const _ALLOWED_PATHS = ["/", "/gestion", "/compte", "/bienvenue", "/recherche", "/pro", "/planifier-visite"];
@@ -59,10 +60,11 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
         }
 
         // ===== 1. CHECK TEAM SUBSCRIPTION & USAGE (SMART REDIRECT) =====
+        const { getUserTeamContext } = await import("./team-context");
+        const { createPersonalTeam } = await import("./team-permissions.server");
 
         // Récupérer le contexte d'équipe avec subscription (optimisé, 1 seul appel DB)
-        const { getUserTeamContext, createPersonalTeam } = await import("@/lib/team-permissions.server");
-        let teamContext = await getUserTeamContext();
+        let teamContext: UserTeamContext | null = await getUserTeamContext();
 
         // 1b. Auto-create team if needed (signup flow)
         if (!teamContext && user.user_metadata?.selected_plan) {
@@ -80,9 +82,25 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
         if (teamContext) {
             const { subscription_status, subscription_tier, team_id } = teamContext;
 
-            // A. PAID PLANS -> ALWAYS GESTION
-            // Si l'utilisateur paie pour un plan Pro/Business, il veut probablement voir son dashboard SaaS
-            // (Même s'il n'a pas encore de données, il a payé pour les outils)
+            // A. FIRST LOGIN — priorité maximale (avant plan, avant données)
+            // Déclenche le modal de bienvenue quelle que soit la situation
+            const { data: profileData } = await supabase
+                .from("profiles")
+                .select("first_login")
+                .eq("id", user.id)
+                .single();
+
+            if (profileData?.first_login) {
+                console.log("🆕 First Login → /?welcome=true");
+                trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
+                    from: "login",
+                    to: "/?welcome=true",
+                    reason: "first_login_welcome_modal",
+                });
+                return "/?welcome=true";
+            }
+
+            // B. PAID PLANS -> ALWAYS GESTION
             if (['pro', 'business', 'agency'].includes(subscription_tier || '')) {
                 console.log("✅ Paid Plan User (Tier: " + subscription_tier + ") → /gestion");
                 trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
@@ -94,12 +112,12 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
                 return "/gestion";
             }
 
-            // A-bis. EXPIRED PLANS -> GESTION (To renew)
+            // B-bis. EXPIRED PLANS -> GESTION (To renew)
             if (subscription_status === 'past_due' || subscription_status === 'canceled') {
                 return "/gestion?upgrade=required";
             }
 
-            // B. FREE / STARTER / TRIAL PLANS -> CHECK USAGE
+            // C. FREE / STARTER / TRIAL PLANS -> CHECK USAGE
             // Ici on sépare les "Gestionnaires" des "Simples Annonceurs"
 
             // 1. Check for Leases (Gestionnaire Indicator)
@@ -125,7 +143,6 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
                 .select("*", { count: 'exact', head: true })
                 .or(`team_id.eq.${team_id},owner_id.eq.${user.id}`);
 
-
             if (propertiesCount && propertiesCount > 0) {
                 console.log("✅ User has Properties (" + propertiesCount + ") but NO leases → /compte/mes-biens (Annonceur)");
                 trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
@@ -136,24 +153,13 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
                 return "/compte/mes-biens";
             }
 
-            // 3. New User / No Data
-            // Si ni baux ni propriétés, on l'oriente vers le dépôt d'annonce (Onboarding Annonceur)
-            // Sauf si c'est la toute première visite (Welcome Modal)
-
-            // Legacy check (to be removed eventually)
-            /*
-            if (profile?.first_login) {
-                return "/?welcome=true";
-            }
-            */
-
-            console.log("🆕 Empty Account → /compte/deposer (Promote Ad Creation)");
+            console.log("ℹ️ Empty Account → / (Home)");
             trackServerEvent(EVENTS.REDIRECT_EXECUTED, {
                 from: "login",
-                to: "/compte/deposer",
+                to: "/",
                 reason: "new_user_empty_account",
             });
-            return "/compte/deposer";
+            return "/";
         }
 
         // ===== 2. FALLBACK (NO TEAM) =====
@@ -176,13 +182,5 @@ export async function getSmartRedirectPath(explicitNext?: string): Promise<strin
         console.error("Error determining redirect path:", error);
         return "/";
     }
-}
-
-/**
- * Version client-callable qui ne peut être utilisée que depuis une action serveur
- */
-export async function determinePostLoginRedirect(explicitNext?: string): Promise<{ redirectPath: string }> {
-    const redirectPath = await getSmartRedirectPath(explicitNext);
-    return { redirectPath };
 }
 

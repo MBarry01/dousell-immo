@@ -11,7 +11,9 @@ import { requireTeamPermission } from "@/lib/permissions";
  * Filters via the lease relationship since inventory_reports doesn't have team_id
  */
 export async function getInventoryReports() {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { error: 'Non autorisé', data: [] };
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) {
@@ -65,7 +67,9 @@ export async function getInventoryReports() {
  * Get a single inventory report by ID (only if lease belongs to team)
  */
 export async function getInventoryReportById(id: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { error: 'Non autorisé' };
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) {
@@ -118,7 +122,9 @@ export async function createInventoryReport(data: {
     propertyType?: PropertyType;
     roomsCount?: number;
 }) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { error: 'Non autorisé' };
+    const { teamId, user } = context;
     await requireTeamPermission('leases.edit'); // Permission for inventory reports linked to leases
     const supabase = await createClient();
 
@@ -202,7 +208,9 @@ export async function updateInventoryReport(id: string, updates: {
     general_comments?: string;
     status?: 'draft' | 'completed';
 }) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { error: 'Non autorisé' };
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) {
@@ -237,7 +245,9 @@ export async function signInventoryReport(id: string, signatures: {
     owner_signature?: string;
     tenant_signature?: string;
 }) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { error: 'Non autorisé' };
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) {
@@ -277,7 +287,9 @@ export async function signInventoryReport(id: string, signatures: {
  * Delete an inventory report (only drafts)
  */
 export async function deleteInventoryReport(id: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { error: 'Non autorisé' };
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) {
@@ -312,7 +324,9 @@ export async function deleteInventoryReport(id: string) {
  * Get leases for dropdown selection
  */
 export async function getLeasesForInventory() {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { error: 'Non autorisé', data: [] };
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) {
@@ -362,7 +376,9 @@ export async function getOwnerSignature() {
  * Get owner's agency branding
  */
 export async function getAgencyBranding() {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { error: 'Non autorisé' };
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) {
@@ -391,7 +407,9 @@ export async function getAgencyBranding() {
  * Upload a photo for an inventory item
  */
 export async function uploadInventoryPhoto(file: File, reportId: string) {
-    const { teamId, user } = await getUserTeamContext();
+    const context = await getUserTeamContext();
+    if (!context) return { error: 'Non autorisé' };
+    const { teamId, user } = context;
     const supabase = await createClient();
 
     if (!user) {

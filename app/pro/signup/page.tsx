@@ -349,6 +349,20 @@ export default function SignupPage() {
 
             {/* Right Panel - Form (Full Width) */}
             <div className="relative flex w-full flex-col bg-zinc-900 lg:w-1/2">
+                {/* Background Image Container - Faded Deco */}
+                <div className="absolute inset-0 z-0 opacity-[0.14] pointer-events-none overflow-hidden">
+                    <Image
+                        src="/images/assetSignup.png"
+                        alt="Background Decoration"
+                        fill
+                        className="object-cover object-center"
+                        priority
+                    />
+                    {/* Gradient to blend with the dark background */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-zinc-900" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-zinc-900/40 via-transparent to-zinc-900/40" />
+                </div>
+
                 {/* Progress Bar */}
                 <div className="absolute left-0 right-0 top-0 z-20 h-1 bg-white/5">
                     <motion.div
@@ -360,7 +374,7 @@ export default function SignupPage() {
                 </div>
 
                 {/* Mobile Header */}
-                <div className="flex items-center justify-between border-b border-white/5 p-4 lg:hidden">
+                <div className="relative z-10 flex items-center justify-between border-b border-white/5 p-4 lg:hidden">
                     <Link
                         href="/landing"
                         className="inline-flex items-center justify-center rounded-full bg-white/5 p-2.5 transition-colors hover:bg-white/10"
@@ -378,7 +392,7 @@ export default function SignupPage() {
                 </div>
 
                 {/* Scrollable Form Area */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="relative z-10 flex-1 overflow-y-auto">
                     <div className="mx-auto max-w-lg px-6 py-8 lg:px-12 lg:py-16">
                         <motion.div
                             initial="hidden"

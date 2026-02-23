@@ -3,7 +3,7 @@ import { getOwnerProfileForReceipts } from "@/services/rentalService.cached";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { LegalPageClient } from "./LegalPageClient";
-import { getUserTeamContext } from "@/lib/team-permissions.server";
+import { getUserTeamContext } from "@/lib/team-context";
 import { getActivationData } from "@/lib/activation/get-activation-stage";
 import { ActivationInlineNotice } from "@/components/activation/ActivationInlineNotice";
 

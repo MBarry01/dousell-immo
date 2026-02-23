@@ -296,7 +296,13 @@ export function PropertyCard({ property, viewMode, onRefresh }: PropertyCardProp
                     className="mt-4 w-full rounded-full bg-[#0F172A] text-white hover:bg-[#0F172A]/90 dark:!bg-accent/50 dark:!border dark:!border-border dark:!text-foreground dark:hover:!bg-accent"
                     asChild
                 >
-                    <Link href={`/biens/${property.id}`}>Voir l&apos;annonce</Link>
+                    <Link href={`/biens/${property.id}`}>
+                        {property.occupation_status === 'occupied'
+                            ? 'Gérer mon bien'
+                            : property.validation_status === 'approved'
+                                ? "Voir le bien"
+                                : 'Détails du bien'}
+                    </Link>
                 </Button>
             </div>
         </motion.div>

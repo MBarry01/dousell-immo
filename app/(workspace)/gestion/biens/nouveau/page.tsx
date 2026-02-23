@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { getUserTeamContext, hasTeamPermission } from "@/lib/team-permissions.server";
+import { getUserTeamContext } from "@/lib/team-context";
+import { hasTeamPermission } from "@/lib/team-permissions.server";
 import { NouveauBienClient } from "./nouveau-client";
 
 export const metadata = {

@@ -193,9 +193,12 @@ export default function ComptabilitePage() {
         { name: 'En retard', value: totals.overdue, color: chartColors.overdue },
     ].filter(d => d.value > 0), [totals, chartColors]);
 
-    // Revert chart filtering - Show all months again
+    // Ne montrer que depuis le premier mois avec des données réelles
     const chartData = useMemo(() => {
-        return monthlyData;
+        const firstDataIndex = monthlyData.findIndex(
+            m => m.expected > 0 || m.collected > 0 || m.overdue > 0
+        );
+        return firstDataIndex === -1 ? monthlyData : monthlyData.slice(firstDataIndex);
     }, [monthlyData]);
 
     const formatAmount = (val: number) => {

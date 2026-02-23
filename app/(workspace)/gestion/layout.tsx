@@ -1,5 +1,5 @@
 // app/(workspace)/gestion/layout.tsx
-import { getUserTeamContext } from "@/lib/team-permissions.server";
+import { getUserTeamContext } from "@/lib/team-context";
 import { getActivationData } from "@/lib/activation/get-activation-stage";
 import { ActivationBanner } from "@/components/activation/ActivationBanner";
 

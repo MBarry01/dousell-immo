@@ -264,7 +264,7 @@ export function OwnerDashboard({ isTenant, isOwner, gestionLocativeEnabled, gest
                                         <CardDescription className="text-sm text-muted-foreground">
                                             {gestionLocativeStatus === 'pending'
                                                 ? 'Votre demande est en cours de vérification par notre équipe.'
-                                                : 'Gérez vos biens en location sans publier d\'annonce.'}
+                                                : 'Gérez vos biens en location sans publication publique.'}
                                         </CardDescription>
                                         {gestionLocativeStatus !== 'pending' && (
                                             <div className="mt-4 flex items-center text-sm font-medium text-amber-500">
@@ -325,7 +325,7 @@ export function OwnerDashboard({ isTenant, isOwner, gestionLocativeEnabled, gest
                                         </CardTitle>
                                     </div>
                                     <CardDescription className="text-sm text-muted-foreground">
-                                        Suivez vos annonces en ligne et leurs stats.
+                                        Suivez vos biens et leur visibilité.
                                     </CardDescription>
                                     <div className="mt-4 flex items-center text-sm text-muted-foreground">
                                         Voir tout
@@ -352,7 +352,7 @@ export function OwnerDashboard({ isTenant, isOwner, gestionLocativeEnabled, gest
                                         </CardTitle>
                                     </div>
                                     <CardDescription className="text-sm text-muted-foreground">
-                                        Créez une nouvelle annonce en 2 minutes.
+                                        Ajoutez un nouveau bien en 2 minutes.
                                     </CardDescription>
                                 </CardHeader>
                             </Card>

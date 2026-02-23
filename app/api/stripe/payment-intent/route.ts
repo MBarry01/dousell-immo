@@ -6,7 +6,9 @@ import { CONNECT_CONFIG } from '@/lib/config/stripe-config';
 
 export async function POST(req: Request) {
     try {
-        const { teamId, team } = await getUserTeamContext();
+        const context = await getUserTeamContext();
+        if (!context) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+        const { teamId, team } = context;
 
         // 1. Strict Security Checks (Audit Requirement)
         if (!team.stripe_account_id) {

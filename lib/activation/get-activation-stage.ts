@@ -50,24 +50,24 @@ export async function getActivationData(teamId: string): Promise<ActivationData>
 
   const firstPropertyId = properties?.[0]?.id ?? null;
 
-  // Count tenants
-  const { count: tenantCount } = await supabase
-    .from("tenants")
+  // Count total leases (any status) as a proxy for tenant/contract setup
+  const { count: totalLeases } = await supabase
+    .from("leases")
     .select("*", { count: "exact", head: true })
     .eq("team_id", teamId);
 
-  if (!tenantCount || tenantCount === 0) {
+  if (!totalLeases || totalLeases === 0) {
     return { stage: 2, completedAt: null, firstPropertyId };
   }
 
-  // Count active leases
-  const { count: leaseCount } = await supabase
+  // Count active leases for final completion
+  const { count: activeLeases } = await supabase
     .from("leases")
     .select("*", { count: "exact", head: true })
     .eq("team_id", teamId)
     .eq("status", "active");
 
-  if (!leaseCount || leaseCount === 0) {
+  if (!activeLeases || activeLeases === 0) {
     return { stage: 3, completedAt: null, firstPropertyId };
   }
 

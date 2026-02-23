@@ -3,7 +3,7 @@ import DashboardContent from "./dash-content";
 import { getUserTeamContext } from "@/lib/team-context";
 import { redirect } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LoadingClient } from "./LoadingClient";
+import LoadingClient from "./LoadingClient";
 
 // Force dynamic rendering to prevent stale RSC cache on navigation
 export const dynamic = "force-dynamic";
@@ -42,12 +42,12 @@ export default async function GestionLocativePage({
         // Let Next.js redirect errors pass through (from getUserTeamContext)
         if ((err as any)?.digest?.startsWith("NEXT_REDIRECT")) throw err;
         console.error("[Gestion/page] ✗ Erreur getUserTeamContext:", err);
-        redirect("/auth/login?reason=timeout");
+        redirect("/login?reason=timeout");
     }
 
     if (!context) {
         console.warn("[Gestion/page] ✗ Contexte null, redirection login");
-        redirect("/auth/login?reason=timeout");
+        redirect("/login?reason=timeout");
     }
 
     return (

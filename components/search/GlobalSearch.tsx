@@ -123,6 +123,8 @@ export function GlobalSearch() {
         }
     };
 
+    const isWorkspace = pathname?.startsWith("/gestion") || pathname?.startsWith("/admin") || pathname?.startsWith("/compte") || pathname?.startsWith("/locataire");
+
     return (
         <div ref={wrapperRef} className="relative w-full">
             <form onSubmit={handleSearchSubmit} className="relative w-full">
@@ -131,7 +133,13 @@ export function GlobalSearch() {
                     type="search"
                     enterKeyHint="search"
                     placeholder="Rechercher un bien, une ville..."
-                    className="pl-9 bg-white/5 border-white/10 focus-visible:ring-primary/50 focus-visible:ring-offset-0 focus-visible:bg-white/10 transition-all w-full rounded-2xl placeholder:text-white/40"
+                    className={cn(
+                        "pl-9 transition-all w-full rounded-2xl focus-visible:ring-offset-0",
+                        // Dynamic styling: Workspace (adaptive) vs Vitrine (fixed dark)
+                        isWorkspace
+                            ? "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 focus-visible:ring-primary/50 focus-visible:bg-slate-200 dark:focus-visible:bg-white/10 placeholder:text-slate-500 dark:placeholder:text-white/40"
+                            : "bg-white/5 border-white/10 text-white placeholder:text-white/40 focus-visible:bg-white/10 focus-visible:border-white/20 focus-visible:ring-white/10"
+                    )}
                     value={query}
                     onChange={(e) => {
                         setQuery(e.target.value);

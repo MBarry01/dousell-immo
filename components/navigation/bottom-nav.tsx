@@ -114,7 +114,7 @@ const UserIcon = ({ filled }: { filled: boolean }) => (
 
 const navItems = [
   { href: "/", label: "Accueil", Icon: HomeIcon },
-  { href: "/recherche", label: "Annonce", Icon: SearchIcon },
+  { href: "/recherche", label: "Biens", Icon: SearchIcon },
   { href: "/pro/start", label: "Gestion", Icon: BuildingIcon },
   { href: "/compte", label: "Compte", Icon: UserIcon },
 ];
@@ -142,9 +142,8 @@ export const BottomNav = () => {
               className="flex flex-1 flex-col items-center gap-1 px-1 py-1 min-w-0"
             >
               <span
-                className={`inline-flex h-7 w-7 shrink-0 items-center justify-center transition-all duration-200 ${
-                  active ? "text-[#F4C430]" : "text-white/50"
-                }`}
+                className={`inline-flex h-7 w-7 shrink-0 items-center justify-center transition-all duration-200 ${active ? "text-[#F4C430]" : "text-white/50"
+                  }`}
               >
                 <item.Icon filled={active} />
               </span>

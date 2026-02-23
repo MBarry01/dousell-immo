@@ -30,6 +30,14 @@ export default function Error({
             Retour à l&apos;accueil
           </Button>
         </div>
+
+        {process.env.NODE_ENV === "development" && (
+          <div className="mt-8 max-w-2xl overflow-auto rounded-lg bg-white/5 p-4 text-left text-xs font-mono text-white/40 border border-white/10">
+            <p className="mb-2 font-bold text-red-500">Détails de l&apos;erreur (Dev uniquement) :</p>
+            <pre className="whitespace-pre-wrap">{error.stack || error.message}</pre>
+            {error.digest && <p className="mt-2 text-white/20">Digest: {error.digest}</p>}
+          </div>
+        )}
       </div>
     </div>
   );
