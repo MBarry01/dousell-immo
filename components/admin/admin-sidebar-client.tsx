@@ -16,6 +16,7 @@ import {
   ChevronDown,
   ChevronRight,
   Building2,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -93,6 +94,12 @@ const navItems: NavItem[] = [
     href: "/admin/users",
     label: "Utilisateurs",
     icon: Users,
+    roles: ["admin", "superadmin"]
+  },
+  {
+    href: "/admin/abonnements",
+    label: "Abonnements",
+    icon: CreditCard,
     roles: ["admin", "superadmin"]
   },
   {

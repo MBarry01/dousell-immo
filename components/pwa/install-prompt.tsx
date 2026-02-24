@@ -196,7 +196,7 @@ export function InstallPrompt() {
                 </div>
                 <div>
                   <p className="font-semibold text-white">Appuyez sur le bouton Partager</p>
-                  <p className="text-xs text-white/60">En bas de l&apos;écran (icône carrée avec flèche)</p>
+                  <p className="text-xs text-white/60">En bas de l'écran (icône carrée avec flèche)</p>
                 </div>
               </div>
               <div className="flex gap-3">
@@ -204,7 +204,7 @@ export function InstallPrompt() {
                   2
                 </div>
                 <div>
-                  <p className="font-semibold text-white">Sélectionnez &quot;Sur l&apos;écran d&apos;accueil&quot;</p>
+                  <p className="font-semibold text-white">Sélectionnez "Sur l'écran d'accueil"</p>
                   <p className="text-xs text-white/60">Faites défiler si nécessaire</p>
                 </div>
               </div>
@@ -213,8 +213,8 @@ export function InstallPrompt() {
                   3
                 </div>
                 <div>
-                  <p className="font-semibold text-white">Confirmez l&apos;installation</p>
-                  <p className="text-xs text-white/60">L&apos;app apparaîtra sur votre écran d&apos;accueil</p>
+                  <p className="font-semibold text-white">Confirmez l'installation</p>
+                  <p className="text-xs text-white/60">L'app apparaîtra sur votre écran d'accueil</p>
                 </div>
               </div>
             </div>
@@ -222,7 +222,7 @@ export function InstallPrompt() {
               className="mt-6 w-full rounded-full"
               onClick={handleDismiss}
             >
-              J&apos;ai compris
+              J'ai compris
             </Button>
           </motion.div>
         </motion.div>
@@ -251,7 +251,7 @@ export function InstallPrompt() {
                 Installer Dousell Immo
               </h3>
               <p className="mt-1 text-xs text-white/70">
-                Ajoutez l&apos;app à votre écran d&apos;accueil pour un accès
+                Ajoutez l'app à votre écran d'accueil pour un accès
                 rapide
               </p>
             </div>

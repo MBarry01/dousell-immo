@@ -69,15 +69,15 @@ export default function TrustSection() {
             >
               <div className="relative h-full rounded-2xl bg-white/[0.02] border border-white/5 p-8 transition-all duration-500 hover:border-[#F4C430]/30 hover:bg-white/[0.04]">
 
-                {/* Icon container */}
-                <div className="mb-6 inline-flex p-3 rounded-xl bg-white/5 text-[#F4C430] ring-1 ring-white/10 group-hover:scale-110 transition-transform duration-300">
-                  <feature.icon className="w-8 h-8" strokeWidth={1.5} />
+                {/* Icon & Title Row */}
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="inline-flex p-3 rounded-xl bg-white/5 text-[#F4C430] ring-1 ring-white/10 group-hover:scale-110 transition-transform duration-300">
+                    <feature.icon className="w-6 h-6" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white group-hover:text-[#F4C430] transition-colors">
+                    {feature.title}
+                  </h3>
                 </div>
-
-                {/* Title */}
-                <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-[#F4C430] transition-colors">
-                  {feature.title}
-                </h3>
 
                 {/* Description */}
                 <p className="text-gray-400 mb-6 leading-relaxed text-sm">

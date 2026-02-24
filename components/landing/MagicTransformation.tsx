@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Upload, Home, Ruler, Wand2, ArrowRight } from "lucide-react";
+import { AddressAutocomplete } from "@/components/forms/address-autocomplete";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import imageCompression from "browser-image-compression";
@@ -18,6 +19,8 @@ export default function MagicTransformation() {
   const [propertySurface, setPropertySurface] = useState("350");
   const [propertyCity, setPropertyCity] = useState("Saly, Sénégal");
   const [propertyRooms, setPropertyRooms] = useState("4");
+  const [propertyLat, setPropertyLat] = useState<number | null>(null);
+  const [propertyLon, setPropertyLon] = useState<number | null>(null);
   const [propertyImage, setPropertyImage] = useState("https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1600&auto=format&fit=crop");
   const [propertyImageBase64, setPropertyImageBase64] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -70,6 +73,8 @@ export default function MagicTransformation() {
         surface: propertySurface,
         city: propertyCity,
         bedrooms: propertyRooms,
+        lat: propertyLat,
+        lon: propertyLon,
         imageBase64: propertyImageBase64,
       };
 
@@ -173,7 +178,7 @@ export default function MagicTransformation() {
                   FACE 1 : CÔTÉ ADMIN (SAISIE)
                  ======================================================== */}
               <div
-                className={`absolute inset-0 backface-hidden rounded-2xl overflow-hidden shadow-2xl shadow-primary/20 bg-[#1A1A1A] border border-white/5 p-4 md:p-8 flex flex-col justify-between transition-opacity duration-300 ${isFlipped ? 'opacity-0 pointer-events-none z-0' : 'opacity-100 pointer-events-auto z-10'
+                className={`absolute inset-0 backface-hidden rounded-2xl overflow-hidden shadow-2xl shadow-primary/20 bg-[#1A1A1A] border border-white/5 p-4 md:p-6 lg:p-8 flex flex-col justify-between transition-opacity duration-300 ${isFlipped ? 'opacity-0 pointer-events-none z-0' : 'opacity-100 pointer-events-auto z-10'
                   }`}
               >
                 {/* En-tête style "Code" */}
@@ -185,9 +190,9 @@ export default function MagicTransformation() {
                 </div>
 
                 {/* Formulaire simulé */}
-                <div className="space-y-4 font-mono text-sm">
+                <div className="space-y-3 md:space-y-4 font-mono text-sm flex-1 flex flex-col justify-center">
                   <div>
-                    <label className="text-slate-500 block mb-1.5">Titre de l&apos;annonce</label>
+                    <label className="text-slate-500 block mb-1.5">Titre de l'annonce</label>
                     <input
                       type="text"
                       value={propertyTitle}
@@ -210,12 +215,15 @@ export default function MagicTransformation() {
                     </div>
                     <div className="flex flex-col h-full">
                       <label className="text-slate-500 block mb-1.5 text-xs md:text-sm">Localisation</label>
-                      <input
-                        type="text"
-                        value={propertyCity}
-                        onChange={(e) => setPropertyCity(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white mt-auto focus:outline-none focus:ring-1 focus:ring-[#F4C430]/50 focus:border-[#F4C430]/50 transition-colors placeholder:text-white/20"
-                        placeholder="Ex: Saly"
+                      <AddressAutocomplete
+                        defaultValue={propertyCity}
+                        onChange={(val) => setPropertyCity(val)}
+                        onAddressSelect={(details) => {
+                          setPropertyCity(details.display_name);
+                          setPropertyLat(details.lat ? parseFloat(details.lat) : null);
+                          setPropertyLon(details.lon ? parseFloat(details.lon) : null);
+                        }}
+                        className="w-full"
                       />
                     </div>
                   </div>
@@ -244,8 +252,8 @@ export default function MagicTransformation() {
                   </div>
 
                   <div className="relative">
-                    <label className="text-slate-500 block mb-1.5">Photos (Upload)</label>
-                    <div className="relative border-2 border-dashed border-white/10 rounded-lg p-8 flex flex-col items-center text-center justify-center text-slate-500 bg-white/5 hover:border-[#F4C430]/50 transition-colors cursor-pointer overflow-hidden group">
+                    <label className="text-slate-500 block mb-1 text-xs md:text-sm">Photos (Upload)</label>
+                    <div className="relative border-2 border-dashed border-white/10 rounded-lg p-4 md:p-8 flex flex-col items-center text-center justify-center text-slate-500 bg-white/5 hover:border-[#F4C430]/50 transition-colors cursor-pointer overflow-hidden group min-h-[100px] md:min-h-[140px]">
                       <input
                         type="file"
                         accept="image/*"
@@ -259,8 +267,8 @@ export default function MagicTransformation() {
                           <img src={propertyImage} alt="Preview" className="w-full h-full object-cover" />
                         </div>
                       ) : null}
-                      <Upload className="w-8 h-8 mb-2 opacity-50 relative z-20 group-hover:text-[#F4C430] transition-colors" />
-                      <span className="relative z-20 group-hover:text-white transition-colors">{propertyImage && propertyImage !== "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1600&auto=format&fit=crop" ? "Image chargée. Cliquez pour changer." : "Glisser-déposer ou cliquer pour choisir"}</span>
+                      <Upload className="w-6 h-6 md:w-8 md:h-8 mb-1 md:mb-2 opacity-50 relative z-20 group-hover:text-[#F4C430] transition-colors" />
+                      <span className="relative z-20 group-hover:text-white transition-colors text-xs md:text-sm">{propertyImage && propertyImage !== "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1600&auto=format&fit=crop" ? "Image chargée. Cliquez pour changer." : "Glisser-déposer ou cliquer pour choisir"}</span>
                     </div>
                   </div>
                 </div>
@@ -479,7 +487,7 @@ export default function MagicTransformation() {
 
               className="mt-8 font-display text-2xl md:text-3xl lg:text-4xl text-white text-center max-w-3xl mx-auto leading-tight"
             >
-              Bénéficiez d&apos;une vitrine visible sur Google. <br className="hidden md:block" />
+              Bénéficiez d'une vitrine visible sur Google. <br className="hidden md:block" />
               <span className="text-[#F4C430]">Recevez des demandes de visite qualifiées.</span>
             </motion.h3>
           </div>

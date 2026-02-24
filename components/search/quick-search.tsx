@@ -142,6 +142,7 @@ export const QuickSearch = () => {
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.5 }}
         className="mt-0 mb-0 md:mt-0 md:mb-0 rounded-[32px] border border-white/10 bg-white/5 px-4 py-6 text-white md:px-6 md:py-8 min-h-[152px]"
+        suppressHydrationWarning
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>

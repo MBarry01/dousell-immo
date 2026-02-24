@@ -189,8 +189,8 @@ export function MemberCard({
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "h-8 w-8",
-                    isDark && "hover:bg-slate-800 text-slate-400"
+                    "h-8 w-8 transition-all duration-200 rounded-full border border-white/10 bg-white/5 hover:scale-110 hover:border-[#F4C430]/50 hover:bg-transparent",
+                    isDark ? "text-slate-400 hover:text-[#F4C430]" : "text-gray-500 hover:text-[#F4C430]"
                   )}
                 >
                   <MoreVertical className="w-4 h-4" />

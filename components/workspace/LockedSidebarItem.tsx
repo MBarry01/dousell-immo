@@ -35,6 +35,7 @@ interface LockedSidebarItemProps {
   activationLock?: boolean;
   /** Avertissement ⚠ — ex: configuration incomplète */
   showWarning?: boolean;
+  userRole?: string;
 }
 
 /**
@@ -72,9 +73,10 @@ export function LockedSidebarItem({
   badgeCount = 0,
   activationLock = false,
   showWarning = false,
+  userRole,
 }: LockedSidebarItemProps) {
-  const [hasAccess, setHasAccess] = useState(true); // Par défaut autorisé
-  const [isLoading, setIsLoading] = useState(!!requiredPermission || !!requiredTier);
+  const [hasAccess, setHasAccess] = useState(true);
+  const [isLoading, setIsLoading] = useState(!userRole && (!!requiredPermission || !!requiredTier));
   const [lockReason, setLockReason] = useState<'tier' | 'permission' | null>(null);
 
   useEffect(() => {
@@ -107,6 +109,15 @@ export function LockedSidebarItem({
     if (!requiredPermission) {
       setHasAccess(true);
       setLockReason(null);
+      setIsLoading(false);
+      return;
+    }
+
+    // 3. Si on a déjà le rôle (passé en prop), vérification immédiate
+    if (userRole) {
+      const allowed = roleHasPermission(userRole, requiredPermission);
+      setHasAccess(allowed);
+      setLockReason(allowed ? null : 'permission');
       setIsLoading(false);
       return;
     }

@@ -75,11 +75,10 @@ export function Combobox({
     <div ref={containerRef} className={`relative ${className}`}>
       {/* Trigger */}
       <div
-        className={`w-full flex items-center justify-between bg-zinc-800/30 border rounded-lg px-4 py-3 text-left transition-all cursor-pointer ${
-          isOpen
+        className={`w-full flex items-center justify-between bg-zinc-800/30 border rounded-lg px-4 py-3 text-left transition-all cursor-pointer ${isOpen
             ? "border-[#F4C430]/50 ring-1 ring-[#F4C430]/20"
             : "border-zinc-800 hover:border-zinc-700"
-        }`}
+          }`}
       >
         <span
           onClick={() => setIsOpen(!isOpen)}
@@ -106,7 +105,7 @@ export function Combobox({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute z-50 w-full mt-2 bg-popover/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl ring-1 ring-white/5 overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
           {/* Search Input */}
           <div className="p-2 border-b border-zinc-800">
             <div className="relative">
@@ -143,11 +142,10 @@ export function Combobox({
                   key={option.value}
                   type="button"
                   onClick={() => handleSelect(option.value)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
-                    option.value === value
+                  className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${option.value === value
                       ? "bg-[#F4C430]/10 text-[#F4C430]"
                       : "text-zinc-300 hover:bg-zinc-800"
-                  }`}
+                    }`}
                 >
                   <span>{option.label}</span>
                   {option.value === value && <Check className="w-4 h-4" />}

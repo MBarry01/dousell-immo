@@ -19,6 +19,7 @@ import {
   Heart,
   Settings,
 } from "lucide-react";
+import { IconBuildingEstate } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/theme-provider";
 import type { LucideIcon } from "lucide-react";
@@ -32,7 +33,7 @@ interface NavItem {
 // Navigation pour propriétaires (/gestion) - 4 items principaux
 const gestionNavItems: NavItem[] = [
   { href: "/gestion", icon: BarChart3, label: "Dashboard" },
-  { href: "/gestion/biens", icon: Building2, label: "Biens" },
+  { href: "/gestion/biens", icon: IconBuildingEstate as any, label: "Biens" },
   { href: "/gestion/interventions", icon: Wrench, label: "Travaux" },
   { href: "/gestion/comptabilite", icon: Wallet, label: "Compta" },
 ];
@@ -56,7 +57,7 @@ const adminNavItems: NavItem[] = [
 // Navigation pour compte (/compte)
 const compteNavItems: NavItem[] = [
   { href: "/compte", icon: User, label: "Profil" },
-  { href: "/compte/mes-biens", icon: Building2, label: "Mes Biens" },
+  { href: "/compte/mes-biens", icon: IconBuildingEstate as any, label: "Mes Biens" },
   { href: "/compte/favoris", icon: Heart, label: "Favoris" },
   { href: "/compte/parametres", icon: Settings, label: "Paramètres" },
 ];
@@ -187,7 +188,7 @@ export function WorkspaceBottomNav() {
   return (
     <nav
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 backdrop-blur-lg lg:hidden print:hidden",
+        "fixed inset-x-0 bottom-0 z-30 backdrop-blur-lg lg:hidden print:hidden",
         "transition-transform duration-300 ease-out",
         !isVisible && "translate-y-full"
       )}

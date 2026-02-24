@@ -134,8 +134,11 @@ export default function VideoTestimonials({ mode = "owner" }: VideoTestimonialsP
                             Témoignages
                         </span>
                         <h2 className="font-display text-[clamp(2rem,4.5vw,3rem)] text-white">
-                            Ils ont <span className="gradient-text-animated">transformé</span><br />
-                            leur gestion
+                            {mode === "owner" ? (
+                                <>Ils ont <span className="gradient-text-animated">transformé</span><br />leur gestion</>
+                            ) : (
+                                <>Ils ont <span className="gradient-text-animated">trouvé</span><br />leur bonheur</>
+                            )}
                         </h2>
                     </div>
                 </div>

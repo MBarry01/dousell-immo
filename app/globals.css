@@ -1,4 +1,5 @@
 ﻿@import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 /* Tailwind v4: Configurer les sources Ã  scanner (exclure saasable-ui) */
 @source "../app/**/*.{ts,tsx,js,jsx}";

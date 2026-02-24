@@ -152,7 +152,7 @@ export function GlobalSearch() {
             </form>
 
             {isOpen && (query.length >= 2) && (
-                <div className="absolute top-full left-0 right-0 mt-2 rounded-xl border bg-popover p-1 text-popover-foreground shadow-xl outline-none animate-in fade-in-0 zoom-in-95 z-[100] max-h-[250px] sm:max-h-[400px] overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-3 rounded-2xl border border-white/10 bg-popover/80 backdrop-blur-xl p-1.5 text-popover-foreground shadow-2xl outline-none animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 z-[100] max-h-[250px] sm:max-h-[400px] overflow-y-auto ring-1 ring-white/5">
                     {loading ? (
                         <div className="flex items-center justify-center p-4 text-sm text-muted-foreground">
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -165,16 +165,20 @@ export function GlobalSearch() {
                                 <button
                                     key={`${item.type}-${item.id}`}
                                     onClick={() => handleSelect(item.url)}
-                                    className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                                    className="relative flex w-full cursor-pointer select-none items-center rounded-xl px-3 py-2.5 text-sm outline-none transition-all duration-200 hover:bg-[#F4C430]/10 hover:text-foreground group/item"
                                 >
                                     {item.type === 'nav' ? (
-                                        <div className="mr-2 flex items-center justify-center w-4 h-4">
-                                            {item.icon ? <item.icon className="h-4 w-4 text-orange-500" /> : <LayoutDashboard className="h-4 w-4 text-orange-500" />}
+                                        <div className="mr-3 flex items-center justify-center w-5 h-5">
+                                            {item.icon ? <item.icon className="h-4 w-4 text-[#F4C430] group-hover/item:scale-110 transition-transform" /> : <LayoutDashboard className="h-4 w-4 text-[#F4C430] group-hover/item:scale-110 transition-transform" />}
                                         </div>
                                     ) : item.type === 'tenant' ? (
-                                        <User className="mr-2 h-4 w-4 text-blue-500 shrink-0" />
+                                        <div className="mr-3 flex items-center justify-center w-5 h-5">
+                                            <User className="h-4 w-4 text-[#F4C430] group-hover/item:scale-110 transition-transform shrink-0" />
+                                        </div>
                                     ) : (
-                                        <Building className="mr-2 h-4 w-4 text-green-500 shrink-0" />
+                                        <div className="mr-3 flex items-center justify-center w-5 h-5">
+                                            <Building className="h-4 w-4 text-[#F4C430] group-hover/item:scale-110 transition-transform shrink-0" />
+                                        </div>
                                     )}
                                     <div className="flex flex-col items-start truncate">
                                         <span className="font-medium truncate w-full text-left">{item.label}</span>

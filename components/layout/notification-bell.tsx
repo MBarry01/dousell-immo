@@ -48,12 +48,12 @@ const notificationIcons: Record<NotificationType, typeof Info> = {
 };
 
 const notificationStyles: Record<NotificationType, string> = {
-  info: "bg-blue-500/10 text-blue-400",
-  success: "text-green-500 bg-green-50 dark:bg-green-900/10",
-  warning: "text-yellow-500 bg-yellow-50 dark:bg-yellow-900/10",
-  error: "text-red-500 bg-red-50 dark:bg-red-900/10",
-  message: "text-blue-500 bg-blue-50 dark:bg-blue-900/10",
-  maintenance: "text-orange-500 bg-orange-50 dark:bg-orange-900/10",
+  info: "bg-white/5 text-[#F4C430]",
+  success: "bg-white/5 text-[#F4C430]",
+  warning: "bg-white/5 text-[#F4C430]",
+  error: "text-red-500 bg-red-500/10",
+  message: "bg-white/5 text-[#F4C430]",
+  maintenance: "bg-white/5 text-[#F4C430]",
 };
 
 function useIsMobile() {
@@ -164,21 +164,21 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
 
   const notificationList = (
     <>
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+      <div className="flex items-center justify-between border-b border-white/5 px-4 py-4">
+        <h3 className="text-sm font-bold text-foreground">Notifications</h3>
         <Button
           variant="ghost"
           size="sm"
           disabled={unreadCount === 0}
-          className="h-auto gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:text-muted-foreground/50"
+          className="h-auto gap-1.5 px-2 py-1 text-xs font-medium text-[#F4C430] hover:text-[#F4C430]/80 hover:bg-[#F4C430]/10 disabled:cursor-not-allowed disabled:opacity-30 rounded-lg transition-all"
           onClick={handleMarkAllAsRead}
         >
-          <CheckCheck className="h-3 w-3" />
+          <CheckCheck className="h-3.5 w-3.5" />
           Tout marquer
         </Button>
       </div>
 
-      <ScrollArea className={cn("w-full", isMobile ? "h-[60vh]" : "h-[320px] rounded-b-2xl")}>
+      <ScrollArea className={cn("w-full transition-all", isMobile ? "h-[calc(96dvh-120px)]" : "h-[320px] rounded-b-2xl")}>
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -203,8 +203,8 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     className={cn(
-                      "flex gap-4 p-4 transition-all hover:scale-[1.01] cursor-pointer relative",
-                      !notification.is_read && "bg-muted/30"
+                      "flex gap-4 p-4 transition-all hover:bg-white/[0.08] cursor-pointer relative",
+                      !notification.is_read ? "bg-white/[0.03]" : "bg-transparent"
                     )}
                     onClick={() => handleNotificationClick(notification)}
                   >
@@ -228,7 +228,7 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
                       <p className="text-xs text-muted-foreground line-clamp-2">
                         {notification.message}
                       </p>
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground/70">
+                      <p className="text-[11px] text-muted-foreground/60 font-medium italic">
                         {formatTimeAgo(notification.created_at)}
                       </p>
                     </div>
@@ -251,17 +251,36 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
           <SheetContent
             side="bottom"
             className={cn(
-              "rounded-t-2xl p-0 pb-safe",
-              !isWorkspace ? "dark bg-[#05080c] text-white border-white/10" : "bg-background"
+              "p-0 pb-safe overflow-hidden border-none bg-transparent shadow-none z-[150]",
+              isMobile ? "h-[96dvh]" : "h-auto"
             )}
             hideClose
           >
-            <SheetTitle className="sr-only">Notifications</SheetTitle>
-            {/* Drag handle */}
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="h-1 w-10 rounded-full bg-muted-foreground/30" />
-            </div>
-            {notificationList}
+            <motion.div
+              drag="y"
+              dragConstraints={{ top: 0 }}
+              dragElastic={0.1}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 150 || info.velocity.y > 500) {
+                  setIsOpen(false);
+                }
+              }}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className={cn(
+                "flex flex-col h-full w-full rounded-t-[32px] border-t border-white/10 shadow-2xl relative",
+                !isWorkspace ? "dark bg-[#05080c]/95 backdrop-blur-2xl text-white" : "bg-background/95 backdrop-blur-2xl"
+              )}
+            >
+              <SheetTitle className="sr-only">Notifications</SheetTitle>
+              {/* Drag handle area */}
+              <div className="flex flex-col items-center pt-3 pb-2 cursor-grab active:cursor-grabbing group">
+                <div className="h-1.5 w-12 rounded-full bg-white/20 transition-colors group-hover:bg-white/40" />
+              </div>
+              {notificationList}
+            </motion.div>
           </SheetContent>
         </Sheet>
       </>
@@ -276,13 +295,11 @@ export function NotificationBell({ userId, className }: NotificationBellProps) {
       </PopoverTrigger>
       <PopoverContent
         className={cn(
-          "w-96 max-w-[90vw] p-0 rounded-2xl shadow-2xl z-[100]",
-          !isWorkspace
-            ? "dark bg-[#05080c] text-white border border-white/10"
-            : "border border-border bg-popover text-popover-foreground"
+          "w-96 max-w-[90vw] p-0 rounded-2xl shadow-2xl z-[100] border-white/10 bg-black/60 backdrop-blur-2xl ring-1 ring-white/5",
+          !isWorkspace && "dark bg-black/60"
         )}
         align="end"
-        sideOffset={8}
+        sideOffset={12}
       >
         <div className="flex flex-col">
           {notificationList}

@@ -50,7 +50,7 @@ export function InfoTooltip({ content, className }: InfoTooltipProps) {
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          className="max-w-[250px] bg-black/95 border-white/20 text-white text-sm p-3"
+          className="max-w-[250px] p-3"
           sideOffset={8}
         >
           <p className="leading-relaxed">{content}</p>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Search, LogOut, ArrowLeft, Sun, Moon, Menu } from "lucide-react";
+import { Bell, Search, LogOut, Sun, Moon, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import {
@@ -63,7 +63,7 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
 
   return (
     <header
-      className="shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40 transition-all pwa-header-safe"
+      className="shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-30 transition-all pwa-header-safe"
     >
       <div className="flex h-14 items-center justify-between px-4 lg:px-6">
         {/* Left: Menu (mobile) + Logo + Retour site */}
@@ -75,7 +75,7 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
             className="lg:hidden h-9 w-9 -ml-1 text-foreground transition-transform duration-200 hover:scale-110 active:scale-95"
             onClick={onMenuClick}
           >
-            <Menu className="h-5 w-5" />
+            <PanelLeft className="h-5 w-5" />
             <span className="sr-only">Menu</span>
           </Button>
           {/* Logo avec lien retour vitrine */}
@@ -90,10 +90,6 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
               alt="Dousell Immo"
               className="rounded"
             />
-            <span className="hidden sm:flex items-center gap-1 text-xs">
-              <ArrowLeft className="h-3 w-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              <span>Retour au site</span>
-            </span>
           </Link>
 
           {/* Séparateur + Titre contexte */}

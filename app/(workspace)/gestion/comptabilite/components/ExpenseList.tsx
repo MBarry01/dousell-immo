@@ -170,7 +170,7 @@ export function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
                                         size="sm"
                                         onClick={() => handleDelete(expense.id)}
                                         disabled={deletingId === expense.id}
-                                        className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"
+                                        className="text-slate-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"
                                     >
                                         {deletingId === expense.id ? (
                                             <Loader2 className="w-4 h-4 animate-spin" />

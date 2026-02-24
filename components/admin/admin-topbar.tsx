@@ -26,6 +26,10 @@ export function AdminTopbar() {
         nouveau: "Nouveau",
         moderation: "Modération",
         roles: "Rôles",
+        abonnements: "Abonnements",
+        verifications: "Vérifications",
+        identites: "Identités",
+        "activation-requests": "Demandes Activation",
       };
 
       paths.slice(1).forEach((segment, index) => {

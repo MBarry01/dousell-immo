@@ -34,7 +34,7 @@ export async function POST(req: Request) {
         // Verify if the team already has an active subscription
         const { data: teamData, error: teamError } = await supabase
             .from('teams')
-            .select('stripe_customer_id, stripe_subscription_id, subscription_tier, name, subscription_status')
+            .select('stripe_customer_id, stripe_subscription_id, subscription_tier, name, subscription_status, trial_used')
             .eq('id', teamId)
             .single();
 
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         if (teamData.subscription_status && BLOCKED_STATUSES.includes(teamData.subscription_status) && teamData.stripe_subscription_id) {
             return NextResponse.json({
                 error: 'Vous avez déjà un abonnement actif. Gérez-le depuis votre espace abonnement.',
-                redirect: '/gestion/abonnement'
+                redirect: '/gestion/config?tab=subscription'
             }, { status: 400 });
         }
 
@@ -109,8 +109,8 @@ export async function POST(req: Request) {
                 },
             ],
             mode: 'subscription',
-            success_url: `${baseUrl}/gestion/abonnement?success=true&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${baseUrl}/gestion/abonnement?canceled=true`,
+            success_url: `${baseUrl}/gestion/config?tab=subscription&checkout=success`,
+            cancel_url: `${baseUrl}/gestion/config?tab=subscription&checkout=canceled`,
             metadata: {
                 team_id: teamId,
                 plan_id: planId,
@@ -122,6 +122,10 @@ export async function POST(req: Request) {
                     team_id: teamId,
                     plan_id: planId,
                 },
+                // Un seul essai gratuit par équipe.
+                // Si trial_used = true, on force trial_period_days: 0 pour annuler
+                // le trial configuré sur le prix Stripe.
+                ...(teamData.trial_used ? { trial_period_days: 0 } : {}),
             },
             // Optional: Handle tax, address collection, etc. based on currency/region
             // payment_method_types: currency === 'xof' ? ['card'] : ['card', 'sepa_debit'], // Example

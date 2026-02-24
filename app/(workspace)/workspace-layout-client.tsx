@@ -11,6 +11,7 @@ import { useState, Suspense, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { scrollToTop } from "@/lib/scroll-utils";
 import type { WorkspaceTeamData } from "@/types/team";
+import { cn } from "@/lib/utils";
 
 interface WorkspaceLayoutClientProps {
   user: User;
@@ -36,61 +37,64 @@ export function WorkspaceLayoutClient({
 
   const isDistractionFree = pathname === "/compte/reset-password";
 
-  if (isDistractionFree) {
-    return (
-      <div className="flex h-dvh flex-col overflow-hidden bg-[#05080c] text-white">
-        <main className="flex-1 overflow-y-auto w-full flex items-center justify-center">
-          <FadeIn delay={100} className="w-full">
-            {children}
-          </FadeIn>
-        </main>
-      </div>
-    );
-  }
-
   return (
-    <div suppressHydrationWarning className="flex h-dvh flex-col overflow-hidden bg-background">
-      {/* Header - Full Width Top */}
-      <WorkspaceHeader
-        user={user}
-        onMenuClick={() => setIsMobileOpen(true)}
-      />
+    <div className={cn(
+      "flex h-dvh flex-col overflow-hidden",
+      isDistractionFree ? "bg-[#05080c] text-white" : "bg-background text-foreground"
+    )}>
+      {/* Header - Uniquement si hors distraction */}
+      {!isDistractionFree && (
+        <WorkspaceHeader
+          user={user}
+          onMenuClick={() => setIsMobileOpen(true)}
+        />
+      )}
 
       {/* Content Row - Sidebar + Main */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar Desktop */}
-        <Suspense fallback={<div className="hidden lg:block w-16 bg-background border-r border-border" />}>
-          <WorkspaceSidebar
-            user={user}
-            teams={teams}
-            currentTeamId={currentTeamId || undefined}
-            onSwitchTeam={switchTeam}
-            isMobileOpen={isMobileOpen}
-            onMobileOpenChange={setIsMobileOpen}
-          />
-        </Suspense>
+        {/* Sidebar Desktop - Uniquement si hors distraction */}
+        {!isDistractionFree && (
+          <Suspense fallback={<div className="hidden lg:block w-16 bg-background border-r border-border" />}>
+            <WorkspaceSidebar
+              user={user}
+              teams={teams}
+              currentTeamId={currentTeamId || undefined}
+              onSwitchTeam={switchTeam}
+              isMobileOpen={isMobileOpen}
+              onMobileOpenChange={setIsMobileOpen}
+            />
+          </Suspense>
+        )}
 
         {/* Main Content Area */}
         <main
           ref={mainRef}
           id="main-scroll-container"
-          className="flex-1 overflow-y-auto pb-safe-nav lg:pb-0 overscroll-contain bg-background"
+          className={cn(
+            "flex-1 overflow-y-auto overscroll-contain",
+            !isDistractionFree ? "pb-safe-nav lg:pb-0 bg-background" : "w-full flex items-center justify-center"
+          )}
         >
           <Suspense fallback={<div className="p-6 animate-pulse bg-muted/20" />}>
             <div className="w-full h-full flex flex-col">
-              <FadeIn delay={100} noTransform={pathname?.includes("/messages")} className="flex-1 flex flex-col">
+              <FadeIn
+                delay={100}
+                noTransform={pathname?.includes("/messages") || isDistractionFree}
+                className={isDistractionFree ? "w-full" : "flex-1 flex flex-col"}
+              >
                 {children}
               </FadeIn>
             </div>
           </Suspense>
         </main>
-
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <Suspense fallback={null}>
-        <WorkspaceBottomNav />
-      </Suspense>
+      {/* Mobile Bottom Navigation - Uniquement si hors distraction */}
+      {!isDistractionFree && (
+        <Suspense fallback={null}>
+          <WorkspaceBottomNav />
+        </Suspense>
+      )}
     </div>
   );
 }

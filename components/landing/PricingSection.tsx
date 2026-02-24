@@ -58,7 +58,7 @@ export default function PricingSection() {
 
     // Check if user is already on this plan (active or trial)
     if (currentPlan === planId && (subscriptionStatus === 'active' || subscriptionStatus === 'trialing')) {
-      router.push('/gestion/abonnement');
+      router.push('/gestion/config?tab=subscription');
       return;
     }
 
@@ -274,7 +274,7 @@ export default function PricingSection() {
                     : 'bg-white/5 text-gray-300 border-white/10'
                     }`}>
                     <Star className="w-3.5 h-3.5 fill-current" />
-                    14j d&apos;essai (renouvelable)
+                    14j d'essai (renouvelable)
                   </span>
                 </div>
               )}
@@ -289,10 +289,10 @@ export default function PricingSection() {
                 </Link>
               ) : currentPlan === plan.id && (subscriptionStatus === 'active' || subscriptionStatus === 'trialing') ? (
                 <button
-                  onClick={() => router.push('/gestion/abonnement')}
+                  onClick={() => router.push('/gestion/config?tab=subscription')}
                   className="block w-full py-4 rounded-xl font-semibold text-sm text-center transition-all duration-300 bg-white/10 text-white hover:bg-white/20 border border-white/10"
                 >
-                  Gérer l&apos;abonnement
+                  Gérer l'abonnement
                 </button>
               ) : (
                 <div className="space-y-3">

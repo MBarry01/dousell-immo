@@ -156,10 +156,10 @@ export const SplashProvider = ({
         key="main-content"
         className="will-change-[opacity]"
         style={{
-          opacity: (mounted && showSplash) ? 0 : 1,
-          pointerEvents: (mounted && showSplash) ? "none" : "auto",
+          opacity: mounted ? (showSplash ? 0 : 1) : 1,
+          pointerEvents: mounted ? (showSplash ? "none" : "auto") : "auto",
           transition: "opacity 1s cubic-bezier(0.22, 1, 0.36, 1)",
-          visibility: (mounted && showSplash) ? "hidden" : "visible",
+          visibility: mounted ? (showSplash ? "hidden" : "visible") : "visible",
           backgroundColor: "#05080c",
           position: "relative",
           zIndex: 1,

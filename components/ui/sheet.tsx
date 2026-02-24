@@ -53,17 +53,17 @@ const SheetContent = React.forwardRef<
     <SheetPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed z-50 gap-4 bg-[#0b0f18] p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+        "fixed z-50 gap-4 bg-[#0b0f18] p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:cubic-bezier(0.16, 1, 0.3, 1)",
         sheetVariants[side],
         className
       )}
       style={
         side === "left" || side === "right"
           ? {
-              top: "env(safe-area-inset-top, 0px)",
-              bottom: "env(safe-area-inset-bottom, 0px)",
-              height: "auto",
-            }
+            top: "env(safe-area-inset-top, 0px)",
+            bottom: "env(safe-area-inset-bottom, 0px)",
+            height: "auto",
+          }
           : undefined
       }
       {...props}

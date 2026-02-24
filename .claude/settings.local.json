@@ -96,7 +96,8 @@
       "Bash(python3:*)",
       "Bash(tail:*)",
       "mcp__plugin_playwright_playwright__browser_install",
-      "Bash(npx playwright:*)"
+      "Bash(npx playwright:*)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx next build:*)"
     ]
   }
 }

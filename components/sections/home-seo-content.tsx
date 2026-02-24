@@ -36,16 +36,16 @@ export const HomeSEOContent = () => {
                 >
                     <p>
                         Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte (Mbour, Saly, Somone),
-                        Dousell Immo s&apos;impose comme la plateforme immobilière de référence au Sénégal.
-                        Que ce soit pour l&apos;achat d&apos;une villa de luxe, la location d&apos;un studio moderne
+                        Dousell Immo s'impose comme la plateforme immobilière de référence au Sénégal.
+                        Que ce soit pour l'achat d'une villa de luxe, la location d'un studio moderne
                         ou la gestion locative professionnelle, nous connectons propriétaires, agences
                         et investisseurs grâce à des outils digitaux sécurisés et transparents.
                     </p>
                     <p className="mt-4">
-                        Notre expertise locale alliée à l&apos;innovation technologique permet de sécuriser
+                        Notre expertise locale alliée à l'innovation technologique permet de sécuriser
                         chaque étape de votre projet immobilier. De la vérification rigoureuse des titres
                         de propriété à la dématérialisation des contrats de bail, Dousell Immo simplifie
-                        l&apos;accès au logement et optimise la rentabilité des investissements immobiliers
+                        l'accès au logement et optimise la rentabilité des investissements immobiliers
                         au Sénégal.
                     </p>
                 </motion.div>

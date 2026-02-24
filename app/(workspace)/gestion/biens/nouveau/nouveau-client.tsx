@@ -54,6 +54,7 @@ import { fr } from "date-fns/locale";
 import { createClient } from "@/utils/supabase/client";
 import { OwnerSelector } from "@/components/gestion/OwnerSelector";
 import { createTeamProperty, generateSEODescription, type TeamPropertyData } from "../actions";
+import { smartGeocode } from "@/lib/geocoding";
 import { UpgradeModal } from "@/components/gestion/UpgradeModal";
 import { scrollToTop } from "@/lib/scroll-utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -411,6 +412,23 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
     setIsSubmitting(true);
     setError(null);
 
+    // Geocoding Fallback for manual input
+    let finalLat = formData.lat;
+    let finalLon = formData.lon;
+    let finalCity = formData.city;
+    let finalDistrict = formData.district;
+    let finalRegion = formData.region;
+
+    if (!finalLat || !finalLon) {
+      try {
+        const coords = await smartGeocode(formData.address, formData.district, formData.city);
+        finalLat = coords.lat;
+        finalLon = coords.lng;
+      } catch (e) {
+        console.error("Geocoding failed", e);
+      }
+    }
+
     const data: TeamPropertyData = {
       type: formData.type,
       category: formData.category,
@@ -425,12 +443,12 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
       virtual_tour_url: formData.virtual_tour_url,
       images: formData.images,
       owner_id: formData.owner_id,
-      location: formData.lat && formData.lon ? {
-        lat: formData.lat,
-        lon: formData.lon,
-        city: formData.city,
-        district: formData.district,
-        region: formData.region
+      location: finalLat && finalLon ? {
+        lat: finalLat,
+        lon: finalLon,
+        city: finalCity,
+        district: finalDistrict,
+        region: finalRegion
       } : undefined,
     };
 
@@ -662,6 +680,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
 
                 <AddressAutocomplete
                   defaultValue={formData.address}
+                  onChange={(val) => updateField("address", val)}
                   onAddressSelect={(details) => {
                     setFormData(prev => ({
                       ...prev,

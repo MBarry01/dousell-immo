@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ShootingStars } from "@/components/ui/shooting-stars";
-import CompareSection from "@/components/landing/CompareSection";
 import MagicTransformation from "@/components/landing/MagicTransformation";
 import PricingSection from "@/components/landing/PricingSection";
 import { createClient } from "@/utils/supabase/client";
@@ -868,13 +867,15 @@ function LandingPageContent() {
       {/* Saasable Feature18 - Tabbed Features (Propriétaire uniquement) */}
       {
         userMode === "owner" && (
-          <SaasableSectionWrapper>
-            <Feature18
-              heading=""
-              caption=""
-              topics={featuresDataSaasable}
-            />
-          </SaasableSectionWrapper>
+          <section className="bg-black py-20 overflow-hidden">
+            <SaasableSectionWrapper>
+              <Feature18
+                heading=""
+                caption=""
+                topics={featuresDataSaasable}
+              />
+            </SaasableSectionWrapper>
+          </section>
         )
       }
 
@@ -884,7 +885,6 @@ function LandingPageContent() {
       {userMode === "owner" && <VideoTestimonials mode="owner" />}
 
       {/* Compare Section - Avant/Après (Propriétaire uniquement) */}
-      {userMode === "owner" && <CompareSection />}
 
       {/* Pricing Section - Tarifs (Propriétaire uniquement) */}
       {userMode === "owner" && <PricingSection />}
@@ -899,20 +899,31 @@ function LandingPageContent() {
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="font-display text-[clamp(2rem,5vw,3.75rem)] text-white mb-6">
-              Prêt à{" "}
-              <span className="gradient-text-animated">transformer</span>
-              <br />
-              votre gestion immobilière ?
+              {userMode === "owner" ? (
+                <>
+                  Prêt à <span className="gradient-text-animated">transformer</span>
+                  <br />
+                  votre gestion immobilière ?
+                </>
+              ) : (
+                <>
+                  Prêt à <span className="gradient-text-animated">trouver</span>
+                  <br />
+                  votre prochain chez-vous ?
+                </>
+              )}
             </h2>
             <p className="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
-              Rejoignez les propriétaires qui ont déjà simplifié leur quotidien avec Dousell Immo.
+              {userMode === "owner"
+                ? "Rejoignez les propriétaires qui ont déjà simplifié leur quotidien avec Dousell Immo."
+                : "Découvrez des centaines d'annonces vérifiées et gérez votre location en toute simplicité."}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/pro/signup"
+                href={userMode === "owner" ? "/pro/signup" : "/recherche"}
                 className="btn-shimmer rounded-full px-8 sm:px-12 py-4 sm:py-5 font-semibold text-black text-[clamp(0.9375rem,1.5vw,1.125rem)] transition-all duration-300 hover:scale-105 gold-glow animate-pulse-gold whitespace-nowrap"
               >
-                Commencer maintenant
+                {userMode === "owner" ? "Commencer maintenant" : "Voir les annonces"}
               </Link>
             </div>
             <p className="mt-6 text-gray-500 text-sm">
@@ -1184,7 +1195,7 @@ function LandingPageContent() {
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             {/* Brand */}
-            <div className="md:col-span-2">
+            <div className="md:col-span-2 flex flex-col items-center md:items-start text-center md:text-left">
               <span className="font-display text-2xl gradient-text-animated">
                 Dousell Immo
               </span>
@@ -1195,7 +1206,7 @@ function LandingPageContent() {
             </div>
 
             {/* Links */}
-            <div>
+            <div className="flex flex-col items-center md:items-start text-center md:text-left">
               <h4 className="text-white font-semibold mb-4">Produit</h4>
               <ul className="space-y-3">
                 <li><Link href="/pro?mode=owner#features" className="text-gray-500 hover:text-[#F4C430] transition-colors">Fonctionnalités</Link></li>
@@ -1205,7 +1216,7 @@ function LandingPageContent() {
               </ul>
             </div>
 
-            <div>
+            <div className="flex flex-col items-center md:items-start text-center md:text-left">
               <h4 className="text-white font-semibold mb-4">Contact</h4>
               <ul className="space-y-3">
                 <li><span className="text-gray-500">Dakar, Sénégal</span></li>

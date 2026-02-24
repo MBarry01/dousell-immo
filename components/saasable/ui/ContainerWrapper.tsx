@@ -16,7 +16,7 @@ export default function ContainerWrapper({ children, sx }: { children: React.Rea
     const isDesktop = (upMD || upXL) && !downMD;
 
     return (
-        <Container {...(isDesktop && { maxWidth: upXL ? 'xl' : 'lg' })} sx={{ ...(downMD && { px: { xs: 2, sm: 4, md: 0 } }), ...sx }}>
+        <Container maxWidth="lg" sx={{ px: { xs: 3, sm: 6, md: 6 }, ...sx }}>
             {children}
         </Container>
     );

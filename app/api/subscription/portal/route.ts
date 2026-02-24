@@ -18,7 +18,7 @@ export async function POST(_req: Request) {
             .eq('id', teamId)
             .single();
 
-        if (!team?.stripe_customer_id) {
+        if (!teamData?.stripe_customer_id) {
             return NextResponse.json(
                 { error: "Aucun abonnement trouvé pour cette équipe." },
                 { status: 404 }
@@ -29,8 +29,8 @@ export async function POST(_req: Request) {
 
         // Create Portal Session
         const session = await stripe.billingPortal.sessions.create({
-            customer: team.stripe_customer_id,
-            return_url: `${baseUrl}/gestion/abonnement`,
+            customer: teamData.stripe_customer_id,
+            return_url: `${baseUrl}/gestion/config?tab=subscription`,
         });
 
         return NextResponse.json({ url: session.url });

@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { WizardForm } from "@/components/onboarding/WizardForm";
 
@@ -30,7 +31,14 @@ export default function CommencerPage() {
             </div>
 
             {/* Wizard Form */}
-            <WizardForm />
+            <Suspense fallback={
+                <div className="flex flex-col items-center justify-center py-20">
+                    <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                    <p className="mt-4 text-white/60">Chargement du formulaire...</p>
+                </div>
+            }>
+                <WizardForm />
+            </Suspense>
         </div>
     );
 }

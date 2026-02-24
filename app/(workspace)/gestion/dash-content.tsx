@@ -4,6 +4,9 @@ import { Suspense } from "react";
 import _dynamic from "next/dynamic";
 import { DocumentGeneratorDialog } from "./components/DocumentGeneratorDialog";
 import { ThemedContent } from "./components/ThemedContent";
+import { MessageSquare } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { KPICards } from "./components/KPICards";
 import { RevenueChartSafe as RevenueChart } from "./components/RevenueChartSafe";
 import { DashboardTabs } from "./components/DashboardTabs";
@@ -292,11 +295,16 @@ export default async function DashboardContent({
             filterSection={
                 !isViewingTerminated && (
                     <div id="tour-gestion-actions" className="flex gap-2">
-                        <DocumentGeneratorDialog
-                            leases={filteredLeases}
-                            userEmail={user.email}
-                            profile={profile}
-                        />
+                        <Button
+                            variant="outline"
+                            asChild
+                            className="h-9 px-2 sm:px-3 gap-2 bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+                        >
+                            <Link href="/gestion/messages">
+                                <MessageSquare className="w-4 h-4" />
+                                <span className="hidden sm:inline">Messages</span>
+                            </Link>
+                        </Button>
                         <AddTenantButton ownerId={user.id} profile={profile} />
                     </div>
                 )

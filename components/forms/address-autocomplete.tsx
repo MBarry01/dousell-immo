@@ -26,6 +26,7 @@ interface AddressAutocompleteProps {
     }) => void;
     defaultValue?: string;
     className?: string;
+    onChange?: (value: string) => void;
 }
 
 interface NominatimResult {
@@ -65,10 +66,10 @@ import {
 } from "@/components/ui/popover";
 
 export function AddressAutocomplete({
-
     onAddressSelect,
     defaultValue = "",
     className,
+    onChange,
 }: AddressAutocompleteProps) {
     const [open, setOpen] = React.useState(false);
     const [query, setQuery] = React.useState(defaultValue);
@@ -88,7 +89,7 @@ export function AddressAutocomplete({
             } else {
                 setResults([]);
             }
-        }, 1000); // 1000ms debounce as requested
+        }, 400); // reduced from 1000ms
 
         return () => clearTimeout(timer);
     }, [query]);
@@ -173,6 +174,7 @@ export function AddressAutocomplete({
                         onChange={(e) => {
                             setQuery(e.target.value);
                             setOpen(true);
+                            onChange?.(e.target.value);
                         }}
                         onFocus={() => {
                             if (results.length > 0) setOpen(true);

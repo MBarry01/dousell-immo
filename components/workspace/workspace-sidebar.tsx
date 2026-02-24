@@ -31,6 +31,7 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
+import { IconBuildingEstate } from "@tabler/icons-react";
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { useOwnerUnreadCounts } from "@/hooks/use-unread-counts";
 import { useActivationStage } from "@/hooks/use-activation-stage";
@@ -58,7 +59,7 @@ interface NavItem {
 // Navigation pour propriétaires (/gestion) avec permissions
 const gestionNavItems: NavItem[] = [
   { href: "/gestion", icon: LayoutGrid, label: "Dashboard" },
-  { href: "/gestion/biens", icon: Key, label: "Biens", requiredPermission: "properties.view" },
+  { href: "/gestion/biens", icon: IconBuildingEstate as any, label: "Biens", requiredPermission: "properties.view" },
   { href: "/gestion/etats-lieux", icon: ClipboardList, label: "États des Lieux", requiredPermission: "inventory.view", requiredStage: 3 },
   { href: "/gestion/interventions", icon: Wrench, label: "Interventions", requiredPermission: "maintenance.view", requiredTier: 'pro', requiredStage: 3 },
   { href: "/gestion/documents", icon: FolderOpen, label: "Documents", requiredPermission: "documents.view" },
@@ -82,13 +83,14 @@ const adminNavItems: NavItem[] = [
   { href: "/admin/users", icon: Users, label: "Utilisateurs" },
   { href: "/admin/verifications", icon: Shield, label: "Vérifications" },
   { href: "/admin/moderation", icon: Scale, label: "Modération" },
+  { href: "/admin/abonnements", icon: CreditCard, label: "Abonnements" },
   { href: "/admin/roles", icon: Settings, label: "Rôles" },
 ];
 
 // Navigation pour compte (/compte)
 const compteNavItems: NavItem[] = [
   { href: "/compte", icon: User, label: "Mon Profil" },
-  { href: "/compte/mes-biens", icon: Key, label: "Mes Biens" },
+  { href: "/compte/mes-biens", icon: IconBuildingEstate as any, label: "Mes Biens" },
   { href: "/compte/favoris", icon: Heart, label: "Favoris" },
   { href: "/compte/alertes", icon: Bell, label: "Alertes" },
   { href: "/compte/parametres", icon: Settings, label: "Paramètres" },
@@ -250,6 +252,7 @@ function SidebarContent({
                 currentTeamId={currentTeamId}
                 currentTeamTier={currentTeam?.subscription_tier}
                 currentTeamStatus={currentTeam?.subscription_status}
+                userRole={currentTeam?.role}
                 onNavigate={() => isMobile && onMobileNavigate?.()}
                 onRequestAccess={onRequestAccess}
                 badgeCount={badgeCount}
@@ -329,6 +332,7 @@ function SidebarContent({
             currentTeamId={currentTeamId}
             currentTeamTier={currentTeam?.subscription_tier}
             currentTeamStatus={currentTeam?.subscription_status}
+            userRole={currentTeam?.role}
             onNavigate={() => isMobile && onMobileNavigate?.()}
             onRequestAccess={onRequestAccess}
           />
@@ -343,6 +347,7 @@ function SidebarContent({
             currentTeamId={currentTeamId}
             currentTeamTier={currentTeam?.subscription_tier}
             currentTeamStatus={currentTeam?.subscription_status}
+            userRole={currentTeam?.role}
             onNavigate={() => isMobile && onMobileNavigate?.()}
             onRequestAccess={onRequestAccess}
             showWarning={isGestionRoute && !isConfigComplete}
@@ -497,7 +502,7 @@ export function WorkspaceSidebar({
 
       {/* Desktop: Sidebar fixe */}
       <div
-        className="hidden lg:block relative h-full w-16 shrink-0 z-50"
+        className="hidden lg:block relative h-full w-16 shrink-0 z-40"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >

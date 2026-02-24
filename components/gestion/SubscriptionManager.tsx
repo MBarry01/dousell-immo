@@ -204,8 +204,8 @@ export function SubscriptionManager() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {/* Stripe Portal Button - for active subscribers */}
-                    {isActive && hasStripeCustomer && (
+                    {/* Stripe Portal Button - for active and trialing Stripe subscribers */}
+                    {(isActive || isTrial) && hasStripeCustomer && (
                         <Button
                             variant="outline"
                             size="sm"

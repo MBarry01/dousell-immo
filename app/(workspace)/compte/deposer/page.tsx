@@ -121,6 +121,8 @@ function DeposerPageContent() {
           city: parsed.city || prev.city,
           bedrooms: parsed.bedrooms || prev.bedrooms,
           rooms: parsed.bedrooms || prev.rooms,
+          lat: parsed.lat || prev.lat,
+          lon: parsed.lon || prev.lon,
         }));
         localStorage.removeItem("pending_property_draft");
       } catch (e) { }
@@ -541,6 +543,7 @@ function DeposerPageContent() {
                 <label className="text-sm text-zinc-400 mb-3 block">Adresse complète du bien</label>
                 <AddressAutocomplete
                   defaultValue={formData.address}
+                  onChange={(val) => updateField("address", val)}
                   onAddressSelect={(details) => {
                     setFormData(prev => ({
                       ...prev,

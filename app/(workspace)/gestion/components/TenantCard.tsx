@@ -142,9 +142,9 @@ export function TenantCard({
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 transition-opacity hover:bg-muted"
+                            className="h-8 w-8 p-0 transition-all duration-200 rounded-full border border-white/10 bg-white/5 hover:scale-110 hover:border-[#F4C430]/50 hover:bg-transparent text-muted-foreground hover:text-[#F4C430]"
                         >
-                            <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                            <MoreVertical className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56 p-1">

@@ -160,10 +160,10 @@ export function TeamPageClient({
 
       {/* Tabs */}
       <Tabs id="tour-team-tabs" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="w-full justify-start md:justify-center p-1 gap-1 md:gap-2">
+        <TabsList className="w-full justify-start md:justify-center p-1 gap-1 md:gap-2 overflow-x-auto scrollbar-hide">
           <TabsTrigger
             value="members"
-            className="group rounded-full transition-all flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 text-[10px] font-black uppercase tracking-[0.2em]"
+            className="group rounded-full transition-all flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 text-[10px] font-black uppercase tracking-[0.2em] shrink-0"
           >
             <Users className="h-4 w-4 transition-colors" />
             <span className="transition-colors">Membres</span>
@@ -175,7 +175,7 @@ export function TeamPageClient({
           </TabsTrigger>
           <TabsTrigger
             value="permissions"
-            className="group rounded-full transition-all flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 text-[10px] font-black uppercase tracking-[0.2em]"
+            className="group rounded-full transition-all flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 text-[10px] font-black uppercase tracking-[0.2em] shrink-0"
           >
             <Shield className="h-4 w-4 transition-colors" />
             <span className="transition-colors">Rôles & Permissions</span>
@@ -183,7 +183,7 @@ export function TeamPageClient({
           {canInvite && (
             <TabsTrigger
               value="access-control"
-              className="group rounded-full border border-transparent data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-white dark:data-[state=active]:text-white data-[state=active]:shadow-none text-muted-foreground hover:bg-muted/50 transition-all flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em]"
+              className="group rounded-full border border-transparent data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-white dark:data-[state=active]:text-white data-[state=active]:shadow-none text-muted-foreground hover:bg-muted/50 transition-all flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] shrink-0"
             >
               <KeyRound className="h-4 w-4 transition-colors" />
               <span className="transition-colors">Accès Temporaire</span>

@@ -186,7 +186,6 @@ export function BiensClient({
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
             <div className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-2">En ligne</div>
             <div className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-[#F4C430]" />
               <span className="text-3xl font-black tracking-tighter">{(stats.published).toString().padStart(2, '0')}</span>
             </div>
           </div>
@@ -202,23 +201,18 @@ export function BiensClient({
 
         {/* Filters */}
         <div id="tour-biens-search-filters" className="flex flex-col md:flex-row gap-4 mb-6">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              (document.activeElement as HTMLElement)?.blur();
-            }}
-            className="relative flex-1"
-          >
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <div className="relative flex-1 group">
+            <div className="absolute left-4 inset-y-0 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
+              <Search className="w-5 h-5" />
+            </div>
             <input
-              type="search"
-              enterKeyHint="search"
+              type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher un bien..."
-              className="w-full bg-card border border-border rounded-lg pl-10 pr-4 h-11 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-base"
+              className="w-full bg-card border border-border rounded-xl pl-12 pr-4 h-12 text-base flex items-center leading-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all py-0"
             />
-          </form>
+          </div>
 
           {/* GROUPE 1 : Segmented Control pour le Type */}
           <div className="bg-muted p-1 rounded-lg inline-flex">

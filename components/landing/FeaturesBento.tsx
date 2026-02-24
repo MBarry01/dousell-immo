@@ -19,21 +19,19 @@ const features = [
         icon: LayoutDashboard,
         iconColor: "text-[#F4C430]",
         iconBg: "bg-[#F4C430]/10",
-        badges: ["Temps Réel", "Mobile First", "Vue 360°"]
     },
     {
         id: 2,
         image: "/images/Paiement.webp",     // Updated
         title: "Encaissez sans courir après personne",
         paragraphs: [
-            "Ne perdez plus votre énergie à relancer les retardataires. Dousell envoie automatiquement les rappels de paiement par SMS et email avant et après l&apos;échéance.",
-            "Vos locataires règlent leur loyer via leur méthode préférée (Wave, Orange Money, Carte Bancaire) directement depuis leur espace. L&apos;argent est tracé, sécurisé.",
-            "Dès validation du paiement, la quittance est générée et envoyée instantanément au locataire. Plus besoin de rédiger, d&apos;imprimer ou de se déplacer pour remettre un papier."
+            "Ne perdez plus votre énergie à relancer les retardataires. Dousell envoie automatiquement les rappels de paiement par SMS et email avant et après l'échéance.",
+            "Vos locataires règlent leur loyer via leur méthode préférée (Wave, Orange Money, Carte Bancaire) directement depuis leur espace. L'argent est tracé, sécurisé.",
+            "Dès validation du paiement, la quittance est générée et envoyée instantanément au locataire. Plus besoin de rédiger, d'imprimer ou de se déplacer pour remettre un papier."
         ],
         icon: Wallet,
         iconColor: "text-[#F4C430]",
         iconBg: "bg-[#F4C430]/10",
-        badges: ["Wave & OM", "Quittances Auto", "0 Retards"]
     },
     {
         id: 3,
@@ -42,40 +40,37 @@ const features = [
         paragraphs: [
             "Utilisez des modèles de baux 100% conformes à la législation sénégalaise. Protégez-vous avec des contrats solides, relus par des experts juridiques.",
             "Idéal pour la diaspora : signez et faites signer vos locataires électroniquement depuis n'importe où dans le monde. Plus besoin d'envoyer un cousin avec le stylo.",
-            "Fini les baux égarés ou abîmés par l&apos;humidité. Retrouvez n&apos;importe quel contrat en 3 clics dans votre coffre-fort numérique, même 5 ans après le départ du locataire."
+            "Fini les baux égarés ou abîmés par l'humidité. Retrouvez n'importe quel contrat en 3 clics dans votre coffre-fort numérique, même 5 ans après le départ du locataire."
         ],
         icon: FileText,
         iconColor: "text-[#F4C430]",
         iconBg: "bg-[#F4C430]/10",
-        badges: ["Signature Élec.", "Conforme Loi", "Coffre-fort"]
     },
     {
         id: 4,
         image: "/images/Etat_Lieux.webp",  // Updated
-        title: "L&apos;État des Lieux Incontestable",
+        title: "L'État des Lieux Incontestable",
         paragraphs: [
-            "Prenez des photos datées et géolocalisées directement via l&apos;application. Figez l&apos;état réel du bien à l&apos;entrée pour éviter tout litige à la sortie.",
+            "Prenez des photos datées et géolocalisées directement via l'application. Figez l'état réel du bien à l'entrée pour éviter tout litige à la sortie.",
             "Ne ratez aucun détail : notre outil vous guide pièce par pièce (prises, peinture, robinetterie) pour un constat exhaustif et professionnel.",
             "Le jour du départ, la comparaison est automatique. Le calcul des retenues sur caution devient factuel, transparent et apaisé pour tout le monde."
         ],
         icon: ShieldCheck,
         iconColor: "text-[#F4C430]",
         iconBg: "bg-[#F4C430]/10",
-        badges: ["Photos HD", "Géolocalisé", "Comparatif Auto"]
     },
     {
         id: 5,
         image: "/images/alerte.webp",       // Updated
         title: "Votre Assistant Personnel 24/7",
         paragraphs: [
-            "Laissez Dousell gérer votre agenda mental. Fin de bail, révision de loyer annuelle, régularisation de charges... l&apos;application pense à tout pour vous.",
+            "Laissez Dousell gérer votre agenda mental. Fin de bail, révision de loyer annuelle, régularisation de charges... l'application pense à tout pour vous.",
             "Dormez sur vos deux oreilles. Vous ne raterez plus jamais une date importante ou une échéance légale qui pourrait vous coûter cher.",
             "Montrez à vos locataires que vous gérez votre bien avec sérieux. Une communication fluide, moderne et proactive renforce la confiance et fidélise les bons payeurs."
         ],
         icon: Mail,
         iconColor: "text-[#F4C430]",
         iconBg: "bg-[#F4C430]/10",
-        badges: ["Rappels SMS", "Agenda Auto", "Tranquillité"]
     },
 ];
 
@@ -87,7 +82,6 @@ type FeatureRowProps = {
     iconColor: string;
     iconBg: string;
     isReversed?: boolean;
-    badges: string[];
 };
 
 // Animation Variants
@@ -128,7 +122,7 @@ const imageVariants: Variants = {
     }
 };
 
-function FeatureRow({ image, title, paragraphs, icon: Icon, iconColor, iconBg, isReversed, badges }: FeatureRowProps) {
+function FeatureRow({ image, title, paragraphs, icon: Icon, iconColor, iconBg, isReversed }: FeatureRowProps) {
     return (
         <motion.div
             initial="hidden"
@@ -153,8 +147,8 @@ function FeatureRow({ image, title, paragraphs, icon: Icon, iconColor, iconBg, i
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                 </div>
 
-                {/* Decorative elements */}
-                <div className={`absolute -z-10 w-72 h-72 rounded-full blur-[100px] opacity-30 ${isReversed ? '-right-20 -bottom-20 bg-[#F4C430]' : '-left-20 -bottom-20 bg-[#F4C430]'}`} />
+                {/* Decorative elements - Softer glow */}
+                <div className={`absolute -z-10 w-72 h-72 rounded-full blur-[120px] opacity-20 ${isReversed ? '-right-24 -bottom-24 bg-[#F4C430]/50' : '-left-24 -bottom-24 bg-[#F4C430]/50'}`} />
             </motion.div>
 
             {/* Text Side */}
@@ -164,7 +158,7 @@ function FeatureRow({ image, title, paragraphs, icon: Icon, iconColor, iconBg, i
             >
                 <div className="flex items-center gap-4">
                     {/* Icon */}
-                    <div className={`w-14 h-14 flex-shrink-0 rounded-2xl ${iconBg} flex items-center justify-center ${iconColor} border border-[#F4C430]/20`}>
+                    <div className={`w-14 h-14 flex-shrink-0 rounded-2xl ${iconBg} flex items-center justify-center ${iconColor} border border-[#F4C430]/20 shadow-[0_0_15px_rgba(244,196,48,0.1)]`}>
                         <Icon size={28} />
                     </div>
 
@@ -189,23 +183,8 @@ function FeatureRow({ image, title, paragraphs, icon: Icon, iconColor, iconBg, i
                         </li>
                     ))}
                 </ul>
-
-                {/* Feature highlights - Custom Badges */}
-                <div className="flex flex-wrap gap-3 pt-4 border-t border-white/5 mt-6">
-                    {badges.map((badge, idx) => (
-                        <motion.span
-                            key={idx}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 cursor-default hover:border-[#F4C430]/30 hover:text-white transition-colors"
-                        >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#F4C430]" />
-                            {badge}
-                        </motion.span>
-                    ))}
-                </div>
             </motion.div>
-        </motion.div>
+        </motion.div >
     );
 }
 
@@ -231,7 +210,7 @@ export default function FeaturesBento() {
                         Tout ce dont vous avez besoin pour <span className="gradient-text-animated">piloter</span> votre immobilier
                     </h2>
                     <p className="text-gray-400 max-w-xl mx-auto text-sm md:text-base">
-                        Une suite complète d&apos;outils pour automatiser, sécuriser et rentabiliser vos biens, accessible 24/7.
+                        Une suite complète d'outils pour automatiser, sécuriser et rentabiliser vos biens, accessible 24/7.
                     </p>
                 </motion.div>
 
