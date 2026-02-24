@@ -314,8 +314,9 @@ export function BiensClient({
         </div>
 
         {/* Filters */}
-        <div id="tour-biens-search-filters" className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-1 group">
+        <div id="tour-biens-search-filters" className="flex flex-col gap-3 mb-6">
+          {/* Search */}
+          <div className="relative group">
             <div className="absolute left-4 inset-y-0 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
               <Search className="w-5 h-5" />
             </div>
@@ -324,125 +325,103 @@ export function BiensClient({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher un bien..."
-              className="w-full bg-card border border-border rounded-xl pl-12 pr-4 h-12 text-base flex items-center leading-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all py-0"
+              className="w-full bg-muted border border-border rounded-2xl pl-12 pr-4 h-12 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/40 transition-all"
             />
           </div>
 
-          {/* GROUPE 1 : Segmented Control pour le Type */}
-          <div className="bg-muted p-1 rounded-lg inline-flex">
-            <button
-              onClick={() => setCategoryFilter("all")}
-              className={`px-4 h-11 flex items-center justify-center rounded-md text-sm font-medium transition-all active:scale-95 ${categoryFilter === "all"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                }`}
-            >
-              Tous
-            </button>
-            <button
-              onClick={() => setCategoryFilter("vente")}
-              className={`px-4 h-11 flex items-center justify-center rounded-md text-sm font-medium transition-all active:scale-95 ${categoryFilter === "vente"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                }`}
-            >
-              Vente
-            </button>
-            <button
-              onClick={() => setCategoryFilter("location")}
-              className={`px-4 h-11 flex items-center justify-center rounded-md text-sm font-medium transition-all active:scale-95 ${categoryFilter === "location"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                }`}
-            >
-              Location
-            </button>
-          </div>
+          {/* Filter Row */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* GROUPE 1 : Type */}
+            <div className="bg-muted border border-border rounded-full p-1 inline-flex">
+              {(["all", "vente", "location"] as const).map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setCategoryFilter(cat)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${
+                    categoryFilter === cat
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {cat === "all" ? "Tous" : cat === "vente" ? "Vente" : "Location"}
+                </button>
+              ))}
+            </div>
 
-          {/* SÉPARATEUR */}
-          <div className="hidden md:block h-6 w-px bg-border mx-2"></div>
+            {/* GROUPE 2 : Occupation */}
+            <div className="bg-muted border border-border rounded-full p-1 inline-flex">
+              {(["all", "vacant", "rented"] as const).map((occ) => (
+                <button
+                  key={occ}
+                  onClick={() => setOccupancyFilter(occ)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${
+                    occupancyFilter === occ
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {occ === "all" ? "Tous" : occ === "vacant" ? "Dispos" : "Loués"}
+                </button>
+              ))}
+            </div>
 
-          {/* GROUPE 2 : Occupation (Nouveau) */}
-          <div className="bg-muted p-1 rounded-lg inline-flex">
-            <button
-              onClick={() => setOccupancyFilter("all")}
-              className={`px-4 h-11 flex items-center justify-center rounded-md text-xs font-semibold transition-all active:scale-95 ${occupancyFilter === "all"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+            {/* GROUPE 3 : Statuts */}
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => setStatusFilter(statusFilter === "published" ? "all" : "published")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${
+                  statusFilter === "published"
+                    ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/40"
+                    : "border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
                 }`}
-            >
-              Tous
-            </button>
-            <button
-              onClick={() => setOccupancyFilter("vacant")}
-              className={`px-4 h-11 flex items-center justify-center rounded-md text-xs font-semibold transition-all active:scale-95 ${occupancyFilter === "vacant"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              >
+                <Eye className="w-3.5 h-3.5" /> En ligne
+              </button>
+              <button
+                onClick={() => setStatusFilter(statusFilter === "draft" ? "all" : "draft")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${
+                  statusFilter === "draft"
+                    ? "bg-muted-foreground/15 text-foreground border border-border"
+                    : "border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
                 }`}
-            >
-              Dispos
-            </button>
-            <button
-              onClick={() => setOccupancyFilter("rented")}
-              className={`px-4 h-11 flex items-center justify-center rounded-md text-xs font-semibold transition-all active:scale-95 ${occupancyFilter === "rented"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              >
+                <EyeOff className="w-3.5 h-3.5" /> Brouillon
+              </button>
+              <button
+                onClick={() => setStatusFilter(statusFilter === "scheduled" ? "all" : "scheduled")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${
+                  statusFilter === "scheduled"
+                    ? "bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-500/40"
+                    : "border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
                 }`}
-            >
-              Loués
-            </button>
-          </div>
+              >
+                <Clock className="w-3.5 h-3.5" /> Programmé
+              </button>
+            </div>
 
-          {/* SÉPARATEUR */}
-          <div className="hidden md:block h-6 w-px bg-border mx-2"></div>
-
-          {/* GROUPE 3 : Statuts (Style Badges cliquables) */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setStatusFilter("published")}
-              className={`flex items-center gap-2 px-3 h-11 rounded-full text-xs font-medium transition-all active:scale-95 ${statusFilter === "published"
-                ? "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/50"
-                : "border border-border hover:border-muted-foreground text-muted-foreground"
+            {/* View Toggle */}
+            <div className="ml-auto flex gap-1 bg-muted border border-border rounded-xl p-1">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-95 ${
+                  viewMode === "grid"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
-            >
-              <Eye className="w-4 h-4" /> En ligne
-            </button>
-            <button
-              onClick={() => setStatusFilter("draft")}
-              className={`flex items-center gap-2 px-3 h-11 rounded-full text-xs font-medium transition-all active:scale-95 ${statusFilter === "draft"
-                ? "bg-muted text-foreground border border-muted-foreground/50"
-                : "border border-border hover:border-muted-foreground text-muted-foreground"
+              >
+                <Grid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-95 ${
+                  viewMode === "list"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
-            >
-              <EyeOff className="w-4 h-4" /> Brouillon
-            </button>
-            <button
-              onClick={() => setStatusFilter("scheduled")}
-              className={`flex items-center gap-2 px-3 h-11 rounded-full text-xs font-medium transition-all active:scale-95 ${statusFilter === "scheduled"
-                ? "bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/50"
-                : "border border-border hover:border-muted-foreground text-muted-foreground"
-                }`}
-            >
-              <Clock className="w-4 h-4" /> Programmé
-            </button>
-          </div>
-
-          {/* View Toggle */}
-          <div className="flex gap-1 bg-muted border border-border rounded-lg p-1">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`h-11 w-11 flex items-center justify-center rounded-md transition-all active:scale-95 ${viewMode === "grid" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              <Grid className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`h-11 w-11 flex items-center justify-center rounded-md transition-all active:scale-95 ${viewMode === "list" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              <List className="w-5 h-5" />
-            </button>
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 

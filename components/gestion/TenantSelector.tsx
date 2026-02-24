@@ -109,7 +109,7 @@ export function TenantSelector({ value, onChange, className = "", propertyId, ow
                     </div>
 
                     {/* Inline List */}
-                    <div className="max-h-[200px] overflow-y-auto p-2 space-y-1">
+                    <div className="max-h-[140px] overflow-y-auto p-1.5 space-y-0.5">
                         {isSearching ? (
                             <div className="text-center py-4 text-muted-foreground text-sm">Recherche...</div>
                         ) : tenants.length > 0 ? (

@@ -100,7 +100,7 @@ export function AssociateTenantDialog({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-md bg-card border-border text-foreground shadow-2xl">
+            <DialogContent className="sm:max-w-md bg-card border-border text-foreground shadow-2xl max-h-[90dvh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold">Associer un locataire</DialogTitle>
                     <DialogDescription className="text-sm text-muted-foreground">
@@ -108,7 +108,7 @@ export function AssociateTenantDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+                <form onSubmit={handleSubmit} className="space-y-4 pt-1">
                     {/* SÉLECTEUR DE LOCATAIRE */}
                     <div className="space-y-2">
                         <TenantSelector
@@ -122,39 +122,38 @@ export function AssociateTenantDialog({
                     </div>
 
                     {/* TYPE DE LOCATION */}
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                         <label className="text-sm font-medium text-foreground">Type de location</label>
                         <RadioGroup
                             value={rentalType}
                             onValueChange={(v) => setRentalType(v as 'entire' | 'partial')}
                             className="grid grid-cols-2 gap-4"
                         >
-                            <div>
-                                <RadioGroupItem value="entire" id="entire" className="peer sr-only" />
-                                <Label
-                                    htmlFor="entire"
-                                    className="group flex flex-col items-center justify-between rounded-xl border-2 border-border/50 bg-muted/20 p-4 hover:bg-muted/40 hover:border-primary/50 peer-data-[state=checked]:bg-primary peer-data-[state=checked]:border-primary peer-data-[state=checked]:text-primary-foreground cursor-pointer transition-all duration-300"
-                                >
-                                    <Building className="mb-2 h-6 w-6 transition-transform group-hover:scale-110" />
-                                    <div className="text-center">
-                                        <p className="font-semibold text-sm">Logement entier</p>
-                                        <p className="text-[10px] opacity-70 mt-0.5">Pour un seul locataire ou une famille</p>
+                            {([
+                                { value: 'entire', id: 'entire', Icon: Building, label: 'Logement entier', sub: 'Pour un seul locataire ou une famille' },
+                                { value: 'partial', id: 'partial', Icon: Users, label: 'Colocation', sub: 'Par chambre ou partie du bien' },
+                            ] as const).map(({ value, id, Icon, label, sub }) => {
+                                const isSelected = rentalType === value;
+                                return (
+                                    <div key={value}>
+                                        <RadioGroupItem value={value} id={id} className="sr-only" />
+                                                        <Label
+                                            htmlFor={id}
+                                            className={`group flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 p-3 cursor-pointer transition-all duration-200 ${
+                                                isSelected
+                                                    ? 'bg-primary border-primary text-primary-foreground'
+                                                    : 'bg-card border-border text-foreground hover:bg-muted hover:border-primary/40'
+                                            }`}
+                                        >
+                                            <Icon className="h-5 w-5 transition-transform group-hover:scale-110" />
+                                            <div className="text-center">
+                                                <p className="font-semibold text-xs">{label}</p>
+                                                <p className={`text-[9px] mt-0.5 leading-tight ${isSelected ? 'opacity-70' : 'text-muted-foreground'}`}>{sub}</p>
+                                            </div>
+                                        </Label>
                                     </div>
-                                </Label>
-                            </div>
-                            <div>
-                                <RadioGroupItem value="partial" id="partial" className="peer sr-only" />
-                                <Label
-                                    htmlFor="partial"
-                                    className="group flex flex-col items-center justify-between rounded-xl border-2 border-border/50 bg-muted/20 p-4 hover:bg-muted/40 hover:border-primary/50 peer-data-[state=checked]:bg-primary peer-data-[state=checked]:border-primary peer-data-[state=checked]:text-primary-foreground cursor-pointer transition-all duration-300"
-                                >
-                                    <Users className="mb-2 h-6 w-6 transition-transform group-hover:scale-110" />
-                                    <div className="text-center">
-                                        <p className="font-semibold text-sm">Colocation</p>
-                                        <p className="text-[10px] opacity-70 mt-0.5">Par chambre ou partie du bien</p>
-                                    </div>
-                                </Label>
-                            </div>
+                                );
+                            })}
                         </RadioGroup>
                     </div>
 
@@ -176,7 +175,7 @@ export function AssociateTenantDialog({
                     </div>
 
                     {/* ACTIONS */}
-                    <div className="flex justify-end gap-3 pt-4">
+                    <div className="flex justify-end gap-3 pt-2">
                         <Button
                             type="button"
                             variant="outline"
