@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import DashboardContent from "./dash-content";
 import { getUserTeamContext } from "@/lib/team-context";
+import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import LoadingClient from "./LoadingClient";
@@ -46,8 +47,30 @@ export default async function GestionLocativePage({
     }
 
     if (!context) {
-        console.warn("[Gestion/page] ✗ Contexte null, redirection login");
-        redirect("/login?reason=timeout");
+        // getUserTeamContext retourne null si : (1) pas de team du tout, (2) team inactive/expirée
+        // Le middleware garantit que l'user est authentifié ici — on doit distinguer les deux cas
+        const supabase = await createClient();
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+
+        if (!authUser) {
+            redirect("/login");
+        }
+
+        // Vérifier si l'user a déjà une team (même inactive)
+        const { count } = await supabase
+            .from("team_members")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", authUser.id);
+
+        if (count && count > 0) {
+            // A une team mais inactive/expirée → page de renouvellement
+            console.warn("[Gestion/page] ✗ Team inactive → upgrade");
+            redirect("/pro/start?upgrade=true");
+        } else {
+            // Aucune team → créer son agence (trial 14j)
+            console.warn("[Gestion/page] ✗ Aucune team → création agence");
+            redirect("/pro/start");
+        }
     }
 
     return (

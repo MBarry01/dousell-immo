@@ -111,6 +111,7 @@ export default function AceCompare({
       style={{
         position: "relative",
         cursor: slideMode === "drag" ? "grab" : "col-resize",
+        touchAction: "pan-y", // Allow vertical scrolling
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={mouseLeaveHandler}

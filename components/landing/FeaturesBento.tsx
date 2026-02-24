@@ -162,9 +162,9 @@ function FeatureRow({ image, title, paragraphs, icon: Icon, iconColor, iconBg, i
                 className="w-full lg:w-1/2 space-y-8"
                 variants={itemVariants}
             >
-                <div className="space-y-4">
+                <div className="flex items-center gap-4">
                     {/* Icon */}
-                    <div className={`w-14 h-14 rounded-2xl ${iconBg} flex items-center justify-center ${iconColor} border border-[#F4C430]/20`}>
+                    <div className={`w-14 h-14 flex-shrink-0 rounded-2xl ${iconBg} flex items-center justify-center ${iconColor} border border-[#F4C430]/20`}>
                         <Icon size={28} />
                     </div>
 

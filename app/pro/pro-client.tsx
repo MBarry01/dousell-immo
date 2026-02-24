@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import { ShootingStars } from "@/components/ui/shooting-stars";
 import CompareSection from "@/components/landing/CompareSection";
 import MagicTransformation from "@/components/landing/MagicTransformation";
@@ -340,7 +339,7 @@ function LandingPageContent() {
   };
 
   return (
-    <main className="bg-black overflow-hidden">
+    <main className="bg-black overflow-x-hidden">
       {/* Noise Overlay for texture */}
       <div className="noise-overlay" />
 
@@ -667,31 +666,67 @@ function LandingPageContent() {
       {/* Magic Transformation Section (SaaS -> Vitrine) */}
       {userMode === "owner" && <MagicTransformation />}
 
-      {/* Container Scroll Section */}
+      {/* Mockups Responsive Section */}
       {userMode === "owner" && (
-        <section id="proprietaire-section" className="flex flex-col overflow-hidden w-full bg-zinc-950 -mt-20 md:-mt-40">
-          <ContainerScroll
-            titleComponent={
-              <div className="h-0"></div>
-            }
-          >
-            <Image
-              src="/couv.png"
-              alt="Dashboard de gestion locative Dousell Immo - Interface propriétaire Sénégal"
-              height={2160}
-              width={1400}
-              className="mx-auto rounded-2xl w-full block"
-              style={{
-                height: 'auto',
-                objectFit: 'contain',
-                objectPosition: 'top',
-                margin: 0,
-                padding: 0,
-              }}
-              draggable={false}
-              unoptimized
-            />
-          </ContainerScroll>
+        <section id="proprietaire-section" className="flex flex-col items-center justify-center overflow-hidden w-full bg-zinc-950 relative py-12 md:py-24 -mt-10 md:-mt-20">
+          <div className="container mx-auto px-4 sm:px-6 relative z-10 w-full max-w-7xl flex justify-center">
+            {/* Mobile Mockup */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "0px" }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="block md:hidden w-full max-w-[280px] sm:max-w-sm mx-auto"
+            >
+              <Image
+                src="/images/mockphon.png"
+                alt="App Mobile Dousell Immo"
+                width={800}
+                height={1600}
+                className="w-full h-auto drop-shadow-[0_20px_50px_rgba(244,196,48,0.15)]"
+                unoptimized
+              />
+            </motion.div>
+
+            {/* Tablet Mockup */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "0px" }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="hidden md:block lg:hidden w-full max-w-2xl mx-auto"
+            >
+              <Image
+                src="/images/mockComputer.png"
+                alt="Tablette Dousell Immo"
+                width={1200}
+                height={900}
+                className="w-full h-auto drop-shadow-[0_20px_50px_rgba(244,196,48,0.15)]"
+                unoptimized
+              />
+            </motion.div>
+
+            {/* Desktop Mockup */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "0px" }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="hidden lg:block w-full max-w-5xl mx-auto"
+            >
+              <Image
+                src="/images/mockCPh.png"
+                alt="Desktop Dousell Immo"
+                width={1600}
+                height={1000}
+                className="w-full h-auto drop-shadow-[0_30px_60px_rgba(244,196,48,0.1)]"
+                unoptimized
+              />
+            </motion.div>
+          </div>
+
+          {/* Subtle bottom glow to blend into next section */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-32 bg-[#F4C430]/5 blur-[80px] rounded-full pointer-events-none" />
         </section>
       )}
 

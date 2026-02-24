@@ -274,7 +274,7 @@ export default function PricingSection() {
                     : 'bg-white/5 text-gray-300 border-white/10'
                     }`}>
                     <Star className="w-3.5 h-3.5 fill-current" />
-                    14j d'essai (renouvelable)
+                    14j d&apos;essai (renouvelable)
                   </span>
                 </div>
               )}

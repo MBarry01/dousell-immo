@@ -106,6 +106,26 @@ function DeposerPageContent() {
         setFormData((prev) => ({ ...prev, ...data }));
       } catch { }
     }
+
+    // Check for Magic Transformation draft
+    const draft = localStorage.getItem("pending_property_draft");
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        setFormData((prev) => ({
+          ...prev,
+          title: parsed.title || prev.title,
+          price: parsed.price ? parsed.price.replace(/\D/g, "") : prev.price,
+          surface: parsed.surface || prev.surface,
+          address: parsed.city || prev.address,
+          city: parsed.city || prev.city,
+          bedrooms: parsed.bedrooms || prev.bedrooms,
+          rooms: parsed.bedrooms || prev.rooms,
+        }));
+        localStorage.removeItem("pending_property_draft");
+      } catch (e) { }
+    }
+
     const storedStep = localStorage.getItem(STORAGE_KEYS.step);
     if (storedStep) setCurrentStep(parseInt(storedStep, 10) || 1);
   }, []);

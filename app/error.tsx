@@ -13,6 +13,13 @@ export default function Error({
     reset: () => void;
 }) {
     useEffect(() => {
+        // Handle ChunkLoadError automatically - highly common in Turbopack/HMR desyncs
+        if (error.name === "ChunkLoadError" || error.message?.includes("Failed to load chunk")) {
+            console.warn("[GlobalError] 🔄 ChunkLoadError detected. Attempting automatic reload...");
+            window.location.reload();
+            return;
+        }
+
         // Log real details about the error to identify the "r" problem on mobile
         console.error("[GlobalError] ❌ CRASH DETECTED:", {
             message: error.message,

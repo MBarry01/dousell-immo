@@ -170,7 +170,8 @@ export default function DousellNavbarClient({
                         return { text: "Mon Espace", href: "/gestion" };
                     }
                     // Propager le redirect pour le bouton login du hero
-                    const currentRef = typeof window !== "undefined" ? window.location.pathname + window.location.search : "";
+                    const paramsStr = searchParams?.toString();
+                    const currentRef = pathname ? (paramsStr ? `${pathname}?${paramsStr}` : pathname) : "";
                     const loginHref = currentRef ? `/login?redirect=${encodeURIComponent(currentRef)}` : "/pro/start";
 
                     return { text: "Essai Gratuit", href: loginHref };

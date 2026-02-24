@@ -4,10 +4,91 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Upload, Home, Ruler, Wand2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import imageCompression from "browser-image-compression";
+import { toast } from "sonner";
 
 export default function MagicTransformation() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [displayedText, setDisplayedText] = useState("");
+
+  // Interactive Form State
+  const [propertyTitle, setPropertyTitle] = useState("Villa Saly Portudal");
+  const [propertyPrice, setPropertyPrice] = useState("1.500.000");
+  const [propertySurface, setPropertySurface] = useState("350");
+  const [propertyCity, setPropertyCity] = useState("Saly, Sénégal");
+  const [propertyRooms, setPropertyRooms] = useState("4");
+  const [propertyImage, setPropertyImage] = useState("https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1600&auto=format&fit=crop");
+  const [propertyImageBase64, setPropertyImageBase64] = useState<string | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 15 * 1024 * 1024) {
+        toast.error("L'image sélectionnée est trop volumineuse (max 15Mo).");
+        return;
+      }
+      const imageUrl = URL.createObjectURL(file);
+      setPropertyImage(imageUrl);
+
+      try {
+        toast.info("Préparation de l'image...", { id: "image-uploading" });
+        const compressedFile = await imageCompression(file, {
+          maxSizeMB: 1.5,
+          maxWidthOrHeight: 1200,
+          useWebWorker: true,
+        });
+        const reader = new FileReader();
+        reader.readAsDataURL(compressedFile);
+        reader.onloadend = () => {
+          setPropertyImageBase64(reader.result as string);
+          toast.success("Image prête !", { id: "image-uploading" });
+        };
+      } catch (error) {
+        console.error("Error compressing image:", error);
+        toast.error("Erreur, l'image n'a pas pu être compréssée.", { id: "image-uploading" });
+      }
+    }
+  };
+
+  const router = useRouter();
+
+  const handlePublish = (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    setIsPublishing(true);
+
+    // Provide explicit visual feedback for heavy operations
+    setTimeout(() => {
+      const draftData = {
+        title: propertyTitle,
+        price: propertyPrice,
+        surface: propertySurface,
+        city: propertyCity,
+        bedrooms: propertyRooms,
+        imageBase64: propertyImageBase64,
+      };
+
+      try {
+        localStorage.setItem("pending_property_draft", JSON.stringify(draftData));
+      } catch (err) {
+        console.warn("Stockage brouillon impossible", err);
+      }
+
+      const redirectUrl = "/login?tab=register&redirect=" + encodeURIComponent("/compte/traitement-magique");
+
+      try {
+        router.push(redirectUrl);
+      } catch (routingErr) {
+        console.error("Router error, fallback to window.location", routingErr);
+        window.location.href = redirectUrl;
+      }
+    }, 150);
+  };
 
   const fullText = "Saisissez vos données une fois. Sublimez vos biens partout.";
 
@@ -91,55 +172,100 @@ export default function MagicTransformation() {
               {/* ========================================================
                   FACE 1 : CÔTÉ ADMIN (SAISIE)
                  ======================================================== */}
-              <div className="absolute inset-0 backface-hidden">
-                <div className="h-full w-full bg-[#0a0a0a] border border-white/10 rounded-2xl p-4 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl relative overflow-hidden">
+              <div
+                className={`absolute inset-0 backface-hidden rounded-2xl overflow-hidden shadow-2xl shadow-primary/20 bg-[#1A1A1A] border border-white/5 p-4 md:p-8 flex flex-col justify-between transition-opacity duration-300 ${isFlipped ? 'opacity-0 pointer-events-none z-0' : 'opacity-100 pointer-events-auto z-10'
+                  }`}
+              >
+                {/* En-tête style "Code" */}
+                <div className="flex gap-2 mb-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500/20" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/20" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/20" />
+                  <span className="ml-4 text-xs font-mono text-slate-500">app.dousell.immo/add-property</span>
+                </div>
 
-                  {/* En-tête style "Code" */}
-                  <div className="flex gap-2 mb-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500/20" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/20" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/20" />
-                    <span className="ml-4 text-xs font-mono text-slate-500">app.dousell.immo/add-property</span>
+                {/* Formulaire simulé */}
+                <div className="space-y-4 font-mono text-sm">
+                  <div>
+                    <label className="text-slate-500 block mb-1.5">Titre de l&apos;annonce</label>
+                    <input
+                      type="text"
+                      value={propertyTitle}
+                      onChange={(e) => setPropertyTitle(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white focus:outline-none focus:ring-1 focus:ring-[#F4C430]/50 focus:border-[#F4C430]/50 transition-colors placeholder:text-white/20"
+                      placeholder="Ex: Villa Saly Portudal"
+                    />
                   </div>
 
-                  {/* Formulaire simulé */}
-                  <div className="space-y-4 font-mono text-sm">
-                    <div>
-                      <label className="text-slate-500 block mb-1.5">Titre de l&apos;annonce</label>
-                      <div className="bg-white/5 border border-white/10 rounded-md p-3 text-white">
-                        Villa Saly Portudal
-                      </div>
+                  <div className="grid grid-cols-2 gap-4 items-end">
+                    <div className="flex flex-col h-full">
+                      <label className="text-slate-500 block mb-1.5 text-xs md:text-sm">Prix / Mois (FCFA)</label>
+                      <input
+                        type="text"
+                        value={propertyPrice}
+                        onChange={(e) => setPropertyPrice(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white mt-auto focus:outline-none focus:ring-1 focus:ring-[#F4C430]/50 focus:border-[#F4C430]/50 transition-colors placeholder:text-white/20"
+                        placeholder="Ex: 1.500.000"
+                      />
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4 items-end">
-                      <div className="flex flex-col h-full">
-                        <label className="text-slate-500 block mb-1.5 text-xs md:text-sm">Prix / Mois (FCFA)</label>
-                        <div className="bg-white/5 border border-white/10 rounded-md p-3 text-white mt-auto">
-                          1.500.000
-                        </div>
-                      </div>
-                      <div className="flex flex-col h-full">
-                        <label className="text-slate-500 block mb-1.5 text-xs md:text-sm">Surface (m2)</label>
-                        <div className="bg-white/5 border border-white/10 rounded-md p-3 text-white mt-auto">
-                          350
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-slate-500 block mb-1.5">Photos (Upload)</label>
-                      <div className="border-2 border-dashed border-white/10 rounded-lg p-8 flex flex-col items-center text-center justify-center text-slate-500 bg-white/5">
-                        <Upload className="w-8 h-8 mb-2 opacity-50" />
-                        <span>Glisser-déposer les fichiers</span>
-                      </div>
+                    <div className="flex flex-col h-full">
+                      <label className="text-slate-500 block mb-1.5 text-xs md:text-sm">Localisation</label>
+                      <input
+                        type="text"
+                        value={propertyCity}
+                        onChange={(e) => setPropertyCity(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white mt-auto focus:outline-none focus:ring-1 focus:ring-[#F4C430]/50 focus:border-[#F4C430]/50 transition-colors placeholder:text-white/20"
+                        placeholder="Ex: Saly"
+                      />
                     </div>
                   </div>
 
-                  {/* Badge Admin en bas à droite */}
-                  <div className="absolute bottom-4 right-4 bg-white/10 px-3 py-1 rounded-full text-xs text-white/50 font-mono">
-                    Vue Admin
+                  <div className="grid grid-cols-2 gap-4 items-end">
+                    <div className="flex flex-col h-full">
+                      <label className="text-slate-500 block mb-1.5 text-xs md:text-sm">Surface (m2)</label>
+                      <input
+                        type="text"
+                        value={propertySurface}
+                        onChange={(e) => setPropertySurface(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white mt-auto focus:outline-none focus:ring-1 focus:ring-[#F4C430]/50 focus:border-[#F4C430]/50 transition-colors placeholder:text-white/20"
+                        placeholder="Ex: 350"
+                      />
+                    </div>
+                    <div className="flex flex-col h-full">
+                      <label className="text-slate-500 block mb-1.5 text-xs md:text-sm">Chambres</label>
+                      <input
+                        type="number"
+                        value={propertyRooms}
+                        onChange={(e) => setPropertyRooms(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white mt-auto focus:outline-none focus:ring-1 focus:ring-[#F4C430]/50 focus:border-[#F4C430]/50 transition-colors placeholder:text-white/20"
+                        placeholder="Ex: 4"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <label className="text-slate-500 block mb-1.5">Photos (Upload)</label>
+                    <div className="relative border-2 border-dashed border-white/10 rounded-lg p-8 flex flex-col items-center text-center justify-center text-slate-500 bg-white/5 hover:border-[#F4C430]/50 transition-colors cursor-pointer overflow-hidden group">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        data-1p-ignore
+                        data-lpignore="true"
+                      />
+                      {propertyImage && propertyImage !== "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1600&auto=format&fit=crop" ? (
+                        <div className="absolute inset-0 w-full h-full opacity-40 group-hover:opacity-20 transition-opacity">
+                          <img src={propertyImage} alt="Preview" className="w-full h-full object-cover" />
+                        </div>
+                      ) : null}
+                      <Upload className="w-8 h-8 mb-2 opacity-50 relative z-20 group-hover:text-[#F4C430] transition-colors" />
+                      <span className="relative z-20 group-hover:text-white transition-colors">{propertyImage && propertyImage !== "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1600&auto=format&fit=crop" ? "Image chargée. Cliquez pour changer." : "Glisser-déposer ou cliquer pour choisir"}</span>
+                    </div>
                   </div>
                 </div>
+
+                {/* Le bouton Publier a été déplacé sur la Face 2 */}
               </div>
 
               {/* ========================================================
@@ -147,13 +273,14 @@ export default function MagicTransformation() {
                   (Rotation 180deg pour être visible au dos)
                  ======================================================== */}
               <div
-                className="absolute inset-0 backface-hidden rounded-2xl overflow-hidden shadow-2xl shadow-[#F4C430]/20 border border-[#F4C430]/30"
+                className={`absolute inset-0 backface-hidden rounded-2xl overflow-hidden shadow-2xl shadow-[#F4C430]/20 border border-[#F4C430]/30 transition-opacity duration-300 ${isFlipped ? 'opacity-100 pointer-events-auto z-10' : 'opacity-0 pointer-events-none z-0'
+                  }`}
                 style={{ transform: "rotateY(180deg)" }}
               >
                 {/* Image de fond (La Villa) */}
                 <div className="absolute inset-0">
                   <img
-                    src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1600&auto=format&fit=crop"
+                    src={propertyImage}
                     alt="Villa Saly"
                     className="w-full h-full object-cover"
                   />
@@ -163,32 +290,40 @@ export default function MagicTransformation() {
                 {/* Contenu de la carte Vitrine */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
                   <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-1 md:gap-0 mb-2">
-                    <h3 className="text-xl md:text-3xl font-bold text-white">Villa Saly Portudal</h3>
+                    <h3 className="text-xl md:text-3xl font-bold text-white max-w-[70%] truncate">{propertyTitle || "Villa Saly Portudal"}</h3>
                     <span className="bg-black/60 backdrop-blur-md text-[#F4C430] px-2 py-0.5 md:px-3 md:py-1 rounded-full font-bold border border-[#F4C430]/30 text-xs md:text-sm w-fit">
                       À Louer
                     </span>
                   </div>
 
                   <p className="text-slate-300 mb-3 md:mb-6 flex items-center gap-1 md:gap-2 text-sm md:text-base">
-                    <Home size={14} className="md:hidden" /><Home size={16} className="hidden md:block" /> Saly, Sénégal • <Ruler size={14} className="md:hidden" /><Ruler size={16} className="hidden md:block" /> 350 m²
+                    <Home size={14} className="md:hidden" /><Home size={16} className="hidden md:block" /> {propertyCity || "Saly, Sénégal"} • <Ruler size={14} className="md:hidden" /><Ruler size={16} className="hidden md:block" /> {propertySurface || "350"} m²
                   </p>
 
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
                     <div className="flex flex-wrap gap-1 md:gap-2">
-                      {["4 Ch.", "Piscine", "Meublé"].map(tag => (
-                        <span key={tag} className="text-[10px] md:text-xs bg-white/10 backdrop-blur text-white px-1.5 py-0.5 md:px-2 md:py-1 rounded-md border border-white/10">
-                          {tag}
-                        </span>
-                      ))}
+                      <span className="text-[10px] md:text-xs bg-white/10 backdrop-blur text-white px-1.5 py-0.5 md:px-2 md:py-1 rounded-md border border-white/10">
+                        {propertyRooms ? `${propertyRooms} Ch.` : "4 Ch."}
+                      </span>
                     </div>
                     <div className="text-left md:text-right">
-                      <span className="text-xl md:text-2xl font-bold text-[#F4C430]">1.5M</span>
-                      <span className="text-xs md:text-sm text-slate-400"> /mois</span>
+                      <span className="text-xl md:text-2xl font-bold text-[#F4C430]">{propertyPrice ? propertyPrice.replace(/\./g, ' ') : "1.500.000"}</span>
+                      <span className="text-xs md:text-sm text-slate-400"> FCFA/mois</span>
                     </div>
                   </div>
 
-                  <button className="w-full mt-3 md:mt-6 bg-white text-black font-bold py-2 md:py-3 rounded-full hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 text-sm md:text-base">
-                    Demander une visite <ArrowRight size={14} className="md:hidden" /><ArrowRight size={16} className="hidden md:block" />
+                  <button
+                    onClick={handlePublish}
+                    onTouchStart={handlePublish}
+                    disabled={isPublishing}
+                    className={`w-full mt-3 md:mt-6 text-black font-bold py-2 md:py-3 rounded-full transition-colors flex items-center justify-center gap-2 text-sm md:text-base relative z-50 cursor-pointer ${isFlipped
+                      ? 'bg-[#F4C430] hover:bg-[#F4C430]/90 shadow-[0_0_20px_rgba(244,196,48,0.3)] disabled:opacity-70 disabled:cursor-wait'
+                      : 'bg-white hover:bg-slate-200 disabled:opacity-70 disabled:cursor-wait'
+                      }`}
+                  >
+                    {isPublishing ? 'Chargement en cours...' : (isFlipped ? 'Publier cette annonce gratuitement' : 'Demander une visite')}
+                    {!isPublishing && <ArrowRight size={14} className="md:hidden" />}
+                    {!isPublishing && <ArrowRight size={16} className="hidden md:block" />}
                   </button>
                 </div>
 

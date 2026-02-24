@@ -40,7 +40,7 @@ export function WelcomeModalContent() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name")
+        .select("full_name, keep_first_login")
         .eq("id", user.id)
         .single();
 
@@ -60,8 +60,10 @@ export function WelcomeModalContent() {
       setHasTeam(!!memberships && memberships.length > 0);
       setIsOpen(true);
 
-      // Marquer first_login comme false pour ne plus afficher ce modal
-      await supabase.from("profiles").update({ first_login: false }).eq("id", user.id);
+      // Marquer first_login comme false, sauf pour les comptes de test (keep_first_login = true)
+      if (!profile?.keep_first_login) {
+        await supabase.from("profiles").update({ first_login: false }).eq("id", user.id);
+      }
     };
 
     loadUser();

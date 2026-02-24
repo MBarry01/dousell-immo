@@ -110,7 +110,12 @@ export function WizardForm() {
                     ...prev,
                     fullName: profile?.full_name || user.user_metadata?.full_name || prev.fullName,
                     email: user.email || prev.email,
-                    phone: profile?.phone || user.user_metadata?.phone || prev.phone,
+                    phone: (() => {
+                        const raw = profile?.phone || user.user_metadata?.phone || prev.phone || "";
+                        if (!raw) return "";
+                        // Normalize to E.164: if missing leading +, assume Senegal (+221)
+                        return raw.startsWith("+") ? raw : `+221${raw}`;
+                    })(),
                 }));
             }
         };

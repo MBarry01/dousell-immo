@@ -2,7 +2,7 @@
 
 import { AddressAutocomplete } from "@/components/forms/address-autocomplete";
 import { toast } from "sonner";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -130,6 +130,31 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [_statsSummary, _setStatsSummary] = useState({ properties: 0, leases: 0 });
+
+  useEffect(() => {
+    try {
+      const draft = localStorage.getItem("pending_property_draft");
+      if (draft) {
+        const parsed = JSON.parse(draft);
+        setFormData((prev) => ({
+          ...prev,
+          title: parsed.title || prev.title,
+          price: parsed.price ? parsed.price.replace(/\D/g, "") : prev.price,
+          surface: parsed.surface || prev.surface,
+        }));
+        // Auto-generate description if possible
+        if (parsed.price && parsed.title) {
+          setTimeout(() => {
+            // Let the state settle, then we could auto-generate or just let the user click the AI button
+            // For safety against race conditions with state in handleGenerateAI, we just pre-fill.
+          }, 500);
+        }
+        localStorage.removeItem("pending_property_draft");
+      }
+    } catch (e) {
+      console.error("Erreur lecture draft", e);
+    }
+  }, []);
 
   const updateField = (field: string, value: string | number | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
