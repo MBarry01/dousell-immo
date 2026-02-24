@@ -144,27 +144,37 @@ export async function getTeamProperties(teamId: string) {
       .in("property_id", propertyIds.length > 0 ? propertyIds : ['00000000-0000-0000-0000-000000000000']);
 
     if (leasesData && leasesData.length > 0) {
-      // Créer une map pour accès rapide: property_id -> lease info
-      const leaseMap = new Map(leasesData.map((l) => [l.property_id, l]));
+      // Créer une map pour accès rapide: property_id -> array of leases
+      const leaseMap = new Map<string, any[]>();
+      leasesData.forEach(l => {
+        const existing = leaseMap.get(l.property_id) || [];
+        leaseMap.set(l.property_id, [...existing, l]);
+      });
 
-      // 3. Fusionner les propriétés avec les infos du locataire
-      const propertiesWithTenant = properties.map((property: any) => {
-        const lease = leaseMap.get(property.id);
+      // 3. Fusionner les propriétés avec les infos des locataires
+      const propertiesWithTenants = properties.map((property: any) => {
+        const matchingLeases = leaseMap.get(property.id) || [];
+
+        // Un bien est considéré comme "entièrement loué" si au moins un bail est de type "entire"
+        const hasFullRental = matchingLeases.some(l =>
+          (l.custom_data as any)?.rental_type === 'entire'
+        );
 
         return {
           ...property,
-          // Le statut est déjà "loué" si le bien a un bail
-          status: lease ? "loué" : property.status,
-          tenant: lease ? {
+          // Le statut est "loué" si au moins un bail est actif
+          status: matchingLeases.length > 0 ? "loué" : property.status,
+          is_full_rental: hasFullRental,
+          tenants: matchingLeases.map((lease) => ({
             id: lease.id, // ID du bail
             full_name: lease.tenant_name,
             avatar_url: undefined, // Pas stocké dans leases
             payment_status: "up_to_date" as const // TODO: Calculer depuis rental_transactions
-          } : undefined
+          }))
         };
       });
 
-      return { properties: propertiesWithTenant };
+      return { properties: propertiesWithTenants };
     }
   } catch (err) {
     console.warn("⚠️ Impossible de récupérer les locataires:", err);
@@ -737,7 +747,8 @@ export async function associateTenant(
   teamId: string,
   propertyId: string,
   tenantId: string,
-  startDate: string
+  startDate: string,
+  rentalType: 'entire' | 'partial' = 'entire'
 ) {
   const permCheck = await requireTeamPermission(teamId, "properties.edit");
   if (!permCheck.success) {
@@ -763,17 +774,8 @@ export async function associateTenant(
     return { success: false, error: "Utilisateur non connecté" };
   }
 
-  // 1. Vérifier si le bien est déjà loué
-  const { data: existingLease } = await supabase
-    .from("leases")
-    .select("id")
-    .eq("property_id", propertyId)
-    .eq("status", "active")
-    .single();
-
-  if (existingLease) {
-    return { success: false, error: "Ce bien a déjà un bail actif." };
-  }
+  // 1. Vérifier si le bien est déjà loué (Note: En colocation on peut avoir plusieurs baux)
+  // On laisse l'utilisateur décider s'il veut ajouter un autre locataire
 
   // 2. Récupérer les informations du locataire
   const { data: tenant } = await supabase
@@ -789,7 +791,7 @@ export async function associateTenant(
   // 3. Récupérer les infos du bien (adresse et prix)
   const { data: property } = await supabase
     .from("properties")
-    .select("price, location, owner_id")
+    .select("price, location, owner_id, specs, details")
     .eq("id", propertyId)
     .single();
 
@@ -804,7 +806,7 @@ export async function associateTenant(
   const { createAdminClient } = await import("@/utils/supabase/admin");
   const adminClient = createAdminClient();
 
-  const { error } = await adminClient
+  const { data: lease, error } = await adminClient
     .from("leases")
     .insert({
       property_id: propertyId,
@@ -817,21 +819,54 @@ export async function associateTenant(
       monthly_amount: property.price || 0,
       start_date: startDate,
       status: "active",
-    });
+      custom_data: { rental_type: rentalType }
+    })
+    .select("id")
+    .single();
 
-  if (error) {
+  if (error || !lease) {
     console.error("❌ Erreur associateTenant:", error);
-    return { success: false, error: `Erreur: ${error.message}` };
+    return { success: false, error: error?.message || "Erreur lors de la création du bail" };
   }
 
-  // 5. Mettre à jour le statut du bien ET le retirer de la vitrine publique
-  await adminClient
-    .from("properties")
-    .update({
-      status: "loué",
-      validation_status: "pending" // Retire de la vitrine publique
-    })
-    .eq("id", propertyId);
+  // 5. Mettre à jour le statut du bien de manière adaptative
+  // En colocation, on ne retire de la vitrine QUE si c'est plein ou loué entièrement
+  const { count: activeLeasesCount } = await adminClient
+    .from("leases")
+    .select("*", { count: "exact", head: true })
+    .eq("property_id", propertyId)
+    .eq("status", "active");
+
+  const bedrooms = (property.specs as any)?.bedrooms || 1;
+  const currentOccupancy = activeLeasesCount || 0;
+  const isFull = rentalType === 'entire' || currentOccupancy >= bedrooms;
+
+  const newDetails = {
+    ...(property.details as any || {}),
+    is_colocation: rentalType === 'partial' || currentOccupancy > 1,
+    occupied_rooms: currentOccupancy
+  };
+
+  if (isFull) {
+    await adminClient
+      .from("properties")
+      .update({
+        status: "loué",
+        validation_status: "pending", // Retire de la vitrine publique si plein
+        details: newDetails
+      })
+      .eq("id", propertyId);
+  } else {
+    // Si c'est une colocation et qu'il reste de la place, on le laisse en ligne
+    await adminClient
+      .from("properties")
+      .update({
+        status: "disponible",
+        validation_status: "approved",
+        details: newDetails
+      })
+      .eq("id", propertyId);
+  }
 
   revalidatePath("/gestion/biens");
   revalidatePath("/gestion"); // Refresh dashboard KPIs
@@ -839,7 +874,7 @@ export async function associateTenant(
   // Invalider le cache Redis des baux
   await invalidateRentalCaches(user.id);
 
-  return { success: true };
+  return { success: true, leaseId: lease.id };
 }
 
 // =====================================================

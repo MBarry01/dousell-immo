@@ -132,7 +132,7 @@ export function GlobalSearch() {
                 <Input
                     type="search"
                     enterKeyHint="search"
-                    placeholder="Rechercher un bien, une ville..."
+                    placeholder={isWorkspace ? "Rechercher dans vos biens, locataires..." : "Rechercher un bien, une ville..."}
                     className={cn(
                         "pl-9 transition-all w-full rounded-2xl focus-visible:ring-offset-0",
                         // Dynamic styling: Workspace (adaptive) vs Vitrine (fixed dark)

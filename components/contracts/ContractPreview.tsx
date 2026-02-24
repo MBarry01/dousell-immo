@@ -205,7 +205,7 @@ export function ContractPreview({ leaseId }: ContractPreviewProps) {
         <div className="bg-[#F4C430]/10 border border-[#F4C430]/30 rounded-lg p-4">
           <p className="text-xs text-gray-300 leading-relaxed">
             <span className="font-semibold text-[#F4C430]">🇸🇳 Conformité Juridique :</span>
-            {' '}Ce contrat sera généré conformément au Code des Obligations Civiles et Commerciales (COCC),
+            {' '}Ce contrat sera généré conformément aux dispositions des articles relatifs au louage d'immeubles du COCC en vigueur au Sénégal,
             au décret 2023 sur la caution (max 2 mois de loyer), et à la loi 2024 sur les baux d&apos;habitation.
           </p>
         </div>

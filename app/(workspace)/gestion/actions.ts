@@ -13,6 +13,7 @@ import { requireTeamPermission } from "@/lib/permissions";
 import { checkFeatureAccess } from "@/lib/subscription/team-subscription";
 import { generateMaintenancePDF } from '@/lib/maintenance-pdf-generator';
 import { uploadPDFToStorage } from '@/lib/pdf-generator';
+import { generateLeaseContract } from '@/lib/actions/contract-actions';
 import { storeDocumentInGED } from '@/lib/ged-utils';
 import {
     getRentalTransactions,
@@ -567,93 +568,19 @@ export async function createNewLease(formData: Record<string, unknown>) {
     });
 
     // ==============================================
-    // 4. GÉNÉRATION ET STOCKAGE GED DU BAIL PDF
+    // 4. GÉNÉRATION ET STOCKAGE DU BAIL PDF
     // ==============================================
     try {
-        // Préparer les données pour le PDF (ContractData)
-        // Note: On utilise les données brutes car le profil owner est peut-être fraîchement créé
-        const { data: ownerProfile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        console.log("📄 Génération automatique du contrat de bail...");
+        const contractResult = await generateLeaseContract({ leaseId: lease.id });
 
-        // Construction des données du contrat
-        // Import dynamique pour éviter les cycles si besoin, ou utiliser les imports existants
-        // On suppose que les types sont dispos via imports en haut de fichier (à ajouter si absent)
-
-        const contractData = {
-            landlord: {
-                firstName: ownerProfile?.first_name || user.user_metadata?.full_name?.split(' ')[0] || 'Propriétaire',
-                lastName: ownerProfile?.last_name || user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '',
-                address: ownerProfile?.company_address || 'Adresse non renseignée',
-                phone: ownerProfile?.phone_number || '',
-                email: user.email,
-                companyName: ownerProfile?.company_name,
-                ninea: ownerProfile?.company_ninea
-            },
-            tenant: {
-                firstName: lease.tenant_name?.split(' ')[0] || '',
-                lastName: lease.tenant_name?.split(' ').slice(1).join(' ') || '',
-                phone: lease.tenant_phone || '',
-                email: lease.tenant_email,
-                nationalId: '',
-                address: propertyAddress
-            },
-            property: {
-                address: propertyAddress || '',
-                description: (finalData as any).custom_data?.description || propertyAddress || 'Bien immobilier', // Fallback description
-                propertyType: 'appartement' as any
-            },
-            lease: {
-                monthlyRent: Number(lease.monthly_amount),
-                securityDeposit: Number(lease.monthly_amount) * (depositMonths || 2),
-                depositMonths: depositMonths || 2,
-                startDate: new Date(lease.start_date),
-                duration: Number(lease.duration) || 12,
-                billingDay: Number(lease.billing_day) || 5,
-            },
-            signatures: {
-                signatureCity: 'Dakar',
-                signatureDate: new Date()
-            }
-        };
-
-        // Générer le PDF
-
-        const { generateLeasePDF } = await import('@/lib/pdf-generator');
-        const pdfResult = await generateLeasePDF(contractData);
-
-        if (pdfResult.success && pdfResult.pdfBytes) {
-            // Stocker dans la GED
-
-            const { storeDocumentInGED } = await import('@/lib/ged-utils');
-
-            // Utiliser un client admin pour outrepasser les restrictions de session sur le storage
-            const { createClient: createAdminSupabase } = await import('@supabase/supabase-js');
-            const supabaseAdmin = createAdminSupabase(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.SUPABASE_SERVICE_ROLE_KEY!
-            );
-
-            await storeDocumentInGED({
-                userId: user.id,
-                teamId: teamId,
-                fileBuffer: pdfResult.pdfBytes,
-                fileName: `Bail - ${lease.tenant_name} - ${new Date().getFullYear()}.pdf`,
-                bucketName: 'lease-contracts',
-                documentType: 'bail',
-                metadata: {
-                    leaseId: lease.id,
-                    propertyId: propertyId,
-                    tenantName: lease.tenant_name,
-                    description: `Contrat de bail pour ${lease.tenant_name}`
-                }
-            }, supabaseAdmin);
-            console.log("✅ Bail PDF généré et stocké en GED via utility");
+        if (contractResult.success) {
+            console.log("✅ Bail PDF généré et stocké avec succès");
         } else {
-            console.error("❌ Echec génération PDF interne:", pdfResult.error);
+            console.error("❌ Echec génération automatique du bail:", contractResult.error);
         }
-
-    } catch (gedError) {
-        console.error("❌ Erreur processus GED Bail:", gedError);
-        // On ne bloque pas la réponse, le bail est créé
+    } catch (contractError) {
+        console.error("❌ Erreur lors de la génération automatique du bail:", contractError);
     }
 
     // DÉCLENCHEUR N8N : Supprimé car génération interne
@@ -764,8 +691,8 @@ export async function sendWelcomePack(leaseId: string) {
     // 4. Préparer les pièces jointes (Contrat PDF + Reçu de Caution + Quittance si applicable)
     const attachments: Array<{ filename: string; content: Buffer | string; contentType?: string }> = [];
 
-    // IMPORTANT: Re-fetch lease data to get the latest lease_pdf_url (may have been updated by generateLeaseContract)
-    const { data: freshLease } = await supabase
+    // IMPORTANT: Re-fetch lease data to get the latest lease_pdf_url
+    let { data: freshLease } = await supabase
         .from('leases')
         .select('*, lease_pdf_url')
         .eq('id', leaseId)
@@ -773,27 +700,78 @@ export async function sendWelcomePack(leaseId: string) {
 
     console.log("[sendWelcomePack] Fresh lease data - PDF URL:", freshLease?.lease_pdf_url || "NOT SET");
 
-    // 4a. Contrat de bail (si déjà généré)
-    if (freshLease?.lease_pdf_url) {
+    // 4a. Contrat de bail — auto-générer si pas encore fait
+    if (!freshLease?.lease_pdf_url) {
+        console.log("[sendWelcomePack] No contract PDF found — auto-generating...");
         try {
-            console.log("[sendWelcomePack] Fetching contract PDF from:", freshLease.lease_pdf_url);
-            const pdfResponse = await fetchWithRetry(freshLease.lease_pdf_url);
-            if (pdfResponse.ok) {
-                const pdfArrayBuffer = await pdfResponse.arrayBuffer();
+            const contractResult = await generateLeaseContract({ leaseId });
+            if (contractResult.success) {
+                console.log("[sendWelcomePack] Contract auto-generated successfully");
+                // Re-fetch pour récupérer l'URL fraîchement sauvegardée
+                const { data: refetched } = await supabase
+                    .from('leases')
+                    .select('lease_pdf_url')
+                    .eq('id', leaseId)
+                    .single();
+                if (refetched?.lease_pdf_url) {
+                    freshLease = { ...freshLease, lease_pdf_url: refetched.lease_pdf_url } as typeof freshLease;
+                }
+            } else {
+                console.error("[sendWelcomePack] Contract auto-generation failed:", contractResult.error);
+            }
+        } catch (e) {
+            console.error("[sendWelcomePack] Error during contract auto-generation:", e);
+        }
+    }
+
+    if (freshLease?.lease_pdf_url || freshLease?.id) {
+        try {
+            console.log("[sendWelcomePack] Attempting to fetch contract PDF...");
+
+            const supabaseAdmin = createAdminClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!
+            );
+
+            // Reconstruire le chemin probable si l'URL est corrompue ou expirée
+            // Format standard: {owner_id}/contract-{lease_id}.pdf
+            const storagePath = `${freshLease.owner_id}/contract-${leaseId}.pdf`;
+
+            console.log("[sendWelcomePack] Priority storage path:", storagePath);
+
+            const { data: pdfBlob, error: downloadError } = await supabaseAdmin.storage
+                .from('lease-contracts')
+                .download(storagePath);
+
+            if (!downloadError && pdfBlob) {
+                const pdfBuffer = Buffer.from(await pdfBlob.arrayBuffer());
                 attachments.push({
                     filename: `Contrat_Bail_${lease.tenant_name.replace(/\s+/g, '_')}.pdf`,
-                    content: Buffer.from(pdfArrayBuffer),
+                    content: pdfBuffer,
                     contentType: 'application/pdf'
                 });
-                console.log("[sendWelcomePack] Contract PDF attached");
+                console.log("[sendWelcomePack] Contract PDF attached successfully from storage");
             } else {
-                console.error("[sendWelcomePack] Failed to fetch contract PDF, status:", pdfResponse.status);
+                console.warn("[sendWelcomePack] Could not download from primary path, trying URL fetch fallback...", downloadError?.message);
+
+                if (freshLease.lease_pdf_url && freshLease.lease_pdf_url.startsWith('http')) {
+                    const pdfResponse = await fetchWithRetry(freshLease.lease_pdf_url);
+                    if (pdfResponse.ok) {
+                        const pdfArrayBuffer = await pdfResponse.arrayBuffer();
+                        attachments.push({
+                            filename: `Contrat_Bail_${lease.tenant_name.replace(/\s+/g, '_')}.pdf`,
+                            content: Buffer.from(pdfArrayBuffer),
+                            contentType: 'application/pdf'
+                        });
+                        console.log("[sendWelcomePack] Contract PDF attached via URL fallback");
+                    }
+                }
             }
         } catch (e) {
             console.error("[sendWelcomePack] Error fetching contract PDF:", e);
         }
     } else {
-        console.log("[sendWelcomePack] No contract PDF URL available - skipping contract attachment");
+        console.warn("[sendWelcomePack] Contract PDF unavailable — skipping");
     }
 
     // 4b. Reçu de Caution (si caution payée)
@@ -1427,10 +1405,32 @@ export async function linkLeaseToProperty(leaseId: string, propertyId: string) {
         return { success: false, error: linkError.message };
     }
 
-    // 4. Mettre à jour le statut du bien en "loué"
+    // 4. Mettre à jour le statut du bien de manière adaptative
+    // Compter les baux actifs pour ce bien
+    const { count: activeLeasesCount } = await supabase
+        .from('leases')
+        .select('*', { count: 'exact', head: true })
+        .eq('property_id', propertyId)
+        .eq('status', 'active');
+
+    const bedrooms = (property as any).specs?.bedrooms || 1;
+    const currentOccupancy = activeLeasesCount || 0;
+
+    // Déterminer s'il est plein
+    const isFull = currentOccupancy >= bedrooms;
+
+    const newDetails = {
+        ...((property as any).details || {}),
+        occupied_rooms: currentOccupancy
+    };
+
     await supabase
         .from('properties')
-        .update({ status: 'loué' })
+        .update({
+            status: isFull ? 'loué' : 'disponible',
+            validation_status: isFull ? 'pending' : 'approved',
+            details: newDetails
+        })
         .eq('id', propertyId)
         .eq('team_id', teamId);
 

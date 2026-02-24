@@ -29,7 +29,7 @@ export async function getLeasesByTeam(
         .select(`
           id, tenant_name, tenant_phone, tenant_email, property_address, monthly_amount, 
           billing_day, start_date, end_date, status, created_at, lease_pdf_url, team_id, owner_id, property_id,
-          properties:property_id(id, title, images)
+          properties:property_id(id, title, images, specs)
         `)
         .eq("team_id", teamId)
         .order("created_at", { ascending: false });

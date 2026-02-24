@@ -1,5 +1,7 @@
 export type Property = {
   id: string;
+  is_colocation?: boolean;
+  occupied_rooms?: number;
   title: string;
   price: number;
   transaction: "vente" | "location";

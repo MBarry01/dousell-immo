@@ -225,6 +225,8 @@ export const mapProperty = (row: SupabasePropertyRow): Property => {
     verification_requested_at: row.verification_requested_at,
     featured: row.featured,
     exclusive: row.exclusive,
+    is_colocation: (details as any).is_colocation || false,
+    occupied_rooms: (details as any).occupied_rooms || 0,
   };
 };
 

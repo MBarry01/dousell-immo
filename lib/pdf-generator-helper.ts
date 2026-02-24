@@ -63,6 +63,26 @@ export function replacePlaceholders(template: string, data: ContractData): strin
             return `${data.tenant.firstName} ${data.tenant.lastName}`;
         }
 
+        // Cas calculés : date_fin = date_debut + durée en mois
+        if (trimmedKey === 'date_fin') {
+            if (data.lease.startDate && data.lease.duration) {
+                const endDate = new Date(data.lease.startDate);
+                endDate.setMonth(endDate.getMonth() + data.lease.duration);
+                return format(endDate, 'dd MMMM yyyy', { locale: fr });
+            }
+            return '';
+        }
+
+        // mois_caution : nombre de mois du dépôt de garantie
+        if (trimmedKey === 'mois_caution') {
+            return data.lease.depositMonths?.toString() ?? '1';
+        }
+
+        // Frais de rédaction : par défaut à la charge du Bailleur (COCC)
+        if (trimmedKey === 'répartition_frais') {
+            return 'Le Bailleur';
+        }
+
         // Mappings spécifiques pour les templates français (contract-defaults.ts uses French keys)
         const frenchMappings: Record<string, string> = {
             'montant_caution': 'lease.securityDeposit',
@@ -72,7 +92,6 @@ export function replacePlaceholders(template: string, data: ContractData): strin
             'jour_paiement': 'lease.billingDay',
             'adresse_bien': 'property.address',
             'description_bien': 'property.description',
-            'répartition_frais': 'lease.frais' // Pas standard, mais au cas où
         };
 
         if (frenchMappings[trimmedKey]) {

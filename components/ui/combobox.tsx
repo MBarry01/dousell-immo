@@ -1,7 +1,17 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { ChevronDown, Check, Search, X } from "lucide-react";
+import { useState } from "react";
+import { Check, ChevronDown, X } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 type ComboboxOption = {
   value: string;
@@ -29,132 +39,106 @@ export function Combobox({
   className = "",
   allowCustom = false,
 }: ComboboxProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const selectedOption = options.find((opt) => opt.value === value);
 
-  const filteredOptions = options.filter((opt) =>
-    opt.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Close on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-        setSearchQuery("");
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Focus input when opened
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isOpen]);
-
   const handleSelect = (optionValue: string) => {
-    onChange(optionValue);
-    setIsOpen(false);
-    setSearchQuery("");
+    onChange(optionValue === value ? "" : optionValue);
+    setOpen(false);
+    setSearch("");
   };
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     onChange("");
-    setSearchQuery("");
   };
 
   return (
-    <div ref={containerRef} className={`relative ${className}`}>
-      {/* Trigger */}
-      <div
-        className={`w-full flex items-center justify-between bg-zinc-800/30 border rounded-lg px-4 py-3 text-left transition-all cursor-pointer ${isOpen
-            ? "border-[#F4C430]/50 ring-1 ring-[#F4C430]/20"
-            : "border-zinc-800 hover:border-zinc-700"
-          }`}
-      >
-        <span
-          onClick={() => setIsOpen(!isOpen)}
-          className={`flex-1 ${selectedOption ? "text-white" : "text-zinc-500"}`}
-        >
-          {selectedOption?.label || placeholder}
-        </span>
-        <div className="flex items-center gap-2">
-          {value && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="p-0.5 hover:bg-zinc-700 rounded transition-colors"
-            >
-              <X className="w-4 h-4 text-zinc-500" />
-            </button>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          role="combobox"
+          aria-expanded={open}
+          className={cn(
+            "w-full flex items-center justify-between bg-zinc-800/30 border rounded-lg px-4 py-3 text-left transition-all",
+            open
+              ? "border-[#F4C430]/50 ring-1 ring-[#F4C430]/20"
+              : "border-zinc-800 hover:border-zinc-700",
+            className
           )}
-          <ChevronDown
-            onClick={() => setIsOpen(!isOpen)}
-            className={`w-4 h-4 text-zinc-500 transition-transform cursor-pointer ${isOpen ? "rotate-180" : ""}`}
-          />
-        </div>
-      </div>
-
-      {/* Dropdown */}
-      {isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-popover/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl ring-1 ring-white/5 overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
-          {/* Search Input */}
-          <div className="p-2 border-b border-zinc-800">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-              <input
-                ref={inputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={searchPlaceholder}
-                className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg pl-9 pr-4 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#F4C430]/50"
-              />
-            </div>
-          </div>
-
-          {/* Options List */}
-          <div className="max-h-60 overflow-y-auto py-1">
-            {filteredOptions.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-zinc-500 text-center">
-                {emptyText}
-                {allowCustom && searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => handleSelect(searchQuery)}
-                    className="block w-full mt-2 px-3 py-2 bg-zinc-800 rounded-lg text-white hover:bg-zinc-700 transition-colors"
-                  >
-                    Ajouter &quot;{searchQuery}&quot;
-                  </button>
-                )}
-              </div>
-            ) : (
-              filteredOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => handleSelect(option.value)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${option.value === value
-                      ? "bg-[#F4C430]/10 text-[#F4C430]"
-                      : "text-zinc-300 hover:bg-zinc-800"
-                    }`}
-                >
-                  <span>{option.label}</span>
-                  {option.value === value && <Check className="w-4 h-4" />}
-                </button>
-              ))
+        >
+          <span className={selectedOption ? "text-white" : "text-zinc-500"}>
+            {selectedOption?.label || placeholder}
+          </span>
+          <div className="flex items-center gap-2">
+            {value && (
+              <span
+                role="button"
+                onClick={handleClear}
+                className="p-0.5 hover:bg-zinc-700 rounded transition-colors"
+              >
+                <X className="w-4 h-4 text-zinc-500" />
+              </span>
             )}
+            <ChevronDown
+              className={cn(
+                "w-4 h-4 text-zinc-500 transition-transform",
+                open && "rotate-180"
+              )}
+            />
           </div>
-        </div>
-      )}
-    </div>
+        </button>
+      </PopoverTrigger>
+
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+        sideOffset={4}
+      >
+        <Command>
+          <CommandInput
+            placeholder={searchPlaceholder}
+            value={search}
+            onValueChange={setSearch}
+          />
+          <CommandList>
+            <CommandEmpty>
+              <span className="text-zinc-500">{emptyText}</span>
+              {allowCustom && search && (
+                <button
+                  type="button"
+                  onClick={() => handleSelect(search)}
+                  className="block w-full mt-2 px-3 py-2 bg-zinc-800 rounded-lg text-white hover:text-primary transition-all active:scale-95"
+                >
+                  Ajouter &quot;{search}&quot;
+                </button>
+              )}
+            </CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  value={option.label}
+                  onSelect={() => handleSelect(option.value)}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4 shrink-0 text-primary",
+                      option.value === value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <span className={option.value === value ? "text-primary font-medium" : ""}>
+                    {option.label}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }

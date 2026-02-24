@@ -42,6 +42,8 @@ interface Tenant {
     period_year?: number;
     period_start?: string | null;
     period_end?: string | null;
+    property_id?: string;
+    composition?: string | null;
 }
 
 interface TenantCardProps {
@@ -251,6 +253,29 @@ export function TenantCard({
                             <span className="truncate">{tenant.property}</span>
                         </div>
 
+                        {/* Composition (rooms, surface) */}
+                        {tenant.composition && (
+                            <div className="flex items-center gap-2 text-[11px] text-muted-foreground/70 pl-5.5">
+                                <span className="truncate italic font-medium">{tenant.composition}</span>
+                            </div>
+                        )}
+
+                        {/* Link to property */}
+                        {tenant.property_id && (
+                            <div className="mt-1 pl-5.5">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        router.push(`/gestion/biens?q=${encodeURIComponent(tenant.property)}`);
+                                    }}
+                                    className="text-[11px] font-bold text-blue-500 hover:text-blue-400 hover:underline flex items-center gap-1 transition-all"
+                                >
+                                    <Eye className="w-3 h-3" />
+                                    Voir le bien
+                                </button>
+                            </div>
+                        )}
+
                         {/* Contact info - show on hover or always on mobile */}
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                             {tenant.phone && (
@@ -286,25 +311,27 @@ export function TenantCard({
             </div>
 
             {/* Quick action button for pending/overdue */}
-            {(tenant.status === 'pending' || tenant.status === 'overdue') && onConfirmPayment && (
-                <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                    <Button
-                        onClick={() => onConfirmPayment(tenant.id, tenant.last_transaction_id)}
-                        className={`
+            {
+                (tenant.status === 'pending' || tenant.status === 'overdue') && onConfirmPayment && (
+                    <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                        <Button
+                            onClick={() => onConfirmPayment(tenant.id, tenant.last_transaction_id)}
+                            className={`
                             w-full mt-4
                             ${tenant.status === 'overdue'
-                                ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20'
-                                : 'bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20'
-                            }
+                                    ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20'
+                                    : 'bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20'
+                                }
                         `}
-                        variant="ghost"
-                        size="sm"
-                    >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Encaisser le loyer
-                    </Button>
-                </div>
-            )}
-        </div>
+                            variant="ghost"
+                            size="sm"
+                        >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Encaisser le loyer
+                        </Button>
+                    </div>
+                )
+            }
+        </div >
     );
 }

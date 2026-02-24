@@ -156,6 +156,9 @@ export function PropertySelector({
                                 <span className="flex items-center gap-2 truncate">
                                     <Home className="w-4 h-4 text-primary shrink-0" />
                                     <span className="truncate">{selectedProperty.title}</span>
+                                    {selectedProperty.is_rented && (
+                                        <span className="text-[10px] bg-orange-500/10 text-orange-600 px-1.5 py-0.5 rounded-full font-bold shrink-0">LOUÉ</span>
+                                    )}
                                     <span className="text-muted-foreground text-xs shrink-0">
                                         {selectedProperty.price.toLocaleString()} FCFA
                                     </span>
@@ -201,7 +204,14 @@ export function PropertySelector({
                                                     )}
                                                 />
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="font-medium truncate text-foreground">{property.title}</div>
+                                                    <div className="flex items-center gap-2 truncate">
+                                                        <div className="font-medium truncate text-foreground">{property.title}</div>
+                                                        {property.is_rented && (
+                                                            <span className="px-1.5 py-0.5 rounded-full bg-orange-500/10 text-orange-600 text-[9px] font-bold uppercase shrink-0">
+                                                                Déjà loué
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     <div className="text-xs text-muted-foreground flex items-center gap-1 truncate">
                                                         <MapPin className="w-3 h-3" />
                                                         {property.address}

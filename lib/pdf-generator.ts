@@ -129,16 +129,20 @@ async function addContractContent(
   const articles = [
     { title: "ARTICLE 1 : OBJET DU BAIL ET DESCRIPTION DU BIEN", content: finalTexts.article_1_objet },
     { title: "ARTICLE 2 : DESTINATION DES LIEUX", content: finalTexts.article_2_destination },
-    { title: "ARTICLE 3 : DURÉE DU BAIL", content: finalTexts.article_3_duree },
-    { title: "ARTICLE 4 : LOYER", content: finalTexts.article_4_loyer },
+    { title: "ARTICLE 3 : DUREE DU BAIL", content: finalTexts.article_3_duree },
+    { title: "ARTICLE 4 : LOYER, PAIEMENT ET PENALITES DE RETARD", content: finalTexts.article_4_loyer },
     { title: "ARTICLE 5 : CHARGES ET CONSOMMATIONS", content: finalTexts.article_5_charges },
-    { title: "ARTICLE 6 : DÉPÔT DE GARANTIE (CAUTION)", content: finalTexts.article_6_caution },
+    { title: "ARTICLE 6 : DEPOT DE GARANTIE (CAUTION)", content: finalTexts.article_6_caution },
     { title: "ARTICLE 7 : OBLIGATIONS DU PRENEUR", content: finalTexts.article_7_obligations_preneur },
     { title: "ARTICLE 8 : OBLIGATIONS DU BAILLEUR", content: finalTexts.article_8_obligations_bailleur },
-    { title: "ARTICLE 9 : RÉSILIATION ET PRÉAVIS", content: finalTexts.article_9_resiliation },
-    { title: "ARTICLE 10 : CLAUSE RÉSOLUTOIRE", content: finalTexts.article_10_clause_resolutoire },
-    { title: "ARTICLE 11 : ÉLECTION DE DOMICILE ET JURIDICTION COMPÉTENTE", content: finalTexts.article_11_election_domicile },
-    { title: "ARTICLE 12 : FRAIS ET EXEMPLAIRES", content: finalTexts.article_12_frais },
+    { title: "ARTICLE 9 : RESILIATION ET PREAVIS", content: finalTexts.article_9_resiliation },
+    { title: "ARTICLE 10 : CLAUSE RESOLUTOIRE", content: finalTexts.article_10_clause_resolutoire },
+    { title: "ARTICLE 11 : FORCE MAJEURE", content: finalTexts.article_11_force_majeure },
+    { title: "ARTICLE 12 : DECES DU PRENEUR", content: finalTexts.article_12_deces_preneur },
+    { title: "ARTICLE 13 : SOLIDARITE ENTRE CO-PRENEURS", content: finalTexts.article_13_solidarite },
+    { title: "ARTICLE 14 : PROTECTION DES DONNEES PERSONNELLES", content: finalTexts.article_14_donnees_personnelles },
+    { title: "ARTICLE 15 : ELECTION DE DOMICILE ET JURIDICTION COMPETENTE", content: finalTexts.article_15_election_domicile },
+    { title: "ARTICLE 16 : FRAIS, EXEMPLAIRES ET ANNEXES", content: finalTexts.article_16_frais },
   ];
 
   // Titre introductif
@@ -337,6 +341,7 @@ async function drawHeader(
 ): Promise<number> {
   let currentY = startY;
 
+  /* 
   // 1. Logo à Gauche (s'il existe)
   if (options.logoUrl) {
     try {
@@ -356,6 +361,7 @@ async function drawHeader(
       }
     } catch (e) { console.warn("Erreur logo", e); }
   }
+  */
 
   // 2. Titre Centré et Encadré (Sous le logo)
   const title = "CONTRAT DE BAIL A USAGE D'HABITATION";

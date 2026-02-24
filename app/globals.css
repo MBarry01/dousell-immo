@@ -179,6 +179,14 @@
       transform: translateY(10px);
     }
   }
+
+  /* Z-Index Scale - Tailwind v4 utilities (--z-{name} → z-{name} class) */
+  --z-navbar: 50;
+  --z-mobile-nav: 100;
+  --z-modal: 150;
+  --z-popover: 160;
+  --z-tooltip: 170;
+  --z-toast: 200;
 }
 
 @layer base {
@@ -373,7 +381,15 @@
 
 @layer utilities {
 
-  /* Couleurs sÃ©mantiques qui s'adaptent au thÃ¨me */
+  /* Z-Index utilities — définies explicitement pour garantir le rendu correct */
+  .z-navbar { z-index: 50; }
+  .z-mobile-nav { z-index: 100; }
+  .z-modal { z-index: 150; }
+  .z-popover { z-index: 160; }
+  .z-tooltip { z-index: 170; }
+  .z-toast { z-index: 200; }
+
+  /* Couleurs sémantiques qui s'adaptent au thème */
   .text-foreground {
     color: var(--foreground) !important;
   }

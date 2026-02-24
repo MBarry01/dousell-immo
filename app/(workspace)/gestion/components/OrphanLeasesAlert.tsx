@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { getVacantTeamProperties, type VacantProperty } from "../actions/property-selector";
+import { getAllTeamProperties, type VacantProperty } from "../actions/property-selector";
 import { linkLeaseToProperty } from "../actions";
 
 interface OrphanLease {
@@ -44,7 +44,7 @@ export function OrphanLeasesAlert({ count, leases }: OrphanLeasesAlertProps) {
 
     const handleOpenDialog = async () => {
         setLoading(true);
-        const result = await getVacantTeamProperties();
+        const result = await getAllTeamProperties();
         if (result.success && result.data) {
             setProperties(result.data);
         }

@@ -53,23 +53,50 @@ export async function GET(request: Request) {
         }
     }
 
-    // 2. Search Properties (Public)
-    const { data: properties } = await supabase
+    // 2. Search Properties (Public + Private if authenticated)
+    let propertiesQuery = supabase
         .from('properties')
-        .select('id, title, location')
-        .eq('validation_status', 'approved')
-        .eq('status', 'disponible')
+        .select('id, title, location, status, team_id, owner_id')
         .or(`title.ilike.%${query}%,location->>city.ilike.%${query}%`)
-        .limit(5);
+        .limit(10);
+
+    // If authenticated, we also show non-public properties owned by the user/team
+    if (user) {
+        // We already have userTeamIds from step 1
+        const userTeamIds = (await supabase
+            .from("team_members")
+            .select("team_id")
+            .eq("user_id", user.id)).data?.map(tm => tm.team_id) || [];
+
+        if (userTeamIds.length > 0) {
+            propertiesQuery = propertiesQuery.or(`validation_status.eq.approved,owner_id.eq.${user.id},team_id.in.(${userTeamIds.join(',')})`);
+        } else {
+            propertiesQuery = propertiesQuery.or(`validation_status.eq.approved,owner_id.eq.${user.id}`);
+        }
+    } else {
+        // Public only
+        propertiesQuery = propertiesQuery.eq('validation_status', 'approved').eq('status', 'disponible');
+    }
+
+    const { data: properties } = await propertiesQuery;
 
     if (properties) {
-        results.push(...properties.map(p => ({
-            id: p.id,
-            label: p.title || (p.location as any)?.city || "Bien",
-            subLabel: (p.location as any)?.city,
-            type: 'property' as const,
-            url: `/recherche?q=${encodeURIComponent(p.title || "")}`
-        })));
+        results.push(...properties.map(p => {
+            const isUserProperty = user && (p.owner_id === user.id || (p.team_id && (p as any).userTeamIds?.includes(p.team_id)));
+            // simplified check: if user is logged in, we assume they might want to see it in gestion if it's theirs
+            const url = user ? `/gestion/biens?q=${encodeURIComponent(p.title || "")}` : `/recherche?q=${encodeURIComponent(p.title || "")}`;
+
+            const statusLabel = p.status === 'loué' ? " (Loué)" : " (Disponible)";
+            const city = (p.location as any)?.city || "";
+
+            return {
+                id: p.id,
+                label: p.title || city || "Bien",
+                subLabel: `${city}${statusLabel}`,
+                type: 'property' as const,
+                url: url
+            };
+        }));
     }
 
     // 3. Search External Listings (Public) - Critical for Dakar results

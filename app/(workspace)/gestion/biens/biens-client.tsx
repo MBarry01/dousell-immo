@@ -7,7 +7,8 @@ import { TeamPropertyCard } from "@/components/gestion/TeamPropertyCard";
 import { AssociateTenantDialog } from "@/components/gestion/AssociateTenantDialog";
 import { BiensTour } from "@/components/gestion/tours/BiensTour";
 import { togglePropertyPublication, deleteTeamProperty } from "./actions";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useEffect } from "react";
 import type { TeamRole } from "@/types/team";
 
 type Property = {
@@ -39,12 +40,13 @@ type Property = {
     phone?: string;
   };
   view_count?: number;
-  tenant?: {
+  is_full_rental?: boolean;
+  tenants?: Array<{
     id: string;
     full_name: string;
     avatar_url?: string;
     payment_status: "up_to_date" | "late";
-  };
+  }>;
 };
 
 type BiensClientProps = {
@@ -63,12 +65,50 @@ export function BiensClient({
   error,
 }: BiensClientProps) {
   const _router = useRouter();
+  const searchParams = useSearchParams();
   const [properties, setProperties] = useState(initialProperties);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<"all" | "vente" | "location">("all");
-  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft" | "scheduled">("all");
+  const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") || "");
+  const [categoryFilter, setCategoryFilter] = useState<"all" | "vente" | "location">((searchParams?.get("category") as any) || "all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft" | "scheduled">((searchParams?.get("status") as any) || "all");
+  const [occupancyFilter, setOccupancyFilter] = useState<"all" | "vacant" | "rented">((searchParams?.get("occupancy") as any) || "all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const q = searchParams?.get("q") || "";
+    const category = searchParams?.get("category") || "all";
+    const status = searchParams?.get("status") || "all";
+    const occupancy = searchParams?.get("occupancy") || "all";
+
+    setSearchQuery(q);
+    setCategoryFilter(category as any);
+    setStatusFilter(status as any);
+    setOccupancyFilter(occupancy as any);
+  }, [searchParams]);
+
+  const pathname = usePathname();
+
+  // Update URL when filters change (Debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams(searchParams?.toString());
+
+      // Sync State to Params
+      if (searchQuery) params.set('q', searchQuery); else params.delete('q');
+      if (categoryFilter !== "all") params.set('category', categoryFilter); else params.delete('category');
+      if (statusFilter !== "all") params.set('status', statusFilter); else params.delete('status');
+      if (occupancyFilter !== "all") params.set('occupancy', occupancyFilter); else params.delete('occupancy');
+
+      const newSearch = params.toString();
+      const currentSearch = searchParams?.toString() || "";
+
+      if (newSearch !== currentSearch) {
+        _router.replace(`${pathname}?${newSearch}`, { scroll: false });
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, categoryFilter, statusFilter, occupancyFilter, searchParams, pathname, _router]);
 
   // State pour la modale d'association
   const [propertyToAssociate, setPropertyToAssociate] = useState<{
@@ -86,22 +126,51 @@ export function BiensClient({
   const filteredProperties = properties.filter((property) => {
     // Recherche textuelle
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const matchesTitle = property.title.toLowerCase().includes(query);
-      const matchesCity = property.location.city.toLowerCase().includes(query);
-      const matchesDistrict = property.location.district?.toLowerCase().includes(query);
-      const matchesTenant = property.tenant?.full_name.toLowerCase().includes(query);
+      const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+      const query = normalize(searchQuery);
+      const terms = query.split(/[\s,]+/).filter(t => t.length > 0);
 
-      if (!matchesTitle && !matchesCity && !matchesDistrict && !matchesTenant) return false;
+      const title = normalize(property.title);
+      const city = normalize(property.location.city);
+      const district = normalize(property.location.district || "");
+      const address = normalize(property.location.address || "");
+      const tenantsStr = normalize(property.tenants?.map(t => t.full_name).join(" ") || "");
+
+      // Matcher direct si titre identique (pour les clics depuis suggestion)
+      if (title === query) return true;
+
+      // On vérifie que chaque terme de la recherche est présent
+      const matchesSearch = terms.every(term => {
+        // Si le terme est purement numérique, on cherche une correspondance de mot entier
+        // Pour éviter que la recherche "1" ne remonte tous les "10", "11", etc. au milieu des titres
+        if (/^\d+$/.test(term)) {
+          return new RegExp(`\\b${term}\\b`, 'i').test(title) ||
+            title.includes(term) ||
+            city.includes(term);
+        }
+
+        return title.includes(term) ||
+          city.includes(term) ||
+          district.includes(term) ||
+          address.includes(term) ||
+          tenantsStr.includes(term);
+      });
+
+      if (!matchesSearch) return false;
     }
+
+    // Filtre d'occupation
+    if (occupancyFilter === "vacant" && property.status === "loué") return false;
+    if (occupancyFilter === "rented" && property.status !== "loué") return false;
 
     // Filtre catégorie
     if (categoryFilter !== "all" && property.category !== categoryFilter) return false;
 
     // Filtre statut publication
     if (statusFilter === "published") {
-      // Un bien n'est réellement "en ligne" que s'il est approuvé ET non loué
-      if (property.validation_status !== "approved" || property.status === "loué") return false;
+      if (property.validation_status !== "approved") return false;
+      // On ne masque plus par défaut le "loué" si on est en mode gestion
+      // Sauf si l'utilisateur demande explicitement les "Disponibles"
     }
     if (statusFilter === "draft" && property.validation_status !== "pending") return false;
     if (statusFilter === "scheduled" && property.validation_status !== "scheduled") return false;
@@ -109,10 +178,55 @@ export function BiensClient({
     return true;
   });
 
-  // Stats
+  // Tri par pertinence si recherche active
+  const sortedProperties = [...filteredProperties].sort((a, b) => {
+    if (!searchQuery) return 0;
+
+    const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const query = normalize(searchQuery);
+    const terms = query.split(/[\s,]+/).filter(t => t.length > 0);
+
+    const getScore = (p: Property) => {
+      const title = normalize(p.title);
+      let score = 0;
+
+      // 1. Match exact du titre (Poids colossal)
+      if (title === query) return 100000;
+
+      // 2. Match de mot entier exact (ex: "Appartement 1")
+      // On utilise une regex pour vérifier les frontières de mots
+      const exactWordMatch = new RegExp(`(?<=^|\\s)${query}(?=$|\\s)`, 'i').test(title);
+      if (exactWordMatch) score += 50000;
+
+      // 3. Commence par la requête
+      if (title.startsWith(query)) score += 10000;
+
+      // 4. Score par terme individuel
+      terms.forEach(term => {
+        // Mot entier
+        if (new RegExp(`(?<=^|\\s)${term}(?=$|\\s)`, 'i').test(title)) score += 1000;
+        // Contient simplement
+        else if (title.includes(term)) score += 100;
+
+        // Bonus pour la ville/quartier
+        if (normalize(p.location.city).includes(term)) score += 50;
+        if (normalize(p.location.district || "").includes(term)) score += 30;
+      });
+
+      return score;
+    };
+
+    const scoreA = getScore(a);
+    const scoreB = getScore(b);
+
+    if (scoreA !== scoreB) return scoreB - scoreA;
+
+    return 0;
+  });
+
   const stats = {
     total: properties.length,
-    published: properties.filter((p) => p.validation_status === "approved" && p.status !== "loué").length,
+    published: properties.filter((p) => p.validation_status === "approved").length, // Tout ce qui est approuvé est considéré "En ligne/Validé"
     draft: properties.filter((p) => p.validation_status === "pending").length,
     scheduled: properties.filter((p) => p.validation_status === "scheduled").length,
     vente: properties.filter((p) => p.category === "vente").length,
@@ -248,7 +362,41 @@ export function BiensClient({
           {/* SÉPARATEUR */}
           <div className="hidden md:block h-6 w-px bg-border mx-2"></div>
 
-          {/* GROUPE 2 : Statuts (Style Badges cliquables) */}
+          {/* GROUPE 2 : Occupation (Nouveau) */}
+          <div className="bg-muted p-1 rounded-lg inline-flex">
+            <button
+              onClick={() => setOccupancyFilter("all")}
+              className={`px-4 h-11 flex items-center justify-center rounded-md text-xs font-semibold transition-all active:scale-95 ${occupancyFilter === "all"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+                }`}
+            >
+              Tous
+            </button>
+            <button
+              onClick={() => setOccupancyFilter("vacant")}
+              className={`px-4 h-11 flex items-center justify-center rounded-md text-xs font-semibold transition-all active:scale-95 ${occupancyFilter === "vacant"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+                }`}
+            >
+              Dispos
+            </button>
+            <button
+              onClick={() => setOccupancyFilter("rented")}
+              className={`px-4 h-11 flex items-center justify-center rounded-md text-xs font-semibold transition-all active:scale-95 ${occupancyFilter === "rented"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+                }`}
+            >
+              Loués
+            </button>
+          </div>
+
+          {/* SÉPARATEUR */}
+          <div className="hidden md:block h-6 w-px bg-border mx-2"></div>
+
+          {/* GROUPE 3 : Statuts (Style Badges cliquables) */}
           <div className="flex gap-2">
             <button
               onClick={() => setStatusFilter("published")}
@@ -306,7 +454,7 @@ export function BiensClient({
         )}
 
         {/* Properties Grid */}
-        {filteredProperties.length === 0 ? (
+        {sortedProperties.length === 0 ? (
           <div className="text-center py-16">
             <Building2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">
@@ -335,7 +483,7 @@ export function BiensClient({
                 : "space-y-4"
             }
           >
-            {filteredProperties.map((property) => (
+            {sortedProperties.map((property) => (
               <TeamPropertyCard
                 key={property.id}
                 property={property}

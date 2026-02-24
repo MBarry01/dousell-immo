@@ -11,6 +11,8 @@ export type VacantProperty = {
     address: string;
     city?: string;
     images?: string[];
+    status: string;
+    is_rented: boolean;
 };
 
 /**
@@ -31,19 +33,21 @@ export async function getVacantTeamProperties(): Promise<{
         const { teamId } = context;
         await requireTeamPermission('properties.view');
 
-        // Récupérer les biens de l'équipe qui sont disponibles (pas loués)
+        // Récupérer tous les biens de l'équipe (on filtrera/marquera les loués côté client)
         const { data: properties, error } = await supabase
             .from("properties")
             .select(`
-        id,
-        title,
-        price,
-        location,
-        images,
-        status
-      `)
+                id,
+                title,
+                price,
+                location,
+                images,
+                status,
+                specs,
+                details,
+                validation_status
+            `)
             .eq("team_id", teamId)
-            .in("status", ["disponible", "preavis"]) // Vacants ou en préavis
             .order("title", { ascending: true });
 
         if (error) {
@@ -51,15 +55,31 @@ export async function getVacantTeamProperties(): Promise<{
             return { success: false, error: error.message };
         }
 
-        // Mapper les données
-        const vacantProperties: VacantProperty[] = (properties || []).map((p) => ({
-            id: p.id,
-            title: p.title || "Bien sans nom",
-            price: p.price || 0,
-            address: p.location?.address || `${p.location?.district || ""}, ${p.location?.city || ""}`.trim() || "Adresse non renseignée",
-            city: p.location?.city,
-            images: p.images,
-        }));
+        // Mapper les propriétés avec info d'occupation
+        const vacantProperties: VacantProperty[] = (properties || [])
+            .map((p) => {
+                const details = p.details as any;
+                const specs = p.specs as any;
+                let isRented = p.status === 'loué';
+
+                // Cas particulier Colocation : n'est pas considéré "plein" s'il reste des chambres
+                if (details?.is_colocation) {
+                    const bedrooms = specs?.bedrooms || 1;
+                    const occupied = details?.occupied_rooms || 0;
+                    isRented = occupied >= bedrooms;
+                }
+
+                return {
+                    id: p.id,
+                    title: p.title || "Bien sans nom",
+                    price: p.price || 0,
+                    address: p.location?.address || `${p.location?.district || ""}, ${p.location?.city || ""}`.trim() || "Adresse non renseignée",
+                    city: p.location?.city,
+                    images: p.images,
+                    status: p.status,
+                    is_rented: isRented,
+                };
+            });
 
         return { success: true, data: vacantProperties };
     } catch (error) {
@@ -91,7 +111,7 @@ export async function getAllTeamProperties(): Promise<{
 
         const { data: properties, error } = await supabase
             .from("properties")
-            .select(`id, title, price, location, images`)
+            .select(`id, title, price, location, images, status`)
             .eq("team_id", teamId)
             .order("title", { ascending: true });
 
@@ -106,6 +126,8 @@ export async function getAllTeamProperties(): Promise<{
             address: p.location?.address || `${p.location?.district || ""}, ${p.location?.city || ""}`.trim() || "",
             city: p.location?.city,
             images: p.images,
+            status: p.status || "disponible",
+            is_rented: p.status === 'loué',
         }));
 
         return { success: true, data: allProperties };

@@ -20,6 +20,8 @@ interface Tenant {
     period_year?: number;
     period_start?: string | null;
     period_end?: string | null;
+    property_id?: string;
+    composition?: string | null;
 }
 
 interface TenantCardGridProps {

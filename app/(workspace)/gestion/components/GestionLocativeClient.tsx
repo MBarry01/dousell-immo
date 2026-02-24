@@ -35,6 +35,8 @@ interface Tenant {
     period_year?: number;
     period_start?: string | null;
     period_end?: string | null;
+    property_id?: string;
+    composition?: string | null;
 }
 
 interface Transaction {
@@ -76,6 +78,7 @@ interface Lease {
         id: string;
         title: string;
         images?: string[];
+        specs?: any;
     } | null;
 }
 
@@ -321,7 +324,19 @@ export function GestionLocativeClient({
                 period_month: selectedMonth,
                 period_year: selectedYear,
                 period_start: paidTx?.period_start || null,
-                period_end: paidTx?.period_end || null
+                period_end: paidTx?.period_end || null,
+                property_id: lease.property_id,
+                composition: lease.properties?.specs ? (() => {
+                    const specs = lease.properties.specs;
+                    const parts = [];
+                    const rooms = specs.rooms || specs.pieces || specs.nb_rooms;
+                    const bedrooms = specs.bedrooms || specs.chambres || specs.nb_bedrooms;
+                    const surface = specs.surface || specs.area || specs.superficie;
+                    if (rooms) parts.push(`${rooms} pièce${Number(rooms) > 1 ? 's' : ''}`);
+                    if (bedrooms) parts.push(`${bedrooms} chambre${Number(bedrooms) > 1 ? 's' : ''}`);
+                    if (surface) parts.push(`${surface} m²`);
+                    return parts.length > 0 ? parts.join(', ') : null;
+                })() : null
             });
         });
 

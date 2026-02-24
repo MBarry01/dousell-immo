@@ -32,6 +32,65 @@ interface GenerateContractResult {
 }
 
 /**
+ * Construit une description textuelle du bien à partir des données Supabase.
+ * Priorité : description manuelle → specs JSONB → type + adresse.
+ * N'utilise jamais le title (nom commercial du bien) comme composition.
+ */
+function buildPropertyDescription(
+  property: Record<string, any> | null | undefined,
+  fallbackAddress?: string | null
+): string {
+  if (!property) return fallbackAddress || 'Bien immobilier';
+
+  // 1. Priorité aux spécifications techniques (Composition réelle du bien)
+  // C'est ce qui est attendu dans un contrat juridique (nb de pièces, surface, etc.)
+  const specs = property.specs as Record<string, any> | null;
+  const parts: string[] = [];
+
+  if (specs && typeof specs === 'object' && Object.keys(specs).length > 0) {
+    const rooms = specs.rooms || specs.pieces || specs.nb_rooms;
+    const bedrooms = specs.bedrooms || specs.chambres || specs.nb_bedrooms;
+    const bathrooms = specs.bathrooms || specs.salles_bain || specs.nb_bathrooms;
+    const salon = specs.salon || specs.living_room;
+    const kitchen = specs.kitchen || specs.cuisine;
+    const surface = specs.surface || specs.area || specs.superficie;
+
+    if (rooms) parts.push(`${rooms} pièce(s)`);
+    if (bedrooms) parts.push(`${bedrooms} chambre(s)`);
+    if (bathrooms) parts.push(`${bathrooms} salle(s) de bain`);
+    if (salon) parts.push('1 salon');
+    if (kitchen) parts.push('1 cuisine');
+    if (surface) parts.push(`${surface} m²`);
+  }
+
+  // Si on a des spécifications structurées (>= 1 élément), on les utilise en priorité
+  if (parts.length >= 1) return parts.join(', ');
+
+  // 2. Fallback sur la description manuelle (champ libre) 
+  // Attention : contient souvent du texte commercial peu adapté au contrat
+  const manualDesc = property.description?.trim();
+  if (manualDesc && manualDesc.length > 5 && manualDesc.length < 300) return manualDesc;
+
+  // 3. Construire depuis details JSONB si renseigné
+  const details = property.details as Record<string, any> | null;
+  if (details && typeof details === 'object') {
+    const detailDesc = details.description || details.composition;
+    if (detailDesc && typeof detailDesc === 'string' && detailDesc.trim().length > 5) {
+      return detailDesc.trim();
+    }
+  }
+
+  // 4. Fallback : type de bien + adresse (jamais le title qui est le nom commercial)
+  const type = property.property_type;
+  const addr = fallbackAddress || property.location?.address || property.location?.city;
+  if (type && addr) return `${type} – ${addr}`;
+  if (type) return type;
+  if (addr) return addr;
+
+  return 'Bien immobilier';
+}
+
+/**
  * Génère un contrat de bail PDF à partir d'un lease ID
  */
 export async function generateLeaseContract(
@@ -79,7 +138,9 @@ export async function generateLeaseContract(
           title,
           location,
           description,
-          property_type
+          property_type,
+          specs,
+          details
         )
       `)
       .eq('id', leaseId)
@@ -163,7 +224,7 @@ export async function generateLeaseContract(
       },
       property: {
         address: lease.property_address || (lease.properties as any)?.location?.address || (lease.properties as any)?.location?.city || '',
-        description: (lease.properties as any)?.description || (lease.properties as any)?.title || 'Non spécifié',
+        description: buildPropertyDescription(lease.properties as any, lease.property_address),
         propertyType: (lease.properties as any)?.property_type as any || undefined,
       },
       lease: {

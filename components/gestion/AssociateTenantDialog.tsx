@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TenantSelector } from "./TenantSelector";
 import { associateTenant } from "@/app/(workspace)/gestion/biens/actions";
+import { sendWelcomePack } from "@/app/(workspace)/gestion/actions";
 import { Button } from "@/components/ui/button";
 import { Calendar, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,6 +14,9 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Building, Users } from "lucide-react";
 
 type AssociateTenantDialogProps = {
     isOpen: boolean;
@@ -37,6 +41,7 @@ export function AssociateTenantDialog({
 }: AssociateTenantDialogProps) {
     const [selectedTenantId, setSelectedTenantId] = useState<string | undefined>();
     const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
+    const [rentalType, setRentalType] = useState<'entire' | 'partial'>('entire');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -45,8 +50,15 @@ export function AssociateTenantDialog({
 
         setIsSubmitting(true);
         try {
-            const result = await associateTenant(teamId, propertyId, selectedTenantId, startDate);
-            if (result.success) {
+            const result = await associateTenant(teamId, propertyId, selectedTenantId, startDate, rentalType);
+            if (result.success && result.leaseId) {
+                // Envoi automatique du pack de bienvenue
+                toast.promise(sendWelcomePack(result.leaseId), {
+                    loading: "Envoi du pack de bienvenue...",
+                    success: "Pack de bienvenue envoyé ! 🎉",
+                    error: "Erreur lors de l'envoi du pack"
+                });
+
                 // Nudge Toast avec actions de suivi
                 toast.success(
                     <div className="space-y-3">
@@ -109,6 +121,43 @@ export function AssociateTenantDialog({
                         />
                     </div>
 
+                    {/* TYPE DE LOCATION */}
+                    <div className="space-y-3">
+                        <label className="text-sm font-medium text-foreground">Type de location</label>
+                        <RadioGroup
+                            value={rentalType}
+                            onValueChange={(v) => setRentalType(v as 'entire' | 'partial')}
+                            className="grid grid-cols-2 gap-4"
+                        >
+                            <div>
+                                <RadioGroupItem value="entire" id="entire" className="peer sr-only" />
+                                <Label
+                                    htmlFor="entire"
+                                    className="group flex flex-col items-center justify-between rounded-xl border-2 border-border/50 bg-muted/20 p-4 hover:bg-muted/40 hover:border-primary/50 peer-data-[state=checked]:bg-primary peer-data-[state=checked]:border-primary peer-data-[state=checked]:text-primary-foreground cursor-pointer transition-all duration-300"
+                                >
+                                    <Building className="mb-2 h-6 w-6 transition-transform group-hover:scale-110" />
+                                    <div className="text-center">
+                                        <p className="font-semibold text-sm">Logement entier</p>
+                                        <p className="text-[10px] opacity-70 mt-0.5">Pour un seul locataire ou une famille</p>
+                                    </div>
+                                </Label>
+                            </div>
+                            <div>
+                                <RadioGroupItem value="partial" id="partial" className="peer sr-only" />
+                                <Label
+                                    htmlFor="partial"
+                                    className="group flex flex-col items-center justify-between rounded-xl border-2 border-border/50 bg-muted/20 p-4 hover:bg-muted/40 hover:border-primary/50 peer-data-[state=checked]:bg-primary peer-data-[state=checked]:border-primary peer-data-[state=checked]:text-primary-foreground cursor-pointer transition-all duration-300"
+                                >
+                                    <Users className="mb-2 h-6 w-6 transition-transform group-hover:scale-110" />
+                                    <div className="text-center">
+                                        <p className="font-semibold text-sm">Colocation</p>
+                                        <p className="text-[10px] opacity-70 mt-0.5">Par chambre ou partie du bien</p>
+                                    </div>
+                                </Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+
                     {/* DATE D'ENTRÉE */}
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-foreground">
@@ -133,14 +182,14 @@ export function AssociateTenantDialog({
                             variant="outline"
                             onClick={onClose}
                             disabled={isSubmitting}
-                            className="h-11 px-6"
+                            className="h-11 px-6 rounded-xl border-border/50 hover:bg-muted/50 transition-all"
                         >
                             Annuler
                         </Button>
                         <Button
                             type="submit"
                             disabled={!selectedTenantId || !startDate || isSubmitting}
-                            className="h-11 px-8 font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md"
+                            className="h-11 px-8 font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98]"
                         >
                             {isSubmitting ? (
                                 <>

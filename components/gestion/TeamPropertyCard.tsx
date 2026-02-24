@@ -42,12 +42,13 @@ type TeamPropertyCardProps = {
       phone?: string;
     };
     view_count?: number;
-    tenant?: {
+    is_full_rental?: boolean;
+    tenants?: Array<{
       id: string;
       full_name: string;
       avatar_url?: string;
       payment_status: "up_to_date" | "late";
-    };
+    }>;
   };
   onTogglePublication: (id: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
@@ -199,47 +200,53 @@ export function TeamPropertyCard({
                 </Link>
               </DropdownMenuItem>
 
-              {property.tenant ? (
+              {property.tenants && property.tenants.length > 0 && (
                 <>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href={`/gestion/locataires/${property.tenant.id}#documents`}>
-                      <FileText className="w-4 h-4 mr-2" />
-                      Voir le Bail
-                    </Link>
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                <>
-                  <DropdownMenuItem onClick={() => onTogglePublication(property.id)}>
-                    {isPublished ? (
-                      <>
-                        <EyeOff className="w-4 h-4 mr-2" /> Dépublier
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="w-4 h-4 mr-2" /> Publier
-                      </>
-                    )}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleDuplicate}>
-                    <Copy className="w-4 h-4 mr-2" /> Dupliquer
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                    onClick={() => {
-                      if (confirm("Êtes-vous sûr de vouloir supprimer ce bien ?")) {
-                        onDelete(property.id);
-                      }
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Supprimer
-                  </DropdownMenuItem>
+                  {property.tenants.map((t) => (
+                    <DropdownMenuItem key={t.id} asChild>
+                      <Link href={`/gestion/locataires/${t.id}#documents`}>
+                        <FileText className="w-4 h-4 mr-2" />
+                        Bail: {t.full_name}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
                 </>
               )}
+
+              <DropdownMenuSeparator />
+
+              {(!property.tenants || property.tenants.length === 0) ? (
+                <DropdownMenuItem onClick={() => onTogglePublication(property.id)}>
+                  {isPublished ? (
+                    <>
+                      <EyeOff className="w-4 h-4 mr-2" /> Dépublier
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-4 h-4 mr-2" /> Publier
+                    </>
+                  )}
+                </DropdownMenuItem>
+              ) : null}
+
+              <DropdownMenuItem onClick={handleDuplicate}>
+                <Copy className="w-4 h-4 mr-2" /> Dupliquer
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                onClick={() => {
+                  if (confirm("Êtes-vous sûr de vouloir supprimer ce bien ?")) {
+                    onDelete(property.id);
+                  }
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Supprimer
+              </DropdownMenuItem>
 
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleShare}>
@@ -282,39 +289,46 @@ export function TeamPropertyCard({
 
         {/* Tenant Section */}
         <div className="pt-3 border-t border-border">
-          {property.tenant ? (
-            <Link
-              href={`/gestion/locataires/${property.tenant.id}`}
-              className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
-            >
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={property.tenant.avatar_url} />
-                <AvatarFallback>{property.tenant.full_name.substring(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
-                  {property.tenant.full_name}
-                </p>
-                <div className="flex items-center gap-2">
-                  <span className={cn(
-                    "w-2 h-2 rounded-full",
-                    property.tenant.payment_status === "up_to_date" ? "bg-green-500" : "bg-red-500"
-                  )} />
-                  <span className="text-xs text-muted-foreground">
-                    {property.tenant.payment_status === "up_to_date" ? "À jour" : "Retard"}
-                  </span>
+          <div className="space-y-2">
+            {property.tenants?.map((tenant) => (
+              <Link
+                key={tenant.id}
+                href={`/gestion/locataires/${tenant.id}`}
+                className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/30 hover:bg-muted/60 border border-transparent hover:border-primary/20 transition-all duration-300 group"
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={tenant.avatar_url} />
+                  <AvatarFallback>{tenant.full_name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                    {tenant.full_name}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "w-2 h-2 rounded-full",
+                      tenant.payment_status === "up_to_date" ? "bg-green-500" : "bg-red-500"
+                    )} />
+                    <span className="text-xs text-muted-foreground">
+                      {tenant.payment_status === "up_to_date" ? "À jour" : "Retard"}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ) : (
-            <button
-              onClick={() => onAssociate(property.id)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-dashed border-border hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-all group"
-            >
-              <UserPlus className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              <span className="text-sm">Associer un locataire</span>
-            </button>
-          )}
+              </Link>
+            ))}
+
+            {(!property.is_full_rental && (!property.tenants || property.tenants.length < (property.specs.bedrooms || 1))) && (
+              <button
+                onClick={() => onAssociate(property.id)}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-dashed border-border/60 hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-primary transition-all duration-300 group shadow-sm"
+              >
+                <UserPlus className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-medium">
+                  {property.tenants?.length ? "Ajouter un colocataire" : "Associer un locataire"}
+                </span>
+              </button>
+            )}
+          </div>
 
         </div>
 

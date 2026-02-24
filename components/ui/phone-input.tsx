@@ -104,7 +104,7 @@ const CountrySelect = ({
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0 bg-[#05080c] border-white/10 text-white z-[9999]" align="start">
+      <PopoverContent className="w-[300px] p-0 bg-[#05080c] border-white/10 text-white z-popover" align="start">
         <Command>
           <CommandInput placeholder="Rechercher un pays..." className="text-white" />
           <CommandList>

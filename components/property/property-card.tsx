@@ -277,6 +277,11 @@ export const PropertyCard = ({
           <span className="rounded-full border border-white/10 bg-background px-3 py-1">
             {property.details.type}
           </span>
+          {property.is_colocation && (
+            <span className="rounded-full border border-primary/30 bg-primary/10 text-primary-foreground px-3 py-1 font-medium">
+              Colocation {property.occupied_rooms !== undefined && property.occupied_rooms > 0 && `(${property.occupied_rooms}/${property.specs.bedrooms} occupés)`}
+            </span>
+          )}
         </div>
       </div>
     </CardWrapper>

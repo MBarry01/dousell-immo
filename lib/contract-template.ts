@@ -131,8 +131,9 @@ export function generateContractText(data: ContractData, forPdf = false, include
   if (includeHeaderParties) {
     text += `
 ================================================================
-                    CONTRAT DE BAIL A USAGE D'HABITATION
-                          Republique du Senegal
+        CONTRAT DE BAIL A USAGE D'HABITATION
+              Republique du Senegal
+Regi par le Code des Obligations Civiles et Commerciales (COCC)
 ================================================================
 
 
@@ -176,58 +177,100 @@ IL A ETE CONVENU ET ARRETE CE QUI SUIT :
 
   // CORPS DU CONTRAT (ARTICLES)
   text += `
-ARTICLE 1 : DESIGNATION DES LIEUX
-Le BAILLEUR donne en location au PRENEUR les locaux à usage d'habitation dont la désignation suit :
+ARTICLE 1 : OBJET DU BAIL ET DESCRIPTION DU BIEN
+Le présent contrat est régi par les dispositions des articles relatifs au louage d'immeubles du Code des Obligations Civiles et Commerciales (COCC) en vigueur au Sénégal.
+Le BAILLEUR donne en location au PRENEUR les locaux à usage d'habitation :
 Adresse : ${property.address}
 Type : ${property.propertyType || "Logement"}
 Description : ${property.description}
 ${property.floor ? `Étage : ${property.floor}` : ''}
 ${property.buildingName ? `Immeuble : ${property.buildingName}` : ''}
+Un état des lieux contradictoire d'entrée ET de sortie sera établi et signé par les deux parties.
+En l'absence de réserves à la sortie, le logement est présumé restitué en bon état. L'usure normale s'apprécie en fonction de la durée d'occupation.
 
-ARTICLE 2 : DUREE DU BAIL
-Le présent bail est consenti et accepté pour une durée de ${lease.duration} mois, commençant à courir le ${startDateStr} pour se terminer le ${endDateStr}.
-Il se renouvellera ensuite par tacite reconduction, faute de congé donné par l'une des parties par lettre recommandée avec accusé de réception ou par acte extrajudiciaire au moins 6 mois avant l'expiration du bail (selon la loi en vigueur).
+ARTICLE 2 : DESTINATION DES LIEUX
+Usage exclusif d'habitation personnelle du PRENEUR et des personnes vivant habituellement avec lui.
+Toute utilisation commerciale ou professionnelle est interdite sans accord écrit du BAILLEUR.
+Le PRENEUR s'engage à occuper les lieux avec un nombre d'occupants compatible avec la superficie.
+Toute sous-location, même via plateformes numériques (Airbnb etc.), est interdite sans autorisation écrite.
+Toute sous-location autorisée fera l'objet d'un avenant écrit précisant durée et conditions.
 
-ARTICLE 3 : LOYER ET PAIEMENT
-Le présent bail est consenti et accepté moyennant un loyer mensuel de ${rentFormatted} FCFA.
-Le loyer est payable d'avance le ${lease.billingDay} de chaque mois. A chaque paiement, le BAILLEUR ou son représentant remettra une quittance au PRENEUR.
+ARTICLE 3 : DUREE DU BAIL
+Le présent bail est consenti pour une durée de ${lease.duration} mois, du ${startDateStr} au ${endDateStr}.
+Il se renouvellera par tacite reconduction, sauf congé donné par l'une des parties selon les conditions légales.
+La remise des clés vaut prise de possession effective et fait courir les obligations des parties.
 
-ARTICLE 4 : CAUTIONNEMENT
-À titre de garantie de l'exécution de ses obligations, le PRENEUR verse ce jour entre les mains du BAILLEUR, qui le reconnaît et lui en donne quittance, la somme de ${depositFormatted} FCFA représentant ${lease.depositMonths} mois de loyer.
-Cette somme ne sera pas productrice d'intérêts et sera remboursée en fin de bail, déduction faite des sommes dont le PRENEUR pourrait être débiteur envers le BAILLEUR. Elle ne pourra en aucun cas s'imputer sur le dernier mois de loyer.
+ARTICLE 4 : LOYER, PAIEMENT ET PENALITES DE RETARD
+Loyer mensuel : ${rentFormatted} FCFA, payable d'avance le ${lease.billingDay} de chaque mois.
+Une quittance est remise au PRENEUR à chaque paiement. Tout mois entamé est intégralement dû.
+En cas de retard, après mise en demeure restée sans effet 7 jours, des pénalités au taux légal en vigueur au Sénégal majoré de trois (3) points seront dues.
+Révision annuelle possible d'un commun accord, dans le respect des dispositions légales sénégalaises.
 
-ARTICLE 5 : OBLIGATIONS DU PRENEUR
-Le PRENEUR est tenu des obligations suivantes :
-1. Payer le loyer aux termes convenus.
-2. User des lieux en « bon père de famille » et suivant la destination prévue au contrat (habitation).
-3. Ne pas céder le bail, ni sous-louer les lieux sans l'accord écrit du BAILLEUR.
-4. Répondre des dégradations et pertes qui surviennent pendant sa jouissance.
-5. Ne faire aucune transformation des lieux sans l'accord écrit du BAILLEUR.
-6. Laisser exécuter dans les lieux les travaux urgents nécessaires.
+ARTICLE 5 : CAUTIONNEMENT
+Dépôt de garantie : ${depositFormatted} FCFA (${lease.depositMonths} mois de loyer).
+Non productif d'intérêts. Ne peut s'imputer sur le loyer courant.
+Restitué dans les 2 mois suivant la remise des clés et l'état des lieux de sortie.
+Toute retenue doit être justifiée par document probant (facture, devis signé, constat).
 
-ARTICLE 6 : OBLIGATIONS DU BAILLEUR
-Le BAILLEUR est tenu des obligations suivantes :
-1. Délivrer au PRENEUR le logement en bon état d'usage et de réparation.
-2. Assurer au PRENEUR la jouissance paisible des lieux pendant la durée du bail.
-3. Entretenir les locaux en état de servir à l'usage prévu et y faire toutes les réparations nécessaires, autres que locatives.
-4. Délivrer gratuitement une quittance au PRENEUR.
+ARTICLE 6 : OBLIGATIONS DU PRENEUR
+1. Payer le loyer aux dates convenues.
+2. User des lieux en bon père de famille, usage habitation uniquement.
+3. Ne pas céder le bail ni sous-louer sans accord écrit du BAILLEUR.
+4. Assurer les réparations locatives ; répondre des dégradations.
+5. Ne faire aucune transformation sans accord écrit du BAILLEUR.
+6. Laisser exécuter les travaux urgents nécessaires.
+7. Souscrire et maintenir une assurance habitation (RC, incendie, DDE) et en fournir l'attestation
+   au BAILLEUR sous 30 jours puis à chaque renouvellement annuel.
 
-ARTICLE 7 : RESILIATION
-Le présent bail pourra être résilié de plein droit, un mois après un commandement de payer resté infructueux, en cas de défaut de paiement d'un seul terme de loyer à son échéance, ou en cas d'inexécution de l'une des clauses du bail.
+ARTICLE 7 : OBLIGATIONS DU BAILLEUR
+1. Délivrer le logement en bon état d'usage et de réparation.
+2. Assurer la jouissance paisible des lieux pendant toute la durée du bail.
+3. Prendre en charge les grosses réparations (structure, toiture, étanchéité),
+   conformément au Code des obligations civiles et commerciales (COCC).
+4. Supporter les réparations dues à la vétusté ou à un cas de force majeure.
+5. Délivrer gratuitement une quittance à chaque paiement.
+
+ARTICLE 8 : RESILIATION ET CLAUSE RESOLUTOIRE
+Résiliation par le PRENEUR : préavis de 3 mois par écrit.
+Résiliation par le BAILLEUR : préavis de 6 mois (motifs légaux – COCC).
+Clause résolutoire : 2 mois après mise en demeure restée sans effet (loyer impayé ou manquement grave).
+L'expulsion peut être ordonnée par décision judiciaire du tribunal compétent.
+
+ARTICLE 9 : FORCE MAJEURE
+Aucune partie ne peut être tenue responsable d'un manquement dû à un cas de force majeure
+(inondation, catastrophe naturelle, acte d'autorité publique, etc.) tel que reconnu par la jurisprudence sénégalaise. Les obligations non empêchées par la force majeure demeurent exigibles.
+Si la force majeure persiste plus de 3 mois, chaque partie peut résilier sans indemnité.
+
+ARTICLE 10 : DECES DU PRENEUR
+En cas de décès, le bail peut être poursuivi par le conjoint ou les descendants directs occupant les lieux,
+sous notification écrite au BAILLEUR dans le mois suivant le décès.
+À défaut, les héritiers disposent de 3 mois pour restituer les lieux moyennant paiement du loyer.
+
+ARTICLE 11 : SOLIDARITE (si pluralité de preneurs)
+En cas de pluralité de preneurs, ceux-ci sont solidairement et indivisiblement tenus au paiement
+du loyer et des charges envers le BAILLEUR.
+
+ARTICLE 12 : DONNEES PERSONNELLES
+Les données des parties sont traitées uniquement pour l'exécution du présent bail, conformément à la loi sénégalaise sur la protection des données (CDP Sénégal) et au Règlement Général sur la Protection des Données (RGPD) pour les résidents européens. Elles ne sont pas communiquées à des tiers non autorisés.
 
 ${additionalClauses.length > 0 ? `
-ARTICLE 8 : CLAUSES PARTICULIERES
+ARTICLE 13 : CLAUSES PARTICULIERES
 ${additionalClauses.map((clause, index) => `${index + 1}. ${clause}`).join('\n')}
 ` : ''}
 
-ARTICLE ${additionalClauses.length > 0 ? 9 : 8} : ELECTION DE DOMICILE / LITIGES
-Pour l'exécution des présentes et leurs suites, les parties font élection de domicile :
-- Le BAILLEUR en son domicile sus-indiqué (ou au cabinet de son gestionnaire).
-- Le PRENEUR dans les lieux loués.
+ARTICLE ${additionalClauses.length > 0 ? 14 : 13} : ELECTION DE DOMICILE / JURIDICTION
+- Le BAILLEUR : son domicile sus-indiqué.
+- Le PRENEUR : les lieux loués.
+Les parties tentent un règlement amiable dans les 30 jours avant tout recours judiciaire, sans que cette tentative amiable ne suspende les délais légaux de prescription.
+Tout litige relève de la compétence exclusive des tribunaux du lieu de situation de l'immeuble (COCC).
 
-Tout litige relatif à l'interprétation ou à l'exécution du présent contrat sera de la compétence exclusive des Tribunaux de Dakar (Sénégal).
+ARTICLE ${additionalClauses.length > 0 ? 15 : 14} : VISITE ET REVENTE
+En cas de mise en vente du bien, ou pour des raisons d'entretien majeur, le Preneur s'engage à permettre les visites du Bailleur ou de ses représentants après un préavis raisonnable de quarante-huit (48) heures.
 
-Fait à Dakar, le ${signatureDateStr}
+Le présent contrat est établi en 2 exemplaires. Frais de rédaction : à la charge du BAILLEUR.
+ANNEXES : état des lieux d'entrée, inventaire (si meublé), règlement intérieur, pièces d'identité, attestation d'assurance.
+
+Fait à ${signatures.signatureCity}, le ${signatureDateStr}
 En autant d'exemplaires que de parties.
 `;
 
