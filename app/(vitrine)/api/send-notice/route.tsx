@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import ReactPDF from '@react-pdf/renderer';
 import { createPreavisDocument } from '@/components/pdf/PreavisPDF';
+import { render } from '@react-email/render';
+import { LegalNoticeEmail } from '@/emails/LegalNoticeEmail';
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -78,45 +81,48 @@ export async function POST(request: NextRequest) {
     console.log('   → TO (Locataire):', data.tenantEmail);
     console.log('   → CC (Propriétaire):', ownerEmailForCC);
 
-    // 7. Préparer l'email (format simple)
+    // 7. Préparer l'email avec React Email
+    const noticeTitle = isJ180
+      ? 'Préavis de Congé pour Reprise'
+      : 'Notification de Reconduction Tacite';
+
+    const mainContent = isJ180
+      ? `Nous vous informons par la présente de notre intention de reprendre le logement que vous occupez actuellement. ${urgency} ${action}`
+      : `Nous vous informons de l'arrivée prochaine de l'échéance de votre contrat de bail. ${urgency} ${action}`;
+
+    const emailHtml = await render(
+      <LegalNoticeEmail
+        tenantName={data.tenantName}
+        propertyAddress={data.propertyAddress}
+        noticeType={isJ180 ? 'termination' : 'general'}
+        noticeTitle={noticeTitle}
+        mainContent={mainContent}
+        effectiveDate={new Date(data.endDate).toLocaleDateString('fr-FR')}
+        senderName={data.ownerName}
+        senderAddress={data.ownerAddress}
+      />
+    );
+
+    const pdfFilename = isJ180
+      ? `Preavis_Conge_${data.noticeNumber}.pdf`
+      : `Notification_Reconduction_${data.noticeNumber}.pdf`;
+
     const mailOptions = {
       from: `${data.ownerName} <${process.env.GMAIL_USER}>`,
       to: data.tenantEmail,
       cc: ownerEmailForCC,
       subject: subject,
-      text: `Bonjour ${data.tenantName},
-
-Veuillez trouver ci-joint un préavis juridique ${data.noticeType} concernant votre bail de location.
-
-INFORMATION IMPORTANTE
-${urgency}
-
-Détails du préavis :
-- N° Préavis : ${data.noticeNumber}
-- Type : ${isJ180 ? 'Congé pour reprise (6 mois)' : 'Reconduction tacite (3 mois)'}
-- Bien concerné : ${data.propertyAddress}
-- Date d'échéance : ${new Date(data.endDate).toLocaleDateString('fr-FR')}
-
-Action requise :
-${action}
-
-Cordialement,
-${data.ownerName}
-${data.ownerAddress}
-
----
-Cadre Juridique Sénégalais
-Loi n° 2014-22 du 24 février 2014 & Code des Obligations Civiles et Commerciales (COCC)
-
-Email généré automatiquement par Dousell Immo`,
+      html: emailHtml,
       attachments: [
         {
-          filename: `Preavis_${data.noticeType}_${data.noticeNumber}.pdf`,
+          filename: pdfFilename,
           content: pdfBuffer,
           contentType: 'application/pdf',
         },
       ],
     };
+
+
 
     // 8. Envoyer l'email
     console.log("📤 Envoi de l'email...");

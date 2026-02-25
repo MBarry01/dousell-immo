@@ -20,6 +20,10 @@ import {
     getLeasesByTeam,
     getRentalStatsByTeam
 } from "@/services/rentalService.cached";
+import { WelcomePackEmail } from '@/emails/WelcomePackEmail';
+import { MaintenanceUpdateEmail } from '@/emails/MaintenanceUpdateEmail';
+import { TenantInvitationEmail } from '@/emails/TenantInvitationEmail';
+
 
 /**
  * Récupérer les propriétés de l'équipe (pour les listes déroulantes)
@@ -909,70 +913,34 @@ export async function sendWelcomePack(leaseId: string) {
         console.error("[sendWelcomePack] Error generating rent receipt:", e);
     }
 
-    // 5. Construire le contenu HTML de l'email
+    // 5. Construire la liste des documents pour l'affichage dans l'email
     const documentsList = [];
     if (attachments.find(a => a.filename.includes('Contrat'))) documentsList.push('Contrat de bail');
-    if (attachments.find(a => a.filename.includes('Caution'))) documentsList.push('Reçu de dépôt de garantie');
-    if (attachments.find(a => a.filename.includes('Quittance'))) documentsList.push('Quittance de loyer');
+    if (attachments.find(a => a.filename.includes('Caution'))) documentsList.push('Reçu de caution');
+    if (attachments.find(a => a.filename.includes('Quittance'))) documentsList.push('Quittance 1 mois de loyer');
 
-    const emailHtml = `
-        <!DOCTYPE html>
-        <html>
-        <head><meta charset="UTF-8"></head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px; max-width: 600px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-                <h1 style="color: white; margin: 0;">Bienvenue ${lease.tenant_name} ! 🎉</h1>
-            </div>
-            
-            <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
-                <p>Nous avons le plaisir de vous accueillir en tant que nouveau locataire.</p>
-                
-                <h3 style="color: #667eea;">📋 Récapitulatif de votre bail</h3>
-                <ul style="background: white; padding: 20px 30px; border-radius: 8px; border-left: 4px solid #667eea;">
-                    <li><strong>Adresse :</strong> ${lease.property_address}</li>
-                    <li><strong>Loyer mensuel :</strong> ${new Intl.NumberFormat('fr-FR').format(lease.monthly_amount)} FCFA</li>
-                    <li><strong>Date de début :</strong> ${new Date(lease.start_date).toLocaleDateString('fr-FR')}</li>
-                    <li><strong>Jour de paiement :</strong> Le ${lease.billing_day} de chaque mois</li>
-                </ul>
-
-                <h3 style="color: #667eea;">🔗 Accéder à votre espace locataire</h3>
-                <p>Cliquez sur le bouton ci-dessous pour accéder à votre espace personnel :</p>
-                <div style="text-align: center; margin: 20px 0;">
-                    <a href="${inviteLink}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
-                        Accéder à mon espace
-                    </a>
-                </div>
-
-                ${attachments.length > 0 ? `
-                <h3 style="color: #667eea;">📎 Documents joints</h3>
-                <ul style="background: white; padding: 15px 30px; border-radius: 8px; border-left: 4px solid #B8860B;">
-                    ${documentsList.map(doc => `<li>📄 ${doc}</li>`).join('')}
-                </ul>
-                ` : ''}
-
-                <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
-                
-                <p>Cordialement,<br><strong>${ownerName}</strong></p>
-                ${profile?.company_address ? `<p style="color: #666; font-size: 14px;">${profile.company_address}</p>` : ''}
-                
-                <p style="font-size: 12px; color: #999; margin-top: 30px; text-align: center;">
-                    Email généré automatiquement par Dousell Immo
-                </p>
-            </div>
-        </body>
-        </html>
-    `;
-
-    // 6. Envoyer l'email via Nodemailer (lib/mail.ts)
+    // 6. Envoyer l'email via Nodemailer avec React Email
     try {
         const _result = await sendEmail({
+
             to: lease.tenant_email,
             subject: `🏠 Bienvenue ${lease.tenant_name} - Votre Pack Locataire`,
-            html: emailHtml,
+            react: WelcomePackEmail({
+                tenantName: lease.tenant_name,
+                propertyAddress: lease.property_address || '',
+                monthlyAmount: new Intl.NumberFormat('fr-FR').format(lease.monthly_amount),
+                startDate: new Date(lease.start_date).toLocaleDateString('fr-FR'),
+                billingDay: lease.billing_day,
+                inviteLink: inviteLink,
+                documentsList: documentsList,
+                ownerName: ownerName,
+                ownerAddress: profile?.company_address || undefined,
+            }),
             attachments: attachments.length > 0 ? attachments : undefined
         });
 
         console.log("[sendWelcomePack] Email sent successfully");
+
 
         // 7. Sauvegarder le pack dans la GED (user_documents)
         if (attachments.length > 0 && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -2034,69 +2002,19 @@ export async function approveQuoteByOwner(requestId: string) {
             await sendEmail({
                 to: tenantEmail,
                 subject: `✅ Intervention validée : ${request.description}`,
-                html: `
-                    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9fafb; padding: 20px;">
-                        <div style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white; padding: 30px 20px; border-radius: 10px 10px 0 0; text-align: center;">
-                            <h1 style="margin: 0; font-size: 24px;">✅ Intervention Validée</h1>
-                        </div>
-
-                        <div style="background-color: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                            <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
-                                Bonjour <strong>${tenantName || 'Locataire'}</strong>,
-                            </p>
-
-                            <p style="font-size: 14px; color: #6b7280; line-height: 1.6;">
-                                Bonne nouvelle ! La demande d'intervention pour <strong style="color: #16a34a;">${request.description}</strong> a été validée par le propriétaire.
-                            </p>
-
-                            <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 20px; margin: 25px 0; border-radius: 8px;">
-                                <p style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #15803d; font-weight: bold;">
-                                    👷‍♂️ Artisan Assigné
-                                </p>
-                                <h2 style="margin: 10px 0; font-size: 20px; color: #111827;">${request.artisan_name}</h2>
-
-                                <div style="margin-top: 15px;">
-                                    <p style="margin: 5px 0; font-size: 14px; color: #374151;">
-                                        <strong>📞 Téléphone :</strong>
-                                        <a href="tel:${request.artisan_phone}" style="color: #16a34a; text-decoration: none; font-weight: 600;">${request.artisan_phone}</a>
-                                    </p>
-                                    ${request.artisan_address ? `
-                                    <p style="margin: 5px 0; font-size: 14px; color: #374151;">
-                                        <strong>📍 Adresse :</strong> ${request.artisan_address}
-                                    </p>` : ''}
-                                    <p style="margin: 5px 0; font-size: 14px; color: #374151;">
-                                        <strong>📅 Date prévue :</strong> ${datePrevue}
-                                    </p>
-                                    ${request.quoted_price ? `
-                                    <p style="margin: 5px 0; font-size: 14px; color: #374151;">
-                                        <strong>💰 Montant :</strong> ${request.quoted_price.toLocaleString('fr-FR')} FCFA
-                                    </p>` : ''}
-                                </div>
-                            </div>
-
-                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 8px; margin-top: 20px;">
-                                <p style="margin: 0; font-size: 13px; color: #92400e;">
-                                    <strong>ℹ️ Que faire maintenant ?</strong><br/>
-                                    L'artisan a été notifié et devrait vous contacter sous peu. Si vous ne recevez pas d'appel dans les 24h, n'hésitez pas à le contacter directement au numéro ci-dessus.
-                                </p>
-                            </div>
-
-                            <p style="font-size: 14px; color: #6b7280; margin-top: 30px; line-height: 1.6;">
-                                Cordialement,<br/>
-                                <strong style="color: #111827;">L'équipe de Gestion</strong>
-                            </p>
-
-                            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;" />
-
-                            <p style="font-size: 11px; color: #9ca3af; text-align: center; margin: 0;">
-                                Cet email a été envoyé automatiquement. Pour toute question, contactez votre propriétaire.
-                            </p>
-                        </div>
-                    </div>
-                `
+                react: MaintenanceUpdateEmail({
+                    tenantName: tenantName || 'Locataire',
+                    description: request.description,
+                    artisanName: request.artisan_name,
+                    artisanPhone: request.artisan_phone,
+                    artisanAddress: request.artisan_address || undefined,
+                    interventionDate: datePrevue,
+                    status: "approved",
+                })
             });
             console.log(`✅ Email envoyé à ${tenantEmail} pour intervention ${request.description}`);
         } catch (emailError) {
+
             console.error("❌ Erreur envoi email locataire:", emailError);
             // On ne bloque pas le workflow si l'email échoue
         }
@@ -2200,6 +2118,16 @@ export async function sendTenantInvitation(leaseId: string) {
     if (lease.team_id !== teamId) return { success: false, error: "Non autorisé" };
     if (!lease.tenant_email) return { success: false, error: "Email du locataire manquant" };
 
+    // Récupérer le nom de l'expéditeur
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, company_name')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    const ownerName = profile?.company_name || profile?.full_name || "Votre propriétaire";
+
+
     // 2. Générer le token d'accès locataire (système custom, cookie-based)
     const { generateTenantAccessToken, getTenantMagicLinkUrl } = await import('@/lib/tenant-magic-link');
     const rawToken = await generateTenantAccessToken(leaseId);
@@ -2210,58 +2138,16 @@ export async function sendTenantInvitation(leaseId: string) {
         await sendEmail({
             to: lease.tenant_email,
             subject: `Invitation à votre Espace Locataire - Dousell`,
-            html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
-                     <div style="text-align: center; margin-bottom: 24px;">
-                        <h2 style="color: #F4C430; margin-bottom: 8px;">Bienvenue sur Dousell Immo</h2>
-                        <p style="color: #6b7280; font-size: 14px;">Votre portail locataire est prêt</p>
-                    </div>
-
-                    <div style="margin-bottom: 24px;">
-                        <p style="color: #374151;">Bonjour <strong>${lease.tenant_name}</strong>,</p>
-                        <p style="color: #374151; line-height: 1.5;">
-                            Votre propriétaire vous invite à rejoindre votre espace locataire pour le bien situé à :
-                        </p>
-                        <div style="background-color: #f3f4f6; padding: 12px; border-radius: 6px; margin: 12px 0; font-size: 14px; color: #111827;">
-                            ${lease.property_address || 'Adresse non renseignée'}
-                        </div>
-                    </div>
-
-                    <div style="background-color: #fefce8; border: 1px solid #fde047; border-radius: 6px; padding: 16px; margin-bottom: 24px;">
-                        <h3 style="color: #854d0e; margin: 0 0 8px 0; font-size: 16px;">Ce que vous pouvez faire :</h3>
-                        <ul style="margin: 0; padding-left: 20px; color: #a16207; font-size: 14px;">
-                            <li style="margin-bottom: 4px;">Payer votre loyer en ligne</li>
-                            <li style="margin-bottom: 4px;">Télécharger vos quittances</li>
-                            <li>Signaler un incident</li>
-                        </ul>
-                    </div>
-
-                    <div style="text-align: center; margin: 32px 0;">
-                        <a href="${magicLink}"
-                           style="display: inline-block; background-color: #F4C430; color: #000000; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            Accéder à mon espace
-                        </a>
-                        <p style="margin-top: 12px; font-size: 12px; color: #9ca3af;">
-                            Ce lien d'accès est personnel et valide pour 7 jours.
-                        </p>
-                    </div>
-
-                    <p style="color: #6b7280; font-size: 13px; text-align: center; margin-top: 15px;">
-                        Le lien ne fonctionne pas ? Copiez et collez cette URL dans votre navigateur :<br>
-                        <code style="background: #f3f4f6; padding: 8px; display: inline-block; margin-top: 5px; word-break: break-all; font-size: 11px;">${magicLink}</code>
-                    </p>
-
-                    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
-
-                    <p style="font-size: 12px; color: #9ca3af; text-align: center;">
-                        Si vous n'êtes pas le destinataire de cet email, merci de l'ignorer.<br>
-                        &copy; ${new Date().getFullYear()} Dousell Immo.
-                    </p>
-                </div>
-            `
+            react: TenantInvitationEmail({
+                tenantName: lease.tenant_name,
+                propertyAddress: lease.property_address || '',
+                magicLink: magicLink,
+                ownerName: ownerName,
+            })
         });
 
         return { success: true, message: `Invitation envoyée à ${lease.tenant_email}` };
+
 
     } catch (emailError) {
         console.error("Erreur envoi email invitation:", emailError);

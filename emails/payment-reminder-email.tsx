@@ -1,34 +1,39 @@
 import {
-    Html,
-    Head,
     Body,
     Container,
+    Head,
+    Heading,
+    Html,
+    Preview,
     Section,
     Text,
-    Button,
     Hr,
-    Heading,
+    Button,
 } from "@react-email/components";
 import * as React from "react";
 
-interface PasswordResetEmailProps {
-    userName: string;
-    resetUrl: string;
+interface PaymentReminderEmailProps {
+    tenantName: string;
+    amountFormatted: string;
+    dueDateStr: string;
+    propertyId?: string;
     teamName?: string;
 }
 
 /**
- * PasswordResetEmail - Nouveau Design SaaS Minimaliste
+ * PaymentReminderEmail - Nouveau Design SaaS Minimaliste
  * Refactorisation par Antigravity
  */
-export function PasswordResetEmail({
-    userName = "Jean Dupont",
-    resetUrl = "https://dousell-immo.app/auth/reset-password",
+export const PaymentReminderEmail = ({
+    tenantName = "Locataire",
+    amountFormatted = "250 000",
+    dueDateStr = "05 Janvier 2026",
     teamName = "Doussel Immo",
-}: PasswordResetEmailProps) {
+}: PaymentReminderEmailProps) => {
     return (
         <Html lang="fr">
             <Head />
+            <Preview>Rappel : Loyer en attente de règlement — {amountFormatted} FCFA</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* En-tête discret */}
@@ -40,30 +45,32 @@ export function PasswordResetEmail({
 
                     {/* Corps de l'email */}
                     <Section style={content}>
-                        <Heading style={h1}>Réinitialisation de votre mot de passe</Heading>
-
-                        <Text style={text}>Bonjour {userName},</Text>
+                        <Heading style={h1}>Rappel de paiement</Heading>
 
                         <Text style={text}>
-                            Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte <strong>{teamName}</strong>. Si vous êtes à l'origine de cette demande, vous pouvez définir un nouveau mot de passe en cliquant sur le bouton ci-dessous.
+                            Bonjour <strong>{tenantName}</strong>,
                         </Text>
 
+                        <Text style={text}>
+                            Sauf erreur de notre part, nous n'avons pas encore reçu le règlement de votre loyer d'un montant de <strong>{amountFormatted} FCFA</strong>, dont l'échéance était le {dueDateStr}.
+                        </Text>
+
+                        {/* Note Importante / Relance */}
+                        <Section style={infoBox}>
+                            <Text style={infoText}>
+                                Nous vous prions de bien vouloir régulariser votre situation dans les meilleurs délais via votre espace locataire ou par virement bancaire habituel.
+                            </Text>
+                        </Section>
+
                         <Section style={buttonAction}>
-                            <Button style={button} href={resetUrl}>
-                                Réinitialiser mon mot de passe
+                            <Button style={button} href="https://dousell-immo.app/locataire">
+                                Régulariser mon paiement
                             </Button>
                         </Section>
 
                         <Text style={textSmall}>
-                            Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :
+                            Si vous avez déjà effectué ce paiement dans les dernières 48 heures, merci de ne pas tenir compte de ce message automatique.
                         </Text>
-                        <Text style={linkText}>{resetUrl}</Text>
-
-                        <Section style={infoBox}>
-                            <Text style={infoText}>
-                                <strong>Sécurité :</strong> Ce lien est valable pendant 60 minutes. Si vous n'avez pas demandé de réinitialisation, vous pouvez ignorer cet email en toute sécurité. Votre mot de passe actuel ne sera pas modifié.
-                            </Text>
-                        </Section>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -71,19 +78,19 @@ export function PasswordResetEmail({
                     {/* Footer */}
                     <Section style={footer}>
                         <Text style={footerText}>
-                            © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
+                            © {new Date().getFullYear()} {teamName} — Service de Gestion Locative
                         </Text>
                         <Text style={footerLink}>
-                            Doussel Immo — Sécurité de votre compte
+                            Doussel Immo — Dakar, Sénégal
                         </Text>
                     </Section>
                 </Container>
             </Body>
         </Html>
     );
-}
+};
 
-export default PasswordResetEmail;
+export default PaymentReminderEmail;
 
 // Styles Inline
 const main = {
@@ -137,21 +144,28 @@ const textSmall = {
     color: "#71717a",
     fontSize: "13px",
     lineHeight: "1.5",
-    marginTop: "32px",
-    marginBottom: "8px",
+    fontStyle: "italic",
+    marginTop: "40px",
 };
 
-const linkText = {
-    color: "#0f172a",
-    fontSize: "12px",
-    wordBreak: "break-all" as const,
+const infoBox = {
+    backgroundColor: "#fafafa",
+    border: "1px solid #f4f4f5",
+    borderRadius: "6px",
+    padding: "20px",
+    margin: "32px 0",
+};
+
+const infoText = {
+    color: "#18181b",
+    fontSize: "14px",
+    lineHeight: "1.6",
     margin: "0",
 };
 
 const buttonAction = {
     textAlign: "center" as const,
-    marginTop: "40px",
-    marginBottom: "40px",
+    marginTop: "10px",
 };
 
 const button = {
@@ -164,20 +178,6 @@ const button = {
     textAlign: "center" as const,
     display: "inline-block",
     padding: "12px 32px",
-};
-
-const infoBox = {
-    backgroundColor: "#f8fafc",
-    borderLeft: "2px solid #e2e8f0",
-    padding: "16px 20px",
-    margin: "32px 0",
-};
-
-const infoText = {
-    color: "#64748b",
-    fontSize: "13px",
-    lineHeight: "1.5",
-    margin: "0",
 };
 
 const footer = {

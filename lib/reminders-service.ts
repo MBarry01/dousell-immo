@@ -133,45 +133,17 @@ export async function internalProcessReminders(supabase: SupabaseClient): Promis
     };
 }
 
+import { PaymentReminderEmail } from "../emails/payment-reminder-email";
+import React from "react";
+
+// ... (existing imports)
+
 /**
  * Real Email Sender using project's existing mailer
  */
 async function sendReminderEmail(email: string, name: string, amount: number, date: Date, ownerEmail?: string) {
     const formattedDate = date.toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' });
     const formattedAmount = amount.toLocaleString("fr-SN");
-
-    const emailHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #f8f9fa; padding: 20px; text-align: center; border-bottom: 3px solid #dc3545; }
-        .content { padding: 30px 20px; }
-        .button { background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 15px; }
-        .footer { font-size: 12px; color: #666; text-align: center; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h2>Rappel de paiement</h2>
-        </div>
-        <div class="content">
-          <p>Bonjour <strong>${name}</strong>,</p>
-          <p>Sauf erreur de notre part, nous n'avons pas encore reçu le règlement de votre loyer d'un montant de <strong>${formattedAmount} FCFA</strong>, dont l'échéance était le <strong>${formattedDate}</strong>.</p>
-          <p>Nous vous remercions de bien vouloir régulariser votre situation dans les meilleurs délais.</p>
-          <p>Si vous avez déjà effectué ce paiement, merci de ne pas tenir compte de ce message.</p>
-        </div>
-        <div class="footer">
-          <p>Ceci est un message automatique envoyé par Doussel Immo.</p>
-          ${ownerEmail ? '<p style="color: #999; margin-top: 10px;">Copie envoyée au propriétaire pour information.</p>' : ''}
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
 
     console.log(`📧 Sending Late Reminder to: ${email}${ownerEmail ? ` (CC: ${ownerEmail})` : ''}`);
 
@@ -182,7 +154,11 @@ async function sendReminderEmail(email: string, name: string, amount: number, da
     await sendEmail({
         to: recipients,
         subject: `Rappel : Retard de paiement - Loyer du ${formattedDate}`,
-        html: emailHtml,
+        react: React.createElement(PaymentReminderEmail, {
+            tenantName: name,
+            amountFormatted: formattedAmount,
+            dueDateStr: formattedDate,
+        }),
         // @ts-ignore - Le type sendEmail accepte cc mais TypeScript ne le voit pas toujours
         cc: ccRecipients,
     });

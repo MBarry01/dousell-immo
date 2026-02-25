@@ -14,7 +14,6 @@ import * as React from "react";
 
 interface AccessRejectedProps {
   userName: string;
-  permission: string;
   permissionLabel?: string;
   reviewerName: string;
   reviewNotes?: string;
@@ -23,73 +22,77 @@ interface AccessRejectedProps {
 }
 
 /**
- * Email envoyé au membre quand sa demande d'accès est rejetée
+ * AccessRejected - Nouveau Design SaaS Minimaliste
+ * Refactorisation par Antigravity
  */
 export function AccessRejected({
   userName = "Jean Dupont",
-  permission = "leases.edit",
   permissionLabel = "Édition des baux",
   reviewerName = "Marie Martin",
   reviewNotes,
-  teamName = "Mon Équipe",
-  contactUrl = "https://dousell.com/gestion/equipe",
+  teamName = "Doussel Immo",
+  contactUrl = "https://dousell-immo.app/gestion/equipe",
 }: AccessRejectedProps) {
   return (
     <Html>
       <Head />
-      <Preview>
-        Votre demande d&apos;accès temporaire a été refusée
-      </Preview>
+      <Preview>Mise à jour de votre demande d'accès</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>Demande d&apos;accès refusée</Heading>
-
-          <Text style={text}>
-            Bonjour {userName},
-          </Text>
-
-          <Text style={text}>
-            Votre demande d&apos;accès temporaire à la fonctionnalité{" "}
-            <strong>{permissionLabel || permission}</strong> a été examinée par{" "}
-            {reviewerName} et n&apos;a pas pu être approuvée pour le moment.
-          </Text>
-
-          {reviewNotes && (
-            <Section style={notesBox}>
-              <Text style={notesLabel}>💬 Raison du refus</Text>
-              <Text style={notesText}>{reviewNotes}</Text>
-            </Section>
-          )}
-
-          <Hr style={hr} />
-
-          <Text style={text}>
-            Si vous pensez avoir besoin de cet accès de manière permanente,
-            nous vous recommandons de discuter avec votre responsable d&apos;équipe
-            pour éventuellement ajuster votre rôle.
-          </Text>
-
-          <Section style={infoBox}>
-            <Text style={infoText}>
-              💡 <strong>Besoin d&apos;aide ?</strong>
-              <br />
-              Contactez votre responsable d&apos;équipe pour en savoir plus sur
-              les raisons du refus ou pour demander un ajustement de vos
-              permissions permanentes.
-            </Text>
+          {/* En-tête discret */}
+          <Section style={header}>
+            <Text style={logo}>DOUSSEL IMMO</Text>
           </Section>
 
-          {contactUrl && (
-            <Section style={buttonContainer}>
-              <Button style={button} href={contactUrl}>
-                Contacter mon équipe
-              </Button>
-            </Section>
-          )}
+          <Hr style={hrSubtle} />
 
-          <Text style={footer}>
-            Équipe {teamName} - Dousell Immo
-          </Text>
+          {/* Corps de l'email */}
+          <Section style={content}>
+            <Heading style={h1}>Demande d'accès non approuvée</Heading>
+
+            <Text style={text}>Bonjour {userName},</Text>
+
+            <Text style={text}>
+              Votre demande d'accès pour <strong>{permissionLabel}</strong> a été examinée par {reviewerName} et n'a pas pu être approuvée pour le moment.
+            </Text>
+
+            {/* Note du responsable - Citation discrète */}
+            {reviewNotes && (
+              <Section style={quoteBox}>
+                <Text style={quoteText}>"{reviewNotes}"</Text>
+              </Section>
+            )}
+
+            <Text style={text}>
+              Si vous pensez que cet accès est nécessaire à votre activité, nous vous invitons à en discuter avec votre responsable d'équipe pour ajuster vos permissions.
+            </Text>
+
+            {contactUrl && (
+              <Section style={buttonAction}>
+                <Button style={button} href={contactUrl}>
+                  Contacter l'équipe
+                </Button>
+              </Section>
+            )}
+
+            <Section style={infoBox}>
+              <Text style={infoText}>
+                <strong>Aide :</strong> Vous pouvez également consulter la documentation interne sur la gestion des rôles et permissions.
+              </Text>
+            </Section>
+          </Section>
+
+          <Hr style={hrSubtle} />
+
+          {/* Footer */}
+          <Section style={footer}>
+            <Text style={footerText}>
+              © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
+            </Text>
+            <Text style={footerLink}>
+              Doussel Immo — Plateforme de Gestion Immobilière
+            </Text>
+          </Section>
         </Container>
       </Body>
     </Html>
@@ -98,99 +101,113 @@ export function AccessRejected({
 
 export default AccessRejected;
 
-// Styles
+// Styles Inline
 const main = {
-  backgroundColor: "#f6f9fc",
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  backgroundColor: "#ffffff",
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
 const container = {
-  backgroundColor: "#ffffff",
   margin: "0 auto",
-  padding: "20px 0 48px",
-  marginBottom: "64px",
+  padding: "40px 20px",
   maxWidth: "600px",
+};
+
+const header = {
+  paddingBottom: "20px",
+};
+
+const logo = {
+  fontSize: "14px",
+  fontWeight: "bold" as const,
+  letterSpacing: "1px",
+  color: "#18181b",
+  margin: "0",
+};
+
+const hrSubtle = {
+  borderColor: "#f4f4f5",
+  margin: "0",
+};
+
+const content = {
+  padding: "40px 0",
 };
 
 const h1 = {
   color: "#18181b",
   fontSize: "24px",
-  fontWeight: "bold",
-  margin: "40px 0 20px",
-  padding: "0 40px",
+  fontWeight: "600" as const,
+  marginBottom: "32px",
+  marginTop: "0",
 };
 
 const text = {
   color: "#3f3f46",
+  fontSize: "15px",
+  lineHeight: "1.6",
+  marginBottom: "20px",
+};
+
+const quoteBox = {
+  borderLeft: "2px solid #e4e4e7",
+  paddingLeft: "20px",
+  margin: "32px 0",
+};
+
+const quoteText = {
+  color: "#71717a",
   fontSize: "14px",
-  lineHeight: "24px",
-  padding: "0 40px",
-  margin: "16px 0",
-};
-
-const notesBox = {
-  backgroundColor: "#fef2f2",
-  borderLeft: "4px solid #ef4444",
-  padding: "16px",
-  margin: "24px 40px",
-  borderRadius: "4px",
-};
-
-const notesLabel = {
-  color: "#7f1d1d",
-  fontSize: "12px",
-  fontWeight: "600",
-  margin: "0 0 8px 0",
-};
-
-const notesText = {
-  color: "#991b1b",
-  fontSize: "14px",
-  lineHeight: "20px",
+  fontStyle: "italic" as const,
   margin: "0",
 };
 
-const hr = {
-  borderColor: "#e5e5e5",
-  margin: "24px 40px",
-};
-
-const infoBox = {
-  backgroundColor: "#eff6ff",
-  border: "1px solid #bfdbfe",
-  borderRadius: "8px",
-  padding: "16px",
-  margin: "24px 40px",
-};
-
-const infoText = {
-  color: "#1e40af",
-  fontSize: "13px",
-  lineHeight: "20px",
-  margin: "0",
-};
-
-const buttonContainer = {
-  padding: "24px 40px",
+const buttonAction = {
+  textAlign: "center" as const,
+  marginTop: "40px",
+  marginBottom: "40px",
 };
 
 const button = {
-  backgroundColor: "#3b82f6",
-  borderRadius: "8px",
-  color: "#fff",
+  backgroundColor: "#0f172a",
+  borderRadius: "6px",
+  color: "#ffffff",
   fontSize: "14px",
-  fontWeight: "600",
+  fontWeight: "500" as const,
   textDecoration: "none",
   textAlign: "center" as const,
-  display: "block",
-  padding: "12px 24px",
+  display: "inline-block",
+  padding: "12px 32px",
+};
+
+const infoBox = {
+  backgroundColor: "#f8fafc",
+  borderLeft: "2px solid #e2e8f0",
+  padding: "16px 20px",
+  margin: "32px 0",
+};
+
+const infoText = {
+  color: "#64748b",
+  fontSize: "13px",
+  lineHeight: "1.5",
+  margin: "0",
 };
 
 const footer = {
-  color: "#71717a",
+  paddingTop: "32px",
+  textAlign: "center" as const,
+};
+
+const footerText = {
+  color: "#a1a1aa",
   fontSize: "12px",
-  lineHeight: "20px",
-  padding: "0 40px",
-  marginTop: "32px",
+  marginBottom: "8px",
+  marginTop: "0",
+};
+
+const footerLink = {
+  color: "#a1a1aa",
+  fontSize: "11px",
+  margin: "0",
 };

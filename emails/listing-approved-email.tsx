@@ -9,6 +9,8 @@ import {
   Preview,
   Section,
   Text,
+  Hr,
+  Button,
 } from "@react-email/components";
 
 type ListingApprovedEmailProps = {
@@ -17,144 +19,132 @@ type ListingApprovedEmailProps = {
   isPaid?: boolean;
   invoiceNumber?: string;
   hasInvoice?: boolean;
-  // Détails de l'annonce
-  propertyType?: string; // Type de bien (Appartement, Villa, etc.)
-  transactionType?: string; // Vente, Location, etc.
+  propertyType?: string;
+  transactionType?: string;
   price?: number;
-  // Localisation
   region?: string;
-  city?: string; // Ville/Commune
+  city?: string;
   address?: string;
-  // Paiement
   paymentAmount?: number;
   serviceName?: string;
+  teamName?: string;
 };
 
+/**
+ * ListingApprovedEmail - Nouveau Design SaaS Minimaliste
+ * Refactorisation par Antigravity
+ */
 export function ListingApprovedEmail({
-  propertyTitle,
-  propertyUrl,
+  propertyTitle = "Villa de Luxe aux Almadies",
+  propertyUrl = "https://dousell-immo.app/biens/1",
   isPaid = false,
   invoiceNumber,
   hasInvoice = false,
-  propertyType,
-  transactionType,
-  price,
-  region,
-  city,
-  address,
+  propertyType = "Villa",
+  transactionType = "Vente",
+  price = 250000000,
+  region = "Dakar",
+  city = "Dakar",
+  address = "Almadies",
   paymentAmount,
   serviceName,
+  teamName = "Doussel Immo",
 }: ListingApprovedEmailProps) {
   return (
     <Html>
-      <Head>
-        <style>
-          {`
-            @media (prefers-color-scheme: dark) {
-              .body { background-color: #18181b !important; }
-              .container { background-color: #27272a !important; color: #ffffff !important; }
-              .text { color: #d4d4d8 !important; }
-              .heading { color: #ffffff !important; }
-              .card { background-color: #3f3f46 !important; border-color: #52525b !important; }
-              .label { color: #a1a1aa !important; }
-              .value { color: #ffffff !important; }
-              .divider { border-color: #52525b !important; }
-              .receipt-card { background-color: #14532d !important; border-color: #166534 !important; }
-              .receipt-text { color: #dcfce7 !important; }
-              .receipt-value { color: #ffffff !important; }
-            }
-          `}
-        </style>
-      </Head>
-      <Preview>Votre annonce est en ligne sur Dousell Immo</Preview>
-      <Body style={main} className="body">
-        <Container style={container} className="container">
-          {/* Header avec Logo (Simulé par texte stylisé si image pas dispo, ou image externe) */}
+      <Head />
+      <Preview>Votre annonce est en ligne — {teamName}</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          {/* En-tête discret */}
           <Section style={header}>
-            <Heading style={brandName}>Dousell Immo</Heading>
-            <Text style={brandSubtitle}>L&apos;immobilier de confiance</Text>
+            <Text style={logo}>DOUSSEL IMMO</Text>
           </Section>
 
+          <Hr style={hrSubtle} />
+
+          {/* Corps de l'email */}
           <Section style={content}>
-            <Heading style={h2} className="heading">Félicitations ! 🎉</Heading>
-            <Text style={paragraph} className="text">
-              Votre annonce <strong>&quot;{propertyTitle}&quot;</strong> a été validée par notre équipe. Elle est désormais visible par des milliers de visiteurs potentiels.
+            <Heading style={h1}>Votre annonce est en ligne</Heading>
+
+            <Text style={text}>
+              Félicitations ! Votre annonce <strong>"{propertyTitle}"</strong> a été validée par notre équipe et est désormais visible sur la plateforme.
             </Text>
 
-            <Section style={card} className="card">
-              <Heading style={cardTitle} className="heading">Détails de l&apos;annonce</Heading>
+            {/* Carte de l'annonce - Aplat Gris Clair */}
+            <Section style={detailsBox}>
+              <Text style={detailsTitle}>DÉTAILS DE L'ANNONCE</Text>
 
-              <div style={grid}>
-                <div style={column}>
-                  <Text style={label} className="label">Type de bien</Text>
-                  <Text style={value} className="value">{propertyType || "Non spécifié"}</Text>
-                </div>
-                <div style={column}>
-                  <Text style={label} className="label">Transaction</Text>
-                  <Text style={value} className="value">{transactionType || "Non spécifié"}</Text>
-                </div>
-              </div>
+              <Section style={gridRow}>
+                <Section style={gridCol}>
+                  <Text style={label}>Type</Text>
+                  <Text style={value}>{propertyType}</Text>
+                </Section>
+                <Section style={gridCol}>
+                  <Text style={label}>Transaction</Text>
+                  <Text style={value}>{transactionType}</Text>
+                </Section>
+              </Section>
 
-              <div style={divider} className="divider"></div>
-
-              <div style={grid}>
-                <div style={column}>
-                  <Text style={label} className="label">Prix</Text>
-                  <Text style={valuePrice} className="value">{price ? price.toLocaleString("fr-SN") + " FCFA" : "Non spécifié"}</Text>
-                </div>
-                <div style={column}>
-                  <Text style={label} className="label">Localisation</Text>
-                  <Text style={value} className="value">
-                    {[city, region].filter(Boolean).join(", ") || address || "Sénégal"}
+              <Section style={gridRow}>
+                <Section style={gridCol}>
+                  <Text style={label}>Prix</Text>
+                  <Text style={valuePrice}>
+                    {price ? price.toLocaleString("fr-SN") + " FCFA" : "Prix non spécifié"}
                   </Text>
-                </div>
-              </div>
+                </Section>
+                <Section style={gridCol}>
+                  <Text style={label}>Localisation</Text>
+                  <Text style={value}>
+                    {[city, region].filter(Boolean).join(", ") || "Sénégal"}
+                  </Text>
+                </Section>
+              </Section>
             </Section>
 
-            <Section style={buttonContainer}>
-              <Link href={propertyUrl} style={button}>
-                Voir mon annonce en ligne
-              </Link>
-            </Section>
-
+            {/* Section Paiement (si applicable) */}
             {isPaid && (
-              <Section style={receiptCard} className="receipt-card">
-                <Heading style={receiptTitle} className="receipt-text">Reçu de paiement</Heading>
-                <Text style={receiptRow}>
-                  <span style={receiptLabel} className="receipt-text">Service :</span>
-                  <span style={receiptValue} className="receipt-value">{serviceName || "Option Visibilité"}</span>
-                </Text>
-                <Text style={receiptRow}>
-                  <span style={receiptLabel} className="receipt-text">Montant réglé :</span>
-                  <span style={receiptValuePrice} className="receipt-value">{(paymentAmount || 0).toLocaleString("fr-SN")} FCFA</span>
-                </Text>
-                <Text style={receiptRow}>
-                  <span style={receiptLabel} className="receipt-text">Référence :</span>
-                  <span style={receiptValue} className="receipt-value">{invoiceNumber || "N/A"}</span>
+              <Section style={receiptBox}>
+                <Text style={detailsTitle}>REÇU DE PAIEMENT</Text>
+                <Text style={receiptText}>
+                  <strong>Service :</strong> {serviceName || "Option Visibilité"}<br />
+                  <strong>Montant :</strong> {(paymentAmount || 0).toLocaleString("fr-SN")} FCFA<br />
+                  <strong>Référence :</strong> {invoiceNumber || "N/A"}
                 </Text>
                 {hasInvoice && (
-                  <Text style={attachmentNote}>
-                    📎 La facture détaillée (PDF) est jointe à cet email.
+                  <Text style={infoText}>
+                    📎 La facture détaillée est jointe à cet email au format PDF.
                   </Text>
                 )}
               </Section>
             )}
 
-            <Text style={paragraph} className="text">
-              Pour toute question ou modification, notre équipe support est à votre disposition.
-            </Text>
+            <Section style={buttonAction}>
+              <Button style={button} href={propertyUrl}>
+                Voir mon annonce
+              </Button>
+            </Section>
+
+            <Section style={infoBox}>
+              <Text style={infoText}>
+                <strong>Aide :</strong> Besoin de modifier votre annonce ? Connectez-vous à votre tableau de bord pour effectuer vos changements à tout moment.
+              </Text>
+            </Section>
           </Section>
 
+          <Hr style={hrSubtle} />
+
+          {/* Footer */}
           <Section style={footer}>
-            <Text style={footerContact}>Besoin d&apos;aide ? Contactez nos agents :</Text>
-            <Text style={footerPhone}>🇫🇷 +33 07 51 08 15 79</Text>
-            <Text style={footerPhone}>🇸🇳 +221 77 138 52 81</Text>
-            <Text style={footerLinks}>
-              <Link href="https://dousell-immo.com" style={link}>Site Web</Link> •{" "}
-              <Link href="mailto:contact@doussel-immo.com" style={link}>Contact</Link>
+            <Section style={footerContacts}>
+              <Text style={footerContactText}>Besoin d'aide ?</Text>
+              <Text style={footerPhone}>🇸🇳 +221 77 138 52 81</Text>
+            </Section>
+            <Text style={footerText}>
+              © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
             </Text>
-            <Text style={footerCopyright}>
-              © {new Date().getFullYear()} Dousell Immo. Tous droits réservés.
+            <Text style={footerLink}>
+              Doussel Immo — Plateforme Immobilière
             </Text>
           </Section>
         </Container>
@@ -163,220 +153,183 @@ export function ListingApprovedEmail({
   );
 }
 
-// Styles
+export default ListingApprovedEmail;
+
+// Styles Inline
 const main = {
-  backgroundColor: "#f4f4f5",
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-  padding: "40px 0",
+  backgroundColor: "#ffffff",
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
 const container = {
-  backgroundColor: "#ffffff",
   margin: "0 auto",
-  padding: "0",
-  borderRadius: "12px",
-  overflow: "hidden",
+  padding: "40px 20px",
   maxWidth: "600px",
-  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
 };
 
 const header = {
-  backgroundColor: "#05080c",
-  padding: "40px 20px",
-  textAlign: "center" as const,
+  paddingBottom: "20px",
 };
 
-const brandName = {
-  color: "#ffffff",
-  fontSize: "28px",
-  fontWeight: "bold",
-  margin: "0",
-  letterSpacing: "-0.5px",
-};
-
-const brandSubtitle = {
-  color: "#fbbf24", // Amber-400
+const logo = {
   fontSize: "14px",
-  margin: "8px 0 0",
-  textTransform: "uppercase" as const,
-  letterSpacing: "2px",
+  fontWeight: "bold" as const,
+  letterSpacing: "1px",
+  color: "#18181b",
+  margin: "0",
+};
+
+const hrSubtle = {
+  borderColor: "#f4f4f5",
+  margin: "0",
 };
 
 const content = {
-  padding: "40px 32px",
+  padding: "40px 0",
 };
 
-const h2 = {
+const h1 = {
   color: "#18181b",
   fontSize: "24px",
-  fontWeight: "700",
-  margin: "0 0 24px",
-  textAlign: "center" as const,
+  fontWeight: "600" as const,
+  marginBottom: "32px",
+  marginTop: "0",
 };
 
-const paragraph = {
-  color: "#52525b",
-  fontSize: "16px",
-  lineHeight: "26px",
-  margin: "0 0 24px",
-  textAlign: "center" as const,
+const text = {
+  color: "#3f3f46",
+  fontSize: "15px",
+  lineHeight: "1.6",
+  marginBottom: "20px",
 };
 
-const card = {
+const detailsBox = {
   backgroundColor: "#fafafa",
-  borderRadius: "12px",
-  border: "1px solid #e4e4e7",
+  border: "1px solid #f4f4f5",
+  borderRadius: "6px",
   padding: "24px",
-  margin: "0 0 32px",
+  margin: "32px 0",
 };
 
-const cardTitle = {
-  color: "#18181b",
-  fontSize: "16px",
-  fontWeight: "600",
-  margin: "0 0 16px",
-  textTransform: "uppercase" as const,
-  letterSpacing: "0.5px",
+const detailsTitle = {
+  color: "#71717a",
+  fontSize: "11px",
+  fontWeight: "600" as const,
+  letterSpacing: "0.05em",
+  marginBottom: "16px",
+  marginTop: "0",
 };
 
-const grid = {
-  display: "flex",
-  justifyContent: "space-between",
-  marginBottom: "12px",
+const gridRow = {
+  display: "table",
+  width: "100%",
+  marginBottom: "16px",
 };
 
-const column = {
-  width: "48%",
+const gridCol = {
+  display: "table-cell",
+  width: "50%",
+  verticalAlign: "top",
 };
 
 const label = {
-  color: "#71717a",
+  color: "#a1a1aa",
   fontSize: "12px",
-  textTransform: "uppercase" as const,
-  margin: "0 0 4px",
-  fontWeight: "500",
+  margin: "0 0 4px 0",
 };
 
 const value = {
   color: "#18181b",
-  fontSize: "15px",
-  fontWeight: "500",
+  fontSize: "14px",
+  fontWeight: "500" as const,
   margin: "0",
 };
 
 const valuePrice = {
-  color: "#05080c",
-  fontSize: "16px",
-  fontWeight: "700",
+  color: "#0f172a",
+  fontSize: "15px",
+  fontWeight: "700" as const,
   margin: "0",
 };
 
-const divider = {
-  borderTop: "1px solid #e4e4e7",
-  margin: "16px 0",
+const receiptBox = {
+  backgroundColor: "#f8fafc",
+  border: "1px solid #f1f5f9",
+  borderRadius: "6px",
+  padding: "24px",
+  margin: "32px 0",
 };
 
-const buttonContainer = {
+const receiptText = {
+  color: "#475569",
+  fontSize: "14px",
+  lineHeight: "1.8",
+  margin: "0",
+};
+
+const buttonAction = {
   textAlign: "center" as const,
-  margin: "0 0 40px",
+  marginTop: "40px",
+  marginBottom: "40px",
 };
 
 const button = {
-  backgroundColor: "#fbbf24", // Amber-400
-  color: "#05080c",
-  fontSize: "16px",
-  fontWeight: "600",
+  backgroundColor: "#0f172a",
+  borderRadius: "6px",
+  color: "#ffffff",
+  fontSize: "14px",
+  fontWeight: "500" as const,
   textDecoration: "none",
-  padding: "14px 32px",
-  borderRadius: "50px",
-  display: "inline-block",
-  boxShadow: "0 4px 12px rgba(251, 191, 36, 0.3)",
-};
-
-const receiptCard = {
-  backgroundColor: "#f0fdf4", // Green-50
-  border: "1px solid #bbf7d0", // Green-200
-  borderRadius: "12px",
-  padding: "24px",
-  margin: "0 0 24px",
-};
-
-const receiptTitle = {
-  color: "#15803d", // Green-700
-  fontSize: "16px",
-  fontWeight: "600",
-  margin: "0 0 16px",
-  display: "flex",
-  alignItems: "center",
-};
-
-const receiptRow = {
-  display: "flex",
-  justifyContent: "space-between",
-  margin: "8px 0",
-  borderBottom: "1px dashed #bbf7d0",
-  paddingBottom: "8px",
-};
-
-const receiptLabel = {
-  color: "#166534", // Green-800
-  fontSize: "14px",
-};
-
-const receiptValue = {
-  color: "#14532d", // Green-900
-  fontSize: "14px",
-  fontWeight: "500",
-  float: "right" as const,
-};
-
-const receiptValuePrice = {
-  color: "#14532d",
-  fontSize: "14px",
-  fontWeight: "700",
-  float: "right" as const,
-};
-
-const attachmentNote = {
-  color: "#15803d",
-  fontSize: "13px",
-  fontStyle: "italic",
-  marginTop: "16px",
   textAlign: "center" as const,
+  display: "inline-block",
+  padding: "12px 32px",
+};
+
+const infoBox = {
+  backgroundColor: "#f8fafc",
+  borderLeft: "2px solid #e2e8f0",
+  padding: "16px 20px",
+  margin: "32px 0",
+};
+
+const infoText = {
+  color: "#64748b",
+  fontSize: "13px",
+  lineHeight: "1.5",
+  margin: "0",
 };
 
 const footer = {
-  backgroundColor: "#18181b",
-  padding: "40px 20px",
+  paddingTop: "32px",
   textAlign: "center" as const,
 };
 
-const footerContact = {
+const footerContacts = {
+  marginBottom: "24px",
+};
+
+const footerContactText = {
   color: "#a1a1aa",
-  fontSize: "14px",
-  margin: "0 0 12px",
+  fontSize: "12px",
+  margin: "0 0 4px 0",
 };
 
 const footerPhone = {
-  color: "#ffffff",
-  fontSize: "15px",
-  fontWeight: "500",
-  margin: "4px 0",
-};
-
-const footerLinks = {
-  margin: "24px 0",
   color: "#71717a",
-  fontSize: "14px",
+  fontSize: "13px",
+  fontWeight: "500" as const,
+  margin: "0",
 };
 
-const link = {
-  color: "#fbbf24",
-  textDecoration: "none",
-};
-
-const footerCopyright = {
-  color: "#52525b",
+const footerText = {
+  color: "#a1a1aa",
   fontSize: "12px",
+  marginBottom: "8px",
+  marginTop: "0",
+};
+
+const footerLink = {
+  color: "#a1a1aa",
+  fontSize: "11px",
   margin: "0",
 };

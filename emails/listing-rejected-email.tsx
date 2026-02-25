@@ -9,55 +9,86 @@ import {
   Preview,
   Section,
   Text,
+  Hr,
+  Button,
 } from "@react-email/components";
 
 type ListingRejectedEmailProps = {
   propertyTitle: string;
   rejectionReason: string;
   editUrl: string;
+  teamName?: string;
 };
 
+/**
+ * ListingRejectedEmail - Nouveau Design SaaS Minimaliste
+ * Refactorisation par Antigravity
+ */
 export function ListingRejectedEmail({
-  propertyTitle,
-  rejectionReason,
-  editUrl,
+  propertyTitle = "Villa avec vue sur mer",
+  rejectionReason = "Les photos sont de trop basse qualité et ne respectent pas nos standards de visibilité.",
+  editUrl = "https://dousell-immo.app/gestion/biens/edit/1",
+  teamName = "Doussel Immo",
 }: ListingRejectedEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>Votre annonce a été refusée</Preview>
+      <Preview>Action requise : Votre annonce a été refusée — {teamName}</Preview>
       <Body style={main}>
         <Container style={container}>
+          {/* En-tête discret */}
           <Section style={header}>
-            <Heading style={h1}>Dousell Immo</Heading>
+            <Text style={logo}>DOUSSEL IMMO</Text>
           </Section>
+
+          <Hr style={hrSubtle} />
+
+          {/* Corps de l'email */}
           <Section style={content}>
-            <Heading style={h2}>Annonce refusée</Heading>
+            <Heading style={h1}>Action requise pour votre annonce</Heading>
+
             <Text style={text}>
-              Votre annonce <strong>{propertyTitle}</strong> a été refusée lors de la modération.
+              Bonjour,
             </Text>
-            <Section style={alertBox}>
-              <Text style={alertTitle}>Motif du refus :</Text>
-              <Text style={alertText}>{rejectionReason}</Text>
+
+            <Text style={text}>
+              Votre annonce <strong>"{propertyTitle}"</strong> a été examinée par notre équipe de modération. Malheureusement, elle ne peut pas être publiée en l'état.
+            </Text>
+
+            {/* Encadré Motif - Aplat Gris Clair / Bordure Neutre */}
+            <Section style={reasonBox}>
+              <Text style={reasonTitle}>MOTIF DU REFUS</Text>
+              <Text style={reasonText}>
+                {rejectionReason}
+              </Text>
             </Section>
+
             <Text style={text}>
-              Vous pouvez modifier votre annonce pour corriger les points soulevés et la soumettre à nouveau.
+              Ne vous inquiétez pas, il vous suffit de corriger les points mentionnés ci-dessus et de soumettre à nouveau votre annonce pour validation.
             </Text>
-            <Section style={buttonContainer}>
-              <Link href={editUrl} style={button}>
+
+            <Section style={buttonAction}>
+              <Button style={button} href={editUrl}>
                 Modifier mon annonce
-              </Link>
+              </Button>
             </Section>
-            <Text style={helpText}>
-              Si vous avez des questions, n&apos;hésitez pas à nous contacter à{" "}
-              <Link href="mailto:contact@dousell.immo" style={link}>
-                contact@dousell.immo
-              </Link>
-            </Text>
+
+            <Section style={infoBox}>
+              <Text style={infoText}>
+                <strong>Conseil :</strong> Des photos lumineuses et une description détaillée augmentent vos chances de validation rapide et de vente.
+              </Text>
+            </Section>
           </Section>
+
+          <Hr style={hrSubtle} />
+
+          {/* Footer */}
           <Section style={footer}>
             <Text style={footerText}>
-              Dousell Immo - L&apos;immobilier de confiance à Dakar
+              © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
+            </Text>
+            <Text style={footerLink}>
+              Doussel Immo — Plateforme Immobilière Professionnelle
             </Text>
           </Section>
         </Container>
@@ -66,112 +97,127 @@ export function ListingRejectedEmail({
   );
 }
 
+export default ListingRejectedEmail;
+
+// Styles Inline
 const main = {
-  backgroundColor: "#05080c",
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  backgroundColor: "#ffffff",
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
 const container = {
-  backgroundColor: "#ffffff",
   margin: "0 auto",
-  padding: "20px 0 48px",
-  marginBottom: "64px",
-  borderRadius: "8px",
+  padding: "40px 20px",
   maxWidth: "600px",
 };
 
 const header = {
-  padding: "32px 24px",
-  backgroundColor: "#05080c",
-  borderRadius: "8px 8px 0 0",
+  paddingBottom: "20px",
 };
 
-const h1 = {
-  color: "#ffffff",
-  fontSize: "24px",
-  fontWeight: "bold",
+const logo = {
+  fontSize: "14px",
+  fontWeight: "bold" as const,
+  letterSpacing: "1px",
+  color: "#18181b",
   margin: "0",
-  textAlign: "center" as const,
+};
+
+const hrSubtle = {
+  borderColor: "#f4f4f5",
+  margin: "0",
 };
 
 const content = {
-  padding: "32px 24px",
+  padding: "40px 0",
 };
 
-const h2 = {
-  color: "#05080c",
-  fontSize: "20px",
-  fontWeight: "bold",
-  margin: "0 0 16px",
+const h1 = {
+  color: "#18181b",
+  fontSize: "24px",
+  fontWeight: "600" as const,
+  marginBottom: "32px",
+  marginTop: "0",
 };
 
 const text = {
-  color: "#666666",
-  fontSize: "16px",
-  lineHeight: "24px",
-  margin: "0 0 16px",
+  color: "#3f3f46",
+  fontSize: "15px",
+  lineHeight: "1.6",
+  marginBottom: "20px",
 };
 
-const alertBox = {
-  backgroundColor: "#fee2e2",
-  borderLeft: "4px solid #ef4444",
-  borderRadius: "4px",
-  padding: "16px",
-  margin: "24px 0",
-};
-
-const alertTitle = {
-  color: "#991b1b",
-  fontSize: "14px",
-  fontWeight: "bold",
-  margin: "0 0 8px",
-};
-
-const alertText = {
-  color: "#7f1d1d",
-  fontSize: "16px",
-  lineHeight: "24px",
-  margin: "0",
-};
-
-const buttonContainer = {
-  textAlign: "center" as const,
+const reasonBox = {
+  backgroundColor: "#fafafa",
+  border: "1px solid #f4f4f5",
+  borderRadius: "6px",
+  padding: "24px",
   margin: "32px 0",
 };
 
+const reasonTitle = {
+  color: "#71717a",
+  fontSize: "11px",
+  fontWeight: "600" as const,
+  letterSpacing: "0.05em",
+  marginBottom: "12px",
+  marginTop: "0",
+};
+
+const reasonText = {
+  color: "#18181b",
+  fontSize: "14px",
+  lineHeight: "1.6",
+  margin: "0",
+};
+
+const buttonAction = {
+  textAlign: "center" as const,
+  marginTop: "40px",
+  marginBottom: "40px",
+};
+
 const button = {
-  backgroundColor: "#05080c",
-  borderRadius: "8px",
+  backgroundColor: "#0f172a",
+  borderRadius: "6px",
   color: "#ffffff",
-  fontSize: "16px",
-  fontWeight: "bold",
+  fontSize: "14px",
+  fontWeight: "500" as const,
   textDecoration: "none",
   textAlign: "center" as const,
   display: "inline-block",
-  padding: "12px 24px",
+  padding: "12px 32px",
 };
 
-const helpText = {
-  color: "#666666",
-  fontSize: "14px",
-  lineHeight: "20px",
-  margin: "24px 0 0",
-  textAlign: "center" as const,
+const infoBox = {
+  backgroundColor: "#f8fafc",
+  borderLeft: "2px solid #e2e8f0",
+  padding: "16px 20px",
+  margin: "32px 0",
 };
 
-const link = {
-  color: "#05080c",
-  textDecoration: "underline",
+const infoText = {
+  color: "#64748b",
+  fontSize: "13px",
+  lineHeight: "1.5",
+  margin: "0",
 };
 
 const footer = {
-  padding: "24px",
+  paddingTop: "32px",
   textAlign: "center" as const,
 };
 
 const footerText = {
-  color: "#999999",
+  color: "#a1a1aa",
   fontSize: "12px",
+  marginBottom: "8px",
+  marginTop: "0",
+};
+
+const footerLink = {
+  color: "#a1a1aa",
+  fontSize: "11px",
   margin: "0",
 };
 

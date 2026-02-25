@@ -107,34 +107,50 @@ export async function POST(request: NextRequest) {
       ], "rentals");
     }
 
-    // Envoyer email de confirmation
+    // Envoyer email de confirmation avec StandardNotificationEmail
     if (lease.tenant_email) {
       const subject = `Reçu de paiement - Loyer ${periodMonth}/${periodYear}`;
       const amountFmt = lease.monthly_amount?.toLocaleString("fr-FR");
 
-      const html = `
-        <h1>Paiement reçu !</h1>
-        <p>Bonjour ${lease.tenant_name || "Locataire"},</p>
-        <p>Nous confirmons la réception de votre paiement de <strong>${amountFmt} FCFA</strong> pour le loyer de <strong>${periodMonth}/${periodYear}</strong>.</p>
-        <p>Référence de transaction: <code>${transactionId}</code></p>
-        <p>Votre quittance est désormais disponible dans votre espace locataire.</p>
-        <br/>
-        <p>Cordialement,<br/>L'équipe Doussel Immo</p>
-      `;
+      const { render } = await import('@react-email/render');
+      const React = await import('react');
+      const { StandardNotificationEmail } = await import('@/emails/StandardNotificationEmail');
+
+      const emailHtml = await render(
+        React.createElement(StandardNotificationEmail, {
+          title: "Paiement reçu !",
+          previewText: `Confirmation de réception de votre loyer de ${amountFmt} FCFA`,
+          greeting: `Bonjour ${lease.tenant_name || "Locataire"},`,
+          mainContent: `Nous confirmons la réception de votre paiement de ${amountFmt} FCFA pour le loyer de ${periodMonth}/${periodYear}. Votre référence de transaction est ${transactionId}. Votre quittance est désormais disponible dans votre espace locataire.`,
+          ctaText: "Accéder à mon espace",
+          ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/locataire`,
+          footerText: "L'équipe Doussel Immo"
+        })
+      );
 
       await sendEmail({
         to: lease.tenant_email,
         subject,
-        html,
+        html: emailHtml,
       });
 
       // Notification propriétaire
-      const owner = lease.owner as { email?: string; full_name?: string } | undefined;
-      if (owner?.email) {
+      const owner = lease.owner as any;
+      const ownerEmail = Array.isArray(owner) ? owner[0]?.email : owner?.email;
+
+      if (ownerEmail) {
+        const ownerEmailHtml = await render(
+          React.createElement(StandardNotificationEmail, {
+            title: "Nouveau paiement reçu",
+            previewText: `Le locataire ${lease.tenant_name} a réglé son loyer`,
+            mainContent: `Le locataire ${lease.tenant_name} a réglé son loyer de ${amountFmt} FCFA via KKiaPay. Référence: ${transactionId}`,
+            footerText: "Système de Notification Doussell"
+          })
+        );
         await sendEmail({
-          to: owner.email,
+          to: ownerEmail,
           subject: `[Paiement] Loyer reçu - ${lease.tenant_name}`,
-          html: `<p>Le locataire ${lease.tenant_name} a réglé son loyer de ${amountFmt} FCFA via KKiaPay.</p><p>Référence: ${transactionId}</p>`,
+          html: ownerEmailHtml,
         });
       }
     }

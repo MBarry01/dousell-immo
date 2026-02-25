@@ -4,6 +4,9 @@ import ReactPDF from '@react-pdf/renderer';
 import { createQuittanceDocument } from '@/components/pdf/QuittancePDF_v2';
 import { createClient } from '@supabase/supabase-js';
 import { storeDocumentInGED } from '@/lib/ged-utils';
+import { render } from '@react-email/render';
+import { ReceiptEmail } from '@/emails/ReceiptEmail';
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -102,55 +105,51 @@ export async function POST(request: NextRequest) {
     const documentType = isGuarantee ? 'Dépôt de garantie' : 'Quittance de loyer';
     const periodDisplay = isGuarantee ? 'Garantie' : data.periodMonth;
 
-    // 8. Préparer l'email
+    // 8. Préparer l'email avec React Email
+    const emailHtml = await render(
+      <ReceiptEmail
+        tenantName={data.tenantName}
+        receiptNumber={data.receiptNumber}
+        periodDisplay={periodDisplay}
+        amountFormatted={amountFormatted}
+        isGuarantee={isGuarantee}
+        ownerName={data.ownerName}
+        ownerAddress={data.ownerAddress}
+      />
+    );
+
+    // Determine the subject based on document type
+    let subject = `${documentType} - ${periodDisplay}`;
+
+    // Determine the PDF filename based on document type
+    let pdfFilename;
+    if (data.isJ180 !== undefined) { // Assuming isJ180 indicates a notice document
+      const isJ180 = data.isJ180 === true;
+      pdfFilename = isJ180
+        ? `Preavis_Conge_${data.noticeNumber}.pdf`
+        : `Notification_Reconduction_${data.noticeNumber}.pdf`;
+      subject = isJ180 ? `Préavis de congé - ${data.noticeNumber}` : `Notification de reconduction - ${data.noticeNumber}`;
+    } else { // Default to receipt logic if not a notice
+      pdfFilename = isGuarantee
+        ? `Recu_Caution_${data.receiptNumber}.pdf`
+        : `Quittance_${data.receiptNumber}.pdf`;
+    }
+
     const mailOptions = {
       from: `${data.ownerName} <${process.env.GMAIL_USER}>`,
       to: data.tenantEmail,
       cc: ownerEmailForCC, // Mettre le propriétaire en copie
-      subject: `${documentType} - ${periodDisplay}`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-        </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px;">
-          <p>Bonjour <strong>${data.tenantName}</strong>,</p>
-
-          <p>Veuillez trouver ci-joint ${isGuarantee
-          ? `votre attestation de dépôt de garantie.`
-          : `votre quittance de loyer pour le mois de <strong>${data.periodMonth}</strong>.`
-        }</p>
-
-          <p><strong>Détails ${isGuarantee ? 'du dépôt' : 'de la quittance'} :</strong></p>
-          <ul>
-            <li><strong>N° ${isGuarantee ? 'Attestation' : 'Quittance'} :</strong> ${data.receiptNumber}</li>
-            <li><strong>${isGuarantee ? 'Nature' : 'Période'} :</strong> ${periodDisplay}</li>
-            <li><strong>Montant acquitté :</strong> ${amountFormatted} FCFA</li>
-          </ul>
-
-          <p>${isGuarantee
-          ? 'Nous accusons réception de votre dépôt de garantie. Ce montant vous sera restitué conformément aux termes de votre contrat de bail.'
-          : 'Nous accusons réception du paiement de votre loyer.'
-        }</p>
-
-          <p>Cordialement,<br>
-          <strong>${data.ownerName}</strong><br>
-          ${data.ownerAddress}</p>
-
-          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-          <p style="font-size: 12px; color: #999;">Email généré automatiquement par Dousell Immo</p>
-        </body>
-        </html>
-      `,
+      subject: subject,
+      html: emailHtml,
       attachments: [
         {
-          filename: `Quittance_${data.receiptNumber}.pdf`,
+          filename: pdfFilename,
           content: pdfBuffer,
           contentType: 'application/pdf',
         },
       ],
     };
+
 
     // 8. Envoyer l'email
     console.log('📤 Envoi de l\'email à:', data.tenantEmail);

@@ -1,34 +1,36 @@
 import {
-    Html,
-    Head,
     Body,
     Container,
+    Head,
+    Heading,
+    Html,
+    Preview,
     Section,
     Text,
-    Button,
     Hr,
-    Heading,
+    Button,
 } from "@react-email/components";
 import * as React from "react";
 
-interface PasswordResetEmailProps {
-    userName: string;
-    resetUrl: string;
+interface ActivationApprovedEmailProps {
+    firstName: string;
+    loginUrl?: string;
     teamName?: string;
 }
 
 /**
- * PasswordResetEmail - Nouveau Design SaaS Minimaliste
+ * ActivationApprovedEmail - Nouveau Design SaaS Minimaliste
  * Refactorisation par Antigravity
  */
-export function PasswordResetEmail({
-    userName = "Jean Dupont",
-    resetUrl = "https://dousell-immo.app/auth/reset-password",
+export const ActivationApprovedEmail = ({
+    firstName = "Utilisateur",
+    loginUrl = "https://dousell-immo.app/compte",
     teamName = "Doussel Immo",
-}: PasswordResetEmailProps) {
+}: ActivationApprovedEmailProps) => {
     return (
         <Html lang="fr">
             <Head />
+            <Preview>Félicitations ! Votre accès est activé 🎉 — {teamName}</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* En-tête discret */}
@@ -40,30 +42,40 @@ export function PasswordResetEmail({
 
                     {/* Corps de l'email */}
                     <Section style={content}>
-                        <Heading style={h1}>Réinitialisation de votre mot de passe</Heading>
-
-                        <Text style={text}>Bonjour {userName},</Text>
+                        <Heading style={h1}>Bienvenue dans la Gestion Locative</Heading>
 
                         <Text style={text}>
-                            Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte <strong>{teamName}</strong>. Si vous êtes à l'origine de cette demande, vous pouvez définir un nouveau mot de passe en cliquant sur le bouton ci-dessous.
+                            Bonjour <strong>{firstName}</strong>,
                         </Text>
 
+                        <Text style={text}>
+                            Bonne nouvelle ! Votre demande d'activation de la <strong>Gestion Locative</strong> a été approuvée par notre équipe. Vous pouvez maintenant profiter de toute la puissance de notre plateforme.
+                        </Text>
+
+                        {/* Liste des fonctionnalités - Design épuré */}
+                        <Section style={featureBox}>
+                            <Text style={featureTitle}>CE QUE VOUS POUVEZ FAIRE DÉSORMAIS</Text>
+
+                            <Section style={featureItem}>
+                                <Text style={featureText}>• Création et gestion complète de vos biens et baux</Text>
+                            </Section>
+                            <Section style={featureItem}>
+                                <Text style={featureText}>• Suivi automatisé des paiements et quittances</Text>
+                            </Section>
+                            <Section style={featureItem}>
+                                <Text style={featureText}>• Gestion simplifiée de vos relations locataires</Text>
+                            </Section>
+                        </Section>
+
                         <Section style={buttonAction}>
-                            <Button style={button} href={resetUrl}>
-                                Réinitialiser mon mot de passe
+                            <Button style={button} href={loginUrl}>
+                                Accéder à mon espace gestion
                             </Button>
                         </Section>
 
-                        <Text style={textSmall}>
-                            Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :
+                        <Text style={text}>
+                            Nous sommes ravis de vous accompagner dans la digitalisation de votre patrimoine immobilier.
                         </Text>
-                        <Text style={linkText}>{resetUrl}</Text>
-
-                        <Section style={infoBox}>
-                            <Text style={infoText}>
-                                <strong>Sécurité :</strong> Ce lien est valable pendant 60 minutes. Si vous n'avez pas demandé de réinitialisation, vous pouvez ignorer cet email en toute sécurité. Votre mot de passe actuel ne sera pas modifié.
-                            </Text>
-                        </Section>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -74,16 +86,16 @@ export function PasswordResetEmail({
                             © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
                         </Text>
                         <Text style={footerLink}>
-                            Doussel Immo — Sécurité de votre compte
+                            Doussel Immo — Votre partenaire immobilier de confiance
                         </Text>
                     </Section>
                 </Container>
             </Body>
         </Html>
     );
-}
+};
 
-export default PasswordResetEmail;
+export default ActivationApprovedEmail;
 
 // Styles Inline
 const main = {
@@ -133,18 +145,30 @@ const text = {
     marginBottom: "20px",
 };
 
-const textSmall = {
+const featureBox = {
+    backgroundColor: "#fafafa",
+    border: "1px solid #f4f4f5",
+    borderRadius: "6px",
+    padding: "24px",
+    margin: "32px 0",
+};
+
+const featureTitle = {
     color: "#71717a",
-    fontSize: "13px",
-    lineHeight: "1.5",
-    marginTop: "32px",
+    fontSize: "11px",
+    fontWeight: "600" as const,
+    letterSpacing: "0.05em",
+    marginBottom: "16px",
+    marginTop: "0",
+};
+
+const featureItem = {
     marginBottom: "8px",
 };
 
-const linkText = {
-    color: "#0f172a",
-    fontSize: "12px",
-    wordBreak: "break-all" as const,
+const featureText = {
+    color: "#18181b",
+    fontSize: "14px",
     margin: "0",
 };
 
@@ -164,20 +188,6 @@ const button = {
     textAlign: "center" as const,
     display: "inline-block",
     padding: "12px 32px",
-};
-
-const infoBox = {
-    backgroundColor: "#f8fafc",
-    borderLeft: "2px solid #e2e8f0",
-    padding: "16px 20px",
-    margin: "32px 0",
-};
-
-const infoText = {
-    color: "#64748b",
-    fontSize: "13px",
-    lineHeight: "1.5",
-    margin: "0",
 };
 
 const footer = {

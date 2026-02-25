@@ -113,33 +113,53 @@ export async function POST(request: Request) {
             ], 'rentals');
           }
 
-          // Envoyer Email de confirmation
+          // Envoyer Email de confirmation avec StandardNotificationEmail
           if (lease && lease.tenant_email) {
             const subject = `Reçu de paiement - Loyer ${customData.period_month}/${customData.period_year}`;
             const amountFmt = lease.monthly_amount?.toLocaleString('fr-FR');
 
-            // Contenu HTML simple
-            const html = `
-                    <h1>Paiement reçu !</h1>
-                    <p>Bonjour ${lease.tenant_name || 'Locataire'},</p>
-                    <p>Nous confirmons la réception de votre paiement de <strong>${amountFmt} FCFA</strong> pour le loyer de <strong>${customData.period_month}/${customData.period_year}</strong>.</p>
-                    <p>Votre quittance est désormais disponible dans votre espace locataire.</p>
-                    <br/>
-                    <p>Cordialement,<br/>L'équipe Doussel Immo</p>
-                  `;
+            const { render } = await import('@react-email/render');
+            const React = await import('react');
+            const { StandardNotificationEmail } = await import('@/emails/StandardNotificationEmail');
+
+            const emailHtml = await render(
+              React.createElement(StandardNotificationEmail, {
+                title: "Paiement reçu !",
+                previewText: `Confirmation de réception de votre loyer de ${amountFmt} FCFA`,
+                greeting: `Bonjour ${lease.tenant_name || 'Locataire'},`,
+                mainContent: `Nous confirmons la réception de votre paiement de ${amountFmt} FCFA pour le loyer de ${customData.period_month}/${customData.period_year}. Votre quittance est désormais disponible dans votre espace locataire.`,
+                ctaText: "Accéder à mon espace",
+                ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/locataire`,
+                footerText: "L'équipe Doussel Immo"
+              })
+            );
 
             await sendEmail({
               to: lease.tenant_email,
               subject,
-              html
+              html: emailHtml
             });
 
             // Notification Proprio (CC)
-            // @ts-expect-error - owner peut être undefined selon le join
-            if (lease.owner?.email) {
-              // @ts-expect-error - owner.email existe si la condition précédente passe
-              await sendEmail({ to: lease.owner.email, subject: `[Paiement] Loyer reçu - ${lease.tenant_name}`, html: `<p>Le locataire ${lease.tenant_name} a réglé son loyer de ${amountFmt} FCFA via PayDunya.</p>` });
+            const owner = lease.owner as any;
+            const ownerEmail = Array.isArray(owner) ? owner[0]?.email : owner?.email;
+
+            if (ownerEmail) {
+              const ownerEmailHtml = await render(
+                React.createElement(StandardNotificationEmail, {
+                  title: "Nouveau paiement reçu",
+                  previewText: `Le locataire ${lease.tenant_name} a réglé son loyer`,
+                  mainContent: `Le locataire ${lease.tenant_name} a réglé son loyer de ${amountFmt} FCFA via PayDunya.`,
+                  footerText: "Système de Notification Doussell"
+                })
+              );
+              await sendEmail({
+                to: ownerEmail,
+                subject: `[Paiement] Loyer reçu - ${lease.tenant_name}`,
+                html: ownerEmailHtml
+              });
             }
+
           }
         }
       }

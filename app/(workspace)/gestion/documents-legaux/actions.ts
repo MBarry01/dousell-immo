@@ -7,6 +7,9 @@ import { addMonths } from "date-fns";
 import { sendEmail } from "@/lib/mail-gmail";
 import { getUserTeamContext } from "@/lib/team-context";
 import { requireTeamPermission } from "@/lib/permissions";
+import { LeaseRenewalEmail } from "@/emails/LeaseRenewalEmail";
+import React from 'react';
+
 
 // Schema de validation pour générer un préavis
 const generateNoticeSchema = z.object({
@@ -343,6 +346,17 @@ export async function renewLease(formData: FormData) {
             return { success: false, error: "Bail non trouvé" };
         }
 
+        // Récupérer le profil du propriétaire
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, company_name, company_address')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        const ownerName = profile?.company_name || profile?.full_name || "Votre propriétaire";
+        const ownerAddress = profile?.company_address || undefined;
+
+
         // Calculer la nouvelle date de fin (par défaut: +1 an)
         const currentEndDate = new Date(lease.end_date);
         const calculatedNewEndDate = newEndDate
@@ -391,67 +405,21 @@ export async function renewLease(formData: FormData) {
                 month: 'long',
                 year: 'numeric'
             });
-            const formattedRent = (newRentAmount ? parseFloat(newRentAmount) : lease.monthly_amount).toLocaleString('fr-SN');
-
-            const renewalEmailHtml = `
-                <!DOCTYPE html>
-                <html lang="fr">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Renouvellement de bail</title>
-                    <style>
-                        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
-                        .container { background-color: #ffffff; border-radius: 8px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-                        .header { text-align: center; border-bottom: 3px solid #22c55e; padding-bottom: 20px; margin-bottom: 30px; }
-                        .header h1 { color: #05080c; margin: 0; font-size: 28px; }
-                        .success-badge { background-color: #dcfce7; color: #166534; padding: 10px 20px; border-radius: 8px; display: inline-block; font-weight: 600; margin: 15px 0; }
-                        .content { margin: 30px 0; }
-                        .content p { margin: 15px 0; color: #555; }
-                        .details { background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 15px; margin: 20px 0; }
-                        .details p { margin: 5px 0; }
-                        .details strong { color: #05080c; }
-                        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #666; font-size: 14px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="header">
-                            <h1>🎉 Bonne nouvelle !</h1>
-                            <div class="success-badge">✅ Bail Renouvelé</div>
-                        </div>
-                        
-                        <div class="content">
-                            <p>Bonjour <strong>${lease.tenant_name || 'Cher locataire'}</strong>,</p>
-                            
-                            <p>Nous avons le plaisir de vous informer que votre propriétaire a validé le <strong>renouvellement de votre bail</strong> pour le bien situé à :</p>
-                            
-                            <p style="font-size: 16px; font-weight: 600; color: #05080c;">${lease.property_address || 'Adresse non renseignée'}</p>
-                            
-                            <div class="details">
-                                <p><strong>📅 Nouvelle date de fin :</strong> ${formattedNewEndDate}</p>
-                                <p><strong>💰 Loyer mensuel :</strong> ${formattedRent} FCFA ${newRentAmount ? '(nouveau montant)' : '(inchangé)'}</p>
-                            </div>
-                            
-                            <p>Les autres conditions de votre bail restent inchangées.</p>
-                            
-                            <p>Pour toute question, n'hésitez pas à contacter votre propriétaire.</p>
-                        </div>
-                        
-                        <div class="footer">
-                            <p><strong>Doussel Immo</strong></p>
-                            <p>Votre partenaire immobilier à Dakar</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-            `;
 
             try {
                 await sendEmail({
                     to: lease.tenant_email,
                     subject: `✅ Bonne nouvelle ! Votre bail a été renouvelé jusqu'au ${formattedNewEndDate}`,
-                    html: renewalEmailHtml,
+                    react: React.createElement(LeaseRenewalEmail, {
+                        tenantName: lease.tenant_name || 'Locataire',
+                        propertyAddress: lease.property_address || '',
+                        currentEndDate: new Date(lease.end_date).toLocaleDateString('fr-FR'),
+                        newEndDate: formattedNewEndDate,
+                        newMonthlyAmount: (newRentAmount ? parseFloat(newRentAmount) : lease.monthly_amount).toLocaleString('fr-FR'),
+                        acceptanceLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://dousell-immo.com'}/locataire`, // Fallback link
+                        ownerName: ownerName,
+                        ownerAddress: ownerAddress,
+                    })
                 });
                 console.log(`📧 Email de renouvellement envoyé à ${lease.tenant_email}`);
             } catch (emailError) {
@@ -459,6 +427,7 @@ export async function renewLease(formData: FormData) {
                 // Ne pas bloquer si l'email échoue
             }
         }
+
 
         revalidatePath('/gestion/documents-legaux');
         revalidatePath('/gestion-locative');

@@ -7,76 +7,74 @@ import {
   Text,
   Button,
   Hr,
-  Img,
 } from "@react-email/components";
+import * as React from "react";
 
 interface VerificationEmailProps {
   userName: string;
   verificationUrl: string;
+  teamName?: string;
 }
 
+/**
+ * VerificationEmail - Nouveau Design SaaS Minimaliste
+ * Refactorisation par Antigravity
+ * Unifie Verification et Confirmation d'inscription
+ */
 export function VerificationEmail({
-  userName,
-  verificationUrl,
+  userName = "Jean Dupont",
+  verificationUrl = "https://dousell-immo.app/auth/confirm",
+  teamName = "Doussel Immo",
 }: VerificationEmailProps) {
   return (
     <Html lang="fr">
       <Head />
       <Body style={main}>
         <Container style={container}>
+          {/* En-tête discret */}
           <Section style={header}>
-            <Text style={logo}>Doussel Immo</Text>
-            <Text style={tagline}>Votre partenaire immobilier à Dakar</Text>
+            <Text style={logo}>DOUSSEL IMMO</Text>
           </Section>
 
+          <Hr style={hrSubtle} />
+
+          {/* Corps de l'email */}
           <Section style={content}>
-            <Text style={title}>Bienvenue sur Doussel Immo ! 👋</Text>
+            <Heading style={h1}>Confirmez votre adresse email</Heading>
+
+            <Text style={text}>Bonjour {userName},</Text>
 
             <Text style={text}>
-              Bonjour <strong>{userName}</strong>,
+              Merci de vous être inscrit sur <strong>{teamName}</strong>. Pour finaliser votre inscription et accéder à toutes nos fonctionnalités, veuillez confirmer votre adresse email.
             </Text>
 
-            <Text style={text}>
-              Merci de vous être inscrit sur Doussel Immo. Pour finaliser votre
-              inscription et accéder à toutes les fonctionnalités, veuillez
-              confirmer votre adresse email en cliquant sur le bouton ci-dessous.
-            </Text>
-
-            <Section style={buttonContainer}>
+            <Section style={buttonAction}>
               <Button style={button} href={verificationUrl}>
-                Confirmer mon email
+                Confirmer mon inscription
               </Button>
             </Section>
 
-            <Text style={text}>
-              Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre
-              navigateur :
+            <Text style={textSmall}>
+              Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :
             </Text>
+            <Text style={linkText}>{verificationUrl}</Text>
 
-            <Text style={link}>{verificationUrl}</Text>
-
-            <Hr style={hr} />
-
-            <Text style={footer}>
-              Ce lien est valide pendant 24 heures. Si vous n&apos;avez pas créé de
-              compte sur Doussel Immo, vous pouvez ignorer cet email.
-            </Text>
-
-            <Text style={footer}>
-              Pour toute question, contactez-nous à{" "}
-              <a href="mailto:support@dousell-immo.app" style={linkStyle}>
-                support@dousell-immo.app
-              </a>
-            </Text>
+            <Section style={infoBox}>
+              <Text style={infoText}>
+                <strong>Note :</strong> Ce lien est valable pendant 24 heures. Si vous n'avez pas demandé cette inscription, vous pouvez ignorer cet email.
+              </Text>
+            </Section>
           </Section>
 
-          <Section style={footerSection}>
+          <Hr style={hrSubtle} />
+
+          {/* Footer */}
+          <Section style={footer}>
             <Text style={footerText}>
-              <strong>Doussel Immo</strong>
+              © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
             </Text>
-            <Text style={footerText}>Dakar, Sénégal</Text>
-            <Text style={footerText}>
-              © {new Date().getFullYear()} Doussel Immo. Tous droits réservés.
+            <Text style={footerLink}>
+              Doussel Immo — L'immobilier de confiance au Sénégal
             </Text>
           </Section>
         </Container>
@@ -85,112 +83,125 @@ export function VerificationEmail({
   );
 }
 
-// Styles
+// Composant Heading local (mimic @react-email/components/Heading if needed or use Text)
+const Heading = ({ children, style }: { children: React.ReactNode; style: React.CSSProperties }) => (
+  <Text style={style}>{children}</Text>
+);
+
+export default VerificationEmail;
+
+// Styles Inline
 const main = {
-  backgroundColor: "#05080c",
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  backgroundColor: "#ffffff",
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
 const container = {
-  backgroundColor: "#ffffff",
   margin: "0 auto",
-  padding: "0",
-  marginBottom: "64px",
+  padding: "40px 20px",
   maxWidth: "600px",
-  borderRadius: "8px",
-  overflow: "hidden",
 };
 
 const header = {
-  backgroundColor: "#f59e0b",
-  padding: "32px 40px",
-  textAlign: "center" as const,
+  paddingBottom: "20px",
 };
 
 const logo = {
-  color: "#ffffff",
-  fontSize: "28px",
-  fontWeight: "bold",
-  margin: "0 0 8px 0",
+  fontSize: "14px",
+  fontWeight: "bold" as const,
+  letterSpacing: "1px",
+  color: "#18181b",
+  margin: "0",
 };
 
-const tagline = {
-  color: "#ffffff",
-  fontSize: "14px",
+const hrSubtle = {
+  borderColor: "#f4f4f5",
   margin: "0",
-  opacity: 0.9,
 };
 
 const content = {
-  padding: "40px",
+  padding: "40px 0",
 };
 
-const title = {
-  color: "#05080c",
+const h1 = {
+  color: "#18181b",
   fontSize: "24px",
-  fontWeight: "bold",
-  margin: "0 0 24px 0",
+  fontWeight: "600" as const,
+  marginBottom: "32px",
+  marginTop: "0",
+  display: "block",
 };
 
 const text = {
-  color: "#333333",
-  fontSize: "16px",
-  lineHeight: "24px",
-  margin: "0 0 16px 0",
+  color: "#3f3f46",
+  fontSize: "15px",
+  lineHeight: "1.6",
+  marginBottom: "20px",
 };
 
-const buttonContainer = {
+const textSmall = {
+  color: "#71717a",
+  fontSize: "13px",
+  lineHeight: "1.5",
+  marginTop: "32px",
+  marginBottom: "8px",
+};
+
+const linkText = {
+  color: "#0f172a",
+  fontSize: "12px",
+  wordBreak: "break-all" as const,
+  margin: "0",
+};
+
+const buttonAction = {
   textAlign: "center" as const,
-  margin: "32px 0",
+  marginTop: "40px",
+  marginBottom: "40px",
 };
 
 const button = {
-  backgroundColor: "#f59e0b",
+  backgroundColor: "#0f172a",
   borderRadius: "6px",
   color: "#ffffff",
-  fontSize: "16px",
-  fontWeight: "bold",
+  fontSize: "14px",
+  fontWeight: "500" as const,
   textDecoration: "none",
   textAlign: "center" as const,
   display: "inline-block",
-  padding: "14px 32px",
+  padding: "12px 32px",
 };
 
-const link = {
-  color: "#f59e0b",
-  fontSize: "14px",
-  wordBreak: "break-all" as const,
-  margin: "16px 0",
+const infoBox = {
+  backgroundColor: "#f8fafc",
+  borderLeft: "2px solid #e2e8f0",
+  padding: "16px 20px",
+  margin: "40px 0",
 };
 
-const linkStyle = {
-  color: "#f59e0b",
-  textDecoration: "underline",
-};
-
-const hr = {
-  borderColor: "#e5e7eb",
-  margin: "32px 0",
+const infoText = {
+  color: "#64748b",
+  fontSize: "13px",
+  lineHeight: "1.5",
+  margin: "0",
 };
 
 const footer = {
-  color: "#666666",
-  fontSize: "14px",
-  lineHeight: "20px",
-  margin: "16px 0 0 0",
-};
-
-const footerSection = {
-  backgroundColor: "#f9fafb",
-  padding: "24px 40px",
+  paddingTop: "32px",
   textAlign: "center" as const,
 };
 
 const footerText = {
-  color: "#666666",
+  color: "#a1a1aa",
   fontSize: "12px",
-  margin: "4px 0",
+  marginBottom: "8px",
+  marginTop: "0",
+};
+
+const footerLink = {
+  color: "#a1a1aa",
+  fontSize: "11px",
+  margin: "0",
 };
 
 

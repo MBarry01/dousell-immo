@@ -15,68 +15,81 @@ import * as React from "react";
 interface AccessRequestNotificationProps {
   requesterName: string;
   requesterEmail: string;
-  permission: string;
+  permissionLabel?: string;
   reason?: string;
   teamName: string;
   reviewUrl: string;
 }
 
 /**
- * Email envoyé aux owners/managers quand un membre demande un accès temporaire
+ * AccessRequestNotification - Nouveau Design SaaS Minimaliste
+ * Refactorisation par Antigravity
  */
 export function AccessRequestNotification({
   requesterName = "Jean Dupont",
   requesterEmail = "jean.dupont@example.com",
-  permission = "leases.edit",
+  permissionLabel = "Édition des baux",
   reason = "Je dois corriger une erreur de saisie dans le bail",
   teamName = "Mon Équipe",
-  reviewUrl = "https://dousell.com/gestion/access-control",
+  reviewUrl = "https://dousell-immo.app/gestion/access-control",
 }: AccessRequestNotificationProps) {
   return (
     <Html>
       <Head />
-      <Preview>
-        Nouvelle demande d&apos;accès temporaire de {requesterName}
-      </Preview>
+      <Preview>Nouvelle demande d'accès de {requesterName}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>🔑 Nouvelle demande d&apos;accès</Heading>
-
-          <Text style={text}>
-            <strong>{requesterName}</strong> ({requesterEmail}) a demandé un
-            accès temporaire à une fonctionnalité de votre équipe{" "}
-            <strong>{teamName}</strong>.
-          </Text>
-
-          <Section style={permissionBox}>
-            <Text style={permissionLabel}>Permission demandée</Text>
-            <Text style={permissionValue}>{permission}</Text>
+          {/* En-tête discret */}
+          <Section style={header}>
+            <Text style={logo}>DOUSSEL IMMO</Text>
           </Section>
 
-          {reason && (
-            <Section style={reasonBox}>
-              <Text style={reasonLabel}>Raison</Text>
-              <Text style={reasonText}>{reason}</Text>
+          <Hr style={hrSubtle} />
+
+          {/* Corps de l'email */}
+          <Section style={content}>
+            <Heading style={h1}>Nouvelle demande d'accès</Heading>
+
+            <Text style={text}>
+              <strong>{requesterName}</strong> ({requesterEmail}) a demandé un accès temporaire à une fonctionnalité de votre équipe <strong>{teamName}</strong>.
+            </Text>
+
+            {/* Encadré Détails - Aplat Gris Clair */}
+            <Section style={detailsBox}>
+              <Text style={detailsText}>
+                <strong>Permission :</strong> {permissionLabel}
+              </Text>
             </Section>
-          )}
 
-          <Hr style={hr} />
+            {/* Raison - Citation discrète */}
+            {reason && (
+              <Section style={quoteBox}>
+                <Text style={quoteText}>"{reason}"</Text>
+              </Section>
+            )}
 
-          <Text style={text}>
-            En tant que responsable de l&apos;équipe, vous pouvez approuver ou
-            rejeter cette demande.
-          </Text>
+            <Text style={text}>
+              En tant que responsable, vous pouvez examiner les détails de cette demande et décider de l'approuver ou de la rejeter.
+            </Text>
 
-          <Section style={buttonContainer}>
-            <Button style={button} href={reviewUrl}>
-              Traiter la demande
-            </Button>
+            <Section style={buttonAction}>
+              <Button style={button} href={reviewUrl}>
+                Examiner la demande
+              </Button>
+            </Section>
           </Section>
 
-          <Text style={footer}>
-            Vous recevez cet email car vous êtes responsable de l&apos;équipe{" "}
-            {teamName} sur Dousell Immo.
-          </Text>
+          <Hr style={hrSubtle} />
+
+          {/* Footer */}
+          <Section style={footer}>
+            <Text style={footerText}>
+              © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
+            </Text>
+            <Text style={footerLink}>
+              Doussel Immo — Notification Système
+            </Text>
+          </Section>
         </Container>
       </Body>
     </Html>
@@ -85,106 +98,113 @@ export function AccessRequestNotification({
 
 export default AccessRequestNotification;
 
-// Styles
+// Styles Inline
 const main = {
-  backgroundColor: "#f6f9fc",
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  backgroundColor: "#ffffff",
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
 const container = {
-  backgroundColor: "#ffffff",
   margin: "0 auto",
-  padding: "20px 0 48px",
-  marginBottom: "64px",
+  padding: "40px 20px",
   maxWidth: "600px",
+};
+
+const header = {
+  paddingBottom: "20px",
+};
+
+const logo = {
+  fontSize: "14px",
+  fontWeight: "bold" as const,
+  letterSpacing: "1px",
+  color: "#18181b",
+  margin: "0",
+};
+
+const hrSubtle = {
+  borderColor: "#f4f4f5",
+  margin: "0",
+};
+
+const content = {
+  padding: "40px 0",
 };
 
 const h1 = {
   color: "#18181b",
   fontSize: "24px",
-  fontWeight: "bold",
-  margin: "40px 0 20px",
-  padding: "0 40px",
+  fontWeight: "600" as const,
+  marginBottom: "32px",
+  marginTop: "0",
 };
 
 const text = {
   color: "#3f3f46",
-  fontSize: "14px",
-  lineHeight: "24px",
-  padding: "0 40px",
+  fontSize: "15px",
+  lineHeight: "1.6",
+  marginBottom: "20px",
 };
 
-const permissionBox = {
-  backgroundColor: "#f4f4f5",
-  borderRadius: "8px",
-  padding: "16px",
-  margin: "24px 40px",
-};
-
-const permissionLabel = {
-  color: "#71717a",
-  fontSize: "12px",
-  fontWeight: "600",
-  textTransform: "uppercase" as const,
-  margin: "0 0 4px 0",
-};
-
-const permissionValue = {
-  color: "#18181b",
-  fontSize: "16px",
-  fontWeight: "600",
-  fontFamily: "monospace",
-  margin: "0",
-};
-
-const reasonBox = {
+const detailsBox = {
   backgroundColor: "#fafafa",
-  borderLeft: "4px solid #3b82f6",
-  padding: "16px",
-  margin: "16px 40px",
+  border: "1px solid #f4f4f5",
+  borderRadius: "6px",
+  padding: "16px 20px",
+  margin: "32px 0",
 };
 
-const reasonLabel = {
-  color: "#71717a",
-  fontSize: "12px",
-  fontWeight: "600",
-  margin: "0 0 8px 0",
-};
-
-const reasonText = {
-  color: "#3f3f46",
+const detailsText = {
+  color: "#18181b",
   fontSize: "14px",
-  lineHeight: "20px",
   margin: "0",
+};
+
+const quoteBox = {
+  borderLeft: "2px solid #e4e4e7",
+  paddingLeft: "20px",
+  margin: "32px 0",
+};
+
+const quoteText = {
+  color: "#71717a",
+  fontSize: "14px",
   fontStyle: "italic" as const,
+  margin: "0",
 };
 
-const hr = {
-  borderColor: "#e5e5e5",
-  margin: "24px 40px",
-};
-
-const buttonContainer = {
-  padding: "24px 40px",
+const buttonAction = {
+  textAlign: "center" as const,
+  marginTop: "40px",
+  marginBottom: "40px",
 };
 
 const button = {
-  backgroundColor: "#3b82f6",
-  borderRadius: "8px",
-  color: "#fff",
+  backgroundColor: "#0f172a",
+  borderRadius: "6px",
+  color: "#ffffff",
   fontSize: "14px",
-  fontWeight: "600",
+  fontWeight: "500" as const,
   textDecoration: "none",
   textAlign: "center" as const,
-  display: "block",
-  padding: "12px 24px",
+  display: "inline-block",
+  padding: "12px 32px",
 };
 
 const footer = {
-  color: "#71717a",
+  paddingTop: "32px",
+  textAlign: "center" as const,
+};
+
+const footerText = {
+  color: "#a1a1aa",
   fontSize: "12px",
-  lineHeight: "20px",
-  padding: "0 40px",
-  marginTop: "32px",
+  marginBottom: "8px",
+  marginTop: "0",
+};
+
+const footerLink = {
+  color: "#a1a1aa",
+  fontSize: "11px",
+  margin: "0",
 };

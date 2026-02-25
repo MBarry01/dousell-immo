@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Body,
   Container,
@@ -11,6 +9,7 @@ import {
   Text,
   Hr,
 } from "@react-email/components";
+import * as React from "react";
 
 type AppointmentConfirmationEmailProps = {
   userName: string;
@@ -18,137 +17,183 @@ type AppointmentConfirmationEmailProps = {
   time: string;
   meetingType: string;
   phone?: string;
+  location?: string;
+  teamName?: string;
 };
 
+/**
+ * AppointmentConfirmationEmail - Nouveau Design SaaS Minimaliste
+ * Refactorisation par Antigravity
+ */
 export default function AppointmentConfirmationEmail({
-  userName,
-  date,
-  time,
-  meetingType,
+  userName = "Jean Dupont",
+  date = "25 Février 2026",
+  time = "14:00",
+  meetingType = "Visite Immobilière",
   phone,
+  location,
+  teamName = "Doussel Immo",
 }: AppointmentConfirmationEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>Votre rendez-vous Dousell Immo est confirmé - {date} à {time}</Preview>
-      <Body style={styles.body}>
-        <Container style={styles.container}>
-          <Text style={styles.checkmark}>✓</Text>
-          <Heading style={styles.title}>Rendez-vous confirmé !</Heading>
-          <Text style={styles.greeting}>
-            Bonjour {userName},
-          </Text>
-          <Text style={styles.text}>
-            Votre rendez-vous avec l&apos;équipe Dousell Immo est bien enregistré.
-          </Text>
-
-          <Section style={styles.card}>
-            <Text style={styles.label}>📅 DATE</Text>
-            <Text style={styles.value}>{date}</Text>
-
-            <Text style={styles.label}>🕐 HEURE</Text>
-            <Text style={styles.value}>{time}</Text>
-
-            <Text style={styles.label}>📍 TYPE</Text>
-            <Text style={styles.value}>{meetingType}</Text>
+      <Preview>Confirmation de votre rendez-vous — {teamName}</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          {/* En-tête discret */}
+          <Section style={header}>
+            <Text style={logo}>DOUSSEL IMMO</Text>
           </Section>
 
-          <Hr style={styles.hr} />
+          <Hr style={hrSubtle} />
 
-          <Text style={styles.info}>
-            Un conseiller Dousell vous contactera{phone ? ` au ${phone}` : ""} pour confirmer les détails de votre rendez-vous.
-          </Text>
+          {/* Corps de l'email */}
+          <Section style={content}>
+            <Heading style={h1}>Rendez-vous confirmé</Heading>
 
-          <Text style={styles.footer}>
-            À très bientôt !
-          </Text>
-          <Text style={styles.team}>
-            L&apos;équipe Dousell Immo
-          </Text>
+            <Text style={text}>Bonjour {userName},</Text>
+
+            <Text style={text}>
+              Nous vous confirmons que votre rendez-vous avec l'équipe <strong>{teamName}</strong> est bien enregistré.
+            </Text>
+
+            {/* Encadré Détails - Aplat Gris Clair */}
+            <Section style={detailsBox}>
+              <Text style={detailsText}>
+                <strong>Date :</strong> {date}
+              </Text>
+              <Text style={detailsText}>
+                <strong>Heure :</strong> {time}
+              </Text>
+              <Text style={detailsText}>
+                <strong>Type :</strong> {meetingType}
+              </Text>
+              {location && (
+                <Text style={detailsText}>
+                  <strong>Lieu :</strong> {location}
+                </Text>
+              )}
+            </Section>
+
+            <Text style={text}>
+              Un conseiller vous contactera{phone ? ` au ${phone}` : ""} en cas de besoin pour affiner les derniers détails.
+            </Text>
+
+            <Section style={infoBox}>
+              <Text style={infoText}>
+                <strong>Note :</strong> En cas d'empêchement, merci de nous prévenir au moins 24h à l'avance pour nous permettre de réorganiser notre planning.
+              </Text>
+            </Section>
+          </Section>
+
+          <Hr style={hrSubtle} />
+
+          {/* Footer */}
+          <Section style={footer}>
+            <Text style={footerText}>
+              © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
+            </Text>
+            <Text style={footerLink}>
+              Doussel Immo — Votre partenaire immobilier
+            </Text>
+          </Section>
         </Container>
       </Body>
     </Html>
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
-  body: {
-    backgroundColor: "#f4f4f5",
-    fontFamily:
-      '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-    margin: "0",
-    padding: "0",
-  },
-  container: {
-    backgroundColor: "#ffffff",
-    margin: "32px auto",
-    padding: "32px",
-    borderRadius: "24px",
-    maxWidth: "600px",
-    boxShadow: "0 20px 60px rgba(15,23,42,0.08)",
-  },
-  checkmark: {
-    fontSize: "32px",
-    textAlign: "center",
-    margin: "0 0 16px 0",
-  },
-  title: {
-    fontSize: "24px",
-    marginBottom: "16px",
-    color: "#0f172a",
-    textAlign: "center",
-  },
-  greeting: {
-    fontSize: "16px",
-    color: "#0f172a",
-    marginBottom: "8px",
-  },
-  text: {
-    fontSize: "15px",
-    color: "#475569",
-    lineHeight: "1.5",
-  },
-  card: {
-    marginTop: "24px",
-    marginBottom: "24px",
-    padding: "20px",
-    borderRadius: "16px",
-    backgroundColor: "#fef9e7",
-    border: "1px solid #F4C430",
-  },
-  label: {
-    fontSize: "11px",
-    letterSpacing: "0.15em",
-    textTransform: "uppercase",
-    color: "#94a3b8",
-    margin: "12px 0 2px 0",
-  },
-  value: {
-    fontSize: "16px",
-    color: "#0f172a",
-    fontWeight: "600",
-    margin: "0 0 8px 0",
-  },
-  hr: {
-    borderColor: "#e2e8f0",
-    margin: "24px 0",
-  },
-  info: {
-    fontSize: "14px",
-    color: "#64748b",
-    lineHeight: "1.5",
-  },
-  footer: {
-    marginTop: "24px",
-    fontSize: "14px",
-    color: "#0f172a",
-    textAlign: "center",
-  },
-  team: {
-    fontSize: "14px",
-    color: "#F4C430",
-    fontWeight: "600",
-    textAlign: "center",
-    margin: "4px 0 0 0",
-  },
+// Styles Inline
+const main = {
+  backgroundColor: "#ffffff",
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+};
+
+const container = {
+  margin: "0 auto",
+  padding: "40px 20px",
+  maxWidth: "600px",
+};
+
+const header = {
+  paddingBottom: "20px",
+};
+
+const logo = {
+  fontSize: "14px",
+  fontWeight: "bold" as const,
+  letterSpacing: "1px",
+  color: "#18181b",
+  margin: "0",
+};
+
+const hrSubtle = {
+  borderColor: "#f4f4f5",
+  margin: "0",
+};
+
+const content = {
+  padding: "40px 0",
+};
+
+const h1 = {
+  color: "#18181b",
+  fontSize: "24px",
+  fontWeight: "600" as const,
+  marginBottom: "32px",
+  marginTop: "0",
+};
+
+const text = {
+  color: "#3f3f46",
+  fontSize: "15px",
+  lineHeight: "1.6",
+  marginBottom: "20px",
+};
+
+const detailsBox = {
+  backgroundColor: "#fafafa",
+  border: "1px solid #f4f4f5",
+  borderRadius: "6px",
+  padding: "16px 20px",
+  margin: "32px 0",
+};
+
+const detailsText = {
+  color: "#18181b",
+  fontSize: "14px",
+  marginBottom: "8px",
+  marginTop: "0",
+};
+
+const infoBox = {
+  backgroundColor: "#f8fafc",
+  borderLeft: "2px solid #e2e8f0",
+  padding: "16px 20px",
+  margin: "32px 0",
+};
+
+const infoText = {
+  color: "#64748b",
+  fontSize: "13px",
+  lineHeight: "1.5",
+  margin: "0",
+};
+
+const footer = {
+  paddingTop: "32px",
+  textAlign: "center" as const,
+};
+
+const footerText = {
+  color: "#a1a1aa",
+  fontSize: "12px",
+  marginBottom: "8px",
+  marginTop: "0",
+};
+
+const footerLink = {
+  color: "#a1a1aa",
+  fontSize: "11px",
+  margin: "0",
 };

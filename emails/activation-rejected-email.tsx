@@ -1,34 +1,35 @@
 import {
-    Html,
-    Head,
     Body,
     Container,
+    Head,
+    Heading,
+    Html,
+    Preview,
     Section,
     Text,
-    Button,
     Hr,
-    Heading,
 } from "@react-email/components";
 import * as React from "react";
 
-interface PasswordResetEmailProps {
-    userName: string;
-    resetUrl: string;
+interface ActivationRejectedEmailProps {
+    firstName: string;
+    reason: string;
     teamName?: string;
 }
 
 /**
- * PasswordResetEmail - Nouveau Design SaaS Minimaliste
+ * ActivationRejectedEmail - Nouveau Design SaaS Minimaliste
  * Refactorisation par Antigravity
  */
-export function PasswordResetEmail({
-    userName = "Jean Dupont",
-    resetUrl = "https://dousell-immo.app/auth/reset-password",
+export const ActivationRejectedEmail = ({
+    firstName = "Utilisateur",
+    reason = "Les documents fournis sont incomplets ou illisibles.",
     teamName = "Doussel Immo",
-}: PasswordResetEmailProps) {
+}: ActivationRejectedEmailProps) => {
     return (
         <Html lang="fr">
             <Head />
+            <Preview>Mise à jour de votre demande d'activation — {teamName}</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* En-tête discret */}
@@ -40,28 +41,31 @@ export function PasswordResetEmail({
 
                     {/* Corps de l'email */}
                     <Section style={content}>
-                        <Heading style={h1}>Réinitialisation de votre mot de passe</Heading>
-
-                        <Text style={text}>Bonjour {userName},</Text>
+                        <Heading style={h1}>Mise à jour de votre demande</Heading>
 
                         <Text style={text}>
-                            Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte <strong>{teamName}</strong>. Si vous êtes à l'origine de cette demande, vous pouvez définir un nouveau mot de passe en cliquant sur le bouton ci-dessous.
+                            Bonjour <strong>{firstName}</strong>,
                         </Text>
 
-                        <Section style={buttonAction}>
-                            <Button style={button} href={resetUrl}>
-                                Réinitialiser mon mot de passe
-                            </Button>
+                        <Text style={text}>
+                            Nous avons examiné votre demande d'activation pour le service de Gestion Locative. Malheureusement, nous ne pouvons pas l'approuver pour le moment.
+                        </Text>
+
+                        {/* Encadré Motif - Aplat Gris Clair/Neutre */}
+                        <Section style={reasonBox}>
+                            <Text style={reasonTitle}>MOTIF DE LA DÉCISION</Text>
+                            <Text style={reasonText}>
+                                {reason}
+                            </Text>
                         </Section>
 
-                        <Text style={textSmall}>
-                            Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :
+                        <Text style={text}>
+                            Vous pouvez soumettre une nouvelle demande en vous assurant de corriger les points mentionnés ci-dessus. Notre équipe se tient prête à réexaminer votre dossier dès réception des éléments manquants.
                         </Text>
-                        <Text style={linkText}>{resetUrl}</Text>
 
                         <Section style={infoBox}>
                             <Text style={infoText}>
-                                <strong>Sécurité :</strong> Ce lien est valable pendant 60 minutes. Si vous n'avez pas demandé de réinitialisation, vous pouvez ignorer cet email en toute sécurité. Votre mot de passe actuel ne sera pas modifié.
+                                <strong>Des questions ?</strong> Si vous estimez qu'il s'agit d'une erreur ou si vous avez besoin de précisions, n'hésitez pas à répondre directement à cet email.
                             </Text>
                         </Section>
                     </Section>
@@ -74,16 +78,16 @@ export function PasswordResetEmail({
                             © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
                         </Text>
                         <Text style={footerLink}>
-                            Doussel Immo — Sécurité de votre compte
+                            Doussel Immo — Plateforme Immobilière Professionnelle
                         </Text>
                     </Section>
                 </Container>
             </Body>
         </Html>
     );
-}
+};
 
-export default PasswordResetEmail;
+export default ActivationRejectedEmail;
 
 // Styles Inline
 const main = {
@@ -133,37 +137,28 @@ const text = {
     marginBottom: "20px",
 };
 
-const textSmall = {
-    color: "#71717a",
-    fontSize: "13px",
-    lineHeight: "1.5",
-    marginTop: "32px",
-    marginBottom: "8px",
-};
-
-const linkText = {
-    color: "#0f172a",
-    fontSize: "12px",
-    wordBreak: "break-all" as const,
-    margin: "0",
-};
-
-const buttonAction = {
-    textAlign: "center" as const,
-    marginTop: "40px",
-    marginBottom: "40px",
-};
-
-const button = {
-    backgroundColor: "#0f172a",
+const reasonBox = {
+    backgroundColor: "#fafafa",
+    border: "1px solid #f4f4f5",
     borderRadius: "6px",
-    color: "#ffffff",
+    padding: "24px",
+    margin: "32px 0",
+};
+
+const reasonTitle = {
+    color: "#71717a",
+    fontSize: "11px",
+    fontWeight: "600" as const,
+    letterSpacing: "0.05em",
+    marginBottom: "12px",
+    marginTop: "0",
+};
+
+const reasonText = {
+    color: "#18181b",
     fontSize: "14px",
-    fontWeight: "500" as const,
-    textDecoration: "none",
-    textAlign: "center" as const,
-    display: "inline-block",
-    padding: "12px 32px",
+    lineHeight: "1.6",
+    margin: "0",
 };
 
 const infoBox = {

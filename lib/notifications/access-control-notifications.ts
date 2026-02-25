@@ -84,7 +84,7 @@ export async function notifyAccessRequest(data: {
       react: AccessRequestNotification({
         requesterName: requesterInfo.name,
         requesterEmail: requesterInfo.email,
-        permission,
+        permissionLabel: permission,
         reason,
         teamName,
         reviewUrl: `${BASE_URL}/gestion/access-control`,
@@ -120,9 +120,8 @@ export async function notifyAccessApproved(data: {
       subject: "✅ Votre demande d'accès a été approuvée",
       react: AccessApproved({
         userName: requesterInfo.name,
-        permission,
+        permissionLabel: permission,
         expiresAt,
-        durationHours,
         reviewerName: reviewerInfo.name,
         reviewNotes,
         teamName,
@@ -157,7 +156,7 @@ export async function notifyAccessRejected(data: {
       subject: "Votre demande d'accès temporaire",
       react: AccessRejected({
         userName: requesterInfo.name,
-        permission,
+        permissionLabel: permission,
         reviewerName: reviewerInfo.name,
         reviewNotes,
         teamName,
@@ -195,7 +194,7 @@ export async function notifyAccessExpiring(data: {
       subject: `⏰ Votre accès temporaire expire dans ${hoursRemaining}h`,
       react: AccessExpiring({
         userName: userInfo.name,
-        permission,
+        permissionLabel: permission,
         expiresAt,
         hoursRemaining,
         teamName,

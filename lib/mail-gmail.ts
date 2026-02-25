@@ -1,6 +1,9 @@
 import nodemailer from "nodemailer";
 import { render } from "@react-email/render";
 import React from "react";
+import { InvoiceEmail } from "../emails/invoice-email";
+import { ActivationApprovedEmail } from "../emails/activation-approved-email";
+import { ActivationRejectedEmail } from "../emails/activation-rejected-email";
 
 /**
  * Configuration du transporteur SMTP Gmail
@@ -186,123 +189,14 @@ export async function sendInvoiceEmail({
   invoiceNumber?: string;
   amount?: number;
 }) {
-  const invoiceHtml = `
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Votre facture Doussel Immo</title>
-      <style>
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-          background-color: #f5f5f5;
-        }
-        .container {
-          background-color: #ffffff;
-          border-radius: 8px;
-          padding: 30px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-          text-align: center;
-          border-bottom: 3px solid #f59e0b;
-          padding-bottom: 20px;
-          margin-bottom: 30px;
-        }
-        .header h1 {
-          color: #05080c;
-          margin: 0;
-          font-size: 28px;
-        }
-        .header p {
-          color: #666;
-          margin: 5px 0 0 0;
-        }
-        .content {
-          margin: 30px 0;
-        }
-        .content p {
-          margin: 15px 0;
-          color: #555;
-        }
-        .invoice-details {
-          background-color: #f9fafb;
-          border-left: 4px solid #f59e0b;
-          padding: 15px;
-          margin: 20px 0;
-        }
-        .invoice-details p {
-          margin: 5px 0;
-        }
-        .invoice-details strong {
-          color: #05080c;
-        }
-        .footer {
-          margin-top: 30px;
-          padding-top: 20px;
-          border-top: 1px solid #e5e7eb;
-          text-align: center;
-          color: #666;
-          font-size: 14px;
-        }
-        .button {
-          display: inline-block;
-          background-color: #f59e0b;
-          color: #ffffff;
-          padding: 12px 24px;
-          text-decoration: none;
-          border-radius: 6px;
-          margin: 20px 0;
-          font-weight: 600;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>Doussel Immo</h1>
-          <p>Votre partenaire immobilier à Dakar</p>
-        </div>
-        
-        <div class="content">
-          <p>Bonjour <strong>${clientName}</strong>,</p>
-          
-          <p>Nous vous remercions pour votre confiance. Veuillez trouver ci-joint votre facture.</p>
-          
-          ${invoiceNumber || amount
-      ? `
-          <div class="invoice-details">
-            ${invoiceNumber ? `<p><strong>Numéro de facture:</strong> ${invoiceNumber}</p>` : ""}
-            ${amount ? `<p><strong>Montant:</strong> ${amount.toLocaleString("fr-SN")} FCFA</p>` : ""}
-          </div>
-          `
-      : ""}
-          
-          <p>Cette facture est également disponible en pièce jointe au format PDF.</p>
-          
-          <p>Pour toute question concernant cette facture, n'hésitez pas à nous contacter.</p>
-        </div>
-        
-        <div class="footer">
-          <p><strong>Doussel Immo</strong></p>
-          <p>Email: support@dousell-immo.app</p>
-          <p>Dakar, Sénégal</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
   return sendEmail({
     to,
     subject: `Votre facture Doussel Immo${invoiceNumber ? ` - ${invoiceNumber}` : ""}`,
-    html: invoiceHtml,
+    react: React.createElement(InvoiceEmail, {
+      clientName,
+      invoiceNumber,
+      amount,
+    }),
     attachments: [
       {
         filename: "Facture-Doussel.pdf",
@@ -330,45 +224,10 @@ export async function sendActivationApprovedEmail({
   to: string;
   firstName: string;
 }) {
-  const html = `
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        body { font-family: sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .button { background-color: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 20px; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>Félicitations ! 🎉</h1>
-        </div>
-        <p>Bonjour <strong>${firstName}</strong>,</p>
-        <p>Bonne nouvelle ! Votre demande d'activation de la <strong>Gestion Locative</strong> a été approuvée.</p>
-        <p>Vous avez désormais accès à tous les outils pour gérer vos biens immobiliers :</p>
-        <ul>
-          <li>Création de biens et baux</li>
-          <li>Suivi des paiements et quittances</li>
-          <li>Gestion des locataires</li>
-        </ul>
-        <div style="text-align: center;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://doussel-immo.app'}/compte" class="button">Accéder à mon espace</a>
-        </div>
-        <p>Merci de votre confiance.</p>
-        <p>L'équipe Doussel Immo</p>
-      </div>
-    </body>
-    </html>
-  `;
-
   return sendEmail({
     to,
     subject: "Gestion Locative Activée ! 🎉",
-    html,
+    react: React.createElement(ActivationApprovedEmail, { firstName }),
   });
 }
 
@@ -384,40 +243,9 @@ export async function sendActivationRejectedEmail({
   firstName: string;
   reason: string;
 }) {
-  const html = `
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        body { font-family: sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .reason { background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>Mise à jour de votre demande</h1>
-        </div>
-        <p>Bonjour <strong>${firstName}</strong>,</p>
-        <p>Nous avons examiné votre demande d'activation de la Gestion Locative.</p>
-        <p>Malheureusement, nous ne pouvons pas l'approuver pour le moment pour la raison suivante :</p>
-        <div class="reason">
-          <strong>Motif :</strong> ${reason}
-        </div>
-        <p>Vous pouvez soumettre une nouvelle demande en corrigeant les points mentionnés.</p>
-        <p>Si vous avez des questions, n'hésitez pas à répondre à cet email.</p>
-        <p>L'équipe Doussel Immo</p>
-      </div>
-    </body>
-    </html>
-  `;
-
   return sendEmail({
     to,
     subject: "Mise à jour concernant votre demande Gestion Locative",
-    html,
+    react: React.createElement(ActivationRejectedEmail, { firstName, reason }),
   });
 }

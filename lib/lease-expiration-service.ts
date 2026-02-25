@@ -143,6 +143,11 @@ async function processLease(
   return alertsSent;
 }
 
+import { LeaseExpirationEmail } from "../emails/lease-expiration-email";
+import React from "react";
+
+// ... (previous imports)
+
 /**
  * Envoie l'email d'alerte au PROPRIÉTAIRE
  * Retourne true si l'envoi a réussi, false sinon
@@ -177,22 +182,20 @@ async function sendExpirationAlert(
       }
     }
 
-    // 3. Construire le contexte de l'alerte
-    const context: AlertContext = {
-      monthsRemaining,
-      endDate,
-      tenantName: lease.tenant_name || "Votre locataire",
-      propertyName,
-      monthlyAmount: lease.monthly_amount
-    };
+    const endDateStr = format(endDate, 'dd MMMM yyyy', { locale: fr });
+    const formattedAmount = lease.monthly_amount.toLocaleString("fr-SN");
 
-    // 4. Préparer et envoyer l'email
-    const { subject, html } = buildEmailContent(context);
-
+    // 4. Préparer et envoyer l'email (Utilisation de React Email)
     await sendEmail({
       to: ownerEmail,
-      subject,
-      html,
+      subject: `📅 ${monthsRemaining === 6 ? 'Action Requise' : 'Rappel'} : Fin de bail dans ${monthsRemaining} mois`,
+      react: React.createElement(LeaseExpirationEmail, {
+        monthsRemaining,
+        endDateStr,
+        tenantName: lease.tenant_name || "Votre locataire",
+        propertyName,
+        monthlyAmountFormatted: formattedAmount,
+      }),
     });
 
     const daysRemaining = differenceInDays(endDate, new Date());
@@ -206,156 +209,4 @@ async function sendExpirationAlert(
   }
 }
 
-/**
- * Construit le contenu de l'email selon le type d'alerte
- */
-function buildEmailContent(context: AlertContext): { subject: string; html: string } {
-  const { monthsRemaining, endDate, tenantName, propertyName, monthlyAmount } = context;
-
-  const endDateStr = format(endDate, 'dd MMMM yyyy', { locale: fr });
-  const formattedAmount = monthlyAmount.toLocaleString("fr-SN");
-
-  let subject: string;
-  let contextHtml: string;
-  let mainMessage: string;
-
-  if (monthsRemaining === 6) {
-    subject = `📅 Action Requise : Fin de bail dans 6 mois - ${tenantName}`;
-    contextHtml = `
-      <div style="background-color: rgba(239, 68, 68, 0.1); padding: 20px; border-left: 5px solid #ef4444; margin-bottom: 25px; border-radius: 8px;">
-        <strong style="color: #ef4444;">🇸🇳 Contexte Juridique Sénégal :</strong><br/>
-        <p style="margin: 10px 0 0 0; color: #f87171; line-height: 1.6;">
-          Si vous souhaitez récupérer ce bien (pour y habiter ou pour un proche), la loi exige souvent un préavis de <strong>6 mois</strong> signifié par huissier.
-          <br/>C'est le moment d'agir si vous ne souhaitez pas renouveler le bail.
-        </p>
-      </div>
-    `;
-    mainMessage = "Le bail de votre locataire arrive à échéance dans 6 mois. C'est le délai légal pour donner congé si vous souhaitez récupérer votre bien.";
-  } else {
-    subject = `🔔 Rappel : Fin de bail dans 3 mois - ${tenantName}`;
-    contextHtml = `
-      <div style="background-color: rgba(234, 179, 8, 0.1); padding: 20px; border-left: 5px solid #eab308; margin-bottom: 25px; border-radius: 8px;">
-        <strong style="color: #eab308;">ℹ️ Tacite Reconduction :</strong><br/>
-        <p style="margin: 10px 0 0 0; color: #facc15; line-height: 1.6;">
-          Sans action de votre part, ce bail sera probablement renouvelé automatiquement aux mêmes conditions pour une nouvelle période.
-          <br/>C'est le moment idéal pour discuter d'un éventuel renouvellement ou d'ajustements.
-        </p>
-      </div>
-    `;
-    mainMessage = "Le bail de votre locataire se termine dans 3 mois. C'est l'occasion de discuter du renouvellement ou de nouvelles conditions.";
-  }
-
-  const html = `
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <style>
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          line-height: 1.6;
-          color: #e2e8f0;
-          margin: 0;
-          padding: 0;
-          background-color: #020617;
-        }
-        .container {
-          max-width: 600px;
-          margin: 20px auto;
-          background-color: #0f172a;
-          border-radius: 12px;
-          overflow: hidden;
-          border: 1px solid #1e293b;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-        }
-        .header {
-          background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
-          color: #22c55e;
-          padding: 30px 20px;
-          text-align: center;
-          border-bottom: 2px solid #1e293b;
-        }
-        .header h2 {
-          margin: 0;
-          font-size: 24px;
-          color: #22c55e;
-        }
-        .content {
-          padding: 30px 25px;
-          background-color: #0f172a;
-          color: #cbd5e1;
-        }
-        .content p {
-          margin: 15px 0;
-          color: #cbd5e1;
-        }
-        .details-box {
-          background-color: rgba(34, 197, 94, 0.1);
-          border-left: 4px solid #22c55e;
-          padding: 20px;
-          margin: 20px 0;
-          border-radius: 8px;
-        }
-        .details-box ul {
-          margin: 10px 0;
-          padding-left: 20px;
-        }
-        .details-box li {
-          margin: 8px 0;
-          color: #cbd5e1;
-        }
-        .footer {
-          font-size: 12px;
-          color: #64748b;
-          text-align: center;
-          padding: 20px;
-          border-top: 1px solid #1e293b;
-          background-color: #020617;
-        }
-        .highlight {
-          color: #22c55e;
-          font-weight: bold;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h2>🏠 Alerte de Fin de Bail</h2>
-          <p style="margin: 10px 0 0 0; color: #94a3b8; font-size: 14px;">Doussel Immo - Gestion Locative</p>
-        </div>
-
-        <div class="content">
-          <p style="font-size: 16px; font-weight: 500; color: #f1f5f9;">Bonjour,</p>
-
-          <p style="color: #cbd5e1;">${mainMessage}</p>
-
-          ${contextHtml}
-
-          <div class="details-box">
-            <p style="margin-top: 0; color: #f1f5f9;"><strong>📋 Détails du bail :</strong></p>
-            <ul style="list-style-type: none; padding-left: 0;">
-              <li>👤 <strong style="color: #22c55e;">Locataire :</strong> ${tenantName}</li>
-              <li>🏘️ <strong style="color: #22c55e;">Propriété :</strong> ${propertyName}</li>
-              <li>💰 <strong style="color: #22c55e;">Loyer mensuel :</strong> ${formattedAmount} FCFA</li>
-              <li>📅 <strong style="color: #22c55e;">Fin du bail :</strong> ${endDateStr}</li>
-            </ul>
-          </div>
-
-          <p style="margin-top: 25px; color: #cbd5e1;">
-            Pour toute question ou pour gérer ce bail, connectez-vous à votre espace Doussel Immo.
-          </p>
-        </div>
-
-        <div class="footer">
-          <p style="margin: 5px 0; color: #64748b;">Ceci est une alerte automatique de votre assistant de gestion locative.</p>
-          <p style="margin: 5px 0; color: #475569;">Doussel Immo - Gestion Intelligente de Patrimoine Immobilier 🇸🇳</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-  return { subject, html };
-}
+// buildEmailContent and old HTML can be removed as they are no longer used

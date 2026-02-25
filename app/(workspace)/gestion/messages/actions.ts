@@ -6,6 +6,10 @@ import { sendEmail } from '@/lib/mail';
 import { getUserTeamContext } from "@/lib/team-context";
 import { requireTeamPermission } from "@/lib/permissions";
 import { notifyTenant } from "@/lib/notifications";
+import { StandardNotificationEmail } from '@/emails/StandardNotificationEmail';
+import React from 'react';
+import { render } from '@react-email/render';
+
 
 export async function getOwnerMessages(leaseId: string) {
     const context = await getUserTeamContext();
@@ -95,16 +99,20 @@ export async function sendOwnerMessage(leaseId: string, content: string) {
             await sendEmail({
                 to: lease.tenant_email,
                 subject: `Nouveau message de ${ownerName}`,
-                html: `
-                    <p>Bonjour ${lease.tenant_name || ''},</p>
-                    <p>Vous avez reçu un nouveau message de <strong>${ownerName}</strong>.</p>
-                    <p><em>"${content}"</em></p>
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL}/locataire/messages">Voir la conversation</a>
-                `
+                react: React.createElement(StandardNotificationEmail, {
+                    title: `Nouveau message de ${ownerName}`,
+                    previewText: `Vous avez reçu un nouveau message de ${ownerName}`,
+                    greeting: `Bonjour ${lease.tenant_name || ''},`,
+                    mainContent: `Vous avez reçu un nouveau message de ${ownerName} : "${content}"`,
+                    ctaText: "Voir la conversation",
+                    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/locataire/messages`,
+                    footerText: ownerName
+                })
             });
         } catch (mailError) {
             console.error("Erreur notif mail owner:", mailError);
         }
+
 
         // Notification Push
         await notifyTenant({
