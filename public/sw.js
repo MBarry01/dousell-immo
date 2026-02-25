@@ -1,4 +1,4 @@
-// 1. REGISTER LISTENERS IMMEDIATELY AT TOP LEVEL
+// 1. REGISTER LISTENERS IMMEDIATELY (Before any imports/logic)
 // This is critical to avoid "Event handler must be added on the initial evaluation"
 self.onmessage = (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
@@ -6,10 +6,10 @@ self.onmessage = (event) => {
   }
 };
 
-// 2. Import OneSignal SW SDK (synchronous)
+// 2. Synchronous imports
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-const CACHE_NAME = "dousell-immo-v17"; // Increment version
+const CACHE_NAME = "dousell-immo-v18"; // Increment version
 const STATIC_ASSETS = [
   "/gestion",
   "/manifest.json",
@@ -22,18 +22,16 @@ const STATIC_ASSETS = [
   "/offline.html",
 ];
 
-// Install event - cache static assets
+// Install event
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
     })
   );
-  // skipWaiting is triggered by the client via SKIP_WAITING message
-  // to avoid breaking active tabs with stale cache
 });
 
-// Activate event - clean old caches
+// Activate event
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -47,21 +45,12 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-
-
-
-
-// Fetch event - network first, fallback to cache
+// Fetch event
 self.addEventListener("fetch", (event) => {
-  // Only handle GET requests
   if (event.request.method !== "GET") return;
 
   const url = new URL(event.request.url);
 
-  // Skip chrome extensions, Next.js static files, API routes, image optimization, and tenant portal
-  // /locataire is a separate auth context (cookie-based magic link) and must
-  // never be intercepted by the PWA service worker
-  // /_next/image is Next.js image optimization endpoint - let browser handle it
   if (
     event.request.url.startsWith("chrome-extension://") ||
     event.request.url.includes("_next/static") ||
@@ -72,50 +61,43 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Liste des domaines externes à ne JAMAIS cacher (let browser handle them directly)
-  // Cela évite les violations CSP et réduit la taille du cache
   const externalDomains = [
     "images.pexels.com",
     "images.unsplash.com",
     "plus.unsplash.com",
-    "googleusercontent.com",    // Couvrira lh3.googleusercontent.com, etc.
-    "googletagmanager.com",     // Google Tag Manager / Analytics
-    "google-analytics.com",     // Google Analytics
-    "basemaps.cartocdn.com",    // Tuiles de carte
-    "openstreetmap.org",        // Tuiles de carte
-    "supabase.co",              // Backend Supabase
-    "supabase.in",              // Backend Supabase
-    "cloudflare.com",           // Cloudflare Turnstile
-    "vercel-scripts.com",       // Scripts Vercel Analytics
-    "gstatic.com",              // Google Translate styles/fonts
-    "translate.google.com",     // Google Translate API
-    "translate.googleapis.com", // Google Translate API
-    "clarity.ms",               // Microsoft Clarity
-    "bing.com",                 // Bing/Clarity
-    "fonts.googleapis.com",     // Google Fonts
-    "kkiapay.me",               // Kkiapay payment
-    "rokt.com",                 // Rokt (extension ads)
-    "coinafrique.com",          // Images externes CoinAfrique
-    "onesignal.com",            // OneSignal SDK & Styles
-    "cloudinary.com",           // [FIX] Cloudinary images (res.cloudinary.com)
+    "googleusercontent.com",
+    "googletagmanager.com",
+    "google-analytics.com",
+    "basemaps.cartocdn.com",
+    "openstreetmap.org",
+    "supabase.co",
+    "supabase.in",
+    "cloudflare.com",
+    "vercel-scripts.com",
+    "gstatic.com",
+    "translate.google.com",
+    "translate.googleapis.com",
+    "clarity.ms",
+    "bing.com",
+    "fonts.googleapis.com",
+    "kkiapay.me",
+    "rokt.com",
+    "coinafrique.com",
+    "onesignal.com",
+    "cloudinary.com",
   ];
 
-  // Vérifie si l'URL contient un des domaines externes
   const isExternalResource = externalDomains.some((domain) =>
     url.hostname.includes(domain)
   );
 
-  // Pour les ressources externes, laisser le navigateur gérer directement
-  // Ne PAS intercepter avec le service worker
   if (isExternalResource) {
-    return; // Le navigateur gère la requête normalement
+    return;
   }
 
-  // Pour les ressources internes uniquement : stratégie network-first avec cache fallback
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Seulement cacher les réponses réussies
         if (response.status === 200) {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -125,18 +107,13 @@ self.addEventListener("fetch", (event) => {
         return response;
       })
       .catch(async () => {
-        // Échec réseau, essayer le cache
         const cachedResponse = await caches.match(event.request);
         if (cachedResponse) {
           return cachedResponse;
         }
-        // Si pas de cache, retourner la page offline pour les requêtes de navigation
         if (event.request.mode === "navigate") {
           return caches.match("/offline.html");
         }
-
-        // Si c'est une ressource critique (style/script) interne qui échoue, 
-        // on laisse l'erreur se propager proprement plutôt que de retourner undefined
         throw new Error("Resource not found in cache");
       })
   );

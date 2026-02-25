@@ -3,18 +3,14 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-// 1. Module-level variable (fastest, persists within the current bundle)
-let cachedBrowserClient: SupabaseClient | undefined;
-
-// 2. GlobalThis fallback (for cross-bundle sharing or dev hot-reload)
+/**
+ * Singleton browser client to avoid "Multiple GoTrueClient instances" warning.
+ * Using globalThis ensures persistence across module re-evaluations and hot reloads.
+ */
 const globalWithSupabase = globalThis as unknown as {
   browserClient: SupabaseClient | undefined;
 };
 
-/**
- * Returns a single Supabase client instance for the browser context.
- * Reusing one instance avoids concurrent auth/storage issues (GoTrueClient warning).
- */
 export function createClient(): SupabaseClient {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -25,19 +21,22 @@ export function createClient(): SupabaseClient {
     );
   }
 
-  // Double-check cache (Local first, then Global)
-  if (typeof window !== "undefined") {
-    if (cachedBrowserClient) return cachedBrowserClient;
-    if (globalWithSupabase.browserClient) {
-      cachedBrowserClient = globalWithSupabase.browserClient;
-      return cachedBrowserClient;
-    }
+  // 1. Return existing instance if available
+  if (typeof window !== "undefined" && globalWithSupabase.browserClient) {
+    return globalWithSupabase.browserClient;
   }
 
-  const client = createBrowserClient(supabaseUrl, supabaseAnonKey);
+  // 2. Create new instance
+  const client = createBrowserClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
 
+  // 3. Store in global for future use
   if (typeof window !== "undefined") {
-    cachedBrowserClient = client;
     globalWithSupabase.browserClient = client;
   }
 
