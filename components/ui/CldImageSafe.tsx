@@ -87,11 +87,37 @@ export function CldImageSafe(props: CldImageProps) {
             crop, gravity, tint, blur, grayscale, pixelate, ...nextImageProps
         } = restProps;
 
+        // Fallback intelligent pour les IDs Cloudinary vers des chemins locaux
+        let localSrc = finalSrc;
+        if (typeof finalSrc === 'string' && finalSrc.startsWith('doussel/static/')) {
+            if (finalSrc.includes('/logos/')) {
+                const name = finalSrc.split('/logos/')[1];
+                // Tentative sur .svg pour les logos de base, .png pour les variantes spécifiques
+                const useSvg = name === 'logo' || name === 'logo-black' || name === 'Logo';
+                localSrc = useSvg ? `/${name.toLowerCase()}.svg` : `/${name.toLowerCase()}.png`;
+            } else if (finalSrc.includes('/banners/')) {
+                const name = finalSrc.split('/banners/')[1];
+                localSrc = name === 'monument' ? `/${name}.png` : `/images/${name}.webp`;
+            } else if (finalSrc.includes('/images/')) {
+                const name = finalSrc.split('/images/')[1];
+                // Fallback générique .webp, sauf exceptions connues
+                const isJpg = ['fatou-ndiaye', 'moussa-konate'].includes(name);
+                localSrc = `/images/${name}.${isJpg ? 'jpg' : 'webp'}`;
+            } else if (finalSrc.includes('/illustrations/')) {
+                const name = finalSrc.split('/illustrations/')[1];
+                localSrc = `/images/${name}.png`;
+            } else if (finalSrc.includes('/features/')) {
+                const name = finalSrc.split('/features/')[1];
+                localSrc = `/images/${name}.webp`;
+            }
+        }
+
         return (
             <div className={cn("relative overflow-hidden", isFill ? "absolute inset-0" : className)}>
                 {isLoading && <Skeleton className="absolute inset-0 z-10" />}
                 <Image
                     {...(nextImageProps as any)}
+                    src={localSrc}
                     className={cn(
                         "transition-opacity duration-500",
                         isLoading ? "opacity-0" : "opacity-100",
@@ -121,4 +147,4 @@ export function CldImageSafe(props: CldImageProps) {
             />
         </div>
     );
-}
+};

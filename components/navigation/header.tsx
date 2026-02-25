@@ -66,7 +66,7 @@ export const Header = () => {
             aria-label="Dousell Immo - Accueil"
           >
             <Image
-              src="https://res.cloudinary.com/dkkirzpxe/image/upload/doussel/static/logos/Logo.svg"
+              src="/logo.svg"
               alt="Dousell Immo"
               width={120}
               height={40}
@@ -165,7 +165,7 @@ export const Header = () => {
             aria-label="Dousell Immo - Accueil"
           >
             <Image
-              src="https://res.cloudinary.com/dkkirzpxe/image/upload/doussel/static/logos/Logo.svg"
+              src="/logo.svg"
               alt="Dousell Immo"
               width={240}
               height={80}

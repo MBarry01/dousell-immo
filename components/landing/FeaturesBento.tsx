@@ -10,7 +10,7 @@ import { CldImageSafe } from "@/components/ui/CldImageSafe";
 const features = [
     {
         id: 1,
-        image: "doussel/static/banners/DashMock",
+        image: "doussel/static/banners/dash-mock",
         title: "Votre Patrimoine dans votre Poche",
         paragraphs: [
             "Fini les cahiers de notes raturés et les fichiers Excel perdus. Gérez vos biens immobiliers comme un véritable professionnel depuis votre téléphone, que vous soyez à Dakar, Paris ou New York.",
@@ -23,7 +23,7 @@ const features = [
     },
     {
         id: 2,
-        image: "doussel/static/features/Paiement",
+        image: "doussel/static/features/paiement",
         title: "Encaissez sans courir après personne",
         paragraphs: [
             "Ne perdez plus votre énergie à relancer les retardataires. Dousell envoie automatiquement les rappels de paiement par SMS et email avant et après l'échéance.",
@@ -49,7 +49,7 @@ const features = [
     },
     {
         id: 4,
-        image: "doussel/static/features/Etat_Lieux",
+        image: "doussel/static/features/etat-lieux",
         title: "L'État des Lieux Incontestable",
         paragraphs: [
             "Prenez des photos datées et géolocalisées directement via l'application. Figez l'état réel du bien à l'entrée pour éviter tout litige à la sortie.",

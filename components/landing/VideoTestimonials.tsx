@@ -25,7 +25,7 @@ const ownerStories: Story[] = [
         quote: "Dousell a complètement automatisé ma gestion. Je ne passe plus mes week-ends à gérer la paperasse.",
         author: "Amadou Sow",
         role: "Propriétaire Multi-biens",
-        image: "doussel/static/images/amadou_sow",
+        image: "doussel/static/images/amadou-sow",
     },
     {
         id: 2,
@@ -34,7 +34,7 @@ const ownerStories: Story[] = [
         quote: "Les paiements sont sécurisés et arrivent à l'heure. C'est la tranquillité d'esprit que je cherchais.",
         author: "Fatou Ndiaye",
         role: "Investisseuse à Saly",
-        image: "doussel/static/images/fatou_ndiaye",
+        image: "doussel/static/images/fatou-ndiaye",
     },
     {
         id: 3,
@@ -43,7 +43,7 @@ const ownerStories: Story[] = [
         quote: "Mes locataires adorent l'application. Ils paient par Wave en 2 clics et reçoivent leur quittance.",
         author: "Jean-Marc Diouf",
         role: "Gestionnaire Immobilier",
-        image: "doussel/static/images/jean_marc_diouf",
+        image: "doussel/static/images/jean-marc-diouf",
     },
     {
         id: 4,
@@ -52,7 +52,7 @@ const ownerStories: Story[] = [
         quote: "Une équipe réactive et à l'écoute. Le support est vraiment au niveau de mes attentes.",
         author: "Aïcha Diallo",
         role: "Propriétaire à Dakar",
-        image: "doussel/static/images/aicha_diallo",
+        image: "doussel/static/images/aicha-diallo",
     },
     {
         id: 5,
@@ -61,7 +61,7 @@ const ownerStories: Story[] = [
         quote: "J'ai réduit mes impayés de 100% grâce au système de relance automatique.",
         author: "Moussa Konaté",
         role: "Bailleur Indépendant",
-        image: "doussel/static/images/moussa_konate",
+        image: "doussel/static/images/moussa-konate",
     },
 ];
 
@@ -73,7 +73,7 @@ const tenantStories: Story[] = [
         quote: "J'ai visité mon appartement depuis Paris et signé le bail électroniquement. Incroyable !",
         author: "Sophie Diop",
         role: "Expatriée",
-        image: "doussel/static/images/sophie_diop",
+        image: "doussel/static/images/sophie-diop",
     },
     {
         id: 2,
@@ -82,7 +82,7 @@ const tenantStories: Story[] = [
         quote: "Pas de frais cachés, un état des lieux numérique clair. Tout est carré.",
         author: "Cheikh Anta",
         role: "Locataire à Saly",
-        image: "doussel/static/images/cheikh_anta",
+        image: "doussel/static/images/cheikh-anta",
     },
     {
         id: 3,
@@ -91,7 +91,7 @@ const tenantStories: Story[] = [
         quote: "Payer mon loyer avec Wave est super pratique. Je reçois ma quittance instantanément.",
         author: "Aminata Faye",
         role: "Locataire au Plateau",
-        image: "doussel/static/images/anta_faye",
+        image: "doussel/static/images/anta-faye",
     },
     {
         id: 4,
@@ -100,7 +100,7 @@ const tenantStories: Story[] = [
         quote: "J'ai eu un souci de plomberie, j'ai ouvert un ticket et c'était réglé le lendemain.",
         author: "Paul Mendy",
         role: "Locataire à Ouakam",
-        image: "doussel/static/images/paul_mendy",
+        image: "doussel/static/images/paul-mendy",
     },
 ];
 

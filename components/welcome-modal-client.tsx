@@ -174,7 +174,7 @@ export function WelcomeModalContent() {
                 className="pointer-events-none absolute inset-0 z-20 h-full w-full"
               />
               <CldImageSafe
-                src="doussel/static/modals/bannerlogin1"
+                src="doussel/static/modals/banner-login1"
                 alt="Bienvenue sur Dousell Immo"
                 fill
                 className="object-cover object-center"

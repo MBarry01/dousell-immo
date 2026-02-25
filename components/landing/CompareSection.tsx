@@ -97,8 +97,8 @@ export default function CompareSection() {
           >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-[#F4C430]/20">
               <AceCompare
-                firstImage="https://res.cloudinary.com/dkkirzpxe/image/upload/doussel/static/comparison/compare2.webp"
-                secondImage="https://res.cloudinary.com/dkkirzpxe/image/upload/doussel/static/comparison/compare1.webp"
+                firstImage="/images/compare2.webp"
+                secondImage="/images/compare1.webp"
                 className="aspect-[4/3] w-full"
                 slideMode="drag"
                 showHandlebar={true}

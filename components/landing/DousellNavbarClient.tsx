@@ -10,7 +10,7 @@ const dousellConfig: NavbarConfig = {
     logo: {
         alt: "Dousell Immo",
         href: "/landing",
-        src: "doussel/static/logos/logoJnOr",
+        src: "doussel/static/logos/logo-jnor",
         width: 32,
         height: 32,
     },
@@ -32,21 +32,21 @@ const dousellConfig: NavbarConfig = {
                 {
                     title: "Gestion Locative",
                     href: "/pro/start",
-                    src: "doussel/static/banners/DashMock",
+                    src: "doussel/static/banners/dash-mock",
                     description:
                         "Automatisez l'envoi des quittances et encaissez vos loyers sans stress.",
                 },
                 {
                     title: "Espace Locataire",
                     href: "/locataire",
-                    src: "doussel/static/banners/CouverturePay",
+                    src: "doussel/static/banners/couverture-pay",
                     description:
                         "Payez votre loyer en 1 clic (Wave/OM) et téléchargez vos contrats.",
                 },
                 {
                     title: "Syndic de Copro",
                     href: "/pro/syndic",
-                    src: "doussel/static/features/Etat_Lieux",
+                    src: "doussel/static/features/etat-lieux",
                     description:
                         "Une gestion transparente, des AG en ligne et une comptabilité claire.",
                 },

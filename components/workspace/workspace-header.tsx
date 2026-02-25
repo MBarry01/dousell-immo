@@ -84,7 +84,7 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
           >
             <Image
-              src="https://res.cloudinary.com/dkkirzpxe/image/upload/doussel/static/icons/icon-192.png"
+              src="/logo.svg"
               width={28}
               height={28}
               alt="Dousell Immo"

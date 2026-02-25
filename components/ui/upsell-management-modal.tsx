@@ -32,7 +32,7 @@ export function UpsellManagementModal({
 
                     <div className="relative z-10 w-full h-32 overflow-hidden bg-black">
                         <CldImageSafe
-                            src="doussel/static/modals/bannerUpsell1"
+                            src="doussel/static/modals/banner-upsell1"
                             alt="Gestion Locative"
                             fill
                             className="w-full h-full object-cover opacity-90"

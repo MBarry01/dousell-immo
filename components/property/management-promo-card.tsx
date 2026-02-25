@@ -62,7 +62,7 @@ export const ManagementPromoCard = () => {
                     {/* Image à gauche - Plus compacte sur mobile */}
                     <div className="relative w-16 shrink-0 sm:w-24">
                         <CldImageSafe
-                            src="doussel/static/modals/bannerPopup1"
+                            src="doussel/static/modals/banner-popup1"
                             alt="Gestion locative Dousell"
                             fill
                             className="object-cover"

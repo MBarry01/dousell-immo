@@ -91,7 +91,7 @@ export default function TenantBentoGrid() {
                     </div>
                     <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2 border border-white/10">
                       <CldImageSafe
-                        src="doussel/static/icons/CB"
+                        src="doussel/static/icons/cb"
                         alt="Carte Bancaire"
                         width={32}
                         height={32}

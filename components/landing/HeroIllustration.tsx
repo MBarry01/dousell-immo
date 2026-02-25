@@ -39,7 +39,7 @@ export default function HeroIllustration() {
               {/* Screen Content - Image Replacement */}
               <div className="absolute inset-0 bg-black p-1.5 lg:p-2">
                 <CldImageSafe
-                  src="doussel/static/illustrations/mockpay"
+                  src="doussel/static/illustrations/mock-pay"
                   alt="Application Dousell Locataire"
                   fill
                   className="object-cover rounded-[32px] lg:rounded-[36px]"
@@ -133,7 +133,7 @@ export default function HeroIllustration() {
           >
             <div className="flex items-center gap-2">
               <CldImageSafe
-                src="doussel/static/icons/CB"
+                src="doussel/static/icons/cb"
                 alt="Carte Bancaire"
                 width={40}
                 height={40}

@@ -185,7 +185,7 @@ export default function SignupPage() {
                 {/* Background Image */}
                 <div className="absolute inset-0 z-0">
                     <Image
-                        src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop"
+                        src="/images/herobg.webp"
                         alt="Luxury Interior"
                         fill
                         className="object-cover"
@@ -272,7 +272,7 @@ export default function SignupPage() {
                             </motion.div>
 
                             <Image
-                                src="/LogoOr1.png"
+                                src="/logo.svg"
                                 alt="Dousell Immo"
                                 width={320}
                                 height={160}
@@ -352,7 +352,7 @@ export default function SignupPage() {
                 {/* Background Image Container - Faded Deco */}
                 <div className="absolute inset-0 z-0 opacity-[0.14] pointer-events-none overflow-hidden">
                     <Image
-                        src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988350/doussel/static/images/assetSignup.png"
+                        src="/images/asset-signup.png"
                         alt="Background Decoration"
                         fill
                         className="object-cover object-center"
@@ -382,7 +382,7 @@ export default function SignupPage() {
                         <ArrowLeft className="h-5 w-5 text-white" />
                     </Link>
                     <Image
-                        src="/logoJnOr.png"
+                        src="/logo.svg"
                         alt="Dousell Immo"
                         width={120}
                         height={40}

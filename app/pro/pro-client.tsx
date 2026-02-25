@@ -97,7 +97,7 @@ const featuresDataSaasable = [
     title2: "Centralisez votre patrimoine",
     description: "Une vue à 360° sur vos biens, locataires et finances.",
     isCoverImage: true,
-    image: "/Gif/Dasboard1.gif",
+    image: "/gifs/dashboard1.gif",
     bgImage: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80", // Immobilier
     icon: "tabler-building",
     list: [
@@ -111,7 +111,7 @@ const featuresDataSaasable = [
     title2: "Gagnez du temps",
     description: "Laissez l'IA gérer les tâches répétitives.",
     isCoverImage: true,
-    image: "/Gif/Generer.gif",
+    image: "/gifs/generer.gif",
     bgImage: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80", // Robot/AI
     icon: "tabler-sparkles",
     list: [
@@ -125,7 +125,7 @@ const featuresDataSaasable = [
     title2: "Sécurité & Conformité",
     description: "Vos données et vos biens sont protégés.",
     isCoverImage: true,
-    image: "/Gif/security.gif",
+    image: "/gifs/security.gif",
     bgImage: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80", // Sécurité/Lock
     icon: "tabler-shield",
     list: [
@@ -677,7 +677,7 @@ function LandingPageContent() {
               className="block md:hidden w-full max-w-[280px] sm:max-w-sm mx-auto"
             >
               <CldImageSafe
-                src="doussel/static/illustrations/mockphon"
+                src="doussel/static/illustrations/mock-phone"
                 alt="App Mobile Dousell Immo"
                 width={800}
                 height={1600}
@@ -695,7 +695,7 @@ function LandingPageContent() {
               className="hidden md:block lg:hidden w-full max-w-2xl mx-auto"
             >
               <Image
-                src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988377/doussel/static/images/mockComputer.png"
+                src="/images/mock-computer.png"
                 alt="Tablette Dousell Immo"
                 width={1200}
                 height={900}
@@ -713,7 +713,7 @@ function LandingPageContent() {
               className="hidden lg:block w-full max-w-5xl mx-auto"
             >
               <Image
-                src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988378/doussel/static/images/mockCPh.png"
+                src="/images/mock-cph.png"
                 alt="Desktop Dousell Immo"
                 width={1600}
                 height={1000}
