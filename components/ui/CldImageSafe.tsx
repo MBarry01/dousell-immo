@@ -32,6 +32,11 @@ export function CldImageSafe(props: CldImageProps) {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dkkirzpxe';
     const src = props.src as string;
 
+    // Debug help for production
+    if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME && process.env.NODE_ENV === 'production') {
+        console.warn("[CldImageSafe] NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME is missing. Falling back to default.");
+    }
+
     // 1. Détermination de la source et construction de l'URL
     const { isLocal, finalSrc, isLogo, isDesign } = useMemo(() => {
         if (typeof src !== 'string') return { isLocal: false, finalSrc: src, isLogo: false, isDesign: false };
