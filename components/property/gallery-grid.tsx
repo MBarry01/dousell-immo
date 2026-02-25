@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { ChevronLeft, ChevronRight, X, Maximize2, Share2, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
@@ -75,7 +75,7 @@ export const GalleryGrid = ({
               className="relative h-[50vh] min-w-full shrink-0 overflow-hidden touch-pan-y"
               onClick={() => openLightbox(index)}
             >
-              <Image
+              <CldImageSafe
                 src={src}
                 alt={`${title} visuel ${index + 1}`}
                 fill
@@ -131,7 +131,7 @@ export const GalleryGrid = ({
           )}
           onClick={() => openLightbox(0)}
         >
-          <Image
+          <CldImageSafe
             src={images[0]}
             alt={`${title} - Photo principale`}
             fill
@@ -178,7 +178,7 @@ export const GalleryGrid = ({
             )}
             onClick={() => openLightbox(index + 1)}
           >
-            <Image
+            <CldImageSafe
               src={src}
               alt={`${title} - Photo ${index + 2}`}
               fill
@@ -240,7 +240,7 @@ export const GalleryGrid = ({
                   openLightbox(index);
                 }}
               >
-                <Image
+                <CldImageSafe
                   src={src}
                   alt={`${title} - Photo ${index + 1}`}
                   fill

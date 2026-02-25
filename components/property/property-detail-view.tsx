@@ -22,7 +22,7 @@ import {
   LayoutGrid,
   Lock,
 } from "lucide-react";
-import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { hapticFeedback } from "@/lib/haptic";
 
 import { GalleryGrid } from "@/components/property/gallery-grid";
@@ -398,7 +398,7 @@ export const PropertyDetailView = ({
                 <>
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
                     {displayPhoto ? (
-                      <Image
+                      <CldImageSafe
                         src={displayPhoto}
                         alt={displayName}
                         fill

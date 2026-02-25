@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
-import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -164,7 +164,7 @@ export function PropertyLightbox({
                                     }}
                                 >
                                     <div className="relative w-full h-full max-w-[90vw] max-h-[75vh]">
-                                        <Image
+                                        <CldImageSafe
                                             src={src}
                                             alt={`Vue ${index + 1}`}
                                             fill
@@ -194,7 +194,7 @@ export function PropertyLightbox({
                                                 : "border-transparent opacity-50 hover:opacity-80"
                                         )}
                                     >
-                                        <Image
+                                        <CldImageSafe
                                             src={src}
                                             alt={`Miniature ${index + 1}`}
                                             fill

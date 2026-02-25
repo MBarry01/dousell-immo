@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { MapPin, Bed, Bath, Square, ArrowUpRight } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
@@ -30,7 +30,7 @@ export const PropertyCardUnified = ({ property, className }: PropertyCardUnified
             {/* Image Container */}
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] z-10">
                 {property.images[0] ? (
-                    <Image
+                    <CldImageSafe
                         src={property.images[0]}
                         alt={property.title}
                         fill

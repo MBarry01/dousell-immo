@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { motion } from "framer-motion";
 import { MessageCircle, Clock, Phone, BadgeCheck, ExternalLink, Settings2, Users, User } from "lucide-react";
 import { format } from "date-fns";
@@ -117,7 +117,7 @@ export const AgentCard = ({ agent, owner, property, propertyId, propertyTitle }:
       <div className="flex items-start gap-4">
         <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-gray-200 shadow-inner dark:bg-white/10 ring-4 ring-white dark:ring-white/5">
           {displayPhoto ? (
-            <Image
+            <CldImageSafe
               src={displayPhoto}
               alt={displayName}
               fill

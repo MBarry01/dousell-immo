@@ -104,6 +104,28 @@ export function CldImageSafe(props: CldImageProps) {
         );
     }
 
+    // Fonction pour vérifier si une URL appartient à Cloudinary
+    const isCloudinaryUrl = (url: string) => url.includes('res.cloudinary.com');
+
+    // Loader personnalisé pour BYPASSER Vercel et utiliser le srcset natif de Cloudinary
+    const cloudinaryLoader = ({ width }: { width: number }) => {
+        // Si c'est un ID (cas standard)
+        if (!src.startsWith('http') && !src.startsWith('//')) {
+            return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_${width}/${src}`;
+        }
+        // Si c'est déjà une URL complète Cloudinary, on essaie d'y injecter l'optimisation de largeur
+        if (isCloudinaryUrl(src)) {
+            // Remplacer /upload/ par /upload/f_auto,q_auto,w_WIDTH/
+            // On gère aussi le cas où il y a déjà des transformations
+            if (src.includes('/upload/')) {
+                return src.replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`);
+            }
+        }
+        return src;
+    };
+
+    const isCloudinary = !isLocal && (isCloudinaryUrl(src) || (!src.startsWith('http') && !src.startsWith('//')));
+
     return (
         <div className={cn("relative overflow-hidden", isFill ? "absolute inset-0" : className)}>
             {/* Skeleton uniquement pour les images non-design (ex: annonces user) */}
@@ -119,13 +141,11 @@ export function CldImageSafe(props: CldImageProps) {
                     isLoading && !restProps.priority && !isDesign && !isLocal ? "opacity-0" : "opacity-100",
                     className
                 )}
-                // Loader personnalisé pour BYPASSER Vercel et utiliser le srcset natif de Cloudinary
-                loader={!isLocal && !src.startsWith('http') && !src.startsWith('//') ? ({ width }) => {
-                    return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_${width}/${src}`;
-                } : undefined}
-                // unoptimized=true uniquement pour les URLs externes déjà complètes (Supabase/Unsplash)
+                // Utiliser le loader si c'est du Cloudinary (ID ou URL)
+                loader={isCloudinary ? cloudinaryLoader : undefined}
+                // unoptimized=true uniquement pour les URLs externes NON-Cloudinary (Supabase/Unsplash)
                 // Pour Cloudinary, on veut unoptimized=false pour que le loader génère le srcset
-                unoptimized={!isLocal && (src.startsWith('http') || src.startsWith('//'))}
+                unoptimized={!isLocal && !isCloudinary && (src.startsWith('http') || src.startsWith('//'))}
                 onLoad={handleLoad}
                 onError={handleError}
             />

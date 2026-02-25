@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ThumbsUp, ThumbsDown, Star } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 
 import { toggleReviewReaction } from "@/services/reviewReactionService";
 import type { Review } from "@/services/reviewService";
@@ -80,7 +80,7 @@ const ReviewItem = ({ review, propertyId }: ReviewItemProps) => {
     <div className="flex gap-4">
       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-200 dark:bg-white/20">
         {review.user_photo ? (
-          <Image
+          <CldImageSafe
             src={review.user_photo}
             alt={review.user_name}
             fill
@@ -102,11 +102,10 @@ const ReviewItem = ({ review, propertyId }: ReviewItemProps) => {
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`h-4 w-4 ${
-                  i < review.rating
+                className={`h-4 w-4 ${i < review.rating
                     ? "fill-amber-400 text-amber-400"
                     : "fill-gray-300 text-gray-300 dark:fill-gray-600 dark:text-gray-600"
-                }`}
+                  }`}
               />
             ))}
           </div>
@@ -129,11 +128,10 @@ const ReviewItem = ({ review, propertyId }: ReviewItemProps) => {
           <button
             onClick={() => handleReaction("like")}
             disabled={isPending}
-            className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs transition ${
-              localUserReaction === "like"
+            className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs transition ${localUserReaction === "like"
                 ? "bg-amber-500/20 text-amber-500"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/10 dark:text-white/60 dark:hover:bg-white/20"
-            }`}
+              }`}
           >
             <ThumbsUp className={`h-3.5 w-3.5 ${localUserReaction === "like" ? "fill-current" : ""}`} />
             <span>{localLikes}</span>
@@ -141,11 +139,10 @@ const ReviewItem = ({ review, propertyId }: ReviewItemProps) => {
           <button
             onClick={() => handleReaction("dislike")}
             disabled={isPending}
-            className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs transition ${
-              localUserReaction === "dislike"
+            className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs transition ${localUserReaction === "dislike"
                 ? "bg-red-500/20 text-red-500"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/10 dark:text-white/60 dark:hover:bg-white/20"
-            }`}
+              }`}
           >
             <ThumbsDown className={`h-3.5 w-3.5 ${localUserReaction === "dislike" ? "fill-current" : ""}`} />
             <span>{localDislikes}</span>

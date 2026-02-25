@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import Link from "next/link";
 import {
     ArrowLeft,
@@ -54,7 +54,7 @@ export const ExternalPropertyTeaser = ({
             {/* Hero Image */}
             <div className="relative h-[50vh] min-h-[320px] max-h-[500px] w-full overflow-hidden">
                 {property.images[0] ? (
-                    <Image
+                    <CldImageSafe
                         src={property.images[0]}
                         alt={property.title}
                         fill

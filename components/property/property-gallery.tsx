@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
@@ -58,7 +58,7 @@ export const PropertyGallery = ({
               key={`${propertyId}-${src}-${index}`}
             >
               <div className="relative h-full w-full">
-                <Image
+                <CldImageSafe
                   src={src}
                   alt={`${title} visuel ${index + 1}`}
                   fill
