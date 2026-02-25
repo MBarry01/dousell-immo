@@ -1,5 +1,3 @@
-// Service Worker for Dousell Immo PWA + OneSignal Push
-
 // 1. Listeners must be added at the VERY TOP for initial evaluation
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
@@ -10,7 +8,7 @@ self.addEventListener("message", (event) => {
 // 2. Import OneSignal SW SDK
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-const CACHE_NAME = "dousell-immo-v13"; // Increment version
+const CACHE_NAME = "dousell-immo-v14"; // Increment version
 const STATIC_ASSETS = [
   "/gestion",
   "/manifest.json",
@@ -98,6 +96,7 @@ self.addEventListener("fetch", (event) => {
     "rokt.com",                 // Rokt (extension ads)
     "coinafrique.com",          // Images externes CoinAfrique
     "onesignal.com",            // OneSignal SDK & Styles
+    "cloudinary.com",           // [FIX] Cloudinary images (res.cloudinary.com)
   ];
 
   // Vérifie si l'URL contient un des domaines externes

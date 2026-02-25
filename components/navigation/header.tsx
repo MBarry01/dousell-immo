@@ -66,10 +66,10 @@ export const Header = () => {
             aria-label="Dousell Immo - Accueil"
           >
             <Image
-              src="/logo.svg"
+              src="/icons/icon.svg"
               alt="Dousell Immo"
-              width={120}
-              height={40}
+              width={32}
+              height={32}
               className={cn("h-8 w-auto transition-opacity", isSearchOpen && "opacity-0 invisible w-0")}
               priority
             />
@@ -165,11 +165,11 @@ export const Header = () => {
             aria-label="Dousell Immo - Accueil"
           >
             <Image
-              src="/logo.svg"
+              src="/icons/icon.svg"
               alt="Dousell Immo"
-              width={240}
-              height={80}
-              className="h-9 w-auto transition-transform hover:scale-105 lg:h-14"
+              width={48}
+              height={48}
+              className="h-10 w-auto transition-transform hover:scale-105 lg:h-12"
               priority
             />
           </Link>

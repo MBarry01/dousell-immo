@@ -272,10 +272,10 @@ export default function SignupPage() {
                             </motion.div>
 
                             <Image
-                                src="/logo.svg"
+                                src="/icons/icon.svg"
                                 alt="Dousell Immo"
-                                width={320}
-                                height={160}
+                                width={120}
+                                height={120}
                                 className="mx-auto"
                                 priority
                             />
@@ -382,11 +382,11 @@ export default function SignupPage() {
                         <ArrowLeft className="h-5 w-5 text-white" />
                     </Link>
                     <Image
-                        src="/logo.svg"
+                        src="/icons/icon.svg"
                         alt="Dousell Immo"
-                        width={120}
+                        width={40}
                         height={40}
-                        className="h-8 w-auto"
+                        className="h-10 w-auto"
                     />
                     <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-white/60">{formProgress}%</span>
                 </div>
