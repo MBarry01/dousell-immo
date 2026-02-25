@@ -79,7 +79,7 @@ const dousellConfig: NavbarConfig = {
 // Configuration pour utilisateur connecté
 const loggedInCta = {
     text: "Mon Espace",
-    href: "/gestion",
+    href: "https://app.doussel.immo/gestion",
 };
 
 // Configuration pour visiteur (mode propriétaire)
@@ -162,12 +162,12 @@ export default function DousellNavbarClient({
                 case "demo":
                 case "features":
                     return isLoggedIn
-                        ? { text: "Mon Espace", href: "/gestion" }
+                        ? { text: "Mon Espace", href: "https://app.doussel.immo/gestion" }
                         : { text: "Commencer gratuitement", href: "/pro/start" };
                 case "hero":
                 default:
                     if (isLoggedIn) {
-                        return { text: "Mon Espace", href: "/gestion" };
+                        return { text: "Mon Espace", href: "https://app.doussel.immo/gestion" };
                     }
                     // Propager le redirect pour le bouton login du hero
                     const paramsStr = searchParams?.toString();
