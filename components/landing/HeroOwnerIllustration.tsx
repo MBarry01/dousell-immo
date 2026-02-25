@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { useState, useEffect } from "react";
 
 export default function HeroOwnerIllustration() {
@@ -41,11 +41,11 @@ export default function HeroOwnerIllustration() {
           className="absolute top-12 left-1/2 -translate-x-1/2 w-[90%] md:w-[110%] lg:w-[120%] z-10"
         >
           <div className="relative rounded-[28px] overflow-hidden border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
-            <Image
-              src="/images/TabDash.png"
+            <CldImageSafe
+              src="doussel/static/banners/tab-dash_hlbyt9"
               alt="Tableau de bord Revenus"
               width={580}
-              height={387} // Approximate height to maintain aspect ratio
+              height={387}
               className="w-full h-auto object-cover"
               priority
             />
@@ -80,7 +80,7 @@ export default function HeroOwnerIllustration() {
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-xs lg:text-sm font-medium leading-tight">Loyer de Sidy Dia reçu</p>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <Image
+                      <CldImageSafe
                         src="/images/wave.png"
                         alt="Wave"
                         width={16}

@@ -1,14 +1,14 @@
-// 1. IMPORT ONESIGNAL FIRST - Required for initial evaluation of event listeners
-importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
-
-// 2. Custom message listener for skipWaiting
+// 1. Add basic listeners BEFORE imports to ensure they are available during initial evaluation
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
 
-const CACHE_NAME = "dousell-immo-v15"; // Increment version
+// 2. Import OneSignal SW SDK
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
+
+const CACHE_NAME = "dousell-immo-v16"; // Increment version
 const STATIC_ASSETS = [
   "/gestion",
   "/manifest.json",
