@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Play, Award, Building, Wallet, Shield } from "lucide-react";
-import Image from "next/image";
-import { CldImage } from "next-cloudinary";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 
 interface Story {
     id: number;
@@ -174,7 +173,7 @@ export default function VideoTestimonials({ mode = "owner" }: VideoTestimonialsP
                                 className="flex-none w-[300px] md:w-[400px] aspect-[4/5] relative rounded-3xl overflow-hidden group/card snap-center cursor-pointer border border-white/10"
                             >
                                 {/* Background Image */}
-                                <CldImage
+                                <CldImageSafe
                                     src={story.image}
                                     alt={story.author}
                                     fill

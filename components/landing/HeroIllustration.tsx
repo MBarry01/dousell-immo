@@ -1,8 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
-import { CldImage } from "next-cloudinary";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 
 export default function HeroIllustration() {
   return (
@@ -39,7 +38,7 @@ export default function HeroIllustration() {
 
               {/* Screen Content - Image Replacement */}
               <div className="absolute inset-0 bg-black p-1.5 lg:p-2">
-                <CldImage
+                <CldImageSafe
                   src="doussel/static/illustrations/mockpay.png"
                   alt="Application Dousell Locataire"
                   fill
@@ -77,7 +76,7 @@ export default function HeroIllustration() {
             className="bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2.5 lg:p-3 shadow-lg shadow-[#1DC3E4]/20"
           >
             <div className="flex items-center gap-2.5">
-              <CldImage
+              <CldImageSafe
                 src="doussel/static/icons/wave.png"
                 alt="Wave"
                 width={44}
@@ -105,7 +104,7 @@ export default function HeroIllustration() {
             className="bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2.5 lg:p-3 shadow-lg shadow-orange-500/20"
           >
             <div className="flex items-center gap-2.5">
-              <CldImage
+              <CldImageSafe
                 src="doussel/static/icons/om.png"
                 alt="Orange Money"
                 width={44}
@@ -133,7 +132,7 @@ export default function HeroIllustration() {
             className="bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2.5 lg:p-3 shadow-xl"
           >
             <div className="flex items-center gap-2">
-              <CldImage
+              <CldImageSafe
                 src="doussel/static/icons/CB.png"
                 alt="Carte Bancaire"
                 width={40}

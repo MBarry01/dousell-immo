@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
-import { CldImage } from "next-cloudinary";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -680,7 +680,7 @@ function DeposerPageContent() {
                     {formData.images.map((url, index) => (
                       <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
                         {url.includes("res.cloudinary.com") ? (
-                          <CldImage src={url} alt={`Photo ${index + 1}`} fill className="object-cover" crop="fill" gravity="auto" />
+                          <CldImageSafe src={url} alt={`Photo ${index + 1}`} fill className="object-cover" crop="fill" gravity="auto" />
                         ) : (
                           <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
                         )}

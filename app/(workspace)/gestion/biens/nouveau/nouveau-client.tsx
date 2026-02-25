@@ -6,7 +6,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { CldImage } from "next-cloudinary";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import {
   ArrowLeft,
   ArrowRight,
@@ -812,7 +812,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                     {formData.images.map((url, index) => (
                       <div key={index} className="relative aspect-square rounded-lg overflow-hidden group border border-border">
                         {url.includes("res.cloudinary.com") ? (
-                          <CldImage src={url} alt={`Photo ${index + 1}`} fill className="object-cover" crop="fill" gravity="auto" />
+                          <CldImageSafe src={url} alt={`Photo ${index + 1}`} fill className="object-cover" crop="fill" gravity="auto" />
                         ) : (
                           <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
                         )}

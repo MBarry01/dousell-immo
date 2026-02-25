@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import AceCompare from "@/components/ui/ace-compare";
-import { CldImage } from "next-cloudinary";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 
 const features = [
   {

@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { Wallet, FileText, ShieldCheck, Mail, LayoutDashboard, CheckCircle2, type LucideIcon } from "lucide-react";
 import { motion, Variants } from "framer-motion";
-import { CldImage } from "next-cloudinary";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 
 // Feature data
 const features = [
@@ -138,7 +138,7 @@ function FeatureRow({ image, title, paragraphs, icon: Icon, iconColor, iconBg, i
                 variants={imageVariants}
             >
                 <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl group">
-                    <CldImage
+                    <CldImageSafe
                         src={image}
                         alt={title}
                         fill

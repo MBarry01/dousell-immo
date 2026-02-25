@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/motion-wrapper";
-import { CldImage } from "next-cloudinary";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 
 export const HeroSection = () => {
   return (
@@ -19,7 +19,7 @@ export const HeroSection = () => {
       >
         {/* Image de fond — taille naturelle, ancrée en haut */}
         <div className="absolute inset-0">
-          <CldImage
+          <CldImageSafe
             src="doussel/static/banners/monument"
             alt="Monument Renaissance Africaine"
             fill
@@ -117,7 +117,7 @@ export const HeroSection = () => {
         >
           {/* Conteneur qui pousse l'image à droite */}
           <div className="absolute right-0 bottom-0 h-full w-full md:w-1/2 lg:w-2/3" suppressHydrationWarning>
-            <CldImage
+            <CldImageSafe
               src="doussel/static/banners/monument"
               alt="Monument Renaissance Africaine"
               fill

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { CldImage } from "next-cloudinary";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 
@@ -140,7 +140,7 @@ export const ListingImageCarousel = ({
             >
               <div className="relative h-full w-full">
                 {src.includes("res.cloudinary.com") ? (
-                  <CldImage
+                  <CldImageSafe
                     src={src}
                     alt={`${alt} visuel ${index + 1}`}
                     fill

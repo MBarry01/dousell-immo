@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { CldImage } from "next-cloudinary";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import Link from "next/link";
 import { Building2, MapPin, Bed, Bath, Square, Eye, EyeOff, Pencil, Trash2, MoreVertical, Clock, Copy, Share2, UserPlus, CheckCircle2, AlertCircle, Plus, FileText } from "lucide-react";
 import { useState } from "react";
@@ -105,7 +105,7 @@ export function TeamPropertyCard({
       <div className="relative aspect-video bg-muted group-hover:scale-[1.01] transition-transform duration-500">
         {property.images?.[0] ? (
           property.images[0].includes("res.cloudinary.com") ? (
-            <CldImage
+            <CldImageSafe
               src={property.images[0]}
               alt={property.title}
               fill
