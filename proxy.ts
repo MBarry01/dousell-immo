@@ -6,13 +6,22 @@ import { contextStorage } from "./lib/context";
 export async function proxy(request: NextRequest) {
   const requestId = globalThis.crypto?.randomUUID() || Math.random().toString(36).substring(7);
   const pathname = request.nextUrl.pathname;
+  const hostname = request.headers.get('host') || '';
+
+  // RÈGLE SOUS-DOMAINE : Si le visiteur est sur "app.*"
+  if (hostname.startsWith('app.')) {
+    if (!pathname.startsWith('/gestion')) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/gestion${pathname}`;
+      return NextResponse.rewrite(url);
+    }
+  }
 
   const response = await contextStorage.run({ requestId, route: pathname }, async () => {
     return await updateSession(request);
   });
 
   // Expose le pathname courant via header pour les Server Components (ex: workspace layout)
-  // Permet de détecter la route sans avoir accès à usePathname() côté serveur
   if (response instanceof NextResponse) {
     response.headers.set("x-pathname", pathname);
   }
