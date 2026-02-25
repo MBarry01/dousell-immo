@@ -6,6 +6,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { CldImage } from "next-cloudinary";
 import {
   ArrowLeft,
   ArrowRight,
@@ -60,6 +61,7 @@ import { scrollToTop } from "@/lib/scroll-utils";
 import { useAuth } from "@/hooks/use-auth";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import { uploadPropertyPhotoAction } from "@/lib/cloudinary-actions";
 
 type PublishMode = "publish" | "draft" | "schedule";
 
@@ -253,28 +255,23 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
             // En cas d'échec, fileToUpload reste = file (l'original), finalExt reste fileExt
           }
 
-          // Upload de l'image principale
-          const baseName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
-          const fileName = `${baseName}.${finalExt}`;
-          const filePath = `team-properties/${teamId}/${fileName}`;
+          // Convert to Base64 for Server Action
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(fileToUpload);
+          });
+          const fileBase64 = await base64Promise;
 
-          const { error: uploadError } = await supabase.storage
-            .from("properties")
-            .upload(filePath, fileToUpload, { cacheControl: "3600", upsert: false });
+          toast.loading(`Envoi vers Cloudinary...`, { id: 'uploading' });
+          const clouinaryResult = await uploadPropertyPhotoAction(fileBase64, teamId);
+          toast.dismiss('uploading');
 
-          if (uploadError) throw new Error(`Erreur upload principale: ${uploadError.message}`);
-
-          const { data: { publicUrl } } = supabase.storage.from("properties").getPublicUrl(filePath);
-          uploadedUrls.push(publicUrl);
-
-          // Upload silencieux de la miniature (utilisation de la même String d'origine complétée plus tard)
-          if (thumbToUpload) {
-            const thumbPath = `team-properties/${teamId}/${baseName}-thumb.${finalExt}`;
-            // On lance l'upload de manière asynchrone non-bloquante pour la perfo, ou bloquante si on veut être sûr
-            await supabase.storage
-              .from("properties")
-              .upload(thumbPath, thumbToUpload, { cacheControl: "31536000", upsert: false });
+          if ('error' in clouinaryResult) {
+            throw new Error(clouinaryResult.error);
           }
+
+          uploadedUrls.push(clouinaryResult.url);
 
         } catch (e) {
           console.error(e);
@@ -814,7 +811,11 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mt-4">
                     {formData.images.map((url, index) => (
                       <div key={index} className="relative aspect-square rounded-lg overflow-hidden group border border-border">
-                        <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
+                        {url.includes("res.cloudinary.com") ? (
+                          <CldImage src={url} alt={`Photo ${index + 1}`} fill className="object-cover" crop="fill" gravity="auto" />
+                        ) : (
+                          <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
+                        )}
                         <button
                           type="button"
                           onClick={() => removeImage(index)}

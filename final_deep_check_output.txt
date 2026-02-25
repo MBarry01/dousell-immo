@@ -1,0 +1,11 @@
+[dotenv@17.3.1] injecting env (65) from .env.local -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+--- Checking Inventory Reports ---
+Found 3 inventory reports.
+Report ID: d95bc988-5701-44ed-ab4b-dd95f8ef4e5d
+Report ID: d3cadb9e-ffd9-4e59-a6d9-cf8f585f8918
+  ⚠️ Supabase sig in owner_signature
+Report ID: c6b50513-d6cb-4148-9471-dff0dbe0544e
+  ⚠️ FOUND Supabase image in rooms JSON!
+--- Checking Lease Documents ---
+--- Checking Vitrine/Public Properties ---
+Remaining Supabase images in properties: 0

@@ -1,0 +1,16 @@
+[dotenv@17.3.1] injecting env (65) from .env.local -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+maintenance_requests keys: [
+  'id',                    'lease_id',
+  'description',           'status',
+  'photo_urls',            'quote_amount',
+  'quote_url',             'created_at',
+  'category',              'artisan_name',
+  'artisan_phone',         'artisan_rating',
+  'artisan_address',       'quoted_price',
+  'intervention_date',     'completed_at',
+  'owner_approved',        'team_id',
+  'property_id',           'tenant_response',
+  'tenant_suggested_date', 'rejection_reason',
+  'owner_viewed_at'
+]
+inspection_reports keys: []

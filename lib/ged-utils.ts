@@ -1,5 +1,6 @@
 
 import { createClient } from '@/utils/supabase/server';
+import { uploadToCloudinary } from './cloudinary-actions';
 
 type DocumentType = 'titre_propriete' | 'bail' | 'cni' | 'facture' | 'attestation' | 'autre' | 'quittance' | 'etat_lieux' | 'facture_travaux' | 'maintenance';
 
@@ -31,64 +32,58 @@ export async function storeDocumentInGED(params: StoreDocumentParams, supabaseCl
     } = params;
 
     try {
-        // 1. Upload vers Storage
+        // 1. Upload vers Storage (ou Cloudinary pour les images)
         // On assainit le nom de fichier
         const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_\.]/g, '_');
         const filePath = `${userId}/${Date.now()}_${sanitizedFileName}`;
 
-        let { data: uploadData, error: uploadError } = await supabase.storage
-            .from(bucketName)
-            .upload(filePath, fileBuffer, {
-                contentType: 'application/pdf',
-                upsert: true
-            });
+        let fileUrl = "";
+        let storagePath = "";
 
-        // Retry: Auto-create bucket if missing (requires admin/service_role client)
-        if (uploadError && uploadError.message.includes("Bucket not found")) {
-            console.log(`⚠️ Bucket '${bucketName}' introuvable. Tentative de création...`);
-            const { error: createError } = await supabase.storage.createBucket(bucketName, {
-                public: false,
-                fileSizeLimit: 52428800, // 50MB
-                allowedMimeTypes: ['application/pdf', 'image/png', 'image/jpeg']
-            });
+        const isImage = fileName.match(/\.(jpg|jpeg|png|webp|gif)$/i);
 
-            if (createError) {
-                console.error("❌ Échec création bucket:", createError);
-                return { success: false, error: "Bucket introuvable et impossible à créer: " + createError.message };
+        if (isImage) {
+            // Pour les images, on préfère Cloudinary pour l'optimisation
+            const buffer = Buffer.from(fileBuffer);
+            const base64 = `data:image/${fileName.split('.').pop()};base64,${buffer.toString('base64')}`;
+            const uploadResult = await uploadToCloudinary(base64, `ged/${documentType}`);
+
+            if ('error' in uploadResult) {
+                console.error("Erreur Cloudinary GED:", uploadResult.error);
+                return { success: false, error: uploadResult.error };
             }
 
-            // Retry upload
-            const retry = await supabase.storage
+            fileUrl = uploadResult.url;
+            storagePath = uploadResult.publicId; // On stocke le public_id dans le path pour référence
+        } else {
+            // Pour les PDFs et autres, on reste sur Supabase
+            let { data: uploadData, error: uploadError } = await supabase.storage
                 .from(bucketName)
                 .upload(filePath, fileBuffer, {
-                    contentType: 'application/pdf',
+                    contentType: bucketName === 'properties' ? undefined : 'application/pdf',
                     upsert: true
                 });
 
-            uploadData = retry.data;
-            uploadError = retry.error;
-        }
+            // Retry: Auto-create bucket if missing
+            if (uploadError && uploadError.message.includes("Bucket not found")) {
+                await supabase.storage.createBucket(bucketName, { public: false });
+                const retry = await supabase.storage.from(bucketName).upload(filePath, fileBuffer, { upsert: true });
+                uploadData = retry.data;
+                uploadError = retry.error;
+            }
 
-        if (uploadError) {
-            console.error("Erreur Upload Storage:", uploadError);
-            return { success: false, error: uploadError.message };
-        }
+            if (uploadError) {
+                console.error("Erreur Upload Storage:", uploadError);
+                return { success: false, error: uploadError.message };
+            }
 
-        // 2. Générer l'URL publique ou signée (selon le bucket)
-        // Pour 'properties' c'est public, pour 'lease-contracts' privé
-        let fileUrl = "";
-
-        if (bucketName === 'properties') {
-            const { data: publicUrlData } = supabase.storage
-                .from(bucketName)
-                .getPublicUrl(filePath);
-            fileUrl = publicUrlData.publicUrl;
-        } else {
-            // Pour les buckets privés, on stocke le chemin interne et on générera des URLs signées à la volée
-            // OU on génère une URL signée longue durée (mais risqué).
-            // Mieux : Stocker le chemin relatif ou l'URL interne qui sera traitée par le client/serveur
-            // Ici on va stocker le path complet pour référence
-            fileUrl = uploadData.path;
+            storagePath = uploadData.path;
+            if (bucketName === 'properties') {
+                const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+                fileUrl = publicUrlData.publicUrl;
+            } else {
+                fileUrl = uploadData.path;
+            }
         }
 
         // 3. Créer l'entrée dans user_documents
@@ -99,7 +94,7 @@ export async function storeDocumentInGED(params: StoreDocumentParams, supabaseCl
                 description: metadata.description || fileName,
                 file_name: fileName,
                 file_type: documentType, // Utilise la colonne file_type définie dans la migration
-                file_path: uploadData.path,
+                file_path: storagePath,
                 file_size: fileBuffer.length,
                 mime_type: 'application/pdf',
                 entity_type: documentType === 'bail' ? 'lease' : documentType === 'quittance' ? 'payment' : documentType === 'maintenance' ? 'maintenance_request' : 'other',
@@ -128,7 +123,7 @@ export async function storeDocumentInGED(params: StoreDocumentParams, supabaseCl
                     // description: metadata.description || fileName, // On retire description au cas où
                     file_name: fileName,
                     file_type: 'autre',
-                    file_path: uploadData.path,
+                    file_path: storagePath,
                     file_size: fileBuffer.length,
                     mime_type: 'application/pdf',
                     // source: 'generated', // On retire generated au cas où
@@ -154,7 +149,7 @@ export async function storeDocumentInGED(params: StoreDocumentParams, supabaseCl
             return { success: false, error: dbError.message };
         }
 
-        return { success: true, document: doc, filePath: uploadData.path, fileUrl };
+        return { success: true, document: doc, filePath: storagePath, fileUrl };
 
     } catch (error) {
         console.error("Exception storeDocumentInGED:", error);

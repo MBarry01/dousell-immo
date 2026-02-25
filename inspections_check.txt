@@ -1,0 +1,2 @@
+[dotenv@17.3.1] injecting env (65) from .env.local -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2
+Total inspection reports: null

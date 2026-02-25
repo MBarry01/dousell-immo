@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowLeft, ArrowRight, Play, Award, Building, Wallet, Shield } from "lucide-react";
 import Image from "next/image";
+import { CldImage } from "next-cloudinary";
 
 interface Story {
     id: number;
@@ -25,7 +26,7 @@ const ownerStories: Story[] = [
         quote: "Dousell a complètement automatisé ma gestion. Je ne passe plus mes week-ends à gérer la paperasse.",
         author: "Amadou Sow",
         role: "Propriétaire Multi-biens",
-        image: "/images/Amadou Sow.webp",
+        image: "doussel/static/images/Amadou Sow",
     },
     {
         id: 2,
@@ -34,7 +35,7 @@ const ownerStories: Story[] = [
         quote: "Les paiements sont sécurisés et arrivent à l'heure. C'est la tranquillité d'esprit que je cherchais.",
         author: "Fatou Ndiaye",
         role: "Investisseuse à Saly",
-        image: "/images/Fatou Ndiaye.webp",
+        image: "doussel/static/images/Fatou Ndiaye",
     },
     {
         id: 3,
@@ -43,7 +44,7 @@ const ownerStories: Story[] = [
         quote: "Mes locataires adorent l'application. Ils paient par Wave en 2 clics et reçoivent leur quittance.",
         author: "Jean-Marc Diouf",
         role: "Gestionnaire Immobilier",
-        image: "/images/Jean Marc Diouf.webp",
+        image: "doussel/static/images/Jean Marc Diouf",
     },
     {
         id: 4,
@@ -52,7 +53,7 @@ const ownerStories: Story[] = [
         quote: "Une équipe réactive et à l'écoute. Le support est vraiment au niveau de mes attentes.",
         author: "Aïcha Diallo",
         role: "Propriétaire à Dakar",
-        image: "/images/Aicha Diallo.webp",
+        image: "doussel/static/images/Aicha Diallo",
     },
     {
         id: 5,
@@ -61,7 +62,7 @@ const ownerStories: Story[] = [
         quote: "J'ai réduit mes impayés de 100% grâce au système de relance automatique.",
         author: "Moussa Konaté",
         role: "Bailleur Indépendant",
-        image: "/images/Moussa Konaté.jpg",
+        image: "doussel/static/images/Moussa Konaté",
     },
 ];
 
@@ -73,7 +74,7 @@ const tenantStories: Story[] = [
         quote: "J'ai visité mon appartement depuis Paris et signé le bail électroniquement. Incroyable !",
         author: "Sophie Diop",
         role: "Expatriée",
-        image: "/images/Sophie_diop.webp",
+        image: "doussel/static/images/Sophie_diop",
     },
     {
         id: 2,
@@ -82,7 +83,7 @@ const tenantStories: Story[] = [
         quote: "Pas de frais cachés, un état des lieux numérique clair. Tout est carré.",
         author: "Cheikh Anta",
         role: "Locataire à Saly",
-        image: "/images/Cheikh Anta.webp",
+        image: "doussel/static/images/Cheikh Anta",
     },
     {
         id: 3,
@@ -91,7 +92,7 @@ const tenantStories: Story[] = [
         quote: "Payer mon loyer avec Wave est super pratique. Je reçois ma quittance instantanément.",
         author: "Aminata Faye",
         role: "Locataire au Plateau",
-        image: "/images/Anta Faye.webp",
+        image: "doussel/static/testimonials/Anta_Faye",
     },
     {
         id: 4,
@@ -100,7 +101,7 @@ const tenantStories: Story[] = [
         quote: "J'ai eu un souci de plomberie, j'ai ouvert un ticket et c'était réglé le lendemain.",
         author: "Paul Mendy",
         role: "Locataire à Ouakam",
-        image: "/images/Paul Mendy.webp",
+        image: "doussel/static/images/Paul Mendy",
     },
 ];
 
@@ -173,11 +174,14 @@ export default function VideoTestimonials({ mode = "owner" }: VideoTestimonialsP
                                 className="flex-none w-[300px] md:w-[400px] aspect-[4/5] relative rounded-3xl overflow-hidden group/card snap-center cursor-pointer border border-white/10"
                             >
                                 {/* Background Image */}
-                                <Image
+                                <CldImage
                                     src={story.image}
                                     alt={story.author}
                                     fill
                                     className="object-cover transition-transform duration-700 group-hover/card:scale-110"
+                                    sizes="(max-width: 768px) 300px, 400px"
+                                    crop="fill"
+                                    gravity="auto"
                                 />
 
                                 {/* Overlay Gradient */}

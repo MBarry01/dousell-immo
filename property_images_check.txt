@@ -1,0 +1,4 @@
+[dotenv@17.3.1] injecting env (65) from .env.local -- tip: ⚙️  override existing env vars with { override: true }
+Total properties: 74
+Total images: 20
+Images on Supabase: 19

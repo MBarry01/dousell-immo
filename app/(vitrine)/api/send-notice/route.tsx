@@ -90,17 +90,18 @@ export async function POST(request: NextRequest) {
       ? `Nous vous informons par la présente de notre intention de reprendre le logement que vous occupez actuellement. ${urgency} ${action}`
       : `Nous vous informons de l'arrivée prochaine de l'échéance de votre contrat de bail. ${urgency} ${action}`;
 
+    // 7. Préparer l'email avec React Email
     const emailHtml = await render(
-      <LegalNoticeEmail
-        tenantName={data.tenantName}
-        propertyAddress={data.propertyAddress}
-        noticeType={isJ180 ? 'termination' : 'general'}
-        noticeTitle={noticeTitle}
-        mainContent={mainContent}
-        effectiveDate={new Date(data.endDate).toLocaleDateString('fr-FR')}
-        senderName={data.ownerName}
-        senderAddress={data.ownerAddress}
-      />
+      renderNoticeEmail({
+        tenantName: data.tenantName,
+        propertyAddress: data.propertyAddress,
+        isJ180: isJ180,
+        noticeTitle: noticeTitle,
+        mainContent: mainContent,
+        endDate: data.endDate,
+        ownerName: data.ownerName,
+        ownerAddress: data.ownerAddress
+      })
     );
 
     const pdfFilename = isJ180
@@ -147,4 +148,19 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function renderNoticeEmail(props: any) {
+  return (
+    <LegalNoticeEmail
+      tenantName={props.tenantName}
+      propertyAddress={props.propertyAddress}
+      noticeType={props.isJ180 ? 'termination' : 'general'}
+      noticeTitle={props.noticeTitle}
+      mainContent={props.mainContent}
+      effectiveDate={new Date(props.endDate).toLocaleDateString('fr-FR')}
+      senderName={props.ownerName}
+      senderAddress={props.ownerAddress}
+    />
+  );
 }

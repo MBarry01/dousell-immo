@@ -683,7 +683,7 @@ function LandingPageContent() {
                 width={800}
                 height={1600}
                 className="w-full h-auto drop-shadow-[0_20px_50px_rgba(244,196,48,0.15)]"
-                unoptimized
+                sizes="(max-width: 768px) 100vw, 400px"
               />
             </motion.div>
 
@@ -696,12 +696,12 @@ function LandingPageContent() {
               className="hidden md:block lg:hidden w-full max-w-2xl mx-auto"
             >
               <Image
-                src="/images/mockComputer.png"
+                src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988377/doussel/static/images/mockComputer.png"
                 alt="Tablette Dousell Immo"
                 width={1200}
                 height={900}
                 className="w-full h-auto drop-shadow-[0_20px_50px_rgba(244,196,48,0.15)]"
-                unoptimized
+                sizes="(max-width: 1024px) 100vw, 800px"
               />
             </motion.div>
 
@@ -714,12 +714,12 @@ function LandingPageContent() {
               className="hidden lg:block w-full max-w-5xl mx-auto"
             >
               <Image
-                src="/images/mockCPh.png"
+                src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988378/doussel/static/images/mockCPh.png"
                 alt="Desktop Dousell Immo"
                 width={1600}
                 height={1000}
                 className="w-full h-auto drop-shadow-[0_30px_60px_rgba(244,196,48,0.1)]"
-                unoptimized
+                sizes="100vw"
               />
             </motion.div>
           </div>

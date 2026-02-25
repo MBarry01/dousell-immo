@@ -107,15 +107,15 @@ export async function POST(request: NextRequest) {
 
     // 8. Préparer l'email avec React Email
     const emailHtml = await render(
-      <ReceiptEmail
-        tenantName={data.tenantName}
-        receiptNumber={data.receiptNumber}
-        periodDisplay={periodDisplay}
-        amountFormatted={amountFormatted}
-        isGuarantee={isGuarantee}
-        ownerName={data.ownerName}
-        ownerAddress={data.ownerAddress}
-      />
+      renderReceiptEmail({
+        tenantName: data.tenantName,
+        receiptNumber: data.receiptNumber,
+        periodDisplay: periodDisplay,
+        amountFormatted: amountFormatted,
+        isGuarantee: isGuarantee,
+        ownerName: data.ownerName,
+        ownerAddress: data.ownerAddress
+      })
     );
 
     // Determine the subject based on document type
@@ -178,4 +178,18 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function renderReceiptEmail(props: any) {
+  return (
+    <ReceiptEmail
+      tenantName={props.tenantName}
+      receiptNumber={props.receiptNumber}
+      periodDisplay={props.periodDisplay}
+      amountFormatted={props.amountFormatted}
+      isGuarantee={props.isGuarantee}
+      ownerName={props.ownerName}
+      ownerAddress={props.ownerAddress}
+    />
+  );
 }

@@ -1,0 +1,98 @@
+[dotenv@17.3.1] injecting env (65) from .env.local -- tip: 🤖 agentic secret storage: https://dotenvx.com/as2
+🚀 Starting database images migration (Supabase -> Cloudinary)...
+
+Checking property: Terrain bien placé (19931b53-ddc9-47cc-9480-68b171eda932)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/1770880044904-fwi8m.png...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988822/doussel/teams/unknown/properties/1770880044904-fwi8m.png
+  ✨ Database updated for property 19931b53-ddc9-47cc-9480-68b171eda932
+
+Checking property: Apparemment soyeux (ecd371f5-6307-4635-aa81-7b7541e81eb4)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/1771041758078-4z4fvg.jpeg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988824/doussel/teams/8cb80f00-ab26-4086-9f41-934b1ccb8ade/properties/1771041758078-4z4fvg.jpg
+  ✨ Database updated for property ecd371f5-6307-4635-aa81-7b7541e81eb4
+
+Checking property: f5 (65678ffd-8c10-447d-afbd-d8b5131c2206)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/team-properties/8cb80f00-ab26-4086-9f41-934b1ccb8ade/1769809116146-a9e5hm.webp...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988827/doussel/teams/8cb80f00-ab26-4086-9f41-934b1ccb8ade/properties/1769809116146-a9e5hm.webp
+  ✨ Database updated for property 65678ffd-8c10-447d-afbd-d8b5131c2206
+
+Checking property: Studio F2 (5453c5e0-1972-4c08-b0fe-3bf4850990ea)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/team-properties/8cb80f00-ab26-4086-9f41-934b1ccb8ade/1769802867635-ot8g0h.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988830/doussel/teams/unknown/properties/1769802867635-ot8g0h.jpg
+  ✨ Database updated for property 5453c5e0-1972-4c08-b0fe-3bf4850990ea
+
+Checking property: Appartement Auto E2E Test (6c80044e-e3da-4d76-a5a5-34f2ada7b7b4)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/1771865571564-aqa3fm.png...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988832/doussel/teams/unknown/properties/1771865571564-aqa3fm.png
+  ✨ Database updated for property 6c80044e-e3da-4d76-a5a5-34f2ada7b7b4
+
+Checking property: Appart F2 (cf498621-8287-4adf-9562-7a24e22303b4)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/team-properties/8cb80f00-ab26-4086-9f41-934b1ccb8ade/1769254033473-o2lou.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988835/doussel/teams/8cb80f00-ab26-4086-9f41-934b1ccb8ade/properties/1769254033473-o2lou.jpg
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/team-properties/8cb80f00-ab26-4086-9f41-934b1ccb8ade/1769254059036-n5vgp.webp...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988837/doussel/teams/8cb80f00-ab26-4086-9f41-934b1ccb8ade/properties/1769254059036-n5vgp.webp
+  ✨ Database updated for property cf498621-8287-4adf-9562-7a24e22303b4
+
+Checking property: Studio (a4185190-e368-43b0-b603-887ad90eaf2c)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/1769014652148-61s7ps.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988839/doussel/teams/unknown/properties/1769014652148-61s7ps.jpg
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/properties/0.8633249966850889.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988844/doussel/teams/unknown/properties/0.jpg
+  ✨ Database updated for property a4185190-e368-43b0-b603-887ad90eaf2c
+
+Checking property: Appartement F3 moderne à Dakar Plateau (89bc0a8d-ff88-4e94-9ece-106ff2ab3c39)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/1771771344810-txomn.webp...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988846/doussel/teams/unknown/properties/1771771344810-txomn.webp
+  ✨ Database updated for property 89bc0a8d-ff88-4e94-9ece-106ff2ab3c39
+
+Checking property: Villa Saly Portudal (782ee54f-97db-4787-b2e2-9b11f3e0874e)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/1771894667709-ah41ms.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988849/doussel/teams/8cb80f00-ab26-4086-9f41-934b1ccb8ade/properties/1771894667709-ah41ms.jpg
+  ✨ Database updated for property 782ee54f-97db-4787-b2e2-9b11f3e0874e
+
+Checking property: 38 rue chemin st léger, 93240, stains (f148675b-b104-4463-8840-c4d7a78b1925)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/team-properties/8cb80f00-ab26-4086-9f41-934b1ccb8ade/1769799981132-9rcw9m.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988852/doussel/teams/8cb80f00-ab26-4086-9f41-934b1ccb8ade/properties/1769799981132-9rcw9m.jpg
+  ✨ Database updated for property f148675b-b104-4463-8840-c4d7a78b1925
+
+Checking property: Studio F3 (f67f83fe-fa79-4453-ad29-d6c47c4e458d)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/team-properties/8cb80f00-ab26-4086-9f41-934b1ccb8ade/1770159517239-d4pwfl.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988854/doussel/teams/8cb80f00-ab26-4086-9f41-934b1ccb8ade/properties/1770159517239-d4pwfl.jpg
+  ✨ Database updated for property f67f83fe-fa79-4453-ad29-d6c47c4e458d
+
+Checking property: Villa Saly Portudal (374dde43-04bf-4895-8be2-ae14d7c0439a)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/1771895200975-cnxfa2d.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988857/doussel/teams/unknown/properties/1771895200975-cnxfa2d.jpg
+  ✨ Database updated for property 374dde43-04bf-4895-8be2-ae14d7c0439a
+
+Checking property: Belle Villa Test SimulationBelle Villa Test Simulation (906378e4-95a1-49c2-80dd-aab6fba53bda)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/properties/1771778767714-c6k61d.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988860/doussel/teams/unknown/properties/1771778767714-c6k61d.jpg
+  ✨ Database updated for property 906378e4-95a1-49c2-80dd-aab6fba53bda
+
+Checking property: Villa Saly Portudal (0e587d83-765b-4446-b794-6b8c1368ac58)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/1771898225783-eldmgu.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988863/doussel/teams/unknown/properties/1771898225783-eldmgu.png
+  ✨ Database updated for property 0e587d83-765b-4446-b794-6b8c1368ac58
+
+Checking property: studio (ceb08772-1b2a-4c79-9de4-c0f2ce5867cd)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/team-properties/8cb80f00-ab26-4086-9f41-934b1ccb8ade/1769258313291-9xtaro.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988866/doussel/teams/8cb80f00-ab26-4086-9f41-934b1ccb8ade/properties/1769258313291-9xtaro.jpg
+  ✨ Database updated for property ceb08772-1b2a-4c79-9de4-c0f2ce5867cd
+
+Checking property: Villa Saly Portudal (93308579-07a5-4213-8a5a-f9aee7725045)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/1771899637930-7mh17w.jpg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988868/doussel/teams/unknown/properties/1771899637930-7mh17w.jpg
+  ✨ Database updated for property 93308579-07a5-4213-8a5a-f9aee7725045
+
+Checking property: Studio f5 (438597bb-9a0d-4d64-9e9a-2b8207916be0)
+  Migrating https://blyanhulvwpdfpezlaji.supabase.co/storage/v1/object/public/properties/team-properties/51c322cb-ad6a-470d-8391-e993ce6c68da/1770878934491-uht8sa.jpeg...
+  ✅ Uploaded to https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988871/doussel/teams/unknown/properties/1770878934491-uht8sa.jpg
+  ✨ Database updated for property 438597bb-9a0d-4d64-9e9a-2b8207916be0
+
+Checking property: Villa Saly Portudal (f948e71e-fb50-4dc3-8c72-795bc420fc50)
+
+
+Migration complete!
+✅ Total migrated: 19
+❌ Total failed: 0

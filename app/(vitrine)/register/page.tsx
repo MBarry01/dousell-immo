@@ -358,10 +358,10 @@ function RegisterContent() {
         {/* Background Image - Faded Deco */}
         <div className="absolute inset-0 z-0 opacity-[0.14] pointer-events-none overflow-hidden">
           <Image
-            src="/images/assetSignup.png"
-            alt="Background Decoration"
+            src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771988350/doussel/static/images/assetSignup.png"
+            alt="bg"
             fill
-            className="object-cover object-center"
+            className="object-cover opacity-20"
             priority
           />
           {/* Blend Gradients */}

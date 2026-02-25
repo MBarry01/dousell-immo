@@ -70,9 +70,9 @@ const nextConfig = {
                             "default-src 'self'",
                             `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ""} https://challenges.cloudflare.com https://*.cloudflare.com https://www.googletagmanager.com https://va.vercel-scripts.com https://www.clarity.ms https://*.clarity.ms https://scripts.clarity.ms https://c.bing.com https://cdn.kkiapay.me https://translate.google.com https://translate.googleapis.com https://www.gstatic.com https://*.onesignal.com https://onesignal.com`,
                             "style-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.gstatic.com https://translate.googleapis.com https://*.onesignal.com https://onesignal.com https://fonts.googleapis.com",
-                            "img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com https://images.pexels.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.basemaps.cartocdn.com https://*.openstreetmap.org https://*.tile.openstreetmap.org https://cdnjs.cloudflare.com https://unpkg.com https://a.basemaps.cartocdn.com https://b.basemaps.cartocdn.com https://c.basemaps.cartocdn.com https://d.basemaps.cartocdn.com https://*.google-analytics.com https://*.googletagmanager.com https://c.bing.com https://*.clarity.ms https://fonts.gstatic.com https://www.gstatic.com https://translate.google.com https://*.coinafrique.com https://*.roamcdn.net https://i.roamcdn.net https://*.onesignal.com https://onesignal.com",
+                            "img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com https://images.pexels.com https://*.googleusercontent.com https://*.basemaps.cartocdn.com https://*.openstreetmap.org https://*.tile.openstreetmap.org https://cdnjs.cloudflare.com https://unpkg.com https://a.basemaps.cartocdn.com https://b.basemaps.cartocdn.com https://c.basemaps.cartocdn.com https://d.basemaps.cartocdn.com https://*.google-analytics.com https://*.googletagmanager.com https://c.bing.com https://*.clarity.ms https://fonts.gstatic.com https://www.gstatic.com https://translate.google.com https://*.coinafrique.com https://*.roamcdn.net https://i.roamcdn.net https://*.onesignal.com https://onesignal.com https://res.cloudinary.com",
                             "font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com",
-                            "connect-src 'self' https://*.supabase.co https://*.supabase.in https://challenges.cloudflare.com https://*.google-analytics.com https://www.googletagmanager.com https://va.vercel-scripts.com https://*.basemaps.cartocdn.com https://*.openstreetmap.org https://images.unsplash.com https://images.pexels.com https://*.googleusercontent.com wss://*.supabase.co https://www.clarity.ms https://*.clarity.ms https://c.bing.com https://api.kkiapay.me https://*.kkiapay.me https://raw.githack.com https://translate.google.com https://translate.googleapis.com https://www.gstatic.com https://fonts.gstatic.com https://*.onesignal.com https://onesignal.com",
+                            "connect-src 'self' https://*.supabase.co https://*.supabase.in https://challenges.cloudflare.com https://*.google-analytics.com https://www.googletagmanager.com https://va.vercel-scripts.com https://*.basemaps.cartocdn.com https://*.openstreetmap.org https://images.unsplash.com https://images.pexels.com https://*.googleusercontent.com wss://*.supabase.co https://www.clarity.ms https://*.clarity.ms https://c.bing.com https://api.kkiapay.me https://*.kkiapay.me https://raw.githack.com https://translate.google.com https://translate.googleapis.com https://www.gstatic.com https://fonts.gstatic.com https://*.onesignal.com https://onesignal.com https://res.cloudinary.com",
                             "frame-src 'self' https://*.supabase.co https://challenges.cloudflare.com https://www.youtube.com https://youtube.com https://www.google.com https://maps.google.com https://*.kkiapay.me https://translate.google.com https://*.onesignal.com",
                             "worker-src 'self' blob: https://*.onesignal.com",
                             "media-src 'self' data:",
@@ -84,7 +84,8 @@ const nextConfig = {
     },
     images: {
         ...(isGitHubPages && { unoptimized: true }),
-        qualities: [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100],
+        // Restriction des qualités pour éviter trop de variations de cache
+        qualities: [50, 60, 75, 80],
         remotePatterns: [
             { protocol: "https", hostname: "api.mapbox.com" },
             { protocol: "https", hostname: "images.unsplash.com" },
@@ -98,10 +99,15 @@ const nextConfig = {
             { protocol: "https", hostname: "sn.coinafrique.com" },
             { protocol: "https", hostname: "*.roamcdn.net" },
             { protocol: "https", hostname: "i.roamcdn.net" },
+            { protocol: "https", hostname: "res.cloudinary.com" },
         ],
-        deviceSizes: [360, 375, 390, 414, 428, 640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+        // Réduction du nombre de breakpoints pour limiter les fichiers générés
+        deviceSizes: [640, 750, 828, 1080, 1200, 1920],
         imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+        // Cache agressif (60 jours) pour éviter de fetcher l'origine trop souvent sur Vercel
+        minimumCacheTTL: 5184000,
     },
+
 };
 
 module.exports = nextConfig;

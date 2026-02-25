@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
+import { CldImage } from "next-cloudinary";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -30,6 +31,7 @@ import { AddressAutocomplete } from "@/components/forms/address-autocomplete";
 import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/utils/supabase/client";
 import { submitUserListing, generateAIDescription } from "./actions";
+import { uploadImageAction } from "@/lib/cloudinary-actions";
 import { smartGeocode } from "@/lib/geocoding";
 import { scrollToTop } from "@/lib/scroll-utils";
 
@@ -187,15 +189,23 @@ function DeposerPageContent() {
         }
 
         try {
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-          const { error: uploadError } = await supabase.storage
-            .from("properties")
-            .upload(fileName, file, { cacheControl: "3600", upsert: false });
+          // Convert to Base64 for Server Action
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+          const fileBase64 = await base64Promise;
 
-          if (uploadError) throw uploadError;
+          toast.loading(`Envoi de ${file.name}...`, { id: 'uploading' });
+          const clouinaryResult = await uploadImageAction(fileBase64, 'user-listings', ['user-listing']);
+          toast.dismiss('uploading');
 
-          const { data: { publicUrl } } = supabase.storage.from("properties").getPublicUrl(fileName);
-          uploadedUrls.push(publicUrl);
+          if ('error' in clouinaryResult) {
+            throw new Error(clouinaryResult.error);
+          }
+
+          uploadedUrls.push(clouinaryResult.url);
         } catch (e) {
           console.error(e);
           toast.error(`Erreur lors de l'upload de ${file.name}`);
@@ -669,7 +679,11 @@ function DeposerPageContent() {
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mt-4">
                     {formData.images.map((url, index) => (
                       <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
-                        <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
+                        {url.includes("res.cloudinary.com") ? (
+                          <CldImage src={url} alt={`Photo ${index + 1}`} fill className="object-cover" crop="fill" gravity="auto" />
+                        ) : (
+                          <Image src={url} alt={`Photo ${index + 1}`} fill className="object-cover" />
+                        )}
                         <button
                           type="button"
                           onClick={() => removeImage(index)}

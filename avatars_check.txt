@@ -1,0 +1,4 @@
+[dotenv@17.3.1] injecting env (65) from .env.local -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+Total profiles: 28
+Total avatars: 9
+Avatars on Supabase: 2

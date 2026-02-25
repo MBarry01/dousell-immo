@@ -4,12 +4,13 @@ import React from "react";
 import Image from "next/image";
 import { Wallet, FileText, ShieldCheck, Mail, LayoutDashboard, CheckCircle2, type LucideIcon } from "lucide-react";
 import { motion, Variants } from "framer-motion";
+import { CldImage } from "next-cloudinary";
 
 // Feature data
 const features = [
     {
         id: 1,
-        image: "/images/DashMock.webp",     // Updated
+        image: "doussel/static/banners/DashMock",
         title: "Votre Patrimoine dans votre Poche",
         paragraphs: [
             "Fini les cahiers de notes raturés et les fichiers Excel perdus. Gérez vos biens immobiliers comme un véritable professionnel depuis votre téléphone, que vous soyez à Dakar, Paris ou New York.",
@@ -22,7 +23,7 @@ const features = [
     },
     {
         id: 2,
-        image: "/images/Paiement.webp",     // Updated
+        image: "doussel/static/features/Paiement",
         title: "Encaissez sans courir après personne",
         paragraphs: [
             "Ne perdez plus votre énergie à relancer les retardataires. Dousell envoie automatiquement les rappels de paiement par SMS et email avant et après l'échéance.",
@@ -35,7 +36,7 @@ const features = [
     },
     {
         id: 3,
-        image: "/images/document.webp",     // Updated
+        image: "doussel/static/features/document",
         title: "Des Contrats en Béton, Signés en 2 minutes",
         paragraphs: [
             "Utilisez des modèles de baux 100% conformes à la législation sénégalaise. Protégez-vous avec des contrats solides, relus par des experts juridiques.",
@@ -48,7 +49,7 @@ const features = [
     },
     {
         id: 4,
-        image: "/images/Etat_Lieux.webp",  // Updated
+        image: "doussel/static/features/Etat_Lieux",
         title: "L'État des Lieux Incontestable",
         paragraphs: [
             "Prenez des photos datées et géolocalisées directement via l'application. Figez l'état réel du bien à l'entrée pour éviter tout litige à la sortie.",
@@ -61,7 +62,7 @@ const features = [
     },
     {
         id: 5,
-        image: "/images/alerte.webp",       // Updated
+        image: "doussel/static/features/alerte",
         title: "Votre Assistant Personnel 24/7",
         paragraphs: [
             "Laissez Dousell gérer votre agenda mental. Fin de bail, révision de loyer annuelle, régularisation de charges... l'application pense à tout pour vous.",
@@ -137,11 +138,13 @@ function FeatureRow({ image, title, paragraphs, icon: Icon, iconColor, iconBg, i
                 variants={imageVariants}
             >
                 <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl group">
-                    <Image
+                    <CldImage
                         src={image}
                         alt={title}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        crop="fill"
+                        gravity="auto"
                     />
                     {/* Subtle overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />

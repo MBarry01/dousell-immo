@@ -403,6 +403,8 @@ export async function getAgencyBranding() {
     };
 }
 
+import { uploadInventoryPhotoAction } from '@/lib/cloudinary-actions';
+
 /**
  * Upload a photo for an inventory item
  */
@@ -410,38 +412,25 @@ export async function uploadInventoryPhoto(file: File, reportId: string) {
     const context = await getUserTeamContext();
     if (!context) return { error: 'Non autorisé' };
     const { teamId, user } = context;
-    const supabase = await createClient();
 
     if (!user) {
         return { error: 'Non autorisé' };
     }
 
-    const originalExt = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() : '';
-    const fileExt = originalExt && ['jpg', 'jpeg', 'png', 'webp'].includes(originalExt) ? originalExt : 'jpg';
-    const fileName = `teams/${teamId}/inventory/${reportId}/${Date.now()}_${Math.random().toString(36).substring(2, 11)}.${fileExt}`;
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const base64 = `data:${file.type};base64,${buffer.toString('base64')}`;
 
-    const { error: uploadError } = await supabase.storage
-        .from('inventory')
-        .upload(fileName, file, { upsert: true });
+        const result = await uploadInventoryPhotoAction(base64, teamId, reportId);
 
-    if (uploadError) {
-        console.error('Error uploading inventory photo:', uploadError);
-        return { error: uploadError.message };
+        if ('error' in result) {
+            return { error: result.error };
+        }
+
+        return { url: result.url };
+    } catch (err: any) {
+        console.error('Error uploading inventory photo to Cloudinary:', err);
+        return { error: err.message || 'Erreur lors de l\'upload vers Cloudinary' };
     }
-
-    // Get signed URL for private access (valid 1 hour for editing session)
-    // For long term PDF View, we might need a longer expiry or generate it on view
-    const { data } = await supabase.storage
-        .from('inventory')
-        .createSignedUrl(fileName, 3600 * 24 * 365 * 10); // 10 years (effectively permanent for the PDF)
-
-    // Note: For a real production app with high security requirements,
-    // we would generate short-lived URLs on demand.
-    // Here we generate a long-lived one for simplicity of the PDF generation.
-
-    if (!data?.signedUrl) {
-        return { error: 'Erreur lors de la récupération de l\'URL' };
-    }
-
-    return { url: data.signedUrl };
 }

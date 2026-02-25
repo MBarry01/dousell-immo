@@ -1,0 +1,7 @@
+[dotenv@17.3.1] injecting env (65) from .env.local -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+Error fetching maintenance: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column maintenance_requests.photos does not exist'
+}

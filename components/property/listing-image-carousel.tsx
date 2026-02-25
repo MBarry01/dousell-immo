@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import { CldImage } from "next-cloudinary";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 
@@ -138,17 +139,32 @@ export const ListingImageCarousel = ({
               key={`${src}-${index}`}
             >
               <div className="relative h-full w-full">
-                <Image
-                  src={src}
-                  alt={`${alt} visuel ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 288px, 300px"
-                  priority={priority && index === 0}
-                  onError={() => handleImageError(src)}
-                  unoptimized={src.includes("pexels.com") || src.includes("unsplash.com")}
-                  draggable={false}
-                />
+                {src.includes("res.cloudinary.com") ? (
+                  <CldImage
+                    src={src}
+                    alt={`${alt} visuel ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 288px, 300px"
+                    priority={priority && index === 0}
+                    onError={() => handleImageError(src)}
+                    draggable={false}
+                    crop="fill"
+                    gravity="auto"
+                  />
+                ) : (
+                  <Image
+                    src={src}
+                    alt={`${alt} visuel ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 288px, 300px"
+                    priority={priority && index === 0}
+                    onError={() => handleImageError(src)}
+                    unoptimized={src.includes("pexels.com") || src.includes("unsplash.com")}
+                    draggable={false}
+                  />
+                )}
               </div>
             </div>
           ))}
