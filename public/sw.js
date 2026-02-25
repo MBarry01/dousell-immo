@@ -1,15 +1,34 @@
-// 1. REGISTER LISTENERS IMMEDIATELY (Before any imports/logic)
+// 1. REGISTER LISTENERS IMMEDIATELY AT TOP LEVEL
 // This is critical to avoid "Event handler must be added on the initial evaluation"
-self.onmessage = (event) => {
+// by ensuring the browser sees handler registration in the first execution turn.
+self.addEventListener('message', (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
-};
+});
 
-// 2. Synchronous imports
+self.addEventListener('push', (event) => {
+  // OneSignal will handle the heavy lifting, we just reserve the event here
+  console.debug('[SW] Push event reserved.');
+});
+
+self.addEventListener('notificationclick', (event) => {
+  console.debug('[SW] Notification click reserved.');
+});
+
+self.addEventListener('install', (event) => {
+  self.skipWaiting(); // Activate the new service worker immediately
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(STATIC_ASSETS);
+    })
+  );
+});
+
+// 2. Import OneSignal SW SDK (synchronous)
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-const CACHE_NAME = "dousell-immo-v18"; // Increment version
+const CACHE_NAME = "dousell-immo-v19"; // Increment version
 const STATIC_ASSETS = [
   "/gestion",
   "/manifest.json",
