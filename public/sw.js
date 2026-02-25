@@ -1,14 +1,15 @@
-// 1. Add basic listeners BEFORE imports to ensure they are available during initial evaluation
-self.addEventListener("message", (event) => {
+// 1. REGISTER LISTENERS IMMEDIATELY AT TOP LEVEL
+// This is critical to avoid "Event handler must be added on the initial evaluation"
+self.onmessage = (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
-});
+};
 
-// 2. Import OneSignal SW SDK
+// 2. Import OneSignal SW SDK (synchronous)
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-const CACHE_NAME = "dousell-immo-v16"; // Increment version
+const CACHE_NAME = "dousell-immo-v17"; // Increment version
 const STATIC_ASSETS = [
   "/gestion",
   "/manifest.json",

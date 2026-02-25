@@ -42,7 +42,7 @@ export default function HeroOwnerIllustration() {
         >
           <div className="relative rounded-[28px] overflow-hidden border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
             <CldImageSafe
-              src="doussel/static/banners/tab-dash_hlbyt9"
+              src="doussel/static/banners/tab-dash"
               alt="Tableau de bord Revenus"
               width={580}
               height={387}

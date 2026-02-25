@@ -3,7 +3,10 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-/** Singleton browser client to avoid "Multiple GoTrueClient instances" warning. */
+// 1. Module-level variable (fastest, persists within the current bundle)
+let cachedBrowserClient: SupabaseClient | undefined;
+
+// 2. GlobalThis fallback (for cross-bundle sharing or dev hot-reload)
 const globalWithSupabase = globalThis as unknown as {
   browserClient: SupabaseClient | undefined;
 };
@@ -17,24 +20,26 @@ export function createClient(): SupabaseClient {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.error(
-      "❌ Supabase credentials are missing. Please check your .env.local file."
-    );
     throw new Error(
       "Supabase credentials are missing. Define NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file."
     );
   }
 
-  if (typeof window !== "undefined" && globalWithSupabase.browserClient) {
-    return globalWithSupabase.browserClient;
+  // Double-check cache (Local first, then Global)
+  if (typeof window !== "undefined") {
+    if (cachedBrowserClient) return cachedBrowserClient;
+    if (globalWithSupabase.browserClient) {
+      cachedBrowserClient = globalWithSupabase.browserClient;
+      return cachedBrowserClient;
+    }
   }
 
   const client = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
   if (typeof window !== "undefined") {
+    cachedBrowserClient = client;
     globalWithSupabase.browserClient = client;
   }
 
   return client;
 }
-
