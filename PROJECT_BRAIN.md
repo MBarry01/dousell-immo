@@ -1967,7 +1967,7 @@ export const Constants = {
 ---
 ## 2. UI COMPONENTS (Existing)
 Utilise ces composants pour construire l'interface.
-# 🗺️ MAP DES COMPOSANTS (235)
+# 🗺️ MAP DES COMPOSANTS (236)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -2141,6 +2141,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<button />** (Path: `components\ui\button.tsx`)
 - **<captcha />** (Path: `components\ui\captcha.tsx`)
 - **<card />** (Path: `components\ui\card.tsx`)
+- **<CldImageSafe />** (Path: `components\ui\CldImageSafe.tsx`)
 - **<combobox />** (Path: `components\ui\combobox.tsx`)
 - **<command />** (Path: `components\ui\command.tsx`)
 - **<container-scroll-animation />** (Path: `components\ui\container-scroll-animation.tsx`)

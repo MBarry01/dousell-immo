@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles, Receipt, BellRing, Wallet, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { Button } from "@/components/ui/button";
 
 interface UpsellManagementModalProps {
@@ -30,9 +31,10 @@ export function UpsellManagementModal({
                     <div className="absolute top-0 right-0 -mt-16 -mr-16 w-32 h-32 bg-primary/20 blur-3xl rounded-full" />
 
                     <div className="relative z-10 w-full h-32 overflow-hidden bg-black">
-                        <img
-                            src="/images/bannerUpsell1.png"
+                        <CldImageSafe
+                            src="doussel/static/modals/bannerUpsell1"
                             alt="Gestion Locative"
+                            fill
                             className="w-full h-full object-cover opacity-90"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />

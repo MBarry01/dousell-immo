@@ -1,0 +1,73 @@
+﻿diff --git a/components/sections/hero.tsx b/components/sections/hero.tsx
+index 8afeda0..b372623 100644
+--- a/components/sections/hero.tsx
++++ b/components/sections/hero.tsx
+@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
+ 
+ import { Button } from "@/components/ui/button";
+ import { FadeIn } from "@/components/ui/motion-wrapper";
++import { CldImageSafe } from "@/components/ui/CldImageSafe";
+ 
+ export const HeroSection = () => {
+   return (
+@@ -18,14 +19,13 @@ export const HeroSection = () => {
+       >
+         {/* Image de fond ÔÇö taille naturelle, ancr├®e en haut */}
+         <div className="absolute inset-0">
+-          <Image
+-            src="/monument.png"
++          <CldImageSafe
++            src="doussel/static/banners/monument"
+             alt="Monument Renaissance Africaine"
+             fill
+             priority
+             className="object-contain object-top"
+             sizes="(max-width: 480px) 100vw, (max-width: 768px) 100vw"
+-            quality={85}
+           />
+         </div>
+ 
+@@ -63,7 +63,7 @@ export const HeroSection = () => {
+               size="lg"
+               className="h-[50px] rounded-full border border-white/20 bg-white/10 px-8 text-white hover:bg-white/20 hover:text-white"
+             >
+-              <Link href="/compte/deposer">Publier une annonce</Link>
++              <Link href="/compte/deposer">Publier un bien</Link>
+             </Button>
+           </div>
+         </div>
+@@ -82,7 +82,7 @@ export const HeroSection = () => {
+             <FadeIn delay={0.1}>
+               <p className="text-[clamp(0.9375rem,1.5vw,1.25rem)] text-white/70">
+                 <span className="md:hidden">Plus de 500 biens v├®rifi├®s ├á Dakar et sur la Petite C├┤te.</span>
+-                <span className="hidden md:inline">Avec plus de 500 biens v├®rifi├®s ├á Dakar et sur la Petite C├┤te, Dousell Immo s&apos;impose comme la plateforme immobili├¿re de r├®f├®rence au S├®n├®gal. Que ce soit pour l&apos;achat ou la gestion locative, nous connectons propri├®taires et investisseurs gr├óce ├á des outils digitaux s├®curis├®s.</span>
++                <span className="hidden md:inline">Avec plus de 500 biens v├®rifi├®s ├á Dakar et sur la Petite C├┤te, Dousell Immo s'impose comme la plateforme immobili├¿re de r├®f├®rence au S├®n├®gal. Que ce soit pour l'achat ou la gestion locative, nous connectons propri├®taires et investisseurs gr├óce ├á des outils digitaux s├®curis├®s.</span>
+               </p>
+             </FadeIn>
+           </div>
+@@ -101,7 +101,7 @@ export const HeroSection = () => {
+                 size="lg"
+                 className="h-[46px] lg:h-[50px] rounded-full border border-white/20 bg-white/5 px-6 lg:px-8 text-white hover:bg-white/10 hover:text-white text-[clamp(0.875rem,1.2vw,1rem)]"
+               >
+-                <Link href="/compte/deposer">Publier une annonce</Link>
++                <Link href="/compte/deposer">Publier un bien</Link>
+               </Button>
+             </div>
+           </FadeIn>
+@@ -117,14 +117,13 @@ export const HeroSection = () => {
+         >
+           {/* Conteneur qui pousse l'image ├á droite */}
+           <div className="absolute right-0 bottom-0 h-full w-full md:w-1/2 lg:w-2/3" suppressHydrationWarning>
+-            <Image
+-              src="/monument.png"
++            <CldImageSafe
++              src="doussel/static/banners/monument"
+               alt="Monument Renaissance Africaine"
+               fill
+               priority
+               className="object-contain object-right-bottom opacity-55"
+               sizes="60vw"
+-              quality={75}
+             />
+           </div>
+         </motion.div>

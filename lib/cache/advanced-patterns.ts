@@ -56,8 +56,15 @@ export async function getOrSetCacheSWR<T>(
 
   try {
     // 1. Lire cache (rapide - non bloquant)
-    const cachedData = await redis.get(fullKey);
-    const cachedMeta = await redis.get(metaKey);
+    const timeoutPromise = new Promise<null>((resolve) =>
+      setTimeout(() => {
+        if (debug) console.warn(`⌛ SWR TIMEOUT: ${fullKey} (Redis slow)`);
+        resolve(null);
+      }, 1000)
+    );
+
+    const cachedData = await Promise.race([redis.get(fullKey), timeoutPromise]);
+    const cachedMeta = await Promise.race([redis.get(metaKey), timeoutPromise]);
 
     if (cachedData) {
       // Si c'est déjà un objet (Upstash retourne parfois des objets), on l'utilise directement

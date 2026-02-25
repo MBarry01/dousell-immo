@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Building2, Search, ArrowRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import confetti from "canvas-confetti";
 
 /**
@@ -172,8 +173,8 @@ export function WelcomeModalContent() {
                 ref={canvasRef}
                 className="pointer-events-none absolute inset-0 z-20 h-full w-full"
               />
-              <Image
-                src="/images/bannerlogin1.png"
+              <CldImageSafe
+                src="doussel/static/modals/bannerlogin1"
                 alt="Bienvenue sur Dousell Immo"
                 fill
                 className="object-cover object-center"

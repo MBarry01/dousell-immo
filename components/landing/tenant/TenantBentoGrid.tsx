@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { Smartphone, FileText, MessageCircle, Zap, Bell, Shield } from "lucide-react";
 
 export default function TenantBentoGrid() {
@@ -69,8 +70,8 @@ export default function TenantBentoGrid() {
                   {/* Payment logos */}
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2 border border-white/10">
-                      <Image
-                        src="/images/wave.png"
+                      <CldImageSafe
+                        src="doussel/static/icons/wave"
                         alt="Wave"
                         width={32}
                         height={32}
@@ -79,8 +80,8 @@ export default function TenantBentoGrid() {
                       <span className="text-white text-sm font-medium">Wave</span>
                     </div>
                     <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2 border border-white/10">
-                      <Image
-                        src="/images/om.png"
+                      <CldImageSafe
+                        src="doussel/static/icons/om"
                         alt="Orange Money"
                         width={32}
                         height={32}
@@ -89,8 +90,8 @@ export default function TenantBentoGrid() {
                       <span className="text-white text-sm font-medium">OM</span>
                     </div>
                     <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2 border border-white/10">
-                      <Image
-                        src="/images/CB.png"
+                      <CldImageSafe
+                        src="doussel/static/icons/CB"
                         alt="Carte Bancaire"
                         width={32}
                         height={32}
@@ -136,8 +137,8 @@ export default function TenantBentoGrid() {
 
                           {/* Wave logo */}
                           <div className="mt-4 flex items-center gap-2 bg-[#1DC3E4]/10 rounded-full px-3 py-1.5">
-                            <Image
-                              src="/images/wave.png"
+                            <CldImageSafe
+                              src="doussel/static/icons/wave"
                               alt="Wave"
                               width={20}
                               height={20}

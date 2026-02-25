@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { ArrowRight, X } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -60,8 +61,8 @@ export const ManagementPromoCard = () => {
 
                     {/* Image à gauche - Plus compacte sur mobile */}
                     <div className="relative w-16 shrink-0 sm:w-24">
-                        <Image
-                            src="/images/bannerPopup1.png"
+                        <CldImageSafe
+                            src="doussel/static/modals/bannerPopup1"
                             alt="Gestion locative Dousell"
                             fill
                             className="object-cover"

@@ -10,7 +10,7 @@ const dousellConfig: NavbarConfig = {
     logo: {
         alt: "Dousell Immo",
         href: "/landing",
-        src: "/logoJnOr.png",
+        src: "doussel/static/logos/logoJnOr",
         width: 32,
         height: 32,
     },
@@ -32,28 +32,28 @@ const dousellConfig: NavbarConfig = {
                 {
                     title: "Gestion Locative",
                     href: "/pro/start",
-                    src: "/images/gestionNav1.webp",
+                    src: "doussel/static/banners/DashMock",
                     description:
                         "Automatisez l'envoi des quittances et encaissez vos loyers sans stress.",
                 },
                 {
                     title: "Espace Locataire",
                     href: "/locataire",
-                    src: "/images/payement.webp",
+                    src: "doussel/static/banners/CouverturePay",
                     description:
                         "Payez votre loyer en 1 clic (Wave/OM) et téléchargez vos contrats.",
                 },
                 {
                     title: "Syndic de Copro",
                     href: "/pro/syndic",
-                    src: "/images/copro.webp",
+                    src: "doussel/static/features/Etat_Lieux",
                     description:
                         "Une gestion transparente, des AG en ligne et une comptabilité claire.",
                 },
                 {
                     title: "Investissement",
                     href: "/pro/investissement",
-                    src: "/images/Invesstissement.webp",
+                    src: "doussel/static/banners/herobg",
                     description:
                         "Projets clés en main à haute rentabilité locative au Sénégal.",
                 },

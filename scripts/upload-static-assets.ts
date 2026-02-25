@@ -30,20 +30,38 @@ const assetsToUpload = [
 
     // Banners & Heavy Illustrations
     { path: 'public/images/herobg.webp', folder: 'doussel/static/banners' },
-    { path: 'public/images/CouverturePay.png', folder: 'doussel/static/banners' },
-    { path: 'public/images/DashMock.webp', folder: 'doussel/static/banners' },
+    { path: 'public/images/couverturepay.png', folder: 'doussel/static/banners' },
+    { path: 'public/images/dashmock.webp', folder: 'doussel/static/banners' },
     { path: 'public/images/mockpay.png', folder: 'doussel/static/illustrations' },
-    { path: 'public/images/mockComputer.png', folder: 'doussel/static/illustrations' },
-    { path: 'public/images/mockCPh.png', folder: 'doussel/static/illustrations' },
-    { path: 'public/images/Paiement.webp', folder: 'doussel/static/features' },
+    { path: 'public/images/mockcomputer.png', folder: 'doussel/static/illustrations' },
+    { path: 'public/images/mockcph.png', folder: 'doussel/static/illustrations' },
+    { path: 'public/images/paiement.webp', folder: 'doussel/static/features' },
     { path: 'public/images/document.webp', folder: 'doussel/static/features' },
-    { path: 'public/images/Etat_Lieux.webp', folder: 'doussel/static/features' },
+    { path: 'public/images/etat_lieux.webp', folder: 'doussel/static/features' },
     { path: 'public/images/alerte.webp', folder: 'doussel/static/features' },
     { path: 'public/images/compare1.webp', folder: 'doussel/static/comparison' },
     { path: 'public/images/compare2.webp', folder: 'doussel/static/comparison' },
 
-    // Testimonials (Those not already migrated if any)
-    { path: 'public/images/Anta Faye.webp', folder: 'doussel/static/testimonials' },
+    // Testimonials & People
+    { path: 'public/images/amadou_sow.webp', folder: 'doussel/static/images' },
+    { path: 'public/images/fatou_ndiaye.jpg', folder: 'doussel/static/images' },
+    { path: 'public/images/jean_marc_diouf.webp', folder: 'doussel/static/images' },
+    { path: 'public/images/aicha_diallo.webp', folder: 'doussel/static/images' },
+    { path: 'public/images/moussa_konate.jpg', folder: 'doussel/static/images' },
+    { path: 'public/images/sophie_diop.webp', folder: 'doussel/static/images' },
+    { path: 'public/images/cheikh_anta.webp', folder: 'doussel/static/images' },
+    { path: 'public/images/anta_faye.webp', folder: 'doussel/static/images' },
+    { path: 'public/images/paul_mendy.webp', folder: 'doussel/static/images' },
+
+    // Missing Branding & Modals
+    { path: 'public/images/bannerlogin1.png', folder: 'doussel/static/modals' },
+    { path: 'public/images/bannerupsell1.png', folder: 'doussel/static/modals' },
+    { path: 'public/images/bannerpopup1.png', folder: 'doussel/static/modals' },
+    { path: 'public/tabdash.png', folder: 'doussel/static/banners' },
+    { path: 'public/images/mockphon.png', folder: 'doussel/static/illustrations' },
+    { path: 'public/images/mockcph.png', folder: 'doussel/static/illustrations' },
+    { path: 'public/images/mockcomputer.png', folder: 'doussel/static/illustrations' },
+    { path: 'public/images/bouton-senegal.png', folder: 'doussel/static/icons' },
 ];
 
 async function uploadStaticAssets() {
@@ -57,11 +75,11 @@ async function uploadStaticAssets() {
         }
 
         try {
-            console.log(`Uploading ${asset.path}...`);
+            const publicId = path.basename(asset.path, path.extname(asset.path));
+            console.log(`Uploading ${asset.path} as ${publicId}...`);
             const result = await cloudinary.uploader.upload(fullPath, {
                 folder: asset.folder,
-                use_filename: true,
-                unique_filename: false,
+                public_id: publicId,
                 overwrite: true,
                 tags: ['static', 'branding']
             });

@@ -15,6 +15,7 @@ import {
     Calendar,
 } from 'lucide-react';
 import Link from 'next/link';
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { RentPaymentModal } from './RentPaymentModal';
 
 interface PaymentFormProps {
@@ -223,9 +224,11 @@ export function PaymentForm({
                                 )}
 
                                 <div className="flex items-center justify-center pt-1 opacity-40 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0">
-                                    <img
-                                        src="/images/bouton-senegal.png"
+                                    <CldImageSafe
+                                        src="doussel/static/icons/bouton-senegal"
                                         alt="Paiement sécurisé"
+                                        width={100}
+                                        height={20}
                                         className="h-5 w-auto"
                                     />
                                 </div>

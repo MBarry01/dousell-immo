@@ -4,7 +4,9 @@ import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /** Singleton browser client to avoid "Multiple GoTrueClient instances" warning. */
-let browserClient: SupabaseClient | null = null;
+const globalWithSupabase = globalThis as unknown as {
+  browserClient: SupabaseClient | undefined;
+};
 
 /**
  * Returns a single Supabase client instance for the browser context.
@@ -23,11 +25,16 @@ export function createClient(): SupabaseClient {
     );
   }
 
-  if (typeof window !== "undefined" && browserClient) {
-    return browserClient;
+  if (typeof window !== "undefined" && globalWithSupabase.browserClient) {
+    return globalWithSupabase.browserClient;
   }
 
-  browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey);
-  return browserClient;
+  const client = createBrowserClient(supabaseUrl, supabaseAnonKey);
+
+  if (typeof window !== "undefined") {
+    globalWithSupabase.browserClient = client;
+  }
+
+  return client;
 }
 

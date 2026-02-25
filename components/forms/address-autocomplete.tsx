@@ -107,12 +107,7 @@ export function AddressAutocomplete({
             });
 
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?${params.toString()}`,
-                {
-                    headers: {
-                        'User-Agent': 'DousellImmo/1.0 (https://dousell.com)',
-                    },
-                }
+                `/api/address/search?q=${encodeURIComponent(searchQuery)}`
             );
 
             if (!response.ok) throw new Error("Network response was not ok");

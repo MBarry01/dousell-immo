@@ -109,7 +109,7 @@ export const PropertyCard = ({
 
   const isExternal = property.isExternal;
   const href = isExternal ? `/biens/ext/${property.id}` : `/biens/${property.id}`;
-  const CardWrapper = motion(Link);
+  const CardWrapper = motion.create(Link);
   const linkProps = {};
 
   if (variant === "horizontal") {

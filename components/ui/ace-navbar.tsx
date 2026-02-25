@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link, { LinkProps } from "next/link";
 import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { cn } from "@/lib/utils";
 
 const transition: any = {
@@ -128,7 +129,7 @@ export default function AceNavbar({
             <div className="shrink-0">
               <Link href={config.logo.href} className="flex items-center gap-2">
                 {config.logo.src ? (
-                  <Image
+                  <CldImageSafe
                     src={config.logo.src}
                     alt={config.logo.alt}
                     width={config.logo.width || 32}
@@ -237,7 +238,7 @@ export default function AceNavbar({
               <div className="flex items-center justify-between mb-8">
                 <Link href={config.logo.href} className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
                   {config.logo.src && (
-                    <Image
+                    <CldImageSafe
                       src={config.logo.src}
                       alt={config.logo.alt}
                       width={config.logo.width || 32}
@@ -377,7 +378,7 @@ export const ProductItem = ({
 }) => {
   return (
     <Link href={href} className="flex space-x-4 group">
-      <Image
+      <CldImageSafe
         src={src}
         width={120}
         height={60}

@@ -80,7 +80,7 @@ export async function getOrSetCache<T>(
     // Timeout strict de 500ms pour éviter de bloquer le rendu si Redis rame/est down
     // (Ajusté de 1500ms à 500ms pour privilégier la réactivité de l'UI en cas de latence Upstash)
     const redisPromise = redis.get(fullKey);
-    const timeoutMs = process.env.NODE_ENV === 'development' ? 1500 : 500;
+    const timeoutMs = process.env.NODE_ENV === 'development' ? 800 : 500;
     const timeoutPromise = new Promise<null>((resolve) =>
       setTimeout(() => {
         // Log en warn plutôt qu'en error si c'est un timeout attendu en dev

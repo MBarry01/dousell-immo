@@ -35,9 +35,11 @@ export function OptimizedImage({
   containerClassName,
   showSkeleton = true,
   fadeInDuration = 500,
+  onLoadingComplete,
   ...props
 }: OptimizedImageProps) {
-  const [isLoading, setIsLoading] = useState(true);
+  const isFill = !!props.fill;
+  const [isLoading, setIsLoading] = useState(!props.priority);
   const [hasError, setHasError] = useState(false);
 
   const handleLoadingComplete = () => {
@@ -54,13 +56,13 @@ export function OptimizedImage({
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 1200);
 
     return () => clearTimeout(timeout);
   }, []);
 
   return (
-    <div className={cn("relative overflow-hidden", containerClassName)}>
+    <div className={cn("relative overflow-hidden", isFill ? "absolute inset-0" : containerClassName)}>
       {/* Skeleton pendant le chargement */}
       {isLoading && showSkeleton && (
         <Skeleton
@@ -82,7 +84,7 @@ export function OptimizedImage({
         style={{
           transitionDuration: `${fadeInDuration}ms`,
         }}
-        onLoadingComplete={handleLoadingComplete}
+        onLoad={handleLoadingComplete}
         onError={handleError}
         {...props}
       />

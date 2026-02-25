@@ -13,6 +13,7 @@ import PricingSection from "@/components/landing/PricingSection";
 import { createClient } from "@/utils/supabase/client";
 
 import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import Link from "next/link";
 import { Buildings, ShieldCheck, ChartLineUp, UsersThree, MagicWand, BellRinging, FileText, CalendarDots, CheckCircle, Phone, Envelope } from "@phosphor-icons/react";
 import { SoftwareIcon } from "@/components/ui/software-icon";
@@ -346,15 +347,13 @@ function LandingPageContent() {
       <section id="hero" className="relative min-h-[100svh] w-full overflow-hidden bg-black">
         {/* Background Image with fade effect - Optimized LCP */}
         <div className="absolute inset-0 w-full h-full will-change-transform">
-          <Image
-            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80"
+          <CldImageSafe
+            src="doussel/static/banners/herobg"
             alt="Villa de luxe au Sénégal - Immobilier Dakar"
             fill
             priority
-            fetchPriority="high"
             className="object-cover object-center opacity-30"
             sizes="100vw"
-            quality={85}
           />
           {/* Gradient overlay for fade effect - Smoother transition */}
           {/* Desktop: subtle gradient | Mobile: strong gradient from bottom (70%) for text readability */}
@@ -677,8 +676,8 @@ function LandingPageContent() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="block md:hidden w-full max-w-[280px] sm:max-w-sm mx-auto"
             >
-              <Image
-                src="/images/mockphon.png"
+              <CldImageSafe
+                src="doussel/static/illustrations/mockphon"
                 alt="App Mobile Dousell Immo"
                 width={800}
                 height={1600}

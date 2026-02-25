@@ -39,7 +39,7 @@ export default function HeroIllustration() {
               {/* Screen Content - Image Replacement */}
               <div className="absolute inset-0 bg-black p-1.5 lg:p-2">
                 <CldImageSafe
-                  src="doussel/static/illustrations/mockpay.png"
+                  src="doussel/static/illustrations/mockpay"
                   alt="Application Dousell Locataire"
                   fill
                   className="object-cover rounded-[32px] lg:rounded-[36px]"
@@ -77,7 +77,7 @@ export default function HeroIllustration() {
           >
             <div className="flex items-center gap-2.5">
               <CldImageSafe
-                src="doussel/static/icons/wave.png"
+                src="doussel/static/icons/wave"
                 alt="Wave"
                 width={44}
                 height={44}
@@ -105,7 +105,7 @@ export default function HeroIllustration() {
           >
             <div className="flex items-center gap-2.5">
               <CldImageSafe
-                src="doussel/static/icons/om.png"
+                src="doussel/static/icons/om"
                 alt="Orange Money"
                 width={44}
                 height={44}
@@ -133,7 +133,7 @@ export default function HeroIllustration() {
           >
             <div className="flex items-center gap-2">
               <CldImageSafe
-                src="doussel/static/icons/CB.png"
+                src="doussel/static/icons/CB"
                 alt="Carte Bancaire"
                 width={40}
                 height={40}

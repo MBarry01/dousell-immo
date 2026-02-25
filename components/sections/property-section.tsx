@@ -41,10 +41,10 @@ export const PropertySection = ({
     if (!containerRef.current) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
-    
+
     // Marge de sécurité de 10px pour éviter les problèmes de précision
     const threshold = 10;
-    
+
     setCanScrollLeft(scrollLeft > 0);
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - threshold);
   }, []);
@@ -55,11 +55,11 @@ export const PropertySection = ({
 
     // Vérification initiale
     checkScrollButtons();
-    
+
     // Event listeners
     container.addEventListener("scroll", checkScrollButtons, { passive: true });
     window.addEventListener("resize", checkScrollButtons);
-    
+
     // Vérification après un court délai pour s'assurer que le layout est stable
     const timeoutId = setTimeout(checkScrollButtons, 100);
 
@@ -139,16 +139,16 @@ export const PropertySection = ({
             "px-6 md:px-8"
           )}
         >
-          <StaggerContainer 
+          <StaggerContainer
             staggerDelay={0.05}
             className="flex gap-10 md:gap-12"
           >
-            {displayedProperties.map((property) => (
+            {displayedProperties.map((property, index) => (
               <motion.div
                 key={property.id}
                 variants={staggerItem}
                 className="relative shrink-0 snap-start"
-                style={{ 
+                style={{
                   width: "min(80%, 280px)",
                   minWidth: "280px"
                 }}
@@ -159,9 +159,10 @@ export const PropertySection = ({
                     {badge}
                   </div>
                 )}
-                <PropertyCard 
-                  property={property} 
-                  className="w-full min-w-[280px] md:min-w-[320px]" 
+                <PropertyCard
+                  property={property}
+                  className="w-full min-w-[280px] md:min-w-[320px]"
+                  priority={index < 2}
                 />
               </motion.div>
             ))}
