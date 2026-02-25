@@ -113,13 +113,19 @@ export function CldImageSafe(props: CldImageProps) {
 
             <Image
                 {...(nextImageProps as any)}
-                src={finalSrc}
+                src={isLocal ? finalSrc : src}
                 className={cn(
                     "transition-opacity duration-300",
                     isLoading && !restProps.priority && !isDesign && !isLocal ? "opacity-0" : "opacity-100",
                     className
                 )}
-                unoptimized={!isLocal}
+                // Loader personnalisé pour BYPASSER Vercel et utiliser le srcset natif de Cloudinary
+                loader={!isLocal && !src.startsWith('http') && !src.startsWith('//') ? ({ width }) => {
+                    return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_${width}/${src}`;
+                } : undefined}
+                // unoptimized=true uniquement pour les URLs externes déjà complètes (Supabase/Unsplash)
+                // Pour Cloudinary, on veut unoptimized=false pour que le loader génère le srcset
+                unoptimized={!isLocal && (src.startsWith('http') || src.startsWith('//'))}
                 onLoad={handleLoad}
                 onError={handleError}
             />

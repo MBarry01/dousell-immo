@@ -797,8 +797,8 @@ function LandingPageContent() {
 
                     {/* Screen Content */}
                     <div className="relative bg-zinc-900 rounded-lg md:rounded-xl overflow-hidden">
-                      <Image
-                        src="/images/dasboard.webp"
+                      <CldImageSafe
+                        src="doussel/static/banners/tab-dash_hlbyt9"
                         alt="Tableau de bord gestion locative - Suivi loyers et locataires Dakar Sénégal"
                         width={1200}
                         height={750}
