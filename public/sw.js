@@ -1,6 +1,4 @@
-// 1. REGISTER LISTENERS IMMEDIATELY AT TOP LEVEL
-// This is critical to avoid "Event handler must be added on the initial evaluation"
-// by ensuring the browser sees handler registration in the first execution turn.
+// 1. REGISTER LISTENERS IMMEDIATELY AT TOP LEVEL (Critical for Initial Evaluation)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
@@ -8,7 +6,6 @@ self.addEventListener('message', (event) => {
 });
 
 self.addEventListener('push', (event) => {
-  // OneSignal will handle the heavy lifting, we just reserve the event here
   console.debug('[SW] Push event reserved.');
 });
 
@@ -16,33 +13,20 @@ self.addEventListener('notificationclick', (event) => {
   console.debug('[SW] Notification click reserved.');
 });
 
-self.addEventListener('install', (event) => {
-  self.skipWaiting(); // Activate the new service worker immediately
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
-  );
-});
-
-// 2. Import OneSignal SW SDK (synchronous)
-importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
-
-const CACHE_NAME = "dousell-immo-v19"; // Increment version
+// 2. Constants & Assets
+const CACHE_NAME = "dousell-immo-v20";
 const STATIC_ASSETS = [
-  "/gestion",
+  "/",
+  "/pro",
   "/manifest.json",
-  "/icons/icon.svg",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
-  "/icons/icon-maskable-192.png",
-  "/icons/icon-maskable-512.png",
-  "/icons/apple-touch-icon.png",
   "/offline.html",
 ];
 
-// Install event
-self.addEventListener("install", (event) => {
+// 3. Install event (Reserve it)
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
@@ -50,7 +34,10 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activate event
+// 4. Import OneSignal SW SDK (synchronous)
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
+
+// 5. Activate event
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -64,59 +51,27 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch event
+// 6. Fetch event
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-
   const url = new URL(event.request.url);
 
+  // Skip logic
   if (
     event.request.url.startsWith("chrome-extension://") ||
     event.request.url.includes("_next/static") ||
     event.request.url.includes("_next/image") ||
     event.request.url.includes("api/") ||
-    url.pathname.startsWith("/locataire")
+    url.hostname.includes("cloudinary.com") ||
+    url.hostname.includes("supabase.co")
   ) {
     return;
   }
 
-  const externalDomains = [
-    "images.pexels.com",
-    "images.unsplash.com",
-    "plus.unsplash.com",
-    "googleusercontent.com",
-    "googletagmanager.com",
-    "google-analytics.com",
-    "basemaps.cartocdn.com",
-    "openstreetmap.org",
-    "supabase.co",
-    "supabase.in",
-    "cloudflare.com",
-    "vercel-scripts.com",
-    "gstatic.com",
-    "translate.google.com",
-    "translate.googleapis.com",
-    "clarity.ms",
-    "bing.com",
-    "fonts.googleapis.com",
-    "kkiapay.me",
-    "rokt.com",
-    "coinafrique.com",
-    "onesignal.com",
-    "cloudinary.com",
-  ];
-
-  const isExternalResource = externalDomains.some((domain) =>
-    url.hostname.includes(domain)
-  );
-
-  if (isExternalResource) {
-    return;
-  }
-
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+      return fetch(event.request).then((response) => {
         if (response.status === 200) {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -124,16 +79,11 @@ self.addEventListener("fetch", (event) => {
           });
         }
         return response;
-      })
-      .catch(async () => {
-        const cachedResponse = await caches.match(event.request);
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+      }).catch(() => {
         if (event.request.mode === "navigate") {
           return caches.match("/offline.html");
         }
-        throw new Error("Resource not found in cache");
-      })
+      });
+    })
   );
 });

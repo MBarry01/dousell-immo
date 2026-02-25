@@ -172,14 +172,27 @@ const _features = [
 function LandingPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const availableDates = getAvailableDates();
+  const [availableDates, setAvailableDates] = useState<{ date: number; hasSlots: boolean }[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Mode Propriétaire / Locataire
-  // Priorité : URL > Default "owner" (localStorage géré dans useEffect plus bas)
+  // Priorité : URL > Default "owner"
   const urlMode = searchParams.get("mode");
   const initialMode = (urlMode === "tenant" || urlMode === "owner") ? urlMode : "owner";
 
   const [userMode, setUserMode] = useState<"owner" | "tenant">(initialMode);
+
+  // Load state and data after first mount to avoid hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+    setAvailableDates(getAvailableDates());
+
+    // Check localStorage
+    const saved = localStorage.getItem("dousell_user_mode");
+    if (saved === "owner" || saved === "tenant") {
+      setUserMode(saved);
+    }
+  }, []);
 
   // Sync URL changes to state
   useEffect(() => {
@@ -188,16 +201,6 @@ function LandingPageContent() {
       setUserMode(mode);
     }
   }, [searchParams]);
-  const [_isHydrated, setIsHydrated] = useState(false);
-
-  // Charger le mode depuis localStorage après hydratation
-  useEffect(() => {
-    const saved = localStorage.getItem("dousell_user_mode");
-    if (saved === "owner" || saved === "tenant") {
-      setUserMode(saved);
-    }
-    setIsHydrated(true);
-  }, []);
 
   // Vérifier si l'utilisateur est connecté (client-side)
   const [isLoggedIn, setIsLoggedIn] = useState(false);

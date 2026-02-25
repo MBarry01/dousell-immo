@@ -83,27 +83,6 @@ export function CldImageSafe(props: CldImageProps) {
 
     const { crop, gravity, tint, blur, grayscale, pixelate, ...nextImageProps } = restProps;
 
-    // SSR Prevention
-    if (!hasMounted) {
-        return (
-            <div className={cn("relative overflow-hidden", isFill ? "absolute inset-0" : className)}>
-                {/* Pas de skeleton en SSR pour le design (logo, hero) */}
-                {!isDesign && !isLocal && <Skeleton className="absolute inset-0 z-10 bg-zinc-900" />}
-            </div>
-        );
-    }
-
-    // Protection Error
-    if (hasError) {
-        return (
-            <div className={cn("relative overflow-hidden bg-zinc-900", isFill ? "absolute inset-0" : className)}>
-                <div className="absolute inset-0 flex items-center justify-center text-zinc-800">
-                    <span className="text-[10px]">Image indisponible</span>
-                </div>
-            </div>
-        );
-    }
-
     // Fonction pour vérifier si une URL appartient à Cloudinary
     const isCloudinaryUrl = (url: string) => url.includes('res.cloudinary.com');
 
@@ -116,7 +95,6 @@ export function CldImageSafe(props: CldImageProps) {
         // Si c'est déjà une URL complète Cloudinary, on essaie d'y injecter l'optimisation de largeur
         if (isCloudinaryUrl(src)) {
             // Remplacer /upload/ par /upload/f_auto,q_auto,w_WIDTH/
-            // On gère aussi le cas où il y a déjà des transformations
             if (src.includes('/upload/')) {
                 return src.replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`);
             }
@@ -126,29 +104,35 @@ export function CldImageSafe(props: CldImageProps) {
 
     const isCloudinary = !isLocal && (isCloudinaryUrl(src) || (!src.startsWith('http') && !src.startsWith('//')));
 
+    // SSR Protection: Always render the container.
+    // On server, render a div/skeleton. On client, switch to Image after mount.
     return (
         <div className={cn("relative overflow-hidden", isFill ? "absolute inset-0" : className)}>
-            {/* Skeleton uniquement pour les images non-design (ex: annonces user) */}
-            {isLoading && !restProps.priority && !isDesign && !isLocal && (
+            {/* Show skeleton/placeholder until mounted on client */}
+            {(!hasMounted || isLoading) && !restProps.priority && !isDesign && !isLocal && (
                 <Skeleton className="absolute inset-0 z-10 bg-zinc-900 animate-pulse" />
             )}
 
-            <Image
-                {...(nextImageProps as any)}
-                src={isLocal ? finalSrc : src}
-                className={cn(
-                    "transition-opacity duration-300",
-                    isLoading && !restProps.priority && !isDesign && !isLocal ? "opacity-0" : "opacity-100",
-                    className
-                )}
-                // Utiliser le loader si c'est du Cloudinary (ID ou URL)
-                loader={isCloudinary ? cloudinaryLoader : undefined}
-                // unoptimized=true uniquement pour les URLs externes NON-Cloudinary (Supabase/Unsplash)
-                // Pour Cloudinary, on veut unoptimized=false pour que le loader génère le srcset
-                unoptimized={!isLocal && !isCloudinary && (src.startsWith('http') || src.startsWith('//'))}
-                onLoad={handleLoad}
-                onError={handleError}
-            />
+            {hasMounted ? (
+                <Image
+                    {...(nextImageProps as any)}
+                    src={isLocal ? finalSrc : src}
+                    className={cn(
+                        "transition-opacity duration-300",
+                        isLoading && !restProps.priority && !isDesign && !isLocal ? "opacity-0" : "opacity-100",
+                        className
+                    )}
+                    // Utiliser le loader si c'est du Cloudinary (ID ou URL)
+                    loader={isCloudinary ? cloudinaryLoader : undefined}
+                    // unoptimized=true uniquement pour les URLs externes NON-Cloudinary (Supabase/Unsplash)
+                    unoptimized={!isLocal && !isCloudinary && (src.startsWith('http') || src.startsWith('//'))}
+                    onLoad={handleLoad}
+                    onError={handleError}
+                />
+            ) : (
+                // Server-side placeholder (must match the container size/props exactly)
+                <div className={cn("w-full h-full", className)} />
+            )}
         </div>
     );
 }
