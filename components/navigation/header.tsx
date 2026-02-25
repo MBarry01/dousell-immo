@@ -66,11 +66,11 @@ export const Header = () => {
             aria-label="Dousell Immo - Accueil"
           >
             <Image
-              src="/icons/icon.svg"
+              src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771989699/doussel/static/logos/logoWhite.png"
               alt="Dousell Immo"
-              width={32}
-              height={32}
-              className={cn("h-8 w-auto transition-opacity", isSearchOpen && "opacity-0 invisible w-0")}
+              width={140}
+              height={38}
+              className={cn("h-7 w-auto transition-opacity", isSearchOpen && "opacity-0 invisible w-0")}
               priority
             />
           </Link>
@@ -165,11 +165,11 @@ export const Header = () => {
             aria-label="Dousell Immo - Accueil"
           >
             <Image
-              src="/icons/icon.svg"
+              src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771989699/doussel/static/logos/logoWhite.png"
               alt="Dousell Immo"
-              width={48}
+              width={180}
               height={48}
-              className="h-10 w-auto transition-transform hover:scale-105 lg:h-12"
+              className="h-9 w-auto transition-transform hover:scale-105 lg:h-10"
               priority
             />
           </Link>

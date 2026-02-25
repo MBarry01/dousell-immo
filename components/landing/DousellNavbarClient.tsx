@@ -10,9 +10,9 @@ const dousellConfig: NavbarConfig = {
     logo: {
         alt: "Dousell Immo",
         href: "/landing",
-        src: "doussel/static/logos/logo-jnor",
-        width: 32,
-        height: 32,
+        src: "https://res.cloudinary.com/dkkirzpxe/image/upload/v1771989697/doussel/static/logos/logoJnOr.png",
+        width: 140,
+        height: 38,
     },
     mainNav: {
         // GROUPE 1 : Services Immobiliers
