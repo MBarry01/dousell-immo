@@ -139,33 +139,19 @@ export const ListingImageCarousel = ({
               key={`${src}-${index}`}
             >
               <div className="relative h-full w-full">
-                {/* Utiliser CldImageSafe pour les images Cloudinary (ID ou URL complète) */}
-                {src.includes("res.cloudinary.com") || (!src.startsWith("http") && !src.startsWith("/")) ? (
-                  <CldImageSafe
-                    src={src}
-                    alt={`${alt} visuel ${index + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 288px, 300px"
-                    priority={priority && index === 0}
-                    onError={() => handleImageError(src)}
-                    draggable={false}
-                    crop="fill"
-                    gravity="auto"
-                  />
-                ) : (
-                  <Image
-                    src={src}
-                    alt={`${alt} visuel ${index + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 288px, 300px"
-                    priority={priority && index === 0}
-                    onError={() => handleImageError(src)}
-                    unoptimized={src.includes("pexels.com") || src.includes("unsplash.com") || src.includes("coinafrique")}
-                    draggable={false}
-                  />
-                )}
+                {/* CldImageSafe gère automatiquement tous les types d'URL */}
+                <CldImageSafe
+                  src={src}
+                  alt={`${alt} visuel ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 288px, 300px"
+                  priority={priority && index === 0}
+                  onError={() => handleImageError(src)}
+                  draggable={false}
+                  crop="fill"
+                  gravity="auto"
+                />
               </div>
             </div>
           ))}

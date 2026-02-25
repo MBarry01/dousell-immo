@@ -263,6 +263,18 @@
     color-scheme: light;
   }
 
+  /* Masquer les flèches blanches (spin-buttons) des inputs number - Thème Sombre */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    margin: 0 !important;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield !important;
+  }
+
   /* Sur mobile, s'assurer que les inputs ont au moins 16px */
   @media screen and (max-width: 768px) {
 
@@ -382,12 +394,29 @@
 @layer utilities {
 
   /* Z-Index utilities — définies explicitement pour garantir le rendu correct */
-  .z-navbar { z-index: 50; }
-  .z-mobile-nav { z-index: 100; }
-  .z-modal { z-index: 150; }
-  .z-popover { z-index: 160; }
-  .z-tooltip { z-index: 170; }
-  .z-toast { z-index: 200; }
+  .z-navbar {
+    z-index: 50;
+  }
+
+  .z-mobile-nav {
+    z-index: 100;
+  }
+
+  .z-modal {
+    z-index: 150;
+  }
+
+  .z-popover {
+    z-index: 160;
+  }
+
+  .z-tooltip {
+    z-index: 170;
+  }
+
+  .z-toast {
+    z-index: 200;
+  }
 
   /* Couleurs sémantiques qui s'adaptent au thème */
   .text-foreground {

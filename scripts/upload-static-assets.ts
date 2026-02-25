@@ -54,11 +54,11 @@ const assetsToUpload = [
     { path: 'public/images/paul-mendy.webp', folder: 'doussel/static/images' },
 
     // Missing Branding & Modals
-    { path: 'public/images/bannerlogin1.png', folder: 'doussel/static/modals' },
-    { path: 'public/images/bannerupsell1.png', folder: 'doussel/static/modals' },
-    { path: 'public/images/bannerpopup1.png', folder: 'doussel/static/modals' },
+    { path: 'public/images/banner-login1.png', folder: 'doussel/static/modals' },
+    { path: 'public/images/banner-upsell1.png', folder: 'doussel/static/modals' },
+    { path: 'public/images/banner-popup1.png', folder: 'doussel/static/modals' },
     { path: 'public/tab-dash.png', folder: 'doussel/static/banners' },
-    { path: 'public/images/mock-phon.png', folder: 'doussel/static/illustrations' },
+    { path: 'public/images/mock-phone.png', folder: 'doussel/static/illustrations' },
     { path: 'public/images/mock-cph.png', folder: 'doussel/static/illustrations' },
     { path: 'public/images/mock-computer.png', folder: 'doussel/static/illustrations' },
     { path: 'public/images/bouton-senegal.png', folder: 'doussel/static/icons' },

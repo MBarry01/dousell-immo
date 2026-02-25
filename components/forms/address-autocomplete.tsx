@@ -95,17 +95,9 @@ export function AddressAutocomplete({
     }, [query]);
 
     const fetchSuggestions = async (searchQuery: string) => {
+        if (!searchQuery || searchQuery.length < 3) return;
         setLoading(true);
         try {
-            const params = new URLSearchParams({
-                q: searchQuery,
-                format: "json",
-                addressdetails: "1",
-                limit: "5",
-                countrycodes: "sn", // Restricted to Senegal
-                "accept-language": "fr",
-            });
-
             const response = await fetch(
                 `/api/address/search?q=${encodeURIComponent(searchQuery)}`
             );
@@ -114,7 +106,9 @@ export function AddressAutocomplete({
 
             const data = await response.json();
             setResults(data);
-            setOpen(true);
+            if (data.length > 0) {
+                setOpen(true);
+            }
         } catch (error) {
             console.error("Error fetching address:", error);
             setResults([]);
@@ -163,42 +157,46 @@ export function AddressAutocomplete({
     return (
         <Popover open={open && results.length > 0} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <div className={cn("relative", className)}>
+                <div className={cn("relative group", className)}>
                     <Input
                         value={query}
                         onChange={(e) => {
                             setQuery(e.target.value);
-                            setOpen(true);
                             onChange?.(e.target.value);
+                            if (e.target.value.length >= 3) {
+                                setOpen(true);
+                            } else {
+                                setOpen(false);
+                            }
                         }}
                         onFocus={() => {
-                            if (results.length > 0) setOpen(true);
+                            if (query.length >= 3 && results.length > 0) setOpen(true);
                         }}
-                        placeholder="Ex: 15 Avenue Lamine Gueye..."
-                        className="pr-10"
+                        placeholder="Ex: Saly Portudal, Sénégal"
+                        autoComplete="off"
+                        className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white focus:outline-none focus:ring-1 focus:ring-[#F4C430]/50 focus:border-[#F4C430]/50 transition-all placeholder:text-white/20 h-auto"
                     />
                     {loading && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            <Loader2 className="h-4 w-4 animate-spin text-[#F4C430]" />
                         </div>
                     )}
                 </div>
             </PopoverTrigger>
             <PopoverContent
-                className="p-0 w-[calc(100vw-32px)] md:w-[350px]"
+                className="p-0 border-white/10 bg-zinc-900 w-[calc(100vw-32px)] md:w-[350px] shadow-2xl"
                 align="start"
                 onOpenAutoFocus={(e: Event) => e.preventDefault()}
             >
-                <div className="max-h-[300px] overflow-y-auto p-1">
+                <div className="max-h-[300px] overflow-y-auto p-1 scrollbar-hide">
                     {results.map((item) => {
                         const mainName = getPlaceName(item.address);
-                        const region = item.address.state; // Région au Sénégal
+                        const region = item.address.state;
 
                         const labelParts = [];
                         if (region) labelParts.push(region);
                         if (mainName && mainName !== region) labelParts.push(mainName);
 
-                        // Si on n'a rien trouvé de précis, on garde le display_name de Nominatim
                         const displayLabel = labelParts.length > 0 ? labelParts.join(", ") : item.display_name;
 
                         return (
@@ -208,15 +206,15 @@ export function AddressAutocomplete({
                                     e.preventDefault();
                                     handleSelect(item);
                                 }}
-                                className="flex flex-col items-start gap-1 py-3 px-4 cursor-pointer rounded-sm hover:bg-muted/50 text-sm"
+                                className="flex flex-col items-start gap-1 py-3 px-4 cursor-pointer rounded-md hover:bg-white/10 text-sm transition-colors"
                             >
                                 <div className="flex items-start gap-2 w-full">
-                                    <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                                    <MapPin className="h-4 w-4 mt-0.5 text-[#F4C430] shrink-0" />
                                     <div className="flex flex-col">
-                                        <span className="font-medium text-foreground">
+                                        <span className="font-medium text-white">
                                             {displayLabel}
                                         </span>
-                                        <span className="text-xs text-muted-foreground line-clamp-1">
+                                        <span className="text-[10px] text-zinc-500 line-clamp-1">
                                             {item.display_name}
                                         </span>
                                     </div>

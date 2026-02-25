@@ -84,11 +84,11 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
           >
             <Image
-              src="/logo.svg"
-              width={28}
-              height={28}
+              src="/icons/icon.svg"
+              width={24}
+              height={24}
               alt="Dousell Immo"
-              className="rounded"
+              className="rounded-sm"
             />
           </Link>
 

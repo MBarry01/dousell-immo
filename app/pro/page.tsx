@@ -3,12 +3,13 @@
 import { Suspense } from "react";
 import LandingPageContent from "./pro-client";
 
+// ISR: Régénère la page toutes les heures (3600 secondes)
+export const revalidate = 3600;
+
 export default function LandingPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-black">
-        <div className="w-8 h-8 border-2 border-[#F4C430] border-t-transparent rounded-full animate-spin" />
-      </div>
+      <div className="min-h-screen bg-black" />
     }>
       <LandingPageContent />
     </Suspense>
