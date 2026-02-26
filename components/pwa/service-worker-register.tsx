@@ -8,25 +8,17 @@ export function ServiceWorkerRegister() {
       return;
     }
 
-    // Le but est de DÉTRUIRE l'ancien Service Worker défectueux qui bloque le CSS sur mobile
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      let unregisterPromises = registrations.map((registration) => {
-        console.log("Désinscription du Service Worker détectée :", registration.scope);
-        return registration.unregister();
+    // Le but est d'installer le Service Worker "Tueur" (Killer SW) 
+    // qui va vider le cache et forcer le client à se rafraîchir.
+    navigator.serviceWorker
+      .register("/sw.js", { scope: "/" })
+      .then((registration) => {
+        console.log("Service Worker (Killer) enregistré :", registration.scope);
+        registration.update(); // Force la récupération de la version tueuse
+      })
+      .catch((error) => {
+        console.error("Erreur lors de l'enregistrement du Service Worker :", error);
       });
-
-      if (unregisterPromises.length > 0) {
-        Promise.all(unregisterPromises).then(() => {
-          // Utiliser un flag sessionStorage pour ne recharger qu'une seule fois
-          // afin d'éviter une boucle infinie de rechargement.
-          if (!sessionStorage.getItem("sw-cleared-reload")) {
-            console.log("Tous les Service Workers ont été purgés. Rechargement forcé du CSS...");
-            sessionStorage.setItem("sw-cleared-reload", "true");
-            window.location.reload();
-          }
-        });
-      }
-    });
   }, []);
 
   return null;
