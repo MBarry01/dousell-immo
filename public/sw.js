@@ -63,7 +63,10 @@ self.addEventListener("fetch", (event) => {
     event.request.url.includes("_next/image") ||
     event.request.url.includes("api/") ||
     url.hostname.includes("cloudinary.com") ||
-    url.hostname.includes("supabase.co")
+    url.hostname.includes("supabase.co") ||
+    url.hostname.includes("coinafrique.com") ||
+    url.hostname.includes("roamcdn.net") ||
+    url.hostname.includes("jijistatic.com")
   ) {
     return;
   }
