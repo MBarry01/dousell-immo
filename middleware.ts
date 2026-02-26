@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { contextStorage } from "./lib/context";
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const requestId = globalThis.crypto?.randomUUID() || Math.random().toString(36).substring(7);
   const pathname = request.nextUrl.pathname;
   const hostname = request.headers.get('host') || '';
