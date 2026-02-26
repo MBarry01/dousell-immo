@@ -3,7 +3,6 @@
 import type { MouseEvent } from "react";
 import Link from "next/link";
 import { Bookmark, Bed, Bath, Square, MapPin, Lock } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 import { toast } from "sonner";
 
@@ -109,20 +108,17 @@ export const PropertyCard = ({
 
   const isExternal = property.isExternal;
   const href = isExternal ? `/biens/ext/${property.id}` : `/biens/${property.id}`;
-  const CardWrapper = motion.create(Link);
   const linkProps = {};
 
   if (variant === "horizontal") {
     return (
-      <CardWrapper
+      <Link
         href={href}
         {...linkProps}
         className={cn(
-          "group relative flex min-w-[280px] items-center gap-4 rounded-[24px] border border-white/10 bg-background/50 p-3 text-white transition-all duration-300 backdrop-blur-sm hover:shadow-2xl hover:shadow-primary/5 isolate",
+          "group relative flex min-w-[280px] items-center gap-4 rounded-[24px] border border-white/10 bg-background/50 p-3 text-white transition-all duration-300 backdrop-blur-sm hover:shadow-2xl hover:shadow-primary/5 hover:scale-[1.02] active:scale-[0.98] isolate",
           className
         )}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
       >
         <div className="relative h-24 w-24 overflow-hidden rounded-2xl z-20" data-carousel style={{ pointerEvents: 'auto' }}>
           {/* Prevent link click when clicking carousel */}
@@ -169,22 +165,20 @@ export const PropertyCard = ({
             </div>
           )}
         </div>
-      </CardWrapper>
+      </Link>
     );
   }
 
   return (
-    <CardWrapper
+    <Link
       href={href}
       {...linkProps}
       className={cn(
         // Mobile: largeur fixe pour scroll horizontal
-        "group relative flex w-72 flex-none flex-col overflow-hidden rounded-[28px] bg-background border border-white/10 p-3 text-white transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 isolate cursor-pointer",
+        "group relative flex w-72 flex-none flex-col overflow-hidden rounded-[28px] bg-background border border-white/10 p-3 text-white transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-2 hover:scale-[1.01] active:scale-[0.98] isolate cursor-pointer",
         // Desktop: dans une grille, la largeur est gérée par la grille CSS automatiquement
         className
       )}
-      whileHover={{ y: -8, scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
     >
       <div
         className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] z-10"
@@ -223,19 +217,18 @@ export const PropertyCard = ({
             </span>
           )}
         </div>
-        <motion.div
+        <div
           role="button"
           tabIndex={0}
           aria-label="Enregistrer"
           onClick={toggleFavorite}
-          whileTap={{ scale: 0.8 }}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFavorite(e as unknown as React.MouseEvent); } }}
-          className={`absolute right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/80 cursor-pointer no-select ${favorite ? "text-amber-300" : ""
+          className={`absolute right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white transition-all duration-200 hover:bg-black/80 active:scale-75 cursor-pointer no-select ${favorite ? "text-amber-300" : ""
             }`}
           style={{ pointerEvents: 'auto' }}
         >
           <Bookmark className={`h-5 w-5 ${favorite ? "fill-current" : ""}`} />
-        </motion.div>
+        </div>
         <div className="absolute bottom-4 left-4 rounded-full bg-black/80 backdrop-blur-sm px-4 py-2 border border-primary/30">
           <p className="text-sm font-bold text-primary">{formatCurrency(property.price)}</p>
         </div>
@@ -284,7 +277,7 @@ export const PropertyCard = ({
           )}
         </div>
       </div>
-    </CardWrapper>
+    </Link>
   );
 };
 

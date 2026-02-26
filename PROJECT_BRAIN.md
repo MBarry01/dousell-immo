@@ -1967,7 +1967,7 @@ export const Constants = {
 ---
 ## 2. UI COMPONENTS (Existing)
 Utilise ces composants pour construire l'interface.
-# 🗺️ MAP DES COMPOSANTS (236)
+# 🗺️ MAP DES COMPOSANTS (224)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -2003,24 +2003,13 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<address-input-with-map />** (Path: `components\forms\address-input-with-map.tsx`)
 - **<AssociateTenantDialog />** (Path: `components\gestion\AssociateTenantDialog.tsx`)
 - **<FeatureLockedState />** (Path: `components\gestion\FeatureLockedState.tsx`)
-- **<GestionTour />** (Path: `components\gestion\GestionTour.tsx`)
 - **<OwnerSelector />** (Path: `components\gestion\OwnerSelector.tsx`)
 - **<PermissionDeniedState />** (Path: `components\gestion\PermissionDeniedState.tsx`)
 - **<SubscriptionManager />** (Path: `components\gestion\SubscriptionManager.tsx`)
 - **<TeamPropertyCard />** (Path: `components\gestion\TeamPropertyCard.tsx`)
 - **<TenantSelector />** (Path: `components\gestion\TenantSelector.tsx`)
-- **<BiensTour />** (Path: `components\gestion\tours\BiensTour.tsx`)
-- **<ComptabiliteTour />** (Path: `components\gestion\tours\ComptabiliteTour.tsx`)
-- **<ConfigTour />** (Path: `components\gestion\tours\ConfigTour.tsx`)
-- **<DocumentsTour />** (Path: `components\gestion\tours\DocumentsTour.tsx`)
-- **<EquipeTour />** (Path: `components\gestion\tours\EquipeTour.tsx`)
-- **<EtatsLieuxTour />** (Path: `components\gestion\tours\EtatsLieuxTour.tsx`)
-- **<InterventionsTour />** (Path: `components\gestion\tours\InterventionsTour.tsx`)
-- **<LegalTour />** (Path: `components\gestion\tours\LegalTour.tsx`)
-- **<MessagesTour />** (Path: `components\gestion\tours\MessagesTour.tsx`)
 - **<UpgradeCTA />** (Path: `components\gestion\UpgradeCTA.tsx`)
 - **<UpgradeModal />** (Path: `components\gestion\UpgradeModal.tsx`)
-- **<HomeTour />** (Path: `components\home\HomeTour.tsx`)
 - **<SocialProof />** (Path: `components\home\SocialProof.tsx`)
 - **<InfoBox />** (Path: `components\InfoBox.tsx`)
 - **<KPICard />** (Path: `components\KPICard.tsx`)
@@ -2061,7 +2050,6 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<AccessRequestModal />** (Path: `components\modals\AccessRequestModal.tsx`)
 - **<bottom-nav />** (Path: `components\navigation\bottom-nav.tsx`)
 - **<header />** (Path: `components\navigation\header.tsx`)
-- **<OnboardingTour />** (Path: `components\onboarding\OnboardingTour.tsx`)
 - **<WizardForm />** (Path: `components\onboarding\WizardForm.tsx`)
 - **<KKiaPayWidget />** (Path: `components\payment\KKiaPayWidget.tsx`)
 - **<paydunya-iframe-payment />** (Path: `components\payment\paydunya-iframe-payment.tsx`)

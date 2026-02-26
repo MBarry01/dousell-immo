@@ -1,5 +1,10 @@
 import { Suspense } from "react";
-import { WelcomeModalContent } from "./welcome-modal-client";
+import dynamic from "next/dynamic";
+
+const WelcomeModalContent = dynamic(
+  () => import("./welcome-modal-client").then((mod) => mod.WelcomeModalContent),
+  { ssr: false }
+);
 
 /**
  * Modal de bienvenue - Server component wrapper

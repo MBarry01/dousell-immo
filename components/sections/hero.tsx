@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
-import { FadeIn } from "@/components/ui/motion-wrapper";
 import { CldImageSafe } from "@/components/ui/CldImageSafe";
 
 export const HeroSection = () => {
@@ -73,20 +71,20 @@ export const HeroSection = () => {
       <section className="hidden md:flex relative overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-[#0d101b] via-[#05080c] to-[#05080c] p-6 lg:p-10 min-h-[420px] lg:min-h-[500px] items-center text-white shadow-[0_20px_120px_rgba(5,8,12,0.45)]" suppressHydrationWarning>
         <div className="relative z-10 max-w-[55%] lg:max-w-2xl space-y-5 lg:space-y-6">
           <div className="space-y-3 lg:space-y-4">
-            <FadeIn delay={0}>
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
               <h1 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold leading-tight">
                 Immobilier au Sénégal
                 <span className="sr-only sm:not-sr-only"> : Achète ou investis en toute confiance</span>
               </h1>
-            </FadeIn>
-            <FadeIn delay={0.1}>
+            </div>
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-100">
               <p className="text-[clamp(0.9375rem,1.5vw,1.25rem)] text-white/70">
                 <span className="md:hidden">Plus de 500 biens vérifiés à Dakar et sur la Petite Côte.</span>
                 <span className="hidden md:inline">Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte, Dousel s'impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l'achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.</span>
               </p>
-            </FadeIn>
+            </div>
           </div>
-          <FadeIn delay={0.2}>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-200">
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button
                 asChild
@@ -104,15 +102,12 @@ export const HeroSection = () => {
                 <Link href="/compte/deposer">Publier un bien</Link>
               </Button>
             </div>
-          </FadeIn>
+          </div>
         </div>
 
         {/* Image Monument - fond transparent pour laisser passer le dégradé du hero */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0 }}
-          className="absolute inset-0 z-0 w-full h-full pointer-events-none"
+        <div
+          className="absolute inset-0 z-0 w-full h-full pointer-events-none animate-in fade-in slide-in-from-right-8 duration-1000 fill-mode-both"
           suppressHydrationWarning
         >
           {/* Conteneur qui pousse l'image à droite */}
@@ -126,14 +121,11 @@ export const HeroSection = () => {
               sizes="60vw"
             />
           </div>
-        </motion.div>
+        </div>
 
         {/* Decorative blur effect */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="pointer-events-none absolute -right-10 top-10 h-64 w-64 rounded-full bg-amber-200/30 blur-[120px]"
+        <div
+          className="pointer-events-none absolute -right-10 top-10 h-64 w-64 rounded-full bg-amber-200/30 blur-[120px] animate-in fade-in duration-700 fill-mode-both delay-300"
           suppressHydrationWarning
         />
       </section>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { SlidersHorizontal, ChevronDown, Search, MapPin, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -136,12 +136,8 @@ export const QuickSearch = () => {
 
   return (
     <>
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.5 }}
-        transition={{ duration: 0.5 }}
-        className="mt-0 mb-0 md:mt-0 md:mb-0 rounded-[32px] border border-white/10 bg-white/5 px-4 py-6 text-white md:px-6 md:py-8 min-h-[152px]"
+      <section
+        className="mt-0 mb-0 md:mt-0 md:mb-0 rounded-[32px] border border-white/10 bg-white/5 px-4 py-6 text-white md:px-6 md:py-8 min-h-[152px] animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
         suppressHydrationWarning
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -182,72 +178,64 @@ export const QuickSearch = () => {
         </div>
 
         {/* Mobile: Filtres en accordéon */}
-        <AnimatePresence>
-          {mobileFiltersExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="overflow-hidden md:hidden"
-            >
-              <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
-                <div className="relative">
-                  <Input
-                    ref={inputRef}
-                    placeholder="Ville, quartier"
-                    value={location}
-                    onChange={(e) => {
-                      setLocation(e.target.value);
-                      setShowSuggestions(true);
-                    }}
-                    onFocus={() => setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    onKeyDown={handleKeyDown}
-                    autoComplete="off"
-                  />
-                  <SuggestionsDropdown
-                    showSuggestions={showSuggestions}
-                    suggestions={suggestions}
-                    isLoadingSuggestions={isLoadingSuggestions}
-                    selectedIndex={selectedIndex}
-                    handleSelectSuggestion={handleSelectSuggestion}
-                    setSelectedIndex={setSelectedIndex}
-                  />
-                </div>
-                <Input
-                  placeholder="Budget max (FCFA)"
-                  type="number"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                />
-                <Input
-                  placeholder="Surface min (m²)"
-                  type="number"
-                  value={minSurface}
-                  onChange={(e) => setMinSurface(e.target.value)}
-                />
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    className="flex-1 rounded-2xl"
-                  >
-                    <Search className="mr-2 h-4 w-4" />
-                    Rechercher
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="rounded-2xl text-white/60 hover:text-white"
-                    onClick={() => setFiltersOpen(true)}
-                  >
-                    + de filtres
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div
+          className={`overflow-hidden md:hidden transition-all duration-300 ease-in-out ${mobileFiltersExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+        >
+          <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
+            <div className="relative">
+              <Input
+                ref={inputRef}
+                placeholder="Ville, quartier"
+                value={location}
+                onChange={(e) => {
+                  setLocation(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                onKeyDown={handleKeyDown}
+                autoComplete="off"
+              />
+              <SuggestionsDropdown
+                showSuggestions={showSuggestions}
+                suggestions={suggestions}
+                isLoadingSuggestions={isLoadingSuggestions}
+                selectedIndex={selectedIndex}
+                handleSelectSuggestion={handleSelectSuggestion}
+                setSelectedIndex={setSelectedIndex}
+              />
+            </div>
+            <Input
+              placeholder="Budget max (FCFA)"
+              type="number"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+            />
+            <Input
+              placeholder="Surface min (m²)"
+              type="number"
+              value={minSurface}
+              onChange={(e) => setMinSurface(e.target.value)}
+            />
+            <div className="flex gap-2">
+              <Button
+                type="submit"
+                className="flex-1 rounded-2xl"
+              >
+                <Search className="mr-2 h-4 w-4" />
+                Rechercher
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="rounded-2xl text-white/60 hover:text-white"
+                onClick={() => setFiltersOpen(true)}
+              >
+                + de filtres
+              </Button>
+            </div>
+          </form>
+        </div>
 
         {/* Desktop: Formulaire toujours visible */}
         <form onSubmit={handleSubmit} className="mt-6 hidden gap-3 md:grid md:grid-cols-4">
@@ -293,7 +281,7 @@ export const QuickSearch = () => {
           </Button>
         </form>
 
-      </motion.section>
+      </section>
 
       <FilterDrawer
         open={filtersOpen}
@@ -323,13 +311,10 @@ const SuggestionsDropdown = ({
   handleSelectSuggestion,
   setSelectedIndex,
 }: SuggestionsDropdownProps) => (
-  <AnimatePresence>
+  <>
     {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl border border-white/10 bg-[#0F172A] shadow-2xl shadow-black/50 overflow-hidden"
+      <div
+        className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl border border-white/10 bg-[#0F172A] shadow-2xl shadow-black/50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
       >
         {isLoadingSuggestions ? (
           <div className="flex items-center justify-center py-4 text-white/50">
@@ -358,7 +343,7 @@ const SuggestionsDropdown = ({
             ))}
           </div>
         )}
-      </motion.div>
+      </div>
     )}
-  </AnimatePresence>
+  </>
 );

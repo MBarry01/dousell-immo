@@ -3,13 +3,13 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-import { motion } from "framer-motion";
+
 
 import { PropertyCard } from "@/components/property/property-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Property } from "@/types/property";
-import { StaggerContainer, FadeIn, staggerItem } from "@/components/ui/motion-wrapper";
+
 
 type PropertySectionProps = {
   title: string;
@@ -90,7 +90,7 @@ export const PropertySection = ({
   return (
     <section className="space-y-8 md:space-y-10">
       {/* Header - Style Airbnb */}
-      <FadeIn>
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
         <div className="flex items-center justify-between px-4 md:px-0">
           <Link
             href={href}
@@ -105,7 +105,7 @@ export const PropertySection = ({
             <p className="hidden text-sm text-white/60 md:block">{subtitle}</p>
           )}
         </div>
-      </FadeIn>
+      </div>
 
       {/* Liste des Biens - Scroll Horizontal (Mobile & Desktop) */}
       <div className="relative group">
@@ -139,15 +139,11 @@ export const PropertySection = ({
             "px-6 md:px-8"
           )}
         >
-          <StaggerContainer
-            staggerDelay={0.05}
-            className="flex gap-10 md:gap-12"
-          >
+          <div className="flex gap-10 md:gap-12">
             {displayedProperties.map((property, index) => (
-              <motion.div
+              <div
                 key={property.id}
-                variants={staggerItem}
-                className="relative shrink-0 snap-start"
+                className="relative shrink-0 snap-start animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
                 style={{
                   width: "min(80%, 280px)",
                   minWidth: "280px"
@@ -164,15 +160,15 @@ export const PropertySection = ({
                   className="w-full min-w-[280px] md:min-w-[320px]"
                   priority={index < 2}
                 />
-              </motion.div>
+              </div>
             ))}
-          </StaggerContainer>
+          </div>
         </div>
       </div>
 
       {/* Bouton "Voir plus" */}
       {hasMore && showViewMore && (
-        <FadeIn>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
           <div className="flex justify-center px-4 pt-4 md:px-0">
             <Button
               asChild
@@ -185,7 +181,7 @@ export const PropertySection = ({
               </Link>
             </Button>
           </div>
-        </FadeIn>
+        </div>
       )}
     </section>
   );

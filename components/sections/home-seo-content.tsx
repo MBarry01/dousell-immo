@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -23,15 +23,10 @@ export const HomeSEOContent = () => {
             </h2>
 
             <div className="relative">
-                <motion.div
-                    initial={false}
-                    animate={{
-                        height: isExpanded ? "auto" : "96px"
-                    }}
-                    transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }} // Smooth cubic-bezier
+                <div
                     className={cn(
-                        "text-lg leading-relaxed text-white/70 overflow-hidden relative",
-                        !isExpanded && "mask-gradient"
+                        "text-lg leading-relaxed text-white/70 overflow-hidden relative transition-all duration-300 ease-in-out",
+                        isExpanded ? "max-h-[1000px]" : "max-h-[96px] mask-gradient"
                     )}
                 >
                     <p>
@@ -48,7 +43,7 @@ export const HomeSEOContent = () => {
                         l'accès au logement et optimise la rentabilité des investissements immobiliers
                         au Sénégal.
                     </p>
-                </motion.div>
+                </div>
 
                 {/* Bouton Voir Plus - Visible sur tous les écrans pour un déploiement fluide */}
                 <div className="mt-4">
