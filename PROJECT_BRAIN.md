@@ -5,7 +5,7 @@
 Utilise ces définitions pour comprendre la base de données (Tables, Colonnes, Relations).
 
 ```typescript
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -1827,7 +1827,7 @@ export type Database = {
       }
     }
     Enums: {
-      lead_status: "nouveau" | "contact├®" | "visite_programm├®e" | "clos"
+      lead_status: "nouveau" | "contact+�" | "visite_programm+�e" | "clos"
       notification_type: "info" | "success" | "warning" | "error"
     }
     CompositeTypes: {
@@ -1956,7 +1956,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      lead_status: ["nouveau", "contact├®", "visite_programm├®e", "clos"],
+      lead_status: ["nouveau", "contact+�", "visite_programm+�e", "clos"],
       notification_type: ["info", "success", "warning", "error"],
     },
   },
