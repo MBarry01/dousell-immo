@@ -66,7 +66,7 @@ export const Header = () => {
             aria-label="Dousel - Accueil"
           >
             <Image
-              src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771989699/doussel/static/logos/logoWhite.png"
+              src="/logo-white.png"
               alt="Dousel"
               width={140}
               height={38}
@@ -165,7 +165,7 @@ export const Header = () => {
             aria-label="Dousel - Accueil"
           >
             <Image
-              src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771989699/doussel/static/logos/logoWhite.png"
+              src="/logo-white.png"
               alt="Dousel"
               width={180}
               height={48}
