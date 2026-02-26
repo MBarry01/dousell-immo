@@ -88,51 +88,7 @@ const timeSlots = [
   { time: "17:00", available: true },
 ];
 
-// Data for Feature18 (Saasable Tabbed Features)
-const featuresDataSaasable = [
-  {
-    title: "Gestion Complète",
-    title2: "Centralisez votre patrimoine",
-    description: "Une vue à 360° sur vos biens, locataires et finances.",
-    isCoverImage: true,
-    image: "/gifs/dashboard1.gif",
-    bgImage: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80", // Immobilier
-    icon: "tabler-building",
-    list: [
-      { primary: "Tableau de bord intuitif" },
-      { primary: "Suivi des loyers en temps réel" },
-      { primary: "Gestion des documents" }
-    ]
-  },
-  {
-    title: "Automatisation",
-    title2: "Gagnez du temps",
-    description: "Laissez l'IA gérer les tâches répétitives.",
-    isCoverImage: true,
-    image: "/gifs/generer.gif",
-    bgImage: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80", // Robot/AI
-    icon: "tabler-sparkles",
-    list: [
-      { primary: "Rappels automatiques" },
-      { primary: "Génération de contrats" },
-      { primary: "Quittances digitalisées" }
-    ]
-  },
-  {
-    title: "Sérénité",
-    title2: "Sécurité & Conformité",
-    description: "Vos données et vos biens sont protégés.",
-    isCoverImage: true,
-    image: "/gifs/security.gif",
-    bgImage: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80", // Sécurité/Lock
-    icon: "tabler-shield",
-    list: [
-      { primary: "Stockage sécurisé" },
-      { primary: "Conformité juridique" },
-      { primary: "Support dédié 7j/7" }
-    ]
-  }
-];
+
 
 const _features = [
   {
