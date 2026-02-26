@@ -1,22 +1,38 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import dynamic from "next/dynamic";
 import { ShootingStars } from "@/components/ui/shooting-stars";
-import MagicTransformation from "@/components/landing/MagicTransformation";
-import PricingSection from "@/components/landing/PricingSection";
-import { createClient } from "@/utils/supabase/client";
+
+// === DYNAMIC IMPORTS POUR LAZY-LOADING (Réduction géante du Bundle Initial) ===
+const MagicTransformation = dynamic(() => import("@/components/landing/MagicTransformation"));
+const PricingSection = dynamic(() => import("@/components/landing/PricingSection"));
+const VideoTestimonials = dynamic(() => import("@/components/landing/VideoTestimonials"));
+const FeaturesBento = dynamic(() => import("@/components/landing/FeaturesBento"));
+
+// Saasable Integration
+const SaasableSectionWrapper = dynamic(() => import("@/components/saasable/SaasableSectionWrapper"));
+const Feature18 = dynamic(() => import("@/components/saasable/blocks/Feature18"));
+
+// Tenant Sections (Je suis locataire / Je veux un bien)
+const TenantHeroSearch = dynamic(() => import("@/components/landing/tenant/TenantHeroSearch"));
+const PropertyCategories = dynamic(() => import("@/components/landing/tenant/PropertyCategories"));
+const TenantSteps = dynamic(() => import("@/components/landing/tenant/TenantSteps"));
+const FeaturedPropertiesHero = dynamic(() => import("@/components/landing/tenant/FeaturedPropertiesHero"));
+const TrustSection = dynamic(() => import("@/components/landing/tenant/TrustSection"));
+const TenantBentoGrid = dynamic(() => import("@/components/landing/tenant/TenantBentoGrid"));
+const HeroIllustration = dynamic(() => import("@/components/landing/HeroIllustration"));
+const HeroOwnerIllustration = dynamic(() => import("@/components/landing/HeroOwnerIllustration"));
 
 import Image from "next/image";
 import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import Link from "next/link";
 import { Buildings, ShieldCheck, ChartLineUp, UsersThree, MagicWand, BellRinging, FileText, CalendarDots, CheckCircle, Phone, Envelope } from "@phosphor-icons/react";
-import { SoftwareIcon } from "@/components/ui/software-icon";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AppointmentScheduler } from "@/components/ui/appointment-scheduler";
 import { Button } from "@/components/ui/button";
@@ -27,23 +43,6 @@ import { Captcha } from "@/components/ui/captcha";
 import { createVisitRequest, createAppointment } from "@/app/(vitrine)/planifier-visite/actions";
 import { sendGTMEvent } from "@/lib/gtm";
 import { visitRequestSchema, type VisitRequestFormValues } from "@/lib/schemas/visit-request";
-import VideoTestimonials from "@/components/landing/VideoTestimonials";
-import FeaturesBento from "@/components/landing/FeaturesBento";
-
-// Saasable Integration
-import SaasableSectionWrapper from "@/components/saasable/SaasableSectionWrapper";
-import Feature18 from "@/components/saasable/blocks/Feature18";
-
-// Tenant Sections (Je suis locataire / Je veux un bien)
-import TenantHeroSearch from "@/components/landing/tenant/TenantHeroSearch";
-import PropertyCategories from "@/components/landing/tenant/PropertyCategories";
-import TenantSteps from "@/components/landing/tenant/TenantSteps";
-import _TenantTestimonials from "@/components/landing/tenant/TenantTestimonials";
-import FeaturedPropertiesHero from "@/components/landing/tenant/FeaturedPropertiesHero";
-import TrustSection from "@/components/landing/tenant/TrustSection";
-import TenantBentoGrid from "@/components/landing/tenant/TenantBentoGrid";
-import HeroIllustration from "@/components/landing/HeroIllustration";
-import HeroOwnerIllustration from "@/components/landing/HeroOwnerIllustration";
 
 const faq = [
   {
@@ -207,6 +206,7 @@ function LandingPageContent() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const { createClient } = await import("@/utils/supabase/client");
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         setIsLoggedIn(!!user);
@@ -455,15 +455,13 @@ function LandingPageContent() {
 
                 <div className="relative inline-flex bg-black/60 backdrop-blur-xl border border-white/[0.08] rounded-full p-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)]">
 
-                  {/* Animated Background Indicator with Shimmer */}
-                  <motion.div
-                    className="absolute inset-y-1.5 rounded-full overflow-hidden shadow-[0_2px_16px_rgba(244,196,48,0.5)]"
-                    initial={false}
-                    animate={{
+                  {/* Animated Background Indicator with Shimmer (Maintenant sans framer-motion) */}
+                  <div
+                    className="absolute inset-y-1.5 rounded-full overflow-hidden shadow-[0_2px_16px_rgba(244,196,48,0.5)] transition-all duration-300 ease-in-out"
+                    style={{
                       left: userMode === "owner" ? "6px" : "calc(50% + 2px)",
                       width: "calc(50% - 8px)"
                     }}
-                    transition={{ type: "spring", stiffness: 400, damping: 35 }}
                   >
                     {/* Base gradient */}
                     <div className="absolute inset-0 bg-gradient-to-r from-[#F4C430] to-[#E5B82A]" />
@@ -477,7 +475,7 @@ function LandingPageContent() {
                         animation: "shimmer 2.5s ease-in-out infinite"
                       }}
                     />
-                  </motion.div>
+                  </div>
 
                   <button
                     onClick={() => handleModeChange("owner")}
@@ -590,15 +588,14 @@ function LandingPageContent() {
           </div>
 
           {/* Right side - Illustration (different for each mode) */}
-          <motion.div
+          <div
             key={userMode}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="hidden md:flex flex-1 items-center justify-center max-w-sm lg:max-w-md xl:max-w-[580px]"
+            className="hidden md:flex flex-1 items-center justify-center max-w-sm lg:max-w-md xl:max-w-[580px] animate-in fade-in slide-in-from-right-8 duration-700"
           >
-            {userMode === "tenant" ? <HeroIllustration /> : <HeroOwnerIllustration />}
-          </motion.div>
+            <Suspense fallback={<div className="w-full aspect-square bg-white/5 animate-pulse rounded-full" />}>
+              {userMode === "tenant" ? <HeroIllustration /> : <HeroOwnerIllustration />}
+            </Suspense>
+          </div>
         </div>
 
         {/* Animated Shooting Stars - Optimized single instance */}
@@ -672,12 +669,8 @@ function LandingPageContent() {
         <section id="proprietaire-section" className="flex flex-col items-center justify-center overflow-hidden w-full bg-zinc-950 relative py-12 md:py-24 -mt-10 md:-mt-20">
           <div className="container mx-auto px-4 sm:px-6 relative z-10 w-full max-w-7xl flex justify-center">
             {/* Mobile Mockup */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "0px" }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="block md:hidden w-full max-w-[280px] sm:max-w-sm mx-auto"
+            <div
+              className="block md:hidden w-full max-w-[280px] sm:max-w-sm mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both"
             >
               <CldImageSafe
                 src="doussel/static/illustrations/mock-phone"
@@ -687,15 +680,11 @@ function LandingPageContent() {
                 className="w-full h-auto drop-shadow-[0_20px_50px_rgba(244,196,48,0.15)]"
                 sizes="(max-width: 768px) 100vw, 400px"
               />
-            </motion.div>
+            </div>
 
             {/* Tablet Mockup */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "0px" }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="hidden md:block lg:hidden w-full max-w-2xl mx-auto"
+            <div
+              className="hidden md:block lg:hidden w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both"
             >
               <Image
                 src="/images/mock-computer.png"
@@ -705,15 +694,11 @@ function LandingPageContent() {
                 className="w-full h-auto drop-shadow-[0_20px_50px_rgba(244,196,48,0.15)]"
                 sizes="(max-width: 1024px) 100vw, 800px"
               />
-            </motion.div>
+            </div>
 
             {/* Desktop Mockup */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "0px" }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="hidden lg:block w-full max-w-5xl mx-auto"
+            <div
+              className="hidden lg:block w-full max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both"
             >
               <Image
                 src="/images/mock-cph.png"
@@ -723,7 +708,7 @@ function LandingPageContent() {
                 className="w-full h-auto drop-shadow-[0_30px_60px_rgba(244,196,48,0.1)]"
                 sizes="100vw"
               />
-            </motion.div>
+            </div>
           </div>
 
           {/* Subtle bottom glow to blend into next section */}

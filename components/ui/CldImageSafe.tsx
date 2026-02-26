@@ -25,7 +25,6 @@ const LOCAL_DESIGN_ASSETS: Record<string, string> = {
 export function CldImageSafe(props: CldImageProps) {
     const { className, onLoadingComplete, ...restProps } = props;
     const isFill = !!restProps.fill;
-    const [hasMounted, setHasMounted] = useState(false);
     const [isLoading, setIsLoading] = useState(!restProps.priority);
     const [hasError, setHasError] = useState(false);
 
@@ -65,7 +64,6 @@ export function CldImageSafe(props: CldImageProps) {
     }, [src, cloudName, restProps.width]);
 
     useEffect(() => {
-        setHasMounted(true);
         if (restProps.priority) {
             setIsLoading(false);
         }
@@ -104,36 +102,25 @@ export function CldImageSafe(props: CldImageProps) {
 
     const isCloudinary = !isLocal && (isCloudinaryUrl(src) || (!src.startsWith('http') && !src.startsWith('//')));
 
-    // SSR Protection: Always render the container.
-    // On server, render a div/skeleton. On client, switch to Image after mount.
+    // SSR Protection: We allow the image to render immediately for LCP
     return (
         <div className={cn("relative overflow-hidden", isFill ? "absolute inset-0" : className)}>
-            {/* Show skeleton/placeholder until mounted on client */}
-            {(!hasMounted || isLoading) && !restProps.priority && !isDesign && !isLocal && (
-                <Skeleton className="absolute inset-0 z-10 bg-zinc-900 animate-pulse" />
-            )}
-
-            {hasMounted ? (
-                <Image
-                    {...(nextImageProps as any)}
-                    src={isLocal ? finalSrc : src}
-                    className={cn(
-                        "transition-opacity duration-300",
-                        isLoading && !restProps.priority && !isDesign && !isLocal ? "opacity-0" : "opacity-100",
-                        className
-                    )}
-                    // Utiliser le loader si c'est du Cloudinary (ID ou URL)
-                    loader={isCloudinary ? cloudinaryLoader : undefined}
-                    // unoptimized=true uniquement pour les URLs externes NON-Cloudinary (Supabase/Unsplash)
-                    unoptimized={!isLocal && !isCloudinary && (src.startsWith('http') || src.startsWith('//'))}
-                    referrerPolicy={(!isLocal && !isCloudinary) ? "no-referrer" : undefined}
-                    onLoad={handleLoad}
-                    onError={handleError}
-                />
-            ) : (
-                // Server-side placeholder (must match the container size/props exactly)
-                <div className={cn("w-full h-full", className)} />
-            )}
+            <Image
+                {...(nextImageProps as any)}
+                src={isLocal ? finalSrc : src}
+                className={cn(
+                    "transition-opacity duration-300",
+                    isLoading && !restProps.priority && !isDesign && !isLocal ? "opacity-0" : "opacity-100",
+                    className
+                )}
+                // Utiliser le loader si c'est du Cloudinary (ID ou URL)
+                loader={isCloudinary ? cloudinaryLoader : undefined}
+                // unoptimized=true uniquement pour les URLs externes NON-Cloudinary (Supabase/Unsplash)
+                unoptimized={!isLocal && !isCloudinary && (src.startsWith('http') || src.startsWith('//'))}
+                referrerPolicy={(!isLocal && !isCloudinary) ? "no-referrer" : undefined}
+                onLoad={handleLoad}
+                onError={handleError}
+            />
         </div>
     );
 }

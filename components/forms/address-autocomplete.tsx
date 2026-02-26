@@ -75,7 +75,8 @@ export function AddressAutocomplete({
     const [query, setQuery] = React.useState(defaultValue);
     const [results, setResults] = React.useState<NominatimResult[]>([]);
     const [loading, setLoading] = React.useState(false);
-    const ignoreNextQueryChange = React.useRef(false);
+    const ignoreNextQueryChange = React.useRef(!!defaultValue); // Ne pas fetch immédiatement si on a une valeur par défaut
+    const inputRef = React.useRef<HTMLInputElement>(null);
 
     React.useEffect(() => {
         if (ignoreNextQueryChange.current) {
@@ -106,7 +107,8 @@ export function AddressAutocomplete({
 
             const data = await response.json();
             setResults(data);
-            if (data.length > 0) {
+            // N'ouvrir le Popover que si l'input a toujours le focus
+            if (data.length > 0 && document.activeElement === inputRef.current) {
                 setOpen(true);
             }
         } catch (error) {
@@ -159,6 +161,7 @@ export function AddressAutocomplete({
             <PopoverTrigger asChild>
                 <div className={cn("relative group", className)}>
                     <Input
+                        ref={inputRef}
                         value={query}
                         onChange={(e) => {
                             setQuery(e.target.value);
@@ -170,7 +173,11 @@ export function AddressAutocomplete({
                             }
                         }}
                         onFocus={() => {
-                            if (query.length >= 3 && results.length > 0) setOpen(true);
+                            if (results.length > 0) {
+                                setOpen(true);
+                            } else if (query.length >= 3) {
+                                fetchSuggestions(query);
+                            }
                         }}
                         placeholder="Ex: Saly Portudal, Sénégal"
                         autoComplete="off"
