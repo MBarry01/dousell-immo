@@ -21,18 +21,6 @@ const nextConfig = {
     // Redirections legacy (désactivées pour restauration des chemins)
     async redirects() {
         return [
-            // Rediriger www.dousel.com vers dousel.com pour satisfaire OneSignal
-            {
-                source: '/:path*',
-                has: [
-                    {
-                        type: 'host',
-                        value: 'www.dousel.com',
-                    },
-                ],
-                destination: 'https://dousel.com/:path*',
-                permanent: true,
-            },
             // Route dupliquée CGU
             {
                 source: '/cgu',
