@@ -6,7 +6,7 @@
 
 import { cookies } from 'next/headers';
 
-const ACTIVE_TEAM_COOKIE = 'dousell_active_team_id';
+const ACTIVE_TEAM_COOKIE = 'dousel_active_team_id';
 
 /**
  * Définit l'équipe active pour l'utilisateur

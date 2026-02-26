@@ -62,13 +62,13 @@ export const BAIL_TEMPLATE = {
     },
 
     branding: {
-        logo: "Dousell Immo",
+        logo: "Dousel",
         stamp: "CERTIFIÉ CONFORME",
         website: "www.dousell.com",
         tagline: "Votre partenaire immobilier de confiance"
     },
 
-    footer: "Document généré électroniquement et certifié par Dousell Immo - Dakar, Sénégal"
+    footer: "Document généré électroniquement et certifié par Dousel - Dakar, Sénégal"
 };
 
 // ============================================================
@@ -96,7 +96,7 @@ export const AVIS_ECHEANCE_TEMPLATE = {
     reminder_text: "Nous vous rappelons que le paiement est attendu au plus tard le {billing_day} du mois en cours.",
 
     branding: {
-        logo: "Dousell Immo",
+        logo: "Dousel",
         stamp: "DOCUMENT OFFICIEL"
     },
 
@@ -125,12 +125,12 @@ export const QUITTANCE_TEMPLATE = {
     owner_info: ["Nom du bailleur", "Signature"],
 
     branding: {
-        logo: "Dousell Immo",
+        logo: "Dousel",
         stamp: "PAYÉ ✓",
         color: "#22c55e" // Vert pour indiquer le paiement
     },
 
-    footer: "Cette quittance est libératoire pour la période mentionnée. Document généré électroniquement par Dousell Immo."
+    footer: "Cette quittance est libératoire pour la période mentionnée. Document généré électroniquement par Dousel."
 };
 
 // ============================================================
@@ -152,7 +152,7 @@ export const ETAT_DES_LIEUX_TEMPLATE = {
     rating_scale: ["Neuf", "Bon état", "Usage normal", "À réparer", "Mauvais état"],
 
     branding: {
-        logo: "Dousell Immo",
+        logo: "Dousel",
         stamp: "DOCUMENT OFFICIEL"
     },
 

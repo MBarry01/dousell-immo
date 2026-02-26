@@ -45,7 +45,7 @@ export async function moderateProperty(
       );
 
       if (!ownerError && owner?.user?.email) {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app";
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousel.com";
         const propertyUrl = `${baseUrl}/biens/${propertyId}`;
 
         if (status === "approved") {
@@ -101,7 +101,7 @@ export async function moderateProperty(
             userId: property.owner_id,
             type: "success",
             title: "✅ Votre annonce est en ligne !",
-            message: `Votre annonce "${property.title}" a été approuvée et est maintenant visible sur Dousell Immo.`,
+            message: `Votre annonce "${property.title}" a été approuvée et est maintenant visible sur Dousel.`,
             resourcePath: `/biens/${propertyId}`,
           });
 
@@ -220,7 +220,7 @@ export async function moderatePropertyWithReason(
       );
 
       if (!ownerError && owner?.user?.email) {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app";
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousel.com";
         const editUrl = `${baseUrl}/compte/biens/edit/${propertyId}`;
 
         // Notifier l'utilisateur

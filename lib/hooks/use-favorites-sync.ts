@@ -24,7 +24,7 @@ import {
   FAVORITES_LIMITS,
 } from "@/lib/favorites-sync";
 
-const SYNC_FLAG_KEY = "dousell-favorites-synced";
+const SYNC_FLAG_KEY = "dousel-favorites-synced";
 
 interface UseFavoritesSyncOptions {
   /** User ID if authenticated */

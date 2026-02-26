@@ -7,7 +7,7 @@ import { getTeamAuditLogs } from "../actions";
 import type { TeamRole, TeamAuditLog } from "@/types/team";
 
 export const metadata = {
-  title: "Historique | Équipe - Dousell Immo",
+  title: "Historique | Équipe - Dousel",
   description: "Consultez l'historique des actions de l'équipe",
 };
 

@@ -10,7 +10,7 @@ type SearchPageProps = {
 };
 
 export const metadata = {
-  title: "Recherche · Dousell Immo",
+  title: "Recherche · Dousel",
 };
 
 // Désactivation du cache pour garantir des résultats frais (surtout pour les coords géocodées)

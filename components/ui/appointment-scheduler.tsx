@@ -45,7 +45,7 @@ export function AppointmentScheduler({
   onTimeSelect,
   onConfirm,
   isSubmitting = false,
-  brandName = "Dousell Agenda",
+  brandName = "Dousel Agenda",
 }: AppointmentSchedulerProps) {
   const now = new Date()
   const [currentMonth, setCurrentMonth] = useState(now.getMonth())

@@ -310,7 +310,7 @@ export const createDepositReceiptDocument = (data: DepositReceiptData) => {
 
                 {/* Footer */}
                 <Text style={styles.footer}>
-                    Document généré automatiquement par Dousell Immo pour {data.ownerName}.{'\n'}
+                    Document généré automatiquement par Dousel pour {data.ownerName}.{'\n'}
                     Ce reçu fait foi de la réception du dépôt de garantie pour le bien mentionné ci-dessus.
                 </Text>
             </Page>

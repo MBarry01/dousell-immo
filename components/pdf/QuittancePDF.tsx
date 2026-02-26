@@ -320,7 +320,7 @@ export const createQuittanceDocument = (data: QuittanceData) => {
 
         {/* Footer */}
         <Text style={styles.footer}>
-          Document généré automatiquement par Dousell Immo pour {data.ownerName}.{'\n'}
+          Document généré automatiquement par Dousel pour {data.ownerName}.{'\n'}
           Pour faire valoir ce que de droit.
         </Text>
       </Page>
@@ -435,7 +435,7 @@ const _QuittancePDFOld: React.FC<{ data: QuittanceData }> = ({ data }) => {
 
         {/* Footer */}
         <Text style={styles.footer}>
-          Document généré automatiquement par Dousell Immo pour {data.ownerName}.{'\n'}
+          Document généré automatiquement par Dousel pour {data.ownerName}.{'\n'}
           Pour faire valoir ce que de droit.
         </Text>
       </Page>

@@ -1,7 +1,7 @@
 /**
  * SOURCE UNIQUE DE VÉRITÉ - Configuration des Plans d'Abonnement
  *
- * Ce fichier centralise TOUTE la configuration des plans de Dousell Immo.
+ * Ce fichier centralise TOUTE la configuration des plans de Dousel.
  * Modifier uniquement ici pour propager partout (vitrine, SaaS, feature gating).
  *
  * @version 1.1.0 (Multi-currency support)

@@ -91,7 +91,7 @@ export const LeaseExpirationEmail = ({
                         </Section>
 
                         <Section style={buttonAction}>
-                            <Button style={button} href="https://dousell-immo.app/gestion">
+                            <Button style={button} href="https://dousel.com/gestion">
                                 Gérer ce bail sur la plateforme
                             </Button>
                         </Section>

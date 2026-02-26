@@ -29,7 +29,7 @@ export default function TenantTestimonials() {
         <section className="py-24 bg-zinc-900 border-y border-white/5">
             <div className="container mx-auto px-6 text-center">
                 <h2 className="text-3xl font-bold text-white mb-16">
-                    Ils ont trouvé leur bonheur avec <span className="text-[#F4C430]">Dousell Immo</span>
+                    Ils ont trouvé leur bonheur avec <span className="text-[#F4C430]">Dousel</span>
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

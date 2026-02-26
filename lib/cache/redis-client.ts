@@ -1,5 +1,5 @@
 /**
- * Client Redis/Valkey unifié pour Dousell Immo
+ * Client Redis/Valkey unifié pour Dousel
  *
  * Environnements supportés :
  * - Vercel (Serverless) : Upstash Redis via HTTP

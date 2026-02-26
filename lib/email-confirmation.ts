@@ -81,7 +81,7 @@ export async function sendConfirmationEmail(
 
     const emailResult = await sendEmail({
       to: email,
-      subject: "Confirmez votre compte Dousell Immo",
+      subject: "Confirmez votre compte Dousel",
       html: emailHtml,
     });
 
@@ -271,14 +271,14 @@ function generateConfirmationEmailHTML(fullName: string, verificationLink: strin
 <body>
   <div class="container">
     <div class="header">
-      <h1>🏠 Dousell Immo</h1>
+      <h1>🏠 Dousel</h1>
       <p>L'immobilier de confiance au Sénégal</p>
     </div>
     
     <div class="content">
       <h2>Bienvenue, ${fullName} !</h2>
       
-      <p>Merci de vous être inscrit(e) sur Dousell Immo.</p>
+      <p>Merci de vous être inscrit(e) sur Dousel.</p>
       <p>Pour activer votre compte, veuillez cliquer sur le bouton ci-dessous :</p>
       
       <div class="button-container">
@@ -299,7 +299,7 @@ function generateConfirmationEmailHTML(fullName: string, verificationLink: strin
     </div>
     
     <div class="footer">
-      <p><strong>Dousell Immo</strong></p>
+      <p><strong>Dousel</strong></p>
       <p>Votre partenaire immobilier à Dakar</p>
       <p style="font-size: 11px; color: #999;">
         Cet email a été envoyé automatiquement. Merci de ne pas y répondre.

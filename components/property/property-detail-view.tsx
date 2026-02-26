@@ -701,7 +701,7 @@ export const PropertyDetailView = ({
         {/* Propriétaire / Agent Profile */}
         <div className="mb-12 border-t border-gray-200 pt-12 dark:border-white/10">
           <h2 className="mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-            {property.owner ? "Proposé par" : "Faites connaissance avec Agence Dousell"}
+            {property.owner ? "Proposé par" : "Faites connaissance avec Agence Dousel"}
           </h2>
           <AgentCard
             agent={property.agent}

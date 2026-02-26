@@ -94,7 +94,7 @@ function PlanifierVisitePageContent() {
   const [publisher, setPublisher] = useState<{
     name: string;
     avatar: string | null;
-  }>({ name: "Équipe Dousell", avatar: "/icons/icon-192.png" });
+  }>({ name: "Équipe Dousel", avatar: "/icons/icon-192.png" });
 
   const projectTypeParam = searchParams?.get("projectType");
   const messageParam = searchParams?.get("message");
@@ -129,7 +129,7 @@ function PlanifierVisitePageContent() {
       .then((res) => res.json())
       .then((data) => {
         setPublisher({
-          name: data.name || "Équipe Dousell",
+          name: data.name || "Équipe Dousel",
           avatar: data.avatar || "/icons/icon-192.png",
         });
       })
@@ -264,7 +264,7 @@ function PlanifierVisitePageContent() {
             </p>
           </div>
           <p className="text-white/50 text-sm">
-            Un email de confirmation vous a été envoyé. Un conseiller Dousell vous contactera pour confirmer les détails.
+            Un email de confirmation vous a été envoyé. Un conseiller Dousel vous contactera pour confirmer les détails.
           </p>
 
           {confirmedAppointment.googleCalendarUrl && (
@@ -330,7 +330,7 @@ function PlanifierVisitePageContent() {
               Confiez-nous votre visite
             </h1>
             <p className="mt-2 text-white/60">
-              Remplissez ce formulaire et un conseiller Dousell vous recontacte
+              Remplissez ce formulaire et un conseiller Dousel vous recontacte
               sous 30 minutes pour organiser la visite idéale.
             </p>
           </div>

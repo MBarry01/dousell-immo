@@ -183,7 +183,7 @@ export default function LocataireLayout({
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 pwa-header-safe">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          {/* Logo - DousellLoc branding */}
+          {/* Logo - DouselLoc branding */}
           <Link href="/locataire" className="flex items-center gap-2">
             <div>
               <span className="text-lg font-bold text-slate-900">Dousel</span>

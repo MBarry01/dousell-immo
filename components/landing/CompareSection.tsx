@@ -50,7 +50,7 @@ export default function CompareSection() {
           <div className="gold-divider w-24 mx-auto my-4" />
           <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto">
             Voyez comment{" "}
-            <span className="text-[#F4C430] font-medium">Dousell Immo</span>{" "}
+            <span className="text-[#F4C430] font-medium">Dousel</span>{" "}
             transforme la gestion locative chaotique en une expérience fluide et
             automatisée.
           </p>

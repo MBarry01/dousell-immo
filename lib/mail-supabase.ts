@@ -24,7 +24,7 @@ export async function sendEmailViaSupabase({
   to,
   subject,
   react,
-  fromName = "Dousell Immo",
+  fromName = "Dousel",
   user_id = null,
 }: SendEmailOptions) {
   if (!SUPABASE_URL) {

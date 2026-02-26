@@ -29,7 +29,7 @@ export async function GET(request: Request) {
         // Récupérer les paramètres depuis l'URL
         const url = new URL(request.url);
         const serviceType = url.searchParams.get("serviceType");
-        const description = url.searchParams.get("description") || "Paiement Dousell Immo";
+        const description = url.searchParams.get("description") || "Paiement Dousel";
         const amountStr = url.searchParams.get("amount");
         const propertyId = url.searchParams.get("propertyId");
         const fullName = url.searchParams.get("fullName") || "";
@@ -108,7 +108,7 @@ export async function GET(request: Request) {
                 },
             },
             store: {
-                name: "Dousell Immo",
+                name: "Dousel",
                 tagline: "Votre partenaire immobilier à Dakar",
                 phone: "+221 77 138 52 81",
                 website_url: baseUrl,

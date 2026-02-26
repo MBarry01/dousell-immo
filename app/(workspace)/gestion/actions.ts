@@ -2137,7 +2137,7 @@ export async function sendTenantInvitation(leaseId: string) {
     try {
         await sendEmail({
             to: lease.tenant_email,
-            subject: `Invitation à votre Espace Locataire - Dousell`,
+            subject: `Invitation à votre Espace Locataire - Dousel`,
             react: TenantInvitationEmail({
                 tenantName: lease.tenant_name,
                 propertyAddress: lease.property_address || '',

@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const propertyId = searchParams.get("propertyId");
 
     if (!propertyId) {
-        return NextResponse.json({ name: "Équipe Dousell", avatar: null });
+        return NextResponse.json({ name: "Équipe Dousel", avatar: null });
     }
 
     try {
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
             .single();
 
         if (!prop) {
-            return NextResponse.json({ name: "Équipe Dousell", avatar: null });
+            return NextResponse.json({ name: "Équipe Dousel", avatar: null });
         }
 
         // Cas équipe
@@ -66,5 +66,5 @@ export async function GET(req: NextRequest) {
     }
 
     // Fallback
-    return NextResponse.json({ name: "Équipe Dousell", avatar: null });
+    return NextResponse.json({ name: "Équipe Dousel", avatar: null });
 }

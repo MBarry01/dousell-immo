@@ -246,7 +246,7 @@ export async function generateNotice(formData: FormData) {
         });
 
         // Appeler l'API de génération et envoi du préavis
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/send-notice`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://dousel.com'}/api/send-notice`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -563,7 +563,7 @@ export async function terminateLease(formData: FormData) {
         });
 
         // Appeler l'API de génération et envoi du préavis
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/send-notice`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://dousel.com'}/api/send-notice`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

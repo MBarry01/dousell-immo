@@ -31,7 +31,7 @@ export function AccessRejected({
   reviewerName = "Marie Martin",
   reviewNotes,
   teamName = "Doussel Immo",
-  contactUrl = "https://dousell-immo.app/gestion/equipe",
+  contactUrl = "https://dousel.com/gestion/equipe",
 }: AccessRejectedProps) {
   return (
     <Html>

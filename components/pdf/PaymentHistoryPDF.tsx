@@ -273,7 +273,7 @@ export const createPaymentHistoryDocument = (data: PaymentHistoryData) => {
 
                 {/* Footer */}
                 <Text style={styles.footer}>
-                    Document généré automatiquement par Dousell Immo pour {data.ownerName}.{'\n'}
+                    Document généré automatiquement par Dousel pour {data.ownerName}.{'\n'}
                     Pour faire valoir ce que de droit.
                 </Text>
             </Page>

@@ -167,7 +167,7 @@ export default function UpgradePage() {
                       <Input
                         value={formData.companyName}
                         onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                        placeholder="Ex: Dousell Immobilier"
+                        placeholder="Ex: Douselbilier"
                         className="bg-white/5 border-white/10 text-white"
                       />
                     </div>

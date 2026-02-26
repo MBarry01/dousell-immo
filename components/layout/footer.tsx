@@ -37,7 +37,7 @@ export const Footer = () => {
     <footer className="mt-4 border-t border-white/10 bg-[#05080c]/90 pb-16 text-white md:pb-4 print:hidden">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 md:flex-row md:gap-12">
         <div className="flex-1 space-y-3">
-          <p className="text-lg font-semibold text-white">Dousell Immo</p>
+          <p className="text-lg font-semibold text-white">Dousel</p>
           <p className="text-sm leading-relaxed text-white/70 max-w-md">
             L&apos;immobilier de confiance à Dakar et au Sénégal. Nous accompagnons particuliers et professionnels dans leurs projets immobiliers avec expertise et transparence.
           </p>
@@ -98,7 +98,7 @@ export const Footer = () => {
       <div className="border-t border-white/5 px-4 py-4">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-xs text-white/50 sm:flex-row">
           <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
-            <span>© {new Date().getFullYear()} Dousell Immo. Tous droits réservés.</span>
+            <span>© {new Date().getFullYear()} Dousel. Tous droits réservés.</span>
             <span className="hidden text-white/30 sm:inline">•</span>
             <span className="text-white/40">Dakar, Sénégal</span>
           </div>

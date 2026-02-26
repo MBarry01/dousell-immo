@@ -4,7 +4,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { AcceptInvitationClient } from "./AcceptInvitationClient";
 
 export const metadata = {
-  title: "Accepter l'invitation | Dousell Immo",
+  title: "Accepter l'invitation | Dousel",
   description: "Acceptez votre invitation à rejoindre une équipe",
 };
 

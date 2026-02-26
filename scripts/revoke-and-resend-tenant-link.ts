@@ -161,7 +161,7 @@ async function revokeAndResendMagicLink(lease: any) {
 
   await sendEmail({
     to: lease.tenant_email,
-    subject: "Invitation à votre Espace Locataire - Dousell",
+    subject: "Invitation à votre Espace Locataire - Dousel",
     html: `
       <!DOCTYPE html>
       <html>
@@ -226,7 +226,7 @@ async function revokeAndResendMagicLink(lease: any) {
             </p>
           </div>
           <div class="footer">
-            <p>© ${new Date().getFullYear()} Dousell Immo - Gestion Locative</p>
+            <p>© ${new Date().getFullYear()} Dousel - Gestion Locative</p>
             <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
           </div>
         </div>

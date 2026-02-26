@@ -248,7 +248,7 @@ export function InstallPrompt() {
           <div className="flex items-start gap-3">
             <div className="flex-1">
               <h3 className="text-sm font-semibold text-white">
-                Installer Dousell Immo
+                Installer Dousel
               </h3>
               <p className="mt-1 text-xs text-white/70">
                 Ajoutez l'app à votre écran d'accueil pour un accès

@@ -28,7 +28,7 @@ export async function POST(_req: Request) {
                 business_type: 'company', // Assume company/agency usually
                 business_profile: {
                     url: getBaseUrl(), // Fallback URL
-                    product_description: 'Gestion immobilière via Dousell Immo',
+                    product_description: 'Gestion immobilière via Dousel',
                 },
                 metadata: {
                     team_id: teamId

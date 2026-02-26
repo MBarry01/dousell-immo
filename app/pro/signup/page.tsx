@@ -273,7 +273,7 @@ export default function SignupPage() {
 
                             <Image
                                 src="/icons/icon.svg"
-                                alt="Dousell Immo"
+                                alt="Dousel"
                                 width={120}
                                 height={120}
                                 className="mx-auto"
@@ -383,7 +383,7 @@ export default function SignupPage() {
                     </Link>
                     <Image
                         src="/icons/icon.svg"
-                        alt="Dousell Immo"
+                        alt="Dousel"
                         width={40}
                         height={40}
                         className="h-10 w-auto"

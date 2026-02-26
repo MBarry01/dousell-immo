@@ -6,7 +6,7 @@ import { AccessControlDashboard } from "./components/AccessControlDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata = {
-  title: "Contrôle d'Accès | Dousell",
+  title: "Contrôle d'Accès | Dousel",
   description: "Gérer les demandes d'accès temporaire et les permissions",
 };
 

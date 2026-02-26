@@ -681,7 +681,7 @@ function LandingPageContent() {
             >
               <CldImageSafe
                 src="doussel/static/illustrations/mock-phone"
-                alt="App Mobile Dousell Immo"
+                alt="App Mobile Dousel"
                 width={800}
                 height={1600}
                 className="w-full h-auto drop-shadow-[0_20px_50px_rgba(244,196,48,0.15)]"
@@ -699,7 +699,7 @@ function LandingPageContent() {
             >
               <Image
                 src="/images/mock-computer.png"
-                alt="Tablette Dousell Immo"
+                alt="Tablette Dousel"
                 width={1200}
                 height={900}
                 className="w-full h-auto drop-shadow-[0_20px_50px_rgba(244,196,48,0.15)]"
@@ -717,7 +717,7 @@ function LandingPageContent() {
             >
               <Image
                 src="/images/mock-cph.png"
-                alt="Desktop Dousell Immo"
+                alt="Desktop Dousel"
                 width={1600}
                 height={1000}
                 className="w-full h-auto drop-shadow-[0_30px_60px_rgba(244,196,48,0.1)]"
@@ -848,13 +848,13 @@ function LandingPageContent() {
 
           <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
             <DialogContent className="sm:max-w-[70vw] w-full p-0 bg-black border-zinc-800 overflow-hidden shadow-2xl">
-              <DialogTitle className="sr-only">Démonstration vidéo de Dousell Immo</DialogTitle>
+              <DialogTitle className="sr-only">Démonstration vidéo de Dousel</DialogTitle>
               <div className="aspect-video w-full">
                 <iframe
                   width="100%"
                   height="100%"
                   src="https://www.youtube.com/embed/Ydn8c3trfho?autoplay=1&rel=0"
-                  title="Dousell Demo"
+                  title="Dousel Demo"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -917,7 +917,7 @@ function LandingPageContent() {
             </h2>
             <p className="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
               {userMode === "owner"
-                ? "Rejoignez les propriétaires qui ont déjà simplifié leur quotidien avec Dousell Immo."
+                ? "Rejoignez les propriétaires qui ont déjà simplifié leur quotidien avec Dousel."
                 : "Découvrez des centaines d'annonces vérifiées et gérez votre location en toute simplicité."}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -1148,7 +1148,7 @@ function LandingPageContent() {
                 </div>
                 <div className="flex justify-center">
                   <AppointmentScheduler
-                    userName="Équipe Dousell"
+                    userName="Équipe Dousel"
                     userAvatar="/Logo.svg"
                     meetingTitle="Consultation Immobilière"
                     meetingType={selectedMeetingMode === "online" ? "Visio (Google Meet)" : "Présentiel (Bureau Dakar)"}
@@ -1160,7 +1160,7 @@ function LandingPageContent() {
                     onTimeSelect={(time) => console.log("Heure choisie:", time)}
                     onConfirm={handleSchedulerConfirm}
                     isSubmitting={isSchedulerSubmitting}
-                    brandName="Dousell Agenda"
+                    brandName="Dousel Agenda"
                   />
                 </div>
               </div>
@@ -1199,7 +1199,7 @@ function LandingPageContent() {
             {/* Brand */}
             <div className="md:col-span-2 flex flex-col items-center md:items-start text-center md:text-left">
               <span className="font-display text-2xl gradient-text-animated">
-                Dousell Immo
+                Dousel
               </span>
               <p className="mt-4 text-gray-500 max-w-md">
                 La plateforme de gestion immobilière de référence au Sénégal.
@@ -1231,7 +1231,7 @@ function LandingPageContent() {
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-gray-600 text-sm">
-              © 2026 Dousell Immo. Tous droits réservés.
+              © 2026 Dousel. Tous droits réservés.
             </p>
             <div className="flex gap-6">
               <a href="/legal/cgu" className="text-gray-600 hover:text-[#F4C430] transition-colors text-sm">Mentions légales</a>

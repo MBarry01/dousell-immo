@@ -29,7 +29,7 @@ async function testListingApproved() {
             subject: "🎉 Votre annonce est en ligne ! - Doussel Immo",
             react: React.createElement(ListingApprovedEmail, {
                 propertyTitle: "Superbe Villa aux Almadies avec Piscine",
-                propertyUrl: "https://dousell-immo.app/biens/villa-almadies-piscine",
+                propertyUrl: "https://dousel.com/biens/villa-almadies-piscine",
                 isPaid: true,
                 invoiceNumber: "INV-2026-001",
                 hasInvoice: true,

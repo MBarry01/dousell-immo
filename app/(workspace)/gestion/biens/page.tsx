@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Settings, Building2, ArrowRight } from "lucide-react";
 
 export const metadata = {
-  title: "Biens | Gestion Locative - Dousell Immo",
+  title: "Biens | Gestion Locative - Dousel",
   description: "Gérez les biens immobiliers de votre équipe",
 };
 

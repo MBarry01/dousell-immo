@@ -52,7 +52,7 @@ export default function TrustSection() {
 
           <p className="text-gray-400 text-base md:text-lg max-w-2xl mx-auto">
             Contrairement aux courtiers informels, chaque annonce et chaque propriétaire
-            sur Dousell est vérifié. Votre tranquillité d&apos;esprit est notre priorité.
+            sur Dousel est vérifié. Votre tranquillité d&apos;esprit est notre priorité.
           </p>
         </motion.div>
 

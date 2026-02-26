@@ -240,7 +240,7 @@ export async function generateNotice(formData: FormData) {
         });
 
         // Appeler l'API de génération et envoi du préavis
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/send-notice`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://dousel.com'}/api/send-notice`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -416,7 +416,7 @@ export async function renewLease(formData: FormData) {
                         currentEndDate: new Date(lease.end_date).toLocaleDateString('fr-FR'),
                         newEndDate: formattedNewEndDate,
                         newMonthlyAmount: (newRentAmount ? parseFloat(newRentAmount) : lease.monthly_amount).toLocaleString('fr-FR'),
-                        acceptanceLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://dousell-immo.com'}/locataire`, // Fallback link
+                        acceptanceLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://dousel.com'}/locataire`, // Fallback link
                         ownerName: ownerName,
                         ownerAddress: ownerAddress,
                     })
@@ -531,7 +531,7 @@ export async function terminateLease(formData: FormData) {
         });
 
         // Appeler l'API de génération et envoi du préavis
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/send-notice`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://dousel.com'}/api/send-notice`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

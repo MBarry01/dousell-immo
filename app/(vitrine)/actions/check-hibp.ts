@@ -43,7 +43,7 @@ export async function checkPasswordHIBPServer(
     const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
       method: "GET",
       headers: {
-        "User-Agent": "Dousell-Immo-App (contact@dousell-immo.com)",
+        "User-Agent": "Dousel-Immo-App (contact@dousel.com)",
         "Add-Padding": "true", // Optionnel : ajoute du padding pour masquer la taille
       },
     });

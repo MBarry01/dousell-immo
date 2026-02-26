@@ -22,7 +22,7 @@ const appointmentSchema = z.object({
 
 export type AppointmentFormValues = z.infer<typeof appointmentSchema>;
 
-// Lien Zoom de réunion permanente Dousell (à configurer dans les variables d'environnement)
+// Lien Zoom de réunion permanente Dousel (à configurer dans les variables d'environnement)
 const _ZOOM_MEETING_URL = process.env.ZOOM_MEETING_URL || "https://zoom.us/j/dousellimmo";
 
 // Alias pour compatibilité
@@ -146,7 +146,7 @@ export async function createVisitRequest(values: VisitRequestFormValues, turnsti
     try {
       await sendEmail({
         to: publisherEmail,
-        subject: `📩 Nouvelle demande de visite — ${payload.propertyTitle || "votre bien"} · Dousell Immo`,
+        subject: `📩 Nouvelle demande de visite — ${payload.propertyTitle || "votre bien"} · Dousel`,
         react: (
           <VisitRequestEmail
             fullName={payload.fullName}
@@ -169,7 +169,7 @@ export async function createVisitRequest(values: VisitRequestFormValues, turnsti
     try {
       await sendEmail({
         to: adminEmail,
-        subject: `Nouvelle demande de visite · Dousell Immo${publisherEmail ? ` (copie — publieur notifié)` : ""}`,
+        subject: `Nouvelle demande de visite · Dousel${publisherEmail ? ` (copie — publieur notifié)` : ""}`,
         react: (
           <VisitRequestEmail
             fullName={payload.fullName}
@@ -290,11 +290,11 @@ export async function createAppointment(values: AppointmentFormValues) {
 
   // Générer le lien Google Calendar pour l'utilisateur (ajout manuel)
   const googleCalendarDetails = isOnline && meetLink
-    ? `Rendez-vous en visioconférence avec l'équipe Dousell Immo.\n\nType: ${payload.meetingType === "visite" ? "Visite immobilière" : "Consultation"}\n\n🔗 Lien Google Meet: ${meetLink}\n\nUn conseiller vous contactera pour confirmer les détails.`
-    : `Rendez-vous avec l'équipe Dousell Immo.\n\nType: ${payload.meetingType === "visite" ? "Visite immobilière" : "Consultation"}\n\nUn conseiller vous contactera pour confirmer les détails.`;
+    ? `Rendez-vous en visioconférence avec l'équipe Dousel.\n\nType: ${payload.meetingType === "visite" ? "Visite immobilière" : "Consultation"}\n\n🔗 Lien Google Meet: ${meetLink}\n\nUn conseiller vous contactera pour confirmer les détails.`
+    : `Rendez-vous avec l'équipe Dousel.\n\nType: ${payload.meetingType === "visite" ? "Visite immobilière" : "Consultation"}\n\nUn conseiller vous contactera pour confirmer les détails.`;
 
   const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-    `${payload.meetingType === "visite" ? "Visite immobilière" : "Consultation"}${isOnline ? " (Visio)" : ""} - Dousell Immo`
+    `${payload.meetingType === "visite" ? "Visite immobilière" : "Consultation"}${isOnline ? " (Visio)" : ""} - Dousel`
   )}&dates=${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}&details=${encodeURIComponent(
     googleCalendarDetails
   )}&location=${encodeURIComponent(meetingLocation)}`;
@@ -414,7 +414,7 @@ export async function createAppointment(values: AppointmentFormValues) {
                       <p style="text-align: center; font-size: 32px; margin: 0 0 16px 0;">✓</p>
                       <h1 style="text-align: center; font-size: 24px; color: #0f172a; margin: 0 0 16px 0;">Rendez-vous confirmé !</h1>
                       <p style="font-size: 16px; color: #0f172a; margin: 0 0 8px 0;">Bonjour ${userName},</p>
-                      <p style="font-size: 15px; color: #475569; line-height: 1.5; margin: 0 0 24px 0;">Votre rendez-vous ${isOnline ? "en visioconférence" : ""} avec l'équipe Dousell Immo est bien enregistré.</p>
+                      <p style="font-size: 15px; color: #475569; line-height: 1.5; margin: 0 0 24px 0;">Votre rendez-vous ${isOnline ? "en visioconférence" : ""} avec l'équipe Dousel est bien enregistré.</p>
 
                       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef9e7; border: 1px solid #F4C430; border-radius: 16px; margin-bottom: 24px;">
                         <tr>
@@ -461,11 +461,11 @@ export async function createAppointment(values: AppointmentFormValues) {
                       <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
 
                       <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0 0 24px 0;">
-                        Un conseiller Dousell vous contactera${userPhone ? ` au ${userPhone}` : ""} pour confirmer les détails de votre rendez-vous.
+                        Un conseiller Dousel vous contactera${userPhone ? ` au ${userPhone}` : ""} pour confirmer les détails de votre rendez-vous.
                       </p>
 
                       <p style="text-align: center; font-size: 14px; color: #0f172a; margin: 0;">À très bientôt !</p>
-                      <p style="text-align: center; font-size: 14px; color: #F4C430; font-weight: 600; margin: 4px 0 0 0;">L'équipe Dousell Immo</p>
+                      <p style="text-align: center; font-size: 14px; color: #F4C430; font-weight: 600; margin: 4px 0 0 0;">L'équipe Dousel</p>
                     </td>
                   </tr>
                 </table>
@@ -478,7 +478,7 @@ export async function createAppointment(values: AppointmentFormValues) {
 
       await sendEmail({
         to: userEmail,
-        subject: `Confirmation de votre rendez-vous${isOnline ? " (Visio)" : ""} - Dousell Immo`,
+        subject: `Confirmation de votre rendez-vous${isOnline ? " (Visio)" : ""} - Dousel`,
         html: clientEmailHtml,
       });
     } catch (emailError) {

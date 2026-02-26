@@ -77,14 +77,14 @@ export function TestimonialCard({
 const ownerTestimonials: Testimonial[] = [
   {
     id: 1,
-    testimonial: "Dousell a complètement transformé ma gestion locative. Les paiements automatiques sont une bénédiction.",
+    testimonial: "Dousel a complètement transformé ma gestion locative. Les paiements automatiques sont une bénédiction.",
     author: "Aminata Diallo",
     role: "Propriétaire à Dakar",
     avatarUrl: "https://images.unsplash.com/photo-1507152832244-10d45c7eda57?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Professional Black Woman
   },
   {
     id: 2,
-    testimonial: "Depuis que j'utilise Dousell, je n'ai plus aucun retard de paiement. Tout est clair et net.",
+    testimonial: "Depuis que j'utilise Dousel, je n'ai plus aucun retard de paiement. Tout est clair et net.",
     author: "Pape Modou Ndiaye",
     role: "Propriétaire à Saly",
     avatarUrl: "https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Professional Black Man
@@ -155,8 +155,8 @@ export function ShuffleCards({ mode = "owner" }: ShuffleCardsProps) {
         </h2>
         <p className="text-white/60 max-w-lg mx-auto">
           {mode === "owner"
-            ? "Découvrez les retours de propriétaires qui automatisent leur gestion avec Dousell."
-            : "Découvrez les expériences de locataires qui ont choisi Dousell pour leur logement."
+            ? "Découvrez les retours de propriétaires qui automatisent leur gestion avec Dousel."
+            : "Découvrez les expériences de locataires qui ont choisi Dousel pour leur logement."
           }
         </p>
       </div>

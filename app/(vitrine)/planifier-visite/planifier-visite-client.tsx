@@ -237,7 +237,7 @@ export default function PlanifierVisitePageContent() {
             </p>
           </div>
           <p className="text-white/50 text-sm">
-            Un email de confirmation vous a été envoyé. Un conseiller Dousell vous contactera pour confirmer les détails.
+            Un email de confirmation vous a été envoyé. Un conseiller Dousel vous contactera pour confirmer les détails.
           </p>
 
           {confirmedAppointment.googleCalendarUrl && (
@@ -303,7 +303,7 @@ export default function PlanifierVisitePageContent() {
               Confiez-nous votre visite
             </h1>
             <p className="mt-2 text-white/60">
-              Remplissez ce formulaire et un conseiller Dousell vous recontacte
+              Remplissez ce formulaire et un conseiller Dousel vous recontacte
               sous 30 minutes pour organiser la visite idéale.
             </p>
           </div>
@@ -508,7 +508,7 @@ export default function PlanifierVisitePageContent() {
 
           <div className="flex justify-center px-4">
             <AppointmentScheduler
-              userName="Équipe Dousell"
+              userName="Équipe Dousel"
               userAvatar="/icons/icon-192.png"
               meetingTitle={selectedMeetingType === "visite" ? "Visite Immobilière" : "Consultation"}
               meetingType={selectedMeetingMode === "in_person" ? "En personne" : "Visioconférence Zoom"}
@@ -518,7 +518,7 @@ export default function PlanifierVisitePageContent() {
               timeSlots={timeSlots}
               onConfirm={handleSchedulerConfirm}
               isSubmitting={isSchedulerSubmitting}
-              brandName="Dousell Agenda"
+              brandName="Dousel Agenda"
             />
           </div>
 

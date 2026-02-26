@@ -603,7 +603,7 @@ export const inviteTeamMember = safeAction(
               </div>
               <div class="content">
                 <p>Bonjour,</p>
-                <p><strong>${inviterProfile?.full_name || "Un membre"}</strong> vous invite à rejoindre l'équipe <strong>${teamInfo?.name || "l'équipe"}</strong> sur <strong>Dousell Immo</strong>.</p>
+                <p><strong>${inviterProfile?.full_name || "Un membre"}</strong> vous invite à rejoindre l'équipe <strong>${teamInfo?.name || "l'équipe"}</strong> sur <strong>Dousel</strong>.</p>
 
                 <div class="info-box">
                   <p style="margin: 5px 0;"><strong>Rôle proposé:</strong> ${roleConfig.label}</p>
@@ -626,7 +626,7 @@ export const inviteTeamMember = safeAction(
                 </p>
               </div>
               <div class="footer">
-                <p>© ${new Date().getFullYear()} Dousell Immo - Gestion Locative Intelligente</p>
+                <p>© ${new Date().getFullYear()} Dousel - Gestion Locative Intelligente</p>
               </div>
             </div>
           </body>
@@ -635,9 +635,9 @@ export const inviteTeamMember = safeAction(
 
       await sendEmail({
         to: data.email,
-        subject: `Invitation à rejoindre ${teamInfo?.name || "l'équipe"} sur Dousell Immo`,
+        subject: `Invitation à rejoindre ${teamInfo?.name || "l'équipe"} sur Dousel`,
         html: emailHtml,
-        fromName: "Dousell Immo",
+        fromName: "Dousel",
       });
     } catch (emailError) {
       console.error("Erreur envoi email invitation:", emailError);
@@ -737,7 +737,7 @@ export async function resendInvitation(
               </div>
               <div class="content">
                 <p>Bonjour,</p>
-                <p><strong>${inviterProfile?.full_name || "Un membre"}</strong> vous renvoie l'invitation à rejoindre l'équipe <strong>${team?.name || "l'équipe"}</strong> sur <strong>Dousell Immo</strong>.</p>
+                <p><strong>${inviterProfile?.full_name || "Un membre"}</strong> vous renvoie l'invitation à rejoindre l'équipe <strong>${team?.name || "l'équipe"}</strong> sur <strong>Dousel</strong>.</p>
 
                 <div class="info-box">
                   <p style="margin: 5px 0;"><strong>Rôle proposé:</strong> ${roleConfig.label}</p>
@@ -760,7 +760,7 @@ export async function resendInvitation(
                 </p>
               </div>
               <div class="footer">
-                <p>© ${new Date().getFullYear()} Dousell Immo - Gestion Locative Intelligente</p>
+                <p>© ${new Date().getFullYear()} Dousel - Gestion Locative Intelligente</p>
               </div>
             </div>
           </body>
@@ -769,9 +769,9 @@ export async function resendInvitation(
 
       await sendEmail({
         to: invitation.email,
-        subject: `Rappel - Invitation à rejoindre ${team?.name || "l'équipe"} sur Dousell Immo`,
+        subject: `Rappel - Invitation à rejoindre ${team?.name || "l'équipe"} sur Dousel`,
         html: emailHtml,
-        fromName: "Dousell Immo",
+        fromName: "Dousel",
       });
     } catch (emailError) {
       console.error("Erreur envoi email rappel invitation:", emailError);

@@ -115,7 +115,7 @@ export async function upgradeToProAction(formData: UpgradeFormData) {
 
     await sendEmail({
       to: user.email!,
-      subject: "Bienvenue dans Dousell Pro ! Votre essai gratuit est activé",
+      subject: "Bienvenue dans Dousel Pro ! Votre essai gratuit est activé",
       html: generateWelcomeProEmailHtml(userName, companyName, trialEndFormatted),
     });
   } catch (emailError) {
@@ -147,7 +147,7 @@ function generateWelcomeProEmailHtml(userName: string, companyName: string, tria
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bienvenue dans Dousell Pro</title>
+  <title>Bienvenue dans Dousel Pro</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0a0a0a; padding: 40px 20px;">
@@ -158,7 +158,7 @@ function generateWelcomeProEmailHtml(userName: string, companyName: string, tria
           <tr>
             <td style="padding: 40px 40px 20px; text-align: center;">
               <div style="font-size: 32px; font-weight: 700; color: #F4C430; margin-bottom: 8px;">
-                Dousell Pro
+                Dousel Pro
               </div>
               <div style="width: 60px; height: 4px; background: linear-gradient(90deg, #F4C430, #d4a820); margin: 0 auto; border-radius: 2px;"></div>
             </td>

@@ -63,7 +63,7 @@ export const PaymentReminderEmail = ({
                         </Section>
 
                         <Section style={buttonAction}>
-                            <Button style={button} href="https://dousell-immo.app/locataire">
+                            <Button style={button} href="https://dousel.com/locataire">
                                 Régulariser mon paiement
                             </Button>
                         </Section>

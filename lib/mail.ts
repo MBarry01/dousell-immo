@@ -38,7 +38,7 @@ export async function sendEmail({
   subject,
   react,
   html,
-  fromName = "Dousell Immo",
+  fromName = "Dousel",
   user_id = null,
   attachments,
 }: SendEmailOptions) {

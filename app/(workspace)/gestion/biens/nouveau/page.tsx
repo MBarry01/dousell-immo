@@ -4,7 +4,7 @@ import { hasTeamPermission } from "@/lib/team-permissions.server";
 import { NouveauBienClient } from "./nouveau-client";
 
 export const metadata = {
-  title: "Ajouter un bien | Gestion - Dousell Immo",
+  title: "Ajouter un bien | Gestion - Dousel",
   description: "Créer une nouvelle annonce immobilière pour votre équipe",
 };
 

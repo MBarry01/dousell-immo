@@ -34,7 +34,7 @@ async function testVisitRequest() {
                 availability: "En semaine après 17h",
                 message: "Bonjour, je voudrais visiter le terrain à Diamniadio dès que possible.",
                 teamName: "Doussel Immo",
-                adminUrl: "https://dousell-immo.app/admin/visits/test-id",
+                adminUrl: "https://dousel.com/admin/visits/test-id",
             }),
         });
 

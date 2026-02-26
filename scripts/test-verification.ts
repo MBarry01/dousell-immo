@@ -29,7 +29,7 @@ async function testVerification() {
             subject: "👋 Bienvenue ! Confirmez votre adresse email",
             react: React.createElement(VerificationEmail, {
                 userName: "Barry",
-                verificationUrl: "https://dousell-immo.app/auth/callback?token_hash=test_token_123&type=email&next=/",
+                verificationUrl: "https://dousel.com/auth/callback?token_hash=test_token_123&type=email&next=/",
                 teamName: "Doussel Immo",
             }),
         });

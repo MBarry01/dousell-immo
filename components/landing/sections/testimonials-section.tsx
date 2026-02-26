@@ -10,7 +10,7 @@ const testimonials = [
     location: "Dakar, Sénégal",
     image: null,
     rating: 5,
-    text: "Dousell Immo a complètement transformé ma façon de gérer mes 12 appartements à Dakar. Je gagne au moins 15 heures par semaine ! L'interface est intuitive et le support client est exceptionnel. Je recommande vivement.",
+    text: "Dousel a complètement transformé ma façon de gérer mes 12 appartements à Dakar. Je gagne au moins 15 heures par semaine ! L'interface est intuitive et le support client est exceptionnel. Je recommande vivement.",
   },
   {
     name: "Fatou Sall",
@@ -26,7 +26,7 @@ const testimonials = [
     location: "Paris, France",
     image: null,
     rating: 5,
-    text: "Je gère mes biens au Sénégal depuis la France grâce à Dousell Immo. Les rapports financiers automatiques et la messagerie intégrée me permettent de suivre tout en temps réel. La tranquillité d'esprit n'a pas de prix !",
+    text: "Je gère mes biens au Sénégal depuis la France grâce à Dousel. Les rapports financiers automatiques et la messagerie intégrée me permettent de suivre tout en temps réel. La tranquillité d'esprit n'a pas de prix !",
   },
   {
     name: "Aïssatou Ndiaye",
@@ -34,7 +34,7 @@ const testimonials = [
     location: "Thiès, Sénégal",
     image: null,
     rating: 5,
-    text: "Nous gérons plus de 50 biens avec Dousell Immo. Le système de permissions multi-utilisateurs est parfait pour notre équipe. Nos clients apprécient particulièrement la vitrine en ligne pour leurs annonces.",
+    text: "Nous gérons plus de 50 biens avec Dousel. Le système de permissions multi-utilisateurs est parfait pour notre équipe. Nos clients apprécient particulièrement la vitrine en ligne pour leurs annonces.",
   },
   {
     name: "Moussa Sy",
@@ -50,7 +50,7 @@ const testimonials = [
     location: "Dakar, Sénégal",
     image: null,
     rating: 5,
-    text: "J'utilise Dousell Immo depuis 6 mois et je ne peux plus m'en passer. La comptabilité intégrée me permet de suivre précisément ma rentabilité. L'export PDF pour mon comptable est un vrai plus.",
+    text: "J'utilise Dousel depuis 6 mois et je ne peux plus m'en passer. La comptabilité intégrée me permet de suivre précisément ma rentabilité. L'export PDF pour mon comptable est un vrai plus.",
   },
 ];
 

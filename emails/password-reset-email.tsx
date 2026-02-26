@@ -23,7 +23,7 @@ interface PasswordResetEmailProps {
  */
 export function PasswordResetEmail({
     userName = "Jean Dupont",
-    resetUrl = "https://dousell-immo.app/auth/reset-password",
+    resetUrl = "https://dousel.com/auth/reset-password",
     teamName = "Doussel Immo",
 }: PasswordResetEmailProps) {
     return (

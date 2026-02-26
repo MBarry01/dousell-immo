@@ -23,7 +23,7 @@ interface VerificationEmailProps {
  */
 export function VerificationEmail({
   userName = "Jean Dupont",
-  verificationUrl = "https://dousell-immo.app/auth/confirm",
+  verificationUrl = "https://dousel.com/auth/confirm",
   teamName = "Doussel Immo",
 }: VerificationEmailProps) {
   return (

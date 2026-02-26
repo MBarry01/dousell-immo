@@ -44,7 +44,7 @@ async function checkPasswordHIBP(password: string): Promise<HIBPResponse> {
       `https://api.pwnedpasswords.com/range/${prefix}`,
       {
         headers: {
-          "User-Agent": "Dousell-Immo-App",
+          "User-Agent": "Dousel-Immo-App",
         },
       }
     );

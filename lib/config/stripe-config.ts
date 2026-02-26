@@ -1,4 +1,4 @@
-// Dousell Immo - Stripe Connect Configuration
+// Dousel - Stripe Connect Configuration
 
 export const CONNECT_CONFIG = {
     // Commission Platform (1% by default, adjust per business needs)

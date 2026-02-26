@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Build success and cancel URLs
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dousel.com';
         const successUrl = `${baseUrl}/locataire/paiement-succes?session_id={CHECKOUT_SESSION_ID}`;
         const cancelUrl = `${baseUrl}/locataire`;
 

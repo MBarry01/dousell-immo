@@ -1,5 +1,5 @@
 /**
- * Pattern Cache-Aside pour Dousell Immo
+ * Pattern Cache-Aside pour Dousel
  *
  * Stratégie :
  * 1. Lecture cache (Redis) - Fast (5ms)
@@ -61,7 +61,7 @@ export async function getOrSetCache<T>(
 ): Promise<T> {
   const {
     ttl = 3600,
-    namespace = 'dousell',
+    namespace = 'dousel',
     bypassCache = false,
     debug = process.env.NODE_ENV === 'development',
   } = options;
@@ -143,7 +143,7 @@ export async function getOrSetCache<T>(
  * - `invalidateCache('properties:*')` → Supprime toutes les clés properties
  * - `invalidateCache('property_detail:123')` → Supprime une clé spécifique
  */
-export async function invalidateCache(pattern: string, namespace = 'dousell'): Promise<void> {
+export async function invalidateCache(pattern: string, namespace = 'dousel'): Promise<void> {
   const fullPattern = `${namespace}:${pattern}`;
 
   try {
@@ -174,7 +174,7 @@ export async function invalidateCache(pattern: string, namespace = 'dousell'): P
  */
 export async function invalidateCacheBatch(
   keys: string[],
-  namespace = 'dousell'
+  namespace = 'dousel'
 ): Promise<void> {
   const fullKeys = keys.map((key) => `${namespace}:${key}`);
 

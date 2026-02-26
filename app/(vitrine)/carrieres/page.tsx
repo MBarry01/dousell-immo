@@ -109,7 +109,7 @@ export default function CarrieresPage() {
             Construisons ensemble l&apos;immobilier de demain
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-white/70 sm:text-xl">
-            Dousell Immo recrute des talents passionnés pour révolutionner le marché immobilier sénégalais. Rejoignez une équipe ambitieuse et innovante.
+            Dousel recrute des talents passionnés pour révolutionner le marché immobilier sénégalais. Rejoignez une équipe ambitieuse et innovante.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <a
@@ -140,7 +140,7 @@ export default function CarrieresPage() {
       >
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-white sm:text-3xl">
-            Pourquoi rejoindre Dousell ?
+            Pourquoi rejoindre Dousel ?
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-white/60">
             Plus qu&apos;un emploi, une aventure entrepreneuriale au cœur de l&apos;innovation immobilière.

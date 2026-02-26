@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Mentions Légales · Dousell Immo",
-  description: "Centre légal de Dousell Immo : Mentions légales, CGU et Politique de confidentialité",
+  title: "Mentions Légales · Dousel",
+  description: "Centre légal de Dousel : Mentions légales, CGU et Politique de confidentialité",
 };
 
 export default function LegalHubPage() {
@@ -21,7 +21,7 @@ export default function LegalHubPage() {
       <div className="space-y-4 text-center mb-12">
         <h1 className="text-4xl font-bold">Centre Légal</h1>
         <p className="text-white/60">
-          Retrouvez ici toutes les informations légales concernant Dousell Immo
+          Retrouvez ici toutes les informations légales concernant Dousel
         </p>
       </div>
 
@@ -62,7 +62,7 @@ export default function LegalHubPage() {
             <div>
               <h3 className="text-lg font-medium text-white mb-2">Éditeur</h3>
               <ul className="space-y-1 text-sm text-white/70 list-none pl-0">
-                <li><strong>Raison sociale :</strong> Dousell Immo</li>
+                <li><strong>Raison sociale :</strong> Dousel</li>
                 <li><strong>Siège social :</strong> Sacré-Cœur 3, VDN, Dakar</li>
                 <li><strong>Téléphone :</strong> +221 33 860 00 00</li>
                 <li><strong>Email :</strong> contact@dousell.immo</li>

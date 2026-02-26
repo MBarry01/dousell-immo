@@ -58,14 +58,14 @@ export async function generateMetadata({
   }).format(property.price);
 
   // Titre: "{Titre du Bien} - {Prix} | Doussel Immo"
-  const title = `${property.title} - ${formattedPrice} FCFA | Dousell Immo`;
+  const title = `${property.title} - ${formattedPrice} FCFA | Dousel`;
 
   // Description optimisée pour le SEO
   const description = property.description.length > 160
     ? property.description.substring(0, 157) + "..."
     : property.description;
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousel.com";
   const propertyUrl = `${baseUrl}/biens/${property.id}`;
 
   return {
@@ -110,7 +110,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
     getPropertyReviewStats(property.id),
   ]);
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousel.com";
   const shareUrl = `${baseUrl}/biens/${property.id}`;
 
   return (

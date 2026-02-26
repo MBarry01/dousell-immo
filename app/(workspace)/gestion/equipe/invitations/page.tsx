@@ -10,7 +10,7 @@ import { InviteMemberDialog } from "../components/InviteMemberDialog";
 import { CancelInvitationButton } from "./CancelInvitationButton";
 
 export const metadata = {
-  title: "Invitations | Équipe - Dousell Immo",
+  title: "Invitations | Équipe - Dousel",
   description: "Gérez les invitations en attente",
 };
 

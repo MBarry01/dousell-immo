@@ -30,10 +30,10 @@ export async function generateMetadata({
         maximumFractionDigits: 0,
     }).format(property.price);
 
-    const title = `${property.title} - ${formattedPrice} FCFA | Dousell Immo`;
+    const title = `${property.title} - ${formattedPrice} FCFA | Dousel`;
     const description = `${property.details.type} à ${property.transaction === "location" ? "louer" : "vendre"} à ${property.location.city} - ${formattedPrice} FCFA${property.transaction === "location" ? "/mois" : ""} | Annonce partenaire via ${property.source_site || "nos partenaires"}`;
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousel.com";
 
     return {
         title,

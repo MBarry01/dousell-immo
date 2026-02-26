@@ -86,7 +86,7 @@ export async function requestNewTenantLink(email: string) {
 
         await sendEmail({
           to: normalizedEmail,
-          subject: "Nouveau lien d'accès - Dousell Immo",
+          subject: "Nouveau lien d'accès - Dousel",
           html: `
             <h2>Bonjour ${lease.tenant_name},</h2>
             <p>Vous avez demandé un nouveau lien pour accéder à votre espace locataire.</p>
@@ -99,7 +99,7 @@ export async function requestNewTenantLink(email: string) {
             <p style="color: #666; font-size: 14px;">Ce lien est valable 7 jours.</p>
             <p style="color: #666; font-size: 14px;">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
             <hr />
-            <p style="color: #999; font-size: 12px;">Dousell Immo - Gestion Locative</p>
+            <p style="color: #999; font-size: 12px;">Dousel - Gestion Locative</p>
           `,
         });
       } else {
@@ -126,7 +126,7 @@ export async function requestNewTenantLink(email: string) {
 
         await sendEmail({
           to: normalizedEmail,
-          subject: "Nouveaux liens d'accès - Dousell Immo",
+          subject: "Nouveaux liens d'accès - Dousel",
           html: `
             <h2>Bonjour ${leases[0].tenant_name},</h2>
             <p>Vous avez demandé de nouveaux liens pour accéder à vos espaces locataires.</p>
@@ -135,7 +135,7 @@ export async function requestNewTenantLink(email: string) {
             <p style="color: #666; font-size: 14px;">Ces liens sont valables 7 jours.</p>
             <p style="color: #666; font-size: 14px;">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
             <hr />
-            <p style="color: #999; font-size: 12px;">Dousell Immo - Gestion Locative</p>
+            <p style="color: #999; font-size: 12px;">Dousel - Gestion Locative</p>
           `,
         });
       }

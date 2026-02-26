@@ -1,6 +1,6 @@
 /**
  * Types pour le système de gestion des équipes
- * Dousell Immo - Gestion Locative SaaS
+ * Dousel - Gestion Locative SaaS
  */
 
 // =====================================================

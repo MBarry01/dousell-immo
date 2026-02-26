@@ -22,7 +22,7 @@ async function setup() {
     try {
         // 1. Create Starter Product
         const starterProduct = await stripe.products.create({
-            name: 'Dousell Starter',
+            name: 'Dousel Starter',
             description: 'Gestion locative jusqu\'à 10 biens',
         });
 
@@ -37,7 +37,7 @@ async function setup() {
 
         // 2. Create Pro Product
         const proProduct = await stripe.products.create({
-            name: 'Dousell Pro',
+            name: 'Dousel Pro',
             description: 'Gestion locative - Biens illimités',
         });
 

@@ -84,7 +84,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
         /*
         // Palette dorée luxe
         const goldColors = [
-            '#F4C430', // Or Dousell (primary)
+            '#F4C430', // Or Dousel (primary)
             '#FFD700', // Or pur
             '#DAA520', // Goldenrod
             '#B8860B', // Dark goldenrod

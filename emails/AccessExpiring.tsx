@@ -31,7 +31,7 @@ export function AccessExpiring({
   expiresAt = "25 Février 2026 à 18:00",
   hoursRemaining = 1,
   teamName = "Doussel Immo",
-  requestUrl = "https://dousell-immo.app/gestion",
+  requestUrl = "https://dousel.com/gestion",
 }: AccessExpiringProps) {
   return (
     <Html>

@@ -1,8 +1,8 @@
 import { createClient } from "@/utils/supabase/server";
 import { Suspense } from "react";
-import DousellNavbarClient, { DousellNavbarClientProps } from "./DousellNavbarClient";
+import DouselNavbarClient, { DouselNavbarClientProps } from "./DouselNavbarClient";
 
-interface DousellNavbarProps {
+interface DouselNavbarProps {
   ctaOverride?: {
     text: string;
     href: string;
@@ -17,7 +17,7 @@ interface DousellNavbarProps {
  * - Visiteur mode tenant: "Voir les annonces" → / (détecté côté client via URL)
  * - Utilisateur connecté: "Mon Espace" → /gestion
  */
-export default async function DousellNavbar({ ctaOverride }: DousellNavbarProps) {
+export default async function DouselNavbar({ ctaOverride }: DouselNavbarProps) {
   const supabase = await createClient();
 
   // Vérification rapide de la session (très léger)
@@ -27,7 +27,7 @@ export default async function DousellNavbar({ ctaOverride }: DousellNavbarProps)
 
   return (
     <Suspense>
-      <DousellNavbarClient
+      <DouselNavbarClient
         isLoggedIn={isLoggedIn}
         ctaOverride={ctaOverride}
       />

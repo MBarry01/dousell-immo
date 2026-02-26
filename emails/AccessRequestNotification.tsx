@@ -31,7 +31,7 @@ export function AccessRequestNotification({
   permissionLabel = "Édition des baux",
   reason = "Je dois corriger une erreur de saisie dans le bail",
   teamName = "Mon Équipe",
-  reviewUrl = "https://dousell-immo.app/gestion/access-control",
+  reviewUrl = "https://dousel.com/gestion/access-control",
 }: AccessRequestNotificationProps) {
   return (
     <Html>

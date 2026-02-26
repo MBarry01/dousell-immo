@@ -1,7 +1,7 @@
 {
   "id": "/gestion",
-  "name": "Dousell Immo",
-  "short_name": "Dousell",
+  "name": "Dousel - Gestion Locative",
+  "short_name": "Dousel",
   "description": "L'immobilier de confiance à Dakar et au Sénégal.",
   "start_url": "/gestion?source=pwa",
   "scope": "/",

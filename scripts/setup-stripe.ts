@@ -79,7 +79,7 @@ async function main() {
         if (!product) {
             product = await stripe.products.create({
                 name: config.name,
-                description: `Dousell Immo ${config.name}`,
+                description: `Dousel ${config.name}`,
             });
             console.log(`   ✅ Created Product: ${product.id}`);
         } else {

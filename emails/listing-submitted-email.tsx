@@ -31,7 +31,7 @@ export function ListingSubmittedEmail({
   propertyPrice = 750000,
   ownerEmail = "client@exemple.com",
   serviceType = "Standard",
-  adminUrl = "https://dousell-immo.app/admin/listings/1",
+  adminUrl = "https://dousel.com/admin/listings/1",
   teamName = "Doussel Immo",
 }: ListingSubmittedEmailProps) {
   const formattedPrice = new Intl.NumberFormat("fr-SN", {

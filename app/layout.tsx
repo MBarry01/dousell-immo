@@ -26,10 +26,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://dousell-immo.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://dousel.com"),
   title: {
-    default: "Dousell Immo | L'immobilier de confiance au Sénégal",
-    template: "%s | Dousell Immo",
+    default: "Dousel | L'immobilier de confiance au Sénégal",
+    template: "%s | Dousel",
   },
   description:
     "Villas, terrains et appartements de luxe à Dakar et sur la Petite Côte. Une expérience immobilière transparente et moderne.",
@@ -37,22 +37,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "fr_SN",
-    url: "https://dousell-immo.app",
-    siteName: "Dousell Immo",
-    title: "Dousell Immo | L'immobilier de confiance au Sénégal",
+    url: "https://dousel.com",
+    siteName: "Dousel",
+    title: "Dousel | L'immobilier de confiance au Sénégal",
     description: "Villas, terrains et appartements de luxe à Dakar et sur la Petite Côte.",
     images: [
       {
         url: "/monument.png", // Image par défaut (Monument de la Renaissance)
         width: 1200,
         height: 630,
-        alt: "Dousell Immo - Immobilier Sénégal",
+        alt: "Dousel - Immobilier Sénégal",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dousell Immo | L'immobilier de confiance au Sénégal",
+    title: "Dousel | L'immobilier de confiance au Sénégal",
     description: "Villas, terrains et appartements de luxe à Dakar et sur la Petite Côte.",
     images: ["/monument.png"],
     creator: "@dousell_immo",
@@ -60,13 +60,13 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Dousell Immo",
+    title: "Dousel",
   },
   other: {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
-    "apple-mobile-web-app-title": "Dousell Immo",
+    "apple-mobile-web-app-title": "Dousel",
   },
   icons: {
     icon: [
@@ -169,10 +169,10 @@ export default async function RootLayout({
               "@graph": [
                 {
                   "@type": "Organization",
-                  "@id": "https://dousell-immo.app/#organization",
-                  "name": "Dousell Immo",
-                  "url": "https://dousell-immo.app",
-                  "logo": "https://dousell-immo.app/icons/icon-512.png",
+                  "@id": "https://dousel.com/#organization",
+                  "name": "Dousel",
+                  "url": "https://dousel.com",
+                  "logo": "https://dousel.com/icons/icon-512.png",
                   "description": "Plateforme immobilière de référence au Sénégal pour l'achat, la vente et la gestion locative.",
                   "sameAs": [
                     "https://facebook.com",
@@ -182,10 +182,10 @@ export default async function RootLayout({
                 },
                 {
                   "@type": "RealEstateAgent",
-                  "@id": "https://dousell-immo.app/#localbusiness",
-                  "url": "https://dousell-immo.app",
-                  "name": "Dousell Immo",
-                  "image": "https://dousell-immo.app/monument.png",
+                  "@id": "https://dousel.com/#localbusiness",
+                  "url": "https://dousel.com",
+                  "name": "Dousel",
+                  "image": "https://dousel.com/monument.png",
                   "areaServed": [
                     { "@type": "City", "name": "Dakar" },
                     { "@type": "City", "name": "Saly" },

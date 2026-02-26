@@ -34,7 +34,7 @@ async function testAccessApproved() {
                 reviewerName: "M. Barry (Admin)",
                 reviewNotes: "Accès accordé pour la session de cet après-midi. N'oubliez pas de sauvegarder vos modifications.",
                 teamName: "Doussel Immo",
-                dashboardUrl: "https://dousell-immo.app/gestion",
+                dashboardUrl: "https://dousel.com/gestion",
             }),
         });
 

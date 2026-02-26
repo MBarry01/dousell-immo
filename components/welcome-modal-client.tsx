@@ -175,7 +175,7 @@ export function WelcomeModalContent() {
               />
               <CldImageSafe
                 src="doussel/static/modals/banner-login1"
-                alt="Bienvenue sur Dousell Immo"
+                alt="Bienvenue sur Dousel"
                 fill
                 className="object-cover object-center"
                 priority

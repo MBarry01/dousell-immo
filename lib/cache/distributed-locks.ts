@@ -1,5 +1,5 @@
 /**
- * Verrous Distribués (Distributed Locks) pour Dousell Immo
+ * Verrous Distribués (Distributed Locks) pour Dousel
  *
  * Cas d'usage :
  * - Paiement de loyer (éviter double paiement)

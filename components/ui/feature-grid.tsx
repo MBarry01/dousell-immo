@@ -71,7 +71,7 @@ interface FeatureGridProps {
  * @example
  * ```tsx
  * <FeatureGrid
- *   heading="Pourquoi Dousell ?"
+ *   heading="Pourquoi Dousel ?"
  *   features={[
  *     { icon: "shield", title: "100% Sécurisé", description: "..." },
  *     { icon: "badgeCheck", title: "Biens Vérifiés", description: "..." },

@@ -1,5 +1,5 @@
 /**
- * Données pour la landing page Dousell Immo
+ * Données pour la landing page Dousel
  * Design System: "Luxe & Teranga"
  */
 
@@ -38,7 +38,7 @@ export const heroData = {
 // METRICS SECTION
 // ===========================================
 export const metricsData = {
-  heading: "Dousell en chiffres",
+  heading: "Dousel en chiffres",
   caption:
     "Des milliers de clients nous font confiance pour leur projet immobilier au Sénégal.",
   metrics: [
@@ -53,7 +53,7 @@ export const metricsData = {
 // FEATURES SECTION
 // ===========================================
 export const featuresData = {
-  heading: "Pourquoi choisir Dousell ?",
+  heading: "Pourquoi choisir Dousel ?",
   caption:
     "Une plateforme pensée pour simplifier votre investissement immobilier au Sénégal.",
   features: [
@@ -102,13 +102,13 @@ export const featuresData = {
 export const testimonialsData = {
   heading: "Ce que disent nos clients",
   caption:
-    "Découvrez les témoignages de ceux qui ont fait confiance à Dousell pour leur projet immobilier.",
+    "Découvrez les témoignages de ceux qui ont fait confiance à Dousel pour leur projet immobilier.",
   testimonials: [
     {
       rating: 5,
       title: "Achat sans stress",
       content:
-        "J'ai trouvé ma villa à Saly en moins de 2 semaines. L'équipe Dousell m'a accompagné de A à Z. Je recommande vivement !",
+        "J'ai trouvé ma villa à Saly en moins de 2 semaines. L'équipe Dousel m'a accompagné de A à Z. Je recommande vivement !",
       name: "Aminata D.",
       role: "Propriétaire à Saly",
     },
@@ -116,7 +116,7 @@ export const testimonialsData = {
       rating: 5,
       title: "Investissement réussi",
       content:
-        "En tant que membre de la diaspora, j'avais des craintes pour investir à distance. Dousell a tout géré de manière transparente.",
+        "En tant que membre de la diaspora, j'avais des craintes pour investir à distance. Dousel a tout géré de manière transparente.",
       name: "Mamadou S.",
       role: "Investisseur - France",
     },
@@ -148,7 +148,7 @@ export const testimonialsData = {
       rating: 5,
       title: "Confiance totale",
       content:
-        "Après une mauvaise expérience ailleurs, Dousell m'a redonné confiance. Tout est vérifié et transparent.",
+        "Après une mauvaise expérience ailleurs, Dousel m'a redonné confiance. Tout est vérifié et transparent.",
       name: "Ibrahima G.",
       role: "Investisseur - USA",
     },
@@ -162,7 +162,7 @@ export const ctaData = {
   label: "Prêt à investir ?",
   heading: "Trouvez votre bien idéal au Sénégal",
   caption:
-    "Rejoignez des milliers de clients satisfaits et réalisez votre projet immobilier avec Dousell.",
+    "Rejoignez des milliers de clients satisfaits et réalisez votre projet immobilier avec Dousel.",
   primaryButtonText: "Voir les biens disponibles",
   primaryButtonHref: "/recherche",
   secondaryButtonText: "Nous contacter",
@@ -182,14 +182,14 @@ export const faqData = {
     "Tout ce que vous devez savoir avant d'investir dans l'immobilier au Sénégal.",
   items: [
     {
-      question: "Comment sont vérifiés les biens sur Dousell ?",
+      question: "Comment sont vérifiés les biens sur Dousel ?",
       answer:
         "Chaque propriété passe par un processus de vérification rigoureux. Nous vérifions les titres fonciers, l'authenticité des photos, et effectuons des visites terrain. Seuls les biens conformes sont publiés sur notre plateforme.",
     },
     {
       question: "Puis-je acheter depuis l'étranger ?",
       answer:
-        "Absolument ! Dousell est conçu pour la diaspora sénégalaise et les investisseurs internationaux. Nous proposons des visites virtuelles, un accompagnement à distance, et des paiements sécurisés internationaux.",
+        "Absolument ! Dousel est conçu pour la diaspora sénégalaise et les investisseurs internationaux. Nous proposons des visites virtuelles, un accompagnement à distance, et des paiements sécurisés internationaux.",
     },
     {
       question: "Quels sont les frais de service ?",

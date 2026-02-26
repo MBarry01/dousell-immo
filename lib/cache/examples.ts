@@ -1,5 +1,5 @@
 /**
- * 📚 Exemples d'utilisation du Cache pour Dousell Immo
+ * 📚 Exemples d'utilisation du Cache pour Dousel
  *
  * Ce fichier contient des exemples CONCRETS pour :
  * 1. Liste des propriétés (lecture fréquente)

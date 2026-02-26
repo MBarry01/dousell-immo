@@ -24,7 +24,7 @@ interface ActivationApprovedEmailProps {
  */
 export const ActivationApprovedEmail = ({
     firstName = "Utilisateur",
-    loginUrl = "https://dousell-immo.app/compte",
+    loginUrl = "https://dousel.com/compte",
     teamName = "Doussel Immo",
 }: ActivationApprovedEmailProps) => {
     return (

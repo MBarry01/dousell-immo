@@ -22,7 +22,7 @@ const ownerStories: Story[] = [
         id: 1,
         badge: "GESTION AUTOMATISÉE",
         badgeColor: "bg-emerald-400/20 text-emerald-300",
-        quote: "Dousell a complètement automatisé ma gestion. Je ne passe plus mes week-ends à gérer la paperasse.",
+        quote: "Dousel a complètement automatisé ma gestion. Je ne passe plus mes week-ends à gérer la paperasse.",
         author: "Amadou Sow",
         role: "Propriétaire Multi-biens",
         image: "doussel/static/images/amadou-sow",

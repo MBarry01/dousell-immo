@@ -453,7 +453,7 @@ export const EstimationWizard = () => {
                     {...register("consent")}
                     className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent"
                   />
-                  J&apos;accepte d&apos;être contacté(e) par Dousell Immo pour
+                  J&apos;accepte d&apos;être contacté(e) par Dousel pour
                   finaliser mon estimation.
                 </label>
                 {errors.consent && (

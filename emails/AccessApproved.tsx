@@ -33,7 +33,7 @@ export function AccessApproved({
   reviewerName = "Marie Martin",
   reviewNotes,
   teamName = "Doussel Immo",
-  dashboardUrl = "https://dousell-immo.app/gestion",
+  dashboardUrl = "https://dousel.com/gestion",
 }: AccessApprovedProps) {
   return (
     <Html>

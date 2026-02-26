@@ -42,7 +42,7 @@ export default function EmailVerifiedPage() {
             Email vérifié avec succès !
           </h1>
           <p className="text-lg text-gray-400 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-            Votre compte Dousell Immo est maintenant actif
+            Votre compte Dousel est maintenant actif
           </p>
         </div>
 
@@ -64,7 +64,7 @@ export default function EmailVerifiedPage() {
         {/* Decoration */}
         <div className="pt-8 border-t border-gray-800 space-y-2 animate-in fade-in duration-700 delay-300">
           <p className="text-sm text-gray-500">
-            Bienvenue dans la communauté Dousell Immo
+            Bienvenue dans la communauté Dousel
           </p>
           <div className="flex items-center justify-center gap-1">
             <span className="text-primary text-2xl">✨</span>

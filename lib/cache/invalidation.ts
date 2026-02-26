@@ -1,5 +1,5 @@
 /**
- * Helpers d'invalidation de cache pour Dousell Immo
+ * Helpers d'invalidation de cache pour Dousel
  *
  * À utiliser dans toutes les Server Actions qui modifient des données
  *

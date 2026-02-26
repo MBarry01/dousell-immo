@@ -109,7 +109,7 @@ export async function POST(request: Request) {
         description,
       },
       store: {
-        name: "Dousell Immo",
+        name: "Dousel",
         tagline: "Votre partenaire immobilier à Dakar",
         phone: "+221 77 138 52 81", // Numéro mis à jour
         website_url: baseUrl,

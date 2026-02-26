@@ -34,7 +34,7 @@ export function WelcomePackEmail({
     monthlyAmount = "150 000",
     startDate = "01/01/2026",
     billingDay = 5,
-    inviteLink = "https://dousell-immo.com/invite/test",
+    inviteLink = "https://dousel.com/invite/test",
     documentsList = ["Contrat de bail", "Quittance 1 mois de loyer", "Reçu de caution"],
 
     ownerName = "M. Thiam",

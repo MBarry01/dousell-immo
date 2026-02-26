@@ -10,7 +10,7 @@ import { getTeamStats } from "./actions";
 import type { Team, TeamMember, TeamRole } from "@/types/team";
 
 export const metadata = {
-  title: "Équipe | Gestion Locative - Dousell Immo",
+  title: "Équipe | Gestion Locative - Dousel",
   description: "Gérez votre équipe et collaborateurs",
 };
 

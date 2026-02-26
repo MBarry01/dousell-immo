@@ -29,7 +29,7 @@ async function testPasswordReset() {
             subject: "🔒 Réinitialisation de votre mot de passe - Doussel Immo",
             react: React.createElement(PasswordResetEmail, {
                 userName: "Barry",
-                resetUrl: "https://dousell-immo.app/auth/choose-password?token=test-token-reset",
+                resetUrl: "https://dousel.com/auth/choose-password?token=test-token-reset",
                 teamName: "Doussel Immo",
             }),
         });

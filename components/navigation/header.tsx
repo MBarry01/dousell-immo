@@ -63,11 +63,11 @@ export const Header = () => {
           <Link
             href="/"
             className="flex items-center transition-opacity active:opacity-70 hover:opacity-80"
-            aria-label="Dousell Immo - Accueil"
+            aria-label="Dousel - Accueil"
           >
             <Image
               src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771989699/doussel/static/logos/logoWhite.png"
-              alt="Dousell Immo"
+              alt="Dousel"
               width={140}
               height={38}
               className={cn("h-7 w-auto transition-opacity", isSearchOpen && "opacity-0 invisible w-0")}
@@ -162,11 +162,11 @@ export const Header = () => {
           <Link
             href="/"
             className="flex items-center transition-opacity active:opacity-70 hover:opacity-80 shrink-0"
-            aria-label="Dousell Immo - Accueil"
+            aria-label="Dousel - Accueil"
           >
             <Image
               src="https://res.cloudinary.com/dkkirzpxe/image/upload/v1771989699/doussel/static/logos/logoWhite.png"
-              alt="Dousell Immo"
+              alt="Dousel"
               width={180}
               height={48}
               className="h-9 w-auto transition-transform hover:scale-105 lg:h-10"

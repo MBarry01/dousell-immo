@@ -149,7 +149,7 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
 
     // Footer
     const footerY = 50;
-    page.drawText("Doussel Immo - Dakar, Senegal - Support: +221 77 138 52 81 - Email: contact@doussel-immo.com", { x: margin, y: footerY, size: 8, font: regularFont, color: rgb(0, 0, 0) });
+    page.drawText("Doussel Immo - Dakar, Senegal - Support: +221 77 138 52 81 - Email: contact@dousel.com", { x: margin, y: footerY, size: 8, font: regularFont, color: rgb(0, 0, 0) });
 
     const pdfBytes = await pdfDoc.save();
     return Buffer.from(pdfBytes);

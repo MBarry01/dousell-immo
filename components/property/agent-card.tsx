@@ -55,7 +55,7 @@ export const AgentCard = ({ agent, owner, property, propertyId, propertyTitle }:
       : (agent?.photo || "");
 
   const displayDescription = hasTeam
-    ? "Agence immobilière enregistrée sur Dousell Immo"
+    ? "Agence immobilière enregistrée sur Dousel"
     : isAgentRole
       ? "Agent immobilier professionnel — accompagnement personnalisé"
       : hasOwner

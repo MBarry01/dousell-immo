@@ -140,7 +140,7 @@ function WebAppLayoutContent({
                                 src="/icons/icon-192.png"
                                 width={32}
                                 height={32}
-                                alt="Dousell Immo"
+                                alt="Dousel"
                                 className="rounded"
                             />
                         </Link>

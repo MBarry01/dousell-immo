@@ -16,7 +16,7 @@ export function VerificationSuccessToast() {
   useEffect(() => {
     if (verified === "true") {
       toast.success("Email vérifié avec succès !", {
-        description: "Votre compte est maintenant actif. Bienvenue sur Dousell Immo !",
+        description: "Votre compte est maintenant actif. Bienvenue sur Dousel !",
         duration: 5000,
       });
 

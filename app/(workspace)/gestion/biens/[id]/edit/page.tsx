@@ -9,7 +9,7 @@ type PageProps = {
 };
 
 export const metadata = {
-    title: "Modifier un bien | Gestion - Dousell Immo",
+    title: "Modifier un bien | Gestion - Dousel",
 };
 
 export default async function EditBienPage({ params }: PageProps) {

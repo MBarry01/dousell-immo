@@ -113,7 +113,7 @@ export function AcceptInvitationClient() {
 
       {/* Footer */}
       <p className="text-center text-slate-500 text-sm mt-6">
-        © {new Date().getFullYear()} Dousell Immo. Tous droits réservés.
+        © {new Date().getFullYear()} Dousel. Tous droits réservés.
       </p>
     </div>
   );

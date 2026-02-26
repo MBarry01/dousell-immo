@@ -87,7 +87,7 @@ export function WorkspaceHeader({ user, onMenuClick }: WorkspaceHeaderProps) {
               src="/icons/icon.svg"
               width={24}
               height={24}
-              alt="Dousell Immo"
+              alt="Dousel"
               className="rounded-sm"
             />
           </Link>

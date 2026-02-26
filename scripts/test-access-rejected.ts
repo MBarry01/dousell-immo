@@ -33,7 +33,7 @@ async function testAccessRejected() {
                 reviewerName: "Responsable Sécurité",
                 reviewNotes: "Cette permission nécessite une formation préalable ou une validation de niveau 2.",
                 teamName: "Doussel Immo",
-                contactUrl: "https://dousell-immo.app/gestion/equipe",
+                contactUrl: "https://dousel.com/gestion/equipe",
             }),
         });
 

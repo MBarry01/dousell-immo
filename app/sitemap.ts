@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
 import { slugify } from '@/lib/slugs';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.dousell-immo.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://dousel.com';
 
 export const revalidate = 3600; // Update sitemap every hour
 

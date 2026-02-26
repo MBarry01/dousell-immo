@@ -33,7 +33,7 @@ export default function VisitRequestEmail({
   availability = "Samedi matin",
   message = "Je suis très intéressé par cet appartement, disponible pour une visite rapide.",
   teamName = "Doussel Immo",
-  adminUrl = "https://dousell-immo.app/admin/visits",
+  adminUrl = "https://dousel.com/admin/visits",
 }: VisitRequestEmailProps) {
   return (
     <Html lang="fr">

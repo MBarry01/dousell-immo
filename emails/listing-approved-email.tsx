@@ -36,7 +36,7 @@ type ListingApprovedEmailProps = {
  */
 export function ListingApprovedEmail({
   propertyTitle = "Villa de Luxe aux Almadies",
-  propertyUrl = "https://dousell-immo.app/biens/1",
+  propertyUrl = "https://dousel.com/biens/1",
   isPaid = false,
   invoiceNumber,
   hasInvoice = false,

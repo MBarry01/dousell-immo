@@ -225,7 +225,7 @@ export default function ContactPage() {
             </p>
           </div>
           <p className="text-white/50 text-sm">
-            Un email de confirmation vous a été envoyé. Un conseiller Dousell vous contactera pour confirmer les détails.
+            Un email de confirmation vous a été envoyé. Un conseiller Dousel vous contactera pour confirmer les détails.
           </p>
 
           {confirmedAppointment.googleCalendarUrl && (
@@ -261,7 +261,7 @@ export default function ContactPage() {
         <p className="text-xs uppercase tracking-[0.3em] text-white/40">Contact</p>
         <h1 className="text-4xl font-semibold text-white">Nous contacter</h1>
         <p className="text-white/60 max-w-xl mx-auto">
-          Parlez directement à un expert Dousell pour vos projets immobiliers.
+          Parlez directement à un expert Dousel pour vos projets immobiliers.
         </p>
         <div className="flex flex-wrap justify-center gap-6 mt-6 text-sm text-white/70">
           <div className="flex items-center gap-2">
@@ -314,7 +314,7 @@ export default function ContactPage() {
               Laissez-nous vos coordonnées
             </h2>
             <p className="mt-2 text-white/60">
-              Un conseiller Dousell vous recontacte sous 30 minutes.
+              Un conseiller Dousel vous recontacte sous 30 minutes.
             </p>
           </div>
 
@@ -479,7 +479,7 @@ export default function ContactPage() {
 
           <div className="flex justify-center">
             <AppointmentScheduler
-              userName="Équipe Dousell"
+              userName="Équipe Dousel"
               userAvatar="/Logo.svg"
               meetingTitle={selectedMeetingType === "visite" ? "Visite immobilière" : "Consultation Immobilière"}
               meetingType={selectedMeetingMode === "online" ? "Visio (Google Meet)" : "Présentiel (Bureau Dakar)"}
@@ -491,7 +491,7 @@ export default function ContactPage() {
               onTimeSelect={(time) => console.log("Heure choisie:", time)}
               onConfirm={handleSchedulerConfirm}
               isSubmitting={isSchedulerSubmitting}
-              brandName="Dousell Agenda"
+              brandName="Dousel Agenda"
             />
           </div>
         </div>

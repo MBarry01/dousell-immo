@@ -388,10 +388,10 @@ export async function initializePayment(
       channels: ['wave-senegal', 'orange-money-senegal']
     },
     store: {
-      name: "Doussel Immo",
+      name: "Dousel",
       tagline: "Immobilier Dakar",
       website_url:
-        process.env.NEXT_PUBLIC_APP_URL || "https://doussel-immo.vercel.app",
+        process.env.NEXT_PUBLIC_APP_URL || "https://dousel.com",
     },
     custom_data: {
       property_id: propertyId,
@@ -454,7 +454,7 @@ export async function initializeRentalPayment(
   const baseUrl = getPayDunyaApiBaseUrl(config.mode);
   const url = `${baseUrl}/checkout-invoice/create`;
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://doussel-immo.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dousel.com";
   const callbackUrl =
     process.env.PAYDUNYA_CALLBACK_URL ||
     process.env.NGROK_CALLBACK_URL ||

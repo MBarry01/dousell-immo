@@ -27,7 +27,7 @@ type ListingRejectedEmailProps = {
 export function ListingRejectedEmail({
   propertyTitle = "Villa avec vue sur mer",
   rejectionReason = "Les photos sont de trop basse qualité et ne respectent pas nos standards de visibilité.",
-  editUrl = "https://dousell-immo.app/gestion/biens/edit/1",
+  editUrl = "https://dousel.com/gestion/biens/edit/1",
   teamName = "Doussel Immo",
 }: ListingRejectedEmailProps) {
   return (

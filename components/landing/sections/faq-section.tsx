@@ -15,7 +15,7 @@ const faqItems: FAQItem[] = [
     id: 1,
     question: "Comment fonctionne l'essai gratuit de 14 jours ?",
     answer:
-      "Vous pouvez tester toutes les fonctionnalités de Dousell Immo pendant 14 jours sans engagement. Aucune carte bancaire n'est requise lors de l'inscription. À la fin de l'essai, vous pouvez choisir le plan qui vous convient ou continuer gratuitement avec des fonctionnalités limitées.",
+      "Vous pouvez tester toutes les fonctionnalités de Dousel pendant 14 jours sans engagement. Aucune carte bancaire n'est requise lors de l'inscription. À la fin de l'essai, vous pouvez choisir le plan qui vous convient ou continuer gratuitement avec des fonctionnalités limitées.",
   },
   {
     id: 2,

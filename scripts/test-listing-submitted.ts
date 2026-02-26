@@ -32,7 +32,7 @@ async function testListingSubmitted() {
                 propertyPrice: 120000000,
                 ownerEmail: "test-proprietaire@gmail.com",
                 serviceType: "Pack Premium",
-                adminUrl: "https://dousell-immo.app/admin/listings/test-id",
+                adminUrl: "https://dousel.com/admin/listings/test-id",
                 teamName: "Doussel Immo",
             }),
         });

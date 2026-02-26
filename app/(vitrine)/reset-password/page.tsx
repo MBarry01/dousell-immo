@@ -89,7 +89,7 @@ function ResetPasswordRequestContent() {
                             <Link href="/" className="inline-block mb-6 lg:hidden">
                                 <Image
                                     src="/Logo.svg"
-                                    alt="Dousell Immo"
+                                    alt="Dousel"
                                     width={160}
                                     height={48}
                                     className="h-10 w-auto"
@@ -187,7 +187,7 @@ function ResetPasswordRequestContent() {
                     <div className="mb-12 p-5 rounded-[2.5rem] bg-white/5 backdrop-blur-3xl border border-white/10 shadow-2xl animate-in zoom-in-95 duration-700">
                         <Image
                             src="/Logo.svg"
-                            alt="Dousell Immo"
+                            alt="Dousel"
                             width={240}
                             height={72}
                             className="h-20 w-auto"

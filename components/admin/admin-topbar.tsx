@@ -74,7 +74,7 @@ export function AdminTopbar() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
                   <Home className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-lg font-semibold text-white">Dousell Immo</span>
+                <span className="text-lg font-semibold text-white">Dousel</span>
               </Link>
             </div>
             <nav className="flex-1 space-y-1 px-4 py-6">

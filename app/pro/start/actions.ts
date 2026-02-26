@@ -75,7 +75,7 @@ export async function submitOnboarding(formData: OnboardingData, existingUserId?
                     phone: formData.phone || null,
                     team_size: formData.teamSize || null,
                 },
-                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/gestion`,
+                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://dousel.com'}/auth/callback?next=/gestion`,
             },
         });
 

@@ -112,7 +112,7 @@ export function MaintenanceUpdateEmail({
                     <Section style={footer}>
                         <Text style={footerSignature}>
                             Cordialement,<br />
-                            <strong>L'équipe de Gestion Dousell</strong>
+                            <strong>L'équipe de Gestion Dousel</strong>
                         </Text>
 
                         <Section style={footerBottom}>

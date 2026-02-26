@@ -117,7 +117,7 @@ interface MetricCardProps {
 
 /**
  * Carte métrique avec compteur animé
- * Style Dousell - Design System "Luxe & Teranga"
+ * Style Dousel - Design System "Luxe & Teranga"
  */
 export const MetricCard = ({
   value,

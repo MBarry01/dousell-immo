@@ -1,6 +1,6 @@
 /**
  * Système de permissions pour les équipes
- * Dousell Immo - Gestion Locative SaaS
+ * Dousel - Gestion Locative SaaS
  * 
  * Ce fichier contient uniquement les constantes et fonctions pures 
  * qui peuvent être utilisées côté client ET serveur.

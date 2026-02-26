@@ -45,10 +45,10 @@ interface FAQItem {
 
 export function RealEstateJsonLd({
     type = 'RealEstateAgent',
-    name = 'Dousell Immo',
+    name = 'Dousel',
     description = "Plateforme immobilière de confiance au Sénégal. Trouvez villas, appartements et terrains à Dakar et sur la Petite Côte.",
-    url = 'https://dousell-immo.app',
-    logo = 'https://dousell-immo.app/icons/icon-512.png',
+    url = 'https://dousel.com',
+    logo = 'https://dousel.com/icons/icon-512.png',
     address = {
         addressLocality: 'Dakar',
         addressCountry: 'SN',
@@ -135,14 +135,14 @@ export function LandingPageJsonLd() {
     const websiteSchema = {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        name: 'Dousell Immo',
-        url: 'https://dousell-immo.app',
+        name: 'Dousel',
+        url: 'https://dousel.com',
         description: "Plateforme immobilière de confiance au Sénégal. Gestion locative et annonces immobilières.",
         potentialAction: {
             '@type': 'SearchAction',
             target: {
                 '@type': 'EntryPoint',
-                urlTemplate: 'https://dousell-immo.app/recherche?q={search_term_string}',
+                urlTemplate: 'https://dousel.com/recherche?q={search_term_string}',
             },
             'query-input': 'required name=search_term_string',
         },
@@ -151,10 +151,10 @@ export function LandingPageJsonLd() {
     const organizationSchema = {
         '@context': 'https://schema.org',
         '@type': 'RealEstateAgent',
-        name: 'Dousell Immo',
+        name: 'Dousel',
         description: "L'immobilier de confiance au Sénégal. Villas, terrains et appartements de luxe à Dakar et sur la Petite Côte.",
-        url: 'https://dousell-immo.app',
-        logo: 'https://dousell-immo.app/icons/icon-512.png',
+        url: 'https://dousel.com',
+        logo: 'https://dousel.com/icons/icon-512.png',
         address: {
             '@type': 'PostalAddress',
             addressLocality: 'Dakar',
@@ -176,7 +176,7 @@ export function LandingPageJsonLd() {
     const softwareSchema = {
         '@context': 'https://schema.org',
         '@type': 'SoftwareApplication',
-        name: 'Dousell Immo',
+        name: 'Dousel',
         applicationCategory: 'BusinessApplication',
         operatingSystem: 'Web, iOS, Android',
         offers: {
@@ -362,18 +362,18 @@ export function LocalBusinessJsonLd() {
     const localBusinessSchema = {
         '@context': 'https://schema.org',
         '@type': 'RealEstateAgent',
-        '@id': 'https://dousell-immo.app/#organization',
-        name: 'Dousell Immo',
-        alternateName: 'Dousell Immobilier Sénégal',
+        '@id': 'https://dousel.com/#organization',
+        name: 'Dousel',
+        alternateName: 'Douselbilier Sénégal',
         description: "Plateforme de gestion locative et annonces immobilières au Sénégal. Villas, appartements et terrains à Dakar, Saly, Thiès.",
-        url: 'https://dousell-immo.app',
+        url: 'https://dousel.com',
         logo: {
             '@type': 'ImageObject',
-            url: 'https://dousell-immo.app/icons/icon-512.png',
+            url: 'https://dousel.com/icons/icon-512.png',
             width: 512,
             height: 512,
         },
-        image: 'https://dousell-immo.app/og-landing.png',
+        image: 'https://dousel.com/og-landing.png',
         telephone: '+221338600000',
         email: 'contact@dousell.immo',
         address: {

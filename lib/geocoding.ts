@@ -47,7 +47,7 @@ export async function getCoordinates(
   if (!query || !query.trim()) return null;
 
   const cleanQueryStr = cleanQuery(query);
-  
+
   // Si la requête est trop courte ou ne contient que "Sénégal", on skip
   if (cleanQueryStr.length < 3 || cleanQueryStr.toLowerCase() === "sénégal") {
     return null;
@@ -62,7 +62,7 @@ export async function getCoordinates(
 
       // Respect de la politique d'utilisation de Nominatim (User-Agent requis)
       const headers = {
-        "User-Agent": "Doussel-Immo-App/1.0",
+        "User-Agent": "Dousel-App/1.0",
         "Accept-Language": "fr",
       };
 
@@ -168,7 +168,7 @@ export async function smartGeocode(
   const knownCities = ["Touba", "Thiès", "Kaolack", "Saint-Louis", "Ziguinchor", "Louga", "Tambacounda", "Kolda", "Matam", "Fatick", "Kédougou", "Sédhiou"];
   const addressLower = cleanAddress.toLowerCase();
   const cityLower = cleanCity.toLowerCase();
-  
+
   for (const knownCity of knownCities) {
     const knownCityLower = knownCity.toLowerCase();
     // Si l'adresse contient une ville connue mais la ville est différente, corriger
@@ -208,7 +208,7 @@ export async function smartGeocode(
       return result;
     }
   }
-  
+
   // Niveau 3.5 : Si l'adresse est une ville connue, essayer directement
   if (cleanAddress) {
     const addressAsCityQuery = `${cleanAddress}, Sénégal`;

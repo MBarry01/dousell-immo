@@ -26,7 +26,7 @@ const features = [
         image: "doussel/static/features/paiement",
         title: "Encaissez sans courir après personne",
         paragraphs: [
-            "Ne perdez plus votre énergie à relancer les retardataires. Dousell envoie automatiquement les rappels de paiement par SMS et email avant et après l'échéance.",
+            "Ne perdez plus votre énergie à relancer les retardataires. Dousel envoie automatiquement les rappels de paiement par SMS et email avant et après l'échéance.",
             "Vos locataires règlent leur loyer via leur méthode préférée (Wave, Orange Money, Carte Bancaire) directement depuis leur espace. L'argent est tracé, sécurisé.",
             "Dès validation du paiement, la quittance est générée et envoyée instantanément au locataire. Plus besoin de rédiger, d'imprimer ou de se déplacer pour remettre un papier."
         ],
@@ -65,7 +65,7 @@ const features = [
         image: "doussel/static/features/alerte",
         title: "Votre Assistant Personnel 24/7",
         paragraphs: [
-            "Laissez Dousell gérer votre agenda mental. Fin de bail, révision de loyer annuelle, régularisation de charges... l'application pense à tout pour vous.",
+            "Laissez Dousel gérer votre agenda mental. Fin de bail, révision de loyer annuelle, régularisation de charges... l'application pense à tout pour vous.",
             "Dormez sur vos deux oreilles. Vous ne raterez plus jamais une date importante ou une échéance légale qui pourrait vous coûter cher.",
             "Montrez à vos locataires que vous gérez votre bien avec sérieux. Une communication fluide, moderne et proactive renforce la confiance et fidélise les bons payeurs."
         ],

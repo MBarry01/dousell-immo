@@ -11,7 +11,7 @@ import { AccessApproved } from "@/emails/AccessApproved";
 import { AccessRejected } from "@/emails/AccessRejected";
 import { AccessExpiring } from "@/emails/AccessExpiring";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://dousell.com";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://dousel.com";
 
 // Récupère les emails des owners et managers d'une équipe
 async function getTeamManagersEmails(teamId: string): Promise<string[]> {

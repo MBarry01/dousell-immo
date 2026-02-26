@@ -1,6 +1,6 @@
 /**
  * Fonctions serveur pour le système de permissions d'équipe
- * Dousell Immo - Gestion Locative SaaS
+ * Dousel - Gestion Locative SaaS
  * 
  * CE FICHIER NE DOIT ÊTRE IMPORTÉ QUE DANS DES SERVER COMPONENTS OU SERVER ACTIONS
  */

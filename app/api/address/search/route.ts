@@ -22,7 +22,7 @@ export async function GET(request: Request) {
             `https://nominatim.openstreetmap.org/search?${params.toString()}`,
             {
                 headers: {
-                    'User-Agent': 'DousellImmo/1.0 (https://dousell.com)',
+                    'User-Agent': 'DouselImmo/1.0 (https://dousell.com)',
                 },
             }
         );

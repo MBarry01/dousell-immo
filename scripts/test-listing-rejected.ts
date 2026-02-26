@@ -30,7 +30,7 @@ async function testListingRejected() {
             react: React.createElement(ListingRejectedEmail, {
                 propertyTitle: "Appartement F4 à Mermoz",
                 rejectionReason: "La description est trop courte et ne mentionne pas les charges de copropriété. De plus, les photos du salon sont floues.",
-                editUrl: "https://dousell-immo.app/gestion/biens/edit/test-id",
+                editUrl: "https://dousel.com/gestion/biens/edit/test-id",
                 teamName: "Doussel Immo",
             }),
         });

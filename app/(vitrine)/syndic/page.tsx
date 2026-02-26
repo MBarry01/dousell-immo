@@ -200,7 +200,7 @@ export default function SyndicPage() {
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
           <div>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Pourquoi choisir Dousell Syndic ?
+              Pourquoi choisir Dousel Syndic ?
             </h2>
             <p className="mt-4 text-white/60">
               Une solution pensée pour les réalités du marché sénégalais, avec un accompagnement personnalisé.
@@ -268,7 +268,7 @@ export default function SyndicPage() {
           Prêt à moderniser votre copropriété ?
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-white/60">
-          Demandez une démonstration gratuite et découvrez comment Dousell peut transformer la gestion de votre immeuble.
+          Demandez une démonstration gratuite et découvrez comment Dousel peut transformer la gestion de votre immeuble.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <a

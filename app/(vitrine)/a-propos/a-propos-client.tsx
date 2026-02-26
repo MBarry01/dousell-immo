@@ -61,7 +61,7 @@ export default function AProposContent() {
             Rendre l&apos;immobilier transparent au Sénégal
           </h1>
           <p className="mt-6 text-lg text-white/70 sm:text-xl">
-            Dousell Immo révolutionne l&apos;expérience immobilière en combinant expertise locale et technologie moderne. Nous mettons à votre disposition une plateforme intuitive pour trouver, vendre ou louer votre bien en toute confiance.
+            Dousel révolutionne l&apos;expérience immobilière en combinant expertise locale et technologie moderne. Nous mettons à votre disposition une plateforme intuitive pour trouver, vendre ou louer votre bien en toute confiance.
           </p>
         </div>
       </motion.section>
@@ -86,7 +86,7 @@ export default function AProposContent() {
           {/* Texte */}
           <div className="order-2 rounded-2xl border border-white/10 bg-background/5 p-6 text-white/80 sm:p-8 md:order-1">
             <p className="leading-relaxed">
-              Fondée avec la vision de démocratiser l&apos;accès à l&apos;immobilier au Sénégal, Dousell Immo est née d&apos;un constat simple : trouver un bien de qualité, que ce soit à Dakar, Saly ou en région, ne devrait pas être un parcours du combattant.
+              Fondée avec la vision de démocratiser l&apos;accès à l&apos;immobilier au Sénégal, Dousel est née d&apos;un constat simple : trouver un bien de qualité, que ce soit à Dakar, Saly ou en région, ne devrait pas être un parcours du combattant.
             </p>
             <p className="mt-4 leading-relaxed">
               Notre équipe, composée d&apos;experts locaux et de passionnés de technologie, a développé une plateforme qui allie la chaleur de l&apos;accompagnement humain aux avantages du digital. Chaque bien est vérifié, chaque transaction est sécurisée, et chaque client est accompagné de A à Z.
@@ -203,7 +203,7 @@ export default function AProposContent() {
                 </h3>
                 <p className="mt-1 text-amber-400">Co-fondateur - Techninicien</p>
                 <p className="mt-4 text-sm leading-relaxed text-white/70">
-                  Spécialisé dans l&apos;aspect technique et technologique de l&apos;immobilier, Mohamadou a créé Dousell Immo pour rendre l&apos;accès à la propriété plus accessible grâce aux solutions digitales innovantes. Expert en plateformes et outils technologiques pour faciliter vos transactions immobilières.
+                  Spécialisé dans l&apos;aspect technique et technologique de l&apos;immobilier, Mohamadou a créé Dousel pour rendre l&apos;accès à la propriété plus accessible grâce aux solutions digitales innovantes. Expert en plateformes et outils technologiques pour faciliter vos transactions immobilières.
                 </p>
                 <div className="mt-4 flex items-center justify-center gap-4 sm:justify-start">
                   <Button
@@ -244,7 +244,7 @@ export default function AProposContent() {
                 </h3>
                 <p className="mt-1 text-amber-400">Co-Fondateur - Expert Immobilier</p>
                 <p className="mt-4 text-sm leading-relaxed text-white/70">
-                  Expert terrain et cofondateur de Dousell Immo, Amadou apporte sa connaissance approfondie du marché immobilier dakarois. Spécialisé dans les visites, l&apos;accompagnement sur le terrain et la relation client, il est votre contact privilégié pour toutes vos démarches immobilières concrètes.
+                  Expert terrain et cofondateur de Dousel, Amadou apporte sa connaissance approfondie du marché immobilier dakarois. Spécialisé dans les visites, l&apos;accompagnement sur le terrain et la relation client, il est votre contact privilégié pour toutes vos démarches immobilières concrètes.
                 </p>
                 <div className="mt-4 flex items-center justify-center gap-4 sm:justify-start">
                   <Button

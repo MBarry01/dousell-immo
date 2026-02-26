@@ -82,7 +82,7 @@ export const HeroSection = () => {
             <FadeIn delay={0.1}>
               <p className="text-[clamp(0.9375rem,1.5vw,1.25rem)] text-white/70">
                 <span className="md:hidden">Plus de 500 biens vérifiés à Dakar et sur la Petite Côte.</span>
-                <span className="hidden md:inline">Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte, Dousell Immo s'impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l'achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.</span>
+                <span className="hidden md:inline">Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte, Dousel s'impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l'achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.</span>
               </p>
             </FadeIn>
           </div>

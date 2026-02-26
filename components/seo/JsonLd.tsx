@@ -11,7 +11,7 @@ type JsonLdProps = {
  * 
  * Utilise le schéma RealEstateListing pour obtenir des Rich Snippets Google.
  */
-export function JsonLd({ property, baseUrl = "https://dousell-immo.app" }: JsonLdProps) {
+export function JsonLd({ property, baseUrl = "https://dousel.com" }: JsonLdProps) {
   const propertyUrl = `${baseUrl}/biens/${property.id}`;
   const firstImage = property.images?.[0] || "";
 

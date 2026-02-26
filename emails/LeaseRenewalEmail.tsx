@@ -33,7 +33,7 @@ export function LeaseRenewalEmail({
     currentEndDate = "31/12/2025",
     newEndDate = "31/12/2026",
     newMonthlyAmount = "150 000",
-    acceptanceLink = "https://dousell-immo.app/locataire/renouvellement",
+    acceptanceLink = "https://dousel.com/locataire/renouvellement",
     ownerName = "Propriétaire",
     ownerAddress = "Dakar, Sénégal",
 }: LeaseRenewalEmailProps) {

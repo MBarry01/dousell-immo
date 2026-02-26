@@ -7,7 +7,7 @@ import { TeamSettingsForm } from "./TeamSettingsForm";
 import type { Team, TeamRole } from "@/types/team";
 
 export const metadata = {
-  title: "Paramètres | Équipe - Dousell Immo",
+  title: "Paramètres | Équipe - Dousel",
   description: "Configurez les paramètres de votre équipe",
 };
 

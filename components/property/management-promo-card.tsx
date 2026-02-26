@@ -63,7 +63,7 @@ export const ManagementPromoCard = () => {
                     <div className="relative w-16 shrink-0 sm:w-24">
                         <CldImageSafe
                             src="doussel/static/modals/banner-popup1"
-                            alt="Gestion locative Dousell"
+                            alt="Gestion locative Dousel"
                             fill
                             className="object-cover"
                             sizes="(max-width: 640px) 64px, 96px"

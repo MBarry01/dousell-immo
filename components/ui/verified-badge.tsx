@@ -43,7 +43,7 @@ export const VerifiedBadge = ({
                 <TooltipContent className="bg-black/90 text-white border-[#F4C430]/30 backdrop-blur-md px-3 py-2">
                     <p className="flex items-center gap-2 font-medium">
                         <BadgeCheck className="h-4 w-4 fill-[#F4C430] text-black" />
-                        Bien vérifié par Dousell
+                        Bien vérifié par Dousel
                     </p>
                 </TooltipContent>
             </Tooltip>

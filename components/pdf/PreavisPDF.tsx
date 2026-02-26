@@ -326,7 +326,7 @@ const PreaviseDocument = ({ data }: { data: PreaviseData }) => {
 
         {/* Pied de page */}
         <View style={styles.footer}>
-          <Text>Document généré automatiquement par Dousell Immo</Text>
+          <Text>Document généré automatiquement par Dousel</Text>
           <Text>Conforme à la loi n° 2014-22 du 24 février 2014 & Code des Obligations Civiles et Commerciales du Sénégal</Text>
         </View>
       </Page>

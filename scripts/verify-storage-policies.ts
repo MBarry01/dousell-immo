@@ -64,7 +64,7 @@ async function main() {
 
   console.log("\n🎯 Prochaine étape:");
   console.log("   Testez l'upload depuis l'interface web:");
-  console.log("   1. Connectez-vous à Dousell Immo");
+  console.log("   1. Connectez-vous à Dousel");
   console.log("   2. Allez dans 'Compte' > 'Mes Documents'");
   console.log("   3. Cliquez sur 'Ajouter un document'");
   console.log("   4. Uploadez un PDF ou une image (< 5 MB)");

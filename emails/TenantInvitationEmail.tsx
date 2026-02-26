@@ -26,13 +26,13 @@ interface TenantInvitationEmailProps {
 export function TenantInvitationEmail({
     tenantName = "Locataire",
     propertyAddress = "Adresse du bien",
-    magicLink = "https://dousell-immo.app/locataire/login?token=xyz",
+    magicLink = "https://dousel.com/locataire/login?token=xyz",
     ownerName = "Propriétaire",
 }: TenantInvitationEmailProps) {
     return (
         <Html>
             <Head />
-            <Preview>Invitation à votre Espace Locataire Dousell — {propertyAddress}</Preview>
+            <Preview>Invitation à votre Espace Locataire Dousel — {propertyAddress}</Preview>
             <Body style={main}>
                 <Container style={container}>
                     {/* En-tête */}
@@ -83,8 +83,8 @@ export function TenantInvitationEmail({
                     {/* Footer */}
                     <Section style={footer}>
                         <Text style={footerSignature}>
-                            À très vite sur Dousell,<br />
-                            <strong>L'équipe Dousell Immo</strong>
+                            À très vite sur Dousel,<br />
+                            <strong>L'équipe Dousel</strong>
                         </Text>
 
                         <Section style={footerBottom}>

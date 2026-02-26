@@ -15,7 +15,7 @@ export default function CommencerPage() {
                         Démarrez votre transformation digitale
                     </h1>
                     <p className="text-lg text-white/60 max-w-xl mx-auto">
-                        Rejoignez plus de 500 gestionnaires qui font confiance à Dousell Immo.
+                        Rejoignez plus de 500 gestionnaires qui font confiance à Dousel.
                     </p>
                     {/* Lien de connexion pour les utilisateurs existants */}
                     <p className="mt-4 text-sm text-white/50">

@@ -8,7 +8,7 @@ const HIDDEN_ROUTES = ["/pro/start"];
 
 const dousellConfig: NavbarConfig = {
     logo: {
-        alt: "Dousell Immo",
+        alt: "Dousel",
         href: "/landing",
         src: "https://res.cloudinary.com/dkkirzpxe/image/upload/v1771989697/doussel/static/logos/logoJnOr.png",
         width: 140,
@@ -61,7 +61,7 @@ const dousellConfig: NavbarConfig = {
         },
         // GROUPE 3 : Entreprise
         lastGroup: {
-            title: "Dousell",
+            title: "Dousel",
             items: [
                 { title: "Qui sommes-nous ?", href: "/pro/a-propos" },
                 { title: "Nous contacter", href: "#contact" },
@@ -79,7 +79,7 @@ const dousellConfig: NavbarConfig = {
 // Configuration pour utilisateur connecté
 const loggedInCta = {
     text: "Mon Espace",
-    href: "https://app.doussel.immo/gestion",
+    href: "https://app.dousel.com/gestion",
 };
 
 // Configuration pour visiteur (mode propriétaire)
@@ -94,7 +94,7 @@ const visitorTenantCta = {
     href: "/",
 };
 
-export interface DousellNavbarClientProps {
+export interface DouselNavbarClientProps {
     isLoggedIn?: boolean;
     ctaOverride?: {
         text: string;
@@ -102,10 +102,10 @@ export interface DousellNavbarClientProps {
     };
 }
 
-export default function DousellNavbarClient({
+export default function DouselNavbarClient({
     isLoggedIn = false,
     ctaOverride
-}: DousellNavbarClientProps) {
+}: DouselNavbarClientProps) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const urlMode = searchParams.get("mode");
@@ -162,12 +162,12 @@ export default function DousellNavbarClient({
                 case "demo":
                 case "features":
                     return isLoggedIn
-                        ? { text: "Mon Espace", href: "https://app.doussel.immo/gestion" }
+                        ? { text: "Mon Espace", href: "https://app.dousel.com/gestion" }
                         : { text: "Commencer gratuitement", href: "/pro/start" };
                 case "hero":
                 default:
                     if (isLoggedIn) {
-                        return { text: "Mon Espace", href: "https://app.doussel.immo/gestion" };
+                        return { text: "Mon Espace", href: "https://app.dousel.com/gestion" };
                     }
                     // Propager le redirect pour le bouton login du hero
                     const paramsStr = searchParams?.toString();

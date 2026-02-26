@@ -1,5 +1,5 @@
 /**
- * 🚀 PATTERNS DE CACHE AVANCÉS - Dousell Immo
+ * 🚀 PATTERNS DE CACHE AVANCÉS - Dousel
  *
  * Optimisations pour aller au-delà du Cache-Aside basique :
  * 1. Stale-While-Revalidate (SWR) - Réponse instantanée 100%
@@ -47,7 +47,7 @@ export async function getOrSetCacheSWR<T>(
 ): Promise<T> {
   const {
     ttl = 3600,
-    namespace = 'dousell',
+    namespace = 'dousel',
     debug = process.env.NODE_ENV === 'development',
   } = options;
 
@@ -165,7 +165,7 @@ export async function getOrSetCacheCompressed<T>(
 ): Promise<T> {
   const {
     ttl = 3600,
-    namespace = 'dousell',
+    namespace = 'dousel',
     debug = process.env.NODE_ENV === 'development',
     compressionThreshold = 5000, // 5KB par défaut
   } = options;
@@ -392,7 +392,7 @@ export function GET() {
 }
 
 // ============================================================================
-// 4. USAGE RECOMMANDÉ POUR DOUSELL
+// 4. USAGE RECOMMANDÉ POUR DOUSEL
 // ============================================================================
 
 /**

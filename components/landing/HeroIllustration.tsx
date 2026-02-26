@@ -40,7 +40,7 @@ export default function HeroIllustration() {
               <div className="absolute inset-0 bg-black p-1.5 lg:p-2">
                 <CldImageSafe
                   src="doussel/static/illustrations/mock-pay"
-                  alt="Application Dousell Locataire"
+                  alt="Application Dousel Locataire"
                   fill
                   className="object-cover rounded-[32px] lg:rounded-[36px]"
                   priority
