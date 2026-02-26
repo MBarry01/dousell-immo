@@ -15,7 +15,7 @@ import { RolePermissionsTable } from "./RolePermissionsTable";
 import { InviteMemberDialog } from "./InviteMemberDialog";
 import { AccessControlTab } from "./AccessControlTab";
 import type { Team, TeamMember, TeamRole, TeamStats } from "@/types/team";
-import { EquipeTour } from '@/components/gestion/tours/EquipeTour';
+
 
 interface TeamInvitation {
   id: string;
@@ -63,7 +63,7 @@ export function TeamPageClient({
 
   return (
     <div className="space-y-4 px-4 lg:space-y-6 lg:px-8">
-      <EquipeTour />
+
       {/* En-tête de la page */}
       <div id="tour-team-header" className={cn(
         "rounded-2xl p-4 md:p-6",

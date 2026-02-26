@@ -8,7 +8,7 @@ import { SubscriptionManager } from "@/components/gestion/SubscriptionManager";
 import { ApiSettings } from "./api-settings";
 import { User, CreditCard, Code } from "lucide-react";
 import { toast } from "sonner";
-import { ConfigTour } from '@/components/gestion/tours/ConfigTour';
+
 
 interface ConfigTabsProps {
     brandingData: any;
@@ -32,7 +32,7 @@ export function ConfigTabs({ brandingData }: ConfigTabsProps) {
 
     return (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <ConfigTour />
+
             <TabsList id="tour-config-tabs" className="h-14 w-full md:w-auto overflow-x-auto rounded-xl">
                 <TabsTrigger
                     value="branding"

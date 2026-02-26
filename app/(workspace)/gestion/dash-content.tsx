@@ -14,7 +14,7 @@ import { OrphanLeasesAlert } from "./components/OrphanLeasesAlert";
 import { ExpiredBanner } from "./components/ExpiredBanner";
 import { QuotaBanner } from "./components/QuotaBanner";
 import { ListSkeleton } from "./components/PremiumSkeletons";
-import { GestionTour } from "@/components/gestion/GestionTour";
+
 import { createClient } from "@/utils/supabase/server";
 import {
     getLeasesByTeam as getLeasesByOwner,
@@ -383,7 +383,7 @@ export default async function DashboardContent({
             )}
 
             {/* Tutoriel interactif de la page gestion */}
-            <GestionTour />
+
 
         </ThemedContent>
     );

@@ -126,6 +126,7 @@ export function CldImageSafe(props: CldImageProps) {
                     loader={isCloudinary ? cloudinaryLoader : undefined}
                     // unoptimized=true uniquement pour les URLs externes NON-Cloudinary (Supabase/Unsplash)
                     unoptimized={!isLocal && !isCloudinary && (src.startsWith('http') || src.startsWith('//'))}
+                    referrerPolicy={(!isLocal && !isCloudinary) ? "no-referrer" : undefined}
                     onLoad={handleLoad}
                     onError={handleError}
                 />

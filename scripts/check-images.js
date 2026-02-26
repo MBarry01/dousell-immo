@@ -1,5 +1,4 @@
 const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs');
 require('dotenv').config({ path: '.env.local' });
 
 const supabase = createClient(
@@ -10,20 +9,19 @@ const supabase = createClient(
 async function check() {
     const { data, error } = await supabase
         .from('external_listings')
-        .select('image_url')
-        .limit(500);
+        .select('title, image_url, source_site, created_at')
+        .limit(5)
+        .order('created_at', { ascending: false });
 
     if (error) {
         console.error(error);
     } else {
-        const domains = new Set();
         data.forEach(d => {
-            if (d.image_url) {
-                try { domains.add(new URL(d.image_url).hostname); } catch (e) { }
-            }
+            console.log(`Title: ${d.title}`);
+            console.log(`Image URL type: ${typeof d.image_url}`);
+            console.log(`Image URL value: ${d.image_url}`);
+            console.log(`---`);
         });
-        fs.writeFileSync('domains.json', JSON.stringify([...domains], null, 2));
-        console.log("Done");
     }
 }
 

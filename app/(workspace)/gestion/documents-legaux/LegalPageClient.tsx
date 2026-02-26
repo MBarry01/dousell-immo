@@ -8,7 +8,7 @@ import { DecisionModal } from "./components/DecisionModal";
 import { CreateContractDialog } from "./components/CreateContractDialog";
 import { CreateReceiptDialog } from "./components/CreateReceiptDialog";
 import { useTheme } from "@/components/theme-provider";
-import { LegalTour } from '@/components/gestion/tours/LegalTour';
+
 
 interface LegalPageClientProps {
     stats: {
@@ -27,7 +27,7 @@ export function LegalPageClient({ stats, alerts, leases, userEmail, profile }: L
 
     return (
         <div className={`min-h-screen ${isDark ? 'bg-slate-950' : 'bg-gray-50'}`}>
-            <LegalTour />
+
             <div className="w-full mx-auto px-4 md:px-6 py-8 space-y-8 animate-in fade-in duration-500">
 
                 {/* SECTION 1 : EN-TÊTE */}

@@ -11,34 +11,18 @@ import { VerificationSuccessToast } from "@/components/auth/verification-success
 export const revalidate = 3600;
 
 import { createClient } from "@/utils/supabase/server";
-import { HomeTour } from "@/components/home/HomeTour";
+
 
 export default async function Home() {
   const supabase = await createClient();
 
-  // Paralléliser toutes les requêtes pour performance mobile
-  const [userResult, sectionsResult] = await Promise.all([
-    supabase.auth.getUser(),
-    getHomePageSections()
-  ]);
-
-  const user = userResult.data?.user;
+  // Mode ISR activé : aucun appel dépendant du contexte utilisateur (cookies/session)
+  // pour garantir que la page d'accueil est pré-rendue statiquement au build/revalidation
+  const sectionsResult = await getHomePageSections();
   const { locations, ventes, terrains } = sectionsResult;
-
-  // Vérifier si l'utilisateur a des propriétés (pour le tour) - séparé car dépend de user
-  let hasProperties = false;
-  if (user) {
-    const { count } = await supabase
-      .from('properties')
-      .select('id', { count: 'exact', head: true })
-      .eq('owner_id', user.id);
-    hasProperties = (count || 0) > 0;
-  }
 
   return (
     <div className="space-y-6">
-      {/* Tour pour les nouveaux utilisateurs connectés (Mobile/PWA Focus) */}
-      {user && <HomeTour hasProperties={hasProperties} />}
 
       {/* Toast de succès après vérification d'email */}
       <Suspense fallback={null}>

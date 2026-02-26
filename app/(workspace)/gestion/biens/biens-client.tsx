@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Plus, Building2, Search, Filter, Grid, List, Eye, EyeOff, Clock } from "lucide-react";
 import { TeamPropertyCard } from "@/components/gestion/TeamPropertyCard";
 import { AssociateTenantDialog } from "@/components/gestion/AssociateTenantDialog";
-import { BiensTour } from "@/components/gestion/tours/BiensTour";
+
 import { togglePropertyPublication, deleteTeamProperty } from "./actions";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useEffect } from "react";
@@ -265,7 +265,7 @@ export function BiensClient({
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <BiensTour canCreate={canCreate} />
+
         {/* Header */}
         <div id="tour-biens-header" className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8 text-left">
           <div className="flex flex-col items-start">
@@ -337,11 +337,10 @@ export function BiensClient({
                 <button
                   key={cat}
                   onClick={() => setCategoryFilter(cat)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${
-                    categoryFilter === cat
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${categoryFilter === cat
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {cat === "all" ? "Tous" : cat === "vente" ? "Vente" : "Location"}
                 </button>
@@ -354,11 +353,10 @@ export function BiensClient({
                 <button
                   key={occ}
                   onClick={() => setOccupancyFilter(occ)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${
-                    occupancyFilter === occ
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${occupancyFilter === occ
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {occ === "all" ? "Tous" : occ === "vacant" ? "Dispos" : "Loués"}
                 </button>
@@ -369,31 +367,28 @@ export function BiensClient({
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setStatusFilter(statusFilter === "published" ? "all" : "published")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${
-                  statusFilter === "published"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${statusFilter === "published"
                     ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/40"
                     : "border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
-                }`}
+                  }`}
               >
                 <Eye className="w-3.5 h-3.5" /> En ligne
               </button>
               <button
                 onClick={() => setStatusFilter(statusFilter === "draft" ? "all" : "draft")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${
-                  statusFilter === "draft"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${statusFilter === "draft"
                     ? "bg-muted-foreground/15 text-foreground border border-border"
                     : "border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
-                }`}
+                  }`}
               >
                 <EyeOff className="w-3.5 h-3.5" /> Brouillon
               </button>
               <button
                 onClick={() => setStatusFilter(statusFilter === "scheduled" ? "all" : "scheduled")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${
-                  statusFilter === "scheduled"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 ${statusFilter === "scheduled"
                     ? "bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-500/40"
                     : "border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
-                }`}
+                  }`}
               >
                 <Clock className="w-3.5 h-3.5" /> Programmé
               </button>
@@ -403,21 +398,19 @@ export function BiensClient({
             <div className="ml-auto flex gap-1 bg-muted border border-border rounded-xl p-1">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-95 ${
-                  viewMode === "grid"
+                className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-95 ${viewMode === "grid"
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-95 ${
-                  viewMode === "list"
+                className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-95 ${viewMode === "list"
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 <List className="w-4 h-4" />
               </button>

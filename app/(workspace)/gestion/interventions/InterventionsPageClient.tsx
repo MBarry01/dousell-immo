@@ -2,7 +2,7 @@
 
 import { MaintenanceHub } from '../components/MaintenanceHub';
 import { useTheme } from "@/components/theme-provider";
-import { InterventionsTour } from '@/components/gestion/tours/InterventionsTour';
+
 
 interface MaintenanceRequest {
     id: string;
@@ -37,7 +37,7 @@ export function InterventionsPageClient({ requests }: InterventionsPageClientPro
 
     return (
         <div className={`min-h-screen ${isDark ? 'bg-slate-950' : 'bg-gray-50'}`}>
-            <InterventionsTour />
+
             {/* Header */}
             <div
                 id="tour-intervention-stats"

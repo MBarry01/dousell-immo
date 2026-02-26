@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
-import { MessagesTour } from '@/components/gestion/tours/MessagesTour';
+
 
 interface Lease {
     id: string;
@@ -33,7 +33,7 @@ export function MessagesPageClient({
 
     return (
         <div className="space-y-6 p-4 md:p-6">
-            <MessagesTour />
+
             <div id="tour-msg-header" className="flex items-center justify-between">
                 <h1 className={`text-2xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     Messagerie
@@ -90,12 +90,12 @@ export function MessagesPageClient({
                                 key={lease.id}
                                 href={`/gestion/messages/${lease.id}`}
                                 className={`p-4 rounded-xl border flex items-center justify-between transition-all ${unread > 0
-                                        ? isDark
-                                            ? 'bg-zinc-900 border-blue-500/40 hover:border-blue-400/60'
-                                            : 'bg-blue-50/50 border-blue-200 hover:border-blue-300 hover:shadow-sm'
-                                        : isDark
-                                            ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
-                                            : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                                    ? isDark
+                                        ? 'bg-zinc-900 border-blue-500/40 hover:border-blue-400/60'
+                                        : 'bg-blue-50/50 border-blue-200 hover:border-blue-300 hover:shadow-sm'
+                                    : isDark
+                                        ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+                                        : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
                                     }`}
                             >
                                 <div className="flex items-center gap-4">

@@ -52,7 +52,7 @@ import { useTheme } from "@/components/theme-provider";
 
 import { uploadDocument, deleteDocument, getMyDocuments, getRentalDocuments, getVerificationDocuments } from "@/app/(workspace)/compte/mes-documents/actions";
 import { getProperties, getLeasesByOwner } from "../actions";
-import { DocumentsTour } from "@/components/gestion/tours/DocumentsTour";
+
 import { DocumentGridSkeleton } from "../components/PremiumSkeletons";
 
 // Types
@@ -358,7 +358,7 @@ export default function RentalDocumentsPage() {
 
                 {/* Header */}
                 <div id="tour-ged-header" className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <DocumentsTour />
+
                     <div>
                         <h1 className={`text-2xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-gray-900'}`}>
                             GED & Documents
