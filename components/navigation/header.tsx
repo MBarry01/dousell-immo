@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useScrollPosition } from "@/hooks/use-scroll-position";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { UserNav } from "@/components/layout/user-nav";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 
 const navLinks = [
   { href: "/", label: "Accueil" },
@@ -65,7 +66,7 @@ export const Header = () => {
             className="flex items-center transition-opacity active:opacity-70 hover:opacity-80"
             aria-label="Dousel - Accueil"
           >
-            <Image
+            <CldImageSafe
               src="doussel/static/logos/logo-white"
               alt="Dousel"
               width={140}
@@ -164,7 +165,7 @@ export const Header = () => {
             className="flex items-center transition-opacity active:opacity-70 hover:opacity-80 shrink-0"
             aria-label="Dousel - Accueil"
           >
-            <Image
+            <CldImageSafe
               src="doussel/static/logos/logo-white"
               alt="Dousel"
               width={180}

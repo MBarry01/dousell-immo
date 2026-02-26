@@ -16,15 +16,13 @@ export default function GraphicsImage({ children, image, sx, cardMediaProps }: a
     // Simplified: only support string images (paths) or image objects with src
     if (typeof image === 'string') {
         return (
-            <CardMedia
-                {...(cardMediaProps?.component == 'img'
-                    ? { src: GetImagePath(image), alt: 'Graphics', loading: 'lazy' }
-                    : { image: GetImagePath(image), title: 'Graphics', loading: 'lazy' })}
-                sx={{ width: 'auto', ...sx }}
+            <img
+                src={GetImagePath(image)}
+                alt="Graphics"
+                loading="lazy"
+                style={{ width: '100%', height: '100%', objectFit: 'contain', ...sx }}
                 {...cardMediaProps}
-            >
-                {children}
-            </CardMedia>
+            />
         );
     }
 

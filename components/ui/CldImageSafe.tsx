@@ -9,7 +9,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 /**
  * Assets de design légers (< 50KB) servis localement pour un LCP instantané.
  */
-const LOCAL_DESIGN_ASSETS: Record<string, string> = {};
+const LOCAL_DESIGN_ASSETS: Record<string, string> = {
+    'doussel/static/logos/logo-white': '/logo-white.png',
+};
 
 /**
  * CldImageSafe v9 : "Zéro Bande Passante Vercel" + Optimisation Visuelle Logos
@@ -108,7 +110,7 @@ export function CldImageSafe(props: CldImageProps) {
         <div className={cn("relative overflow-hidden", isFill ? "absolute inset-0" : className)}>
             <Image
                 {...(nextImageProps as any)}
-                src={isLocal ? finalSrc : src}
+                src={finalSrc}
                 className={cn(
                     "transition-opacity duration-300",
                     isLoading && !restProps.priority && !isDesign && !isLocal ? "opacity-0" : "opacity-100",

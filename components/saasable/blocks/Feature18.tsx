@@ -124,16 +124,18 @@ export default function Feature18({ heading, caption, topics }: any) {
                                                         height: { xs: 260, sm: 396, md: 434 },
                                                         display: 'flex',
                                                         alignItems: 'center',
-                                                        justifyContent: 'center'
+                                                        justifyContent: 'center',
+                                                        overflow: 'hidden', // Empêche l'image de dépasser
+                                                        width: '100%' // Assure que la boîte prend toute la largeur
                                                     }}
                                                 >
                                                     {/* Force img tag for GIF support */}
                                                     <GraphicsImage
                                                         cardMediaProps={{ component: 'img' }}
                                                         sx={{
-                                                            width: 1,
-                                                            height: 1,
-                                                            objectFit: 'contain',
+                                                            width: '100%',
+                                                            height: '100%',
+                                                            objectFit: 'cover', // Cover au lieu de contain pour remplir le bloc
                                                             ...(item.isImageBorder && { borderTop: '5px solid', borderLeft: '5px solid', borderColor: 'grey.200' }),
                                                             // Removed background props which contest with img tag usage
                                                             borderTopLeftRadius: { xs: 12 },
