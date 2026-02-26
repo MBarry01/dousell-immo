@@ -850,20 +850,7 @@ function LandingPageContent() {
         </>
       )}
 
-      {/* Saasable Feature18 - Tabbed Features (Propriétaire uniquement) */}
-      {
-        userMode === "owner" && (
-          <section className="bg-black py-20 overflow-hidden">
-            <SaasableSectionWrapper>
-              <Feature18
-                heading=""
-                caption=""
-                topics={featuresDataSaasable}
-              />
-            </SaasableSectionWrapper>
-          </section>
-        )
-      }
+      {/* Sections de fonctionnalités supprimées à la demande de l'utilisateur (Gestion Complète, Automatisation, Sérénité) */}
 
       {/* Features Section (Propriétaire uniquement) */}
       {userMode === "owner" && <FeaturesBento />}
