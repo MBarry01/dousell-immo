@@ -14,15 +14,8 @@ self.addEventListener('activate', (event) => {
                 })
             );
         }).then(() => {
-            // Prendre le contrôle immédiat
+            // Prendre le contrôle immédiat, mais ne PAS forcer de reload (évite les boucles infinies avec DevTools)
             return self.clients.claim();
-        }).then(() => {
-            // Forcer le rechargement des clients contrôlés
-            return self.clients.matchAll({ type: 'window' }).then((windowClients) => {
-                for (let client of windowClients) {
-                    client.navigate(client.url);
-                }
-            });
         })
     );
 });

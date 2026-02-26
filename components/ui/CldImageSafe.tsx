@@ -9,15 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 /**
  * Assets de design légers (< 50KB) servis localement pour un LCP instantané.
  */
-const LOCAL_DESIGN_ASSETS: Record<string, string> = {
-    'doussel/static/logos/logo': '/logo.svg',
-    'doussel/static/logos/logo-black': '/logo-black.png',
-    'doussel/static/logos/Logo': '/logo.svg',
-    'doussel/static/logos/logo-white': '/logo-white.png',
-    'doussel/static/logos/logo-or1': '/logo-or1.png',
-    'doussel/static/logos/logo-jnor': '/logo-jnor.png',
-    'doussel/static/logos/logo-black.png': '/logo-black.png',
-};
+const LOCAL_DESIGN_ASSETS: Record<string, string> = {};
 
 /**
  * CldImageSafe v9 : "Zéro Bande Passante Vercel" + Optimisation Visuelle Logos
@@ -124,8 +116,8 @@ export function CldImageSafe(props: CldImageProps) {
                 )}
                 // Utiliser le loader si c'est du Cloudinary (ID ou URL)
                 loader={isCloudinary ? cloudinaryLoader : undefined}
-                // unoptimized=true uniquement pour les URLs externes NON-Cloudinary (Supabase/Unsplash)
-                unoptimized={!isLocal && !isCloudinary && (src.startsWith('http') || src.startsWith('//'))}
+                // unoptimized=true pour les images LCP locales ET les URLs externes non-Cloudinary
+                unoptimized={isLocal || (!isCloudinary && (src.startsWith('http') || src.startsWith('//')))}
                 referrerPolicy={(!isLocal && !isCloudinary) ? "no-referrer" : undefined}
                 onLoad={handleLoad}
                 onError={handleError}

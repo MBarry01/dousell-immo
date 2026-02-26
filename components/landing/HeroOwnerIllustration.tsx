@@ -80,13 +80,7 @@ export default function HeroOwnerIllustration() {
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-xs lg:text-sm font-medium leading-tight">Loyer de Sidy Dia reçu</p>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <CldImageSafe
-                        src="/images/wave.png"
-                        alt="Wave"
-                        width={16}
-                        height={16}
-                        className="w-4 h-4 rounded"
-                      />
+                      <span className="text-sm">👋</span>
                       <span className="text-emerald-400 text-xs lg:text-sm font-bold">+250.000 F</span>
                     </div>
                     <p className="text-white/30 text-[10px] mt-1">Il y a 2 min</p>

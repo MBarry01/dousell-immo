@@ -10,7 +10,7 @@ const dousellConfig: NavbarConfig = {
     logo: {
         alt: "Dousel",
         href: "/landing",
-        src: "/logo-jnor.png",
+        src: "doussel/static/logos/logo-jnor",
         width: 140,
         height: 38,
     },
