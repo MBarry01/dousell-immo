@@ -79,7 +79,7 @@ const dousellConfig: NavbarConfig = {
 // Configuration pour utilisateur connecté
 const loggedInCta = {
     text: "Mon Espace",
-    href: "https://app.dousel.com/gestion",
+    href: "https://app.dousel.com",
 };
 
 // Configuration pour visiteur (mode propriétaire)
@@ -162,12 +162,12 @@ export default function DouselNavbarClient({
                 case "demo":
                 case "features":
                     return isLoggedIn
-                        ? { text: "Mon Espace", href: "https://app.dousel.com/gestion" }
+                        ? { text: "Mon Espace", href: "https://app.dousel.com" }
                         : { text: "Commencer gratuitement", href: "/pro/start" };
                 case "hero":
                 default:
                     if (isLoggedIn) {
-                        return { text: "Mon Espace", href: "https://app.dousel.com/gestion" };
+                        return { text: "Mon Espace", href: "https://app.dousel.com" };
                     }
                     // Propager le redirect pour le bouton login du hero
                     const paramsStr = searchParams?.toString();

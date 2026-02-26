@@ -9,12 +9,8 @@ let AsyncLocalStorageClass: any;
 try {
     // Try global first (Edge Runtime / Recent Node.js)
     AsyncLocalStorageClass = (globalThis as any).AsyncLocalStorage;
-    if (!AsyncLocalStorageClass) {
-        // Fallback to import (Node.js)
-        AsyncLocalStorageClass = require('async_hooks').AsyncLocalStorage;
-    }
 } catch (e) {
-    // Fallback if unavailable
+    // Fallback if unavailable (should not happen in modern Next.js/Edge)
     AsyncLocalStorageClass = class {
         run(_: any, callback: any) { return callback(); }
         getStore() { return undefined; }
