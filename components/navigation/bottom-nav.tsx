@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 // Icônes personnalisées avec version filled pour l'état actif
 const HomeIcon = ({ filled }: { filled: boolean }) => (
@@ -121,12 +123,51 @@ const navItems = [
 
 export const BottomNav = () => {
   const pathname = usePathname();
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const scrollDelta = currentScrollY - lastScrollY.current;
+
+          if (Math.abs(scrollDelta) > 10) {
+            if (scrollDelta > 0 && currentScrollY > 100) {
+              setIsVisible(false);
+            } else if (scrollDelta < 0) {
+              setIsVisible(true);
+            }
+            lastScrollY.current = currentScrollY;
+          }
+
+          ticking.current = false;
+        });
+        ticking.current = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Toujours visible au changement de page
+  useEffect(() => {
+    setIsVisible(true);
+    lastScrollY.current = 0;
+  }, [pathname]);
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#05080c]/90 backdrop-blur-xl md:hidden print:hidden"
+      className={cn(
+        "fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#05080c]/90 backdrop-blur-xl md:hidden print:hidden",
+        "transition-transform duration-300 ease-out",
+        !isVisible && "translate-y-full"
+      )}
       style={{
-        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
+        paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
       <div className="mx-auto flex w-full max-w-full items-center justify-between px-2 py-2 text-[10px] font-medium">
