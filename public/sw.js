@@ -14,7 +14,7 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // 2. Constants & Assets
-const CACHE_NAME = "dousell-immo-v20";
+const CACHE_NAME = "dousell-immo-v21";
 const STATIC_ASSETS = [
   "/",
   "/pro",
