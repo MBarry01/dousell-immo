@@ -1,4 +1,4 @@
-﻿data/properties.ts(27,7): error TS2353: Object literal may only specify known properties, and 'dpe' does not exist in type '{ surface: number; rooms: number; bedrooms: number; bathrooms: number; }'.
+data/properties.ts(27,7): error TS2353: Object literal may only specify known properties, and 'dpe' does not exist in type '{ surface: number; rooms: number; bedrooms: number; bathrooms: number; }'.
 data/properties.ts(78,7): error TS2353: Object literal may only specify known properties, and 'dpe' does not exist in type '{ surface: number; rooms: number; bedrooms: number; bathrooms: number; }'.
 data/properties.ts(129,7): error TS2353: Object literal may only specify known properties, and 'dpe' does not exist in type '{ surface: number; rooms: number; bedrooms: number; bathrooms: number; }'.
 data/properties.ts(179,7): error TS2353: Object literal may only specify known properties, and 'dpe' does not exist in type '{ surface: number; rooms: number; bedrooms: number; bathrooms: number; }'.

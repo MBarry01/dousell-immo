@@ -1,4 +1,4 @@
-﻿
+
 > dousell-immo@0.1.0 lint
 > eslint
 
@@ -77,7 +77,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(vitrine)\auth\verify-email\page.tsx:2
   20 |         if (!token) {
 > 21 |             setStatus("error");
      |             ^^^^^^^^^ Avoid calling setState() directly within an effect
-  22 |             setErrorMessage("Lien de v├®rification invalide. Le token est manquant.");
+  22 |             setErrorMessage("Lien de v+�rification invalide. Le token est manquant.");
   23 |         }
   24 |     }, [token]);  react-hooks/set-state-in-effect
 
@@ -95,7 +95,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(vitrine)\auth\verify-email\verify-ema
   20 |         if (!token) {
 > 21 |             setStatus("error");
      |             ^^^^^^^^^ Avoid calling setState() directly within an effect
-  22 |             setErrorMessage("Lien de v├®rification invalide. Le token est manquant.");
+  22 |             setErrorMessage("Lien de v+�rification invalide. Le token est manquant.");
   23 |         }
   24 |     }, [token]);  react-hooks/set-state-in-effect
 
@@ -162,7 +162,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(vitrine)\register\register-client.tsx
      |           ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
   65 |         }
   66 |       } catch (e) {
-  67 |         // Ignorer les erreurs de d├®tection de pays (num├®ro invalide, etc.)  react-hooks/set-state-in-effect
+  67 |         // Ignorer les erreurs de d+�tection de pays (num+�ro invalide, etc.)  react-hooks/set-state-in-effect
   66:16  warning  'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
 
 C:\Users\Barry\Downloads\Doussel_immo\app\(vitrine)\reset-password\page.tsx
@@ -220,7 +220,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(webapp)\etats-lieux\[id]\pdf\PDFPrevi
 > 39 |         const [reportResult, brandingResult] = await Promise.all([
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 40 |             getInventoryReportById(reportId),
-     ÔÇª
+     �Ǫ
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 64 |         setLoading(false);
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -282,7 +282,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(webapp)\etats-lieux\components\Signat
 > 33 |         // Fetch report and owner's saved signature in parallel
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 34 |         const [reportResult, signatureResult] = await Promise.all([
-     ÔÇª
+     �Ǫ
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 57 |         setLoading(false);
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -760,7 +760,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\components\Revenue
   30 |     useEffect(() => {
 > 31 |         setMounted(true);
      |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
-  32 |         console.log("[RevenueChart] Ô£ô Component mounted");
+  32 |         console.log("[RevenueChart] ԣ� Component mounted");
   33 |     }, []);
   34 |                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/set-state-in-effect
    52:56  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
@@ -786,7 +786,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\components\Revenue
 > 53 |         if (active && payload && payload.length) {
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 54 |             return (
-     ÔÇª
+     �Ǫ
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 74 |         return null;
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -909,7 +909,7 @@ Components created during render will reset their state each time they are creat
 
 C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\components\TenantTable.tsx:220:42
   218 |                                     >
-  219 |                                         P├®riode
+  219 |                                         P+�riode
 > 220 |                                         <SortIcon field="period" />
       |                                          ^^^^^^^^ This component is created during render
   221 |                                     </button>
@@ -1053,7 +1053,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\comptabilite\page.
 > 143 |         if (!leases.length) return [];
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 144 |
-      ÔÇª
+      �Ǫ
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 165 |         }));
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1108,7 +1108,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:3
 > 32 |     const t0 = Date.now();
      |                ^^^^^^^^^^ Cannot call impure function
   33 |     const { teamId, user, team } = context;
-  34 |     console.log(LOG_PREFIX, "ÔûÂ D├®but fetch donn├®es", { teamId: teamId?.slice(0, 8), userId: user?.id?.slice(0, 8) });
+  34 |     console.log(LOG_PREFIX, "��� D+�but fetch donn+�es", { teamId: teamId?.slice(0, 8), userId: user?.id?.slice(0, 8) });
   35 |                                                                                                                                                                     react-hooks/purity
    57:23  error    Error: Cannot call impure function during render
 
@@ -1116,12 +1116,12 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:3
 
 C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:57:23
   55 |         (async () => {
-  56 |             console.log(LOG_PREFIX, "ÔûÂ start profile");
+  56 |             console.log(LOG_PREFIX, "��� start profile");
 > 57 |             const t = Date.now();
      |                       ^^^^^^^^^^ Cannot call impure function
   58 |             const r = await getOwnerProfileForReceipts(user.id);
   59 |             fetchTimers.profile = Date.now() - t;
-  60 |             console.log(LOG_PREFIX, "Ô£ô end profile", fetchTimers.profile);                                                                        react-hooks/purity
+  60 |             console.log(LOG_PREFIX, "ԣ� end profile", fetchTimers.profile);                                                                        react-hooks/purity
    59:35  error    Error: Cannot call impure function during render
 
 `Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
@@ -1131,7 +1131,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:5
   58 |             const r = await getOwnerProfileForReceipts(user.id);
 > 59 |             fetchTimers.profile = Date.now() - t;
      |                                   ^^^^^^^^^^ Cannot call impure function
-  60 |             console.log(LOG_PREFIX, "Ô£ô end profile", fetchTimers.profile);
+  60 |             console.log(LOG_PREFIX, "ԣ� end profile", fetchTimers.profile);
   61 |             return r;
   62 |         })(),                                                                                                       react-hooks/purity
    65:23  error    Error: Cannot call impure function during render
@@ -1140,7 +1140,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:5
 
 C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:65:23
   63 |         (async () => {
-  64 |             console.log(LOG_PREFIX, "ÔûÂ start leases");
+  64 |             console.log(LOG_PREFIX, "��� start leases");
 > 65 |             const t = Date.now();
      |                       ^^^^^^^^^^ Cannot call impure function
   66 |             // Force status "all" explicitly
@@ -1155,7 +1155,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:6
   67 |             const r = await getLeasesByOwner(teamId, "all");
 > 68 |             fetchTimers.leases = Date.now() - t;
      |                                  ^^^^^^^^^^ Cannot call impure function
-  69 |             console.log(LOG_PREFIX, "Ô£ô end leases", fetchTimers.leases);
+  69 |             console.log(LOG_PREFIX, "ԣ� end leases", fetchTimers.leases);
   70 |             return r;
   71 |         })(),                                                                                                    react-hooks/purity
    74:23  error    Error: Cannot call impure function during render
@@ -1164,12 +1164,12 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:6
 
 C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:74:23
   72 |         (async () => {
-  73 |             console.log(LOG_PREFIX, "ÔûÂ start transactions");
+  73 |             console.log(LOG_PREFIX, "��� start transactions");
 > 74 |             const t = Date.now();
      |                       ^^^^^^^^^^ Cannot call impure function
   75 |             const r = await getRentalTransactions([], teamId);
   76 |             fetchTimers.transactions = Date.now() - t;
-  77 |             console.log(LOG_PREFIX, "Ô£ô end transactions", fetchTimers.transactions);                                                      react-hooks/purity
+  77 |             console.log(LOG_PREFIX, "ԣ� end transactions", fetchTimers.transactions);                                                      react-hooks/purity
    76:40  error    Error: Cannot call impure function during render
 
 `Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
@@ -1179,7 +1179,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:7
   75 |             const r = await getRentalTransactions([], teamId);
 > 76 |             fetchTimers.transactions = Date.now() - t;
      |                                        ^^^^^^^^^^ Cannot call impure function
-  77 |             console.log(LOG_PREFIX, "Ô£ô end transactions", fetchTimers.transactions);
+  77 |             console.log(LOG_PREFIX, "ԣ� end transactions", fetchTimers.transactions);
   78 |             return r;
   79 |         })(),                                                                                     react-hooks/purity
    82:23  error    Error: Cannot call impure function during render
@@ -1188,12 +1188,12 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:7
 
 C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:82:23
   80 |         (async () => {
-  81 |             console.log(LOG_PREFIX, "ÔûÂ start expenses");
+  81 |             console.log(LOG_PREFIX, "��� start expenses");
 > 82 |             const t = Date.now();
      |                       ^^^^^^^^^^ Cannot call impure function
   83 |             const r = await getExpensesByOwner(teamId);
   84 |             fetchTimers.expenses = Date.now() - t;
-  85 |             console.log(LOG_PREFIX, "Ô£ô end expenses", fetchTimers.expenses);                                                                             react-hooks/purity
+  85 |             console.log(LOG_PREFIX, "ԣ� end expenses", fetchTimers.expenses);                                                                             react-hooks/purity
    84:36  error    Error: Cannot call impure function during render
 
 `Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
@@ -1203,7 +1203,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:8
   83 |             const r = await getExpensesByOwner(teamId);
 > 84 |             fetchTimers.expenses = Date.now() - t;
      |                                    ^^^^^^^^^^ Cannot call impure function
-  85 |             console.log(LOG_PREFIX, "Ô£ô end expenses", fetchTimers.expenses);
+  85 |             console.log(LOG_PREFIX, "ԣ� end expenses", fetchTimers.expenses);
   86 |             return r;
   87 |         })(),                                                                                                            react-hooks/purity
    90:23  error    Error: Cannot call impure function during render
@@ -1212,12 +1212,12 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:8
 
 C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:90:23
   88 |         (async () => {
-  89 |             console.log(LOG_PREFIX, "ÔûÂ start properties");
+  89 |             console.log(LOG_PREFIX, "��� start properties");
 > 90 |             const t = Date.now();
      |                       ^^^^^^^^^^ Cannot call impure function
   91 |             const r = await supabase.from("properties").select("*", { count: "exact", head: true }).eq("team_id", teamId);
   92 |             fetchTimers.properties = Date.now() - t;
-  93 |             console.log(LOG_PREFIX, "Ô£ô end properties", fetchTimers.properties);  react-hooks/purity
+  93 |             console.log(LOG_PREFIX, "ԣ� end properties", fetchTimers.properties);  react-hooks/purity
    92:38  error    Error: Cannot call impure function during render
 
 `Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
@@ -1227,7 +1227,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:9
   91 |             const r = await supabase.from("properties").select("*", { count: "exact", head: true }).eq("team_id", teamId);
 > 92 |             fetchTimers.properties = Date.now() - t;
      |                                      ^^^^^^^^^^ Cannot call impure function
-  93 |             console.log(LOG_PREFIX, "Ô£ô end properties", fetchTimers.properties);
+  93 |             console.log(LOG_PREFIX, "ԣ� end properties", fetchTimers.properties);
   94 |             return r;
   95 |         })(),                                 react-hooks/purity
   111:47  error    Error: Cannot call impure function during render
@@ -1237,10 +1237,10 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:9
 C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\dash-content.tsx:111:47
   109 |     }
   110 |
-> 111 |     console.log(LOG_PREFIX, "ÔÅ▒ Total fetch:", Date.now() - t0, "ms");
+> 111 |     console.log(LOG_PREFIX, "�Ŧ Total fetch:", Date.now() - t0, "ms");
       |                                               ^^^^^^^^^^ Cannot call impure function
   112 |
-  113 |     // Extraire les valeurs (fallback gracieux si une requ├¬te ├®choue)
+  113 |     // Extraire les valeurs (fallback gracieux si une requ+�te +�choue)
   114 |     const profile = results[0].status === "fulfilled" ? results[0].value : null;                                                                                                                    react-hooks/purity
   115:22  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
   115:87  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
@@ -1450,7 +1450,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\etats-lieux\[id]\p
 > 39 |         const [reportResult, brandingResult] = await Promise.all([
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 40 |             getInventoryReportById(reportId),
-     ÔÇª
+     �Ǫ
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 64 |         setLoading(false);
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1515,7 +1515,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\(workspace)\gestion\etats-lieux\compon
 > 33 |         // Fetch report and owner's saved signature in parallel
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 34 |         const [reportResult, signatureResult] = await Promise.all([
-     ÔÇª
+     �Ǫ
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 57 |         setLoading(false);
      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1829,7 +1829,7 @@ C:\Users\Barry\Downloads\Doussel_immo\app\locataire\paiements\[id]\page.tsx:91:5
 >  92 |         if (!params.id || typeof params.id !== 'string') {
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 >  93 |             setLoading(false);
-      ÔÇª
+      �Ǫ
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 103 |         setLoading(false);
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1955,12 +1955,12 @@ Effects are intended to synchronize state between React and external systems suc
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
 C:\Users\Barry\Downloads\Doussel_immo\components\gestion\GestionTour.tsx:17:9
-  15 |     // Attendre que le composant soit mont├® c├┤t├® client
+  15 |     // Attendre que le composant soit mont+� c+�t+� client
   16 |     useEffect(() => {
 > 17 |         setMounted(true);
      |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
   18 |
-  19 |         // D├®tecter si mobile
+  19 |         // D+�tecter si mobile
   20 |         const checkMobile = () => {  react-hooks/set-state-in-effect
   33:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
 
@@ -2037,12 +2037,12 @@ Effects are intended to synchronize state between React and external systems suc
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
 C:\Users\Barry\Downloads\Doussel_immo\components\gestion\tours\BiensTour.tsx:17:9
-  15 |     // Attendre que le composant soit mont├® c├┤t├® client
+  15 |     // Attendre que le composant soit mont+� c+�t+� client
   16 |     useEffect(() => {
 > 17 |         setMounted(true);
      |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
   18 |
-  19 |         // D├®tecter si mobile
+  19 |         // D+�tecter si mobile
   20 |         const checkMobile = () => {  react-hooks/set-state-in-effect
   33:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
 
@@ -2207,7 +2207,7 @@ Effects are intended to synchronize state between React and external systems suc
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
 C:\Users\Barry\Downloads\Doussel_immo\components\gestion\tours\EtatsLieuxTour.tsx:17:9
-  15 |     // Attendre que le composant soit mont├® c├┤t├® client
+  15 |     // Attendre que le composant soit mont+� c+�t+� client
   16 |     useEffect(() => {
 > 17 |         setMounted(true);
      |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
@@ -2473,7 +2473,7 @@ C:\Users\Barry\Downloads\Doussel_immo\components\maps\location-picker-dialog.tsx
 > 92 |       setSelectedPosition([initialPosition.lat, initialPosition.lng]);
      |       ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
   93 |     } else if (open && initialAddress && !initialPosition) {
-  94 |       // Si pas de position initiale mais une adresse, on essaie de g├®ocoder
+  94 |       // Si pas de position initiale mais une adresse, on essaie de g+�ocoder
   95 |       const geocodeAddress = async () => {  react-hooks/set-state-in-effect
 
 C:\Users\Barry\Downloads\Doussel_immo\components\modals\AccessRequestModal.tsx
@@ -2581,7 +2581,7 @@ Calling setState synchronously within an effect body causes cascading renders th
 
 C:\Users\Barry\Downloads\Doussel_immo\components\providers\splash-provider.tsx:87:5
   85 |
-  86 |     // PWA + premi├¿re visite ÔåÆ activer le splash
+  86 |     // PWA + premi+�re visite ��� activer le splash
 > 87 |     setShowSplash(true);
      |     ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
   88 |     setIsPWASplashActive(true);
@@ -2721,7 +2721,7 @@ C:\Users\Barry\Downloads\Doussel_immo\components\search\map-view.tsx:297:13
   296 |         if (media.matches) {
 > 297 |             setZoomLevel(MOBILE_ZOOM);
       |             ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  298 |             setLongitudeOffset(0.5); // Moins de d├®calage sur mobile
+  298 |             setLongitudeOffset(0.5); // Moins de d+�calage sur mobile
   299 |         } else {
   300 |             setZoomLevel(DEFAULT_ZOOM);                                                                                     react-hooks/set-state-in-effect
   337:43  error    Compilation Skipped: Existing memoization could not be preserved
@@ -2736,7 +2736,7 @@ C:\Users\Barry\Downloads\Doussel_immo\components\search\map-view.tsx:337:43
 > 338 |         setActiveId(propertyId);
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 339 |
-      ÔÇª
+      �Ǫ
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 352 |         }, 100);
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2757,7 +2757,7 @@ C:\Users\Barry\Downloads\Doussel_immo\components\search\map-view.tsx:337:43
 > 338 |         setActiveId(propertyId);
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 339 |
-      ÔÇª
+      �Ǫ
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 > 352 |         }, 100);
       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3042,7 +3042,7 @@ Effects are intended to synchronize state between React and external systems suc
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
 C:\Users\Barry\Downloads\Doussel_immo\components\workspace\TemporaryAccessWidget.tsx:209:5
-  207 |   // Mettre ├á jour le countdown chaque seconde
+  207 |   // Mettre +� jour le countdown chaque seconde
   208 |   useEffect(() => {
 > 209 |     calculateTimeRemaining();
       |     ^^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
@@ -3570,5 +3570,5 @@ C:\Users\Barry\Downloads\Doussel_immo\update_invoice_logo.js
   1:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
   2:14  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
 
-Ô£û 1150 problems (662 errors, 488 warnings)
+ԣ� 1150 problems (662 errors, 488 warnings)
 

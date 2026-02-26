@@ -30,7 +30,7 @@ export function AccessRejected({
   permissionLabel = "Édition des baux",
   reviewerName = "Marie Martin",
   reviewNotes,
-  teamName = "Doussel Immo",
+  teamName = "Dousel",
   contactUrl = "https://dousel.com/gestion/equipe",
 }: AccessRejectedProps) {
   return (
@@ -41,7 +41,7 @@ export function AccessRejected({
         <Container style={container}>
           {/* En-tête discret */}
           <Section style={header}>
-            <Text style={logo}>DOUSSEL IMMO</Text>
+            <Text style={logo}>Dousel</Text>
           </Section>
 
           <Hr style={hrSubtle} />
@@ -90,7 +90,7 @@ export function AccessRejected({
               © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
             </Text>
             <Text style={footerLink}>
-              Doussel Immo — Plateforme de Gestion Immobilière
+              Dousel — Plateforme de Gestion Immobilière
             </Text>
           </Section>
         </Container>

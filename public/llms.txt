@@ -1,20 +1,20 @@
-# Dousell Immo
+# Dousel
 
 > La plateforme de référence pour l'immobilier et la gestion locative au Sénégal.
 
 ## Qui sommes-nous ?
-Dousell Immo est une PropTech sénégalaise qui connecte propriétaires, locataires et investisseurs. Nous proposons :
+Dousel est une PropTech sénégalaise qui connecte propriétaires, locataires et investisseurs. Nous proposons :
 - Une marketplace de plus de 500 biens vérifiés (Vente & Location).
 - Une solution SaaS complète pour la gestion locative automatisée (Quittances, Contrats, Paiements).
 - Un accompagnement pour les projets d'investissement à Dakar et sur la Petite Côte.
 
 ## Liens Principaux
-- **Accueil** : [https://dousell-immo.app/](https://dousell-immo.app/)
-- **Recherche de Biens** : [https://dousell-immo.app/recherche](https://dousell-immo.app/recherche)
-- **Gestion Locative (Propriétaires)** : [https://dousell-immo.app/landing](https://dousell-immo.app/landing)
-- **Estimation** : [https://dousell-immo.app/estimation](https://dousell-immo.app/estimation)
-- **À Propos** : [https://dousell-immo.app/a-propos](https://dousell-immo.app/a-propos)
+- **Accueil** : [https://dousel.com/](https://dousel.com/)
+- **Recherche de Biens** : [https://dousel.com/recherche](https://dousel.com/recherche)
+- **Gestion Locative (Propriétaires)** : [https://dousel.com/pro](https://dousel.com/pro)
+- **Estimation** : [https://dousel.com/estimation](https://dousel.com/estimation)
+- **À Propos** : [https://dousel.com/a-propos](https://dousel.com/a-propos)
 
 ## Contact
-- **Email** : contact@dousell-immo.app
+- **Email** : contact@dousel.com
 - **Zone d'intervention** : Dakar, Saly, Mbour, Petite Côte et partout au Sénégal.

@@ -5,6 +5,10 @@ import {
   sendActivationApprovedEmail as sendActivationApprovedEmailGmail,
   sendActivationRejectedEmail as sendActivationRejectedEmailGmail
 } from "./mail-gmail";
+import {
+  sendEmailResend,
+  sendInvoiceEmailResend
+} from "./mail-resend";
 import { render } from "@react-email/render";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import React from "react";
@@ -27,63 +31,55 @@ type SendEmailOptions = {
     content: Buffer | string;
     contentType?: string;
   }>;
+  replyTo?: string;
 };
 
 /**
- * Fonction générique pour envoyer des emails via Gmail (Nodemailer)
- * Utilise GMAIL_USER et GMAIL_APP_PASSWORD depuis les variables d'environnement
+ * Fonction générique pour envoyer des emails.
+ * Priorise Resend si RESEND_API_KEY est présent, sinon utilise Gmail.
  */
-export async function sendEmail({
-  to,
-  subject,
-  react,
-  html,
-  fromName = "Dousel",
-  user_id = null,
-  attachments,
-}: SendEmailOptions) {
-  // Si react est fourni, le convertir en HTML
-  let emailHtml = html;
-  if (react && !html) {
-    emailHtml = await render(react);
+export async function sendEmail(options: SendEmailOptions) {
+  // Si react est fourni, le convertir en HTML pour les deux services si nécessaire
+  let emailHtml = options.html;
+  if (options.react && !options.html) {
+    emailHtml = await render(options.react);
+  }
+
+  // Si l'API Resend est configurée, on l'utilise en priorité
+  if (process.env.RESEND_API_KEY) {
+    const result = await sendEmailResend({
+      ...options,
+      html: emailHtml,
+    });
+
+    if (!result.error) return result;
+
+    console.warn("⚠️ Resend failed, falling back to Gmail:", result.error);
   }
 
   return sendEmailGmail({
-    to,
-    subject,
+    ...options,
     html: emailHtml,
-    attachments,
   });
 }
 
 /**
  * Fonction pour envoyer une facture par email
- * @param to - Adresse email du destinataire
- * @param clientName - Nom du client
- * @param pdfBuffer - Buffer du PDF de la facture
- * @param invoiceNumber - Numéro de facture (optionnel)
- * @param amount - Montant de la facture (optionnel)
  */
-export async function sendInvoiceEmail({
-  to,
-  clientName,
-  pdfBuffer,
-  invoiceNumber,
-  amount,
-}: {
+export async function sendInvoiceEmail(params: {
   to: string;
   clientName: string;
   pdfBuffer: Buffer;
   invoiceNumber?: string;
   amount?: number;
 }) {
-  return sendInvoiceEmailGmail({
-    to,
-    clientName,
-    pdfBuffer,
-    invoiceNumber,
-    amount,
-  });
+  if (process.env.RESEND_API_KEY) {
+    const result = await sendInvoiceEmailResend(params);
+    if (!result.error) return result;
+    console.warn("⚠️ Resend invoice failed, falling back to Gmail");
+  }
+
+  return sendInvoiceEmailGmail(params);
 }
 
 /**

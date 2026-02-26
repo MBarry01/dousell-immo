@@ -317,7 +317,7 @@ async function triggerN8N(webhookPath: string, payload: Record<string, unknown>)
             body: JSON.stringify({
                 ...payload,
                 timestamp: new Date().toISOString(),
-                source: 'dousell-immo'
+                source: 'dousel-immo'
             }),
         });
 
@@ -661,7 +661,7 @@ export async function sendWelcomePack(leaseId: string) {
     const ownerName = profile?.company_name || profile?.full_name || "Votre Gestionnaire";
 
     // 3. Générer le lien d'invitation (Magic Link) via Admin API
-    let inviteLink = "https://doussell-immo.com/auth/login"; // Fallback
+    let inviteLink = "https://dousel.com/auth/login"; // Fallback
 
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
         try {
@@ -675,7 +675,7 @@ export async function sendWelcomePack(leaseId: string) {
                 type: 'magiclink',
                 email: lease.tenant_email,
                 options: {
-                    redirectTo: 'https://doussell-immo.com/espace-locataire'
+                    redirectTo: 'https://dousel.com/espace-locataire'
                 }
             });
 

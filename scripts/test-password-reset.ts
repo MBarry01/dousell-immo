@@ -26,11 +26,11 @@ async function testPasswordReset() {
     try {
         const result = await sendEmail({
             to: testEmail,
-            subject: "🔒 Réinitialisation de votre mot de passe - Doussel Immo",
+            subject: "🔒 Réinitialisation de votre mot de passe - Dousel",
             react: React.createElement(PasswordResetEmail, {
                 userName: "Barry",
                 resetUrl: "https://dousel.com/auth/choose-password?token=test-token-reset",
-                teamName: "Doussel Immo",
+                teamName: "Dousel",
             }),
         });
 

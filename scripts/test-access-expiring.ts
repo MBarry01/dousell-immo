@@ -32,7 +32,7 @@ async function testAccessExpiring() {
                 permissionLabel: "Édition des baux",
                 expiresAt: "25 Février 2026 à 18:00",
                 hoursRemaining: 1,
-                teamName: "Doussel Immo",
+                teamName: "Dousel",
                 requestUrl: "https://dousel.com/gestion",
             }),
         });

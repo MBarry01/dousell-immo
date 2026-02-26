@@ -30,7 +30,7 @@ async function testRefactoredTemplates() {
         console.log("--- Envoi Facture ---");
         await sendEmail({
             to: testEmail,
-            subject: "🧾 TEST : Votre facture Doussel Immo",
+            subject: "🧾 TEST : Votre facture Dousel",
             react: React.createElement(InvoiceEmail, {
                 clientName: "Barry",
                 invoiceNumber: "INV-2026-TEST",

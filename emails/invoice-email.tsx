@@ -27,7 +27,7 @@ export const InvoiceEmail = ({
     clientName = "Client",
     invoiceNumber = "INV-2026-001",
     amount = 250000,
-    teamName = "Doussel Immo",
+    teamName = "Dousel",
 }: InvoiceEmailProps) => {
     return (
         <Html lang="fr">
@@ -37,7 +37,7 @@ export const InvoiceEmail = ({
                 <Container style={container}>
                     {/* En-tête discret */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO</Text>
+                        <Text style={logo}>DOUSEL</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -94,7 +94,7 @@ export const InvoiceEmail = ({
                             © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
                         </Text>
                         <Text style={footerLink}>
-                            Doussel Immo — Plateforme Immobilière Professionnelle
+                            Dousel — Plateforme Immobilière Professionnelle
                         </Text>
                     </Section>
                 </Container>

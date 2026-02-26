@@ -1,4 +1,4 @@
-ï»¿diff --git a/components/sections/hero.tsx b/components/sections/hero.tsx
+diff --git a/components/sections/hero.tsx b/components/sections/hero.tsx
 index 8afeda0..b372623 100644
 --- a/components/sections/hero.tsx
 +++ b/components/sections/hero.tsx
@@ -12,7 +12,7 @@ index 8afeda0..b372623 100644
    return (
 @@ -18,14 +19,13 @@ export const HeroSection = () => {
        >
-         {/* Image de fond Ã”Ã‡Ã¶ taille naturelle, ancrâ”œÂ®e en haut */}
+         {/* Image de fond ÔÇö taille naturelle, ancr+®e en haut */}
          <div className="absolute inset-0">
 -          <Image
 -            src="/monument.png"
@@ -39,9 +39,9 @@ index 8afeda0..b372623 100644
 @@ -82,7 +82,7 @@ export const HeroSection = () => {
              <FadeIn delay={0.1}>
                <p className="text-[clamp(0.9375rem,1.5vw,1.25rem)] text-white/70">
-                 <span className="md:hidden">Plus de 500 biens vâ”œÂ®rifiâ”œÂ®s â”œÃ¡ Dakar et sur la Petite Câ”œâ”¤te.</span>
--                <span className="hidden md:inline">Avec plus de 500 biens vâ”œÂ®rifiâ”œÂ®s â”œÃ¡ Dakar et sur la Petite Câ”œâ”¤te, Dousell Immo s&apos;impose comme la plateforme immobiliâ”œÂ¿re de râ”œÂ®fâ”œÂ®rence au Sâ”œÂ®nâ”œÂ®gal. Que ce soit pour l&apos;achat ou la gestion locative, nous connectons propriâ”œÂ®taires et investisseurs grâ”œÃ³ce â”œÃ¡ des outils digitaux sâ”œÂ®curisâ”œÂ®s.</span>
-+                <span className="hidden md:inline">Avec plus de 500 biens vâ”œÂ®rifiâ”œÂ®s â”œÃ¡ Dakar et sur la Petite Câ”œâ”¤te, Dousell Immo s'impose comme la plateforme immobiliâ”œÂ¿re de râ”œÂ®fâ”œÂ®rence au Sâ”œÂ®nâ”œÂ®gal. Que ce soit pour l'achat ou la gestion locative, nous connectons propriâ”œÂ®taires et investisseurs grâ”œÃ³ce â”œÃ¡ des outils digitaux sâ”œÂ®curisâ”œÂ®s.</span>
+                 <span className="md:hidden">Plus de 500 biens v+®rifi+®s +á Dakar et sur la Petite C+¦te.</span>
+-                <span className="hidden md:inline">Avec plus de 500 biens v+®rifi+®s +á Dakar et sur la Petite C+¦te, Dousell Immo s&apos;impose comme la plateforme immobili+¿re de r+®f+®rence au S+®n+®gal. Que ce soit pour l&apos;achat ou la gestion locative, nous connectons propri+®taires et investisseurs gr+óce +á des outils digitaux s+®curis+®s.</span>
++                <span className="hidden md:inline">Avec plus de 500 biens v+®rifi+®s +á Dakar et sur la Petite C+¦te, Dousell Immo s'impose comme la plateforme immobili+¿re de r+®f+®rence au S+®n+®gal. Que ce soit pour l'achat ou la gestion locative, nous connectons propri+®taires et investisseurs gr+óce +á des outils digitaux s+®curis+®s.</span>
                </p>
              </FadeIn>
            </div>
@@ -56,7 +56,7 @@ index 8afeda0..b372623 100644
            </FadeIn>
 @@ -117,14 +117,13 @@ export const HeroSection = () => {
          >
-           {/* Conteneur qui pousse l'image â”œÃ¡ droite */}
+           {/* Conteneur qui pousse l'image +á droite */}
            <div className="absolute right-0 bottom-0 h-full w-full md:w-1/2 lg:w-2/3" suppressHydrationWarning>
 -            <Image
 -              src="/monument.png"

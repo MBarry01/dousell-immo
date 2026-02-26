@@ -56,7 +56,7 @@ export default function LegalHubPage() {
           <Shield className="h-6 w-6 text-blue-400" />
           <h2 className="text-2xl font-semibold m-0">Mentions Légales</h2>
         </div>
-        
+
         <div className="bg-background/5 rounded-2xl p-6 border border-white/10 space-y-4">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
@@ -65,10 +65,10 @@ export default function LegalHubPage() {
                 <li><strong>Raison sociale :</strong> Dousel</li>
                 <li><strong>Siège social :</strong> Sacré-Cœur 3, VDN, Dakar</li>
                 <li><strong>Téléphone :</strong> +221 33 860 00 00</li>
-                <li><strong>Email :</strong> contact@dousell.immo</li>
+                <li><strong>Email :</strong> contact@dousel.com</li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="text-lg font-medium text-white mb-2">Hébergement</h3>
               <ul className="space-y-1 text-sm text-white/70 list-none pl-0">

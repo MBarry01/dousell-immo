@@ -1,4 +1,4 @@
-Ôªø
+
 > dousell-immo@0.1.0 build
 > next build
 
@@ -7,7 +7,7 @@ The data in this module is over two
 months old.  To ensure accurate 
 Baseline data, please update: `npm i 
 baseline-browser-mapping@latest -D`
-Au caract√®re Ligne:1 : 1
+Au caractËre Ligne:1 : 1
 + & "C:\Program Files\nodejs/node.exe" 
 "C:\Program Files\nodejs/node_mo ...
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -18,13 +18,13 @@ Au caract√®re Ligne:1 : 1
     + FullyQualifiedErrorId : NativeCom 
    mandError
  
-√î√ª‚ñì Next.js 16.1.1 (Turbopack)
+‘˚¶ Next.js 16.1.1 (Turbopack)
 - Environments: .env.local
 - Experiments (use with caution):
-  ‚î¨√Ä optimizePackageImports
-  ‚î¨√Ä serverActions
+  -¿ optimizePackageImports
+  -¿ serverActions
 
-√î√ú√° The "middleware" file convention is 
+‘‹· The "middleware" file convention is 
 deprecated. Please use "proxy" instead. 
 Learn more: https://nextjs.org/docs/mess
 ages/middleware-to-proxy
@@ -34,7 +34,7 @@ this module is over two months old.  To
 ensure accurate Baseline data, please 
 update: `npm i 
 baseline-browser-mapping@latest -D`
-√î¬£√¥ Compiled successfully in 53s
+‘£Ù Compiled successfully in 53s
   Running TypeScript ...
 Failed to compile.
 

@@ -114,7 +114,7 @@ async function runTests() {
                 mainContent: "Le système de notification a été mis à jour avec succès. Ce template est désormais utilisé pour les messages et les confirmations de paiement.",
                 ctaText: "Vérifier le dashboard",
                 ctaUrl: "https://dousel.com/gestion",
-                footerText: "Équipe Technique Doussell"
+                footerText: "Équipe Technique Dousel"
             })
         }
 

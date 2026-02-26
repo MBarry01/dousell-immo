@@ -27,7 +27,7 @@ import { sendEmail, sendInvoiceEmail } from "../lib/mail";
 
 async function testEmailService() {
   console.log("🧪 Test du service d'envoi d'emails Gmail\n");
-  console.log("=" .repeat(50));
+  console.log("=".repeat(50));
 
   // Vérifier les variables d'environnement
   const gmailUser = process.env.GMAIL_USER;
@@ -48,7 +48,7 @@ async function testEmailService() {
   // Test 1: Email simple HTML
   console.log("📨 Test 1: Envoi d'un email simple HTML");
   console.log("-".repeat(50));
-  
+
   if (!testEmail) {
     console.error("❌ TEST_EMAIL ou GMAIL_USER doit être défini");
     process.exit(1);
@@ -57,7 +57,7 @@ async function testEmailService() {
   try {
     const result1 = await sendEmail({
       to: testEmail,
-      subject: "🧪 Test Email - Doussel Immo",
+      subject: "🧪 Test Email - Dousel",
       html: `
         <!DOCTYPE html>
         <html>
@@ -73,7 +73,7 @@ async function testEmailService() {
         <body>
           <div class="container">
             <div class="header">
-              <h1>Doussel Immo</h1>
+              <h1>Dousel</h1>
               <p>Test d'envoi d'email</p>
             </div>
             <div class="content">
@@ -101,7 +101,9 @@ async function testEmailService() {
     } else {
       console.log(`✅ Email envoyé avec succès !`);
       console.log(`   Message ID: ${result1.messageId}`);
-      console.log(`   Destinataires acceptés: ${result1.accepted?.join(", ")}`);
+      if ('accepted' in result1) {
+        console.log(`   Destinataires acceptés: ${(result1 as any).accepted?.join(", ")}`);
+      }
     }
   } catch (error) {
     console.error(`❌ Erreur lors de l'envoi:`, error);
@@ -116,7 +118,7 @@ async function testEmailService() {
   try {
     const result2 = await sendEmail({
       to: testEmail,
-      subject: "🧪 Test Email React - Doussel Immo",
+      subject: "🧪 Test Email React - Dousel",
       html: `
         <!DOCTYPE html>
         <html>
@@ -133,7 +135,7 @@ async function testEmailService() {
           <div class="container">
             <div class="card">
               <div class="header">
-                <h1 style="color: #05080c; margin: 0;">Doussel Immo</h1>
+                <h1 style="color: #05080c; margin: 0;">Dousel</h1>
                 <p style="color: #666; margin: 5px 0 0 0;">Votre partenaire immobilier</p>
               </div>
               <h2>Test de template React Email</h2>
@@ -208,7 +210,7 @@ stream
 BT
 /F1 12 Tf
 100 700 Td
-(Test Invoice - Doussel Immo) Tj
+(Test Invoice - Dousel) Tj
 ET
 endstream
 endobj
@@ -250,7 +252,7 @@ startxref
   }
 
   console.log("\n");
-  console.log("=" .repeat(50));
+  console.log("=".repeat(50));
   console.log("✅ Tests terminés !");
   console.log(`📧 Vérifiez votre boîte de réception: ${testEmail}`);
   console.log("   (Vérifiez aussi les spams si nécessaire)");

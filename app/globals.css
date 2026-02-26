@@ -1,7 +1,7 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-/* Tailwind v4: Configurer les sources Ã  scanner (exclure saasable-ui) */
+/* Tailwind v4: Configurer les sources à scanner (exclure saasable-ui) */
 @source "../app/**/*.{ts,tsx,js,jsx}";
 @source "../components/**/*.{ts,tsx,js,jsx}";
 @source "../lib/**/*.{ts,tsx,js,jsx}";
@@ -48,7 +48,7 @@
   --popover-foreground: #0f172a;
   --accent: #0F172A;
   --accent-foreground: #ffffff;
-  /* Bleu NuitÃ© (Slate 900) pour remplacer le Jaune Or en mode clair */
+  /* Bleu Nuité (Slate 900) pour remplacer le Jaune Or en mode clair */
   --primary: 222 47% 11%;
   --primary-foreground: 210 40% 98%;
   --ring: 215 25% 27%;
@@ -84,15 +84,15 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Couleurs primaires - Dynamiques selon le thÃ¨me */
+  /* Couleurs primaires - Dynamiques selon le thème */
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-ring: hsl(var(--ring));
 
-  /* Alias pour compatibilitÃ© Shadcn UI */
+  /* Alias pour compatibilité Shadcn UI */
   --color-brand: #F4C430;
 
-  /* Couleurs sÃ©mantiques - Mapping vers les variables CSS */
+  /* Couleurs sémantiques - Mapping vers les variables CSS */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
@@ -180,7 +180,7 @@
     }
   }
 
-  /* Z-Index Scale - Tailwind v4 utilities (--z-{name} → z-{name} class) */
+  /* Z-Index Scale - Tailwind v4 utilities (--z-{name} ? z-{name} class) */
   --z-navbar: 50;
   --z-mobile-nav: 100;
   --z-modal: 150;
@@ -224,7 +224,7 @@
     opacity: 0.85 !important;
   }
 
-  /* Pour les titres, on rÃ©duit l'espacement des lettres pour faire plus "compact/pro" */
+  /* Pour les titres, on réduit l'espacement des lettres pour faire plus "compact/pro" */
   h1,
   h2,
   h3,
@@ -246,14 +246,14 @@
     }
   }
 
-  /* EmpÃªcher le zoom automatique sur mobile quand on focus les inputs */
+  /* Empêcher le zoom automatique sur mobile quand on focus les inputs */
   input,
   textarea,
   select {
     font-size: 16px !important;
   }
 
-  /* Color scheme pour les contrÃ´les natifs des inputs (spinners, etc.) */
+  /* Color scheme pour les contrôles natifs des inputs (spinners, etc.) */
   :where(.dark, [data-theme="dark"]) :where(input, textarea, select) {
     color-scheme: dark;
     accent-color: currentColor;
@@ -263,7 +263,7 @@
     color-scheme: light;
   }
 
-  /* Masquer les flèches blanches (spin-buttons) des inputs number - Thème Sombre */
+  /* Masquer les fl�ches blanches (spin-buttons) des inputs number - Th�me Sombre */
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none !important;
@@ -290,7 +290,7 @@
     color: var(--foreground);
   }
 
-  /* Cursor pointer pour tous les Ã©lÃ©ments cliquables */
+  /* Cursor pointer pour tous les éléments cliquables */
   a,
   button,
   [role="button"],
@@ -314,7 +314,7 @@
     cursor: pointer !important;
   }
 
-  /* Hover explicite pour les Ã©lÃ©ments interactifs */
+  /* Hover explicite pour les éléments interactifs */
   a:hover,
   button:hover,
   [role="button"]:hover,
@@ -325,7 +325,7 @@
     cursor: pointer !important;
   }
 
-  /* Standardisation des hovers "bleu grisÃ©" */
+  /* Standardisation des hovers "bleu grisé" */
 
 
 
@@ -393,7 +393,7 @@
 
 @layer utilities {
 
-  /* Z-Index utilities — définies explicitement pour garantir le rendu correct */
+  /* Z-Index utilities � d�finies explicitement pour garantir le rendu correct */
   .z-navbar {
     z-index: 50;
   }
@@ -418,7 +418,7 @@
     z-index: 200;
   }
 
-  /* Couleurs sémantiques qui s'adaptent au thème */
+  /* Couleurs s�mantiques qui s'adaptent au th�me */
   .text-foreground {
     color: var(--foreground) !important;
   }
@@ -455,7 +455,7 @@
     border-color: var(--border) !important;
   }
 
-  /* Group hover pour les icÃ´nes dans les liens */
+  /* Group hover pour les icônes dans les liens */
   .group:hover .group-hover\:text-foreground {
     color: var(--foreground) !important;
   }
@@ -482,12 +482,12 @@
   }
 
   /* Padding pour le contenu au-dessus de la bottom nav mobile */
-  /* Utilise la variable calculÃ©e pour Ãªtre parfaitement synchro */
+  /* Utilise la variable calculée pour être parfaitement synchro */
   .pb-safe-nav {
     padding-bottom: var(--mobile-nav-height) !important;
   }
 
-  /* BanniÃ¨re promo : au-dessus de la bottom nav sur mobile */
+  /* Bannière promo : au-dessus de la bottom nav sur mobile */
   .bottom-above-mobile-nav {
     bottom: calc(var(--mobile-nav-height) + 0.5rem);
   }
@@ -511,7 +511,7 @@
     display: none;
   }
 
-  /* Mobile-first: EmpÃªcher le dÃ©bordement horizontal */
+  /* Mobile-first: Empêcher le débordement horizontal */
   @media screen and (max-width: 768px) {
     body {
       overflow-x: hidden;
@@ -637,7 +637,7 @@
   }
 }
 
-/* Animation shimmer luxueux pour skeletons - ThÃ¨me "Luxe & Teranga" */
+/* Animation shimmer luxueux pour skeletons - Thème "Luxe & Teranga" */
 @keyframes shimmer-luxury {
   0% {
     background-position: -200% 0;
@@ -648,7 +648,7 @@
   }
 }
 
-/* AmÃ©lioration des transitions pour les dropdowns Radix UI */
+/* Amélioration des transitions pour les dropdowns Radix UI */
 [data-radix-dropdown-menu-content],
 [data-radix-popover-content] {
   animation-duration: 200ms;
@@ -665,15 +665,15 @@
   animation: smooth-fade-out 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Header safe area - toujours appliquer pour les appareils avec notch/barre d'Ã©tat */
+/* Header safe area - toujours appliquer pour les appareils avec notch/barre d'état */
 .pwa-header-safe {
   padding-top: env(safe-area-inset-top, 0px);
 }
 
-/* PWA Optimizations - mode standalone (installÃ©) */
+/* PWA Optimizations - mode standalone (installé) */
 @media all and (display-mode: standalone) {
 
-  /* EmpÃªcher tout dÃ©calage visuel au lancement */
+  /* Empêcher tout décalage visuel au lancement */
   html,
   body {
     background-color: var(--background) !important;
@@ -684,12 +684,12 @@
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 43px) !important;
   }
 
-  /* Safe area padding renforcÃ© pour PWA standalone */
+  /* Safe area padding renforcé pour PWA standalone */
   .pt-safe {
     padding-top: calc(env(safe-area-inset-top, 0px) + 1rem) !important;
   }
 
-  /* Header mobile en mode PWA - padding extra pour la barre d'Ã©tat */
+  /* Header mobile en mode PWA - padding extra pour la barre d'état */
   .pwa-header-safe {
     padding-top: env(safe-area-inset-top, 0px) !important;
   }
@@ -1095,7 +1095,7 @@
     page-break-inside: avoid !important;
   }
 
-  /* Ã‰viter les coupures */
+  /* Éviter les coupures */
   table,
   tr,
   td,
@@ -1128,7 +1128,7 @@
 }
 
 /* ===== HIDE GOOGLE COOKIE BANNER ===== */
-/* Masquer la banniÃ¨re cookie Google par dÃ©faut pour Ã©viter le conflit avec notre CookieConsent personnalisÃ© */
+/* Masquer la bannière cookie Google par défaut pour éviter le conflit avec notre CookieConsent personnalisé */
 
 /* Google Translate Banner */
 .goog-te-banner-frame {
@@ -1137,14 +1137,14 @@
   opacity: 0 !important;
 }
 
-/* Google Cookie Consent Banner (gÃ©nÃ©ralement injectÃ© avec z-index trÃ¨s Ã©levÃ©) */
+/* Google Cookie Consent Banner (généralement injecté avec z-index très élevé) */
 div[style*="z-index: 2147483647"],
 div[style*="z-index:2147483647"] {
   display: none !important;
   visibility: hidden !important;
 }
 
-/* Autres Ã©lÃ©ments de banniÃ¨re Google potentiels */
+/* Autres éléments de bannière Google potentiels */
 iframe[src*="consent.google.com"],
 iframe[src*="google.com/gen_204"] {
   display: none !important;

@@ -28,7 +28,7 @@ export const PaymentReminderEmail = ({
     tenantName = "Locataire",
     amountFormatted = "250 000",
     dueDateStr = "05 Janvier 2026",
-    teamName = "Doussel Immo",
+    teamName = "Dousel",
 }: PaymentReminderEmailProps) => {
     return (
         <Html lang="fr">
@@ -38,7 +38,7 @@ export const PaymentReminderEmail = ({
                 <Container style={container}>
                     {/* En-tête discret */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO</Text>
+                        <Text style={logo}>Dousel</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -81,7 +81,7 @@ export const PaymentReminderEmail = ({
                             © {new Date().getFullYear()} {teamName} — Service de Gestion Locative
                         </Text>
                         <Text style={footerLink}>
-                            Doussel Immo — Dakar, Sénégal
+                            Dousel — Dakar, Sénégal
                         </Text>
                     </Section>
                 </Container>

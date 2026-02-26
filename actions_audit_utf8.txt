@@ -1,5 +1,5 @@
-﻿
+
 > dousell-immo@0.1.0 check:actions
 > tsx scripts/check-actions.ts
 
-Ô£à Server Actions Check: PASSED (Warnings allowed)
+ԣ� Server Actions Check: PASSED (Warnings allowed)

@@ -33,7 +33,7 @@ async function testListingSubmitted() {
                 ownerEmail: "test-proprietaire@gmail.com",
                 serviceType: "Pack Premium",
                 adminUrl: "https://dousel.com/admin/listings/test-id",
-                teamName: "Doussel Immo",
+                teamName: "Dousel",
             }),
         });
 

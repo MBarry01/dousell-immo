@@ -41,7 +41,7 @@ export function AccessRequestNotification({
         <Container style={container}>
           {/* En-tête discret */}
           <Section style={header}>
-            <Text style={logo}>DOUSSEL IMMO</Text>
+            <Text style={logo}>Dousel</Text>
           </Section>
 
           <Hr style={hrSubtle} />
@@ -87,7 +87,7 @@ export function AccessRequestNotification({
               © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
             </Text>
             <Text style={footerLink}>
-              Doussel Immo — Notification Système
+              Dousel — Notification Système
             </Text>
           </Section>
         </Container>

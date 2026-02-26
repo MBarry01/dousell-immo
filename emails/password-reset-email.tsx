@@ -24,7 +24,7 @@ interface PasswordResetEmailProps {
 export function PasswordResetEmail({
     userName = "Jean Dupont",
     resetUrl = "https://dousel.com/auth/reset-password",
-    teamName = "Doussel Immo",
+    teamName = "Dousel",
 }: PasswordResetEmailProps) {
     return (
         <Html lang="fr">
@@ -33,7 +33,7 @@ export function PasswordResetEmail({
                 <Container style={container}>
                     {/* En-tête discret */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO</Text>
+                        <Text style={logo}>Dousel</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -74,7 +74,7 @@ export function PasswordResetEmail({
                             © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
                         </Text>
                         <Text style={footerLink}>
-                            Doussel Immo — Sécurité de votre compte
+                            Dousel — Sécurité de votre compte
                         </Text>
                     </Section>
                 </Container>

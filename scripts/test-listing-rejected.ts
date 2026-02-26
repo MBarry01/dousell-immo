@@ -31,7 +31,7 @@ async function testListingRejected() {
                 propertyTitle: "Appartement F4 à Mermoz",
                 rejectionReason: "La description est trop courte et ne mentionne pas les charges de copropriété. De plus, les photos du salon sont floues.",
                 editUrl: "https://dousel.com/gestion/biens/edit/test-id",
-                teamName: "Doussel Immo",
+                teamName: "Dousel",
             }),
         });
 

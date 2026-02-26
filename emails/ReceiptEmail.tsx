@@ -46,7 +46,7 @@ export function ReceiptEmail({
                 <Container style={container}>
                     {/* En-tête */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO</Text>
+                        <Text style={logo}>Dousel</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -101,7 +101,7 @@ export function ReceiptEmail({
 
                         <Section style={footerBottom}>
                             <Text style={footerTextSubtle}>
-                                © {new Date().getFullYear()} Doussel Immo — Dakar, Sénégal
+                                © {new Date().getFullYear()} Dousel — Dakar, Sénégal
                             </Text>
                             <Text style={footerLink}>
                                 Email généré automatiquement • Ne pas répondre

@@ -24,7 +24,7 @@ interface VerificationEmailProps {
 export function VerificationEmail({
   userName = "Jean Dupont",
   verificationUrl = "https://dousel.com/auth/confirm",
-  teamName = "Doussel Immo",
+  teamName = "Dousel",
 }: VerificationEmailProps) {
   return (
     <Html lang="fr">
@@ -33,7 +33,7 @@ export function VerificationEmail({
         <Container style={container}>
           {/* En-tête discret */}
           <Section style={header}>
-            <Text style={logo}>DOUSSEL IMMO</Text>
+            <Text style={logo}>Dousel</Text>
           </Section>
 
           <Hr style={hrSubtle} />
@@ -74,7 +74,7 @@ export function VerificationEmail({
               © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
             </Text>
             <Text style={footerLink}>
-              Doussel Immo — L'immobilier de confiance au Sénégal
+              Dousel — L'immobilier de confiance au Sénégal
             </Text>
           </Section>
         </Container>

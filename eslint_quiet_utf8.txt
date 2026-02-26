@@ -1,4 +1,4 @@
-﻿
+
 > dousell-immo@0.1.0 lint
 > eslint --quiet
 
@@ -7,5 +7,5 @@ C:\Users\Barry\Downloads\Doussel_immo\components\gestion\PermissionDeniedState.t
   49:31  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
   53:66  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
 
-Ô£û 2 problems (2 errors, 0 warnings)
+ԣ� 2 problems (2 errors, 0 warnings)
 

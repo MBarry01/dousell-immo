@@ -1,4 +1,4 @@
-Ôªøf95454c - perf: optimize performance - RES 51 √î√•√Ü 85+ (ISR, lazy analytics, dead code removal)
+f95454c - perf: optimize performance - RES 51 ‘Â∆ 85+ (ISR, lazy analytics, dead code removal)
 d142877 - feat(mobile): refine Hero section layout and spacing
 a38257e - fix: sync vitrine page.tsx with SectionResult type
 fbd123e - feat(gestion-locative): enhance rental management with deposit receipts and cache improvements

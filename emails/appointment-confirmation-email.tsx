@@ -32,7 +32,7 @@ export default function AppointmentConfirmationEmail({
   meetingType = "Visite Immobilière",
   phone,
   location,
-  teamName = "Doussel Immo",
+  teamName = "Dousel",
 }: AppointmentConfirmationEmailProps) {
   return (
     <Html>
@@ -42,7 +42,7 @@ export default function AppointmentConfirmationEmail({
         <Container style={container}>
           {/* En-tête discret */}
           <Section style={header}>
-            <Text style={logo}>DOUSSEL IMMO</Text>
+            <Text style={logo}>Dousel</Text>
           </Section>
 
           <Hr style={hrSubtle} />
@@ -94,7 +94,7 @@ export default function AppointmentConfirmationEmail({
               © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
             </Text>
             <Text style={footerLink}>
-              Doussel Immo — Votre partenaire immobilier
+              Dousel — Votre partenaire immobilier
             </Text>
           </Section>
         </Container>

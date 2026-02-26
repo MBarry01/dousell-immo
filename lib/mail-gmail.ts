@@ -40,6 +40,7 @@ type SendEmailOptions = {
     content: Buffer | string;
     contentType?: string;
   }>;
+  replyTo?: string;
 };
 
 /**
@@ -53,6 +54,7 @@ export async function sendEmail({
   html,
   react,
   attachments,
+  replyTo,
 }: SendEmailOptions) {
   try {
     const GMAIL_USER = process.env.GMAIL_USER;
@@ -128,12 +130,16 @@ export async function sendEmail({
     }) || [];
 
     // Configuration de l'email avec le nom d'expéditeur professionnel
+    const isNoReply = replyTo === 'noreply';
+    const sender = isNoReply ? (process.env.NOREPLY_EMAIL || `"Dousel" <${GMAIL_USER}>`) : (process.env.FROM_EMAIL || `"Dousel Support" <${GMAIL_USER}>`);
+
     const mailOptions = {
-      from: `"Doussel Immo Support" <${GMAIL_USER}>`,
+      from: sender,
       to: recipients.join(", "),
       subject,
       html: emailHtml,
       attachments: formattedAttachments,
+      replyTo: isNoReply ? undefined : (replyTo || process.env.CONTACT_EMAIL || "contact@dousel.com"),
     };
 
     console.log(`📧 Envoi d'email à: ${recipients.join(", ")}`);
@@ -191,7 +197,7 @@ export async function sendInvoiceEmail({
 }) {
   return sendEmail({
     to,
-    subject: `Votre facture Doussel Immo${invoiceNumber ? ` - ${invoiceNumber}` : ""}`,
+    subject: `Votre facture Dousel${invoiceNumber ? ` - ${invoiceNumber}` : ""}`,
     react: React.createElement(InvoiceEmail, {
       clientName,
       invoiceNumber,
@@ -199,7 +205,7 @@ export async function sendInvoiceEmail({
     }),
     attachments: [
       {
-        filename: "Facture-Doussel.pdf",
+        filename: "Facture-Dousel.pdf",
         content: pdfBuffer,
         contentType: "application/pdf",
       },

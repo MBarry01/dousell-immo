@@ -30,7 +30,7 @@ async function testVerification() {
             react: React.createElement(VerificationEmail, {
                 userName: "Barry",
                 verificationUrl: "https://dousel.com/auth/callback?token_hash=test_token_123&type=email&next=/",
-                teamName: "Doussel Immo",
+                teamName: "Dousel",
             }),
         });
 

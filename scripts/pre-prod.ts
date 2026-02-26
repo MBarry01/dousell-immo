@@ -30,6 +30,6 @@ if (failed) {
   console.error("\n🚫 Validation échouée — push annulé.");
   process.exit(1);
 } else {
-  console.log("\n✅ Doussel Immo est prêt pour la Prod");
+  console.log("\n✅ Dousel est prêt pour la Prod");
   process.exit(0);
 }

@@ -42,7 +42,7 @@ async function getCoordinates(query: string, retries: number = 2): Promise<{ lat
       )}&countrycodes=sn&limit=1&addressdetails=1`;
 
       const headers = {
-        "User-Agent": "Doussel-Immo-Script/1.0",
+        "User-Agent": "Dousel-Immo-Script/1.0",
         "Accept-Language": "fr",
       };
 

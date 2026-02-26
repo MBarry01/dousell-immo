@@ -76,9 +76,9 @@ export function RealEstateJsonLd({
             name: 'Sénégal',
         },
         sameAs: [
-            'https://www.facebook.com/dousellimmo',
-            'https://www.instagram.com/dousellimmo',
-            'https://twitter.com/dousell_immo',
+            'https://www.facebook.com/douselimmo',
+            'https://www.instagram.com/douselimmo',
+            'https://twitter.com/dousel_immo',
         ],
     };
 
@@ -375,7 +375,7 @@ export function LocalBusinessJsonLd() {
         },
         image: 'https://dousel.com/og-landing.png',
         telephone: '+221338600000',
-        email: 'contact@dousell.immo',
+        email: 'contact@dousel.com',
         address: {
             '@type': 'PostalAddress',
             streetAddress: 'Sacré-Cœur 3, VDN',
@@ -430,10 +430,10 @@ export function LocalBusinessJsonLd() {
             },
         ],
         sameAs: [
-            'https://www.facebook.com/dousellimmo',
-            'https://www.instagram.com/dousellimmo',
-            'https://twitter.com/dousell_immo',
-            'https://www.linkedin.com/company/dousell-immo',
+            'https://www.facebook.com/douselimmo',
+            'https://www.instagram.com/douselimmo',
+            'https://twitter.com/dousel_immo',
+            'https://www.linkedin.com/company/dousel-immo',
         ],
         hasOfferCatalog: {
             '@type': 'OfferCatalog',

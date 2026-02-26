@@ -1,4 +1,4 @@
-﻿.next/dev/types/validator.ts(530,1): error TS2304: Cannot find name 'page'.
+.next/dev/types/validator.ts(530,1): error TS2304: Cannot find name 'page'.
 .next/dev/types/validator.ts(532,52): error TS2344: Type '"/admin/roles"' does not satisfy the constraint 'AppRoutes'.
 .next/dev/types/validator.ts(541,52): error TS2344: Type '"/admin/users"' does not satisfy the constraint 'AppRoutes'.
 .next/dev/types/validator.ts(550,52): error TS2344: Type '"/admin/verifications/biens"' does not satisfy the constraint 'AppRoutes'.

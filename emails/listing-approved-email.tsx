@@ -48,7 +48,7 @@ export function ListingApprovedEmail({
   address = "Almadies",
   paymentAmount,
   serviceName,
-  teamName = "Doussel Immo",
+  teamName = "Dousel",
 }: ListingApprovedEmailProps) {
   return (
     <Html>
@@ -58,7 +58,7 @@ export function ListingApprovedEmail({
         <Container style={container}>
           {/* En-tête discret */}
           <Section style={header}>
-            <Text style={logo}>DOUSSEL IMMO</Text>
+            <Text style={logo}>Dousel</Text>
           </Section>
 
           <Hr style={hrSubtle} />
@@ -144,7 +144,7 @@ export function ListingApprovedEmail({
               © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
             </Text>
             <Text style={footerLink}>
-              Doussel Immo — Plateforme Immobilière
+              Dousel — Plateforme Immobilière
             </Text>
           </Section>
         </Container>

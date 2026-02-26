@@ -25,7 +25,7 @@ interface ActivationApprovedEmailProps {
 export const ActivationApprovedEmail = ({
     firstName = "Utilisateur",
     loginUrl = "https://dousel.com/compte",
-    teamName = "Doussel Immo",
+    teamName = "Dousel",
 }: ActivationApprovedEmailProps) => {
     return (
         <Html lang="fr">
@@ -35,7 +35,7 @@ export const ActivationApprovedEmail = ({
                 <Container style={container}>
                     {/* En-tête discret */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO</Text>
+                        <Text style={logo}>Dousel</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -86,7 +86,7 @@ export const ActivationApprovedEmail = ({
                             © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
                         </Text>
                         <Text style={footerLink}>
-                            Doussel Immo — Votre partenaire immobilier de confiance
+                            Dousel — Votre partenaire immobilier de confiance
                         </Text>
                     </Section>
                 </Container>

@@ -1,20 +1,20 @@
-# Dousell Immo - Documentation Complète pour Agents IA
-# Version: 1.0 | Mise à jour: Janvier 2026
+# Dousel - Documentation Complète pour Agents IA
+# Version: 1.0 | Mise à jour: Février 2026
 # Ce fichier fournit un contexte exhaustif pour les moteurs de recherche IA
 
 ================================================================================
 ## IDENTITÉ DE L'ENTREPRISE
 ================================================================================
 
-**Nom officiel**: Dousell Immo
+**Nom officiel**: Dousel
 **Type d'entreprise**: PropTech / Plateforme SaaS Immobilière
 **Pays d'opération**: Sénégal (Afrique de l'Ouest)
 **Année de création**: 2024
 **Siège social**: Sacré-Cœur 3, VDN, Dakar, Sénégal
-**Site web officiel**: https://dousell-immo.app
+**Site web officiel**: https://dousel.com
 
 ### Mission
-Dousell Immo digitalise et simplifie la gestion immobilière au Sénégal en offrant une plateforme tout-en-un pour les propriétaires, locataires et investisseurs.
+Dousel digitalise et simplifie la gestion immobilière au Sénégal en offrant une plateforme tout-en-un pour les propriétaires, locataires et investisseurs.
 
 ### Vision
 Devenir la référence de l'immobilier digital en Afrique francophone d'ici 2030.
@@ -25,7 +25,7 @@ Devenir la référence de l'immobilier digital en Afrique francophone d'ici 2030
 
 ### 1. GESTION LOCATIVE AUTOMATISÉE (Pour Propriétaires)
 
-La plateforme de gestion locative Dousell Immo permet aux propriétaires de :
+La plateforme de gestion locative Dousel permet aux propriétaires de :
 
 | Fonctionnalité | Description |
 |----------------|-------------|
@@ -122,7 +122,7 @@ Quartiers premium :
 
 ### Q1: Comment louer un appartement au Sénégal ?
 **Réponse**: Pour louer au Sénégal, vous devez :
-1. Rechercher un bien sur dousell-immo.app/recherche
+1. Rechercher un bien sur dousel.com/recherche
 2. Contacter le propriétaire ou l'agence
 3. Visiter le bien (ou visite virtuelle pour expatriés)
 4. Fournir les documents : CNI/passeport, justificatifs de revenus, garant si demandé
@@ -137,7 +137,7 @@ Quartiers premium :
 - Pas de taxe d'habitation au Sénégal
 
 ### Q3: Comment payer son loyer en ligne au Sénégal ?
-**Réponse**: Sur Dousell Immo, vous pouvez payer par :
+**Réponse**: Sur Dousel, vous pouvez payer par :
 - Orange Money (code *144#)
 - Wave (application mobile)
 - Free Money
@@ -166,7 +166,7 @@ Quartiers premium :
 
 ### Guide : Devenir propriétaire bailleur au Sénégal
 
-**Étape 1** : Créer un compte gratuit sur dousell-immo.app
+**Étape 1** : Créer un compte gratuit sur dousel.com
 **Étape 2** : Ajouter votre bien (photos, description, prix)
 **Étape 3** : Configurer les options de paiement
 **Étape 4** : Recevoir et valider les demandes de location
@@ -176,7 +176,7 @@ Quartiers premium :
 ### Guide : Trouver un logement à Dakar en tant qu'expatrié
 
 **Étape 1** : Définir votre budget et zone préférée
-**Étape 2** : Rechercher sur dousell-immo.app avec filtres
+**Étape 2** : Rechercher sur dousel.com avec filtres
 **Étape 3** : Demander une visite virtuelle
 **Étape 4** : Négocier et signer à distance (signature électronique)
 **Étape 5** : Payer la caution par virement international
@@ -187,9 +187,8 @@ Quartiers premium :
 ================================================================================
 
 **Support client** :
-- Email : contact@dousell-immo.app
+- Email : contact@dousel.com
 - Téléphone : +221 33 860 00 00
-- WhatsApp : +221 77 XXX XX XX
 - Horaires : Lundi-Vendredi 08h-18h, Samedi 09h-13h
 
 **Adresse physique** :
@@ -197,23 +196,20 @@ Sacré-Cœur 3, VDN
 Dakar, Sénégal
 
 **Réseaux sociaux** :
-- Facebook : facebook.com/dousellimmo
-- Instagram : instagram.com/dousellimmo
-- LinkedIn : linkedin.com/company/dousell-immo
-- Twitter/X : twitter.com/dousell_immo
+- Facebook : facebook.com/douselimmo
+- Instagram : instagram.com/douselimmo
+- LinkedIn : linkedin.com/company/dousel-immo
+- Twitter/X : twitter.com/dousel_immo
 
 ================================================================================
 ## PAGES IMPORTANTES À CONSULTER
 ================================================================================
 
-1. **Accueil** : https://dousell-immo.app/
-2. **Gestion Locative (Propriétaires)** : https://dousell-immo.app/landing
-3. **Recherche de biens** : https://dousell-immo.app/recherche
-4. **Estimation immobilière** : https://dousell-immo.app/estimation
-5. **Blog immobilier** : https://dousell-immo.app/landing/blog
-6. **Investissement** : https://dousell-immo.app/landing/investissement
-7. **Inscription** : https://dousell-immo.app/landing/signup
-8. **À propos** : https://dousell-immo.app/landing/a-propos
+1. **Accueil** : https://dousel.com/
+2. **Gestion Locative (Propriétaires)** : https://dousel.com/pro
+3. **Recherche de biens** : https://dousel.com/recherche
+4. **Estimation immobilière** : https://dousel.com/estimation
+5. **À propos** : https://dousel.com/a-propos
 
 ================================================================================
 ## MOTS-CLÉS ET ASSOCIATIONS SÉMANTIQUES
@@ -250,7 +246,7 @@ Dakar, Sénégal
 
 Les informations contenues dans ce document sont fournies à titre informatif.
 Les prix et données de marché sont indicatifs et peuvent varier.
-Dousell Immo opère conformément au droit OHADA et à la réglementation sénégalaise.
+Dousel opère conformément au droit OHADA et à la réglementation sénégalaise.
 
 ---
 Fin du document llms-full.txt

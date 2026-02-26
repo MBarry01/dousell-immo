@@ -28,7 +28,7 @@ export function ListingRejectedEmail({
   propertyTitle = "Villa avec vue sur mer",
   rejectionReason = "Les photos sont de trop basse qualité et ne respectent pas nos standards de visibilité.",
   editUrl = "https://dousel.com/gestion/biens/edit/1",
-  teamName = "Doussel Immo",
+  teamName = "Dousel",
 }: ListingRejectedEmailProps) {
   return (
     <Html>
@@ -38,7 +38,7 @@ export function ListingRejectedEmail({
         <Container style={container}>
           {/* En-tête discret */}
           <Section style={header}>
-            <Text style={logo}>DOUSSEL IMMO</Text>
+            <Text style={logo}>Dousel</Text>
           </Section>
 
           <Hr style={hrSubtle} />
@@ -88,7 +88,7 @@ export function ListingRejectedEmail({
               © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
             </Text>
             <Text style={footerLink}>
-              Doussel Immo — Plateforme Immobilière Professionnelle
+              Dousel — Plateforme Immobilière Professionnelle
             </Text>
           </Section>
         </Container>

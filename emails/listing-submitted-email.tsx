@@ -32,7 +32,7 @@ export function ListingSubmittedEmail({
   ownerEmail = "client@exemple.com",
   serviceType = "Standard",
   adminUrl = "https://dousel.com/admin/listings/1",
-  teamName = "Doussel Immo",
+  teamName = "Dousel",
 }: ListingSubmittedEmailProps) {
   const formattedPrice = new Intl.NumberFormat("fr-SN", {
     maximumFractionDigits: 0,
@@ -46,7 +46,7 @@ export function ListingSubmittedEmail({
         <Container style={container}>
           {/* En-tête discret */}
           <Section style={header}>
-            <Text style={logo}>DOUSSEL IMMO</Text>
+            <Text style={logo}>Dousel</Text>
           </Section>
 
           <Hr style={hrSubtle} />
@@ -105,7 +105,7 @@ export function ListingSubmittedEmail({
               © {new Date().getFullYear()} {teamName} — Système de Modération
             </Text>
             <Text style={footerLink}>
-              Doussel Immo Admin Panel
+              Dousel Admin Panel
             </Text>
           </Section>
         </Container>

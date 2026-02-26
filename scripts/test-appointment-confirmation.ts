@@ -26,7 +26,7 @@ async function testAppointmentConfirmation() {
     try {
         const result = await sendEmail({
             to: testEmail,
-            subject: "📅 Votre rendez-vous est confirmé - Doussel Immo",
+            subject: "📅 Votre rendez-vous est confirmé - Dousel",
             react: React.createElement(AppointmentConfirmationEmail, {
                 userName: "Barry",
                 date: "Mercredi 25 Février 2026",
@@ -34,7 +34,7 @@ async function testAppointmentConfirmation() {
                 meetingType: "Visite de la Villa Almadies",
                 location: "Almadies, Dakar",
                 phone: "+221 77 XXX XX XX",
-                teamName: "Doussel Immo",
+                teamName: "Dousel",
             }),
         });
 

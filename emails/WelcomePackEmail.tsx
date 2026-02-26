@@ -49,7 +49,7 @@ export function WelcomePackEmail({
                 <Container style={container}>
                     {/* En-tête */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO</Text>
+                        <Text style={logo}>DOUSEL</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -119,7 +119,7 @@ export function WelcomePackEmail({
 
                         <Section style={footerBottom}>
                             <Text style={footerTextSubtle}>
-                                © {new Date().getFullYear()} Doussel Immo — Écosystème Immobilier
+                                © {new Date().getFullYear()} Dousel — Écosystème Immobilier
                             </Text>
                         </Section>
                     </Section>

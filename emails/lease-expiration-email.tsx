@@ -31,7 +31,7 @@ export const LeaseExpirationEmail = ({
     tenantName = "Moussa Diop",
     propertyName = "Appartement Plateau",
     monthlyAmountFormatted = "450 000",
-    teamName = "Doussel Immo",
+    teamName = "Dousel",
 }: LeaseExpirationEmailProps) => {
     const isUrgent = monthsRemaining <= 3;
 
@@ -43,7 +43,7 @@ export const LeaseExpirationEmail = ({
                 <Container style={container}>
                     {/* En-tête discret */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO</Text>
+                        <Text style={logo}>Dousel</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -105,7 +105,7 @@ export const LeaseExpirationEmail = ({
                             © {new Date().getFullYear()} {teamName} — Assistant de Gestion Locative
                         </Text>
                         <Text style={footerLink}>
-                            Doussel Immo — Plateforme de Gestion Immobilière Intelligente
+                            Dousel — Plateforme de Gestion Immobilière Intelligente
                         </Text>
                     </Section>
                 </Container>

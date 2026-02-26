@@ -34,7 +34,7 @@ async function uploadFile(filePath: string, relativePath: string): Promise<{ url
         const filename = path.basename(relativePath, path.extname(relativePath));
 
         const result = await cloudinary.uploader.upload(filePath, {
-            folder: `doussel/static/${folder}`,
+            folder: `Dousel/static/${folder}`,
             public_id: filename,
             overwrite: true,
             resource_type: 'auto'

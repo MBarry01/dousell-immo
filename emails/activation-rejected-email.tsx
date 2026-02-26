@@ -24,7 +24,7 @@ interface ActivationRejectedEmailProps {
 export const ActivationRejectedEmail = ({
     firstName = "Utilisateur",
     reason = "Les documents fournis sont incomplets ou illisibles.",
-    teamName = "Doussel Immo",
+    teamName = "Dousel",
 }: ActivationRejectedEmailProps) => {
     return (
         <Html lang="fr">
@@ -34,7 +34,7 @@ export const ActivationRejectedEmail = ({
                 <Container style={container}>
                     {/* En-tête discret */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO</Text>
+                        <Text style={logo}>Dousel</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -78,7 +78,7 @@ export const ActivationRejectedEmail = ({
                             © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
                         </Text>
                         <Text style={footerLink}>
-                            Doussel Immo — Plateforme Immobilière Professionnelle
+                            Dousel — Plateforme Immobilière Professionnelle
                         </Text>
                     </Section>
                 </Container>

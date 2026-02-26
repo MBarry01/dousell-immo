@@ -1,4 +1,4 @@
-﻿C:\Users\Barry\Downloads\Doussel_immo\app\(webapp)\etats-lieux\[id]\pdf\PDFPreview.tsx
+C:\Users\Barry\Downloads\Doussel_immo\app\(webapp)\etats-lieux\[id]\pdf\PDFPreview.tsx
 C:\Users\Barry\Downloads\Doussel_immo\app\(webapp)\etats-lieux\components\SignaturePage.tsx
 C:\Users\Barry\Downloads\Doussel_immo\app\(webapp)\etats-lieux\formulaire-vierge\page.tsx
 C:\Users\Barry\Downloads\Doussel_immo\app\(webapp)\etats-lieux\new\page.tsx

@@ -26,14 +26,14 @@ async function testVisitRequest() {
     try {
         const result = await sendEmail({
             to: testEmail,
-            subject: "🏠 Nouvelle demande de visite - Doussel Immo",
+            subject: "🏠 Nouvelle demande de visite - Dousel",
             react: React.createElement(VisitRequestEmail, {
                 fullName: "Moussa Sarr",
                 phone: "+221 78 123 45 67",
                 projectType: "achat",
                 availability: "En semaine après 17h",
                 message: "Bonjour, je voudrais visiter le terrain à Diamniadio dès que possible.",
-                teamName: "Doussel Immo",
+                teamName: "Dousel",
                 adminUrl: "https://dousel.com/admin/visits/test-id",
             }),
         });

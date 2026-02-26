@@ -60,7 +60,7 @@ export function MaintenanceUpdateEmail({
                 <Container style={container}>
                     {/* En-tête */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO — MAINTENANCE</Text>
+                        <Text style={logo}>Dousel — MAINTENANCE</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -117,7 +117,7 @@ export function MaintenanceUpdateEmail({
 
                         <Section style={footerBottom}>
                             <Text style={footerTextSubtle}>
-                                © {new Date().getFullYear()} Doussel Immo — Service Technique
+                                © {new Date().getFullYear()} Dousel — Service Technique
                             </Text>
                         </Section>
                     </Section>

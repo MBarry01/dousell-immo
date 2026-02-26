@@ -37,7 +37,7 @@ export function TenantInvitationEmail({
                 <Container style={container}>
                     {/* En-tête */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO</Text>
+                        <Text style={logo}>Dousel</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -89,7 +89,7 @@ export function TenantInvitationEmail({
 
                         <Section style={footerBottom}>
                             <Text style={footerTextSubtle}>
-                                © {new Date().getFullYear()} Doussel Immo — Simplifiez votre gestion locative
+                                © {new Date().getFullYear()} Dousel — Simplifiez votre gestion locative
                             </Text>
                             <Text style={footerLink}>
                                 Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet email.

@@ -15,11 +15,11 @@ async function listResources() {
         console.log("Listing Cloudinary resources...");
         const result = await cloudinary.api.resources({
             type: 'upload',
-            prefix: 'doussel/',
+            prefix: 'Dousel/',
             max_results: 50
         });
 
-        console.log(`Found ${result.resources.length} resources in doussel/ folder:`);
+        console.log(`Found ${result.resources.length} resources in Dousel/ folder:`);
         result.resources.forEach((res: any) => {
             console.log(`- ${res.public_id} (${res.secure_url})`);
         });

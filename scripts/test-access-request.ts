@@ -32,7 +32,7 @@ async function testAccessRequest() {
                 requesterEmail: "barrymohamadou98@gmail.com",
                 permissionLabel: "Édition des baux",
                 reason: "Je dois mettre à jour le montant du loyer sur le contrat de la villa A1.",
-                teamName: "Doussel Immo",
+                teamName: "Dousel",
                 reviewUrl: "https://dousel.com/gestion/access-control",
             }),
         });

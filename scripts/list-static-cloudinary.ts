@@ -13,7 +13,7 @@ async function listStatic() {
     try {
         const result = await cloudinary.api.resources({
             type: 'upload',
-            prefix: 'doussel/static/',
+            prefix: 'Dousel/static/',
             max_results: 100
         });
         console.log("--- Static Assets on Cloudinary ---");

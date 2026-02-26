@@ -52,7 +52,7 @@ export function LegalNoticeEmail({
                 <Container style={container}>
                     {/* En-tête */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO — GESTION JURIDIQUE</Text>
+                        <Text style={logo}>Dousel — GESTION JURIDIQUE</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -101,7 +101,7 @@ export function LegalNoticeEmail({
 
                         <Section style={footerBottom}>
                             <Text style={footerTextSubtle}>
-                                © {new Date().getFullYear()} Doussel Immo — Conformité Locative
+                                © {new Date().getFullYear()} Dousel — Conformité Locative
                             </Text>
                         </Section>
                     </Section>

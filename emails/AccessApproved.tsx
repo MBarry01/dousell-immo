@@ -32,7 +32,7 @@ export function AccessApproved({
   expiresAt = "25 Février 2026 à 14:00",
   reviewerName = "Marie Martin",
   reviewNotes,
-  teamName = "Doussel Immo",
+  teamName = "Dousel",
   dashboardUrl = "https://dousel.com/gestion",
 }: AccessApprovedProps) {
   return (
@@ -43,7 +43,7 @@ export function AccessApproved({
         <Container style={container}>
           {/* En-tête discret */}
           <Section style={header}>
-            <Text style={logo}>DOUSSEL IMMO</Text>
+            <Text style={logo}>Dousel</Text>
           </Section>
 
           <Hr style={hrSubtle} />

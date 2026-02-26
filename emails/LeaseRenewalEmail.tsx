@@ -45,7 +45,7 @@ export function LeaseRenewalEmail({
                 <Container style={container}>
                     {/* En-tête */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO</Text>
+                        <Text style={logo}>Dousel</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -100,7 +100,7 @@ export function LeaseRenewalEmail({
 
                         <Section style={footerBottom}>
                             <Text style={footerTextSubtle}>
-                                © {new Date().getFullYear()} Doussel Immo — Écosystème Immobilier
+                                © {new Date().getFullYear()} Dousel — Écosystème Immobilier
                             </Text>
                         </Section>
                     </Section>

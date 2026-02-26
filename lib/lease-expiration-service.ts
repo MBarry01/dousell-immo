@@ -196,6 +196,7 @@ async function sendExpirationAlert(
         propertyName,
         monthlyAmountFormatted: formattedAmount,
       }),
+      replyTo: 'noreply'
     });
 
     const daysRemaining = differenceInDays(endDate, new Date());

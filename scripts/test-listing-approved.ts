@@ -26,7 +26,7 @@ async function testListingApproved() {
     try {
         const result = await sendEmail({
             to: testEmail,
-            subject: "🎉 Votre annonce est en ligne ! - Doussel Immo",
+            subject: "🎉 Votre annonce est en ligne ! - Dousel",
             react: React.createElement(ListingApprovedEmail, {
                 propertyTitle: "Superbe Villa aux Almadies avec Piscine",
                 propertyUrl: "https://dousel.com/biens/villa-almadies-piscine",
@@ -40,7 +40,7 @@ async function testListingApproved() {
                 region: "Almadies",
                 paymentAmount: 15000,
                 serviceName: "Boost Visibilité (7 jours)",
-                teamName: "Doussel Immo",
+                teamName: "Dousel",
             }),
         });
 

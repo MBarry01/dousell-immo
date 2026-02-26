@@ -161,5 +161,6 @@ async function sendReminderEmail(email: string, name: string, amount: number, da
         }),
         // @ts-ignore - Le type sendEmail accepte cc mais TypeScript ne le voit pas toujours
         cc: ccRecipients,
+        replyTo: 'noreply'
     });
 }

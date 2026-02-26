@@ -89,6 +89,7 @@ export async function notifyAccessRequest(data: {
         teamName,
         reviewUrl: `${BASE_URL}/gestion/access-control`,
       }),
+      replyTo: 'noreply'
     });
 
     return { success: true };
@@ -127,6 +128,7 @@ export async function notifyAccessApproved(data: {
         teamName,
         dashboardUrl: `${BASE_URL}/gestion`,
       }),
+      replyTo: 'noreply'
     });
 
     return { success: true };
@@ -162,6 +164,7 @@ export async function notifyAccessRejected(data: {
         teamName,
         contactUrl: `${BASE_URL}/gestion/equipe`,
       }),
+      replyTo: 'noreply'
     });
 
     return { success: true };
@@ -200,6 +203,7 @@ export async function notifyAccessExpiring(data: {
         teamName,
         requestUrl: `${BASE_URL}/gestion`,
       }),
+      replyTo: 'noreply'
     });
 
     return { success: true };

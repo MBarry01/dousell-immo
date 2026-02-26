@@ -26,13 +26,13 @@ interface StandardNotificationEmailProps {
  * Design Minimaliste SaaS
  */
 export function StandardNotificationEmail({
-    title = "Notification Doussel Immo",
+    title = "Notification Dousel",
     previewText = "Vous avez une nouvelle notification",
     greeting = "Bonjour,",
     mainContent = "Ceci est une notification automatique de votre plateforme immobilière.",
     ctaText,
     ctaUrl,
-    footerText = "L'équipe Doussel Immo",
+    footerText = "L'équipe Dousel",
 }: StandardNotificationEmailProps) {
     return (
         <Html>
@@ -42,7 +42,7 @@ export function StandardNotificationEmail({
                 <Container style={container}>
                     {/* En-tête */}
                     <Section style={header}>
-                        <Text style={logo}>DOUSSEL IMMO</Text>
+                        <Text style={logo}>Dousel</Text>
                     </Section>
 
                     <Hr style={hrSubtle} />
@@ -76,7 +76,7 @@ export function StandardNotificationEmail({
 
                         <Section style={footerBottom}>
                             <Text style={footerTextSubtle}>
-                                © {new Date().getFullYear()} Doussel Immo — Écosystème Immobilier
+                                © {new Date().getFullYear()} Dousel — Écosystème Immobilier
                             </Text>
                         </Section>
                     </Section>

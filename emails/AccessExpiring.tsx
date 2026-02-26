@@ -30,7 +30,7 @@ export function AccessExpiring({
   permissionLabel = "Édition des baux",
   expiresAt = "25 Février 2026 à 18:00",
   hoursRemaining = 1,
-  teamName = "Doussel Immo",
+  teamName = "Dousel",
   requestUrl = "https://dousel.com/gestion",
 }: AccessExpiringProps) {
   return (
@@ -41,7 +41,7 @@ export function AccessExpiring({
         <Container style={container}>
           {/* En-tête discret */}
           <Section style={header}>
-            <Text style={logo}>DOUSSEL IMMO</Text>
+            <Text style={logo}>Dousel</Text>
           </Section>
 
           <Hr style={hrSubtle} />
@@ -90,7 +90,7 @@ export function AccessExpiring({
               © {new Date().getFullYear()} {teamName} — Dakar, Sénégal
             </Text>
             <Text style={footerLink}>
-              Doussel Immo — Plateforme de Gestion Immobilière
+              Dousel — Plateforme de Gestion Immobilière
             </Text>
           </Section>
         </Container>

@@ -38,7 +38,7 @@ async function migrateAvatars() {
                 console.log(`  Migrating avatar for ${profile.full_name || profile.id}...`);
 
                 const result = await cloudinary.uploader.upload(profile.avatar_url, {
-                    folder: 'doussel/profiles/avatars',
+                    folder: 'Dousel/profiles/avatars',
                     public_id: `avatar_${profile.id}`,
                     resource_type: 'auto',
                     overwrite: true,

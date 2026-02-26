@@ -33,7 +33,7 @@ async function testAccessApproved() {
                 expiresAt: "25 Février 2026 à 18:00",
                 reviewerName: "M. Barry (Admin)",
                 reviewNotes: "Accès accordé pour la session de cet après-midi. N'oubliez pas de sauvegarder vos modifications.",
-                teamName: "Doussel Immo",
+                teamName: "Dousel",
                 dashboardUrl: "https://dousel.com/gestion",
             }),
         });

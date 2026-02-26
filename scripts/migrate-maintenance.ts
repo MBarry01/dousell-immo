@@ -44,7 +44,7 @@ async function migrateMaintenance() {
                     try {
                         console.log(`  Migrating maintenance photo for ${req.id}...`);
                         const result = await cloudinary.uploader.upload(url, {
-                            folder: `doussel/teams/${req.team_id || 'unknown'}/maintenance/${req.id}`,
+                            folder: `Dousel/teams/${req.team_id || 'unknown'}/maintenance/${req.id}`,
                             resource_type: 'auto',
                             tags: ['maintenance', 'migrated']
                         });
@@ -69,7 +69,7 @@ async function migrateMaintenance() {
                 try {
                     console.log(`  Migrating quote image for ${req.id}...`);
                     const result = await cloudinary.uploader.upload(req.quote_url, {
-                        folder: `doussel/teams/${req.team_id || 'unknown'}/maintenance/${req.id}/quotes`,
+                        folder: `Dousel/teams/${req.team_id || 'unknown'}/maintenance/${req.id}/quotes`,
                         resource_type: 'auto',
                         tags: ['quote', 'migrated']
                     });

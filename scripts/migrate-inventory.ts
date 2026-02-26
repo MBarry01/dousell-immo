@@ -41,7 +41,7 @@ async function migrateInventory() {
             try {
                 console.log(`  Migrating owner signature for report ${report.id}...`);
                 const result = await cloudinary.uploader.upload(report.owner_signature, {
-                    folder: `doussel/teams/${teamId}/inventory/${report.id}/signatures`,
+                    folder: `Dousel/teams/${teamId}/inventory/${report.id}/signatures`,
                     tags: ['signature', 'migrated']
                 });
                 report.owner_signature = result.secure_url;
@@ -54,7 +54,7 @@ async function migrateInventory() {
             try {
                 console.log(`  Migrating tenant signature for report ${report.id}...`);
                 const result = await cloudinary.uploader.upload(report.tenant_signature, {
-                    folder: `doussel/teams/${teamId}/inventory/${report.id}/signatures`,
+                    folder: `Dousel/teams/${teamId}/inventory/${report.id}/signatures`,
                     tags: ['signature', 'migrated']
                 });
                 report.tenant_signature = result.secure_url;
@@ -75,7 +75,7 @@ async function migrateInventory() {
                                     try {
                                         console.log(`  Migrating item photo in room ${room.name} for report ${report.id}...`);
                                         const result = await cloudinary.uploader.upload(photoUrl, {
-                                            folder: `doussel/teams/${teamId}/inventory/${report.id}/items`,
+                                            folder: `Dousel/teams/${teamId}/inventory/${report.id}/items`,
                                             tags: ['inventory-item', 'migrated']
                                         });
                                         newPhotos.push(result.secure_url);

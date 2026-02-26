@@ -32,7 +32,7 @@ async function testAccessRejected() {
                 permissionLabel: "Édition des baux",
                 reviewerName: "Responsable Sécurité",
                 reviewNotes: "Cette permission nécessite une formation préalable ou une validation de niveau 2.",
-                teamName: "Doussel Immo",
+                teamName: "Dousel",
                 contactUrl: "https://dousel.com/gestion/equipe",
             }),
         });

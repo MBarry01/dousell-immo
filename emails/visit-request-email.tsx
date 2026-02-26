@@ -32,7 +32,7 @@ export default function VisitRequestEmail({
   projectType = "location",
   availability = "Samedi matin",
   message = "Je suis très intéressé par cet appartement, disponible pour une visite rapide.",
-  teamName = "Doussel Immo",
+  teamName = "Dousel",
   adminUrl = "https://dousel.com/admin/visits",
 }: VisitRequestEmailProps) {
   return (
@@ -43,7 +43,7 @@ export default function VisitRequestEmail({
         <Container style={container}>
           {/* En-tête discret */}
           <Section style={header}>
-            <Text style={logo}>DOUSSEL IMMO</Text>
+            <Text style={logo}>Dousel</Text>
           </Section>
 
           <Hr style={hrSubtle} />
@@ -109,7 +109,7 @@ export default function VisitRequestEmail({
               © {new Date().getFullYear()} {teamName} — Conciergerie Immobilière
             </Text>
             <Text style={footerLink}>
-              Doussel Immo — Plateforme de Gestion Locative & Vente
+              Dousel — Plateforme de Gestion Locative & Vente
             </Text>
           </Section>
         </Container>

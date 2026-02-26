@@ -48,7 +48,7 @@ async function migrateImages() {
                     console.log(`  Migrating ${imageUrl}...`);
 
                     // Use Cloudinary's ability to upload from a URL
-                    const teamFolder = `doussel/teams/${property.team_id || 'unknown'}/properties`;
+                    const teamFolder = `Dousel/teams/${property.team_id || 'unknown'}/properties`;
                     const filename = imageUrl.split('/').pop()?.split('?')[0] || `property_${Date.now()}`;
                     const publicId = filename.split('.')[0];
 
