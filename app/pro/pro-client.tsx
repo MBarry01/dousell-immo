@@ -685,8 +685,8 @@ function LandingPageContent() {
             <div
               className="hidden md:block lg:hidden w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both"
             >
-              <Image
-                src="/images/mock-computer.png"
+              <CldImageSafe
+                src="doussel/static/illustrations/mock-computer"
                 alt="Tablette Dousel"
                 width={1200}
                 height={900}
@@ -699,8 +699,8 @@ function LandingPageContent() {
             <div
               className="hidden lg:block w-full max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both"
             >
-              <Image
-                src="/images/mock-cph.png"
+              <CldImageSafe
+                src="doussel/static/illustrations/mock-cph"
                 alt="Desktop Dousel"
                 width={1600}
                 height={1000}

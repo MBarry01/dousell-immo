@@ -83,7 +83,6 @@ const nextConfig = {
         ];
     },
     images: {
-        unoptimized: true,
         // Restriction des qualités pour éviter trop de variations de cache
         qualities: [50, 60, 75, 80],
         remotePatterns: [

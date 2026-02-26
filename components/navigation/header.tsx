@@ -66,7 +66,7 @@ export const Header = () => {
             aria-label="Dousel - Accueil"
           >
             <Image
-              src="/logo-white.png"
+              src="doussel/static/logos/logo-white"
               alt="Dousel"
               width={140}
               height={38}
@@ -165,7 +165,7 @@ export const Header = () => {
             aria-label="Dousel - Accueil"
           >
             <Image
-              src="/logo-white.png"
+              src="doussel/static/logos/logo-white"
               alt="Dousel"
               width={180}
               height={48}
