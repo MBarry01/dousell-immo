@@ -99,6 +99,7 @@ const nextConfig = {
             { protocol: "https", hostname: "sn.coinafrique.com" },
             { protocol: "https", hostname: "*.roamcdn.net" },
             { protocol: "https", hostname: "i.roamcdn.net" },
+            { protocol: "https", hostname: "imganuncios.roamcdn.net" },
             { protocol: "https", hostname: "*.jijistatic.com" },
             { protocol: "https", hostname: "pictures-senegal.jijistatic.com" },
             { protocol: "https", hostname: "res.cloudinary.com" },
