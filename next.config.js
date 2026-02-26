@@ -21,6 +21,18 @@ const nextConfig = {
     // Redirections legacy (désactivées pour restauration des chemins)
     async redirects() {
         return [
+            // Rediriger www.dousel.com vers dousel.com pour satisfaire OneSignal
+            {
+                source: '/:path*',
+                has: [
+                    {
+                        type: 'host',
+                        value: 'www.dousel.com',
+                    },
+                ],
+                destination: 'https://dousel.com/:path*',
+                permanent: true,
+            },
             // Route dupliquée CGU
             {
                 source: '/cgu',
@@ -40,10 +52,6 @@ const nextConfig = {
                 // Appliquer à toutes les routes
                 source: '/:path*',
                 headers: [
-                    {
-                        key: 'Cache-Control',
-                        value: 'public, max-age=0, must-revalidate',
-                    },
                     {
                         key: 'X-DNS-Prefetch-Control',
                         value: 'on',
@@ -87,7 +95,7 @@ const nextConfig = {
         ];
     },
     images: {
-        ...(isGitHubPages && { unoptimized: true }),
+        unoptimized: true,
         // Restriction des qualités pour éviter trop de variations de cache
         qualities: [50, 60, 75, 80],
         remotePatterns: [
