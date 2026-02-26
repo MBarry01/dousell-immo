@@ -27,6 +27,11 @@ export function CldImageSafe(props: CldImageProps) {
     const isFill = !!restProps.fill;
     const [isLoading, setIsLoading] = useState(!restProps.priority);
     const [hasError, setHasError] = useState(false);
+    const [hasMounted, setHasMounted] = useState(false);
+
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
 
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dkkirzpxe';
     const src = props.src as string;
@@ -102,7 +107,11 @@ export function CldImageSafe(props: CldImageProps) {
 
     const isCloudinary = !isLocal && (isCloudinaryUrl(src) || (!src.startsWith('http') && !src.startsWith('//')));
 
-    // SSR Protection: We allow the image to render immediately for LCP
+    // SSR Protection: We allow the image to render immediately ONLY if priority or if mounted
+    if (!hasMounted && !restProps.priority) {
+        return <div className={cn("bg-zinc-900/10", isFill ? "absolute inset-0" : className)} />;
+    }
+
     return (
         <div className={cn("relative overflow-hidden", isFill ? "absolute inset-0" : className)}>
             <Image

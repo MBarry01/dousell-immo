@@ -7,13 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
-import { ShootingStars } from "@/components/ui/shooting-stars";
-
 // === DYNAMIC IMPORTS POUR LAZY-LOADING (Réduction géante du Bundle Initial) ===
-const MagicTransformation = dynamic(() => import("@/components/landing/MagicTransformation"));
-const PricingSection = dynamic(() => import("@/components/landing/PricingSection"));
-const VideoTestimonials = dynamic(() => import("@/components/landing/VideoTestimonials"));
-const FeaturesBento = dynamic(() => import("@/components/landing/FeaturesBento"));
+const MagicTransformation = dynamic(() => import("@/components/landing/MagicTransformation"), { ssr: false });
+const PricingSection = dynamic(() => import("@/components/landing/PricingSection"), { ssr: false });
+const VideoTestimonials = dynamic(() => import("@/components/landing/VideoTestimonials"), { ssr: false });
+const FeaturesBento = dynamic(() => import("@/components/landing/FeaturesBento"), { ssr: false });
 
 // Saasable Integration
 const SaasableSectionWrapper = dynamic(() => import("@/components/saasable/SaasableSectionWrapper"));
@@ -26,8 +24,9 @@ const TenantSteps = dynamic(() => import("@/components/landing/tenant/TenantStep
 const FeaturedPropertiesHero = dynamic(() => import("@/components/landing/tenant/FeaturedPropertiesHero"));
 const TrustSection = dynamic(() => import("@/components/landing/tenant/TrustSection"));
 const TenantBentoGrid = dynamic(() => import("@/components/landing/tenant/TenantBentoGrid"));
-const HeroIllustration = dynamic(() => import("@/components/landing/HeroIllustration"));
-const HeroOwnerIllustration = dynamic(() => import("@/components/landing/HeroOwnerIllustration"));
+const HeroIllustration = dynamic(() => import("@/components/landing/HeroIllustration"), { ssr: false });
+const HeroOwnerIllustration = dynamic(() => import("@/components/landing/HeroOwnerIllustration"), { ssr: false });
+const ShootingStars = dynamic(() => import("@/components/ui/shooting-stars").then(mod => mod.ShootingStars), { ssr: false });
 
 import Image from "next/image";
 import { CldImageSafe } from "@/components/ui/CldImageSafe";
