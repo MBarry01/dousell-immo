@@ -11,12 +11,12 @@ import { Skeleton } from "@/components/ui/skeleton";
  */
 const LOCAL_DESIGN_ASSETS: Record<string, string> = {
     'doussel/static/logos/logo': '/logo.svg',
-    'doussel/static/logos/logo-black': '/logo-black.svg',
+    'doussel/static/logos/logo-black': '/logo-black.png',
     'doussel/static/logos/Logo': '/logo.svg',
     'doussel/static/logos/logo-white': '/logo-white.png',
     'doussel/static/logos/logo-or1': '/logo-or1.png',
     'doussel/static/logos/logo-jnor': '/logo-jnor.png',
-    'doussel/static/logos/logo-black.png': '/logo-black.svg',
+    'doussel/static/logos/logo-black.png': '/logo-black.png',
 };
 
 /**
