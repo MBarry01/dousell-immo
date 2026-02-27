@@ -37,6 +37,8 @@ export async function middleware(request: NextRequest) {
     // Headers de debug
     response.headers.set("x-debug-host", host);
     response.headers.set("x-debug-rewrite", "true");
+    response.headers.set("x-debug-target", url.pathname);
+    response.headers.set("x-middleware-active", "true");
     return response;
   }
 
@@ -49,6 +51,7 @@ export async function middleware(request: NextRequest) {
     response.headers.set("x-pathname", pathname);
     response.headers.set("x-debug-host", host);
     response.headers.set("x-debug-rewrite", "false");
+    response.headers.set("x-middleware-active", "true");
   }
 
   return response;
