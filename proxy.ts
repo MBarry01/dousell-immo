@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { contextStorage } from "./lib/context";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const requestId = globalThis.crypto?.randomUUID() || Math.random().toString(36).substring(7);
 
   // Détection robuste du host (Vercel utilise x-forwarded-host)
