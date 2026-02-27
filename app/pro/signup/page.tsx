@@ -352,7 +352,7 @@ export default function SignupPage() {
                 {/* Background Image Container - Faded Deco */}
                 <div className="absolute inset-0 z-0 opacity-[0.14] pointer-events-none overflow-hidden">
                     <Image
-                        src="/images/asset-signup.png"
+                        src="/images/assetSignup.png"
                         alt="Background Decoration"
                         fill
                         className="object-cover object-center"
