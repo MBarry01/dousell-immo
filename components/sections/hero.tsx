@@ -38,8 +38,7 @@ export const HeroSection = () => {
     <>
       {/* ========== MOBILE HERO — Immersion plein écran ========== */}
       <section
-        className="relative md:hidden overflow-hidden"
-        style={{ minHeight: "100svh" }}
+        className="relative md:hidden overflow-hidden h-[100dvh]"
         suppressHydrationWarning
       >
         {/* Image de fond — taille naturelle, ancrée en haut */}
@@ -59,10 +58,9 @@ export const HeroSection = () => {
 
         {/* Contenu ancré en bas — remonté agressivement pour la nav bar (160px) */}
         <div
-          className="relative z-20 flex flex-col justify-end px-4 sm:px-6 pt-20"
+          className="relative z-20 flex flex-col justify-end px-4 sm:px-6 pt-20 h-full"
           style={{
-            minHeight: "100svh",
-            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 160px)",
+            paddingBottom: "calc(env(safe-area-inset-bottom, 20px) + 140px)",
           }}
         >
           <div className="space-y-1 mb-4">

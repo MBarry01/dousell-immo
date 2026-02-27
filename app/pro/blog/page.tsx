@@ -12,6 +12,16 @@ const fadeUp = {
 
 const articles = [
     {
+        id: 7,
+        title: "Investir au Sénégal depuis la Diaspora : Le Guide Complet",
+        excerpt: "Tout ce qu'il faut savoir pour sécuriser votre investissement immobilier au pays : procédures, financement, gestion à distance et conseils juridiques.",
+        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
+        category: "Guides",
+        date: "27 Fév 2026",
+        readTime: "12 min",
+        href: "/pro/blog/immobilier-senegal-diaspora"
+    },
+    {
         id: 1,
         title: "Guide complet : Acheter un bien immobilier au Sénégal en 2026",
         excerpt: "Découvrez les étapes clés, les pièges à éviter et nos conseils d'experts pour réussir votre investissement immobilier à Dakar et dans les régions.",
@@ -19,6 +29,7 @@ const articles = [
         category: "Guides",
         date: "15 Jan 2026",
         readTime: "8 min",
+        href: "/pro/blog/immobilier-senegal-diaspora", // Redirecting similar guide
     },
     {
         id: 2,
@@ -28,6 +39,7 @@ const articles = [
         category: "Investissement",
         date: "10 Jan 2026",
         readTime: "6 min",
+        href: "#",
     },
     {
         id: 3,
@@ -37,6 +49,7 @@ const articles = [
         category: "Juridique",
         date: "5 Jan 2026",
         readTime: "10 min",
+        href: "#",
     },
     {
         id: 4,
@@ -46,6 +59,7 @@ const articles = [
         category: "Conseils",
         date: "28 Déc 2025",
         readTime: "5 min",
+        href: "#",
     },
     {
         id: 5,
@@ -55,6 +69,7 @@ const articles = [
         category: "Marché",
         date: "20 Déc 2025",
         readTime: "7 min",
+        href: "#",
     },
     {
         id: 6,
@@ -64,8 +79,10 @@ const articles = [
         category: "Innovation",
         date: "15 Déc 2025",
         readTime: "6 min",
+        href: "#",
     },
 ];
+
 
 const categories = ["Tous", "Guides", "Investissement", "Juridique", "Conseils", "Marché", "Innovation"];
 
@@ -137,45 +154,47 @@ export default function BlogPage() {
                             transition={{ duration: 0.5, delay: index * 0.1 }}
                             className="group overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/50 transition-all hover:border-[#F4C430]/30 hover:shadow-lg hover:shadow-[#F4C430]/5 hover:-translate-y-1"
                         >
-                            <div className="relative h-56 overflow-hidden">
-                                <Image
-                                    src={article.image}
-                                    alt={article.title}
-                                    fill
-                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                                <span className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-full bg-[#F4C430] px-3 py-1 text-xs font-bold text-black uppercase tracking-wide">
-                                    <Tag className="h-3 w-3" />
-                                    {article.category}
-                                </span>
-                            </div>
-
-                            <div className="p-6">
-                                <div className="mb-4 flex items-center gap-4 text-xs font-medium text-white/40 uppercase tracking-wider">
-                                    <span className="flex items-center gap-1.5">
-                                        <Calendar className="h-3.5 w-3.5" />
-                                        {article.date}
-                                    </span>
-                                    <span className="flex items-center gap-1.5">
-                                        <Clock className="h-3.5 w-3.5" />
-                                        {article.readTime}
+                            <_Link href={(article as any).href || "#"} className="block h-full">
+                                <div className="relative h-56 overflow-hidden">
+                                    <Image
+                                        src={article.image}
+                                        alt={article.title}
+                                        fill
+                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                                    <span className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-full bg-[#F4C430] px-3 py-1 text-xs font-bold text-black uppercase tracking-wide">
+                                        <Tag className="h-3 w-3" />
+                                        {article.category}
                                     </span>
                                 </div>
 
-                                <h3 className="mb-3 text-xl font-bold text-white group-hover:text-[#F4C430] transition-colors line-clamp-2">
-                                    {article.title}
-                                </h3>
+                                <div className="p-6">
+                                    <div className="mb-4 flex items-center gap-4 text-xs font-medium text-white/40 uppercase tracking-wider">
+                                        <span className="flex items-center gap-1.5">
+                                            <Calendar className="h-3.5 w-3.5" />
+                                            {article.date}
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <Clock className="h-3.5 w-3.5" />
+                                            {article.readTime}
+                                        </span>
+                                    </div>
 
-                                <p className="mb-6 text-sm text-white/60 line-clamp-2 leading-relaxed">
-                                    {article.excerpt}
-                                </p>
+                                    <h3 className="mb-3 text-xl font-bold text-white group-hover:text-[#F4C430] transition-colors line-clamp-2">
+                                        {article.title}
+                                    </h3>
 
-                                <div className="flex items-center text-sm font-bold text-[#F4C430] group-hover:gap-2 transition-all">
-                                    Lire l&apos;article
-                                    <ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
+                                    <p className="mb-6 text-sm text-white/60 line-clamp-2 leading-relaxed">
+                                        {article.excerpt}
+                                    </p>
+
+                                    <div className="flex items-center text-sm font-bold text-[#F4C430] group-hover:gap-2 transition-all">
+                                        Lire l&apos;article
+                                        <ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
+                                    </div>
                                 </div>
-                            </div>
+                            </_Link>
                         </motion.article>
                     ))}
                 </motion.section>

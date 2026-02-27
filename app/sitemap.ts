@@ -87,7 +87,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         '/a-propos',
         '/contact',
         '/planifier-visite',
-        '/immobilier-senegal-diaspora',
+        '/pro/blog/immobilier-senegal-diaspora',
     ].map((route) => ({
         url: `${BASE_URL}${route}`,
         lastModified: new Date(),

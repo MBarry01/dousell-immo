@@ -620,8 +620,8 @@ export const getSimilarProperties = async (
 
     if (error) throw error;
     return (data ?? []).map(mapProperty);
-  } catch (error) {
-    console.error("getSimilarProperties error:", error); // Improved logging
+  } catch (error: any) {
+    console.error("getSimilarProperties error:", error?.message || error);
     return [];
   }
 };

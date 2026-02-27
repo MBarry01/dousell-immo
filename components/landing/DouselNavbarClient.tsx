@@ -66,6 +66,7 @@ const dousellConfig: NavbarConfig = {
                 { title: "Qui sommes-nous ?", href: "/pro/a-propos" },
                 { title: "Nous contacter", href: "#contact" },
                 { title: "Blog Immobilier", href: "/pro/blog" },
+                { title: "Guide Diaspora", href: "/pro/blog/immobilier-senegal-diaspora" },
                 { title: "Recrutement", href: "/pro/carrieres" },
             ],
         },

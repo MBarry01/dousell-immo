@@ -191,7 +191,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
           </div>
           <div className="mt-8 text-center">
             <Link
-              href="/immobilier-senegal-diaspora"
+              href="/pro/blog/immobilier-senegal-diaspora"
               className="inline-flex items-center text-sm text-white/40 hover:text-[#F4C430] transition-colors"
             >
               Guide : Investir au Sénégal depuis l'étranger

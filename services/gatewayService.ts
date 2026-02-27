@@ -186,7 +186,12 @@ export async function getExternalListingsByType(
         const { data, error } = await query;
 
         if (error) {
-            console.error("[gatewayService] Error fetching external listings:", error);
+            console.error("[gatewayService] Error fetching external listings:", {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            });
             return [];
         }
 
@@ -254,7 +259,12 @@ export async function getExternalListingsCount(
         const { count, error } = await query;
 
         if (error) {
-            console.error("[gatewayService] Error counting external listings:", error);
+            console.error("[gatewayService] Error counting external listings:", {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            });
             return 0;
         }
 
@@ -355,8 +365,8 @@ export async function getSimilarListings(options: {
         }
 
         return combined.slice(0, limit);
-    } catch (error) {
-        console.error("[gatewayService] getSimilarListings error:", error);
+    } catch (error: any) {
+        console.error("[gatewayService] getSimilarListings error:", error?.message || error);
         return [];
     }
 }
@@ -409,18 +419,18 @@ export const getUnifiedListings = async (filters: PropertyFilters = {}): Promise
                 {
                     city: filters.city || filters.citySlug,
                     category: filters.type,
-                    limit: limit + skipOnFirstPage,
+                    limit: limit + (skipOnFirstPage || 0),
                     page: externalPage
                 }
             );
 
-            listings = externalListings.slice(skipOnFirstPage, skipOnFirstPage + limit);
+            listings = (externalListings || []).slice(skipOnFirstPage, skipOnFirstPage + limit);
         }
 
-        return { listings, total };
+        return { listings: listings || [], total: total || 0 };
 
-    } catch (err) {
-        console.error("[gatewayService] getUnifiedListings Gateway Error", err);
+    } catch (err: any) {
+        console.error("[gatewayService] getUnifiedListings Gateway Error:", err?.message || err);
         return { listings: [], total: 0 };
     }
 };

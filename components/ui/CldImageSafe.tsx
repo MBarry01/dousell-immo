@@ -78,22 +78,22 @@ export function CldImageSafe(props: CldImageProps) {
         setHasError(true);
     };
 
-    const { crop, gravity, tint, blur, grayscale, pixelate, ...nextImageProps } = restProps;
+    const { crop, gravity, tint, blur, grayscale, pixelate, width, height, ...nextImageProps } = restProps;
 
     // Fonction pour vérifier si une URL appartient à Cloudinary
     const isCloudinaryUrl = (url: string) => url.includes('res.cloudinary.com');
 
     // Loader personnalisé pour BYPASSER Vercel et utiliser le srcset natif de Cloudinary
-    const cloudinaryLoader = ({ width }: { width: number }) => {
+    const cloudinaryLoader = ({ width: loaderWidth }: { width: number }) => {
         // Si c'est un ID (cas standard)
         if (!src.startsWith('http') && !src.startsWith('//')) {
-            return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_${width}/${src}`;
+            return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_${loaderWidth}/${src}`;
         }
         // Si c'est déjà une URL complète Cloudinary, on essaie d'y injecter l'optimisation de largeur
         if (isCloudinaryUrl(src)) {
             // Remplacer /upload/ par /upload/f_auto,q_auto,w_WIDTH/
             if (src.includes('/upload/')) {
-                return src.replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`);
+                return src.replace('/upload/', `/upload/f_auto,q_auto,w_${loaderWidth}/`);
             }
         }
         return src;
@@ -111,6 +111,8 @@ export function CldImageSafe(props: CldImageProps) {
             <Image
                 {...(nextImageProps as any)}
                 src={finalSrc}
+                width={isFill ? undefined : width}
+                height={isFill ? undefined : height}
                 className={cn(
                     "transition-opacity duration-300",
                     isLoading && !restProps.priority && !isDesign && !isLocal ? "opacity-0" : "opacity-100",
