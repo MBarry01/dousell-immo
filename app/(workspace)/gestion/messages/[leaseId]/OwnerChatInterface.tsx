@@ -139,7 +139,7 @@ export default function OwnerChatInterface({ initialMessages, leaseId, currentUs
         <div className={cn(
             "fixed inset-x-0 z-30 flex flex-col overflow-hidden bg-background",
             "top-[calc(3.5rem+env(safe-area-inset-top))] md:top-14", // WorkspaceHeader h-14 + safe area
-            "bottom-[calc(4rem+env(safe-area-inset-bottom))] lg:bottom-0", // Au-dessus de BottomNav
+            "bottom-[calc(7.5rem+env(safe-area-inset-bottom))] lg:bottom-0", // Au-dessus de BottomNav
             "lg:left-16 lg:right-0 lg:top-14 lg:bottom-0 lg:static lg:flex-1 lg:h-full lg:max-w-none lg:mx-0", // Reset Desktop
         )}>
             {/* Header Chat - Fixe */}

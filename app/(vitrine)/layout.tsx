@@ -123,7 +123,7 @@ export default function VitrineLayout({ children }: VitrineLayoutProps) {
         className="mx-auto w-full max-w-[1360px] px-4 md:px-6 md:pb-4 md:pt-6 print:p-0 print:max-w-none"
         style={{
           paddingTop: "calc(env(safe-area-inset-top, 0px) + 4rem)",
-          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)"
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 7rem)"
         }}
       >
         {shouldShowBreadcrumbs && (

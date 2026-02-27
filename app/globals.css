@@ -468,8 +468,8 @@
 
   @media (max-width: 1024px) {
     :root {
-      /* 4rem (64px) + safe-area (pour la bottom nav) */
-      --mobile-nav-height: calc(5.5rem + env(safe-area-inset-bottom));
+      /* Increased from 5.5rem to 7.5rem to account for the protruding FAB */
+      --mobile-nav-height: calc(7.5rem + env(safe-area-inset-bottom));
     }
   }
 

@@ -18,6 +18,7 @@ import {
   Shield,
   Heart,
   Settings,
+  Plus
 } from "lucide-react";
 import { IconBuildingEstate } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
@@ -183,77 +184,176 @@ export function WorkspaceBottomNav() {
   const activeBg = isDark ? 'rgba(244, 196, 48, 0.1)' : 'rgba(15, 23, 42, 0.08)';
   const inactiveColor = isDark ? '#9da7b9' : '#64748b';
   const navBg = isDark ? 'rgba(5, 8, 12, 0.85)' : 'rgba(255, 255, 255, 0.9)';
-  const navBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.1)';
+
+  const leftItems = navItems.slice(0, 2);
+  const rightItems = navItems.slice(2);
 
   return (
-    <nav
+    <div
       className={cn(
-        "fixed inset-x-0 bottom-0 z-30 backdrop-blur-lg lg:hidden print:hidden",
+        "fixed inset-x-0 bottom-0 z-30 lg:hidden print:hidden",
         "transition-transform duration-300 ease-out",
-        !isVisible && "translate-y-full"
+        !isVisible && "translate-y-[200%]"
       )}
-      style={{
-        paddingBottom: "env(safe-area-inset-bottom)",
-        backgroundColor: navBg,
-        borderTop: `1px solid ${navBorder}`,
-      }}
     >
-      <div className="flex h-16 items-center justify-between px-4">
-        {navItems.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/gestion" &&
-              item.href !== "/locataire" &&
-              item.href !== "/admin" &&
-              item.href !== "/compte" &&
-              pathname?.startsWith(`${item.href}/`));
+      {/* Conteneur de navigation principal */}
+      <nav
+        className="relative"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)",
+          height: "calc(60px + env(safe-area-inset-bottom))",
+          backgroundColor: "transparent", // Background handled by SVG
+        }}
+      >
+        {/* SVG Background with "Real Hole" */}
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          <svg
+            viewBox="0 0 1000 85"
+            preserveAspectRatio="none"
+            className="h-full w-full"
+            aria-hidden="true"
+            style={{ filter: "drop-shadow(0 -2px 10px rgba(0,0,0,0.1))" }}
+          >
+            <path
+              d="M 0,85 L 0,0 L 350,0 C 350,0 350,70 410,70 L 590,70 C 650,70 650,0 650,0 L 1000,0 L 1000,85 Z"
+              fill={navBg}
+              fillOpacity={isDark ? "0.95" : "0.98"}
+            />
+            {/* Outline/Border for the path */}
+            <path
+              d="M 0,0 L 350,0 C 350,0 350,70 410,70 L 590,70 C 650,70 650,0 650,0 L 1000,0"
+              fill="none"
+              stroke={isDark ? "white" : "black"}
+              strokeOpacity={isDark ? "0.08" : "0.06"}
+              strokeWidth="1.5"
+            />
+          </svg>
+        </div>
 
-          const Icon = item.icon;
+        <div className="mx-auto flex h-full w-full items-center justify-between px-2 text-[10px] font-medium">
+          {/* Section Gauche */}
+          <div className="flex flex-1 justify-around">
+            {leftItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/gestion" &&
+                  item.href !== "/locataire" &&
+                  item.href !== "/admin" &&
+                  item.href !== "/compte" &&
+                  pathname?.startsWith(`${item.href}/`));
 
-          // Badge count for this item
-          const badgeCount = item.href === "/gestion/interventions"
-            ? badgeCounts.pendingMaintenance
-            : item.href === "/gestion/comptabilite"
-              ? 0
-              : 0;
+              const Icon = item.icon;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              prefetch={false} // Disable prefetch to prevent stale RSC cache
-              className="flex flex-1 flex-col items-center justify-center gap-1 min-w-0 no-select active:scale-95 hover:scale-[1.05] transition-transform duration-200"
-            >
-              <span
-                className="relative inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-all duration-200"
-                style={{
-                  color: isActive ? activeColor : inactiveColor,
-                  backgroundColor: isActive ? activeBg : 'transparent',
-                }}
-              >
-                <Icon
-                  className="h-5 w-5"
-                  strokeWidth={isActive ? 2.5 : 1.5}
-                />
-                {badgeCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white">
-                    {badgeCount > 9 ? "9+" : badgeCount}
+              // Badge count for this item
+              const badgeCount = item.href === "/gestion/interventions"
+                ? badgeCounts.pendingMaintenance
+                : 0;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  prefetch={false}
+                  className="flex flex-col items-center justify-center gap-1 px-1 py-1 transition-transform active:scale-90"
+                >
+                  <span
+                    className="relative inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-all duration-200"
+                    style={{
+                      color: isActive ? activeColor : inactiveColor,
+                      backgroundColor: isActive ? activeBg : 'transparent',
+                    }}
+                  >
+                    <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 1.5} />
+                    {badgeCount > 0 && (
+                      <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white">
+                        {badgeCount > 9 ? "9+" : badgeCount}
+                      </span>
+                    )}
                   </span>
-                )}
-              </span>
-              <span
-                className="truncate w-full text-center text-[10px] transition-colors duration-200"
-                style={{
-                  color: isActive ? activeColor : inactiveColor,
-                  fontWeight: isActive ? 600 : 500,
-                }}
-              >
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+                  <span
+                    className="truncate w-full text-center text-[10px] transition-colors duration-200"
+                    style={{
+                      color: isActive ? activeColor : inactiveColor,
+                      fontWeight: isActive ? 600 : 500,
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Espace central pour le FAB */}
+          <div className="w-[80px]" aria-hidden="true" />
+
+          {/* Section Droite */}
+          <div className="flex flex-1 justify-around">
+            {rightItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/gestion" &&
+                  item.href !== "/locataire" &&
+                  item.href !== "/admin" &&
+                  item.href !== "/compte" &&
+                  pathname?.startsWith(`${item.href}/`));
+
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  prefetch={false}
+                  className="flex flex-col items-center justify-center gap-1 px-1 py-1 transition-transform active:scale-90"
+                >
+                  <span
+                    className="relative inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-all duration-200"
+                    style={{
+                      color: isActive ? activeColor : inactiveColor,
+                    }}
+                  >
+                    <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 1.5} />
+                  </span>
+                  <span
+                    className="truncate w-full text-center text-[10px] transition-colors duration-200"
+                    style={{
+                      color: isActive ? activeColor : inactiveColor,
+                      fontWeight: isActive ? 600 : 500,
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
+
+      {/* FAB Central Button - Dynamic based on path */}
+      <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[28%] pointer-events-auto">
+        <Link href={pathname?.startsWith("/gestion") ? "/gestion?add=tenant" : "/"}>
+          <button
+            className={cn(
+              "flex h-[66px] w-[66px] items-center justify-center rounded-full bg-transparent shadow-xl backdrop-blur-sm",
+              "border-[2px] transition-all active:scale-95",
+              isDark ? "border-white/20 hover:bg-white/5" : "border-black/10 hover:bg-black/5",
+              "focus:outline-none"
+            )}
+            style={{
+              color: inactiveColor,
+            }}
+            aria-label={pathname?.startsWith("/gestion") ? "Ajouter un locataire" : "Retour accueil"}
+          >
+            {pathname?.startsWith("/gestion") ? (
+              <Plus className="h-8 w-8 stroke-[2.5]" />
+            ) : (
+              <Home className="h-7 w-7 stroke-[2]" />
+            )}
+          </button>
+        </Link>
       </div>
-    </nav>
+    </div>
   );
 }

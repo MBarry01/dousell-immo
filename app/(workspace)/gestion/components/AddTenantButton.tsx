@@ -46,12 +46,27 @@ interface AddTenantButtonProps {
         startDate?: string;
         endDate?: string;
     };
+    initialOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
 const FIRST_TENANT_KEY = 'dousell_first_tenant_created';
 
-export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddTenantButtonProps) {
-    const [open, setOpen] = useState(false);
+export function AddTenantButton({ ownerId, trigger, initialData, profile, initialOpen, onOpenChange }: AddTenantButtonProps) {
+    const [open, setOpen] = useState(initialOpen || false);
+
+    // Sync internal state with initialOpen prop
+    useEffect(() => {
+        if (initialOpen !== undefined && initialOpen !== open) {
+            setOpen(initialOpen);
+        }
+    }, [initialOpen]);
+
+    // Notify parent when state changes
+    const handleOpenChange = (newOpen: boolean) => {
+        setOpen(newOpen);
+        onOpenChange?.(newOpen);
+    };
     const [bulkImportOpen, setBulkImportOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -286,7 +301,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile }: AddT
     return (
         <>
             {renderTrigger()}
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog open={open} onOpenChange={handleOpenChange}>
                 <DialogContent className="z-[100] fixed top-[4%] left-[50%] translate-x-[-50%] translate-y-0 sm:top-[50%] sm:translate-y-[-50%] w-[90vw] sm:w-full max-w-lg max-h-[92vh] overflow-y-auto overflow-x-hidden bg-card border-border text-foreground px-4 pt-4 pb-24 sm:p-6 outline-none shadow-2xl">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-semibold text-foreground">

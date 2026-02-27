@@ -150,7 +150,7 @@ export default function ChatInterface({ initialMessages, leaseId, ownerId, owner
         <div className={cn(
             "fixed inset-x-0 z-30 flex flex-col overflow-hidden bg-slate-50",
             "top-[calc(4rem+env(safe-area-inset-top))] md:top-16",
-            "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0",
+            "bottom-[calc(7.5rem+env(safe-area-inset-bottom))] md:bottom-0",
         )}>
             {/* Header Chat - Fixe */}
             <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center gap-4 shadow-sm shrink-0 z-20">

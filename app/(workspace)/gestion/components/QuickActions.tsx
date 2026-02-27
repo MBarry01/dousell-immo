@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
     UserPlus,
     FileText,
@@ -35,6 +36,19 @@ export function QuickActions({
     profile
 }: QuickActionsProps) {
     const { isDark } = useTheme();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const [autoOpen, setAutoOpen] = useState(false);
+
+    useEffect(() => {
+        if (searchParams?.get('add') === 'tenant') {
+            setAutoOpen(true);
+            // Clean up the URL parameter
+            const params = new URLSearchParams(searchParams.toString());
+            params.delete('add');
+            router.replace(`/gestion?${params.toString()}`, { scroll: false });
+        }
+    }, [searchParams, router]);
 
     const actions = [
         {
@@ -179,6 +193,8 @@ export function QuickActions({
                                 <AddTenantButton
                                     ownerId={ownerId}
                                     profile={profile}
+                                    initialOpen={autoOpen}
+                                    onOpenChange={setAutoOpen}
                                     trigger={
                                         <button className={baseClasses}>
                                             <ActionContent action={action} />

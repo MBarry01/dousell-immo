@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Icônes personnalisées avec version filled pour l'état actif
@@ -123,6 +124,7 @@ const navItems = [
 
 export const BottomNav = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
@@ -159,42 +161,124 @@ export const BottomNav = () => {
     lastScrollY.current = 0;
   }, [pathname]);
 
+  const leftItems = navItems.slice(0, 2);
+  const rightItems = navItems.slice(2);
+
   return (
-    <nav
+    <div
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#05080c]/90 backdrop-blur-xl md:hidden print:hidden",
+        "fixed inset-x-0 bottom-0 z-50 md:hidden print:hidden",
         "transition-transform duration-300 ease-out",
-        !isVisible && "translate-y-full"
+        !isVisible && "translate-y-[200%]"
       )}
-      style={{
-        paddingBottom: "env(safe-area-inset-bottom)",
-      }}
     >
-      <div className="mx-auto flex w-full max-w-full items-center justify-between px-2 py-2 text-[10px] font-medium">
-        {navItems.map((item) => {
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              id={item.label === "Annonce" ? "tour-home-search" :
-                item.label === "Gestion" ? "tour-home-gestion" :
-                  item.label === "Compte" ? "tour-home-account" : undefined}
-              href={item.href}
-              className="flex flex-1 flex-col items-center gap-1 px-1 py-1 min-w-0"
-            >
-              <span
-                className={`inline-flex h-7 w-7 shrink-0 items-center justify-center transition-all duration-200 ${active ? "text-[#F4C430]" : "text-white/50"
-                  }`}
-              >
-                <item.Icon filled={active} />
-              </span>
-              <span className={`truncate w-full text-center transition-colors duration-200 ${active ? "text-[#F4C430] font-semibold" : "text-white/50"}`}>
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+      {/* Conteneur de navigation principal */}
+      <nav
+        className="relative"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)",
+          height: "calc(60px + env(safe-area-inset-bottom))",
+        }}
+      >
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          <svg
+            viewBox="0 0 1000 85"
+            preserveAspectRatio="none"
+            className="h-full w-full"
+            aria-hidden="true"
+          >
+            <path
+              d="M 0,85 L 0,0 L 350,0 C 350,0 350,70 410,70 L 590,70 C 650,70 650,0 650,0 L 1000,0 L 1000,85 Z"
+              fill="#05080c"
+              fillOpacity="0.95"
+            />
+            {/* Outline/Border for the path */}
+            <path
+              d="M 0,0 L 350,0 C 350,0 350,70 410,70 L 590,70 C 650,70 650,0 650,0 L 1000,0"
+              fill="none"
+              stroke="white"
+              strokeOpacity="0.1"
+              strokeWidth="2"
+            />
+          </svg>
+        </div>
+
+        <div className="mx-auto flex h-full w-full items-center justify-between px-2 text-[10px] font-medium">
+          {/* Section Gauche */}
+          <div className="flex flex-1 justify-around">
+            {leftItems.map((item) => {
+              const active = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex flex-col items-center gap-1 px-1 py-1 transition-transform active:scale-90"
+                >
+                  <span className={cn(
+                    "inline-flex h-7 w-7 items-center justify-center transition-all duration-200",
+                    active ? "text-[#F4C430]" : "text-white/50"
+                  )}>
+                    <item.Icon filled={active} />
+                  </span>
+                  <span className={cn(
+                    "truncate transition-colors duration-200",
+                    active ? "text-[#F4C430] font-semibold" : "text-white/50"
+                  )}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Espace central pour le FAB */}
+          <div className="w-[80px]" aria-hidden="true" />
+
+          {/* Section Droite */}
+          <div className="flex flex-1 justify-around">
+            {rightItems.map((item) => {
+              const active = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  id={item.label === "Gestion" ? "tour-home-gestion" : item.label === "Compte" ? "tour-home-account" : undefined}
+                  href={item.href}
+                  className="flex flex-col items-center gap-1 px-1 py-1 transition-transform active:scale-90"
+                >
+                  <span className={cn(
+                    "inline-flex h-7 w-7 items-center justify-center transition-all duration-200",
+                    active ? "text-[#F4C430]" : "text-white/50"
+                  )}>
+                    <item.Icon filled={active} />
+                  </span>
+                  <span className={cn(
+                    "truncate transition-colors duration-200",
+                    active ? "text-[#F4C430] font-semibold" : "text-white/50"
+                  )}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
+
+      {/* FAB Central Button */}
+      <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[28%] pointer-events-auto">
+        <button
+          onClick={() => router.push("/compte/deposer")}
+          className={cn(
+            "flex h-[68px] w-[68px] items-center justify-center rounded-full bg-transparent",
+            "border-[2px] border-white/20 transition-all active:scale-95 shadow-xl backdrop-blur-sm",
+            "hover:bg-white/5 focus:outline-none"
+          )}
+          aria-label="Ajouter un bien"
+        >
+          <Plus className="h-8 w-8 text-white stroke-[2.5]" />
+        </button>
       </div>
-    </nav>
+    </div>
   );
 };
+
