@@ -102,6 +102,11 @@ export default function OneSignalProvider({ userId }: { userId?: string }) {
     const _lastUserId = useRef<string | undefined>(userId);
 
     useEffect(() => {
+        // OneSignal is only authorized for www.dousel.com / dousel.com
+        if (typeof window !== "undefined" && window.location.hostname.startsWith("app.")) {
+            console.log("🚫 OneSignal: Disabled on subdomain");
+            return;
+        }
         // Initial init on mount
         initOneSignal();
 

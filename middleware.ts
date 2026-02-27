@@ -5,15 +5,23 @@ import { contextStorage } from "./lib/context";
 
 export async function middleware(request: NextRequest) {
   const requestId = globalThis.crypto?.randomUUID() || Math.random().toString(36).substring(7);
+  const hostname = request.nextUrl.hostname;
   const pathname = request.nextUrl.pathname;
-  const hostname = request.headers.get('host') || '';
+
+  // DEBUG LOG (visible dans Headers de réponse)
+  const debugHeaders = new Headers(request.headers);
+  debugHeaders.set("x-debug-hostname", hostname);
+  debugHeaders.set("x-debug-pathname", pathname);
 
   // RÈGLE SOUS-DOMAINE : Si le visiteur est sur "app.*"
   if (hostname.startsWith('app.')) {
     if (!pathname.startsWith('/gestion')) {
       const url = request.nextUrl.clone();
       url.pathname = `/gestion${pathname}`;
-      return NextResponse.rewrite(url);
+      console.log(`Rewriting ${hostname}${pathname} to ${url.pathname}`);
+      const response = NextResponse.rewrite(url);
+      response.headers.set("x-debug-rewrite", "true");
+      return response;
     }
   }
 
