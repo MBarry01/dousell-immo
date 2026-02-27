@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import type { Property } from "@/types/property";
-import { getProperties, getSimilarProperties, type PropertyFilters } from "./propertyService";
+import { getProperties, getPropertiesCount, getSimilarProperties, type PropertyFilters } from "./propertyService";
 
 // Type pour les résultats bruts de la table external_listings
 type ExternalListingRow = {
@@ -149,16 +149,20 @@ export async function getExternalListingsByType(
     transactionType: "location" | "vente",
     options: {
         category?: string;
-        city?: string;
         limit?: number;
+        page?: number;
+        city?: string;
     } = {}
 ): Promise<Property[]> {
-    const { category, city, limit = 8 } = options;
+    const { category, city, limit = 8, page = 1 } = options;
 
     try {
         // On ne récupère que les annonces vues récemment (< 4 jours)
         const fourDaysAgo = new Date();
         fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
+
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
 
         let query = supabase
             .from("external_listings")
@@ -167,7 +171,7 @@ export async function getExternalListingsByType(
             .not("image_url", "is", null)
             .neq("image_url", "")
             .ilike("type", `%${transactionType}%`)
-            .limit(limit);
+            .range(from, to);
 
         // Filtre optionnel par catégorie (Appartement, Villa, Terrain)
         if (category) {
@@ -357,122 +361,66 @@ export async function getSimilarListings(options: {
     }
 }
 
-export const getUnifiedListings = async (filters: PropertyFilters = {}) => {
+export const getUnifiedListings = async (filters: PropertyFilters = {}): Promise<{ listings: Property[], total: number }> => {
     try {
-        // 1. Récupération des annonces internes (via propertyService existant)
-        const internalPromise = getProperties(filters);
+        const page = filters.page || 1;
+        const limit = filters.limit || 12;
 
-        // 2. Construction de la requête externe
-        let externalQuery = supabase
-            .from("external_listings")
-            .select("*");
+        // 1. Récupération des counts totaux
+        const [internalCount, externalCount] = await Promise.all([
+            getPropertiesCount(filters),
+            getExternalListingsCount(filters.category === "location" ? "location" : (filters.category === "vente" ? "vente" : "any"), {
+                category: filters.type,
+                city: filters.city || filters.citySlug
+            })
+        ]);
 
-        // -- Filtres de Sécurité (Nettoyage) --
-        // On ne récupère que les annonces vues récemment (ex: 4 jours max)
-        const fourDaysAgo = new Date();
-        fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
-        externalQuery = externalQuery
-            .gt("last_seen_at", fourDaysAgo.toISOString())
-            .not("image_url", "is", null)
-            .neq("image_url", "");
+        const total = internalCount + externalCount;
+        let listings: Property[] = [];
 
-        // -- Application des filtres utilisateur --
-        if (filters.q) {
-            // Nettoyage de la recherche
-            let searchTerm = filters.q.trim();
+        // 2. Logique de pagination mixte
+        if ((page - 1) * limit < internalCount) {
+            // On a des biens internes à afficher
+            const internalListings = await getProperties(filters);
+            listings.push(...internalListings);
 
-            // Si la recherche contient une virgule (ex: "Mermoz, Dakar"), on prend le premier terme
-            if (searchTerm.includes(",")) {
-                const parts = searchTerm.split(",");
-                if (parts.length > 0) {
-                    searchTerm = parts[0].trim();
-                }
-            }
-
-            externalQuery = externalQuery.or(`title.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
-        }
-
-        // Mapping des filtres de catégorie
-        if (filters.category) {
-            // Mapping simple : propertyService utilise "vente"|"location" dans category parfois, 
-            // ou alors category est le type de transaction.
-            // Dans external_listings: type = Vente/Location, category = Appartement/Villa...
-
-            // Si le filtre category est 'vente' ou 'location' -> c'est le champ 'type'
-            const catLower = filters.category.toLowerCase();
-            if (catLower === 'vente' || catLower === 'location') {
-                externalQuery = externalQuery.ilike('type', `%${catLower}%`);
-            } else {
-                // Sinon on cherche dans category (Appartement, etc.)
-                externalQuery = externalQuery.ilike('category', `%${catLower}%`);
-            }
-        }
-
-        if (filters.city) {
-            externalQuery = externalQuery.ilike('city', `%${filters.city}%`);
-        }
-
-        if (filters.type) {
-            // Filtre type de bien (Appartement, Villa...)
-            // Utilise le même mapping intelligent que pour le comptage
-            externalQuery = externalQuery.or(mapCategoryToQuery(filters.type));
-        }
-
-        // Note : Le prix est stocké en TEXT dans external_listings ("500 000 FCFA")
-        // Le filtrage SQL sur prix texte est complexe. 
-        // Pour une V1 simple, on filtre les prix APRES réception ou on ignore ce filtre pour l'externe.
-        // Ici on va les récupérer et filtrer en JS.
-
-        const externalPromise = externalQuery;
-
-        // 3. Exécution parallèle
-        // 3. Exécution parallèle avec gestion d'erreurs indépendante
-        const [internalResult, externalResult] = await Promise.allSettled([internalPromise, externalPromise]);
-
-        let internalProps: Property[] = [];
-        if (internalResult.status === 'fulfilled') {
-            internalProps = internalResult.value || [];
-        } else {
-            console.error("[gatewayService] Failed to load internal properties:", internalResult.reason);
-        }
-
-        let externalProps: Property[] = [];
-        if (externalResult.status === 'fulfilled') {
-            const data = externalResult.value.data || [];
-            externalProps = data.map(mapExternalListing);
-
-            // Debug: coordonnées (dev only pour éviter spam console)
-            if (process.env.NODE_ENV === "development" && externalProps.length > 0) {
-                const sample = externalProps.find(p => p.location.coords.lat !== 14.6928);
-                if (sample) {
-                    console.log(`[gatewayService] ✅ Coords loaded for ${sample.id}:`, sample.location.coords);
-                } else {
-                    console.warn(`[gatewayService] ⚠️ All ${externalProps.length} external props use default fallback coords (Dakar)`);
-                }
+            // Si on a de la place pour des externes sur la même page
+            if (listings.length < limit && externalCount > 0) {
+                const neededExternal = limit - listings.length;
+                const externalListings = await getExternalListingsByType(
+                    filters.category === "location" ? "location" : "vente",
+                    {
+                        city: filters.city || filters.citySlug,
+                        category: filters.type,
+                        limit: neededExternal,
+                        page: 1
+                    }
+                );
+                listings.push(...externalListings);
             }
         } else {
-            console.error("[gatewayService] Failed to load external properties:", externalResult.reason);
+            // On est uniquement sur les biens externes
+            const externalOffset = (page - 1) * limit - internalCount;
+            const externalPage = Math.floor(externalOffset / limit) + 1;
+            const skipOnFirstPage = externalOffset % limit;
+
+            const externalListings = await getExternalListingsByType(
+                filters.category === "location" ? "location" : "vente",
+                {
+                    city: filters.city || filters.citySlug,
+                    category: filters.type,
+                    limit: limit + skipOnFirstPage,
+                    page: externalPage
+                }
+            );
+
+            listings = externalListings.slice(skipOnFirstPage, skipOnFirstPage + limit);
         }
 
-        // Filtrage JS du prix pour les externes
-        if (filters.minPrice || filters.maxPrice) {
-            externalProps = externalProps.filter(p => {
-                if (filters.minPrice && p.price < filters.minPrice) return false;
-                if (filters.maxPrice && p.price > filters.maxPrice) return false;
-                return true;
-            });
-        }
-
-        // 4. Fusion
-        const unifiedListings = [...internalProps, ...externalProps];
-
-        // 5. Tri (Interne d'abord, puis Externe, en attendant mieux)
-        return unifiedListings;
-
-
+        return { listings, total };
 
     } catch (err) {
         console.error("[gatewayService] getUnifiedListings Gateway Error", err);
-        return []; // Fail safe, au moins on ne crashe pas l'app
+        return { listings: [], total: 0 };
     }
 };

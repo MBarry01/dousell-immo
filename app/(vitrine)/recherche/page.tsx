@@ -76,6 +76,10 @@ const recordToFilters = (
     filters.ownerId = params.owner;
   }
 
+  // Pagination
+  filters.page = params.page ? Number(params.page) : 1;
+  filters.limit = params.limit ? Number(params.limit) : 12;
+
   return filters;
 };
 
@@ -84,14 +88,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const filters = recordToFilters(resolved);
 
   // Appel du service unifié (Fusion Interne + Externe)
-  // Utilisation de getUnifiedListings au lieu de getProperties
-  const properties = await getUnifiedListings(filters);
+  const { listings: properties, total } = await getUnifiedListings(filters);
 
   return (
     <div className="space-y-6 py-6">
       <h1 className="text-3xl font-semibold text-white">Explorer les biens</h1>
       <Suspense fallback={<div className="h-96 animate-pulse bg-white/5 rounded-xl" />}>
-        <SearchExperience initialFilters={filters} initialResults={properties} />
+        <SearchExperience
+          initialFilters={filters}
+          initialResults={properties}
+          totalCount={total}
+        />
       </Suspense>
     </div>
   );

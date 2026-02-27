@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
 import { slugify } from '@/lib/slugs';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://dousel.com';
+const BASE_URL = 'https://www.dousel.com';
 
 export const revalidate = 3600; // Update sitemap every hour
 
@@ -16,10 +16,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const { data: sales } = await supabase
         .rpc('get_active_cities_and_types', { min_count: 1, target_transaction_type: 'vente' });
 
+    // 3. Récupérer les données IMMOBILIER (Global)
+    const { data: global } = await supabase
+        .rpc('get_active_cities_and_types', { min_count: 1 });
+
+    // 4. Récupérer tous les biens approuvés pour les inclure individuellement
+    const { data: properties } = await supabase
+        .from('properties')
+        .select('id, updated_at')
+        .eq('validation_status', 'approved')
+        .eq('status', 'disponible');
+
     const routes: MetadataRoute.Sitemap = [];
 
-    // Helper pour ajouter des routes
-    const addRoutes = (items: any[], mode: 'location' | 'vente') => {
+    // Helper pour ajouter des routes de catégories
+    const addCategoryRoutes = (items: any[], mode: 'location' | 'vente' | 'immobilier') => {
         const processedCities = new Set<string>();
 
         // Root de la section
@@ -57,16 +68,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         });
     }
 
-    addRoutes(rentals, 'location');
-    addRoutes(sales, 'vente');
+    addCategoryRoutes(rentals, 'location');
+    addCategoryRoutes(sales, 'vente');
+    addCategoryRoutes(global, 'immobilier');
 
-    // 3. Les pages statiques de base
+    // Mappage des biens individuels
+    const propertyRoutes = (properties || []).map((prop) => ({
+        url: `${BASE_URL}/biens/${prop.id}`,
+        lastModified: new Date(prop.updated_at || new Date()),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+    }));
+
+    // 4. Les pages statiques de base
     const staticRoutes = [
         '',
         '/recherche',
         '/a-propos',
         '/contact',
         '/planifier-visite',
+        '/immobilier-senegal-diaspora',
     ].map((route) => ({
         url: `${BASE_URL}${route}`,
         lastModified: new Date(),
@@ -74,5 +95,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 1.0,
     }));
 
-    return [...staticRoutes, ...routes];
+    return [...staticRoutes, ...routes, ...propertyRoutes];
 }

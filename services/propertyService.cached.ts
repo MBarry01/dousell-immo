@@ -199,9 +199,13 @@ export async function getPropertiesWithFilters(
 
       query = query.order("created_at", { ascending: false });
 
-      if (filters.limit) {
-        query = query.limit(filters.limit);
-      }
+      // Pagination logic
+      const limit = filters.limit || 12;
+      const page = filters.page || 1;
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+
+      query = query.range(from, to);
 
       const { data, error } = await query;
       if (error) throw error;

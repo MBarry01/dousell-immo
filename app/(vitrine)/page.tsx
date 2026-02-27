@@ -5,6 +5,7 @@ import { QuickSearch } from "@/components/search/quick-search";
 import { HomeSEOContent } from "@/components/sections/home-seo-content";
 import { getHomePageSections } from "@/services/homeService.cached";
 import { VerificationSuccessToast } from "@/components/auth/verification-success-toast";
+import { LandingPageJsonLd, LocalBusinessJsonLd } from "@/components/seo/json-ld";
 
 // ISR: Régénère la page toutes les heures (3600 secondes)
 // Cela améliore drastiquement les performances (TTFB < 500ms) et réduit la charge sur Supabase
@@ -23,6 +24,8 @@ export default async function Home() {
 
   return (
     <div className="space-y-6">
+      <LandingPageJsonLd />
+      <LocalBusinessJsonLd />
 
       {/* Toast de succès après vérification d'email */}
       <Suspense fallback={null}>

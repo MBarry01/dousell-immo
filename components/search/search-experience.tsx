@@ -47,11 +47,13 @@ const MapView = dynamic(
 type SearchExperienceProps = {
   initialFilters: PropertyFilters;
   initialResults: Property[];
+  totalCount: number;
 };
 
 export const SearchExperience = ({
   initialFilters,
   initialResults,
+  totalCount: initialTotal,
 }: SearchExperienceProps) => {
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -60,11 +62,12 @@ export const SearchExperience = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [alertDialogOpen, setAlertDialogOpen] = useState(false);
   const [results, setResults] = useState<Property[]>(initialResults);
+  const [total, setTotal] = useState(initialTotal);
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState(filters.q ?? "");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(filters.page || 1);
 
   // Debounce de la recherche textuelle (500ms)
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -105,21 +108,17 @@ export const SearchExperience = ({
       const searchFilters = async () => {
         console.log("[SearchExperience] Triggering search for:", debouncedSearchQuery);
         setIsSearching(true);
-        const nextFilters = { ...filters, q: debouncedSearchQuery || undefined };
+        const nextFilters = { ...filters, q: debouncedSearchQuery || undefined, page: 1 };
 
-        console.log("[SearchExperience] Updating URL with filters:", nextFilters);
         setFilters(nextFilters);
 
         try {
-          console.log("[SearchExperience] Fetching listings for:", debouncedSearchQuery);
-          const data = await getUnifiedListings(nextFilters);
+          const { listings, total: nextTotal } = await getUnifiedListings(nextFilters);
 
           if (!ignoreResult) {
-            console.log("[SearchExperience] Search results received:", data.length);
-            setResults(data);
+            setResults(listings);
+            setTotal(nextTotal);
             setCurrentPage(1);
-          } else {
-            console.log("[SearchExperience] Result ignored (stale call)");
           }
         } catch (error) {
           console.error("[SearchExperience] Search error:", error);
@@ -138,13 +137,13 @@ export const SearchExperience = ({
   }, [debouncedSearchQuery, filters, setFilters]);
 
   const applyFilters = useCallback(async (nextFilters: PropertyFilters) => {
-    console.log("[SearchExperience] Applying filters:", nextFilters);
     setIsSearching(true);
-    setFilters(nextFilters);
+    const filtersWithPage = { ...nextFilters, page: 1 };
+    setFilters(filtersWithPage);
     try {
-      const data = await getUnifiedListings(nextFilters);
-      console.log("[SearchExperience] Filtered results received:", data.length);
-      setResults(data);
+      const { listings, total: nextTotal } = await getUnifiedListings(filtersWithPage);
+      setResults(listings);
+      setTotal(nextTotal);
       setCurrentPage(1);
     } catch (error) {
       console.error("[SearchExperience] Filter application error:", error);
@@ -153,25 +152,30 @@ export const SearchExperience = ({
     }
   }, [setFilters]);
 
-  // Mémoiser le nombre de résultats et les résultats paginés
-  const resultCount = useMemo(() => results.length, [results.length]);
-
-  const paginatedResults = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return results.slice(start, start + ITEMS_PER_PAGE);
-  }, [results, currentPage]);
-
-  const totalPages = Math.ceil(resultCount / ITEMS_PER_PAGE);
-
-  // Effet pour défiler vers le haut des résultats lors d'un changement de page
-  useEffect(() => {
-    if (currentPage > 1) {
+  // Nouvelle fonction pour changer de page
+  const handlePageChange = useCallback(async (page: number) => {
+    setIsSearching(true);
+    setCurrentPage(page);
+    const nextFilters = { ...filters, page };
+    setFilters(nextFilters);
+    try {
+      const { listings, total: nextTotal } = await getUnifiedListings(nextFilters);
+      setResults(listings);
+      setTotal(nextTotal);
+    } catch (error) {
+      console.error("[SearchExperience] Page change error:", error);
+    } finally {
+      setIsSearching(false);
+      // Scroll to top
       const resultsElement = document.getElementById("search-results-top");
       if (resultsElement) {
         resultsElement.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }
-  }, [currentPage]);
+  }, [filters, setFilters]);
+
+  const resultCount = total;
+  const totalPages = Math.ceil(resultCount / ITEMS_PER_PAGE);
 
   return (
     <div className="relative space-y-6 pb-32">
@@ -281,7 +285,7 @@ export const SearchExperience = ({
         ) : (
           <div id="search-results-top" className="scroll-mt-24">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&>*]:w-full">
-              {paginatedResults.map((property) => (
+              {results.map((property) => (
                 <PropertyCardUnified key={property.id} property={property} />
               ))}
             </div>
@@ -293,7 +297,7 @@ export const SearchExperience = ({
                     <PaginationItem>
                       {currentPage > 1 ? (
                         <PaginationPrevious
-                          onClick={() => setCurrentPage(prev => prev - 1)}
+                          onClick={() => handlePageChange(currentPage - 1)}
                         />
                       ) : (
                         <div className="pointer-events-none opacity-30">
@@ -302,10 +306,8 @@ export const SearchExperience = ({
                       )}
                     </PaginationItem>
 
-                    {/* Logic to show page numbers with ellipsis */}
                     {Array.from({ length: totalPages }, (_, i) => i + 1)
                       .filter(page => {
-                        // Alléger la pagination sur mobile
                         if (totalPages <= 5) return true;
                         if (page === 1 || page === totalPages) return true;
                         if (Math.abs(page - currentPage) <= 1) return true;
@@ -321,7 +323,7 @@ export const SearchExperience = ({
                           <PaginationItem>
                             <PaginationLink
                               isActive={currentPage === page}
-                              onClick={() => setCurrentPage(page)}
+                              onClick={() => handlePageChange(page)}
                             >
                               {page}
                             </PaginationLink>
@@ -332,7 +334,7 @@ export const SearchExperience = ({
                     <PaginationItem>
                       {currentPage < totalPages ? (
                         <PaginationNext
-                          onClick={() => setCurrentPage(prev => prev + 1)}
+                          onClick={() => handlePageChange(currentPage + 1)}
                         />
                       ) : (
                         <div className="pointer-events-none opacity-30">

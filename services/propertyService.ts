@@ -19,8 +19,9 @@ export type PropertyFilters = {
   isVerified?: boolean; // Filtrer par biens certifiés/vérifiés
   type?: Property["details"]["type"];
   types?: Property["details"]["type"][]; // Support pour sélection multiple
-  limit?: number;
   ownerId?: string; // Filtrer par publieur (owner_id)
+  page?: number;     // Défaut: 1
+  limit?: number;    // Défaut: 12
 };
 
 type SupabasePropertyRow = {
@@ -336,9 +337,13 @@ export const getProperties = async (filters: PropertyFilters = {}) => {
       ascending: false,
     });
 
-    if (filters.limit) {
-      query = query.limit(filters.limit);
-    }
+    // Pagination logic
+    const limit = filters.limit || 12;
+    const page = filters.page || 1;
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    query = query.range(from, to);
 
     const { data, error } = await query;
     if (error) {

@@ -26,7 +26,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://dousel.com"),
+  metadataBase: new URL("https://www.dousel.com"),
+  alternates: {
+    canonical: "./",
+  },
   title: {
     default: "Dousel | L'immobilier de confiance au Sénégal",
     template: "%s | Dousel",
@@ -37,7 +40,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "fr_SN",
-    url: "https://dousel.com",
+    url: "https://www.dousel.com",
     siteName: "Dousel",
     title: "Dousel | L'immobilier de confiance au Sénégal",
     description: "Villas, terrains et appartements de luxe à Dakar et sur la Petite Côte.",
@@ -169,10 +172,10 @@ export default async function RootLayout({
               "@graph": [
                 {
                   "@type": "Organization",
-                  "@id": "https://dousel.com/#organization",
+                  "@id": "https://www.dousel.com/#organization",
                   "name": "Dousel",
-                  "url": "https://dousel.com",
-                  "logo": "https://dousel.com/icons/icon-512.png",
+                  "url": "https://www.dousel.com",
+                  "logo": "https://www.dousel.com/icons/icon-512.png",
                   "description": "Plateforme immobilière de référence au Sénégal pour l'achat, la vente et la gestion locative.",
                   "sameAs": [
                     "https://facebook.com",
@@ -182,10 +185,10 @@ export default async function RootLayout({
                 },
                 {
                   "@type": "RealEstateAgent",
-                  "@id": "https://dousel.com/#localbusiness",
-                  "url": "https://dousel.com",
+                  "@id": "https://www.dousel.com/#localbusiness",
+                  "url": "https://www.dousel.com",
                   "name": "Dousel",
-                  "image": "https://dousel.com/monument.png",
+                  "image": "https://www.dousel.com/monument.png",
                   "areaServed": [
                     { "@type": "City", "name": "Dakar" },
                     { "@type": "City", "name": "Saly" },

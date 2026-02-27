@@ -26,7 +26,6 @@ const TrustSection = dynamic(() => import("@/components/landing/tenant/TrustSect
 const TenantBentoGrid = dynamic(() => import("@/components/landing/tenant/TenantBentoGrid"));
 const HeroIllustration = dynamic(() => import("@/components/landing/HeroIllustration"), { ssr: false });
 const HeroOwnerIllustration = dynamic(() => import("@/components/landing/HeroOwnerIllustration"), { ssr: false });
-const ShootingStars = dynamic(() => import("@/components/ui/shooting-stars").then(mod => mod.ShootingStars), { ssr: false });
 
 import Image from "next/image";
 import { CldImageSafe } from "@/components/ui/CldImageSafe";
@@ -542,18 +541,6 @@ function LandingPageContent() {
           </div>
         </div>
 
-        {/* Animated Shooting Stars - Optimized single instance */}
-        <ShootingStars
-          starColor="#F4C430"
-          trailColor="#FFD700"
-          minSpeed={15}
-          maxSpeed={35}
-          starWidth={24}
-          starHeight={2}
-          minDelay={1500}
-          maxDelay={4000}
-          className="opacity-80"
-        />
       </section>
 
       {/* ============================================

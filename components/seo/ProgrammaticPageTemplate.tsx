@@ -22,8 +22,13 @@ interface ProgrammaticPageTemplateProps {
     displayCity: string; // Formatting (e.g. Thiès Region)
     type?: string; // Slug (e.g. appartement)
     displayType?: string; // Formatted
-    mode: 'location' | 'vente';
+    mode: 'location' | 'vente' | 'immobilier';
     nearbyCities?: string[]; // New prop for mesh
+    seoContent?: React.ReactNode; // Long form SEO content
+    hideInternalLinking?: boolean;
+    totalCount?: number;
+    currentPage?: number;
+    limit?: number;
 }
 
 export default function ProgrammaticPageTemplate({
@@ -34,18 +39,27 @@ export default function ProgrammaticPageTemplate({
     type,
     displayType,
     mode,
-    nearbyCities = []
+    nearbyCities = [],
+    seoContent,
+    hideInternalLinking = false,
+    totalCount = properties.length,
+    currentPage = 1,
+    limit = 12
 }: ProgrammaticPageTemplateProps) {
     const isRental = mode === 'location';
+    const isVente = mode === 'vente';
+    const isGlobal = mode === 'immobilier';
     const _actionText = isRental ? "Louer" : "Acheter";
     const _connector = isRental ? "à" : "à"; // Grammaire simple
 
     // SEO Title Logic
+    const actionText = isRental ? "Location" : isVente ? "Vente" : "Immobilier";
     const mainTitle = type
-        ? `${isRental ? "Location" : "Vente"} ${displayType} à `
-        : `Immobilier à `;
+        ? `${actionText} ${displayType} à `
+        : `${actionText} à `;
 
-    const countText = `${properties.length} bien${properties.length > 1 ? 's' : ''}`;
+    // Use totalCount instead of properties.length for global count
+    const countText = `${totalCount} bien${totalCount > 1 ? 's' : ''}`;
 
     // Average Price (Loyer ou Prix Vente)
     const avgPrice = properties.length > 0
@@ -133,112 +147,149 @@ export default function ProgrammaticPageTemplate({
                     ))}
                 </div>
 
-                {/* Simple Inline CTA for Owners */}
-                <div className="mt-12 py-6 text-center border-t border-border/30">
-                    <p className="text-muted-foreground text-base">
-                        <span className="text-foreground font-semibold">Propriétaire à {cleanCityName(displayCity)} ?</span>{" "}
-                        Publiez gratuitement votre annonce et trouvez un locataire en 48h.{" "}
-                        <Link
-                            href="/compte/deposer"
-                            className="text-primary font-bold hover:underline"
-                        >
-                            Déposer une annonce →
-                        </Link>
-                    </p>
-                </div>
+                {/* Pagination Section */}
+                {totalCount > limit && (
+                    <div className="mt-16 flex justify-center">
+                        <div className="flex items-center gap-2">
+                            {currentPage > 1 && (
+                                <Button asChild variant="outline" size="sm">
+                                    <Link href={{ query: { page: currentPage - 1 } }}>Précédent</Link>
+                                </Button>
+                            )}
 
-                {/* Similar Listings Section */}
-                <SimilarListingsSection properties={similarProperties} />
+                            <span className="text-sm font-medium text-muted-foreground px-4">
+                                Page {currentPage} sur {Math.ceil(totalCount / limit)}
+                            </span>
 
-                {/* FAQ Automatisée SEO */}
-                <ProgrammaticSectionFAQ
-                    properties={[...properties, ...similarProperties]}
-                    city={displayCity}
-                    mode={mode}
-                />
-
-                {/* Internal Linking Footer (Maillage Type) */}
-                {type && (
-                    <div className="mt-20 pt-10 border-t border-border/50">
-                        <div className="flex items-center gap-2 text-xl font-bold mb-6">
-                            <GripHorizontal className="h-6 w-6 text-primary" />
-                            <h3>Autres recherches {isRental ? "locatives" : "immobilières"} à {displayCity}</h3>
-                        </div>
-                        <div className="flex flex-wrap gap-3">
-                            {['Appartement', 'Villa', 'Studio', 'Terrain', 'Bureau'].map((otherType) => {
-                                if (otherType.toLowerCase() === displayType?.toLowerCase()) return null;
-                                return (
-                                    <Link
-                                        key={otherType}
-                                        href={`/${mode}/${city}/${slugify(otherType)}`}
-                                        className="px-5 py-2.5 rounded-full bg-muted/50 hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 transition-all text-sm font-medium"
-                                    >
-                                        {otherType} à {cleanCityName(displayCity)}
-                                    </Link>
-                                );
-                            })}
+                            {currentPage < Math.ceil(totalCount / limit) && (
+                                <Button asChild variant="outline" size="sm">
+                                    <Link href={{ query: { page: currentPage + 1 } }}>Suivant</Link>
+                                </Button>
+                            )}
                         </div>
                     </div>
                 )}
 
-                {/* Internal Linking Geographic (Maillage Villes - Design Postcard Grid) */}
-                {nearbyCities.length > 0 && (
-                    <section className="mt-20 py-16 -mx-4 px-4 sm:px-8">
-                        <div className="container mx-auto max-w-6xl">
-
-                            <div className="text-center mb-12">
-                                <h3 className="text-3xl font-bold text-foreground mb-3">
-                                    Destinations populaires
-                                </h3>
-                                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                                    Élargissez votre recherche. Découvrez les opportunités immobilières dans les villes les plus prisées.
-                                </p>
-                            </div>
-
-                            {/* GRILLE DE CARTES POSTALES */}
-                            {/* GRILLE DE CARTES POSTALES (Flex centered) */}
-                            <div className="flex flex-wrap justify-center gap-6">
-                                {nearbyCities.map((cityName) => {
-                                    const imageUrl = getCityImage(cityName);
-                                    const citySlug = slugify(cityName);
-
-                                    return (
-                                        <Link
-                                            key={cityName}
-                                            href={`/${mode}/${citySlug}`}
-                                            className="group relative h-72 w-full sm:w-80 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 block"
-                                        >
-                                            {/* 1. L'Image de fond */}
-                                            <Image
-                                                src={imageUrl}
-                                                alt={`Immobilier à ${cleanCityName(cityName)}`}
-                                                fill
-                                                className="object-cover group-hover:scale-110 transition-transform duration-700"
-                                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                                            />
-
-                                            {/* 2. L'Overlay sombre */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-
-                                            {/* 3. Le Contenu Texte */}
-                                            <div className="absolute bottom-0 left-0 p-6 w-full">
-                                                <h4 className="text-2xl font-bold text-white capitalize mb-2">
-                                                    {cleanCityName(cityName)}
-                                                </h4>
-                                                <div className="flex items-center text-white/90 text-sm font-medium gap-2 group/btn">
-                                                    <span>Explorer les offres</span>
-                                                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    )
-                                })}
-                            </div>
-
-                        </div>
-                    </section>
-                )}
+                {/* Simple Inline CTA for Owners */}
             </div>
+
+            {/* Lead Magnet Section (Diaspora focus) */}
+            <div className="mt-16 p-8 rounded-2xl bg-gradient-to-br from-[#F4C430]/20 to-primary/5 border border-[#F4C430]/30 shadow-xl relative overflow-hidden">
+                <div className="relative z-10 max-w-2xl">
+                    <h3 className="text-2xl font-bold text-white mb-2">Investir au Sénégal : Le Guide Complet de la Diaspora</h3>
+                    <p className="text-white/70 mb-6">
+                        Notaire, sécurité juridique, choix du quartier et fiscalité. Téléchargez gratuitement notre guide PDF pour sécuriser votre projet immobilier depuis l'étranger.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <input
+                            type="email"
+                            placeholder="Votre email"
+                            className="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#F4C430]/50"
+                        />
+                        <Button className="bg-[#F4C430] hover:bg-[#F4C430]/90 text-black font-bold h-auto py-3 px-8">
+                            Recevoir le guide →
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Deep SEO Content */}
+            {seoContent && (
+                <div className="mt-20 prose prose-invert prose-yellow max-w-none border-t border-white/5 pt-16">
+                    <div className="max-w-4xl mx-auto">
+                        {seoContent}
+                    </div>
+                </div>
+            )}
+
+            {/* FAQ Automatisée SEO */}
+            <ProgrammaticSectionFAQ
+                properties={[...properties, ...similarProperties]}
+                city={displayCity}
+                mode={mode === 'immobilier' ? 'location' : mode}
+            />
+
+            {/* Internal Linking Footer (Maillage Type) */}
+            {type && (
+                <div className="mt-20 pt-10 border-t border-border/50">
+                    <div className="flex items-center gap-2 text-xl font-bold mb-6">
+                        <GripHorizontal className="h-6 w-6 text-primary" />
+                        <h3>Autres recherches {isRental ? "locatives" : "immobilières"} à {displayCity}</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                        {['Appartement', 'Villa', 'Studio', 'Terrain', 'Bureau'].map((otherType) => {
+                            if (otherType.toLowerCase() === displayType?.toLowerCase()) return null;
+                            return (
+                                <Link
+                                    key={otherType}
+                                    href={`/${mode}/${city}/${slugify(otherType)}`}
+                                    className="px-5 py-2.5 rounded-full bg-muted/50 hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 transition-all text-sm font-medium"
+                                >
+                                    {otherType} à {cleanCityName(displayCity)}
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* Internal Linking Geographic (Maillage Villes - Design Postcard Grid) */}
+            {nearbyCities.length > 0 && (
+                <section className="mt-20 py-16 -mx-4 px-4 sm:px-8">
+                    <div className="container mx-auto max-w-6xl">
+
+                        <div className="text-center mb-12">
+                            <h3 className="text-3xl font-bold text-foreground mb-3">
+                                Destinations populaires
+                            </h3>
+                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                                Élargissez votre recherche. Découvrez les opportunités immobilières dans les villes les plus prisées.
+                            </p>
+                        </div>
+
+                        {/* GRILLE DE CARTES POSTALES */}
+                        {/* GRILLE DE CARTES POSTALES (Flex centered) */}
+                        <div className="flex flex-wrap justify-center gap-6">
+                            {nearbyCities.map((cityName) => {
+                                const imageUrl = getCityImage(cityName);
+                                const citySlug = slugify(cityName);
+
+                                return (
+                                    <Link
+                                        key={cityName}
+                                        href={`/${mode}/${citySlug}`}
+                                        className="group relative h-72 w-full sm:w-80 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 block"
+                                    >
+                                        {/* 1. L'Image de fond */}
+                                        <Image
+                                            src={imageUrl}
+                                            alt={`Immobilier à ${cleanCityName(cityName)}`}
+                                            fill
+                                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                                        />
+
+                                        {/* 2. L'Overlay sombre */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+
+                                        {/* 3. Le Contenu Texte */}
+                                        <div className="absolute bottom-0 left-0 p-6 w-full">
+                                            <h4 className="text-2xl font-bold text-white capitalize mb-2">
+                                                {cleanCityName(cityName)}
+                                            </h4>
+                                            <div className="flex items-center text-white/90 text-sm font-medium gap-2 group/btn">
+                                                <span>Explorer les offres</span>
+                                                <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                                            </div>
+                                        </div>
+                                    </Link>
+                                )
+                            })}
+                        </div>
+
+                    </div>
+                </section>
+            )}
         </div>
     );
 }
