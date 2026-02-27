@@ -511,7 +511,7 @@
     display: none;
   }
 
-  /* Mobile-first: Emp  cher le d  bordement horizontal */
+  /* Mobile-first: Empêcher le débordement horizontal */
   @media screen and (max-width: 768px) {
     body {
       overflow-x: hidden;

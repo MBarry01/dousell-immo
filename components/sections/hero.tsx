@@ -2,43 +2,20 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Building2, ShieldCheck, Users, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { cn } from "@/lib/utils";
 
 export const HeroSection = () => {
-  const TrustBadges = ({ className }: { className?: string }) => (
-    <div className={cn("grid grid-cols-3 gap-2 pointer-events-none", className)}>
-      {[
-        { label: "Audit complet", icon: Building2, delay: "delay-700" },
-        { label: "Cadre Légal", icon: ShieldCheck, delay: "delay-[800ms]" },
-        { label: "Accompagnement", icon: Users, delay: "delay-[900ms]" },
-      ].map((stat, i) => (
-        <div
-          key={i}
-          className={cn(
-            "relative flex flex-col items-center justify-center rounded-2xl border border-white/[0.03] bg-white/[0.02] p-3 backdrop-blur-sm",
-            "shadow-md transition-colors duration-300",
-            "animate-in fade-in zoom-in-95 duration-700 fill-mode-both",
-            stat.delay
-          )}
-        >
-          <div className="relative mb-1 flex items-center justify-center">
-            <stat.icon className="h-5 w-5 text-white/60" />
-          </div>
-          <div className="text-[10px] font-semibold text-white/80 leading-tight whitespace-nowrap tracking-wide">{stat.label}</div>
-        </div>
-      ))}
-    </div>
-  );
+
 
   return (
     <>
-      {/* ========== MOBILE HERO — Immersion plein écran ========== */}
+      {/* ========== MOBILE HERO — Hauteur adaptative, zéro élasticité ========== */}
       <section
-        className="relative md:hidden overflow-hidden h-[100dvh]"
+        className="relative md:hidden overflow-hidden"
+        style={{ height: "93svh" }}
         suppressHydrationWarning
       >
         {/* Image de fond — taille naturelle, ancrée en haut */}
@@ -56,12 +33,10 @@ export const HeroSection = () => {
         {/* Gradient fort en bas pour lisibilité du texte */}
         <div className="absolute inset-0 z-10 bg-gradient-to-t from-black from-30% via-black/70 via-60% to-transparent" />
 
-        {/* Contenu ancré en bas — remonté agressivement pour la nav bar (160px) */}
+        {/* Contenu — positionné en absolu depuis le bas avec valeurs fixes */}
         <div
-          className="relative z-20 flex flex-col justify-end px-4 sm:px-6 pt-20 h-full"
-          style={{
-            paddingBottom: "calc(env(safe-area-inset-bottom, 20px) + 140px)",
-          }}
+          className="absolute inset-x-0 bottom-0 z-20 px-4 sm:px-6"
+          style={{ paddingBottom: "clamp(120px, 17svh, 170px)" }}
         >
           <div className="space-y-1 mb-4">
             <h1 className="text-[clamp(1.75rem,7vw,2.25rem)] font-semibold leading-tight text-white">
@@ -69,7 +44,7 @@ export const HeroSection = () => {
               <span className="sr-only"> : Achat, location et gestion locative</span>
             </h1>
             <p className="text-[clamp(1rem,3.5vw,1.125rem)] text-white/90 max-w-xl">
-              Plus de 500 biens vérifiés à Dakar et sur la Petite Côte.
+              Trouvez le bien idéal pour votre projet.
             </p>
           </div>
           <div className="flex flex-col gap-3">
@@ -89,8 +64,6 @@ export const HeroSection = () => {
               <Link href="/compte/deposer">Publier un bien</Link>
             </Button>
           </div>
-          {/* Trust Badges - Creative "Void Filler" (Absolute) */}
-          <TrustBadges className="absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom,0px)+25px)]" />
         </div>
       </section>
 
@@ -106,8 +79,8 @@ export const HeroSection = () => {
             </div>
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-100">
               <p className="text-[clamp(0.9375rem,1.5vw,1.25rem)] text-white/70">
-                <span className="md:hidden">Plus de 500 biens vérifiés à Dakar et sur la Petite Côte.</span>
-                <span className="hidden md:inline">Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte, Dousel s'impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l'achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.</span>
+                <span className="md:hidden">Votre prochain bien vérifié au Sénégal.</span>
+                <span className="hidden md:inline">Découvrez une large sélection de biens vérifiés à Dakar et sur la Petite Côte. Dousel s'impose comme la plateforme immobilière de référence au Sénégal. Que ce soit pour l'achat ou la gestion locative, nous connectons propriétaires et investisseurs grâce à des outils digitaux sécurisés.</span>
               </p>
             </div>
           </div>

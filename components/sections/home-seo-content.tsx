@@ -30,7 +30,7 @@ export const HomeSEOContent = () => {
                     )}
                 >
                     <p>
-                        Avec plus de 500 biens vérifiés à Dakar et sur la Petite Côte (Mbour, Saly, Somone),
+                        Avec notre vaste catalogue de biens vérifiés à Dakar et sur la Petite Côte (Mbour, Saly, Somone),
                         Dousel s'impose comme la plateforme immobilière de référence au Sénégal.
                         Que ce soit pour l'achat d'une villa de luxe, la location d'un studio moderne
                         ou la gestion locative professionnelle, nous connectons propriétaires, agences
