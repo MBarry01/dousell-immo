@@ -8,11 +8,6 @@ export async function middleware(request: NextRequest) {
   const hostname = request.nextUrl.hostname;
   const pathname = request.nextUrl.pathname;
 
-  // DEBUG LOG (visible dans Headers de réponse)
-  const debugHeaders = new Headers(request.headers);
-  debugHeaders.set("x-debug-hostname", hostname);
-  debugHeaders.set("x-debug-pathname", pathname);
-
   // RÈGLE SOUS-DOMAINE : Si le visiteur est sur "app.*"
   if (hostname.startsWith('app.')) {
     if (!pathname.startsWith('/gestion')) {
@@ -21,6 +16,8 @@ export async function middleware(request: NextRequest) {
       console.log(`Rewriting ${hostname}${pathname} to ${url.pathname}`);
       const response = NextResponse.rewrite(url);
       response.headers.set("x-debug-rewrite", "true");
+      response.headers.set("x-debug-hostname", hostname);
+      response.headers.set("x-debug-pathname", pathname);
       return response;
     }
   }
@@ -32,6 +29,9 @@ export async function middleware(request: NextRequest) {
   // Expose le pathname courant via header pour les Server Components (ex: workspace layout)
   if (response instanceof NextResponse) {
     response.headers.set("x-pathname", pathname);
+    response.headers.set("x-debug-hostname", hostname);
+    response.headers.set("x-debug-pathname", pathname);
+    response.headers.set("x-debug-rewrite", "false");
   }
 
   return response;
