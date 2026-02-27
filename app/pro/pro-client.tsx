@@ -528,18 +528,7 @@ function LandingPageContent() {
               </div>
             )}
 
-            {/* Trust indicators - Inline on mobile */}
-            <div className="animate-fade-in-up delay-500 mt-6 md:mt-14 flex flex-row items-center justify-center md:justify-start gap-4 sm:gap-6 text-white/50 text-[clamp(0.75rem,1.5vw,0.875rem)] relative z-20">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
-                <span>100+ Propriétaires</span>
-              </div>
-              <div className="w-px h-3 sm:h-4 bg-white/20" />
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#F4C430] shadow-[0_0_8px_rgba(244,196,48,0.5)]" />
-                <span>500+ Biens gérés</span>
-              </div>
-            </div>
+            {/* Trust indicators removed or harmonized */}
           </div>
 
           {/* Right side - Illustration (different for each mode) */}

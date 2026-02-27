@@ -9,13 +9,17 @@ export async function updateSession(request: NextRequest) {
   // Added by WORKFLOW_PROPOSAL.md implementation
   // ============================================
 
+  // 3. LEGACY REDIRECTS (Migration vers /gestion/*)
   // Redirect /gestion-locative/* → /gestion/* (permanent 301)
   // /gestion-locative is a legacy duplicate that should be removed
-  if (pathname.startsWith("/gestion-locative")) {
-    const newPath = pathname.replace("/gestion-locative", "/gestion");
-    const url = request.nextUrl.clone();
-    url.pathname = newPath;
-    return NextResponse.redirect(url, 301);
+  if (pathname.startsWith('/gestion-locative') && !pathname.startsWith('/gestion/')) {
+    return NextResponse.redirect(new URL(pathname.replace('/gestion-locative', '/gestion'), request.url), 301);
+  }
+  if ((pathname === '/documents-legaux' || pathname.startsWith('/documents-legaux/')) && !pathname.startsWith('/gestion/')) {
+    return NextResponse.redirect(new URL(pathname.replace('/documents-legaux', '/gestion/documents-legaux'), request.url), 301);
+  }
+  if ((pathname === '/comptabilite' || pathname.startsWith('/comptabilite/')) && !pathname.startsWith('/gestion/')) {
+    return NextResponse.redirect(new URL(pathname.replace('/comptabilite', '/gestion/comptabilite'), request.url), 301);
   }
 
   // Redirect /landing/* → /pro/* (permanent 301)

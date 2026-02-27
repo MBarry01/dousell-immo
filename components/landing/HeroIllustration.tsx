@@ -200,30 +200,7 @@ export default function HeroIllustration() {
           </motion.div>
         </motion.div>
 
-        {/* Stats Badge - Bottom Center */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.5 }}
-          className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-20"
-        >
-          <div className="bg-gradient-to-r from-zinc-900/95 to-zinc-800/95 backdrop-blur-xl border border-[#F4C430]/20 rounded-full px-5 py-2.5 shadow-lg flex items-center gap-4">
-            <div className="text-center">
-              <p className="text-[#F4C430] text-sm font-bold">500+</p>
-              <p className="text-white/40 text-[9px]">Biens</p>
-            </div>
-            <div className="w-px h-6 bg-white/10" />
-            <div className="text-center">
-              <p className="text-white text-sm font-bold">24h</p>
-              <p className="text-white/40 text-[9px]">Réponse</p>
-            </div>
-            <div className="w-px h-6 bg-white/10" />
-            <div className="text-center">
-              <p className="text-emerald-400 text-sm font-bold">98%</p>
-              <p className="text-white/40 text-[9px]">Satisfaits</p>
-            </div>
-          </div>
-        </motion.div>
+        {/* Stats Badge removed to avoid redundancy with main Hero badges */}
 
         {/* Decorative glow elements */}
         <div className="absolute top-1/4 -right-8 w-32 h-32 bg-[#F4C430]/8 rounded-full blur-3xl" />

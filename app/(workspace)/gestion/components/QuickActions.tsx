@@ -72,7 +72,7 @@ export function QuickActions({
             label: 'Interventions',
             shortLabel: 'Travaux',
             icon: Wrench,
-            href: '/interventions',
+            href: '/gestion/interventions',
             type: 'link' as const,
         },
         {
@@ -84,12 +84,11 @@ export function QuickActions({
             type: 'link' as const,
         },
         {
-
             id: 'legal',
             label: 'Documents Juridiques',
             shortLabel: 'Juridique',
             icon: FileText,
-            href: '/documents-legaux',
+            href: '/gestion/documents-legaux',
             type: 'link' as const,
         },
         {

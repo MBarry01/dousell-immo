@@ -180,28 +180,44 @@ export const BottomNav = () => {
           height: "calc(60px + env(safe-area-inset-bottom))",
         }}
       >
-        <div className="absolute inset-0 -z-10 pointer-events-none">
+        <div className="absolute inset-x-0 top-0 h-[60px] -z-10 pointer-events-none">
+          {/* 
+            SVG Path Explanation:
+            M 0,60: Start bottom-left
+            L 0,0: Line to top-left
+            L 380,0: Line to start of the curve
+            C 410,0 420,56 500,56: Bezier to the bottom-center (depth 56)
+            C 580,56 590,0 620,0: Bezier back to the top edge
+            L 1000,0: Line to top-right
+            L 1000,60: Line to bottom-right
+          */}
           <svg
-            viewBox="0 0 1000 85"
+            viewBox="0 0 1000 60"
             preserveAspectRatio="none"
             className="h-full w-full"
             aria-hidden="true"
           >
+            {/* Version optimisée - Courbe élargie (Marge latérale augmentée, profondeur fixe) */}
             <path
-              d="M 0,85 L 0,0 L 350,0 C 350,0 350,70 410,70 L 590,70 C 650,70 650,0 650,0 L 1000,0 L 1000,85 Z"
+              d="M 0,60 L 0,0 L 370,0 C 410,0 420,38 500,38 C 580,38 590,0 630,0 L 1000,0 L 1000,60 Z"
               fill="#05080c"
               fillOpacity="0.95"
             />
-            {/* Outline/Border for the path */}
+
+            {/* Bordure optimisée */}
             <path
-              d="M 0,0 L 350,0 C 350,0 350,70 410,70 L 590,70 C 650,70 650,0 650,0 L 1000,0"
+              d="M 0,0 L 370,0 C 410,0 420,38 500,38 C 580,38 590,0 630,0 L 1000,0"
               fill="none"
               stroke="white"
               strokeOpacity="0.1"
-              strokeWidth="2"
+              strokeWidth="1.5"
             />
           </svg>
         </div>
+        <div
+          className="absolute inset-x-0 top-[60px] bottom-0 -z-10 pointer-events-none"
+          style={{ backgroundColor: "#05080c", opacity: 0.95 }}
+        />
 
         <div className="mx-auto flex h-full w-full items-center justify-between px-2 text-[10px] font-medium">
           {/* Section Gauche */}
@@ -265,17 +281,17 @@ export const BottomNav = () => {
       </nav>
 
       {/* FAB Central Button */}
-      <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[28%] pointer-events-auto">
+      <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
         <button
           onClick={() => router.push("/compte/deposer")}
           className={cn(
-            "flex h-[68px] w-[68px] items-center justify-center rounded-full bg-transparent",
-            "border-[2px] border-white/20 transition-all active:scale-95 shadow-xl backdrop-blur-sm",
+            "flex h-[56px] w-[56px] items-center justify-center rounded-full bg-transparent",
+            "border-[1.5px] border-white/20 transition-all active:scale-95 shadow-xl backdrop-blur-sm",
             "hover:bg-white/5 focus:outline-none"
           )}
           aria-label="Ajouter un bien"
         >
-          <Plus className="h-8 w-8 text-white stroke-[2.5]" />
+          <Plus className="h-6 w-6 text-white stroke-[2.5]" />
         </button>
       </div>
     </div>

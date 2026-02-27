@@ -155,6 +155,7 @@ export const SplashProvider = ({
       <div
         key="main-content"
         className="will-change-[opacity]"
+        suppressHydrationWarning
         style={{
           opacity: mounted ? (showSplash ? 0 : 1) : 1,
           pointerEvents: mounted ? (showSplash ? "none" : "auto") : "auto",

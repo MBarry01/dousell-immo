@@ -119,7 +119,7 @@ export default function FeaturedPropertiesHero() {
                             </>
                           ) : (
                             <>
-                              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                              <span className="w-1.5 h-1.5 bg-white/60 rounded-full" />
                               Location
                             </>
                           )}

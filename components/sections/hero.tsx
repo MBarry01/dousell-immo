@@ -2,11 +2,38 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { Building2, ShieldCheck, Users, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CldImageSafe } from "@/components/ui/CldImageSafe";
+import { cn } from "@/lib/utils";
 
 export const HeroSection = () => {
+  const TrustBadges = ({ className }: { className?: string }) => (
+    <div className={cn("grid grid-cols-3 gap-2 pointer-events-none", className)}>
+      {[
+        { label: "Audit complet", icon: Building2, delay: "delay-700" },
+        { label: "Cadre Légal", icon: ShieldCheck, delay: "delay-[800ms]" },
+        { label: "Accompagnement", icon: Users, delay: "delay-[900ms]" },
+      ].map((stat, i) => (
+        <div
+          key={i}
+          className={cn(
+            "relative flex flex-col items-center justify-center rounded-2xl border border-white/[0.03] bg-white/[0.02] p-3 backdrop-blur-sm",
+            "shadow-md transition-colors duration-300",
+            "animate-in fade-in zoom-in-95 duration-700 fill-mode-both",
+            stat.delay
+          )}
+        >
+          <div className="relative mb-1 flex items-center justify-center">
+            <stat.icon className="h-5 w-5 text-white/60" />
+          </div>
+          <div className="text-[10px] font-semibold text-white/80 leading-tight whitespace-nowrap tracking-wide">{stat.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <>
       {/* ========== MOBILE HERO — Immersion plein écran ========== */}
@@ -64,6 +91,8 @@ export const HeroSection = () => {
               <Link href="/compte/deposer">Publier un bien</Link>
             </Button>
           </div>
+          {/* Trust Badges - Creative "Void Filler" (Absolute) */}
+          <TrustBadges className="absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom,0px)+25px)]" />
         </div>
       </section>
 

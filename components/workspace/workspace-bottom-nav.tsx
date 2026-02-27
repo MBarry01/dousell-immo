@@ -206,22 +206,32 @@ export function WorkspaceBottomNav() {
         }}
       >
         {/* SVG Background with "Real Hole" */}
-        <div className="absolute inset-0 -z-10 pointer-events-none">
+        <div className="absolute inset-x-0 top-0 h-[60px] -z-10 pointer-events-none">
+          {/* 
+            SVG Path Explanation:
+            M 0,60: Start bottom-left
+            L 0,0: Line to top-left 
+            L 370,0: Start of cutout
+            C 410,0 420,38 500,38: Curve to center bottom (depth 38)
+            C 580,38 590,0 630,0: Curve back to top edge
+            L 1000,0: Line to top-right
+            L 1000,60: Bottom-right
+          */}
           <svg
-            viewBox="0 0 1000 85"
+            viewBox="0 0 1000 60"
             preserveAspectRatio="none"
             className="h-full w-full"
             aria-hidden="true"
             style={{ filter: "drop-shadow(0 -2px 10px rgba(0,0,0,0.1))" }}
           >
             <path
-              d="M 0,85 L 0,0 L 350,0 C 350,0 350,70 410,70 L 590,70 C 650,70 650,0 650,0 L 1000,0 L 1000,85 Z"
+              d="M 0,60 L 0,0 L 370,0 C 410,0 420,38 500,38 C 580,38 590,0 630,0 L 1000,0 L 1000,60 Z"
               fill={navBg}
               fillOpacity={isDark ? "0.95" : "0.98"}
             />
             {/* Outline/Border for the path */}
             <path
-              d="M 0,0 L 350,0 C 350,0 350,70 410,70 L 590,70 C 650,70 650,0 650,0 L 1000,0"
+              d="M 0,0 L 370,0 C 410,0 420,38 500,38 C 580,38 590,0 630,0 L 1000,0"
               fill="none"
               stroke={isDark ? "white" : "black"}
               strokeOpacity={isDark ? "0.08" : "0.06"}
@@ -229,6 +239,10 @@ export function WorkspaceBottomNav() {
             />
           </svg>
         </div>
+        <div
+          className="absolute inset-x-0 top-[60px] bottom-0 -z-10 pointer-events-none"
+          style={{ backgroundColor: navBg, opacity: isDark ? 0.95 : 0.98 }}
+        />
 
         <div className="mx-auto flex h-full w-full items-center justify-between px-2 text-[10px] font-medium">
           {/* Section Gauche */}
@@ -332,12 +346,12 @@ export function WorkspaceBottomNav() {
       </nav>
 
       {/* FAB Central Button - Dynamic based on path */}
-      <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[28%] pointer-events-auto">
+      <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
         <Link href={pathname?.startsWith("/gestion") ? "/gestion?add=tenant" : "/"}>
           <button
             className={cn(
-              "flex h-[66px] w-[66px] items-center justify-center rounded-full bg-transparent shadow-xl backdrop-blur-sm",
-              "border-[2px] transition-all active:scale-95",
+              "flex h-[56px] w-[56px] items-center justify-center rounded-full bg-transparent shadow-xl backdrop-blur-sm",
+              "border-[1.5px] transition-all active:scale-95",
               isDark ? "border-white/20 hover:bg-white/5" : "border-black/10 hover:bg-black/5",
               "focus:outline-none"
             )}
@@ -347,9 +361,9 @@ export function WorkspaceBottomNav() {
             aria-label={pathname?.startsWith("/gestion") ? "Ajouter un locataire" : "Retour accueil"}
           >
             {pathname?.startsWith("/gestion") ? (
-              <Plus className="h-8 w-8 stroke-[2.5]" />
+              <Plus className="h-6 w-6 stroke-[2.5]" />
             ) : (
-              <Home className="h-7 w-7 stroke-[2]" />
+              <Home className="h-5 w-5 stroke-[2]" />
             )}
           </button>
         </Link>
