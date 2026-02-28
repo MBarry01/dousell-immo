@@ -18,6 +18,7 @@ const getResendClient = () => {
 
 export type SendEmailOptions = {
     to: string | string[];
+    cc?: string | string[];
     subject: string;
     html?: string;
     react?: React.ReactElement;
@@ -35,6 +36,7 @@ export type SendEmailOptions = {
  */
 export async function sendEmailResend({
     to,
+    cc,
     subject,
     html,
     react,
@@ -60,9 +62,14 @@ export async function sendEmailResend({
         const sender = from || (isNoReply ? process.env.NOREPLY_EMAIL : process.env.FROM_EMAIL) || "Dousel Support <contact@dousel.com>";
         const reply_to = isNoReply ? undefined : (replyTo || process.env.CONTACT_EMAIL || "contact@dousel.com");
 
+        const ccList = cc
+            ? (Array.isArray(cc) ? cc : [cc]).filter(Boolean)
+            : undefined;
+
         const { data, error } = await resend.emails.send({
             from: sender,
             to: Array.isArray(to) ? to : [to],
+            cc: ccList,
             subject,
             html: emailHtml,
             replyTo: reply_to,

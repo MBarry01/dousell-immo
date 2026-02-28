@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
 import ReactPDF from '@react-pdf/renderer';
 import { createQuittanceDocument } from '@/components/pdf/QuittancePDF_v2';
 import { createClient } from '@supabase/supabase-js';
 import { storeDocumentInGED } from '@/lib/ged-utils';
 import { render } from '@react-email/render';
 import { ReceiptEmail } from '@/emails/ReceiptEmail';
+import { sendEmail } from '@/lib/mail';
 
 
 export async function POST(request: NextRequest) {
@@ -84,15 +84,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 5. Configuration de Nodemailer (Gmail)
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    });
-
     // 5. Formatter le montant pour l'email
     const amountFormatted = new Intl.NumberFormat('fr-FR').format(data.amount);
 
@@ -123,23 +114,33 @@ export async function POST(request: NextRequest) {
 
     // Determine the PDF filename based on document type
     let pdfFilename;
-    if (data.isJ180 !== undefined) { // Assuming isJ180 indicates a notice document
+    if (data.isJ180 !== undefined) {
       const isJ180 = data.isJ180 === true;
       pdfFilename = isJ180
         ? `Preavis_Conge_${data.noticeNumber}.pdf`
         : `Notification_Reconduction_${data.noticeNumber}.pdf`;
       subject = isJ180 ? `Préavis de congé - ${data.noticeNumber}` : `Notification de reconduction - ${data.noticeNumber}`;
-    } else { // Default to receipt logic if not a notice
+    } else {
       pdfFilename = isGuarantee
         ? `Recu_Caution_${data.receiptNumber}.pdf`
         : `Quittance_${data.receiptNumber}.pdf`;
     }
 
-    const mailOptions = {
-      from: `${data.ownerName} <${process.env.GMAIL_USER}>`,
+    // Expéditeur : nom du propriétaire + adresse email de la plateforme Dousel
+    const platformFrom = process.env.FROM_EMAIL || process.env.NOREPLY_EMAIL || 'noreply@dousel.com';
+    const senderFrom = `${data.ownerName} via Dousel <${platformFrom}>`;
+
+    // 9. Envoyer l'email via le système centralisé (Resend en priorité, Gmail en fallback)
+    console.log('📤 Envoi de l\'email à:', data.tenantEmail);
+    if (ownerEmailForCC) {
+      console.log('📧 Copie envoyée au propriétaire:', ownerEmailForCC);
+    }
+
+    const result = await sendEmail({
+      from: senderFrom,
       to: data.tenantEmail,
-      cc: ownerEmailForCC, // Mettre le propriétaire en copie
-      subject: subject,
+      cc: ownerEmailForCC || undefined,
+      subject,
       html: emailHtml,
       attachments: [
         {
@@ -148,22 +149,19 @@ export async function POST(request: NextRequest) {
           contentType: 'application/pdf',
         },
       ],
-    };
+    });
 
-
-    // 8. Envoyer l'email
-    console.log('📤 Envoi de l\'email à:', data.tenantEmail);
-    if (ownerEmailForCC) {
-      console.log('📧 Copie envoyée au propriétaire:', ownerEmailForCC);
+    if (result.error) {
+      throw new Error(result.error);
     }
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email envoyé:', info.messageId);
 
-    // 9. Retourner le succès
+    console.log('✅ Email envoyé:', result.messageId);
+
+    // 10. Retourner le succès
     return NextResponse.json({
       success: true,
       message: `Email envoyé à ${data.tenantEmail}${ownerEmailForCC ? ` (copie à ${ownerEmailForCC})` : ''}`,
-      messageId: info.messageId,
+      messageId: result.messageId,
       receiptNumber: data.receiptNumber,
     });
 

@@ -32,6 +32,7 @@ const createTransporter = () => {
 
 type SendEmailOptions = {
   to: string | string[];
+  cc?: string | string[];
   subject: string;
   html?: string;
   react?: React.ReactElement;
@@ -41,6 +42,7 @@ type SendEmailOptions = {
     contentType?: string;
   }>;
   replyTo?: string;
+  from?: string;
 };
 
 /**
@@ -50,11 +52,13 @@ type SendEmailOptions = {
  */
 export async function sendEmail({
   to,
+  cc,
   subject,
   html,
   react,
   attachments,
   replyTo,
+  from: fromOverride,
 }: SendEmailOptions) {
   try {
     const GMAIL_USER = process.env.GMAIL_USER;
@@ -131,11 +135,19 @@ export async function sendEmail({
 
     // Configuration de l'email avec le nom d'expéditeur professionnel
     const isNoReply = replyTo === 'noreply';
-    const sender = isNoReply ? (process.env.NOREPLY_EMAIL || `"Dousel" <${GMAIL_USER}>`) : (process.env.FROM_EMAIL || `"Dousel Support" <${GMAIL_USER}>`);
+    const defaultSender = isNoReply
+      ? (process.env.NOREPLY_EMAIL || `"Dousel" <${GMAIL_USER}>`)
+      : (process.env.FROM_EMAIL || `"Dousel Support" <${GMAIL_USER}>`);
+    const sender = fromOverride || defaultSender;
+
+    const ccRecipients = cc
+      ? (Array.isArray(cc) ? cc.join(", ") : cc)
+      : undefined;
 
     const mailOptions = {
       from: sender,
       to: recipients.join(", "),
+      cc: ccRecipients,
       subject,
       html: emailHtml,
       attachments: formattedAttachments,

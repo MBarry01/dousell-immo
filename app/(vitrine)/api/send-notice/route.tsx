@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
 import ReactPDF from '@react-pdf/renderer';
 import { createPreavisDocument } from '@/components/pdf/PreavisPDF';
 import { render } from '@react-email/render';
 import { LegalNoticeEmail } from '@/emails/LegalNoticeEmail';
+import { sendEmail } from '@/lib/mail';
 
 
 export async function POST(request: NextRequest) {
@@ -45,16 +45,7 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ PDF préavis généré:', pdfBuffer.length, 'bytes');
 
-    // 4. Configuration de Nodemailer (Gmail)
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    });
-
-    // 5. Déterminer le sujet et le contenu selon le type
+    // 4. Déterminer le sujet et le contenu selon le type
     const isJ180 = data.noticeType === 'J-180';
 
     const subject = isJ180
@@ -108,11 +99,17 @@ export async function POST(request: NextRequest) {
       ? `Preavis_Conge_${data.noticeNumber}.pdf`
       : `Notification_Reconduction_${data.noticeNumber}.pdf`;
 
-    const mailOptions = {
-      from: `${data.ownerName} <${process.env.GMAIL_USER}>`,
+    // Expéditeur : nom du propriétaire + adresse email de la plateforme Dousel
+    const platformFrom = process.env.FROM_EMAIL || process.env.NOREPLY_EMAIL || 'noreply@dousel.com';
+    const senderFrom = `${data.ownerName} via Dousel <${platformFrom}>`;
+
+    // 8. Envoyer l'email via le système centralisé (Resend en priorité, Gmail en fallback)
+    console.log("📤 Envoi de l'email...");
+    const result = await sendEmail({
+      from: senderFrom,
       to: data.tenantEmail,
-      cc: ownerEmailForCC,
-      subject: subject,
+      cc: ownerEmailForCC || undefined,
+      subject,
       html: emailHtml,
       attachments: [
         {
@@ -121,13 +118,11 @@ export async function POST(request: NextRequest) {
           contentType: 'application/pdf',
         },
       ],
-    };
+    });
 
-
-
-    // 8. Envoyer l'email
-    console.log("📤 Envoi de l'email...");
-    await transporter.sendMail(mailOptions);
+    if (result.error) {
+      throw new Error(result.error);
+    }
 
     console.log("✅ Email envoyé avec succès à:", data.tenantEmail);
 

@@ -19,7 +19,7 @@ import { propertySchema, type PropertyFormValues } from "@/lib/schemas/propertyS
 import { PropertyCard } from "@/app/(workspace)/compte/mes-biens/PropertyCard";
 import type { Property } from "@/types/property";
 
-const AUTHORIZED_ADMIN_EMAIL = "barrymohamadou98@gmail.com";
+const AUTHORIZED_ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "";
 
 const defaultValues: Partial<PropertyFormValues> = {
   title: "",

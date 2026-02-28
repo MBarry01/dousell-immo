@@ -55,7 +55,7 @@ export default function ModerationPageContent() {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
 
   // Vérifier que l'utilisateur a le droit d'accéder à la modération
-  const isMainAdmin = user?.email?.toLowerCase() === "barrymohamadou98@gmail.com".toLowerCase();
+  const isMainAdmin = !!(process.env.NEXT_PUBLIC_ADMIN_EMAIL && user?.email?.toLowerCase() === process.env.NEXT_PUBLIC_ADMIN_EMAIL.toLowerCase());
   const canModerate = isMainAdmin || userRoles.some((role) => ["admin", "moderateur", "superadmin"].includes(role));
 
   // Initialize filters from URL params

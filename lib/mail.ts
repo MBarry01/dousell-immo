@@ -20,10 +20,11 @@ const ADMIN_ROLES = ["admin", "moderateur", "superadmin"];
 
 type SendEmailOptions = {
   to: string | string[];
+  cc?: string | string[];
   subject: string;
   react?: React.ReactElement;
   html?: string;
-  from?: string; // Conservé pour compatibilité
+  from?: string;
   fromName?: string;
   user_id?: string | null;
   attachments?: Array<{

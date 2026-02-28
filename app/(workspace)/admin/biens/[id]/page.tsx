@@ -17,7 +17,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { propertySchema, type PropertyFormValues } from "@/lib/schemas/propertySchema";
 import { getPropertyById } from "@/services/propertyService";
 
-const AUTHORIZED_ADMIN_EMAIL = "barrymohamadou98@gmail.com";
+const AUTHORIZED_ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "";
 
 const quartiers = [
   "Almadies",
