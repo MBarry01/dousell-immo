@@ -40,7 +40,7 @@ export default function HeroIllustration() {
           initial={{ opacity: 0, x: -30, y: 20 }}
           animate={{ opacity: 1, x: 0, y: 0 }}
           transition={{ duration: 0.6, delay: 1 }}
-          className="absolute top-8 -left-4 lg:top-12 lg:-left-8 z-20"
+          className="absolute top-8 -left-4 lg:top-7 lg:-left-8 z-20"
         >
           <motion.div
             animate={{ y: [0, -8, 0] }}
@@ -68,7 +68,7 @@ export default function HeroIllustration() {
           initial={{ opacity: 0, x: 30, y: 20 }}
           animate={{ opacity: 1, x: 0, y: 0 }}
           transition={{ duration: 0.6, delay: 1.2 }}
-          className="absolute top-16 -right-2 lg:top-20 lg:-right-6 z-20"
+          className="absolute top-16 -right-2 lg:top-35 lg:-right-6 z-20"
         >
           <motion.div
             animate={{ y: [0, -6, 0] }}
@@ -96,7 +96,7 @@ export default function HeroIllustration() {
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 1.4 }}
-          className="absolute top-1/2 -left-6 lg:-left-12 -translate-y-1/2 z-20"
+          className="absolute top-1/2 -left-6 lg:-left-7 -translate-y-1/2 z-20"
         >
           <motion.div
             animate={{ y: [0, -5, 0] }}
