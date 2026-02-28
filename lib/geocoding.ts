@@ -66,7 +66,11 @@ export async function getCoordinates(
         "Accept-Language": "fr",
       };
 
-      const response = await fetch(url, { headers });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s max par requête pour éviter de bloquer
+
+      const response = await fetch(url, { headers, signal: controller.signal });
+      clearTimeout(timeoutId);
 
       // Si rate limit (429), on attend un peu plus longtemps
       if (response.status === 429) {
@@ -182,7 +186,7 @@ export async function smartGeocode(
   // Niveau 1 : Adresse complète (précision maximale)
   if (cleanAddress && cleanDistrict && cleanCity) {
     const fullQuery = `${cleanAddress}, ${cleanDistrict}, ${cleanCity}, Sénégal`;
-    const result = await getCoordinates(fullQuery, 1);
+    const result = await getCoordinates(fullQuery, 0); // 0 retries pour fail fast
     if (result) {
       console.log(`✅ Géocodage niveau 1 (adresse complète): ${fullQuery}`);
       return result;
@@ -192,7 +196,7 @@ export async function smartGeocode(
   // Niveau 2 : Quartier + Ville
   if (cleanDistrict && cleanCity) {
     const districtQuery = `${cleanDistrict}, ${cleanCity}, Sénégal`;
-    const result = await getCoordinates(districtQuery, 1);
+    const result = await getCoordinates(districtQuery, 0);
     if (result) {
       console.log(`✅ Géocodage niveau 2 (quartier + ville): ${districtQuery}`);
       return result;
@@ -202,7 +206,7 @@ export async function smartGeocode(
   // Niveau 3 : Ville seule (utiliser la ville corrigée)
   if (cleanCity) {
     const cityQuery = `${cleanCity}, Sénégal`;
-    const result = await getCoordinates(cityQuery, 1);
+    const result = await getCoordinates(cityQuery, 0);
     if (result) {
       console.log(`✅ Géocodage niveau 3 (ville): ${cityQuery}`);
       return result;
@@ -212,7 +216,7 @@ export async function smartGeocode(
   // Niveau 3.5 : Si l'adresse est une ville connue, essayer directement
   if (cleanAddress) {
     const addressAsCityQuery = `${cleanAddress}, Sénégal`;
-    const result = await getCoordinates(addressAsCityQuery, 1);
+    const result = await getCoordinates(addressAsCityQuery, 0);
     if (result) {
       console.log(`✅ Géocodage niveau 3.5 (adresse comme ville): ${addressAsCityQuery}`);
       return result;

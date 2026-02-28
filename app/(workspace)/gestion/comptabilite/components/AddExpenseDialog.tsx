@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Plus, Receipt, Building2, Calendar, Tag, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -36,8 +37,16 @@ interface AddExpenseDialogProps {
 
 export function AddExpenseDialog({ properties, onExpenseAdded }: AddExpenseDialogProps) {
     const { isDark } = useTheme();
+    const searchParams = useSearchParams();
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Auto-open modal if action=add is present
+    useEffect(() => {
+        if (searchParams.get('action') === 'add') {
+            setIsOpen(true);
+        }
+    }, [searchParams]);
 
     const [propertyId, setPropertyId] = useState<string>('');
     const [amount, setAmount] = useState<string>('');

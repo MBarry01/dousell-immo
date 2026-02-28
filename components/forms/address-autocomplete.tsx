@@ -6,13 +6,7 @@ import { Command as _CommandPrimitive } from "cmdk";
 import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command";
+// Removed Command imports
 
 interface AddressAutocompleteProps {
     onAddressSelect: (address: {
@@ -59,11 +53,7 @@ const getPlaceName = (address: any) => {
     );
 };
 
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
+// Removed Popover imports
 
 export function AddressAutocomplete({
     onAddressSelect,
@@ -90,7 +80,7 @@ export function AddressAutocomplete({
             } else {
                 setResults([]);
             }
-        }, 400); // reduced from 1000ms
+        }, 300); // reduced to 300ms for snappier feedback
 
         return () => clearTimeout(timer);
     }, [query]);
@@ -157,80 +147,84 @@ export function AddressAutocomplete({
     };
 
     return (
-        <Popover open={open && results.length > 0} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <div className={cn("relative group", className)}>
-                    <Input
-                        ref={inputRef}
-                        value={query}
-                        onChange={(e) => {
-                            setQuery(e.target.value);
-                            onChange?.(e.target.value);
-                            if (e.target.value.length >= 3) {
-                                setOpen(true);
-                            } else {
-                                setOpen(false);
-                            }
-                        }}
-                        onFocus={() => {
-                            if (results.length > 0) {
-                                setOpen(true);
-                            } else if (query.length >= 3) {
-                                fetchSuggestions(query);
-                            }
-                        }}
-                        placeholder="Ex: Saly Portudal, Sénégal"
-                        autoComplete="off"
-                        className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white focus:outline-none focus:ring-1 focus:ring-[#F4C430]/50 focus:border-[#F4C430]/50 transition-all placeholder:text-white/20 h-auto"
-                    />
-                    {loading && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                            <Loader2 className="h-4 w-4 animate-spin text-[#F4C430]" />
-                        </div>
-                    )}
-                </div>
-            </PopoverTrigger>
-            <PopoverContent
-                className="p-0 border-white/10 bg-zinc-900 w-[calc(100vw-32px)] md:w-[350px] shadow-2xl"
-                align="start"
-                onOpenAutoFocus={(e: Event) => e.preventDefault()}
-            >
-                <div className="max-h-[300px] overflow-y-auto p-1 scrollbar-hide">
-                    {results.map((item) => {
-                        const mainName = getPlaceName(item.address);
-                        const region = item.address.state;
+        <div className={cn("relative", className)}>
+            <div className="relative group w-full">
+                <Input
+                    ref={inputRef}
+                    value={query}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        setQuery(val);
+                        onChange?.(val);
+                        if (val.length >= 3) {
+                            setOpen(true);
+                        } else {
+                            setOpen(false);
+                            setResults([]);
+                        }
+                    }}
+                    onFocus={() => {
+                        if (results.length > 0) {
+                            setOpen(true);
+                        } else if (query.length >= 3) {
+                            fetchSuggestions(query);
+                        }
+                    }}
+                    onBlur={() => {
+                        // On ferme immédiatement, car onMouseDown fait un e.preventDefault() et garde le focus sur l'input pour la sélection
+                        setOpen(false);
+                    }}
+                    placeholder="Ex: Saly Portudal, Sénégal"
+                    autoComplete="off"
+                    className="w-full bg-background border-input text-foreground focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all h-auto py-3 px-4 rounded-lg"
+                />
+                {loading && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    </div>
+                )}
+            </div>
 
-                        const labelParts = [];
-                        if (region) labelParts.push(region);
-                        if (mainName && mainName !== region) labelParts.push(mainName);
+            {open && results.length > 0 && (
+                <div className="absolute z-50 top-[calc(100%+4px)] left-0 w-full rounded-md border border-border bg-popover shadow-xl overflow-hidden">
+                    <div className="max-h-[300px] overflow-y-auto p-1 scrollbar-hide">
+                        {results.map((item) => {
+                            const mainName = getPlaceName(item.address);
+                            const region = item.address.state;
 
-                        const displayLabel = labelParts.length > 0 ? labelParts.join(", ") : item.display_name;
+                            const labelParts = [];
+                            if (region) labelParts.push(region);
+                            if (mainName && mainName !== region) labelParts.push(mainName);
 
-                        return (
-                            <div
-                                key={item.place_id}
-                                onMouseDown={(e) => {
-                                    e.preventDefault();
-                                    handleSelect(item);
-                                }}
-                                className="flex flex-col items-start gap-1 py-3 px-4 cursor-pointer rounded-md hover:bg-white/10 text-sm transition-colors"
-                            >
-                                <div className="flex items-start gap-2 w-full">
-                                    <MapPin className="h-4 w-4 mt-0.5 text-[#F4C430] shrink-0" />
-                                    <div className="flex flex-col">
-                                        <span className="font-medium text-white">
-                                            {displayLabel}
-                                        </span>
-                                        <span className="text-[10px] text-zinc-500 line-clamp-1">
-                                            {item.display_name}
-                                        </span>
+                            const displayLabel = labelParts.length > 0 ? labelParts.join(", ") : item.display_name;
+
+                            return (
+                                <div
+                                    key={item.place_id}
+                                    onMouseDown={(e) => {
+                                        // Prevents input blur from firing before onClick
+                                        e.preventDefault();
+                                        handleSelect(item);
+                                    }}
+                                    className="flex flex-col items-start gap-1 py-3 px-4 cursor-pointer rounded-md hover:bg-muted text-sm transition-colors"
+                                >
+                                    <div className="flex items-start gap-2 w-full">
+                                        <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                                        <div className="flex flex-col">
+                                            <span className="font-medium text-popover-foreground">
+                                                {displayLabel}
+                                            </span>
+                                            <span className="text-[10px] text-muted-foreground line-clamp-1">
+                                                {item.display_name}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
                 </div>
-            </PopoverContent>
-        </Popover>
+            )}
+        </div>
     );
 }

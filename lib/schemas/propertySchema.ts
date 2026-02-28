@@ -10,7 +10,7 @@ export const propertySchema = z
     description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
     price: z.number().min(0, "Le prix doit être positif"),
     category: z.enum(["vente", "location"]),
-    type: z.enum(["villa", "appartement", "terrain", "immeuble", "studio", "bureau"]),
+    type: z.enum(["villa", "appartement", "terrain", "immeuble", "studio", "bureau", "magasin"]),
     city: z.string().min(1, "La ville est requise"),
     district: z.string().min(1, "Le quartier est requis"),
     address: z.string().min(3, "L'adresse doit contenir au moins 3 caractères"),

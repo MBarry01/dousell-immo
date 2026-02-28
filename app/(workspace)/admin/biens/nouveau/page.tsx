@@ -60,6 +60,8 @@ const typesBien = [
   { value: "terrain", label: "Terrain" },
   { value: "immeuble", label: "Immeuble / Commercial" },
   { value: "studio", label: "Studio" },
+  { value: "bureau", label: "Bureau" },
+  { value: "magasin", label: "Magasin" },
 ];
 
 const situationsJuridiques = [
@@ -212,12 +214,14 @@ export default function NewPropertyPage() {
         };
 
       // Mapper le type pour details
-      const typeMap: Record<string, "Appartement" | "Maison" | "Studio"> = {
+      const typeMap: Record<string, "Appartement" | "Maison" | "Studio" | "Bureau" | "Magasin"> = {
         villa: "Maison",
         appartement: "Appartement",
         immeuble: "Appartement",
         terrain: "Appartement", // Valeur par défaut, non utilisée pour terrain
         studio: "Studio",
+        bureau: "Bureau",
+        magasin: "Magasin",
       };
 
       const payload = {

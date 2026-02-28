@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, Check, ChevronDown, ChevronUp, Camera, Trash2, Plus, Loader2, Zap, Droplets, Flame, Pen } from 'lucide-react';
@@ -32,13 +33,16 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
     const [report, setReport] = useState<any>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploadTarget, setUploadTarget] = useState<{ roomIndex: number, itemIndex: number } | null>(null);
+    const [viewerPhoto, setViewerPhoto] = useState<string | null>(null);
 
     const [rooms, setRooms] = useState<Room[]>([]);
     const [meterReadings, setMeterReadings] = useState<MeterReadings>({});
     const [generalComments, setGeneralComments] = useState('');
     const [expandedRoom, setExpandedRoom] = useState<number | null>(0);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
         loadReport();
     }, [reportId]);
 
@@ -87,6 +91,15 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
     const handlePhotoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file || !uploadTarget) return;
+
+        // Limite à 5 Mo
+        const MAX_SIZE_MB = 5;
+        if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+            toast.error(`L'image est trop volumineuse (max ${MAX_SIZE_MB} Mo). Veuillez la réduire.`);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            setUploadTarget(null);
+            return;
+        }
 
         setUploadingPhoto(true);
         const { roomIndex, itemIndex } = uploadTarget;
@@ -395,10 +408,14 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
                                                         <img
                                                             src={photo}
                                                             alt="État"
-                                                            className="h-12 w-12 object-cover rounded border border-slate-600"
+                                                            onClick={() => setViewerPhoto(photo)}
+                                                            className="h-12 w-12 object-cover rounded border border-slate-600 cursor-pointer hover:opacity-80 transition-opacity"
                                                         />
                                                         <button
-                                                            onClick={() => removePhoto(roomIndex, itemIndex, pIndex)}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                removePhoto(roomIndex, itemIndex, pIndex);
+                                                            }}
                                                             className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                                         >
                                                             <Trash2 className="w-2 h-2" />
@@ -490,6 +507,29 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
                 accept="image/*"
                 onChange={handlePhotoFileChange}
             />
+
+            {/* Photo Viewer Fullscreen */}
+            {mounted && viewerPhoto && createPortal(
+                <div
+                    className="fixed inset-0 z-[9999] bg-black/90 flex flex-col items-center justify-center p-4 backdrop-blur-sm"
+                    onClick={() => setViewerPhoto(null)}
+                >
+                    <button
+                        className="absolute top-4 right-4 md:top-6 md:right-6 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                        onClick={() => setViewerPhoto(null)}
+                    >
+                        <Plus className="w-6 h-6 rotate-45 transform" />
+                        <span className="sr-only">Fermer</span>
+                    </button>
+                    <img
+                        src={viewerPhoto}
+                        alt="Aperçu en grand"
+                        className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>,
+                document.body
+            )}
         </div>
     );
 }

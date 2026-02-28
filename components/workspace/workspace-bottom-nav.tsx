@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useOwnerUnreadCounts } from "@/hooks/use-unread-counts";
 import { createClient } from "@/utils/supabase/client";
@@ -65,6 +65,7 @@ const compteNavItems: NavItem[] = [
 
 export function WorkspaceBottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(true);
   const [mounted, setMounted] = useState(false);
   const lastScrollY = useRef(0);
@@ -99,6 +100,26 @@ export function WorkspaceBottomNav() {
     teamId
   );
 
+
+  // Determine FAB href and label based on context
+  const { fabHref, fabLabel } = useMemo(() => {
+    if (pathname?.startsWith("/gestion/biens")) {
+      return { fabHref: "/gestion/biens/nouveau", fabLabel: "Ajouter un bien" };
+    }
+    if (pathname?.startsWith("/gestion/interventions")) {
+      return { fabHref: "/gestion/interventions?action=add", fabLabel: "Signaler un problème" };
+    }
+    if (pathname?.startsWith("/gestion/comptabilite")) {
+      return { fabHref: "/gestion/comptabilite?action=add", fabLabel: "Ajouter une dépense" };
+    }
+    if (pathname?.startsWith("/gestion/etats-lieux")) {
+      return { fabHref: "/gestion/etats-lieux/new", fabLabel: "Nouvel état des lieux" };
+    }
+    if (pathname?.startsWith("/gestion")) {
+      return { fabHref: "/gestion?add=tenant", fabLabel: "Ajouter un locataire" };
+    }
+    return { fabHref: "/", fabLabel: "Accueil" };
+  }, [pathname]);
 
   // Déterminer le contexte et les items de navigation
   const navItems = useMemo(() => {
@@ -347,26 +368,25 @@ export function WorkspaceBottomNav() {
 
       {/* FAB Central Button - Dynamic based on path */}
       <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-        <Link href={pathname?.startsWith("/gestion") ? "/gestion?add=tenant" : "/"}>
-          <button
-            className={cn(
-              "flex h-[56px] w-[56px] items-center justify-center rounded-full bg-transparent shadow-xl backdrop-blur-sm",
-              "border-[1.5px] transition-all active:scale-95",
-              isDark ? "border-white/20 hover:bg-white/5" : "border-black/10 hover:bg-black/5",
-              "focus:outline-none"
-            )}
-            style={{
-              color: inactiveColor,
-            }}
-            aria-label={pathname?.startsWith("/gestion") ? "Ajouter un locataire" : "Retour accueil"}
-          >
-            {pathname?.startsWith("/gestion") ? (
-              <Plus className="h-6 w-6 stroke-[2.5]" />
-            ) : (
-              <Home className="h-5 w-5 stroke-[2]" />
-            )}
-          </button>
-        </Link>
+        <button
+          onClick={() => router.push(fabHref)}
+          className={cn(
+            "flex h-[56px] w-[56px] items-center justify-center rounded-full bg-transparent shadow-xl backdrop-blur-sm",
+            "border-[1.5px] transition-all active:scale-95",
+            isDark ? "border-white/20 hover:bg-white/5" : "border-black/10 hover:bg-black/5",
+            "focus:outline-none"
+          )}
+          style={{
+            color: inactiveColor,
+          }}
+          aria-label={fabLabel}
+        >
+          {pathname?.startsWith("/gestion") ? (
+            <Plus className="h-6 w-6 stroke-[2.5]" />
+          ) : (
+            <Home className="h-5 w-5 stroke-[2]" />
+          )}
+        </button>
       </div>
     </div>
   );

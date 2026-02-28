@@ -106,7 +106,7 @@ export function DocumentGeneratorDialog({ leases, userEmail, profile, trigger }:
                         </Button>
                     )}
                 </DialogTrigger>
-                <DialogContent className="bg-card border-border text-foreground sm:max-w-md shadow-2xl p-0 overflow-hidden">
+                <DialogContent className="p-0 overflow-hidden sm:max-w-md">
                     <ConfigurationRequirementCheck profile={profile} isDark={isDark}>
                         <div className="p-6">
                             <DialogHeader>

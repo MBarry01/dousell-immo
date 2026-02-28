@@ -302,7 +302,7 @@ export function AddTenantButton({ ownerId, trigger, initialData, profile, initia
         <>
             {renderTrigger()}
             <Dialog open={open} onOpenChange={handleOpenChange}>
-                <DialogContent className="z-[100] fixed top-[4%] left-[50%] translate-x-[-50%] translate-y-0 sm:top-[50%] sm:translate-y-[-50%] w-[90vw] sm:w-full max-w-lg max-h-[92vh] overflow-y-auto overflow-x-hidden bg-card border-border text-foreground px-4 pt-4 pb-24 sm:p-6 outline-none shadow-2xl">
+                <DialogContent className="z-[100] pb-24 sm:pb-6">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-semibold text-foreground">
                             {initialData ? "Nouveau Bail (Démo)" : "Nouveau Bail"}
@@ -1177,7 +1177,7 @@ function BulkImportDialog({ open, onOpenChange, ownerId, onSuccess }: BulkImport
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="z-[100] sm:max-w-2xl bg-card border-border text-foreground max-h-[90vh] overflow-y-auto shadow-2xl" onFocusOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+            <DialogContent className="z-[100] sm:max-w-2xl" onFocusOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle className="text-foreground">
                         <FileSpreadsheet className="w-5 h-5 inline-block mr-2" />

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Wrench, Clock, CheckCircle2, X, Plus, ChevronDown, ChevronUp, CircleDollarSign, Calendar, Loader2, Send, Star, Phone, MapPin, AlertTriangle, Image as ImageIcon, User, Home, FileText, Upload } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Wrench, Clock, CheckCircle2, X, Plus, ChevronDown, ChevronUp, CircleDollarSign, Calendar, Loader2, Send, Star, Phone, MapPin, AlertTriangle, ImageIcon, User, Home, FileText, Upload } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -65,6 +66,7 @@ const CATEGORIES = [
 ];
 
 export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
+    const searchParams = useSearchParams();
     const [showForm, setShowForm] = useState(false);
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('Plomberie');
@@ -82,6 +84,14 @@ export function MaintenanceHub({ requests = [] }: MaintenanceHubProps) {
     const quoteFileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [expandedId, setExpandedId] = useState<string | null>(null);
+
+    // Auto-open form if action=add is present
+    useEffect(() => {
+        if (searchParams.get('action') === 'add') {
+            setShowForm(true);
+            // Scroll to form if needed or just show it
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (showForm) {

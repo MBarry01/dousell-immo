@@ -24,6 +24,7 @@ import {
   TreePine,
   Briefcase,
   Store,
+  Hotel,
   ChevronDown,
 } from "lucide-react";
 import { PhoneInput } from "@/components/ui/phone-input";
@@ -45,7 +46,7 @@ const STORAGE_KEYS = {
 const PROPERTY_TYPES = [
   { value: "villa", label: "Villa", icon: Home },
   { value: "appartement", label: "Appartement", icon: Building },
-  { value: "studio", label: "Studio", icon: Store }, // Icon temporaire, Store est utilisé pour Magasin, on peut garder ou changer
+  { value: "studio", label: "Studio", icon: Hotel },
   { value: "terrain", label: "Terrain", icon: TreePine },
   { value: "immeuble", label: "Immeuble", icon: Building2 },
   { value: "magasin", label: "Magasin", icon: Store },
@@ -425,7 +426,7 @@ function DeposerPageContent() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 pt-6 pb-28 lg:pb-6">
         {/* Stepper */}
         <div className="flex items-center justify-between mb-8 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
           {STEPS.map((step, index) => {
@@ -494,7 +495,7 @@ function DeposerPageContent() {
               {/* Property Type */}
               <div>
                 <label className="text-sm text-zinc-400 mb-3 block">Type de bien</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   {PROPERTY_TYPES.map((type) => {
                     const Icon = type.icon;
                     return (
@@ -502,13 +503,13 @@ function DeposerPageContent() {
                         key={type.value}
                         type="button"
                         onClick={() => updateField("type", type.value)}
-                        className={`p-3 sm:p-4 rounded-xl border transition-all text-center ${formData.type === type.value
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all ${formData.type === type.value
                           ? "bg-[#F4C430]/10 border-[#F4C430]/50 text-[#F4C430]"
-                          : "bg-zinc-800/30 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white"
+                          : "bg-zinc-800/30 border-zinc-800 text-zinc-400 hover:bg-zinc-800/80 hover:border-zinc-700 hover:text-white"
                           }`}
                       >
-                        <Icon className={`w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-2 ${formData.type === type.value ? "text-[#F4C430]" : "text-zinc-500"}`} />
-                        <span className="text-[11px] sm:text-xs font-medium">{type.label}</span>
+                        <Icon className={`w-4 h-4 ${formData.type === type.value ? "text-[#F4C430]" : "text-zinc-500"}`} />
+                        <span className="text-sm font-medium">{type.label}</span>
                       </button>
                     );
                   })}
@@ -553,7 +554,10 @@ function DeposerPageContent() {
                 <label className="text-sm text-zinc-400 mb-3 block">Adresse complète du bien</label>
                 <AddressAutocomplete
                   defaultValue={formData.address}
-                  onChange={(val) => updateField("address", val)}
+                  onChange={(val) => {
+                    updateField("address", val);
+                    setFormData(prev => ({ ...prev, lat: null, lon: null }));
+                  }}
                   onAddressSelect={(details) => {
                     setFormData(prev => ({
                       ...prev,

@@ -107,6 +107,8 @@ export default function EditPropertyPage() {
         formType = "studio";
       } else if (dbType.includes("bureau") || details.type === "Bureau") {
         formType = "bureau";
+      } else if (dbType.includes("magasin") || details.type === "Magasin") {
+        formType = "magasin";
       }
 
       const defaultJuridique = formType === "terrain" ? "titre-foncier" : undefined;
@@ -293,6 +295,7 @@ export default function EditPropertyPage() {
                       <SelectItem value="terrain">Terrain</SelectItem>
                       <SelectItem value="immeuble">Immeuble / Commercial</SelectItem>
                       <SelectItem value="bureau">Bureau</SelectItem>
+                      <SelectItem value="magasin">Magasin</SelectItem>
                     </SelectContent>
                   </Select>
                 )}

@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { DEFAULT_CONTRACT_TEXTS, ContractTexts } from '@/lib/contract-defaults';
 import { generateLeaseContract } from '@/lib/actions/contract-actions';
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { FileText, PlusCircle, CheckCircle2, RotateCcw } from "lucide-react";
 
 
 interface GenerateContractModalProps {
@@ -126,104 +129,151 @@ export function GenerateContractModal({ leaseId, tenantName, onSuccess, children
                     {children}
                 </DialogTrigger>
             )}
-            <DialogContent className={mode === 'custom' ? "w-[95vw] sm:w-full max-w-3xl max-h-[85vh] overflow-y-auto bg-card border-border text-foreground" : "w-[95vw] sm:w-full sm:max-w-md bg-card border-border text-foreground"}>
-                <DialogHeader>
-                    <DialogTitle>
+            <DialogContent className={cn(
+                "flex flex-col p-0 overflow-hidden bg-card border-border text-foreground w-[95vw] sm:w-full",
+                mode === 'custom' ? "max-w-3xl h-[90vh] sm:h-auto sm:max-h-[85vh]" : "sm:max-w-md"
+            )}>
+                <DialogHeader className="p-4 sm:p-6 pb-2 border-b border-border shrink-0">
+                    <DialogTitle className="pr-6 text-lg sm:text-xl leading-tight">
                         Générer le Contrat de Bail {tenantName ? `- ${tenantName}` : ''}
                     </DialogTitle>
                 </DialogHeader>
 
-                {mode === 'standard' ? (
-                    <div className="space-y-4 py-4">
-                        <div className="bg-muted/50 p-4 rounded-lg border border-border/50 text-sm text-muted-foreground">
-                            <p className="font-medium mb-2 text-foreground">Génération Standard (Recommandé)</p>
-                            <p className="mb-3">Le contrat sera généré avec les clauses juridiques standards conformes au droit sénégalais (COCC / Loi 2014) et les décrets 2023.</p>
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={handlePreview}
-                                disabled={loading}
-                                className="bg-muted hover:bg-muted/80 text-foreground h-8 text-xs w-full sm:w-auto"
-                            >
-                                <svg className="w-3 h-3 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                                Prévisualiser le modèle
-                            </Button>
-                        </div>
-
-                        <div className="bg-primary/5 p-3 rounded border border-primary/10 flex items-start gap-3">
-                            <div className="mt-1 bg-primary/10 text-primary rounded-full p-1 shrink-0">
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0" /></svg>
-                            </div>
-                            <div className="text-xs text-muted-foreground min-w-0 break-words">
-                                <span className="font-semibold text-primary">Option Avancée :</span> Vous avez besoin d&apos;ajouter une clause spécifique (piscine, jardin) ou de modifier un article ? Passez en mode personnalisation.
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="space-y-6 py-4">
-                        {/* SECTION 1 : Articles Standards */}
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center border-b border-border pb-2">
-                                <h3 className="font-semibold text-foreground">Clauses Standards</h3>
-                                <Button variant="ghost" size="sm" onClick={() => setMode('standard')} className="text-xs h-7 text-muted-foreground hover:text-foreground hover:bg-muted">Retour au Standard</Button>
+                <div className="flex-1 overflow-y-auto p-0 custom-scrollbar">
+                    {mode === 'standard' ? (
+                        <div className="p-4 sm:p-6 space-y-4 py-2">
+                            <div className="bg-muted/30 p-5 rounded-2xl border border-border/50 text-sm text-muted-foreground">
+                                <p className="font-bold mb-2 text-foreground text-lg">Génération Rapide</p>
+                                <p className="mb-5 leading-relaxed text-base">Modèle standard 100% conforme au droit sénégalais (COCC) et décrets 2023.</p>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={handlePreview}
+                                    disabled={loading}
+                                    className="bg-muted hover:bg-muted/80 text-foreground h-10 text-sm w-full sm:w-auto font-semibold rounded-xl"
+                                >
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    Aperçu du modèle type
+                                </Button>
                             </div>
 
-                            <div className="grid gap-8">
+                            <div className="bg-primary/5 p-5 rounded-2xl border border-primary/10 flex items-start gap-4">
+                                <div className="mt-1 bg-primary/10 text-primary rounded-full p-2 shrink-0">
+                                    <PlusCircle className="w-5 h-5" />
+                                </div>
+                                <div className="text-sm text-muted-foreground leading-relaxed">
+                                    <span className="font-bold text-primary block text-base mb-1">Besoin de modifier ?</span>
+                                    Personnalisez chaque article ou ajoutez vos propres clauses (piscine, jardin, etc.) via le mode avancé.
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col h-full">
+                            {/* Header sticky for Custom Mode */}
+                            <div className="bg-muted/10 sticky top-0 z-20 px-4 py-3 flex justify-between items-center border-b border-border backdrop-blur-md">
+                                <div className="flex items-center gap-2">
+                                    <div className="bg-primary/10 p-1.5 rounded-full">
+                                        <FileText className="w-4 h-4 text-primary" />
+                                    </div>
+                                    <h3 className="font-bold text-foreground">Éditeur de Clauses</h3>
+                                </div>
+                                <Button variant="ghost" size="sm" onClick={() => setMode('standard')} className="text-xs h-8 text-muted-foreground hover:text-foreground">
+                                    Annuler
+                                </Button>
+                            </div>
+
+                            <Accordion type="single" collapsible className="w-full">
                                 {(Object.keys(DEFAULT_CONTRACT_TEXTS) as Array<keyof typeof DEFAULT_CONTRACT_TEXTS>).map((key) => {
                                     const label = key.replace(/_/g, ' ').replace('article', 'Article').replace(/\d+/, (match) => match + ' :');
+                                    const isModified = texts[key] !== DEFAULT_CONTRACT_TEXTS[key];
+
                                     return (
-                                        <div key={key} className="space-y-6">
-                                            <Label className="text-muted-foreground capitalize text-base font-medium">{label}</Label>
-                                            <Textarea
-                                                value={texts[key] ?? DEFAULT_CONTRACT_TEXTS[key]}
-                                                onChange={(e) => handleChange(key, e.target.value)}
-                                                className="min-h-[100px] resize-y bg-muted/30 border-border text-foreground focus:ring-primary placeholder:text-muted-foreground w-full"
-                                            />
-                                        </div>
+                                        <AccordionItem key={key} value={key} className="border-b border-border/50 px-4 last:border-0 hover:bg-primary/[0.02] transition-colors">
+                                            <AccordionTrigger className="hover:no-underline py-4">
+                                                <div className="flex items-center gap-3 text-left">
+                                                    <span className={cn(
+                                                        "text-sm sm:text-base font-semibold capitalize",
+                                                        isModified ? "text-primary font-bold" : "text-foreground"
+                                                    )}>
+                                                        {label}
+                                                    </span>
+                                                    {isModified && (
+                                                        <span className="flex items-center gap-1 bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                                                            Modifié
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </AccordionTrigger>
+                                            <AccordionContent className="pb-6">
+                                                <div className="space-y-4">
+                                                    <Textarea
+                                                        value={texts[key] ?? DEFAULT_CONTRACT_TEXTS[key]}
+                                                        onChange={(e) => handleChange(key, e.target.value)}
+                                                        className="min-h-[180px] sm:min-h-[220px] resize-none bg-muted/20 border-border text-foreground focus:ring-1 focus:ring-primary/40 p-4 text-base leading-relaxed rounded-xl custom-scrollbar border-0 ring-1 ring-border shadow-inner"
+                                                        placeholder={`Détails de l'${label.toLowerCase()}...`}
+                                                    />
+                                                    <div className="flex justify-end">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-muted-foreground text-xs hover:text-primary h-8 gap-2"
+                                                            onClick={() => handleChange(key, DEFAULT_CONTRACT_TEXTS[key])}
+                                                            disabled={!isModified}
+                                                        >
+                                                            <RotateCcw className="w-3 h-3" />
+                                                            Réinitialiser
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </AccordionContent>
+                                        </AccordionItem>
                                     );
                                 })}
+                            </Accordion>
+
+                            {/* SECTION 2 : Clauses Particulières */}
+                            <div className="p-4 sm:p-6 bg-primary/[0.03] border-t border-border mt-auto">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <div className="bg-primary/20 p-1.5 rounded-full">
+                                        <PlusCircle className="w-4 h-4 text-primary" />
+                                    </div>
+                                    <h3 className="font-bold text-primary">Conditions Particulières</h3>
+                                </div>
+                                <Textarea
+                                    value={customClause}
+                                    onChange={(e) => setCustomClause(e.target.value)}
+                                    placeholder="Ex: Entretien de la piscine à la charge du locataire..."
+                                    className="h-32 bg-card border-border text-foreground placeholder:text-muted-foreground w-full text-base p-4 focus:ring-1 focus:ring-primary/20 rounded-xl shadow-sm border-0 ring-1 ring-border"
+                                />
                             </div>
                         </div>
+                    )}
+                </div>
 
-                        {/* SECTION 2 : Clauses Particulières */}
-                        <div className="space-y-4 bg-primary/5 p-4 rounded-lg border border-primary/10">
-                            <h3 className="font-semibold text-primary">Conditions Particulières (Ajout)</h3>
-                            <p className="text-xs text-muted-foreground">
-                                Ajoutez ici des règles spécifiques (ex: Jardin, Piscine, Animaux interdits, Interdiction de fumer...).
-                            </p>
-                            <Textarea
-                                value={customClause}
-                                onChange={(e) => setCustomClause(e.target.value)}
-                                placeholder="Ex: Le locataire s'engage à entretenir la piscine..."
-                                className="h-32 bg-muted/30 border-border text-foreground placeholder:text-muted-foreground w-full"
-                            />
-                        </div>
-                    </div>
-                )}
-
-                <div className="flex justify-end gap-3 pt-4 border-t border-border">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 sm:p-6 border-t border-border bg-background shrink-0 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
                     {mode === 'standard' ? (
                         <>
-                            <div className="mr-auto">
-                                <Button variant="outline" onClick={() => setMode('custom')} className="border-border text-muted-foreground hover:bg-muted">Personnaliser</Button>
+                            <div className="sm:mr-auto mb-2 sm:mb-0">
+                                <Button variant="outline" onClick={() => setMode('custom')} className="w-full sm:w-auto border-border text-muted-foreground hover:bg-muted h-12 rounded-xl font-semibold px-6">
+                                    <PlusCircle className="w-4 h-4 mr-2" />
+                                    Personnaliser
+                                </Button>
                             </div>
-                            <Button onClick={handleGenerate} disabled={loading} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                                {loading ? "Traitement..." : "Générer Standard"}
+                            <Button onClick={handleGenerate} disabled={loading} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-bold px-10 shadow-lg shadow-primary/20">
+                                {loading ? "Création..." : "Générer Standard"}
                             </Button>
                         </>
                     ) : (
                         <>
-                            <div className="mr-auto">
-                                <Button variant="ghost" onClick={handlePreview} disabled={loading} className="text-primary hover:text-primary/80 hover:bg-primary/10">
-                                    Prévisualiser les modifications
+                            <div className="sm:mr-auto flex flex-col sm:flex-row gap-3">
+                                <Button variant="ghost" onClick={handlePreview} disabled={loading} className="w-full sm:w-auto text-primary hover:text-primary/80 hover:bg-primary/10 h-12 rounded-xl font-bold px-6">
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    Aperçu Final
                                 </Button>
+                                <Button variant="outline" onClick={() => setMode('standard')} className="w-full sm:w-auto border-border text-muted-foreground hover:bg-muted h-12 rounded-xl px-6">Annuler</Button>
                             </div>
-                            <Button variant="outline" onClick={() => setMode('standard')} className="border-border text-muted-foreground hover:bg-muted">Annuler</Button>
-                            <Button onClick={handleGenerate} disabled={loading} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                                {loading ? "Traitement..." : "Valider et Générer"}
+                            <Button onClick={handleGenerate} disabled={loading} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-bold px-10 shadow-lg shadow-primary/20">
+                                {loading ? "Création..." : "Valider et Générer"}
                             </Button>
                         </>
                     )}

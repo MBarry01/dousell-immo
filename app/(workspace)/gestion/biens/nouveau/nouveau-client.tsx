@@ -31,7 +31,7 @@ import {
   TreePine,
   Briefcase,
   Hotel,
-
+  Store,
   ChevronDown,
   Clock,
 } from "lucide-react";
@@ -76,6 +76,7 @@ const PROPERTY_TYPES = [
   { value: "studio", label: "Studio", icon: Hotel },
   { value: "terrain", label: "Terrain", icon: TreePine },
   { value: "immeuble", label: "Immeuble", icon: Building2 },
+  { value: "magasin", label: "Magasin", icon: Store },
   { value: "bureau", label: "Bureau", icon: Briefcase },
 ];
 
@@ -364,10 +365,6 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
           setError("L'adresse est requise");
           return false;
         }
-        if (!formData.address) {
-          setError("L'adresse est requise");
-          return false;
-        }
         return true;
       case 3:
         return true;
@@ -514,7 +511,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
       </div>
 
       {/* Progress Steps */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 pt-6 pb-28 lg:pb-6">
         <div className="flex items-center justify-between mb-8 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
           {STEPS.map((step, index) => {
             const Icon = step.icon;
@@ -592,7 +589,7 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
               {/* Property Type Cards */}
               <div>
                 <label className="text-sm text-muted-foreground mb-3 block">Type de bien</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   {PROPERTY_TYPES.map((type) => {
                     const Icon = type.icon;
                     return (
@@ -600,14 +597,14 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
                         key={type.value}
                         type="button"
                         onClick={() => updateField("type", type.value)}
-                        className={`p-3 sm:p-4 rounded-xl border transition-all text-center ${formData.type === type.value
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all ${formData.type === type.value
                           ? "bg-primary/10 border-primary/50 text-primary"
-                          : "bg-card border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                          : "bg-card border-border text-muted-foreground hover:bg-muted/50 hover:border-primary/30 hover:text-foreground"
                           }`}
                       >
-                        <Icon className={`w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-2 ${formData.type === type.value ? "text-primary" : "text-muted-foreground"
+                        <Icon className={`w-4 h-4 ${formData.type === type.value ? "text-primary" : "text-muted-foreground"
                           }`} />
-                        <span className="text-[11px] sm:text-xs font-medium">{type.label}</span>
+                        <span className="text-sm font-medium">{type.label}</span>
                       </button>
                     );
                   })}
@@ -677,7 +674,10 @@ export function NouveauBienClient({ teamId, teamName }: NouveauBienClientProps) 
 
                 <AddressAutocomplete
                   defaultValue={formData.address}
-                  onChange={(val) => updateField("address", val)}
+                  onChange={(val) => {
+                    updateField("address", val);
+                    setFormData(prev => ({ ...prev, lat: null, lon: null }));
+                  }}
                   onAddressSelect={(details) => {
                     setFormData(prev => ({
                       ...prev,

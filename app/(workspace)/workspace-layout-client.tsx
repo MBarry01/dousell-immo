@@ -72,11 +72,11 @@ export function WorkspaceLayoutClient({
           id="main-scroll-container"
           className={cn(
             "flex-1 overflow-y-auto overscroll-contain",
-            !isDistractionFree ? "pb-safe-nav lg:pb-0 bg-background" : "w-full flex items-center justify-center"
+            !isDistractionFree ? "bg-background" : "w-full flex items-center justify-center"
           )}
         >
           <Suspense fallback={<div className="p-6 animate-pulse bg-muted/20" />}>
-            <div className="w-full h-full flex flex-col">
+            <div className="w-full flex flex-col min-h-full">
               <FadeIn
                 delay={100}
                 noTransform={pathname?.includes("/messages") || isDistractionFree}
@@ -84,6 +84,11 @@ export function WorkspaceLayoutClient({
               >
                 {children}
               </FadeIn>
+
+              {/* Force Extra Space for Bottom Nav on Mobile to fix Safari Scroll Bug */}
+              {!isDistractionFree && (
+                <div className="h-[calc(7.5rem+env(safe-area-inset-bottom))] w-full shrink-0 lg:hidden" aria-hidden="true" />
+              )}
             </div>
           </Suspense>
         </main>
