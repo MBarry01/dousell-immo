@@ -12,7 +12,7 @@ export default function HeroIllustration() {
       {/* Main container */}
       <div className="relative w-[340px] h-[520px] lg:w-[400px] lg:h-[580px]">
 
-        {/* iPhone Mockup */}
+        {/* Phone Mockup */}
         <motion.div
           initial={{ opacity: 0, y: 40, rotateY: -10 }}
           animate={{ opacity: 1, y: 0, rotateY: 0 }}
@@ -20,42 +20,14 @@ export default function HeroIllustration() {
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
           style={{ perspective: "1000px" }}
         >
-          {/* Phone frame */}
           <div className="relative w-[220px] h-[450px] lg:w-[260px] lg:h-[530px]">
-            {/* Outer bezel - dark gradient */}
-            <div className="absolute inset-0 bg-gradient-to-b from-zinc-800 via-zinc-900 to-black rounded-[40px] lg:rounded-[48px] shadow-2xl shadow-black/60" />
-
-            {/* Inner bezel highlight */}
-            <div className="absolute inset-[3px] bg-gradient-to-b from-zinc-700 to-zinc-900 rounded-[38px] lg:rounded-[46px]" />
-
-            {/* Screen container */}
-            <div className="absolute inset-[6px] bg-black rounded-[35px] lg:rounded-[43px] overflow-hidden">
-              {/* Dynamic Island */}
-              <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 lg:w-28 h-7 lg:h-8 bg-black rounded-full z-20 flex items-center justify-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-zinc-800 border border-zinc-700" />
-                <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
-              </div>
-
-              {/* Screen Content - Image Replacement */}
-              <div className="absolute inset-0 bg-black p-1.5 lg:p-2">
-                <CldImageSafe
-                  src="doussel/static/illustrations/mock-pay"
-                  alt="Application Dousel Locataire"
-                  fill
-                  className="object-cover rounded-[32px] lg:rounded-[36px]"
-                  priority
-                />
-                {/* Overlay gradient for better integration if needed */}
-                <div className="absolute inset-0 bg-black/20 pointer-events-none rounded-[32px] lg:rounded-[36px]" />
-              </div>
-            </div>
-
-            {/* Side buttons */}
-            <div className="absolute -left-[2px] top-24 w-[3px] h-8 bg-zinc-700 rounded-l-sm" />
-            <div className="absolute -left-[2px] top-36 w-[3px] h-12 bg-zinc-700 rounded-l-sm" />
-            <div className="absolute -left-[2px] top-52 w-[3px] h-12 bg-zinc-700 rounded-l-sm" />
-            <div className="absolute -right-[2px] top-32 w-[3px] h-16 bg-zinc-700 rounded-r-sm" />
-
+            <CldImageSafe
+              src="mocupProLoc_f0pj79"
+              alt="Application Dousel Locataire"
+              fill
+              className="object-contain drop-shadow-2xl"
+              priority
+            />
             {/* Phone glow effect */}
             <div className="absolute -inset-4 bg-[#F4C430]/10 rounded-[60px] blur-2xl -z-10" />
           </div>
