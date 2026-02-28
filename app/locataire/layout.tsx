@@ -133,7 +133,7 @@ export default function LocataireLayout({
     },
   ];
 
-  // Mobile bottom bar: Accueil → Paiement → Documents → Signaler
+  // Mobile bottom bar: Accueil → Paiement → Messages → Documents → Signaler
   const mobileNavItems = [
     {
       href: "/locataire",
@@ -148,6 +148,13 @@ export default function LocataireLayout({
       icon: CreditCard,
       isActive: pathname?.startsWith("/locataire/paiements"),
       badge: 0,
+    },
+    {
+      href: "/locataire/messages",
+      label: "Messages",
+      icon: MessageSquare,
+      isActive: pathname?.startsWith("/locataire/messages"),
+      badge: unreadMessages,
     },
     {
       href: "/locataire/documents",
@@ -187,7 +194,7 @@ export default function LocataireLayout({
           <Link href="/locataire" className="flex items-center gap-2">
             <div>
               <span className="text-lg font-bold text-slate-900">Dousel</span>
-              <span className="text-lg font-bold text-blue-900">Loc</span>
+              <span className="text-lg font-bold text-[#F4C430]">Loc</span>
             </div>
             {propertyAddress && (
               <p className="hidden sm:block text-xs text-slate-500 truncate max-w-[200px] ml-2 border-l border-slate-200 pl-2">
@@ -205,14 +212,14 @@ export default function LocataireLayout({
                 className={cn(
                   "relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                   item.isActive
-                    ? "text-slate-900 bg-slate-100"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                    ? "text-[#0F172A] bg-[#F4C430]/15 font-semibold"
+                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                 )}
               >
                 <item.icon
                   className={cn(
                     "h-4 w-4",
-                    item.isActive ? "text-slate-900" : "text-slate-400"
+                    item.isActive ? "text-[#0F172A]" : "text-slate-400"
                   )}
                 />
                 {item.label}
@@ -292,21 +299,27 @@ export default function LocataireLayout({
       {/* Note: OneSignal is initialized in RootLayout. 
           Login is triggered in the useEffect above when leaseId is fetched. */}
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 px-2 h-16 flex justify-around items-center z-50 md:hidden safe-area-pb">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/98 backdrop-blur-xl border-t border-slate-100 px-2 h-16 flex justify-around items-center z-50 md:hidden safe-area-pb shadow-[0_-4px_24px_rgba(0,0,0,0.06)]">
         {mobileNavItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={cn(
-              "relative flex flex-col items-center gap-1 p-2 rounded-xl transition-colors min-w-[64px]",
+              "relative flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all duration-200 min-w-[52px]",
               item.isActive
-                ? "text-slate-900"
-                : "text-slate-400 active:text-slate-900"
+                ? "text-[#0F172A]"
+                : "text-slate-400 active:text-slate-700"
             )}
           >
-            <div className="relative">
+            {item.isActive && (
+              <span className="absolute -top-[1px] left-1/2 -translate-x-1/2 w-8 h-0.5 bg-[#F4C430] rounded-b-full" />
+            )}
+            <div className={cn(
+              "relative flex items-center justify-center rounded-xl transition-all duration-200",
+              item.isActive ? "bg-[#F4C430]/10 w-10 h-7" : "w-8 h-7"
+            )}>
               <item.icon
-                className="h-6 w-6"
+                className="h-5 w-5"
                 strokeWidth={item.isActive ? 2.5 : 1.5}
               />
               {item.badge > 0 && (
@@ -315,7 +328,7 @@ export default function LocataireLayout({
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-medium">{item.label}</span>
+            <span className={cn("text-[10px]", item.isActive ? "font-bold" : "font-medium")}>{item.label}</span>
           </Link>
         ))}
       </nav>
