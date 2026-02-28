@@ -224,6 +224,7 @@ export default function MagicTransformation() {
                           setPropertyLon(details.lon ? parseFloat(details.lon) : null);
                         }}
                         className="w-full"
+                        inputClassName="bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:ring-[#F4C430]/50 focus:border-[#F4C430]/50"
                       />
                     </div>
                   </div>

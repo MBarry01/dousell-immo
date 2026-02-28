@@ -20,6 +20,7 @@ interface AddressAutocompleteProps {
     }) => void;
     defaultValue?: string;
     className?: string;
+    inputClassName?: string;
     onChange?: (value: string) => void;
 }
 
@@ -59,6 +60,7 @@ export function AddressAutocomplete({
     onAddressSelect,
     defaultValue = "",
     className,
+    inputClassName,
     onChange,
 }: AddressAutocompleteProps) {
     const [open, setOpen] = React.useState(false);
@@ -176,7 +178,7 @@ export function AddressAutocomplete({
                     }}
                     placeholder="Ex: Saly Portudal, Sénégal"
                     autoComplete="off"
-                    className="w-full bg-card border-border text-foreground focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all h-auto py-3 px-4 rounded-lg"
+                    className={cn("w-full bg-card border-border text-foreground focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all h-auto py-3 px-4 rounded-lg", inputClassName)}
                 />
                 {loading && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
