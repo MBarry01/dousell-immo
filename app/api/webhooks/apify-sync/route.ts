@@ -203,27 +203,56 @@ export async function POST(req: Request) {
 
     console.log(`[${source}] ${processedAds.length} annonces valides (${skipped} ignorées)`);
 
-    // 4.5 Géocodage dynamique via Nominatim (avec rate limiting)
-    console.log(`[${source}] Géocodage en cours...`);
+    // 4.5 Géocodage dynamique via Nominatim — optimisé : skip les annonces déjà géocodées
+    // Les mêmes URLs reviennent à chaque sync (toutes les 2 jours) → réutiliser les coords existantes
+    const existingUrls = processedAds.map(ad => ad.source_url);
+    const { data: existingCoords } = await supabase
+      .from('external_listings')
+      .select('source_url, coords_lat, coords_lng')
+      .in('source_url', existingUrls.slice(0, 500)); // limit IN clause
+
+    const existingCoordsMap = new Map(
+      (existingCoords || [])
+        .filter((e): e is { source_url: string; coords_lat: number; coords_lng: number } =>
+          e.coords_lat != null && e.coords_lng != null
+        )
+        .map(e => [e.source_url, { lat: e.coords_lat, lng: e.coords_lng }])
+    );
+
+    let geocodedCount = 0;
+    let reusedCount = 0;
+
+    console.log(`[${source}] Géocodage en cours (${existingCoordsMap.size} coords existantes réutilisables)...`);
     for (const ad of processedAds) {
-      try {
-        // smartGeocode utilise Nominatim API + fallback intelligent
-        const coords = await smartGeocode(
-          undefined, // Pas d'adresse précise
-          (ad as { location_for_geocode?: string }).location_for_geocode,
-          (ad as { city_for_geocode?: string }).city_for_geocode
-        );
-        (ad as Record<string, unknown>).coords_lat = coords.lat;
-        (ad as Record<string, unknown>).coords_lng = coords.lng;
-      } catch (err) {
-        console.warn(`[${source}] Geocoding failed for "${ad.location}":`, err);
-        (ad as Record<string, unknown>).coords_lat = null;
-        (ad as Record<string, unknown>).coords_lng = null;
+      const existing = existingCoordsMap.get(ad.source_url);
+      if (existing) {
+        // Annonce déjà connue → réutiliser les coordonnées sans appel Nominatim
+        (ad as Record<string, unknown>).coords_lat = existing.lat;
+        (ad as Record<string, unknown>).coords_lng = existing.lng;
+        reusedCount++;
+      } else {
+        try {
+          // Nouvelle annonce → géocoder via Nominatim
+          const coords = await smartGeocode(
+            undefined,
+            (ad as { location_for_geocode?: string }).location_for_geocode,
+            (ad as { city_for_geocode?: string }).city_for_geocode
+          );
+          (ad as Record<string, unknown>).coords_lat = coords.lat;
+          (ad as Record<string, unknown>).coords_lng = coords.lng;
+          geocodedCount++;
+        } catch (err) {
+          console.warn(`[${source}] Geocoding failed for "${ad.location}":`, err);
+          (ad as Record<string, unknown>).coords_lat = null;
+          (ad as Record<string, unknown>).coords_lng = null;
+        }
       }
       // Supprimer les champs temporaires
       delete (ad as Record<string, unknown>).location_for_geocode;
       delete (ad as Record<string, unknown>).city_for_geocode;
     }
+
+    console.log(`[${source}] Géocodage: ${geocodedCount} nouvelles annonces, ${reusedCount} coords réutilisées`);
 
     // 5. Déduplication dans le batch (même URL)
     const uniqueAdsMap = new Map<string, typeof processedAds[0]>();
@@ -274,6 +303,8 @@ export async function POST(req: Request) {
         valid: processedAds.length,
         unique: uniqueAds.length,
         skipped,
+        geocoded: geocodedCount,
+        geocodeReused: reusedCount,
         cleanupTTL: `${CLEANUP_TTL_DAYS} jours`,
       },
     });

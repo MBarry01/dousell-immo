@@ -4,7 +4,7 @@ import { slugify } from '@/lib/slugs';
 
 const BASE_URL = 'https://www.dousel.com';
 
-export const revalidate = 3600; // Update sitemap every hour
+export const revalidate = 86400; // Update sitemap every 24h (réduit la charge Vercel)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
