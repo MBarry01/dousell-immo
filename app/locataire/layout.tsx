@@ -293,44 +293,60 @@ export default function LocataireLayout({
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 pb-20 md:pb-6">{children}</main>
+      {/* Main Content — padding bottom = hauteur nav (4rem) + safe area bottom */}
+      <main
+        className="flex-1 md:pb-6"
+        style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))' }}
+      >
+        {children}
+      </main>
 
-      {/* Note: OneSignal is initialized in RootLayout. 
+      {/* Note: OneSignal is initialized in RootLayout.
           Login is triggered in the useEffect above when leaseId is fetched. */}
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/98 backdrop-blur-xl border-t border-slate-100 px-2 h-16 flex justify-around items-center z-50 md:hidden safe-area-pb shadow-[0_-4px_24px_rgba(0,0,0,0.06)]">
-        {mobileNavItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "relative flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all duration-200 min-w-[52px]",
-              item.isActive
-                ? "text-[#0F172A]"
-                : "text-slate-400 active:text-slate-700"
-            )}
-          >
-            {item.isActive && (
-              <span className="absolute -top-[1px] left-1/2 -translate-x-1/2 w-8 h-0.5 bg-[#F4C430] rounded-b-full" />
-            )}
-            <div className={cn(
-              "relative flex items-center justify-center rounded-xl transition-all duration-200",
-              item.isActive ? "bg-[#F4C430]/10 w-10 h-7" : "w-8 h-7"
-            )}>
-              <item.icon
-                className="h-5 w-5"
-                strokeWidth={item.isActive ? 2.5 : 1.5}
-              />
-              {item.badge > 0 && (
-                <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
-                  {item.badge > 9 ? "9+" : item.badge}
-                </span>
+      {/*
+        Pattern PWA natif :
+        - L'outer <nav> a un padding-bottom = safe-area-inset-bottom → couvre la zone home indicator
+        - L'inner <div h-16> contient les icônes et est centré dans les 64px réels
+        - Les icônes ne sont JAMAIS écrasées par la safe area
+      */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 bg-white/98 backdrop-blur-xl border-t border-slate-100 px-2 z-50 md:hidden shadow-[0_-4px_24px_rgba(0,0,0,0.06)]"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
+        <div className="h-16 flex justify-around items-center">
+          {mobileNavItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "relative flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all duration-200 min-w-[52px]",
+                item.isActive
+                  ? "text-[#0F172A]"
+                  : "text-slate-400 active:text-slate-700"
               )}
-            </div>
-            <span className={cn("text-[10px]", item.isActive ? "font-bold" : "font-medium")}>{item.label}</span>
-          </Link>
-        ))}
+            >
+              {item.isActive && (
+                <span className="absolute -top-[1px] left-1/2 -translate-x-1/2 w-8 h-0.5 bg-[#F4C430] rounded-b-full" />
+              )}
+              <div className={cn(
+                "relative flex items-center justify-center rounded-xl transition-all duration-200",
+                item.isActive ? "bg-[#F4C430]/10 w-10 h-7" : "w-8 h-7"
+              )}>
+                <item.icon
+                  className="h-5 w-5"
+                  strokeWidth={item.isActive ? 2.5 : 1.5}
+                />
+                {item.badge > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                    {item.badge > 9 ? "9+" : item.badge}
+                  </span>
+                )}
+              </div>
+              <span className={cn("text-[10px]", item.isActive ? "font-bold" : "font-medium")}>{item.label}</span>
+            </Link>
+          ))}
+        </div>
       </nav>
     </div>
   );

@@ -221,13 +221,13 @@ export function PaymentForm({
                                     </div>
                                 )}
 
-                                <div className="flex items-center justify-center pt-1 opacity-30 hover:opacity-80 transition-all duration-500">
+                                <div className="flex items-center justify-center pt-1 opacity-70 hover:opacity-100 transition-all duration-300">
                                     <CldImageSafe
                                         src="doussel/static/icons/bouton-senegal"
                                         alt="Paiement sécurisé"
                                         width={100}
                                         height={20}
-                                        className="h-5 w-auto brightness-0 invert"
+                                        className="h-5 w-auto"
                                     />
                                 </div>
                             </div>
