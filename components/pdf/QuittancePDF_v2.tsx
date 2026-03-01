@@ -441,7 +441,7 @@ export const createQuittanceDocument = (data: QuittanceData) => {
         {/* Section Soldes / Impayés (Optionnelle) */}
         {data.balances && (
           <View style={styles.balancesSection}>
-            {data.balances.previousBalanceDate && (
+            {!!data.balances.previousBalanceDate && (
               <View style={styles.balanceRow}>
                 <Text style={styles.balanceLabel}>
                   {(data.balances.previousBalanceAmount ?? 0) > 0 ? 'Solde débiteur' : 'Solde créditeur'} antérieur au {data.balances.previousBalanceDate}
@@ -452,7 +452,7 @@ export const createQuittanceDocument = (data: QuittanceData) => {
               </View>
             )}
 
-            {(data.balances.currentBalanceDate || data.balances.currentBalanceAmount !== undefined) && (
+            {(!!data.balances.currentBalanceDate || data.balances.currentBalanceAmount !== undefined) && (
               <View style={[styles.balanceRow, { marginTop: 4 }]}>
                 <Text style={styles.balanceLabelBold}>
                   {(data.balances.currentBalanceAmount ?? 0) > 0 ? 'Solde débiteur' : 'Solde créditeur'} au {data.balances.currentBalanceDate || today}
