@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { X, Download, Mail } from 'lucide-react';
-import { ReceiptPreview } from './ReceiptPreview';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
 import { createQuittanceDocument } from '@/components/pdf/QuittancePDF_v2';
 
 interface ReceiptData {
@@ -197,24 +196,16 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
                     </Button>
                 </div>
 
-                {/* ── Aperçu du document (scrollable) ── */}
-                <div className="flex-1 overflow-y-auto bg-muted/30 flex justify-center p-4 print:p-0 print:overflow-visible print:bg-white">
-                    <ReceiptPreview
-                        tenant={{
-                            tenant_name: data.tenant?.tenant_name || data.tenant?.name || 'Locataire',
-                            address: data.property_address || data.tenant?.address || ''
-                        }}
-                        profile={{
-                            company_name: data.profile?.company_name || data.profile?.full_name || 'Propriétaire',
-                            company_address: data.profile?.company_address || '',
-                            company_ninea: data.profile?.company_ninea || data.profile?.ninea || undefined,
-                            logo_url: data.profile?.logo_url || undefined,
-                            signature_url: data.profile?.signature_url || undefined
-                        }}
-                        amount={data.amount || 0}
-                        month={data.month || new Date().getMonth() + 1}
-                        year={data.year || new Date().getFullYear()}
-                    />
+                {/* ── Aperçu du document — rendu identique au PDF envoyé ── */}
+                <div className="flex-1 min-h-0 overflow-hidden print:hidden">
+                    <PDFViewer
+                        width="100%"
+                        height="100%"
+                        showToolbar={false}
+                        className="border-none block"
+                    >
+                        {createQuittanceDocument(receiptDetails)}
+                    </PDFViewer>
                 </div>
 
                 {/* ── Pied de carte ── */}
