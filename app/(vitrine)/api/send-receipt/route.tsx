@@ -126,9 +126,8 @@ export async function POST(request: NextRequest) {
         : `Quittance_${data.receiptNumber}.pdf`;
     }
 
-    // Expéditeur : compte Gmail authentifié (le seul que SMTP accepte comme FROM)
-    const gmailUser = process.env.GMAIL_USER || 'contact@dousel.com';
-    const senderFrom = `Dousel <${gmailUser}>`;
+    // Expéditeur : noreply Dousel (domaine vérifié dans Resend)
+    const senderFrom = process.env.NOREPLY_EMAIL || 'Dousel <noreply@dousel.com>';
 
     // 9. Envoyer l'email via le système centralisé (Resend en priorité, Gmail en fallback)
     console.log('📤 Envoi de l\'email à:', data.tenantEmail);
