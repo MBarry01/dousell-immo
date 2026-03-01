@@ -22,303 +22,371 @@ interface QuittanceData {
   isGuarantee?: boolean;
 }
 
-// Styles compacts pour tenir sur une page
+// Palette sobre et professionnelle
+const C = {
+  black:   '#111111',
+  dark:    '#2C2C2C',
+  mid:     '#555555',
+  muted:   '#888888',
+  light:   '#BBBBBB',
+  border:  '#D8D8D8',
+  stripe:  '#F6F6F6',
+  white:   '#FFFFFF',
+  gold:    '#C8A84B',  // or doux, utilisé uniquement pour l'accent header
+};
+
 const styles = StyleSheet.create({
   page: {
-    padding: 25,
+    paddingTop: 36,
+    paddingBottom: 60,
+    paddingHorizontal: 40,
     fontSize: 9,
     fontFamily: 'Helvetica',
-    lineHeight: 1.3,
+    lineHeight: 1.4,
+    color: C.dark,
+    backgroundColor: C.white,
   },
+
+  // ─── En-tête ─────────────────────────────────────────────
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
-    paddingBottom: 8,
-    borderBottomWidth: 2,
-    borderBottomColor: '#F4C430',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: C.border,
+  },
+  headerAccent: {
+    height: 3,
+    backgroundColor: C.gold,
+    marginBottom: 14,
+    borderRadius: 1,
   },
   logo: {
-    width: 70,
-    height: 45,
+    width: 64,
+    height: 40,
     objectFit: 'contain',
+  },
+  companyName: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: C.black,
+    marginBottom: 2,
+  },
+  companyInfo: {
+    fontSize: 7.5,
+    color: C.muted,
+    marginBottom: 1,
   },
   headerRight: {
     textAlign: 'right',
   },
-  companyName: {
+  refLabel: {
+    fontSize: 7,
+    color: C.muted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  refValue: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: C.black,
+    marginBottom: 6,
+  },
+
+  // ─── Titre ───────────────────────────────────────────────
+  titleWrapper: {
+    marginVertical: 16,
+    alignItems: 'center',
+  },
+  titleLine: {
+    width: 40,
+    height: 1,
+    backgroundColor: C.gold,
+    marginBottom: 6,
+  },
+  titleText: {
     fontSize: 13,
     fontWeight: 'bold',
-    marginBottom: 3,
-  },
-  companyInfo: {
-    fontSize: 7,
-    color: '#666',
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
+    color: C.black,
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    backgroundColor: '#f9f9f9',
-    padding: 6,
-    border: '1px solid #eee',
+    letterSpacing: 1.5,
+    textAlign: 'center',
   },
-  infoBlock: {
+  titleLineBtm: {
+    width: 40,
+    height: 1,
+    backgroundColor: C.gold,
+    marginTop: 6,
+  },
+
+  // ─── Blocs parties ───────────────────────────────────────
+  partiesRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 12,
   },
-  box: {
-    width: '48%',
-    padding: 8,
-    border: '1px solid #ddd',
-    borderRadius: 4,
-  },
-  boxHighlight: {
-    width: '48%',
-    padding: 8,
+  partyBox: {
+    width: '47%',
+    padding: 10,
     borderWidth: 1,
-    borderColor: '#F4C430',
-    borderRadius: 4,
-    backgroundColor: '#fffdf5',
+    borderColor: C.border,
+    borderRadius: 2,
   },
-  boxTitle: {
-    fontSize: 7,
-    color: '#999',
+  partyLabel: {
+    fontSize: 6.5,
+    color: C.muted,
     textTransform: 'uppercase',
+    letterSpacing: 0.8,
     marginBottom: 5,
     fontWeight: 'bold',
   },
-  boxName: {
+  partyName: {
     fontSize: 10,
     fontWeight: 'bold',
+    color: C.black,
     marginBottom: 3,
   },
-  boxText: {
+  partyText: {
     fontSize: 8,
-    color: '#555',
+    color: C.mid,
     marginBottom: 2,
   },
-  propertyInfo: {
-    backgroundColor: '#f5f5f5',
-    padding: 6,
-    borderRadius: 4,
-    marginBottom: 8,
-    fontSize: 8,
+
+  // ─── Bien loué ───────────────────────────────────────────
+  propertyRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    backgroundColor: C.stripe,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 2,
+    marginBottom: 14,
   },
+  propertyLabel: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: C.mid,
+    marginRight: 6,
+  },
+  propertyValue: {
+    fontSize: 8.5,
+    color: C.dark,
+  },
+
+  // ─── Texte légal ─────────────────────────────────────────
   legalText: {
-    fontSize: 8,
-    lineHeight: 1.4,
-    marginBottom: 10,
+    fontSize: 8.5,
+    lineHeight: 1.5,
+    marginBottom: 14,
     textAlign: 'justify',
+    color: C.dark,
   },
+
+  // ─── Tableau ─────────────────────────────────────────────
   table: {
-    marginTop: 8,
-    marginBottom: 10,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 2,
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#f9f9f9',
-    borderBottomWidth: 2,
-    borderBottomColor: '#F4C430',
-    paddingVertical: 5,
-    paddingHorizontal: 8,
+    backgroundColor: C.stripe,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: C.border,
   },
   tableRow: {
     flexDirection: 'row',
+    paddingVertical: 7,
+    paddingHorizontal: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    borderBottomColor: C.border,
   },
   tableTotalRow: {
     flexDirection: 'row',
-    backgroundColor: '#FFF8E1',
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    fontWeight: 'bold',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderTopWidth: 2,
+    borderTopColor: C.dark,
   },
-  col1: { width: '40%', fontSize: 8 },
+  col1: { width: '45%', fontSize: 8 },
   col2: { width: '30%', fontSize: 8, textAlign: 'right' },
-  col3: { width: '30%', fontSize: 8, textAlign: 'right' },
-  tableHeaderText: {
+  col3: { width: '25%', fontSize: 8, textAlign: 'right' },
+  colHead: {
     fontSize: 7,
-    color: '#666',
+    color: C.muted,
     fontWeight: 'bold',
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
+
+  // ─── Signature ───────────────────────────────────────────
   signatureBlock: {
-    marginTop: 12,
     alignItems: 'flex-end',
+    marginTop: 10,
   },
   signatureLabel: {
     fontSize: 8,
     fontWeight: 'bold',
-    marginBottom: 5,
+    color: C.mid,
+    marginBottom: 6,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  signature: {
+  signatureImage: {
     width: 90,
     height: 40,
     objectFit: 'contain',
   },
-  signaturePlaceholder: {
-    fontSize: 7,
-    color: '#ccc',
-    fontStyle: 'italic',
-    marginTop: 5,
+  signatureLine: {
+    width: 120,
+    height: 1,
+    backgroundColor: C.border,
+    marginTop: 30,
   },
+
+  // ─── Footer ──────────────────────────────────────────────
   footer: {
     position: 'absolute',
-    bottom: 20,
-    left: 25,
-    right: 25,
+    bottom: 24,
+    left: 40,
+    right: 40,
     textAlign: 'center',
-    fontSize: 6,
-    color: '#999',
+    fontSize: 6.5,
+    color: C.light,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 10,
+    borderTopColor: C.border,
+    paddingTop: 8,
   },
 });
 
-// Helper pour formater les montants
-const formatAmount = (amount: number) => {
-  return new Intl.NumberFormat('fr-FR').format(amount);
-};
+const fmt = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
 
-// Fonction pour générer le Document PDF
 export const createQuittanceDocument = (data: QuittanceData) => {
   const today = new Date().toLocaleDateString('fr-FR');
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
+
+        {/* Bande d'accent or */}
+        <View style={styles.headerAccent} />
+
         {/* En-tête */}
         <View style={styles.header}>
           <View>
-            {data.ownerLogo && (
-              <Image src={data.ownerLogo} style={styles.logo} />
-            )}
+            {data.ownerLogo && <Image src={data.ownerLogo} style={styles.logo} />}
             <Text style={styles.companyName}>{data.ownerName}</Text>
-            {data.ownerAddress && (
-              <Text style={styles.companyInfo}>{data.ownerAddress}</Text>
-            )}
-            {data.ownerNinea && (
-              <Text style={styles.companyInfo}>NINEA: {data.ownerNinea}</Text>
-            )}
+            {data.ownerAddress && <Text style={styles.companyInfo}>{data.ownerAddress}</Text>}
+            {data.ownerNinea && <Text style={styles.companyInfo}>NINEA : {data.ownerNinea}</Text>}
           </View>
           <View style={styles.headerRight}>
-            <Text style={styles.companyInfo}>Quittance N°</Text>
-            <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 3 }}>
-              {data.receiptNumber}
-            </Text>
-            <Text style={styles.companyInfo}>Date d&apos;émission</Text>
-            <Text style={{ fontSize: 9, fontWeight: 'bold' }}>{today}</Text>
+            <Text style={styles.refLabel}>Quittance N°</Text>
+            <Text style={styles.refValue}>{data.receiptNumber}</Text>
+            <Text style={styles.refLabel}>Date d'émission</Text>
+            <Text style={[styles.refValue, { fontSize: 9 }]}>{today}</Text>
           </View>
         </View>
 
         {/* Titre */}
-        <Text style={styles.title}>
-          {data.isGuarantee ? 'ATTESTATION DE DÉPÔT DE GARANTIE' : 'QUITTANCE DE LOYER'}
-        </Text>
+        <View style={styles.titleWrapper}>
+          <View style={styles.titleLine} />
+          <Text style={styles.titleText}>
+            {data.isGuarantee ? 'Attestation de dépôt de garantie' : 'Quittance de loyer'}
+          </Text>
+          <View style={styles.titleLineBtm} />
+        </View>
 
-        {/* Blocs d'infos */}
-        <View style={styles.infoBlock}>
-          <View style={styles.box}>
-            <Text style={styles.boxTitle}>Bailleur / Mandataire</Text>
-            <Text style={styles.boxName}>{data.ownerName}</Text>
-            {data.ownerAddress && (
-              <Text style={styles.boxText}>{data.ownerAddress}</Text>
-            )}
+        {/* Parties */}
+        <View style={styles.partiesRow}>
+          <View style={styles.partyBox}>
+            <Text style={styles.partyLabel}>Bailleur / Mandataire</Text>
+            <Text style={styles.partyName}>{data.ownerName}</Text>
+            {data.ownerAddress && <Text style={styles.partyText}>{data.ownerAddress}</Text>}
           </View>
-          <View style={styles.boxHighlight}>
-            <Text style={[styles.boxTitle, { color: '#B8860B' }]}>Locataire</Text>
-            <Text style={styles.boxName}>{data.tenantName}</Text>
+          <View style={styles.partyBox}>
+            <Text style={styles.partyLabel}>Locataire</Text>
+            <Text style={styles.partyName}>{data.tenantName}</Text>
             {data.tenantAddress && data.tenantAddress !== 'Adresse non renseignée' && (
-              <Text style={styles.boxText}>{data.tenantAddress}</Text>
+              <Text style={styles.partyText}>{data.tenantAddress}</Text>
             )}
-            {data.tenantEmail && (
-              <Text style={styles.boxText}>{data.tenantEmail}</Text>
-            )}
-            {data.tenantPhone && (
-              <Text style={styles.boxText}>{data.tenantPhone}</Text>
-            )}
+            {data.tenantEmail && <Text style={styles.partyText}>{data.tenantEmail}</Text>}
+            {data.tenantPhone && <Text style={styles.partyText}>{data.tenantPhone}</Text>}
           </View>
         </View>
 
-        {/* Adresse du bien - Seulement si renseignée */}
+        {/* Adresse du bien */}
         {data.propertyAddress && data.propertyAddress !== 'Adresse non renseignée' && (
-          <View style={styles.propertyInfo}>
-            <Text>
-              <Text style={{ fontWeight: 'bold' }}>Adresse du bien loué : </Text>
-              {data.propertyAddress}
-            </Text>
+          <View style={styles.propertyRow}>
+            <Text style={styles.propertyLabel}>Bien loué :</Text>
+            <Text style={styles.propertyValue}>{data.propertyAddress}</Text>
           </View>
         )}
 
         {/* Texte légal */}
         <Text style={styles.legalText}>
-          Je soussigné(e) <Text style={{ fontWeight: 'bold' }}>{data.ownerName}</Text>, propriétaire ou mandataire
-          {data.propertyAddress && data.propertyAddress !== 'Adresse non renseignée' ? (
-            <> du bien situé au <Text style={{ fontWeight: 'bold' }}>{data.propertyAddress}</Text></>
-          ) : ''}, reconnais avoir reçu de{' '}
-          <Text style={{ fontWeight: 'bold' }}>{data.tenantName}</Text>, locataire dudit bien, la somme détaillée
-          ci-dessous {data.isGuarantee
-            ? 'au titre du dépôt de garantie.'
-            : 'au titre du loyer et des charges pour la période concernée.'
-          }
+          Je soussigné(e), <Text style={{ fontWeight: 'bold' }}>{data.ownerName}</Text>, propriétaire ou
+          mandataire{data.propertyAddress && data.propertyAddress !== 'Adresse non renseignée'
+            ? <> du bien situé au <Text style={{ fontWeight: 'bold' }}>{data.propertyAddress}</Text></>
+            : ''}, reconnais avoir reçu de{' '}
+          <Text style={{ fontWeight: 'bold' }}>{data.tenantName}</Text>, locataire dudit bien, la somme
+          détaillée ci-dessous{' '}
+          {data.isGuarantee
+            ? 'à titre de dépôt de garantie.'
+            : 'au titre du loyer et des charges pour la période concernée.'}
         </Text>
 
         {/* Tableau */}
         <View style={styles.table}>
           <View style={styles.tableHeader}>
-            <Text style={[styles.col1, styles.tableHeaderText]}>Désignation</Text>
-            <Text style={[styles.col2, styles.tableHeaderText]}>Période</Text>
-            <Text style={[styles.col3, styles.tableHeaderText]}>Montant</Text>
+            <Text style={[styles.col1, styles.colHead]}>Désignation</Text>
+            <Text style={[styles.col2, styles.colHead]}>Période</Text>
+            <Text style={[styles.col3, styles.colHead]}>Montant</Text>
           </View>
           <View style={styles.tableRow}>
-            <Text style={styles.col1}>{data.isGuarantee ? 'Dépôt de garantie' : 'Loyer et charges'}</Text>
-            <Text style={styles.col2}>
-              {data.isGuarantee ? data.periodMonth : `Du ${data.periodStart} au ${data.periodEnd}`}
+            <Text style={styles.col1}>
+              {data.isGuarantee ? 'Dépôt de garantie' : 'Loyer et charges'}
             </Text>
-            <Text style={styles.col3}>{formatAmount(data.amount)} FCFA</Text>
+            <Text style={styles.col2}>
+              {data.isGuarantee
+                ? data.periodMonth
+                : `Du ${data.periodStart} au ${data.periodEnd}`}
+            </Text>
+            <Text style={styles.col3}>{fmt(data.amount)} FCFA</Text>
           </View>
           <View style={styles.tableTotalRow}>
-            <Text style={[styles.col1, { fontWeight: 'bold' }]}>TOTAL ACQUITTÉ</Text>
-            <Text style={styles.col2}></Text>
-            <Text style={[styles.col3, { fontWeight: 'bold', fontSize: 10 }]}>
-              {formatAmount(data.amount)} FCFA
+            <Text style={[styles.col1, { fontWeight: 'bold', color: C.black }]}>Total acquitté</Text>
+            <Text style={styles.col2} />
+            <Text style={[styles.col3, { fontWeight: 'bold', fontSize: 10, color: C.black }]}>
+              {fmt(data.amount)} FCFA
             </Text>
           </View>
         </View>
 
         {/* Signature */}
         <View style={styles.signatureBlock}>
-          <Text style={styles.signatureLabel}>Le Bailleur (Signature)</Text>
-          {data.ownerSignature ? (
-            <Image src={data.ownerSignature} style={styles.signature} />
-          ) : (
-            <Text style={styles.signaturePlaceholder}>(Signé électroniquement)</Text>
-          )}
+          <Text style={styles.signatureLabel}>Le Bailleur</Text>
+          {data.ownerSignature
+            ? <Image src={data.ownerSignature} style={styles.signatureImage} />
+            : <View style={styles.signatureLine} />}
         </View>
 
         {/* Footer */}
         <Text style={styles.footer}>
-          Document généré automatiquement par Dousel pour {data.ownerName}.{'\n'}
-          Pour faire valoir ce que de droit.
+          Document généré par Dousel pour {data.ownerName} — Pour faire valoir ce que de droit.
         </Text>
       </Page>
     </Document>
   );
 };
 
-// Export du type
 export type { QuittanceData };
 
-// Composant React pour compatibilité
 export const QuittancePDF: React.FC<{ data: QuittanceData }> = ({ data }) => {
   return createQuittanceDocument(data);
 };

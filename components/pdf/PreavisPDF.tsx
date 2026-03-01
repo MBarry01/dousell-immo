@@ -3,7 +3,6 @@ import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/render
 
 // Types
 interface PreaviseData {
-  // Informations bail
   tenantName: string;
   tenantEmail?: string;
   tenantPhone?: string;
@@ -12,12 +11,9 @@ interface PreaviseData {
   monthlyAmount: number;
   startDate: string;
   endDate: string;
-
-  // Type de préavis
-  noticeType: 'J-180' | 'J-90'; // 6 mois ou 3 mois
-  noticeDate: string; // Date d'émission du préavis
-
-  // Informations propriétaire
+  noticeType: 'J-180' | 'J-90';
+  noticeDate: string;
+  noticeNumber: string;
   ownerName: string;
   ownerAddress: string;
   ownerEmail?: string;
@@ -25,139 +21,222 @@ interface PreaviseData {
   ownerNinea?: string;
   ownerLogo?: string;
   ownerSignature?: string;
-
-  // Numéro unique
-  noticeNumber: string;
 }
 
-// Styles professionnels pour document juridique
+const C = {
+  black:  '#111111',
+  dark:   '#2C2C2C',
+  mid:    '#555555',
+  muted:  '#888888',
+  light:  '#BBBBBB',
+  border: '#D8D8D8',
+  stripe: '#F6F6F6',
+  white:  '#FFFFFF',
+  gold:   '#C8A84B',
+};
+
 const styles = StyleSheet.create({
   page: {
-    padding: 25,
+    paddingTop: 36,
+    paddingBottom: 60,
+    paddingHorizontal: 40,
     fontSize: 9,
     fontFamily: 'Helvetica',
-    lineHeight: 1.3,
+    lineHeight: 1.45,
+    color: C.dark,
+    backgroundColor: C.white,
+  },
+
+  // ─── En-tête ─────────────────────────────────────────────
+  headerAccent: {
+    height: 3,
+    backgroundColor: C.gold,
+    marginBottom: 14,
+    borderRadius: 1,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
-    paddingBottom: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: '#F4C430',
+    alignItems: 'flex-start',
+    paddingBottom: 12,
+    marginBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: C.border,
   },
   logo: {
-    width: 60,
+    width: 64,
     height: 40,
     objectFit: 'contain',
+  },
+  companyName: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: C.black,
+    marginBottom: 2,
+  },
+  companyInfo: {
+    fontSize: 7.5,
+    color: C.muted,
+    marginBottom: 1,
   },
   headerRight: {
     textAlign: 'right',
   },
-  companyName: {
+
+  // ─── Référence document ──────────────────────────────────
+  docRef: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 10,
+    marginBottom: 16,
+  },
+  docRefText: {
+    fontSize: 7.5,
+    color: C.muted,
+    textAlign: 'right',
+  },
+
+  // ─── Destinataire ────────────────────────────────────────
+  recipientBlock: {
+    marginBottom: 18,
+  },
+  recipientIntro: {
+    fontSize: 8.5,
+    color: C.mid,
+    marginBottom: 3,
+  },
+  recipientName: {
     fontSize: 11,
     fontWeight: 'bold',
+    color: C.black,
     marginBottom: 2,
   },
-  companyInfo: {
-    fontSize: 7,
-    color: '#666',
-    marginBottom: 1,
+  recipientAddress: {
+    fontSize: 8.5,
+    color: C.dark,
   },
-  title: {
+
+  // ─── Titre ───────────────────────────────────────────────
+  titleWrapper: {
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  titleLine: {
+    width: 40,
+    height: 1,
+    backgroundColor: C.gold,
+    marginBottom: 8,
+  },
+  titleText: {
     fontSize: 13,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 15,
-    marginBottom: 12,
+    color: C.black,
     textTransform: 'uppercase',
-    textDecoration: 'underline',
-  },
-  subtitle: {
-    fontSize: 9,
+    letterSpacing: 1.5,
     textAlign: 'center',
-    color: '#666',
-    marginBottom: 15,
   },
-  section: {
-    marginBottom: 12,
+  titleSub: {
+    fontSize: 8,
+    color: C.muted,
+    textAlign: 'center',
+    marginTop: 4,
+    letterSpacing: 0.3,
   },
-  sectionTitle: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    marginBottom: 6,
-    textTransform: 'uppercase',
-    color: '#333',
+  titleLineBtm: {
+    width: 40,
+    height: 1,
+    backgroundColor: C.gold,
+    marginTop: 8,
   },
-  paragraph: {
-    fontSize: 9,
-    textAlign: 'justify',
-    marginBottom: 8,
-    lineHeight: 1.4,
-  },
+
+  // ─── Tableau récapitulatif bail ──────────────────────────
   infoBox: {
-    backgroundColor: '#f9f9f9',
-    padding: 8,
-    borderRadius: 4,
-    marginBottom: 10,
-    borderLeftWidth: 3,
-    borderLeftColor: '#F4C430',
+    backgroundColor: C.stripe,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 2,
+    marginBottom: 14,
+    borderLeftWidth: 2,
+    borderLeftColor: C.border,
   },
   infoRow: {
     flexDirection: 'row',
-    marginBottom: 3,
+    marginBottom: 4,
   },
   infoLabel: {
     fontSize: 8,
     fontWeight: 'bold',
-    width: '35%',
+    color: C.mid,
+    width: '38%',
   },
   infoValue: {
-    fontSize: 8,
-    width: '65%',
+    fontSize: 8.5,
+    color: C.dark,
+    width: '62%',
   },
-  warningBox: {
-    backgroundColor: '#fff3cd',
-    padding: 8,
-    borderRadius: 4,
-    marginTop: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ffc107',
-  },
-  warningTitle: {
+
+  // ─── Corps texte ─────────────────────────────────────────
+  paragraph: {
     fontSize: 9,
+    textAlign: 'justify',
+    marginBottom: 10,
+    lineHeight: 1.55,
+    color: C.dark,
+  },
+
+  // ─── Encadré d'action requise ────────────────────────────
+  actionBox: {
+    marginVertical: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: C.stripe,
+    borderLeftWidth: 3,
+    borderLeftColor: C.dark,
+    borderRadius: 2,
+  },
+  actionTitle: {
+    fontSize: 8,
     fontWeight: 'bold',
-    color: '#856404',
+    color: C.black,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
     marginBottom: 5,
   },
-  warningText: {
-    fontSize: 8,
-    color: '#856404',
-    lineHeight: 1.3,
+  actionText: {
+    fontSize: 8.5,
+    color: C.dark,
+    lineHeight: 1.5,
+    textAlign: 'justify',
   },
-  legalText: {
-    fontSize: 7,
-    color: '#666',
+
+  // ─── Référence légale ────────────────────────────────────
+  legalRef: {
+    fontSize: 7.5,
+    color: C.muted,
     fontStyle: 'italic',
-    marginTop: 6,
-    marginBottom: 6,
+    marginBottom: 12,
   },
-  signatureSection: {
-    marginTop: 20,
+
+  // ─── Signatures ──────────────────────────────────────────
+  signaturesRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 20,
   },
   signatureBox: {
     width: '45%',
   },
   signatureLabel: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 'bold',
+    color: C.mid,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 3,
   },
-  signatureText: {
-    fontSize: 8,
+  signatureName: {
+    fontSize: 8.5,
+    color: C.dark,
     marginBottom: 2,
   },
   signatureImage: {
@@ -166,104 +245,110 @@ const styles = StyleSheet.create({
     marginTop: 8,
     objectFit: 'contain',
   },
+  signatureLine: {
+    marginTop: 40,
+    height: 1,
+    backgroundColor: C.border,
+  },
+  signatureHint: {
+    fontSize: 7,
+    color: C.light,
+    marginTop: 4,
+  },
+
+  // ─── Footer ──────────────────────────────────────────────
   footer: {
     position: 'absolute',
-    bottom: 20,
-    left: 25,
-    right: 25,
+    bottom: 24,
+    left: 40,
+    right: 40,
     textAlign: 'center',
-    fontSize: 6,
-    color: '#999',
+    fontSize: 6.5,
+    color: C.light,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 6,
+    borderTopColor: C.border,
+    paddingTop: 8,
   },
 });
 
-// Contenu des préavis selon le type
-const getNoticeContent = (data: PreaviseData) => {
+const fmtDate = (d: string) => {
+  try {
+    return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  } catch {
+    return d;
+  }
+};
+
+const getContent = (data: PreaviseData) => {
   const isJ180 = data.noticeType === 'J-180';
+  const endDateFR = fmtDate(data.endDate);
 
   return {
-    title: isJ180
-      ? 'PRÉAVIS DE CONGÉ POUR REPRISE'
-      : 'NOTIFICATION DE RECONDUCTION TACITE',
-
+    title: isJ180 ? 'Préavis de congé pour reprise' : 'Notification de reconduction tacite',
     subject: isJ180
-      ? 'Notification de Congé - 6 mois avant échéance'
-      : 'Reconduction du bail - 3 mois avant échéance',
-
-    mainText: isJ180
-      ? `Par la présente, je vous notifie mon intention de ne pas renouveler le bail de location concernant le bien situé ${data.propertyAddress}, dont le contrat arrivera à échéance le ${new Date(data.endDate).toLocaleDateString('fr-FR')}.
-
-Conformément aux dispositions de la loi sénégalaise n° 2014-22 du 24 février 2014 portant loi d'orientation sur l'habitat social et aux articles du Code des Obligations Civiles et Commerciales (COCC), je vous informe par la présente de ma décision de reprendre les lieux loués.
-
-Ce préavis respecte le délai légal de SIX (6) MOIS avant l'échéance du bail, comme l'exige la législation en vigueur.`
-
-      : `Je vous informe que le bail de location concernant le bien situé ${data.propertyAddress} arrivera à échéance le ${new Date(data.endDate).toLocaleDateString('fr-FR')}.
-
-Conformément aux dispositions de la loi sénégalaise n° 2014-22 du 24 février 2014 et aux articles du Code des Obligations Civiles et Commerciales (COCC), en l'absence de congé signifié dans les délais légaux, le bail sera automatiquement reconduit aux mêmes conditions.
-
-Nous sommes dans le délai de TROIS (3) MOIS avant l'échéance, période durant laquelle vous pouvez encore manifester votre intention concernant le renouvellement du bail.`,
-
-    actionRequired: isJ180
-      ? `Vous êtes prié(e) de libérer les lieux au plus tard à la date d'échéance mentionnée ci-dessus, soit le ${new Date(data.endDate).toLocaleDateString('fr-FR')}.`
-      : `Si vous souhaitez donner congé ou négocier de nouvelles conditions, veuillez me contacter dans les meilleurs délais. À défaut, le bail sera renouvelé tacitement pour la même durée.`,
-
-    legalReference: isJ180
-      ? 'Article relatif au préavis de congé - Loi n° 2014-22 du 24 février 2014 & COCC Sénégal'
-      : 'Article relatif à la reconduction tacite - Loi n° 2014-22 du 24 février 2014 & COCC Sénégal'
+      ? 'Congé délivré six mois avant l\'échéance du bail'
+      : 'Information locataire — trois mois avant l\'échéance',
+    body: isJ180
+      ? `Par la présente, je vous notifie ma décision de ne pas renouveler le bail de location portant sur le bien situé au ${data.propertyAddress}, dont l'échéance est fixée au ${endDateFR}.\n\nConformément aux dispositions de la loi sénégalaise n° 2014-22 du 24 février 2014 portant loi d'orientation sur l'habitat social, ainsi qu'aux articles pertinents du Code des Obligations Civiles et Commerciales (COCC), je vous informe de ma décision de reprendre les lieux loués à ladite échéance.\n\nLe présent préavis est délivré dans le respect du délai légal de six (6) mois avant l'échéance du bail, conformément à la législation en vigueur.`
+      : `Je vous informe que le bail de location portant sur le bien situé au ${data.propertyAddress} arrive à échéance le ${endDateFR}.\n\nConformément aux dispositions de la loi sénégalaise n° 2014-22 du 24 février 2014 et aux articles du Code des Obligations Civiles et Commerciales (COCC), en l'absence de congé signifié dans les délais légaux, le bail sera automatiquement reconduit aux mêmes conditions.\n\nNous nous trouvons actuellement dans la période de trois (3) mois précédant l'échéance, durant laquelle il vous est possible de manifester votre intention quant au renouvellement du bail.`,
+    action: isJ180
+      ? `Vous êtes prié(e) de libérer les lieux au plus tard à la date d'échéance, soit le ${endDateFR}, et de restituer les clés au bailleur à cette date.`
+      : `Si vous souhaitez donner congé ou négocier de nouvelles conditions, je vous invite à me contacter dans les meilleurs délais. À défaut de toute manifestation de votre part, le bail sera reconduit tacitement pour la même durée.`,
+    legalRef: isJ180
+      ? 'Référence : art. relatifs au préavis de congé — Loi n° 2014-22 du 24 février 2014 & COCC Sénégal'
+      : 'Référence : art. relatifs à la reconduction tacite — Loi n° 2014-22 du 24 février 2014 & COCC Sénégal',
   };
 };
 
-// Document PDF
-const PreaviseDocument = ({ data }: { data: PreaviseData }) => {
-  const content = getNoticeContent(data);
-  const formattedAmount = new Intl.NumberFormat('fr-FR').format(data.monthlyAmount);
+const PreavisDocument = ({ data }: { data: PreaviseData }) => {
+  const content = getContent(data);
+  const fmtAmt = new Intl.NumberFormat('fr-FR').format(data.monthlyAmount);
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* En-tête avec logo */}
+
+        {/* Bande d'accent */}
+        <View style={styles.headerAccent} />
+
+        {/* En-tête */}
         <View style={styles.header}>
           <View>
-            {data.ownerLogo ? (
-              <Image src={data.ownerLogo} style={styles.logo} />
-            ) : (
-              <Text style={styles.companyName}>{data.ownerName}</Text>
-            )}
-          </View>
-          <View style={styles.headerRight}>
-            <Text style={styles.companyName}>{data.ownerName}</Text>
-            <Text style={styles.companyInfo}>{data.ownerAddress}</Text>
+            {data.ownerLogo
+              ? <Image src={data.ownerLogo} style={styles.logo} />
+              : <Text style={styles.companyName}>{data.ownerName}</Text>}
+            {data.ownerLogo && <Text style={styles.companyName}>{data.ownerName}</Text>}
+            {data.ownerAddress && <Text style={styles.companyInfo}>{data.ownerAddress}</Text>}
             {data.ownerEmail && <Text style={styles.companyInfo}>{data.ownerEmail}</Text>}
             {data.ownerPhone && <Text style={styles.companyInfo}>{data.ownerPhone}</Text>}
-            {data.ownerNinea && <Text style={styles.companyInfo}>NINEA: {data.ownerNinea}</Text>}
+            {data.ownerNinea && <Text style={styles.companyInfo}>NINEA : {data.ownerNinea}</Text>}
           </View>
-        </View>
-
-        {/* Numéro et date */}
-        <View style={{ marginBottom: 20 }}>
-          <Text style={{ fontSize: 9, textAlign: 'right', color: '#666' }}>
-            Préavis N° {data.noticeNumber}
-          </Text>
-          <Text style={{ fontSize: 9, textAlign: 'right', color: '#666' }}>
-            Émis le {new Date(data.noticeDate).toLocaleDateString('fr-FR')}
-          </Text>
+          <View style={styles.headerRight}>
+            <Text style={styles.companyInfo}>Réf. : {data.noticeNumber}</Text>
+            <Text style={[styles.companyInfo, { marginTop: 2 }]}>
+              Fait le {fmtDate(data.noticeDate)}
+            </Text>
+          </View>
         </View>
 
         {/* Destinataire */}
-        <View style={styles.section}>
-          <Text style={{ fontSize: 10, marginBottom: 5 }}>À l&apos;attention de :</Text>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 3 }}>{data.tenantName}</Text>
-          {data.tenantAddress && <Text style={{ fontSize: 9 }}>{data.tenantAddress}</Text>}
+        <View style={styles.recipientBlock}>
+          <Text style={styles.recipientIntro}>À l'attention de :</Text>
+          <Text style={styles.recipientName}>{data.tenantName}</Text>
+          {data.tenantAddress && (
+            <Text style={styles.recipientAddress}>{data.tenantAddress}</Text>
+          )}
         </View>
 
         {/* Titre */}
-        <Text style={styles.title}>{content.title}</Text>
-        <Text style={styles.subtitle}>{content.subject}</Text>
+        <View style={styles.titleWrapper}>
+          <View style={styles.titleLine} />
+          <Text style={styles.titleText}>{content.title}</Text>
+          <Text style={styles.titleSub}>{content.subject}</Text>
+          <View style={styles.titleLineBtm} />
+        </View>
 
-        {/* Informations du bail */}
+        {/* Récapitulatif bail */}
         <View style={styles.infoBox}>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Bien loué :</Text>
@@ -271,70 +356,70 @@ const PreaviseDocument = ({ data }: { data: PreaviseData }) => {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Loyer mensuel :</Text>
-            <Text style={styles.infoValue}>{formattedAmount} FCFA</Text>
+            <Text style={styles.infoValue}>{fmtAmt} FCFA</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Date de début :</Text>
-            <Text style={styles.infoValue}>{new Date(data.startDate).toLocaleDateString('fr-FR')}</Text>
+            <Text style={styles.infoLabel}>Date de début du bail :</Text>
+            <Text style={styles.infoValue}>{fmtDate(data.startDate)}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Date d&apos;échéance :</Text>
-            <Text style={styles.infoValue}>{new Date(data.endDate).toLocaleDateString('fr-FR')}</Text>
+            <Text style={styles.infoLabel}>Date d'échéance :</Text>
+            <Text style={styles.infoValue}>{fmtDate(data.endDate)}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Type de préavis :</Text>
-            <Text style={styles.infoValue}>{data.noticeType === 'J-180' ? '6 mois (Congé pour reprise)' : '3 mois (Reconduction tacite)'}</Text>
+            <Text style={styles.infoValue}>
+              {data.noticeType === 'J-180'
+                ? 'Six (6) mois — Congé pour reprise'
+                : 'Trois (3) mois — Reconduction tacite'}
+            </Text>
           </View>
         </View>
 
-        {/* Corps du préavis */}
-        <Text style={styles.paragraph}>{content.mainText}</Text>
+        {/* Corps */}
+        <Text style={styles.paragraph}>{content.body}</Text>
 
         {/* Action requise */}
-        <View style={styles.warningBox}>
-          <Text style={styles.warningTitle}>⚠️ ACTION REQUISE</Text>
-          <Text style={styles.warningText}>{content.actionRequired}</Text>
+        <View style={styles.actionBox}>
+          <Text style={styles.actionTitle}>Action requise</Text>
+          <Text style={styles.actionText}>{content.action}</Text>
         </View>
 
         {/* Référence légale */}
-        <Text style={styles.legalText}>
-          {content.legalReference}
-        </Text>
+        <Text style={styles.legalRef}>{content.legalRef}</Text>
 
         {/* Formule de politesse */}
         <Text style={styles.paragraph}>
-          Je vous prie d&apos;agréer, Madame, Monsieur, l&apos;expression de mes salutations distinguées.
+          Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.
         </Text>
 
         {/* Signatures */}
-        <View style={styles.signatureSection}>
+        <View style={styles.signaturesRow}>
           <View style={styles.signatureBox}>
             <Text style={styles.signatureLabel}>Le Propriétaire</Text>
-            <Text style={styles.signatureText}>{data.ownerName}</Text>
-            {data.ownerSignature && (
-              <Image src={data.ownerSignature} style={styles.signatureImage} />
-            )}
+            <Text style={styles.signatureName}>{data.ownerName}</Text>
+            {data.ownerSignature
+              ? <Image src={data.ownerSignature} style={styles.signatureImage} />
+              : <View style={styles.signatureLine} />}
           </View>
 
           <View style={styles.signatureBox}>
             <Text style={styles.signatureLabel}>Le Locataire (pour réception)</Text>
-            <Text style={styles.signatureText}>{data.tenantName}</Text>
-            <View style={{ height: 60, borderBottomWidth: 1, borderBottomColor: '#ddd', marginTop: 15 }} />
-            <Text style={{ fontSize: 8, color: '#999', marginTop: 5 }}>Signature et date</Text>
+            <Text style={styles.signatureName}>{data.tenantName}</Text>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureHint}>Signature et date</Text>
           </View>
         </View>
 
-        {/* Pied de page */}
-        <View style={styles.footer}>
-          <Text>Document généré automatiquement par Dousel</Text>
-          <Text>Conforme à la loi n° 2014-22 du 24 février 2014 & Code des Obligations Civiles et Commerciales du Sénégal</Text>
-        </View>
+        {/* Footer */}
+        <Text style={styles.footer}>
+          Document généré par Dousel — Conforme à la loi n° 2014-22 du 24 février 2014 et au Code des Obligations Civiles et Commerciales du Sénégal.
+        </Text>
       </Page>
     </Document>
   );
 };
 
-// Export de la fonction de création
 export const createPreavisDocument = (data: PreaviseData) => {
-  return <PreaviseDocument data={data} />;
+  return <PreavisDocument data={data} />;
 };

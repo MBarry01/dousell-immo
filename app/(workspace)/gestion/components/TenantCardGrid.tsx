@@ -35,6 +35,7 @@ interface TenantCardGridProps {
     isViewingTerminated?: boolean;
     ownerId?: string;
     searchQuery?: string;
+    loadingPaymentId?: string | null;
 }
 
 export function TenantCardGrid({
@@ -47,7 +48,8 @@ export function TenantCardGrid({
     onInvite,
     isViewingTerminated = false,
     ownerId,
-    searchQuery = ''
+    searchQuery = '',
+    loadingPaymentId = null,
 }: TenantCardGridProps) {
     if (tenants.length === 0) {
         return (
@@ -93,6 +95,7 @@ export function TenantCardGrid({
                         onReactivate={onReactivate}
                         onInvite={onInvite}
                         isViewingTerminated={isViewingTerminated}
+                        isPaymentLoading={loadingPaymentId === tenant.id}
                     />
                 </div>
             ))}

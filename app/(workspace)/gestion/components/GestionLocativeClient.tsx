@@ -202,6 +202,7 @@ export function GestionLocativeClient({
     const [currentReceipt, setCurrentReceipt] = useState<ReceiptData | null>(null);
     const [_saving, setSaving] = useState(false);
     const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'pending' | 'overdue'>('all');
+    const [loadingPaymentId, setLoadingPaymentId] = useState<string | null>(null);
 
     const handleMonthChange = (month: number, year: number) => {
         setSelectedMonth(month);
@@ -425,107 +426,51 @@ export function GestionLocativeClient({
             return;
         }
 
-        const result = await confirmPayment(
-            leaseId,
-            transactionId,
-            selectedMonth,
-            selectedYear
-        );
+        setLoadingPaymentId(leaseId);
+        try {
+            // silent=true : on n'envoie pas l'email automatiquement, l'utilisateur décide via la modal
+            const result = await confirmPayment(leaseId, transactionId, selectedMonth, selectedYear, true);
 
-        if (!result.success) {
-            toast.error(result.error || 'Erreur inconnue');
-            return;
-        }
-
-        // --- OPTIMISTIC UPDATE ---
-        const txIndex = localTransactions.findIndex(t =>
-            (transactionId && t.id === transactionId) ||
-            (!transactionId && t.lease_id === leaseId && t.period_month === selectedMonth && t.period_year === selectedYear)
-        );
-
-        const updatedTx: Transaction = txIndex >= 0
-            ? { ...localTransactions[txIndex], status: 'paid', amount_paid: tenant.rentAmount, amount_due: tenant.rentAmount }
-            : {
-                id: transactionId || `temp-${Date.now()}`,
-                lease_id: leaseId,
-                period_month: selectedMonth,
-                period_year: selectedYear,
-                status: 'paid',
-                amount_due: tenant.rentAmount,
-                amount_paid: tenant.rentAmount,
-                paid_at: new Date().toISOString()
-            };
-
-        if (txIndex >= 0) {
-            const newTxs = [...localTransactions];
-            newTxs[txIndex] = updatedTx;
-            setLocalTransactions(newTxs);
-        } else {
-            setLocalTransactions([...localTransactions, updatedTx]);
-        }
-        // ------------------------
-
-        const shouldSendReceipt = window.confirm(
-            `Le loyer est marqué comme payé. Envoyer la quittance par email à ${tenant.name} ?`
-        );
-
-        if (shouldSendReceipt) {
-            if (!tenant.email) {
-                toast.error('Email manquant pour ce locataire');
+            if (!result.success) {
+                toast.error(result.error || 'Erreur inconnue');
                 return;
             }
 
-            const periodMonth = tenant.period_month?.toString().padStart(2, '0') || '01';
-            const periodYear = tenant.period_year || new Date().getFullYear();
-            const periodStartDate = tenant.period_start
-                ? new Date(tenant.period_start)
-                : new Date(periodYear, parseInt(periodMonth) - 1, 1);
-            const periodEndDate = tenant.period_end
-                ? new Date(tenant.period_end)
-                : new Date(periodYear, parseInt(periodMonth), 0);
-
-            const receiptData = {
-                tenantName: tenant.name,
-                tenantEmail: tenant.email,
-                tenantPhone: tenant.phone || '',
-                tenantAddress: tenant.property,
-                amount: Number(tenant.rentAmount) || 0,
-                periodMonth: `${periodMonth}/${periodYear}`,
-                periodStart: periodStartDate.toLocaleDateString('fr-FR'),
-                periodEnd: periodEndDate.toLocaleDateString('fr-FR'),
-                receiptNumber: `QUITT-${Date.now().toString().slice(-6)}`,
-                ownerName: profile?.company_name || profile?.full_name || "Propriétaire",
-                ownerAddress: profile?.company_address || "Adresse non renseignée",
-                ownerNinea: profile?.company_ninea || undefined,
-                ownerLogo: profile?.logo_url || undefined,
-                ownerSignature: profile?.signature_url || undefined,
-                ownerEmail: profile?.company_email || undefined,
-                ownerAccountEmail: userEmail || undefined,
-                propertyAddress: tenant.property,
-            };
-
-            toast.promise(
-                fetch('/api/send-receipt', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(receiptData),
-                }).then(async (res) => {
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || 'Erreur lors de l\'envoi');
-                    return data;
-                }),
-                {
-                    loading: 'Envoi de la quittance...',
-                    success: 'Quittance envoyée !',
-                    error: (err) => `Erreur: ${err.message}`,
-                }
+            // --- OPTIMISTIC UPDATE ---
+            const txIndex = localTransactions.findIndex(t =>
+                (transactionId && t.id === transactionId) ||
+                (!transactionId && t.lease_id === leaseId && t.period_month === selectedMonth && t.period_year === selectedYear)
             );
-        } else {
-            toast.success(result.message || "Paiement enregistré !");
-        }
 
-        // Background refresh to true data
-        router.refresh();
+            const updatedTx: Transaction = txIndex >= 0
+                ? { ...localTransactions[txIndex], status: 'paid', amount_paid: tenant.rentAmount, amount_due: tenant.rentAmount }
+                : {
+                    id: transactionId || `temp-${Date.now()}`,
+                    lease_id: leaseId,
+                    period_month: selectedMonth,
+                    period_year: selectedYear,
+                    status: 'paid',
+                    amount_due: tenant.rentAmount,
+                    amount_paid: tenant.rentAmount,
+                    paid_at: new Date().toISOString()
+                };
+
+            if (txIndex >= 0) {
+                const newTxs = [...localTransactions];
+                newTxs[txIndex] = updatedTx;
+                setLocalTransactions(newTxs);
+            } else {
+                setLocalTransactions([...localTransactions, updatedTx]);
+            }
+            // ------------------------
+
+            toast.success('Paiement enregistré !');
+            // Ouvrir la modal quittance — l'utilisateur choisit d'envoyer ou non
+            handleViewReceipt(tenant);
+            router.refresh();
+        } finally {
+            setLoadingPaymentId(null);
+        }
     };
 
     const handleViewReceipt = (tenant: Tenant) => {
@@ -533,6 +478,7 @@ export function GestionLocativeClient({
         const periodYear = tenant.period_year || new Date().getFullYear();
 
         setCurrentReceipt({
+            leaseId: tenant.id,
             tenant: {
                 tenant_name: tenant.name,
                 email: tenant.email,
@@ -737,6 +683,7 @@ export function GestionLocativeClient({
                             onTerminate={handleTerminateLease}
                             onReactivate={handleReactivateLease}
                             onInvite={handleInvite}
+                            loadingPaymentId={loadingPaymentId}
                         />
                     ) : (
                         <TenantTable

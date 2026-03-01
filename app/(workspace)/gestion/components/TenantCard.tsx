@@ -15,7 +15,8 @@ import {
     Trash2,
     RotateCcw,
     FileText,
-    Send
+    Send,
+    Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -55,6 +56,7 @@ interface TenantCardProps {
     onReactivate?: (leaseId: string, name: string) => void;
     onInvite?: (leaseId: string) => void;
     isViewingTerminated?: boolean;
+    isPaymentLoading?: boolean;
 }
 
 const statusConfig = {
@@ -97,7 +99,8 @@ export function TenantCard({
     onTerminate,
     onReactivate,
     onInvite,
-    isViewingTerminated = false
+    isViewingTerminated = false,
+    isPaymentLoading = false,
 }: TenantCardProps) {
     const router = useRouter();
     const { isDark } = useTheme();
@@ -316,18 +319,28 @@ export function TenantCard({
                     <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                         <Button
                             onClick={() => onConfirmPayment(tenant.id, tenant.last_transaction_id)}
+                            disabled={isPaymentLoading}
                             className={`
-                            w-full mt-4
+                            w-full mt-4 transition-all
                             ${tenant.status === 'overdue'
-                                    ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20'
-                                    : 'bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20'
+                                    ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 disabled:opacity-60'
+                                    : 'bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 disabled:opacity-60'
                                 }
                         `}
                             variant="ghost"
                             size="sm"
                         >
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Encaisser le loyer
+                            {isPaymentLoading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Encaissement...
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    Encaisser le loyer
+                                </>
+                            )}
                         </Button>
                     </div>
                 )
