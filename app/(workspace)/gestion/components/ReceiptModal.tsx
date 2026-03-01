@@ -167,9 +167,9 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
                                 );
                                 return (
                                     <iframe
-                                        src={url ?? undefined}
+                                        src={url ? `${url}#scrollbar=0&view=FitH` : undefined}
                                         title="Aperçu quittance"
-                                        className="w-full h-full border-none bg-white"
+                                        className="w-full h-full border-none bg-white [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                                     />
                                 );
                             }}
