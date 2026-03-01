@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Mail } from 'lucide-react';
+import { Mail, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { BlobProvider } from '@react-pdf/renderer';
@@ -123,69 +123,79 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
             <DialogContent className="max-w-none md:max-w-3xl w-full h-[100dvh] md:h-auto p-0 overflow-hidden border-none bg-transparent shadow-none flex flex-col items-center justify-center">
                 <DialogTitle className="sr-only">Aperçu Quittance</DialogTitle>
 
-                {/* Carte modale style premium */}
-                <div
-                    className="flex flex-col w-full h-full md:h-auto md:max-h-[85vh] bg-background md:bg-card md:rounded-2xl shadow-2xl md:border md:border-border overflow-hidden"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    {/* ── En-tête ── */}
-                    <div className="flex items-center justify-start px-4 py-3 border-b border-border shrink-0 bg-background/50 backdrop-blur-md">
-                        <Button
-                            onClick={handleSendEmail}
-                            disabled={isSending}
-                            size="sm"
-                            className="gap-2 h-9 px-3 font-semibold disabled:opacity-50"
+                <BlobProvider document={createQuittanceDocument(receiptDetails)}>
+                    {({ url, loading, error }) => (
+                        /* Carte modale style premium */
+                        <div
+                            className="flex flex-col w-full h-full md:h-auto md:max-h-[85vh] bg-background md:bg-card md:rounded-2xl shadow-2xl md:border md:border-border overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
                         >
-                            {isSending ? (
-                                <>
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    <span>Envoi...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Mail className="w-4 h-4" />
-                                    <span>Envoyer par Email</span>
-                                </>
-                            )}
-                        </Button>
-                    </div>
+                            {/* ── En-tête ── */}
+                            <div className="flex items-center gap-2 px-4 py-3 border-b border-border shrink-0 bg-background/50 backdrop-blur-md">
+                                <Button
+                                    onClick={handleSendEmail}
+                                    disabled={isSending}
+                                    size="sm"
+                                    className="gap-2 h-9 px-3 font-semibold disabled:opacity-50"
+                                >
+                                    {isSending ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            <span>Envoi...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Mail className="w-4 h-4" />
+                                            <span>Envoyer par Email</span>
+                                        </>
+                                    )}
+                                </Button>
+                                {url && (
+                                    <a
+                                        href={url}
+                                        download={filename}
+                                        className="inline-flex items-center gap-2 h-9 px-3 text-sm font-semibold rounded-md border border-border bg-muted hover:bg-muted/80 text-foreground transition-colors"
+                                    >
+                                        <Download className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Télécharger</span>
+                                    </a>
+                                )}
+                            </div>
 
-                    {/* ── Aperçu du document ── */}
-                    <div className="relative bg-muted/30 flex-1 md:h-[70vh] min-h-[50vh]">
-                        <BlobProvider document={createQuittanceDocument(receiptDetails)}>
-                            {({ url, loading, error }) => {
-                                if (loading) return (
+                            {/* ── Aperçu du document ── */}
+                            <div className="relative bg-muted/30 flex-1 md:h-[70vh] min-h-[50vh]">
+                                {loading && (
                                     <div className="flex items-center justify-center h-full gap-3 text-muted-foreground text-sm">
                                         <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                                         Génération du document…
                                     </div>
-                                );
-                                if (error || !url) return (
+                                )}
+                                {(error || (!loading && !url)) && (
                                     <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                                         Aperçu indisponible — utilisez le bouton Télécharger.
                                     </div>
-                                );
-                                return (
+                                )}
+                                {url && (
                                     <iframe
-                                        src={url ? `${url}#view=FitH&pagemode=none&scrollbar=0&toolbar=0&statusbar=0&messages=0&navpanes=0` : undefined}
+                                        src={`${url}#view=FitH&pagemode=none&scrollbar=0&toolbar=0&statusbar=0&messages=0&navpanes=0`}
                                         title="Aperçu quittance"
                                         className="w-full h-full border-none bg-white [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                                     />
-                                );
-                            }}
-                        </BlobProvider>
-                    </div>
+                                )}
+                            </div>
 
-                    {/* ── Pied de carte ── */}
-                    <div className="flex items-center justify-center py-2.5 border-t border-border bg-card shrink-0">
-                        <button
-                            onClick={onClose}
-                            className="text-sm text-muted-foreground hover:text-foreground transition-colors px-4 py-1.5 rounded-lg hover:bg-muted"
-                        >
-                            Fermer sans envoyer
-                        </button>
-                    </div>
-                </div>
+                            {/* ── Pied de carte ── */}
+                            <div className="flex items-center justify-center py-2.5 border-t border-border bg-card shrink-0">
+                                <button
+                                    onClick={onClose}
+                                    className="text-sm text-muted-foreground hover:text-foreground transition-colors px-4 py-1.5 rounded-lg hover:bg-muted"
+                                >
+                                    Fermer sans envoyer
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </BlobProvider>
             </DialogContent>
         </Dialog>
     );
