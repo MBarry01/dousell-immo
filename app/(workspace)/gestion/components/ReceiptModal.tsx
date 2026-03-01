@@ -120,12 +120,12 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-[95vw] md:max-w-3xl w-full h-[90dvh] md:h-auto p-0 overflow-hidden border-none bg-transparent shadow-none flex flex-col items-center justify-center">
+            <DialogContent className="max-w-none md:max-w-3xl w-full h-[100dvh] md:h-auto p-0 overflow-hidden border-none bg-transparent shadow-none flex flex-col items-center justify-center">
                 <DialogTitle className="sr-only">Aperçu Quittance</DialogTitle>
 
                 {/* Carte modale style premium */}
                 <div
-                    className="flex flex-col w-full h-full md:h-auto md:max-h-[85vh] bg-card rounded-xl md:rounded-2xl shadow-2xl border border-border overflow-hidden"
+                    className="flex flex-col w-full h-full md:h-auto md:max-h-[85vh] bg-background md:bg-card md:rounded-2xl shadow-2xl md:border md:border-border overflow-hidden"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* ── En-tête ── */}
@@ -167,7 +167,7 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
                                 );
                                 return (
                                     <iframe
-                                        src={url ? `${url}#scrollbar=0&view=FitH` : undefined}
+                                        src={url ? `${url}#view=FitH&pagemode=none&scrollbar=0&toolbar=0&statusbar=0&messages=0&navpanes=0` : undefined}
                                         title="Aperçu quittance"
                                         className="w-full h-full border-none bg-white [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                                     />

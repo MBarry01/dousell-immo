@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   page: {
     paddingTop: 36,
     paddingBottom: 60,
-    paddingHorizontal: 40,
+    paddingHorizontal: 30,
     fontSize: 9,
     fontFamily: 'Helvetica',
     lineHeight: 1.4,
