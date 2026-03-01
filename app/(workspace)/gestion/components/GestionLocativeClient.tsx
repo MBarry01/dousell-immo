@@ -93,6 +93,7 @@ interface Profile {
 }
 
 interface ReceiptData {
+    leaseId?: string;
     tenant?: {
         tenant_name?: string;
         name?: string;
