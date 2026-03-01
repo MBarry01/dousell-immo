@@ -1,0 +1,9 @@
+{
+  "user": "noreply@dousel.com",
+  "passLength": "zuv...16",
+  "status": "FAILED",
+  "code": "EAUTH",
+  "responseCode": 535,
+  "response": "535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-483bfcbd781sm185980275e9.8 - gsmtp",
+  "command": "AUTH PLAIN"
+}

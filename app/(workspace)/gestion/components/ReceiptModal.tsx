@@ -120,12 +120,12 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-3xl p-0 overflow-hidden border-none bg-transparent shadow-none">
+            <DialogContent className="max-w-[95vw] md:max-w-3xl w-full h-[90dvh] md:h-auto p-0 overflow-hidden border-none bg-transparent shadow-none flex flex-col items-center justify-center">
                 <DialogTitle className="sr-only">Aperçu Quittance</DialogTitle>
 
                 {/* Carte modale style premium */}
                 <div
-                    className="flex flex-col w-full bg-card rounded-2xl shadow-2xl border border-border overflow-hidden"
+                    className="flex flex-col w-full h-full md:h-auto md:max-h-[85vh] bg-card rounded-xl md:rounded-2xl shadow-2xl border border-border overflow-hidden"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* ── En-tête ── */}
@@ -151,7 +151,7 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
                     </div>
 
                     {/* ── Aperçu du document ── */}
-                    <div className="relative bg-muted/30" style={{ height: '70vh' }}>
+                    <div className="relative bg-muted/30 flex-1 md:h-[70vh] min-h-[50vh]">
                         <BlobProvider document={createQuittanceDocument(receiptDetails)}>
                             {({ url, loading, error }) => {
                                 if (loading) return (
