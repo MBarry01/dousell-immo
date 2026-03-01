@@ -169,7 +169,7 @@ export function PDFPreview({ reportId }: PDFPageProps) {
                         </p>
                         <div className="inline-block border border-gray-400 px-3 py-1 mt-1">
                             <p className="font-bold text-sm uppercase">
-                                {report?.type === 'entry' ? "État des Lieux d&apos;Entrée" : "État des Lieux de Sortie"}
+                                {report?.type === 'entry' ? "État des Lieux d'Entrée" : "État des Lieux de Sortie"}
                             </p>
                         </div>
                     </div>

@@ -300,9 +300,12 @@ const getContent = (data: PreaviseData) => {
   };
 };
 
+// Intl.NumberFormat('fr-FR') génère \u202F (espace fine) non supporté par Helvetica → espace normale
+const fmtNum = (n: number) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
 const PreavisDocument = ({ data }: { data: PreaviseData }) => {
   const content = getContent(data);
-  const fmtAmt = new Intl.NumberFormat('fr-FR').format(data.monthlyAmount);
+  const fmtAmt = fmtNum(data.monthlyAmount);
 
   return (
     <Document>

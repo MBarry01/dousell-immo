@@ -240,7 +240,7 @@ function LoginPageContent() {
                     href="/register"
                     className="font-bold text-primary hover:text-primary/80 transition-colors underline-offset-4 hover:underline"
                   >
-                    S&apos;inscrire
+                    S'inscrire
                   </Link>
                 </p>
               </div>

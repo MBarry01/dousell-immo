@@ -99,9 +99,9 @@ export async function POST(request: NextRequest) {
       ? `Preavis_Conge_${data.noticeNumber}.pdf`
       : `Notification_Reconduction_${data.noticeNumber}.pdf`;
 
-    // Expéditeur : nom du propriétaire + adresse email de la plateforme Dousel
-    const platformFrom = process.env.FROM_EMAIL || process.env.NOREPLY_EMAIL || 'noreply@dousel.com';
-    const senderFrom = `${data.ownerName} via Dousel <${platformFrom}>`;
+    // Expéditeur : compte Gmail authentifié (le seul que SMTP accepte comme FROM)
+    const gmailUser = process.env.GMAIL_USER || 'contact@dousel.com';
+    const senderFrom = `Dousel <${gmailUser}>`;
 
     // 8. Envoyer l'email via le système centralisé (Resend en priorité, Gmail en fallback)
     console.log("📤 Envoi de l'email...");
@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
       from: senderFrom,
       to: data.tenantEmail,
       cc: ownerEmailForCC || undefined,
+      replyTo: ownerEmailForCC || undefined,
       subject,
       html: emailHtml,
       attachments: [

@@ -265,7 +265,8 @@ const styles = StyleSheet.create({
   },
 });
 
-const fmt = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
+// Intl.NumberFormat('fr-FR') génère \u202F (espace fine) non supporté par Helvetica → remplacé par espace normale
+const fmt = (n: number) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
 export const createQuittanceDocument = (data: QuittanceData) => {
   const today = new Date().toLocaleDateString('fr-FR');

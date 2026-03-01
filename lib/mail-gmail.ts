@@ -133,11 +133,9 @@ export async function sendEmail({
       return attachment;
     }) || [];
 
-    // Configuration de l'email avec le nom d'expéditeur professionnel
-    const isNoReply = replyTo === 'noreply';
-    const defaultSender = isNoReply
-      ? (process.env.NOREPLY_EMAIL || `"Dousel" <${GMAIL_USER}>`)
-      : (process.env.FROM_EMAIL || `"Dousel Support" <${GMAIL_USER}>`);
+    // Expéditeur : toujours le compte GMAIL_USER authentifié (SMTP Gmail l'exige)
+    // fromOverride doit également utiliser GMAIL_USER comme adresse (display name libre)
+    const defaultSender = `"Dousel" <${GMAIL_USER}>`;
     const sender = fromOverride || defaultSender;
 
     const ccRecipients = cc
@@ -151,7 +149,7 @@ export async function sendEmail({
       subject,
       html: emailHtml,
       attachments: formattedAttachments,
-      replyTo: isNoReply ? undefined : (replyTo || process.env.CONTACT_EMAIL || "contact@dousel.com"),
+      replyTo: replyTo && replyTo !== 'noreply' ? replyTo : (process.env.CONTACT_EMAIL || undefined),
     };
 
     console.log(`📧 Envoi d'email à: ${recipients.join(", ")}`);

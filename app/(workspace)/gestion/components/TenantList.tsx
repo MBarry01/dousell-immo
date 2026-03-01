@@ -220,7 +220,7 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
             // Vérifier si l'adresse du bien est renseignée
             if (!tenant.property || tenant.property === 'Adresse non renseignée') {
                 toast.error('Adresse du bien manquante', {
-                    description: "Veuillez modifier le locataire et ajouter l&apos;adresse du bien avant d&apos;envoyer la quittance.",
+                    description: "Veuillez modifier le locataire et ajouter l'adresse du bien avant d'envoyer la quittance.",
                     duration: 6000,
                 });
                 return;

@@ -331,7 +331,7 @@ function RegisterContent() {
                       Inscription...
                     </div>
                   ) : (
-                    "S&apos;inscrire gratuitement"
+                    "S'inscrire gratuitement"
                   )}
                 </Button>
               </form>

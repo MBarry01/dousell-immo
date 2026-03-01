@@ -325,7 +325,7 @@ export function InventoryEditor({ reportId }: InventoryEditorProps) {
                     </Link>
                     <div>
                         <h1 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            État des lieux {report?.type === 'entry' ? "d&apos;entrée" : 'de sortie'}
+                            État des lieux {report?.type === 'entry' ? "d'entrée" : 'de sortie'}
                         </h1>
                         <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
                             {report?.lease?.property_address} • {report?.lease?.tenant_name}
