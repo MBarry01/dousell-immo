@@ -18,8 +18,11 @@ export async function POST(request: NextRequest) {
     const headersList = await headers();
     const authHeader = headersList.get("authorization");
     const cronSecretKey = process.env.CRON_SECRET_KEY;
-
-    if (cronSecretKey && authHeader !== `Bearer ${cronSecretKey}`) {
+    if (!cronSecretKey) {
+      console.error('[send-expiring-notification] CRON_SECRET_KEY manquant');
+      return NextResponse.json({ success: false, error: 'Config error' }, { status: 500 });
+    }
+    if (authHeader !== `Bearer ${cronSecretKey}`) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }

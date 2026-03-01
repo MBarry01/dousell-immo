@@ -15,19 +15,16 @@ import { NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
-    // Vérification de sécurité : Seul Vercel Cron peut appeler cette route
-    const isDevelopment = process.env.NODE_ENV === 'development';
-
-    if (isDevelopment) {
-        console.log('🔓 MODE DÉVELOPPEMENT : Cron exécuté sans authentification');
-    } else {
-        const authHeader = request.headers.get('authorization');
-        const CRON_SECRET = process.env.CRON_SECRET;
-
-        if (authHeader !== `Bearer ${CRON_SECRET}`) {
-            console.error('❌ Tentative d\'accès non autorisée au Cron Job');
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+    // Vérification du secret dans tous les environnements
+    const authHeader = request.headers.get('authorization');
+    const CRON_SECRET = process.env.CRON_SECRET;
+    if (!CRON_SECRET) {
+        console.error('❌ CRON_SECRET manquant');
+        return NextResponse.json({ error: 'Config error' }, { status: 500 });
+    }
+    if (authHeader !== `Bearer ${CRON_SECRET}`) {
+        console.error('❌ Tentative d\'accès non autorisée au Cron Job');
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {

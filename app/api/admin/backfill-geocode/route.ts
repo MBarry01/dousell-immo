@@ -109,8 +109,13 @@ export async function POST(req: Request) {
     }
 }
 
-// GET pour vérifier le statut
-export async function GET() {
+// GET pour vérifier le statut — même protection que POST
+export async function GET(req: Request) {
+    const authHeader = req.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.ADMIN_API_KEY}` && process.env.ADMIN_API_KEY) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         // Compter les annonces sans coordonnées
         const { count, error } = await supabase
@@ -128,7 +133,7 @@ export async function GET() {
             message: count ? `${count} annonces en attente de géocodage` : 'Toutes les annonces sont géocodées',
         });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return NextResponse.json({ error: message }, { status: 500 });
+        console.error('[Backfill] GET error:', error);
+        return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
     }
 }

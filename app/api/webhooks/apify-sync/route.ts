@@ -111,13 +111,15 @@ function classifyAd(title: string, location: string) {
 
 export async function POST(req: Request) {
   try {
-    // 1. Vérification du secret (sécurité)
-    if (WEBHOOK_SECRET) {
-      const authHeader = req.headers.get('x-webhook-secret') || req.headers.get('authorization');
-      if (authHeader !== WEBHOOK_SECRET && authHeader !== `Bearer ${WEBHOOK_SECRET}`) {
-        console.error('Webhook secret invalide');
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    // 1. Vérification du secret — obligatoire, non optionnel
+    if (!WEBHOOK_SECRET) {
+      console.error('[apify-sync] APIFY_WEBHOOK_SECRET manquant');
+      return NextResponse.json({ error: 'Config error' }, { status: 500 });
+    }
+    const authHeader = req.headers.get('x-webhook-secret') || req.headers.get('authorization');
+    if (authHeader !== WEBHOOK_SECRET && authHeader !== `Bearer ${WEBHOOK_SECRET}`) {
+      console.error('[apify-sync] Webhook secret invalide');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();

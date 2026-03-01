@@ -19,7 +19,7 @@ export async function POST(request: Request) {
             );
         }
 
-        // Validation basique
+        // Validation du type d'upload
         if (!["logo", "signature"].includes(type)) {
             console.error("❌ [API ERROR] Invalid type:", type);
             return NextResponse.json(
@@ -28,10 +28,23 @@ export async function POST(request: Request) {
             );
         }
 
+        // Validation taille
         if (file.size > 2 * 1024 * 1024) {
             console.error("❌ [API ERROR] File too large");
             return NextResponse.json(
                 { success: false, error: "Fichier trop volumineux (max 2MB)" },
+                { status: 400 }
+            );
+        }
+
+        // Validation MIME type et extension (côté serveur — ne pas faire confiance au client)
+        const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        const ALLOWED_EXT = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+        const fileExt = ('.' + (file.name.split('.').pop() || '')).toLowerCase();
+        if (!ALLOWED_MIME.includes(file.type) || !ALLOWED_EXT.includes(fileExt)) {
+            console.error("❌ [API ERROR] Invalid file type:", file.type, fileExt);
+            return NextResponse.json(
+                { success: false, error: "Format invalide (JPEG, PNG, WebP, GIF uniquement)" },
                 { status: 400 }
             );
         }
@@ -82,8 +95,7 @@ export async function POST(request: Request) {
                 );
             }
 
-            const fileExt = file.name.split(".").pop();
-            const fileName = `teams/${teamId}/${type}_${Date.now()}.${fileExt}`;
+            const fileName = `teams/${teamId}/${type}_${Date.now()}${fileExt}`;
 
             console.log("⬆️ [API] Uploading to bucket with name:", fileName);
 
@@ -127,8 +139,7 @@ export async function POST(request: Request) {
 
             // ID aléatoire pour le dossier temporaire
             const randomId = crypto.randomUUID();
-            const fileExt = file.name.split(".").pop();
-            const fileName = `onboarding/${randomId}/${type}.${fileExt}`;
+            const fileName = `onboarding/${randomId}/${type}${fileExt}`;
 
             const { error: uploadError } = await adminSupabase.storage
                 .from("branding")

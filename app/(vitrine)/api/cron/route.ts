@@ -9,14 +9,15 @@ export async function GET(request: Request) {
     // Vérification de sécurité : Vercel Cron envoie un header spécial
     const authHeader = request.headers.get('authorization');
 
-    // En production, vérifier le header Authorization de Vercel Cron
-    // Vercel envoie automatiquement un Bearer token pour les crons
-    if (process.env.NODE_ENV === 'production') {
-        const cronSecret = process.env.CRON_SECRET;
-        if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-            console.error('Unauthorized cron access attempt');
-            return new NextResponse('Unauthorized', { status: 401 });
-        }
+    // Vérifier le secret dans tous les environnements
+    const cronSecret = process.env.CRON_SECRET;
+    if (!cronSecret) {
+        console.error('[CRON] CRON_SECRET manquant');
+        return new NextResponse('Config error', { status: 500 });
+    }
+    if (authHeader !== `Bearer ${cronSecret}`) {
+        console.error('[CRON] Tentative d\'accès non autorisée');
+        return new NextResponse('Unauthorized', { status: 401 });
     }
 
     try {

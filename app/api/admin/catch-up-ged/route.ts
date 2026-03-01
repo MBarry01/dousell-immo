@@ -7,9 +7,14 @@ import _ReactPDF, { renderToStream } from '@react-pdf/renderer';
 import { createQuittanceDocument } from '@/components/pdf/QuittancePDF_v2';
 
 export async function POST(req: Request) {
-    // 1. Security Check
+    // 1. Security Check — secret dédié, distinct du service role key
+    const adminSecret = process.env.ADMIN_CATCH_UP_SECRET;
+    if (!adminSecret) {
+        console.error('[catch-up-ged] ADMIN_CATCH_UP_SECRET manquant');
+        return NextResponse.json({ error: 'Config error' }, { status: 500 });
+    }
     const secret = req.headers.get('x-admin-secret');
-    if (secret !== process.env.SUPABASE_SERVICE_ROLE_KEY) { // Simple check using existing key as secret, or defined explicitly
+    if (secret !== adminSecret) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
