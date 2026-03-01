@@ -1,5 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { numberToWordsFr } from '@/lib/number-to-words';
+
 
 // Types
 interface QuittanceData {
@@ -20,19 +22,28 @@ interface QuittanceData {
   propertyAddress: string;
   /** If true, this is a guarantee/deposit payment, not rent */
   isGuarantee?: boolean;
+  rentAmount?: number;
+  chargesAmount?: number;
+  balances?: {
+    previousBalanceDate?: string;
+    previousBalanceAmount?: number;
+    currentBalanceDate?: string;
+    currentBalanceAmount?: number;
+    expectedAls?: number;
+  }
 }
 
 // Palette sobre et professionnelle
 const C = {
-  black:   '#111111',
-  dark:    '#2C2C2C',
-  mid:     '#555555',
-  muted:   '#888888',
-  light:   '#BBBBBB',
-  border:  '#D8D8D8',
-  stripe:  '#F6F6F6',
-  white:   '#FFFFFF',
-  gold:    '#C8A84B',  // or doux, utilisé uniquement pour l'accent header
+  black: '#111111',
+  dark: '#2C2C2C',
+  mid: '#555555',
+  muted: '#888888',
+  light: '#BBBBBB',
+  border: '#D8D8D8',
+  stripe: '#F6F6F6',
+  white: '#FFFFFF',
+  gold: '#C8A84B',  // or doux, utilisé uniquement pour l'accent header
 };
 
 const styles = StyleSheet.create({
@@ -184,6 +195,12 @@ const styles = StyleSheet.create({
     textAlign: 'justify',
     color: C.dark,
   },
+  amountInWords: {
+    fontSize: 8.5,
+    fontStyle: 'italic',
+    marginTop: 8,
+    color: C.mid,
+  },
 
   // ─── Tableau ─────────────────────────────────────────────
   table: {
@@ -225,18 +242,69 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // ─── Signature ───────────────────────────────────────────
-  signatureBlock: {
-    alignItems: 'flex-end',
+  // ─── Soldes / Impayés ────────────────────────────────────
+  balancesSection: {
     marginTop: 10,
+    marginBottom: 10,
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  balanceLabel: {
+    fontSize: 8.5,
+    color: C.black,
+  },
+  balanceValue: {
+    fontSize: 8.5,
+    color: C.black,
+    fontWeight: 'bold',
+  },
+  balanceLabelBold: {
+    fontSize: 8.5,
+    color: C.black,
+    fontWeight: 'bold',
+  },
+
+  // ─── Signature ───────────────────────────────────────────
+  signatureContainer: {
+    marginTop: 24,
+    alignSelf: 'flex-end',
+    width: 220,
+  },
+  signatureNotice: {
+    fontSize: 8,
+    color: C.black,
+    marginBottom: 4,
+    lineHeight: 1.3,
+  },
+  signatureBox: {
+    borderWidth: 1,
+    borderColor: C.black,
+    padding: 10,
+    height: 90,
+    position: 'relative',
+  },
+  signatureDateText: {
+    fontSize: 8.5,
+    color: C.black,
+  },
+  signatureImageWrapper: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
   signatureLabel: {
-    fontSize: 8,
-    fontWeight: 'bold',
-    color: C.mid,
-    marginBottom: 6,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    position: 'absolute',
+    bottom: 8,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    fontSize: 8.5,
+    color: C.black,
   },
   signatureImage: {
     width: 90,
@@ -244,7 +312,7 @@ const styles = StyleSheet.create({
     objectFit: 'contain',
   },
   signatureLine: {
-    width: 120,
+    width: 90,
     height: 1,
     backgroundColor: C.border,
     marginTop: 30,
@@ -286,12 +354,6 @@ export const createQuittanceDocument = (data: QuittanceData) => {
             {data.ownerAddress && <Text style={styles.companyInfo}>{data.ownerAddress}</Text>}
             {data.ownerNinea && <Text style={styles.companyInfo}>NINEA : {data.ownerNinea}</Text>}
           </View>
-          <View style={styles.headerRight}>
-            <Text style={styles.refLabel}>Quittance N°</Text>
-            <Text style={styles.refValue}>{data.receiptNumber}</Text>
-            <Text style={styles.refLabel}>Date d'émission</Text>
-            <Text style={[styles.refValue, { fontSize: 9 }]}>{today}</Text>
-          </View>
         </View>
 
         {/* Titre */}
@@ -306,9 +368,10 @@ export const createQuittanceDocument = (data: QuittanceData) => {
         {/* Parties */}
         <View style={styles.partiesRow}>
           <View style={styles.partyBox}>
-            <Text style={styles.partyLabel}>Bailleur / Mandataire</Text>
-            <Text style={styles.partyName}>{data.ownerName}</Text>
-            {data.ownerAddress && <Text style={styles.partyText}>{data.ownerAddress}</Text>}
+            <Text style={styles.refLabel}>Quittance N°</Text>
+            <Text style={styles.refValue}>{data.receiptNumber}</Text>
+            <Text style={styles.refLabel}>Date d'émission</Text>
+            <Text style={[styles.refValue, { fontSize: 10, marginBottom: 0 }]}>{today}</Text>
           </View>
           <View style={styles.partyBox}>
             <Text style={styles.partyLabel}>Locataire</Text>
@@ -349,17 +412,23 @@ export const createQuittanceDocument = (data: QuittanceData) => {
             <Text style={[styles.col2, styles.colHead]}>Période</Text>
             <Text style={[styles.col3, styles.colHead]}>Montant</Text>
           </View>
-          <View style={styles.tableRow}>
-            <Text style={styles.col1}>
-              {data.isGuarantee ? 'Dépôt de garantie' : 'Loyer et charges'}
-            </Text>
-            <Text style={styles.col2}>
-              {data.isGuarantee
-                ? data.periodMonth
-                : `Du ${data.periodStart} au ${data.periodEnd}`}
-            </Text>
-            <Text style={styles.col3}>{fmt(data.amount)} FCFA</Text>
-          </View>
+
+          {data.isGuarantee ? (
+            <View style={styles.tableRow}>
+              <Text style={styles.col1}>Dépôt de garantie</Text>
+              <Text style={styles.col2}>{data.periodMonth}</Text>
+              <Text style={styles.col3}>{fmt(data.amount)} FCFA</Text>
+            </View>
+          ) : (
+            <>
+              <View style={styles.tableRow}>
+                <Text style={styles.col1}>Loyer</Text>
+                <Text style={styles.col2}>{`Du ${data.periodStart} au ${data.periodEnd}`}</Text>
+                <Text style={styles.col3}>{fmt(data.amount)} FCFA</Text>
+              </View>
+            </>
+          )}
+
           <View style={styles.tableTotalRow}>
             <Text style={[styles.col1, { fontWeight: 'bold', color: C.black }]}>Total acquitté</Text>
             <Text style={styles.col2} />
@@ -369,12 +438,63 @@ export const createQuittanceDocument = (data: QuittanceData) => {
           </View>
         </View>
 
+        {/* Section Soldes / Impayés (Optionnelle) */}
+        {data.balances && (
+          <View style={styles.balancesSection}>
+            {data.balances.previousBalanceDate && (
+              <View style={styles.balanceRow}>
+                <Text style={styles.balanceLabel}>
+                  {(data.balances.previousBalanceAmount ?? 0) > 0 ? 'Solde débiteur' : 'Solde créditeur'} antérieur au {data.balances.previousBalanceDate}
+                </Text>
+                <Text style={styles.balanceValue}>
+                  {data.balances.previousBalanceAmount !== undefined ? fmt(Math.abs(data.balances.previousBalanceAmount)) : '0.00'}
+                </Text>
+              </View>
+            )}
+
+            {(data.balances.currentBalanceDate || data.balances.currentBalanceAmount !== undefined) && (
+              <View style={[styles.balanceRow, { marginTop: 4 }]}>
+                <Text style={styles.balanceLabelBold}>
+                  {(data.balances.currentBalanceAmount ?? 0) > 0 ? 'Solde débiteur' : 'Solde créditeur'} au {data.balances.currentBalanceDate || today}
+                </Text>
+                <Text style={styles.balanceValue}>
+                  {data.balances.currentBalanceAmount !== undefined ? fmt(Math.abs(data.balances.currentBalanceAmount)) : '0.00'}
+                </Text>
+              </View>
+            )}
+
+            {data.balances.expectedAls !== undefined && (
+              <View style={[styles.balanceRow, { marginTop: 4 }]}>
+                <Text style={styles.balanceLabelBold}>Montant ALS attendue :</Text>
+                <Text style={styles.balanceValue}>{fmt(data.balances.expectedAls)}</Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        <Text style={styles.amountInWords}>
+          Arrêté la présente quittance à la somme de {numberToWordsFr(data.amount)} francs CFA.
+        </Text>
+
         {/* Signature */}
-        <View style={styles.signatureBlock}>
-          <Text style={styles.signatureLabel}>Le Bailleur</Text>
-          {data.ownerSignature
-            ? <Image src={data.ownerSignature} style={styles.signatureImage} />
-            : <View style={styles.signatureLine} />}
+        <View style={styles.signatureContainer}>
+          <Text style={styles.signatureNotice}>
+            Ce document vaut quittance si le cadre{'\n'}
+            ci-dessous est rempli et signé du bailleur.
+          </Text>
+          <View style={styles.signatureBox}>
+            <Text style={styles.signatureDateText}>
+              Somme acquittée le {today}
+            </Text>
+
+            <View style={styles.signatureImageWrapper}>
+              {data.ownerSignature
+                ? <Image src={data.ownerSignature} style={styles.signatureImage} />
+                : <View style={styles.signatureLine} />}
+            </View>
+
+            <Text style={styles.signatureLabel}>Le Bailleur / Mandataire</Text>
+          </View>
         </View>
 
         {/* Footer */}

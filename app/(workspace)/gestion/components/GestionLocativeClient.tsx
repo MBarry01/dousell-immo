@@ -37,6 +37,13 @@ interface Tenant {
     period_end?: string | null;
     property_id?: string;
     composition?: string | null;
+    balances?: {
+        previousBalanceDate?: string;
+        previousBalanceAmount?: number;
+        currentBalanceDate?: string;
+        currentBalanceAmount?: number;
+        expectedAls?: number;
+    };
 }
 
 interface Transaction {
@@ -122,6 +129,13 @@ interface ReceiptData {
         company_ninea?: string | null;
     };
     receiptImage?: string | null;
+    balances?: {
+        previousBalanceDate?: string;
+        previousBalanceAmount?: number;
+        currentBalanceDate?: string;
+        currentBalanceAmount?: number;
+        expectedAls?: number;
+    };
 }
 
 interface GestionLocativeClientProps {
@@ -311,6 +325,52 @@ export function GestionLocativeClient({
                 // sinon pending (futur ou courant avant échéance)
             }
 
+            // ==========================================
+            // CALCUL DES SOLDES (IMPAYÉS)
+            // ==========================================
+            const previousTransactions = localTransactions.filter(t =>
+                t.lease_id === lease.id &&
+                (t.period_year < selectedYear || (t.period_year === selectedYear && t.period_month < selectedMonth))
+            );
+
+            let previousDue = 0;
+            let previousPaid = 0;
+            previousTransactions.forEach(t => {
+                const amountDue = Number(t.amount_due) || lease.monthly_amount;
+                previousDue += amountDue;
+                if (t.amount_paid !== null && t.amount_paid !== undefined) {
+                    previousPaid += Number(t.amount_paid);
+                } else if (t.status === 'paid' || t.status?.toLowerCase() === 'paid') {
+                    previousPaid += amountDue;
+                }
+            });
+            const previousBalanceAmount = previousDue - previousPaid;
+
+            let currentDue = previousDue;
+            let currentPaid = previousPaid;
+            leaseTransactions.forEach(t => {
+                const amountDue = Number(t.amount_due) || lease.monthly_amount;
+                currentDue += amountDue;
+                if (t.amount_paid !== null && t.amount_paid !== undefined) {
+                    currentPaid += Number(t.amount_paid);
+                } else if (t.status === 'paid' || t.status?.toLowerCase() === 'paid') {
+                    currentPaid += amountDue;
+                }
+            });
+            const currentBalanceAmount = currentDue - currentPaid;
+
+            // Formater les dates pour le mois précédent et actuel
+            const prevMonthDate = new Date(selectedYear, selectedMonth - 1, 0).toLocaleDateString('fr-FR');
+            const currentMonthDate = new Date(selectedYear, selectedMonth, 0).toLocaleDateString('fr-FR');
+
+            // On ne passe l'objet balances que s'il y a des impayés à afficher
+            const balances = (previousBalanceAmount > 0 || currentBalanceAmount > 0) ? {
+                previousBalanceDate: prevMonthDate,
+                previousBalanceAmount: previousBalanceAmount,
+                currentBalanceDate: currentMonthDate,
+                currentBalanceAmount: currentBalanceAmount
+            } : undefined;
+
             result.push({
                 id: lease.id,
                 name: lease.tenant_name,
@@ -322,12 +382,13 @@ export function GestionLocativeClient({
                 dueDate: lease.billing_day,
                 startDate: lease.start_date,
                 endDate: lease.end_date,
-                last_transaction_id: paidTx?.id, // ID unique de la transaction payée si elle existe
+                last_transaction_id: paidTx?.id,
                 period_month: selectedMonth,
                 period_year: selectedYear,
                 period_start: paidTx?.period_start || null,
                 period_end: paidTx?.period_end || null,
                 property_id: lease.property_id,
+                balances,
                 composition: lease.properties?.specs ? (() => {
                     const specs = lease.properties.specs;
                     const parts = [];
@@ -498,7 +559,8 @@ export function GestionLocativeClient({
             amount: tenant.rentAmount,
             month: periodMonth,
             year: periodYear,
-            property_address: tenant.property
+            property_address: tenant.property,
+            balances: tenant.balances
         });
         setIsReceiptOpen(true);
     };

@@ -25,6 +25,13 @@ interface Tenant {
     period_year?: number;
     period_start?: string | null;
     period_end?: string | null;
+    balances?: {
+        previousBalanceDate?: string;
+        previousBalanceAmount?: number;
+        currentBalanceDate?: string;
+        currentBalanceAmount?: number;
+        expectedAls?: number;
+    };
 }
 
 interface ProfileData {
@@ -84,6 +91,13 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
         month: string;
         year: number;
         property_address: string;
+        balances?: {
+            previousBalanceDate?: string;
+            previousBalanceAmount?: number;
+            currentBalanceDate?: string;
+            currentBalanceAmount?: number;
+            expectedAls?: number;
+        };
     } | null>(null);
 
     const getInitials = (name: string) => {
@@ -262,6 +276,7 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
                 ownerEmail: profile?.company_email || undefined, // Email de config (priorité)
                 ownerAccountEmail: userEmail || undefined, // Email du compte (fallback)
                 propertyAddress: tenant.property,
+                balances: tenant.balances,
             };
 
             // Envoyer la quittance
@@ -332,7 +347,8 @@ export function TenantList({ tenants = [], profile, userEmail, isViewingTerminat
             // DONNÉES DYNAMIQUES depuis la DB (transaction)
             month: periodMonth,
             year: periodYear,
-            property_address: tenant.property
+            property_address: tenant.property,
+            balances: tenant.balances
         });
         setIsReceiptOpen(true);
     };

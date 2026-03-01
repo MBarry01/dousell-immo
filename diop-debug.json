@@ -1,0 +1,35 @@
+{
+  "leases": [
+    {
+      "id": "2e45a5ef-fdf9-4c6f-817f-abab0b3ba393",
+      "tenant_name": "Diop",
+      "start_date": "2025-01-01"
+    }
+  ],
+  "txs": [
+    {
+      "id": "4609e92f-0a9f-455b-8d07-79f83364f8f1",
+      "period_month": 3,
+      "period_year": 2026,
+      "status": "paid",
+      "amount_due": 150000,
+      "amount_paid": null
+    },
+    {
+      "id": "0c355cac-b7f9-45ab-9c5d-0679e5adbd4a",
+      "period_month": 2,
+      "period_year": 2026,
+      "status": "pending",
+      "amount_due": 150000,
+      "amount_paid": null
+    },
+    {
+      "id": "02810117-c30a-403b-93c6-df761b2a7114",
+      "period_month": 0,
+      "period_year": 2026,
+      "status": "pending",
+      "amount_due": 300000,
+      "amount_paid": null
+    }
+  ]
+}

@@ -289,6 +289,17 @@ export default async function DashboardContent({
             amount_paid: t.amount_paid ?? ((t.status?.toLowerCase() === 'paid') ? t.amount_due : 0)
         }));
 
+    // DEBUG: Inspect Diop's data
+    const diopLease = allLeases.find((l: any) => l.tenant_name?.toLowerCase().includes('diop'));
+    if (diopLease) {
+        const diopTxs = transactions.filter((t: any) => t.lease_id === diopLease.id);
+        console.log("=== DEBUG DIOP ===", {
+            leaseStartDate: diopLease.start_date,
+            txCount: diopTxs.length,
+            txs: diopTxs.map((t: any) => ({ month: t.period_month, year: t.period_year, status: t.status, amount_due: t.amount_due, amount_paid: t.amount_paid }))
+        });
+    }
+
     return (
         <ThemedContent
             isViewingTerminated={isViewingTerminated}

@@ -1,11 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Download, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
+import { BlobProvider } from '@react-pdf/renderer';
 import { createQuittanceDocument } from '@/components/pdf/QuittancePDF_v2';
+
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 interface ReceiptData {
     leaseId?: string;
@@ -37,6 +43,13 @@ interface ReceiptData {
         company_ninea?: string | null;
     };
     receiptImage?: string | null;
+    balances?: {
+        previousBalanceDate?: string;
+        previousBalanceAmount?: number;
+        currentBalanceDate?: string;
+        currentBalanceAmount?: number;
+        expectedAls?: number;
+    };
 }
 
 interface ReceiptModalProps {
@@ -47,13 +60,6 @@ interface ReceiptModalProps {
 
 export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
     const [isSending, setIsSending] = useState(false);
-    const [hasSaved, setHasSaved] = useState(false);
-
-    // Reset hasSaved quand la modal se ferme
-    useEffect(() => {
-        if (!isOpen) setHasSaved(false);
-    }, [isOpen]);
-
     // Préparer les données pour le PDF
     const receiptDetails = data ? {
         leaseId: data.leaseId,
@@ -74,32 +80,12 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
         ownerEmail: data.profile?.company_email || undefined,
         ownerAccountEmail: data.userEmail || undefined,
         propertyAddress: data.property_address || 'Adresse non renseignée',
+        balances: data.balances,
     } : null;
 
-    // Auto-save silencieuse en arrière-plan
-    useEffect(() => {
-        const autoSave = async () => {
-            if (isOpen && receiptDetails?.leaseId && !hasSaved) {
-                setHasSaved(true);
-                try {
-                    const response = await fetch('/api/save-receipt', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(receiptDetails),
-                    });
-                    if (!response.ok) {
-                        console.error('Auto-save quittance échoué:', await response.text());
-                    }
-                } catch (e) {
-                    console.error('Auto-save error:', e);
-                }
-            }
-        };
-        autoSave();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, data]);
+    // (L'auto-save vers /api/save-receipt a été retiré car la route n'existe pas et causait une erreur 404 en console)
 
-    if (!isOpen || !data || !receiptDetails) return null;
+    if (!data || !receiptDetails) return null;
 
     const filename = `Quittance_${receiptDetails.tenantName.replace(/\s+/g, '_')}_${String(data.month).padStart(2, '0')}_${data.year}.pdf`;
 
@@ -133,38 +119,17 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
     };
 
     return (
-        /* Overlay */
-        <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 print:p-0 print:bg-white print:block print:relative"
-            onClick={onClose}
-        >
-            {/* Carte modale — hauteur limitée à 90vh pour rester visible */}
-            <div
-                className="relative flex flex-col w-full max-w-2xl max-h-[90vh] bg-card rounded-2xl shadow-2xl border border-border print:shadow-none print:border-none print:w-full print:max-w-none print:rounded-none print:bg-white print:max-h-none"
-                onClick={(e) => e.stopPropagation()}
-            >
-                {/* ── En-tête de la carte ── */}
-                <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border shrink-0 print:hidden">
-                    {/* Boutons d'action */}
-                    <div className="flex items-center gap-2">
-                        <PDFDownloadLink
-                            document={createQuittanceDocument(receiptDetails)}
-                            fileName={filename}
-                            className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg text-sm px-3 h-9 font-medium transition-colors"
-                        >
-                            {({ loading }) => loading ? (
-                                <>
-                                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                    <span>Préparation...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Download className="w-4 h-4" />
-                                    <span>Télécharger PDF</span>
-                                </>
-                            )}
-                        </PDFDownloadLink>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="max-w-3xl p-0 overflow-hidden border-none bg-transparent shadow-none">
+                <DialogTitle className="sr-only">Aperçu Quittance</DialogTitle>
 
+                {/* Carte modale style premium */}
+                <div
+                    className="flex flex-col w-full bg-card rounded-2xl shadow-2xl border border-border overflow-hidden"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    {/* ── En-tête ── */}
+                    <div className="flex items-center justify-start px-4 py-3 border-b border-border shrink-0 bg-background/50 backdrop-blur-md">
                         <Button
                             onClick={handleSendEmail}
                             disabled={isSending}
@@ -185,39 +150,43 @@ export function ReceiptModal({ isOpen, onClose, data }: ReceiptModalProps) {
                         </Button>
                     </div>
 
-                    {/* Bouton fermer */}
-                    <Button
-                        onClick={onClose}
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground shrink-0"
-                    >
-                        <X className="w-4 h-4" />
-                    </Button>
-                </div>
+                    {/* ── Aperçu du document ── */}
+                    <div className="relative bg-muted/30" style={{ height: '70vh' }}>
+                        <BlobProvider document={createQuittanceDocument(receiptDetails)}>
+                            {({ url, loading, error }) => {
+                                if (loading) return (
+                                    <div className="flex items-center justify-center h-full gap-3 text-muted-foreground text-sm">
+                                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                        Génération du document…
+                                    </div>
+                                );
+                                if (error || !url) return (
+                                    <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                                        Aperçu indisponible — utilisez le bouton Télécharger.
+                                    </div>
+                                );
+                                return (
+                                    <iframe
+                                        src={url ?? undefined}
+                                        title="Aperçu quittance"
+                                        className="w-full h-full border-none bg-white"
+                                    />
+                                );
+                            }}
+                        </BlobProvider>
+                    </div>
 
-                {/* ── Aperçu du document — rendu identique au PDF envoyé ── */}
-                <div className="flex-1 min-h-0 overflow-hidden print:hidden">
-                    <PDFViewer
-                        width="100%"
-                        height="100%"
-                        showToolbar={false}
-                        className="border-none block"
-                    >
-                        {createQuittanceDocument(receiptDetails)}
-                    </PDFViewer>
+                    {/* ── Pied de carte ── */}
+                    <div className="flex items-center justify-center py-2.5 border-t border-border bg-card shrink-0">
+                        <button
+                            onClick={onClose}
+                            className="text-sm text-muted-foreground hover:text-foreground transition-colors px-4 py-1.5 rounded-lg hover:bg-muted"
+                        >
+                            Fermer sans envoyer
+                        </button>
+                    </div>
                 </div>
-
-                {/* ── Pied de carte ── */}
-                <div className="flex items-center justify-center py-2.5 border-t border-border bg-card shrink-0 print:hidden">
-                    <button
-                        onClick={onClose}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors px-4 py-1.5 rounded-lg hover:bg-muted"
-                    >
-                        Fermer sans envoyer
-                    </button>
-                </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }
