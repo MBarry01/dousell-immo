@@ -84,6 +84,7 @@ const adminNavItems: NavItem[] = [
   { href: "/admin/verifications", icon: Shield, label: "Vérifications" },
   { href: "/admin/moderation", icon: Scale, label: "Modération" },
   { href: "/admin/abonnements", icon: CreditCard, label: "Abonnements" },
+  { href: "/admin/blog", icon: FileText, label: "Blog" },
   { href: "/admin/roles", icon: Settings, label: "Rôles" },
 ];
 
