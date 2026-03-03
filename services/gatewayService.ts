@@ -2,11 +2,14 @@ import { supabase } from "@/lib/supabase";
 import type { Property } from "@/types/property";
 import { getProperties, getPropertiesCount, getSimilarProperties, type PropertyFilters } from "./propertyService";
 
+// TTL de fraîcheur — doit être >= au CLEANUP_TTL_DAYS du webhook apify-sync (7j)
+const FRESHNESS_TTL_DAYS = 7;
+
 // Type pour les résultats bruts de la table external_listings
 type ExternalListingRow = {
     id: string;
     title: string;
-    price: string; // Stocké en texte dans la DB externe
+    price: string | null; // Stocké en texte dans la DB externe (nullable)
     location: string;
     image_url: string;
     source_url: string;
@@ -23,7 +26,7 @@ type ExternalListingRow = {
 // Mapper partiel pour convertir une ExternalListingRow en Property compatible UI
 const mapExternalListing = (row: ExternalListingRow): Property => {
     // Parsing du prix (ex: "500 000 FCFA")
-    const numericPrice = parseInt(row.price.replace(/\D/g, ""), 10) || 0;
+    const numericPrice = row.price ? parseInt(row.price.replace(/\D/g, ""), 10) || 0 : 0;
 
     // Parsing intelligent des pièces/chambres
     let rooms = 0;
@@ -157,9 +160,9 @@ export async function getExternalListingsByType(
     const { category, city, limit = 8, page = 1 } = options;
 
     try {
-        // On ne récupère que les annonces vues récemment (< 4 jours)
-        const fourDaysAgo = new Date();
-        fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
+        // On ne récupère que les annonces vues récemment (< FRESHNESS_TTL_DAYS jours)
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - FRESHNESS_TTL_DAYS);
 
         const from = (page - 1) * limit;
         const to = from + limit - 1;
@@ -167,7 +170,7 @@ export async function getExternalListingsByType(
         let query = supabase
             .from("external_listings")
             .select("*")
-            .gt("last_seen_at", fourDaysAgo.toISOString())
+            .gt("last_seen_at", cutoffDate.toISOString())
             .not("image_url", "is", null)
             .neq("image_url", "")
             .ilike("type", `%${transactionType}%`)
@@ -231,13 +234,13 @@ export async function getExternalListingsCount(
     const { category, city } = options;
 
     try {
-        const fourDaysAgo = new Date();
-        fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - FRESHNESS_TTL_DAYS);
 
         let query = supabase
             .from("external_listings")
             .select("*", { count: "exact", head: true })
-            .gt("last_seen_at", fourDaysAgo.toISOString())
+            .gt("last_seen_at", cutoffDate.toISOString())
             .not("image_url", "is", null)
             .neq("image_url", "");
 
