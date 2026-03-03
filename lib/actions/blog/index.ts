@@ -139,7 +139,11 @@ export async function getArticles(status?: 'draft' | 'published') {
   if (status) query.eq('status', status);
 
   const { data, error } = await query;
-  if (error) throw new Error(`getArticles: ${error.message}`);
+  if (error) {
+    // Table may not exist yet (migration pending) — return empty list instead of crashing
+    console.error(`getArticles: ${error.message}`);
+    return [];
+  }
   return data ?? [];
 }
 
