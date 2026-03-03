@@ -1,0 +1,63 @@
+// app/pro/blog/[slug]/page.tsx
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import { getArticleBySlug } from '@/lib/actions/blog';
+import { ArticleRenderer } from '@/components/blog/ArticleRenderer';
+
+export const revalidate = 3600;
+
+interface Props { params: { slug: string } }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const article = await getArticleBySlug(params.slug);
+  if (!article) return {};
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? 'dkkirzpxe';
+  return {
+    title: article.meta_title ?? article.title,
+    description: article.meta_description ?? article.excerpt ?? undefined,
+    openGraph: article.cover_image
+      ? { images: [`https://res.cloudinary.com/${cloudName}/image/upload/${article.cover_image}`] }
+      : undefined,
+  };
+}
+
+export default async function ProBlogArticlePage({ params }: Props) {
+  const article = await getArticleBySlug(params.slug);
+  if (!article || article.status !== 'published') notFound();
+
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? 'dkkirzpxe';
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: article.title,
+            author: { '@type': 'Person', name: article.author_name },
+            datePublished: article.published_at,
+            description: article.meta_description ?? article.excerpt,
+            ...(article.cover_image && {
+              image: `https://res.cloudinary.com/${cloudName}/image/upload/${article.cover_image}`,
+            }),
+            ...(article.read_time_minutes && {
+              timeRequired: `PT${article.read_time_minutes}M`,
+            }),
+          }),
+        }}
+      />
+      <div className="min-h-screen bg-[#050505] py-16 px-4">
+        <ArticleRenderer
+          title={article.title}
+          blocks={article.blocks}
+          authorName={article.author_name}
+          publishedAt={article.published_at ?? undefined}
+          category={article.category ?? undefined}
+          readTime={article.read_time_minutes ?? undefined}
+        />
+      </div>
+    </>
+  );
+}
