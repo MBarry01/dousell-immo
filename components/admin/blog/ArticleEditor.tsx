@@ -9,20 +9,7 @@ import { TemplateSelector } from './TemplateSelector';
 import { ARTICLE_TEMPLATES } from '@/lib/blog/templates';
 import { createArticle, updateArticle, publishArticle } from '@/lib/actions/blog';
 import { titleToSlug } from '@/lib/blog/slug';
-
-// Placeholder preview — replaced when ArticleRenderer (Task 11) is available
-function PreviewPlaceholder({ title, blocks }: { title: string; blocks: ArticleBlock[] }) {
-  return (
-    <div className="max-w-2xl mx-auto p-6 space-y-4">
-      <h1 className="text-3xl font-bold text-foreground">{title || 'Titre de votre article'}</h1>
-      {blocks.map(block => (
-        <div key={block.id} className="text-sm text-muted-foreground border border-dashed border-border rounded p-2">
-          [{block.type}] {('text' in block ? block.text : '') || '...'}
-        </div>
-      ))}
-    </div>
-  );
-}
+import { ArticleRenderer } from '@/components/blog/ArticleRenderer';
 
 interface Props {
   article?: Article;
@@ -148,7 +135,7 @@ export function ArticleEditor({ article }: Props) {
                 <BlockCanvas blocks={blocks} onChange={setBlocks} />
               </div>
             ) : (
-              <PreviewPlaceholder title={title} blocks={blocks} />
+              <ArticleRenderer title={title} blocks={blocks} />
             )}
           </div>
 
