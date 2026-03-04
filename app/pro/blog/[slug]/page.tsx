@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getArticleBySlug } from '@/lib/actions/blog';
 import { ArticleRenderer } from '@/components/blog/ArticleRenderer';
+import { ArticleTracker } from '@/components/blog/ArticleTracker';
 
 export const revalidate = 3600;
 
@@ -50,7 +51,7 @@ export default async function ProBlogArticlePage({ params }: Props) {
           }),
         }}
       />
-      <div className="min-h-screen bg-[#050505] pt-32 pb-20 px-4">
+      <div className="min-h-screen bg-[#050505] pt-40 lg:pt-32 pb-20 px-4">
         <ArticleRenderer
           title={article.title}
           excerpt={article.excerpt ?? undefined}
@@ -60,6 +61,13 @@ export default async function ProBlogArticlePage({ params }: Props) {
           category={article.category ?? undefined}
           readTime={article.read_time_minutes ?? undefined}
           coverImage={article.cover_image ?? undefined}
+          articleId={article.id}
+        />
+        <ArticleTracker
+          articleId={article.id}
+          slug={article.slug}
+          category={article.category ?? undefined}
+          readTimeMinutes={article.read_time_minutes ?? undefined}
         />
       </div>
     </>
