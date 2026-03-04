@@ -125,7 +125,10 @@ export function WizardForm() {
     const handleSubmit = async () => {
         setIsPending(true);
         try {
-            const result = await submitOnboarding(data, loggedInUserId);
+            const signupArticleId = typeof window !== 'undefined'
+                ? sessionStorage.getItem('last_article_id')
+                : null;
+            const result = await submitOnboarding({ ...data, signupArticleId }, loggedInUserId);
 
             if (result.error) {
                 toast.error(result.error);

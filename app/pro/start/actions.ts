@@ -24,6 +24,9 @@ interface OnboardingData {
     // Billing
     plan?: string;
     interval?: string;
+
+    // Blog attribution
+    signupArticleId?: string | null;
 }
 
 export async function submitOnboarding(formData: OnboardingData, existingUserId?: string | null) {
@@ -117,6 +120,7 @@ export async function submitOnboarding(formData: OnboardingData, existingUserId?
         pro_trial_ends_at: trialEndsAt.toISOString(),
         first_login: false, // Skip /bienvenue since they came via /pro/start
         updated_at: new Date().toISOString(),
+        ...(formData.signupArticleId && { signup_article_id: formData.signupArticleId }),
     };
 
     // Attendre un peu que le trigger crée le profil
