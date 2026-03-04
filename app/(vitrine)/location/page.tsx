@@ -20,17 +20,24 @@ export const metadata: Metadata = {
 };
 
 export default async function LocationRootPage() {
-    // Récupérer toutes les villes actives via notre RPC (Uniquement LOCATION)
-    const { data: combinations } = await supabase
-        .rpc('get_active_cities_and_types', { min_count: 1, target_transaction_type: 'location' });
+    const [{ data: combinations }, { data: extRows }] = await Promise.all([
+        supabase.rpc('get_active_cities_and_types', { min_count: 1, target_transaction_type: 'location' }),
+        supabase.from('external_listings').select('city').eq('type', 'Location'),
+    ]);
 
     const citiesMap = new Map<string, number>();
 
     if (combinations) {
         combinations.forEach((item: { city: string; count: number }) => {
             const citySlug = slugify(item.city);
-            const currentCount = citiesMap.get(citySlug) || 0;
-            citiesMap.set(citySlug, currentCount + Number(item.count));
+            citiesMap.set(citySlug, (citiesMap.get(citySlug) || 0) + Number(item.count));
+        });
+    }
+    if (extRows) {
+        extRows.forEach((row: { city: string }) => {
+            if (!row.city) return;
+            const citySlug = slugify(row.city);
+            citiesMap.set(citySlug, (citiesMap.get(citySlug) || 0) + 1);
         });
     }
 
@@ -97,9 +104,9 @@ export default async function LocationRootPage() {
                     </div>
                 ) : (
                     <div className="text-center py-20">
-                        <h3 className="text-xl font-medium mb-4">Chargement des secteurs...</h3>
+                        <h3 className="text-xl font-medium mb-4">Aucune location disponible pour le moment</h3>
                         <Button asChild>
-                            <Link href="/recherche">Voir toutes les annonces</Link>
+                            <Link href="/">Retour à l&apos;accueil</Link>
                         </Button>
                     </div>
                 )}

@@ -20,17 +20,24 @@ export const metadata: Metadata = {
 };
 
 export default async function SaleRootPage() {
-    // Récupérer toutes les villes AVEC des ventes
-    const { data: combinations, error } = await supabase
-        .rpc('get_active_cities_and_types', { min_count: 1, target_transaction_type: 'vente' });
+    const [{ data: combinations }, { data: extRows }] = await Promise.all([
+        supabase.rpc('get_active_cities_and_types', { min_count: 1, target_transaction_type: 'vente' }),
+        supabase.from('external_listings').select('city').eq('type', 'Vente'),
+    ]);
 
     const citiesMap = new Map<string, number>();
 
     if (combinations) {
         combinations.forEach((item: { city: string; count: number }) => {
             const citySlug = slugify(item.city);
-            const currentCount = citiesMap.get(citySlug) || 0;
-            citiesMap.set(citySlug, currentCount + Number(item.count));
+            citiesMap.set(citySlug, (citiesMap.get(citySlug) || 0) + Number(item.count));
+        });
+    }
+    if (extRows) {
+        extRows.forEach((row: { city: string }) => {
+            if (!row.city) return;
+            const citySlug = slugify(row.city);
+            citiesMap.set(citySlug, (citiesMap.get(citySlug) || 0) + 1);
         });
     }
 

@@ -26,14 +26,30 @@
               "fieldType": "dropdown",
               "fieldOptions": {
                 "values": [
-                  { "option": "Guides" },
-                  { "option": "Investissement" },
-                  { "option": "Juridique" },
-                  { "option": "Marché" },
-                  { "option": "Conseils" },
-                  { "option": "Innovation" },
-                  { "option": "Diaspora" },
-                  { "option": "Analyse" }
+                  {
+                    "option": "Guides"
+                  },
+                  {
+                    "option": "Investissement"
+                  },
+                  {
+                    "option": "Juridique"
+                  },
+                  {
+                    "option": "Marché"
+                  },
+                  {
+                    "option": "Conseils"
+                  },
+                  {
+                    "option": "Innovation"
+                  },
+                  {
+                    "option": "Diaspora"
+                  },
+                  {
+                    "option": "Analyse"
+                  }
                 ]
               },
               "requiredField": true
@@ -43,11 +59,21 @@
               "fieldType": "dropdown",
               "fieldOptions": {
                 "values": [
-                  { "option": "Guide pratique" },
-                  { "option": "Analyse de marché" },
-                  { "option": "Comparatif" },
-                  { "option": "Réglementation juridique" },
-                  { "option": "Conseils diaspora" }
+                  {
+                    "option": "Guide pratique"
+                  },
+                  {
+                    "option": "Analyse de marché"
+                  },
+                  {
+                    "option": "Comparatif"
+                  },
+                  {
+                    "option": "Réglementation juridique"
+                  },
+                  {
+                    "option": "Conseils diaspora"
+                  }
                 ]
               },
               "requiredField": true
@@ -57,10 +83,18 @@
               "fieldType": "dropdown",
               "fieldOptions": {
                 "values": [
-                  { "option": "Propriétaire" },
-                  { "option": "Investisseur/Diaspora" },
-                  { "option": "Locataire" },
-                  { "option": "Agent immobilier" }
+                  {
+                    "option": "Propriétaire"
+                  },
+                  {
+                    "option": "Investisseur/Diaspora"
+                  },
+                  {
+                    "option": "Locataire"
+                  },
+                  {
+                    "option": "Agent immobilier"
+                  }
                 ]
               },
               "requiredField": true
@@ -70,9 +104,15 @@
               "fieldType": "dropdown",
               "fieldOptions": {
                 "values": [
-                  { "option": "Standard 1200 mots" },
-                  { "option": "Court 800 mots" },
-                  { "option": "Long 2000 mots" }
+                  {
+                    "option": "Standard 1200 mots"
+                  },
+                  {
+                    "option": "Court 800 mots"
+                  },
+                  {
+                    "option": "Long 2000 mots"
+                  }
                 ]
               }
             },
@@ -90,7 +130,10 @@
       "name": "📝 Formulaire1",
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2,
-      "position": [0, 300],
+      "position": [
+        0,
+        300
+      ],
       "webhookId": "1207b12e-7946-465d-ab69-5e6a156d0dd3"
     },
     {
@@ -105,7 +148,10 @@
       "name": "🖥️ Admin Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 500],
+      "position": [
+        0,
+        500
+      ],
       "webhookId": "generate-article-admin"
     },
     {
@@ -138,7 +184,10 @@
       "name": "🔀 Mode Auto ?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [220, 300]
+      "position": [
+        220,
+        300
+      ]
     },
     {
       "parameters": {
@@ -149,7 +198,10 @@
       "name": "📰 RSS Google",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1,
-      "position": [440, 160]
+      "position": [
+        440,
+        160
+      ]
     },
     {
       "parameters": {
@@ -169,7 +221,10 @@
       "name": "📦 Grouper Actus",
       "type": "n8n-nodes-base.summarize",
       "typeVersion": 1,
-      "position": [660, 160]
+      "position": [
+        660,
+        160
+      ]
     },
     {
       "parameters": {
@@ -180,7 +235,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer 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"
+              "value": "=Bearer {{ $env.OPENROUTER_API_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -191,14 +246,17 @@
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({ model: 'meta-llama/llama-3.3-70b-instruct', messages: [{ role: 'system', content: 'Tu es rédacteur en chef. Lis ces actus, choisis la plus importante pour l immobilier au Sénégal, et réponds UNIQUEMENT par le sujet de l article formulé en une phrase. Aucun autre texte.' }, { role: 'user', content: JSON.stringify($json) }] }) }}",
+        "body": "={{ JSON.stringify({ model: 'meta-llama/llama-3.3-70b-instruct', messages: [{ role: 'system', content: 'Tu es rédacteur en chef. Lis ces actus et choisis-en UNE au hasard parmi la liste (ne choisis pas toujours la première). Elle doit être importante pour l immobilier au Sénégal. Réponds UNIQUEMENT par le sujet de l article formulé en une phrase. Aucun autre texte.' }, { role: 'user', content: JSON.stringify($json) }] }) }}",
         "options": {}
       },
       "id": "bb7c91fd",
       "name": "🧠 LLM Choix Actu",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [880, 160]
+      "position": [
+        880,
+        160
+      ]
     },
     {
       "parameters": {
@@ -208,7 +266,10 @@
       "name": "⚙️ Config1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1100, 300]
+      "position": [
+        1100,
+        300
+      ]
     },
     {
       "parameters": {
@@ -233,7 +294,10 @@
       "name": "🔍 Tavily ",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1320, 160]
+      "position": [
+        1320,
+        160
+      ]
     },
     {
       "parameters": {
@@ -258,7 +322,10 @@
       "name": "🔍 Tavily 4",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1320, 300]
+      "position": [
+        1320,
+        300
+      ]
     },
     {
       "parameters": {
@@ -283,7 +350,10 @@
       "name": "🔍 Tavily 5",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1320, 440]
+      "position": [
+        1320,
+        440
+      ]
     },
     {
       "parameters": {
@@ -293,7 +363,10 @@
       "name": "🔀 Fusionner1",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
-      "position": [1540, 300]
+      "position": [
+        1540,
+        300
+      ]
     },
     {
       "parameters": {
@@ -303,7 +376,10 @@
       "name": "📊 Traitement Sources1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1760, 300]
+      "position": [
+        1760,
+        300
+      ]
     },
     {
       "parameters": {
@@ -332,17 +408,23 @@
       "name": "✅ Vérif. Sources1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1980, 300]
+      "position": [
+        1980,
+        300
+      ]
     },
     {
       "parameters": {
-        "jsCode": "const d = $input.first().json;\nconst sources = d.sourcesForPrompt || [];\nconst sourcesText = sources.map((s, i) => `[Source ${i+1}] ${s.title}\\nURL: ${s.url}\\nExtrait: ${s.excerpt}`).join('\\n\\n');\n\nconst systemPrompt = `Tu es un journaliste d'investigation senior spécialisé dans l'immobilier africain, notamment sénégalais. Tu rédiges pour Dousel Immo des analyses de fond qui prennent position claire, argumentent avec des données et challengent les idées reçues. Tes articles défendent une thèse — ils ne listent pas des informations.\n\nPHILOSOPHIE RÉDACTIONNELLE :\n- Chaque H2 = un ARGUMENT formulé comme une assertion affirmée (pas juste un sujet)\n  Mauvais : \\\"Le marché immobilier à Dakar\\\"\n  Bon : \\\"Pourquoi le marché dakarois est structurellement biaisé contre les locataires\\\"\n- Chaque chiffre ancré à sa source inline : [Titre source](url)\n- Chaque section développe : thèse → preuves chiffrées → analyse → implication\n- Le lecteur repart avec une conviction, pas juste des informations\n\nSTRUCTURE OBLIGATOIRE (${d.wordTarget || 1200} mots) :\n\n1. INTRODUCTION (150-200 mots) :\n   - Accroche forte : chiffre choc, contradiction, ou question provocatrice\n   - Contextualisation + annonce de la thèse centrale\n\n2. CORPS : 3 à 5 sections argumentatives (200-300 mots chacune) :\n   - H2 formulé comme un argument affirmé\n   - Paragraphes avec citations [texte source](url) dans le fil\n   - H3 pour sous-points si nécessaire\n\n3. BLOCS DE RICHESSE OBLIGATOIRES :\n   a) 1 tableau comparatif (type table) : données chiffrées par zone/type/période\n   b) 1 citation d'expert (type quote) avec auteur réel issu des sources\n   c) 2 encadrés minimum (type callout) avec items sourcés\n   d) 1 liste ordonnée (type list, ordered:true) : étapes ou recommandations\n\n4. CONCLUSION (100-150 mots) + CTA vers la route appropriée selon le contexte de l'article\n\n⚠️ RÈGLE ABSOLUE : chaque valeur dans le JSON doit être RÉELLE et SPÉCIFIQUE au sujet. JAMAIS de placeholders comme \\\"Valeur A\\\", \\\"v1\\\", \\\"Ligne 1\\\", \\\"Fait 1\\\", \\\"Action concrète\\\". Si les sources ne donnent pas un chiffre précis, utilise une donnée plausible et cohérente avec le marché immobilier sénégalais 2024-2025.\n\nTYPES DE BLOCS DISPONIBLES (exemples contextuels — GÉNÉRER du contenu réel, ne pas copier) :\n{\\\"type\\\":\\\"paragraph\\\",\\\"text\\\":\\\"Selon la [Banque Mondiale](https://worldbank.org), le déficit de logements au Sénégal atteint 150 000 unités par an, alimenté par une urbanisation à 4% annuels qui concentre 25% de la population à Dakar.\\\"}\n{\\\"type\\\":\\\"heading\\\",\\\"level\\\":2,\\\"text\\\":\\\"Le marché dakarois est structurellement biaisé contre les ménages à faibles revenus\\\"}\n{\\\"type\\\":\\\"heading\\\",\\\"level\\\":3,\\\"text\\\":\\\"Les quartiers périphériques absorbent la pression mais sans infrastructures\\\"}\n{\\\"type\\\":\\\"quote\\\",\\\"text\\\":\\\"L'accès au logement est devenu plus difficile que l'accès à l'emploi pour la majorité des Sénégalais.\\\",\\\"author\\\":\\\"Moustapha Diop, Directeur de l'Habitat, Ministère de l'Urbanisme\\\"}\n{\\\"type\\\":\\\"callout\\\",\\\"title\\\":\\\"📌 Ce que révèlent les chiffres\\\",\\\"items\\\":[\\\"Le prix moyen au m² à Dakar Plateau a bondi de 23% entre 2020 et 2024 [APIX](https://apix.sn)\\\",\\\"550 000 ménages sénégalais vivent dans des logements précaires\\\",\\\"Seulement 12% des ménages accèdent à un crédit immobilier formel\\\"]}\n{\\\"type\\\":\\\"table\\\",\\\"headers\\\":[\\\"Quartier\\\",\\\"Prix moyen/m² (FCFA)\\\",\\\"Évolution 2024\\\"],\\\"rows\\\":[[\\\"Plateau\\\",\\\"850 000\\\",\\\"+12%\\\"],[\\\"Almadies\\\",\\\"650 000\\\",\\\"+9%\\\"],[\\\"Pikine\\\",\\\"180 000\\\",\\\"+5%\\\"],[\\\"Thiès\\\",\\\"120 000\\\",\\\"+7%\\\"]]}\n{\\\"type\\\":\\\"list\\\",\\\"ordered\\\":true,\\\"items\\\":[\\\"Exiger le titre foncier avant toute signature\\\",\\\"Faire évaluer le bien par un expert immobilier agréé\\\",\\\"Vérifier l'historique cadastral aux Services Domaniaux\\\",\\\"Comparer au moins 3 biens similaires dans le quartier\\\"]}\nROUTES CTA DISPONIBLES (choisir la plus pertinente selon l'angle de l'article) :\n- Location : {\\\"type\\\":\\\"cta\\\",\\\"text\\\":\\\"Voir les biens à louer à Dakar\\\",\\\"href\\\":\\\"/location\\\",\\\"style\\\":\\\"primary\\\"}\n- Vente/Investissement : {\\\"type\\\":\\\"cta\\\",\\\"text\\\":\\\"Voir les biens à vendre\\\",\\\"href\\\":\\\"/vente\\\",\\\"style\\\":\\\"primary\\\"}\n- Recherche générale : {\\\"type\\\":\\\"cta\\\",\\\"text\\\":\\\"Rechercher un bien immobilier\\\",\\\"href\\\":\\\"/recherche\\\",\\\"style\\\":\\\"primary\\\"}\n- Estimation : {\\\"type\\\":\\\"cta\\\",\\\"text\\\":\\\"Estimer la valeur de mon bien\\\",\\\"href\\\":\\\"/estimation\\\",\\\"style\\\":\\\"secondary\\\"}\n- Contact : {\\\"type\\\":\\\"cta\\\",\\\"text\\\":\\\"Contacter un expert Dousel\\\",\\\"href\\\":\\\"/contact\\\",\\\"style\\\":\\\"secondary\\\"}\n\nPUBLIC CIBLE : ${d.audience || 'Grand public immobilier'}\nANGLE : ${d.angle || 'Analyse critique'}\n\nFORMAT DE RÉPONSE (JSON valide uniquement, aucun texte autour) :\n{\n  \\\"title\\\": \\\"Titre journalistique qui annonce une position (60-70 car.)\\\",\n  \\\"excerpt\\\": \\\"Chapeau 150-160 car résumant la thèse centrale\\\",\n  \\\"meta_title\\\": \\\"Titre SEO 55-60 car\\\",\n  \\\"meta_description\\\": \\\"Description SEO 150-160 car\\\",\n  \\\"author_name\\\": \\\"Équipe éditoriale Dousel\\\",\n  \\\"read_time_estimate\\\": 6,\n  \\\"confidence_score\\\": 72,\n  \\\"sources_used\\\": [{\\\"title\\\": \\\"...\\\", \\\"url\\\": \\\"...\\\"}],\n  \\\"blocks\\\": [\n    MINIMUM 15 BLOCS : 1 table + 1 quote + 2 callouts + 1 list ordonnée\n  ]\n}`;\n\nconst userPrompt = `Rédige un article de fond argumentatif sur ce sujet pour Dousel Immo :\\n\\nSujet : ${d.topic}\\nCatégorie : ${d.category}\\nAngle éditorial : ${d.angle}\\nPublic cible : ${d.audience}\\nLongueur cible : ${d.wordTarget} mots\\n\\nSOURCES DISPONIBLES (analyse, croise et cite) :\\n${sourcesText}\\n\\nCHECKLIST :\\n✓ L'article défend-il une thèse claire et affirmée ?\\n✓ Chaque H2 est-il un argument (pas juste un sujet) ?\\n✓ Y a-t-il au moins 15 blocs ?\\n✓ Y a-t-il 1 tableau, 1 citation, 2 callouts, 1 liste ordonnée ?\\n✓ Les sources sont-elles citées avec [texte](url) dans les paragraphes ?\\n✓ Le tableau contient-il des chiffres réels (pas 'Valeur A', 'v1', 'Ligne 1') ?\\n✓ Les callouts contiennent-ils des faits précis (pas 'Fait 1', 'Implication pratique') ?\\n✓ La liste contient-elle des conseils concrets (pas 'Action concrète') ?\\n\\nRéponds UNIQUEMENT avec le JSON valide.`;\n\nreturn [{ json: {\n  ...d,\n  _llmPayload: {\n    model: 'anthropic/claude-3.5-sonnet',\n    messages: [\n      { role: 'system', content: systemPrompt },\n      { role: 'user', content: userPrompt }\n    ],\n    temperature: 0.8,\n    max_tokens: 8000\n  }\n}}];"
+        "jsCode": "const d = $input.first().json;\nconst sources = d.sourcesForPrompt || [];\nconst sourcesText = sources.map((s, i) => `[Source ${i+1}] ${s.title}\\nURL: ${s.url}\\nExtrait: ${s.excerpt}`).join('\\n\\n');\n\nconst systemPrompt = `Tu es un journaliste d'investigation senior spécialisé dans l'immobilier africain, notamment sénégalais. Tu rédiges pour Dousel Immo des analyses de fond qui prennent position claire, argumentent avec des données et challengent les idées reçues. Tes articles défendent une thèse — ils ne listent pas des informations.\n\nPHILOSOPHIE RÉDACTIONNELLE :\n- Chaque H2 = un ARGUMENT formulé comme une assertion affirmée (pas juste un sujet)\n  Mauvais : \\\"Le marché immobilier à Dakar\\\"\n  Bon : \\\"Pourquoi le marché dakarois est structurellement biaisé contre les locataires\\\"\n- Chaque chiffre ancré à sa source inline : [Titre source](url)\n- Chaque section développe : thèse → preuves chiffrées → analyse → implication\n- Le lecteur repart avec une conviction, pas juste des informations\n\nSTRUCTURE OBLIGATOIRE (${d.wordTarget || 1200} mots) :\n\n1. INTRODUCTION (150-200 mots) :\n   - Accroche forte : chiffre choc, contradiction, ou question provocatrice\n   - Contextualisation + annonce de la thèse centrale\n\n2. CORPS : 3 à 5 sections argumentatives (200-300 mots chacune) :\n   - H2 formulé comme un argument affirmé\n   - Paragraphes avec citations [texte source](url) dans le fil\n   - H3 pour sous-points si nécessaire\n\n3. BLOCS DE RICHESSE OBLIGATOIRES :\n   a) 1 tableau comparatif (type table) : données chiffrées par zone/type/période\n   b) 1 citation d'expert (type quote) avec auteur réel issu des sources\n   c) 2 encadrés minimum (type callout) avec items sourcés\n   d) 1 liste ordonnée (type list, ordered:true) : étapes ou recommandations\n\n4. CONCLUSION (100-150 mots) + CTA vers la route appropriée selon le contexte de l'article\n\n⚠️ RÈGLE ABSOLUE : chaque valeur dans le JSON doit être RÉELLE et SPÉCIFIQUE au sujet. JAMAIS de placeholders comme \\\"Valeur A\\\", \\\"v1\\\", \\\"Ligne 1\\\", \\\"Fait 1\\\", \\\"Action concrète\\\". Si les sources ne donnent pas un chiffre précis, utilise une donnée plausible et cohérente avec le marché immobilier sénégalais 2024-2025.\n\nTYPES DE BLOCS DISPONIBLES (exemples contextuels — GÉNÉRER du contenu réel, ne pas copier) :\n{\\\"type\\\":\\\"paragraph\\\",\\\"text\\\":\\\"Selon la [Banque Mondiale](https://worldbank.org), le déficit de logements au Sénégal atteint 150 000 unités par an, alimenté par une urbanisation à 4% annuels qui concentre 25% de la population à Dakar.\\\"}\n{\\\"type\\\":\\\"heading\\\",\\\"level\\\":2,\\\"text\\\":\\\"Le marché dakarois est structurellement biaisé contre les ménages à faibles revenus\\\"}\n{\\\"type\\\":\\\"heading\\\",\\\"level\\\":3,\\\"text\\\":\\\"Les quartiers périphériques absorbent la pression mais sans infrastructures\\\"}\n{\\\"type\\\":\\\"quote\\\",\\\"text\\\":\\\"L'accès au logement est devenu plus difficile que l'accès à l'emploi pour la majorité des Sénégalais.\\\",\\\"author\\\":\\\"Moustapha Diop, Directeur de l'Habitat, Ministère de l'Urbanisme\\\"}\n{\\\"type\\\":\\\"callout\\\",\\\"title\\\":\\\"📌 Ce que révèlent les chiffres\\\",\\\"items\\\":[\\\"Le prix moyen au m² à Dakar Plateau a bondi de 23% entre 2020 et 2024 [APIX](https://apix.sn)\\\",\\\"550 000 ménages sénégalais vivent dans des logements précaires\\\",\\\"Seulement 12% des ménages accèdent à un crédit immobilier formel\\\"]}\n{\\\"type\\\":\\\"table\\\",\\\"headers\\\":[\\\"Quartier\\\",\\\"Prix moyen/m² (FCFA)\\\",\\\"Évolution 2024\\\"],\\\"rows\\\":[[\\\"Plateau\\\",\\\"850 000\\\",\\\"+12%\\\"],[\\\"Almadies\\\",\\\"650 000\\\",\\\"+9%\\\"],[\\\"Pikine\\\",\\\"180 000\\\",\\\"+5%\\\"],[\\\"Thiès\\\",\\\"120 000\\\",\\\"+7%\\\"]]}\n{\\\"type\\\":\\\"list\\\",\\\"ordered\\\":true,\\\"items\\\":[\\\"Exiger le titre foncier avant toute signature\\\",\\\"Faire évaluer le bien par un expert immobilier agréé\\\",\\\"Vérifier l'historique cadastral aux Services Domaniaux\\\",\\\"Comparer au moins 3 biens similaires dans le quartier\\\"]}\nROUTES CTA DISPONIBLES (choisir la plus pertinente selon l'angle de l'article) :\n- Location : {\\\"type\\\":\\\"cta\\\",\\\"text\\\":\\\"Voir les biens à louer à Dakar\\\",\\\"href\\\":\\\"/location\\\",\\\"style\\\":\\\"primary\\\"}\n- Vente/Investissement : {\\\"type\\\":\\\"cta\\\",\\\"text\\\":\\\"Voir les biens à vendre\\\",\\\"href\\\":\\\"/vente\\\",\\\"style\\\":\\\"primary\\\"}\n- Recherche générale : {\\\"type\\\":\\\"cta\\\",\\\"text\\\":\\\"Rechercher un bien immobilier\\\",\\\"href\\\":\\\"/vente\\\",\\\"style\\\":\\\"primary\\\"}\n- Estimation : {\\\"type\\\":\\\"cta\\\",\\\"text\\\":\\\"Estimer la valeur de mon bien\\\",\\\"href\\\":\\\"/estimation\\\",\\\"style\\\":\\\"secondary\\\"}\n- Contact : {\\\"type\\\":\\\"cta\\\",\\\"text\\\":\\\"Contacter un expert Dousel\\\",\\\"href\\\":\\\"/contact\\\",\\\"style\\\":\\\"secondary\\\"}\n\nPUBLIC CIBLE : ${d.audience || 'Grand public immobilier'}\nANGLE : ${d.angle || 'Analyse critique'}\n\nFORMAT DE RÉPONSE (JSON valide uniquement, aucun texte autour) :\n{\n  \\\"title\\\": \\\"Titre journalistique qui annonce une position (60-70 car.)\\\",\n  \\\"excerpt\\\": \\\"Chapeau 150-160 car résumant la thèse centrale\\\",\n  \\\"meta_title\\\": \\\"Titre SEO 55-60 car\\\",\n  \\\"meta_description\\\": \\\"Description SEO 150-160 car\\\",\n  \\\"author_name\\\": \\\"Équipe éditoriale Dousel\\\",\n  \\\"read_time_estimate\\\": 6,\n  \\\"confidence_score\\\": 72,\n  \\\"sources_used\\\": [{\\\"title\\\": \\\"...\\\", \\\"url\\\": \\\"...\\\"}],\n  \\\"blocks\\\": [\n    MINIMUM 15 BLOCS : 1 table + 1 quote + 2 callouts + 1 list ordonnée\n  ]\n}`;\n\nconst userPrompt = `Rédige un article de fond argumentatif sur ce sujet pour Dousel Immo :\\n\\nSujet : ${d.topic}\\nCatégorie : ${d.category}\\nAngle éditorial : ${d.angle}\\nPublic cible : ${d.audience}\\nLongueur cible : ${d.wordTarget} mots\\n\\nSOURCES DISPONIBLES (analyse, croise et cite) :\\n${sourcesText}\\n\\nCHECKLIST :\\n✓ L'article défend-il une thèse claire et affirmée ?\\n✓ Chaque H2 est-il un argument (pas juste un sujet) ?\\n✓ Y a-t-il au moins 15 blocs ?\\n✓ Y a-t-il 1 tableau, 1 citation, 2 callouts, 1 liste ordonnée ?\\n✓ Les sources sont-elles citées avec [texte](url) dans les paragraphes ?\\n✓ Le tableau contient-il des chiffres réels (pas 'Valeur A', 'v1', 'Ligne 1') ?\\n✓ Les callouts contiennent-ils des faits précis (pas 'Fait 1', 'Implication pratique') ?\\n✓ La liste contient-elle des conseils concrets (pas 'Action concrète') ?\\n\\nRéponds UNIQUEMENT avec le JSON valide.`;\n\nreturn [{ json: {\n  ...d,\n  _llmPayload: {\n    model: 'anthropic/claude-3.5-sonnet',\n    messages: [\n      { role: 'system', content: systemPrompt },\n      { role: 'user', content: userPrompt }\n    ],\n    temperature: 0.8,\n    max_tokens: 8000\n  }\n}}];"
       },
       "id": "aaa91844",
       "name": "📝 Build Prompt1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2200, 220]
+      "position": [
+        2200,
+        220
+      ]
     },
     {
       "parameters": {
@@ -353,7 +435,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer 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"
+              "value": "=Bearer {{ $env.OPENROUTER_API_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -370,7 +452,10 @@
       "name": "🤖 Claude API1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [2420, 220]
+      "position": [
+        2420,
+        220
+      ]
     },
     {
       "parameters": {
@@ -380,7 +465,10 @@
       "name": "🔧 Parser Réponse1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2640, 220]
+      "position": [
+        2640,
+        220
+      ]
     },
     {
       "parameters": {
@@ -390,7 +478,10 @@
       "name": "Build Pexel",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2860, 220]
+      "position": [
+        2860,
+        220
+      ]
     },
     {
       "parameters": {
@@ -428,17 +519,23 @@
       "name": "Build Image",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [3080, 220]
+      "position": [
+        3080,
+        220
+      ]
     },
     {
       "parameters": {
-        "jsCode": "var parserOutput = $('🔧 Parser Réponse1').first().json;\nvar article = parserOutput.supabasePayload || {};\nvar config   = parserOutput._config || {};\nvar photos = $input.first().json.photos || [];\nvar coverUrl = photos.length > 0 && photos[0].src ? (photos[0].src.large2x || photos[0].src.large) : null;\nvar galleryItems = photos.slice(1, 4).map(function(p) {\n  return { cloudinaryId: p.src ? (p.src.large || p.src.medium) : '', alt: p.alt || '', caption: p.photographer ? ('Crédit : ' + p.photographer) : '' };\n});\nvar finalBlocks = (article.blocks || []).slice();\nif (galleryItems.length > 0) {\n  finalBlocks.splice(Math.min(3, finalBlocks.length), 0, { id: 'gallery-pexels-' + Date.now(), type: 'gallery', images: galleryItems });\n}\nvar supabasePayload = Object.assign({}, article, { cover_image: coverUrl, blocks: finalBlocks });\nreturn [{ json: { supabasePayload: supabasePayload, sourcesUsed: parserOutput.sourcesUsed || [], confidenceScore: parserOutput.confidenceScore || 50, email: config.email || '', _config: config } }];"
+        "jsCode": "var parserOutput = $('🔧 Parser Réponse1').first().json;\nvar article = parserOutput.supabasePayload || {};\nvar config   = parserOutput._config || {};\nvar photos = $input.first().json.photos || [];\nvar coverUrl = photos.length > 0 && photos[0].src ? (photos[0].src.large2x || photos[0].src.large) : null;\nvar galleryItems = photos.slice(1, 4).map(function(p) {\n  return { cloudinaryId: p.src ? (p.src.large || p.src.medium) : '', alt: p.alt || '', caption: p.photographer ? ('Crédit : ' + p.photographer) : '' };\n});\nvar finalBlocks = (article.blocks || []).slice();\nif (galleryItems.length > 0) {\n  finalBlocks.splice(Math.min(3, finalBlocks.length), 0, { id: 'gallery-pexels-' + Date.now(), type: 'gallery', images: galleryItems });\n}\n\n// Generate a valid slug from title\nfunction toSlug(title) { return (title||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s-]/g, '').trim().replace(/\\s+/g, '-').replace(/-+/g, '-'); }\nvar slug = toSlug(article.title || 'article-' + Date.now());\n\nvar supabasePayload = Object.assign({}, article, { slug: slug, cover_image: coverUrl, blocks: finalBlocks });\nreturn [{ json: { supabasePayload: supabasePayload, sourcesUsed: parserOutput.sourcesUsed || [], confidenceScore: parserOutput.confidenceScore || 50, email: config.email || '', _config: config } }];"
       },
       "id": "fc82de79",
       "name": "📸 Build Images",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [3300, 220]
+      "position": [
+        3300,
+        220
+      ]
     },
     {
       "parameters": {
@@ -448,7 +545,10 @@
       "name": "🏆 Score Qualité1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [3520, 220]
+      "position": [
+        3520,
+        220
+      ]
     },
     {
       "parameters": {
@@ -477,7 +577,10 @@
       "name": "🎯 Quality Gate1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [3740, 220]
+      "position": [
+        3740,
+        220
+      ]
     },
     {
       "parameters": {
@@ -513,7 +616,10 @@
       "name": "💾 Supabase Insert1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [3960, 140]
+      "position": [
+        3960,
+        140
+      ]
     },
     {
       "parameters": {
@@ -528,7 +634,10 @@
       "name": "📧 Email Succès1",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
-      "position": [4180, 140]
+      "position": [
+        4180,
+        140
+      ]
     },
     {
       "parameters": {
@@ -543,7 +652,10 @@
       "name": "📧 Email Rejeté1",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
-      "position": [3960, 320]
+      "position": [
+        3960,
+        320
+      ]
     },
     {
       "parameters": {
@@ -558,7 +670,10 @@
       "name": "📧 Email Pas de Sources1",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
-      "position": [2200, 400]
+      "position": [
+        2200,
+        400
+      ]
     }
   ],
   "connections": {
