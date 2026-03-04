@@ -6,10 +6,11 @@ import { ArticleRenderer } from '@/components/blog/ArticleRenderer';
 
 export const revalidate = 3600;
 
-interface Props { params: { slug: string } }
+interface Props { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const article = await getArticleBySlug(params.slug);
+  const { slug } = await params;
+  const article = await getArticleBySlug(slug);
   if (!article) return {};
   return {
     title: article.meta_title ?? article.title,
@@ -18,18 +19,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function VitrineArticlePage({ params }: Props) {
-  const article = await getArticleBySlug(params.slug);
+  const { slug } = await params;
+  const article = await getArticleBySlug(slug);
   if (!article || article.status !== 'published') notFound();
 
   return (
-    <div className="min-h-screen py-16 px-4">
+    <div className="min-h-screen pt-32 pb-20 px-4">
       <ArticleRenderer
         title={article.title}
+        excerpt={article.excerpt ?? undefined}
         blocks={article.blocks}
-        authorName={article.author_name}
-        publishedAt={article.published_at ?? undefined}
+        authorName={article.author_name ?? undefined}
+        publishedAt={article.published_at ?? article.created_at ?? undefined}
         category={article.category ?? undefined}
         readTime={article.read_time_minutes ?? undefined}
+        coverImage={article.cover_image ?? undefined}
       />
     </div>
   );

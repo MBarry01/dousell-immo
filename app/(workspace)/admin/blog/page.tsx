@@ -2,12 +2,16 @@
 import Link from 'next/link';
 import { requireAnyRole } from '@/lib/permissions';
 import { getArticles, deleteArticle, publishArticle, unpublishArticle } from '@/lib/actions/blog';
+import { GenerateArticleModal } from '@/components/admin/blog/GenerateArticleModal';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminBlogPage() {
-  await requireAnyRole(['admin', 'superadmin']);
-  const articles = await getArticles();
+  const [context, articles] = await Promise.all([
+    requireAnyRole(['admin', 'superadmin']),
+    getArticles(),
+  ]);
+  const userEmail = context?.user?.email ?? '';
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -16,12 +20,15 @@ export default async function AdminBlogPage() {
           <h1 className="text-2xl font-bold text-foreground">Articles du blog</h1>
           <p className="text-sm text-muted-foreground mt-1">{articles.length} article(s)</p>
         </div>
-        <Link
-          href="/admin/blog/new"
-          className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
-        >
-          + Nouvel article
-        </Link>
+        <div className="flex items-center gap-3">
+          <GenerateArticleModal userEmail={userEmail} />
+          <Link
+            href="/admin/blog/new"
+            className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+          >
+            + Nouvel article
+          </Link>
+        </div>
       </div>
 
       {articles.length === 0 ? (

@@ -4,25 +4,56 @@ import type { ArticleBlock } from '@/types/article';
 
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? 'dkkirzpxe';
 
-function cldUrl(id: string): string {
+function cldUrl(id: string, transform = ''): string {
   if (!id) return '';
-  // If it's already a full URL, return as-is
   if (id.startsWith('http')) return id;
-  return `https://res.cloudinary.com/${cloudName}/image/upload/${id}`;
+  return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}${id}`;
+}
+
+/** Parses inline markdown links [label](url) and renders them as <a> elements */
+function parseInlineText(text: string): React.ReactNode[] {
+  const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = linkRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    parts.push(
+      <a
+        key={match.index}
+        href={match[2]}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[#F4C430] hover:text-[#E5B82A] underline underline-offset-2 decoration-[#F4C430]/50 transition-colors"
+      >
+        {match[1]}
+      </a>
+    );
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : [text];
 }
 
 function HeadingRenderer({ block }: { block: Extract<ArticleBlock, { type: 'heading' }> }) {
   const Tag = `h${block.level}` as 'h1' | 'h2' | 'h3';
   const cls = {
     1: 'text-4xl font-bold mt-10 mb-4',
-    2: 'text-2xl font-semibold mt-8 mb-3',
+    2: 'text-2xl font-semibold mt-8 mb-3 border-b border-border pb-2',
     3: 'text-xl font-semibold mt-6 mb-2',
   }[block.level];
   return <Tag className={`${cls} text-foreground font-display`}>{block.text}</Tag>;
 }
 
 function ParagraphRenderer({ block }: { block: Extract<ArticleBlock, { type: 'paragraph' }> }) {
-  return <p className="text-foreground/90 leading-8 text-lg mb-6">{block.text}</p>;
+  return <p className="text-foreground/90 leading-8 text-lg mb-6">{parseInlineText(block.text)}</p>;
 }
 
 function QuoteRenderer({ block }: { block: Extract<ArticleBlock, { type: 'quote' }> }) {
@@ -38,11 +69,10 @@ function QuoteRenderer({ block }: { block: Extract<ArticleBlock, { type: 'quote'
 
 function ImageRenderer({ block }: { block: Extract<ArticleBlock, { type: 'image' }> }) {
   if (!block.cloudinaryId) return null;
-  const src = cldUrl(block.cloudinaryId);
   return (
     <figure className="my-8">
       <div className="relative aspect-video rounded-xl overflow-hidden">
-        <Image src={src} alt={block.alt ?? ''} fill className="object-cover" />
+        <Image src={cldUrl(block.cloudinaryId, 'w_800,q_auto,f_auto/')} alt={block.alt ?? ''} fill className="object-cover" />
       </div>
       {block.caption && (
         <figcaption className="mt-2 text-sm text-center text-muted-foreground">{block.caption}</figcaption>
@@ -59,7 +89,7 @@ function GalleryRenderer({ block }: { block: Extract<ArticleBlock, { type: 'gall
       {images.map((img, i) => (
         <figure key={i}>
           <div className="relative aspect-square rounded-xl overflow-hidden">
-            <Image src={cldUrl(img.cloudinaryId)} alt={img.alt ?? ''} fill className="object-cover" />
+            <Image src={cldUrl(img.cloudinaryId, 'w_400,q_auto,f_auto/')} alt={img.alt ?? ''} fill className="object-cover" />
           </div>
           {img.caption && (
             <figcaption className="mt-1 text-xs text-center text-muted-foreground">{img.caption}</figcaption>
@@ -79,7 +109,7 @@ function CalloutRenderer({ block }: { block: Extract<ArticleBlock, { type: 'call
       <ul className="space-y-2">
         {block.items.map((item, i) => (
           <li key={i} className="flex items-start gap-2 text-foreground/80">
-            <span className="text-[#F4C430] mt-1 shrink-0">✓</span> {item}
+            <span className="text-[#F4C430] mt-1 shrink-0">✓</span> {parseInlineText(item)}
           </li>
         ))}
       </ul>
@@ -142,7 +172,7 @@ function ListRenderer({ block }: { block: Extract<ArticleBlock, { type: 'list' }
           ) : (
             <span className="text-[#F4C430] mt-1.5 shrink-0">•</span>
           )}
-          <span>{item}</span>
+          <span>{parseInlineText(item)}</span>
         </li>
       ))}
     </Tag>
@@ -151,16 +181,10 @@ function ListRenderer({ block }: { block: Extract<ArticleBlock, { type: 'list' }
 
 function VideoRenderer({ block }: { block: Extract<ArticleBlock, { type: 'video' }> }) {
   if (!block.youtubeId) return null;
-  // Extract ID if user pasted full URL
   let id = block.youtubeId;
   if (id.includes('youtube.com')) {
-    try {
-      id = new URL(id).searchParams.get('v') ?? id;
-    } catch {
-      // malformed URL — use as-is
-    }
+    try { id = new URL(id).searchParams.get('v') ?? id; } catch { /* malformed URL */ }
   }
-
   return (
     <figure className="my-8">
       <div className="relative aspect-video rounded-xl overflow-hidden">
@@ -180,65 +204,102 @@ function VideoRenderer({ block }: { block: Extract<ArticleBlock, { type: 'video'
 
 interface Props {
   title: string;
+  excerpt?: string;
   blocks: ArticleBlock[];
   authorName?: string;
   publishedAt?: string;
   category?: string;
   readTime?: number;
+  coverImage?: string;
 }
 
-export function ArticleRenderer({ title, blocks, authorName, publishedAt, category, readTime }: Props) {
+export function ArticleRenderer({ title, excerpt, blocks, authorName, publishedAt, category, readTime, coverImage }: Props) {
+  const formattedDate = publishedAt
+    ? new Date(publishedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
+
   return (
-    <article className="max-w-2xl mx-auto">
-      {/* Article header */}
-      <header className="mb-10">
+    <article className="max-w-3xl mx-auto">
+
+      {/* ── Header style Le Monde ── */}
+      <header className="mb-0">
+
+        {/* Catégorie */}
         {category && (
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#F4C430] mb-4">{category}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-[#F4C430] mb-5">
+            {category}
+          </p>
         )}
-        {title && (
-          <h1 className="text-4xl md:text-5xl font-bold font-display text-foreground leading-tight mb-6">
-            {title}
-          </h1>
+
+        {/* Titre */}
+        <h1 className="text-4xl md:text-5xl font-bold font-display text-foreground leading-tight mb-5">
+          {title}
+        </h1>
+
+        {/* Chapeau / excerpt */}
+        {excerpt && (
+          <p className="text-lg text-foreground/70 leading-relaxed mb-5 border-l-2 border-[#F4C430]/50 pl-4">
+            {excerpt}
+          </p>
         )}
-        {(authorName || publishedAt || readTime) && (
-          <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-            {authorName && <span>{authorName}</span>}
-            {publishedAt && (
-              <>
-                <span>·</span>
-                <span>
-                  {new Date(publishedAt).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </span>
-              </>
+
+        {/* Auteur + date + temps de lecture */}
+        {(authorName || formattedDate || readTime) && (
+          <div className="text-sm text-muted-foreground mb-5 space-y-1">
+            {authorName && (
+              <p>
+                <span className="text-foreground/50">Par</span>{' '}
+                <span className="font-medium text-foreground/80">{authorName}</span>
+              </p>
             )}
-            {readTime && (
-              <>
-                <span>·</span>
-                <span>{readTime} min de lecture</span>
-              </>
+            {(formattedDate || readTime) && (
+              <p className="flex items-center gap-1.5 flex-wrap">
+                {formattedDate && <span>Publié le {formattedDate}</span>}
+                {formattedDate && readTime && <span aria-hidden>·</span>}
+                {readTime && (
+                  <span className="flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Lecture {readTime} min.
+                  </span>
+                )}
+              </p>
             )}
           </div>
         )}
-        <div className="mt-6 h-px bg-border" />
+
+        <div className="h-px bg-border mb-8" />
+
+        {/* Photo de couverture pleine largeur */}
+        {coverImage && (
+          <figure className="mb-10 -mx-4 md:mx-0">
+            <div className="relative aspect-[16/9] md:rounded-xl overflow-hidden">
+              <Image
+                src={cldUrl(coverImage, 'w_1200,q_auto,f_auto/')}
+                alt={title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          </figure>
+        )}
       </header>
 
-      {/* Render blocks */}
+      {/* ── Corps de l'article ── */}
       {blocks.map(block => {
         switch (block.type) {
-          case 'heading':   return <HeadingRenderer key={block.id} block={block} />;
+          case 'heading':   return <HeadingRenderer   key={block.id} block={block} />;
           case 'paragraph': return <ParagraphRenderer key={block.id} block={block} />;
-          case 'quote':     return <QuoteRenderer key={block.id} block={block} />;
-          case 'image':     return <ImageRenderer key={block.id} block={block} />;
-          case 'gallery':   return <GalleryRenderer key={block.id} block={block} />;
-          case 'callout':   return <CalloutRenderer key={block.id} block={block} />;
-          case 'cta':       return <CtaRenderer key={block.id} block={block} />;
-          case 'table':     return <TableRenderer key={block.id} block={block} />;
-          case 'list':      return <ListRenderer key={block.id} block={block} />;
-          case 'video':     return <VideoRenderer key={block.id} block={block} />;
+          case 'quote':     return <QuoteRenderer     key={block.id} block={block} />;
+          case 'image':     return <ImageRenderer     key={block.id} block={block} />;
+          case 'gallery':   return <GalleryRenderer   key={block.id} block={block} />;
+          case 'callout':   return <CalloutRenderer   key={block.id} block={block} />;
+          case 'cta':       return <CtaRenderer       key={block.id} block={block} />;
+          case 'table':     return <TableRenderer     key={block.id} block={block} />;
+          case 'list':      return <ListRenderer      key={block.id} block={block} />;
+          case 'video':     return <VideoRenderer     key={block.id} block={block} />;
         }
       })}
     </article>

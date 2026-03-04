@@ -1,9 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Calendar, Clock, ArrowRight, Tag } from "lucide-react";
 import { useState } from "react";
+
+const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? 'dkkirzpxe';
+
+/** Handles both Cloudinary public IDs and full external URLs (Pexels, etc.) */
+function coverSrc(id: string | null): string | null {
+  if (!id) return null;
+  if (id.startsWith('http')) return id;
+  return `https://res.cloudinary.com/${cloudName}/image/upload/w_600,q_auto,f_auto/${id}`;
+}
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -16,9 +26,11 @@ interface Article {
   id: string;
   title: string;
   slug: string;
+  excerpt: string | null;
   category: string | null;
   published_at: string | null;
   read_time_minutes: number | null;
+  cover_image: string | null;
 }
 
 interface VitrineBlogListProps {
@@ -101,9 +113,37 @@ export function VitrineBlogList({ articles }: VitrineBlogListProps) {
             whileInView="visible"
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="group overflow-hidden rounded-2xl border border-white/10 bg-card transition-all hover:border-[#F4C430]/30 hover:shadow-lg hover:shadow-[#F4C430]/5"
+            className="group overflow-hidden rounded-2xl border border-white/10 bg-card transition-all hover:border-[#F4C430]/30 hover:shadow-lg hover:shadow-[#F4C430]/5 hover:-translate-y-1"
           >
             <Link href={`/blog/${article.slug}`} className="block h-full">
+
+              {/* Vignette de couverture */}
+              <div className="relative aspect-[16/9] overflow-hidden">
+                {article.cover_image ? (
+                  <Image
+                    src={coverSrc(article.cover_image)!}
+                    alt={article.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
+                    <span className="text-4xl opacity-20">📰</span>
+                  </div>
+                )}
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                {/* Badge catégorie en overlay */}
+                {article.category && (
+                  <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full bg-[#F4C430] px-2.5 py-0.5 text-xs font-bold text-black uppercase tracking-wide">
+                    <Tag className="h-3 w-3" />
+                    {article.category}
+                  </span>
+                )}
+              </div>
+
+              {/* Contenu */}
               <div className="p-5">
                 <div className="mb-3 flex items-center gap-4 text-xs text-white/50">
                   {article.published_at && (
@@ -124,20 +164,19 @@ export function VitrineBlogList({ articles }: VitrineBlogListProps) {
                   )}
                 </div>
 
-                {article.category && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#F4C430] px-3 py-1 text-xs font-medium text-black mb-3">
-                    <Tag className="h-3 w-3" />
-                    {article.category}
-                  </span>
-                )}
-
                 <h3 className="mb-2 text-lg font-semibold text-white group-hover:text-[#F4C430] transition-colors line-clamp-2">
                   {article.title}
                 </h3>
 
-                <div className="inline-flex items-center gap-1 text-sm font-medium text-[#F4C430] group-hover:gap-2 transition-all mt-4">
+                {article.excerpt && (
+                  <p className="text-sm text-white/50 line-clamp-2 mb-4">
+                    {article.excerpt}
+                  </p>
+                )}
+
+                <div className="inline-flex items-center gap-1 text-sm font-medium text-[#F4C430] group-hover:gap-2 transition-all mt-2">
                   Lire l&apos;article
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </div>
               </div>
             </Link>

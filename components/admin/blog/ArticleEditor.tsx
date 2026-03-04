@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { Article, ArticleBlock, ArticleTemplate } from '@/types/article';
 import { BlockCanvas } from './BlockCanvas';
-import { SeoPanel } from './SeoPanel';
+import { SeoPanel, type SeoValues } from './SeoPanel';
 import { TemplateSelector } from './TemplateSelector';
 import { ARTICLE_TEMPLATES } from '@/lib/blog/templates';
 import { createArticle, updateArticle, publishArticle } from '@/lib/actions/blog';
@@ -19,14 +19,17 @@ export function ArticleEditor({ article }: Props) {
   const isNew = !article;
   const [showTemplateSelector, setShowTemplateSelector] = useState(isNew);
   const [title, setTitle] = useState(article?.title ?? '');
-  const [blocks, setBlocks] = useState<ArticleBlock[]>(article?.blocks ?? []);
-  const [seo, setSeo] = useState({
+  const [blocks, setBlocks] = useState<ArticleBlock[]>(
+    (article?.blocks ?? []).map(b => b.id ? b : { ...b, id: Math.random().toString(36).slice(2, 9) })
+  );
+  const [seo, setSeo] = useState<SeoValues>({
     slug: article?.slug ?? '',
     meta_title: article?.meta_title ?? '',
     meta_description: article?.meta_description ?? '',
     excerpt: article?.excerpt ?? '',
     category: (article?.category ?? '') as import('@/types/article').ArticleCategory | '',
     author_name: article?.author_name ?? 'Équipe Doussel',
+    cover_image: article?.cover_image ?? '',
   });
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<'editor' | 'preview'>('editor');
@@ -61,11 +64,11 @@ export function ArticleEditor({ article }: Props) {
           status: 'draft',
           template: 'standard',
           content_markdown: null,
-          cover_image: null,
+          cover_image: seo.cover_image || null,
           author_avatar: null,
         });
       } else {
-        await updateArticle(article!.id, payload);
+        await updateArticle(article!.id, { ...payload, cover_image: seo.cover_image || null });
       }
     } finally {
       setSaving(false);
@@ -135,7 +138,14 @@ export function ArticleEditor({ article }: Props) {
                 <BlockCanvas blocks={blocks} onChange={setBlocks} />
               </div>
             ) : (
-              <ArticleRenderer title={title} blocks={blocks} />
+              <ArticleRenderer
+                title={title}
+                blocks={blocks}
+                excerpt={seo.excerpt || undefined}
+                authorName={seo.author_name || undefined}
+                category={seo.category || undefined}
+                coverImage={seo.cover_image || undefined}
+              />
             )}
           </div>
 

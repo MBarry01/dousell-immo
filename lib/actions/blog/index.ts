@@ -133,7 +133,7 @@ export async function deleteArticle(id: string) {
 export async function getArticles(status?: 'draft' | 'published') {
   const query = supabaseAdmin
     .from('articles')
-    .select('id, title, slug, status, category, published_at, read_time_minutes, created_at, template')
+    .select('id, title, slug, status, category, published_at, read_time_minutes, created_at, template, cover_image, excerpt')
     .order('created_at', { ascending: false });
 
   if (status) query.eq('status', status);

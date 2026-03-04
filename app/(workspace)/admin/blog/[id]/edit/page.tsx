@@ -6,12 +6,13 @@ import { ArticleEditor } from '@/components/admin/blog/ArticleEditor';
 import type { Article } from '@/types/article';
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function EditArticlePage({ params }: Props) {
   await requireAnyRole(['admin', 'superadmin']);
-  const raw = await getArticleById(params.id);
+  const { id } = await params;
+  const raw = await getArticleById(id);
   if (!raw) notFound();
   // Cast from Supabase row (articles table not in generated types yet) to domain type
   const article = raw as unknown as Article;

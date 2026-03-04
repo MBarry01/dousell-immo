@@ -1,14 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAnyRole } from '@/lib/permissions';
+import { isAdmin } from '@/lib/admin-auth';
 import { uploadToCloudinary } from '@/lib/cloudinary-utils';
 
+export const runtime = 'nodejs';
+
 export async function POST(req: NextRequest) {
+  // Auth check
   try {
-    await requireAnyRole(['admin', 'superadmin']);
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const adminOk = await isAdmin();
+    if (!adminOk) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  } catch (authError) {
+    console.error('[blog/upload-image] Auth error:', authError);
+    return NextResponse.json({ error: 'Auth check failed' }, { status: 500 });
   }
 
+  // Upload
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
@@ -32,12 +40,14 @@ export async function POST(req: NextRequest) {
     const result = await uploadToCloudinary(base64, 'blog', ['blog-article']);
 
     if ('error' in result) {
+      console.error('[blog/upload-image] Cloudinary error:', result.error);
       return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
     return NextResponse.json({ publicId: result.publicId, url: result.url });
   } catch (error) {
-    console.error('Upload error:', error);
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[blog/upload-image] Unexpected error:', message, error);
+    return NextResponse.json({ error: `Upload failed: ${message}` }, { status: 500 });
   }
 }

@@ -62,11 +62,15 @@ export function ImageBlock({ block, onChange }: Props) {
 
       <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
 
+      {error && (
+        <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+          {error}
+        </p>
+      )}
+
       {block.cloudinaryId && (
         <p className="text-xs text-muted-foreground truncate">ID: {block.cloudinaryId}</p>
       )}
-
-      {error && <p className="text-xs text-red-500">{error}</p>}
 
       <input
         value={block.caption ?? ''}

@@ -12,7 +12,7 @@ function GalleryImageItem({
   img, onUpdate, onRemove,
 }: { img: GalleryImage; onUpdate: (img: Partial<GalleryImage>) => void; onRemove: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { upload, uploading } = useCloudinaryUpload();
+  const { upload, uploading, error } = useCloudinaryUpload();
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -51,6 +51,11 @@ function GalleryImageItem({
         <input value={img.caption ?? ''} onChange={e => onUpdate({ caption: e.target.value })}
           placeholder="Légende" className="w-full bg-transparent text-xs text-muted-foreground outline-none border-none" />
       </div>
+      {error && (
+        <p className="text-xs text-red-400 bg-red-500/10 px-2 py-1.5 border-t border-red-500/20 leading-tight">
+          {error}
+        </p>
+      )}
       <button onClick={onRemove} className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500">✕</button>
       <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
     </div>
