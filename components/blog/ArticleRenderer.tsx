@@ -1,6 +1,7 @@
 // components/blog/ArticleRenderer.tsx
 import Image from 'next/image';
 import type { ArticleBlock } from '@/types/article';
+import { CtaBlockRenderer } from './CtaBlockRenderer';
 
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? 'dkkirzpxe';
 
@@ -211,9 +212,10 @@ interface Props {
   category?: string;
   readTime?: number;
   coverImage?: string;
+  articleId?: string;
 }
 
-export function ArticleRenderer({ title, excerpt, blocks, authorName, publishedAt, category, readTime, coverImage }: Props) {
+export function ArticleRenderer({ title, excerpt, blocks, authorName, publishedAt, category, readTime, coverImage, articleId }: Props) {
   const formattedDate = publishedAt
     ? new Date(publishedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
@@ -296,7 +298,9 @@ export function ArticleRenderer({ title, excerpt, blocks, authorName, publishedA
           case 'image':     return <ImageRenderer     key={block.id} block={block} />;
           case 'gallery':   return <GalleryRenderer   key={block.id} block={block} />;
           case 'callout':   return <CalloutRenderer   key={block.id} block={block} />;
-          case 'cta':       return <CtaRenderer       key={block.id} block={block} />;
+          case 'cta':       return articleId
+            ? <CtaBlockRenderer key={block.id} block={block} articleId={articleId} />
+            : <CtaRenderer      key={block.id} block={block} />;
           case 'table':     return <TableRenderer     key={block.id} block={block} />;
           case 'list':      return <ListRenderer      key={block.id} block={block} />;
           case 'video':     return <VideoRenderer     key={block.id} block={block} />;
