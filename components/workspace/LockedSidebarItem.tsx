@@ -222,7 +222,7 @@ export function LockedSidebarItem({
           "flex items-center rounded-lg transition-all duration-200 group h-11",
           "px-[14px]",
           isActive
-            ? "bg-[#0F172A] text-white shadow-md font-medium dark:bg-primary/20 dark:text-primary"
+            ? "bg-[#0F172A] text-white shadow-md font-medium dark:border-l-2 dark:border-white/40 dark:rounded-l-none dark:bg-white/[0.04] dark:text-white dark:shadow-none"
             : "text-slate-600 dark:text-slate-300 hover:translate-x-1 hover:scale-[1.01]"
         )}
         title={isCollapsed && !isMobile ? label : undefined}
@@ -232,7 +232,7 @@ export function LockedSidebarItem({
             className={cn(
               "h-5 w-5 transition-all",
               isActive
-                ? "text-white dark:text-primary"
+                ? "text-white"
                 : "text-slate-600 dark:text-slate-300 group-hover:text-foreground"
             )}
           />

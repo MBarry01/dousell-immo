@@ -159,7 +159,7 @@ function SidebarContent({ filteredNavItems, isActive }: SidebarContentProps) {
                   className={cn(
                     "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     hasActiveChild || isOpen
-                      ? "bg-white/10 text-white"
+                      ? "border-l-2 border-white/40 rounded-l-none bg-white/[0.04] text-white"
                       : "text-white/70 hover:bg-white/5 hover:text-white"
                   )}
                 >
@@ -187,7 +187,7 @@ function SidebarContent({ filteredNavItems, isActive }: SidebarContentProps) {
                           className={cn(
                             "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
                             active
-                              ? "bg-white/10 text-white"
+                              ? "border-l-2 border-white/40 rounded-l-none bg-white/[0.04] text-white"
                               : "text-white/60 hover:bg-white/5 hover:text-white"
                           )}
                         >
@@ -218,7 +218,7 @@ function SidebarContent({ filteredNavItems, isActive }: SidebarContentProps) {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 active
-                  ? "bg-white/10 text-white"
+                  ? "border-l-2 border-white/40 rounded-l-none bg-white/[0.04] text-white"
                   : "text-white/70 hover:bg-white/5 hover:text-white"
               )}
             >

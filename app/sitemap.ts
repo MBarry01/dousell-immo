@@ -1,12 +1,16 @@
 import { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
 import { slugify } from '@/lib/slugs';
+import { getArticles } from '@/lib/actions/blog';
 
 const BASE_URL = 'https://www.dousel.com';
 
 export const revalidate = 86400; // Update sitemap every 24h (réduit la charge Vercel)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+
+    // 0. Récupérer les articles publiés
+    const publishedArticles = await getArticles('published');
 
     // 1. Récupérer les données LOCATION
     const { data: rentals } = await supabase
@@ -80,6 +84,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
     }));
 
+    // 5. Articles de blog publiés
+    const blogRoutes: MetadataRoute.Sitemap = (publishedArticles || []).map((article) => ({
+        url: `${BASE_URL}/blog/${article.slug}`,
+        lastModified: new Date(article.published_at || article.created_at || new Date()),
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+    }));
+
     // 4. Les pages statiques de base
     const staticRoutes = [
         '',
@@ -87,6 +99,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         '/a-propos',
         '/contact',
         '/planifier-visite',
+        '/blog',
         '/pro/blog/immobilier-senegal-diaspora',
     ].map((route) => ({
         url: `${BASE_URL}${route}`,
@@ -95,5 +108,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 1.0,
     }));
 
-    return [...staticRoutes, ...routes, ...propertyRoutes];
+    return [...staticRoutes, ...routes, ...propertyRoutes, ...blogRoutes];
 }

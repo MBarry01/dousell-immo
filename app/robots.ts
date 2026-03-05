@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
             { userAgent: 'MJ12bot', disallow: '/' },
             { userAgent: 'DotBot', disallow: '/' },
             { userAgent: 'BLEXBot', disallow: '/' },
-            // Tous les autres bots (Google, Bing, etc.) : crawl autorisé avec délai
+            // Tous les autres bots (Google, Bing, etc.) : crawl autorisé sans délai
             {
                 userAgent: '*',
                 allow: '/',
@@ -22,7 +22,6 @@ export default function robots(): MetadataRoute.Robots {
                     '/admin/',
                     '/api/',
                 ],
-                crawlDelay: 10,
             },
         ],
         sitemap: `${BASE_URL}/sitemap.xml`,
