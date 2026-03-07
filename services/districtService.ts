@@ -187,8 +187,9 @@ export async function getPropertiesByDistrict(
 
     // Filter by type if provided
     // Note: type is stored in details.type (JSONB nested field)
+    // Use ilike for case-insensitive matching — slug 'appartement' must match 'Appartement' in DB
     if (type) {
-      query = query.eq('details->type', `"${type}"`);
+      query = query.ilike('details->>type', type);
     }
 
     // Add pagination
