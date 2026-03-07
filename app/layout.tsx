@@ -176,34 +176,50 @@ export default async function RootLayout({
                 {
                   "@type": "Organization",
                   "@id": "https://www.dousel.com/#organization",
-                  "name": "Dousel",
+                  "name": "Dousel Immo",
+                  "alternateName": "Dousel",
                   "url": "https://www.dousel.com",
                   "logo": "https://www.dousel.com/icons/icon-512.png",
-                  "description": "Plateforme immobilière de référence au Sénégal pour l'achat, la vente et la gestion locative.",
+                  "description": "Plateforme immobilière n°1 au Sénégal pour la vente, la location et la gestion locative digitalisée. Experte de l'accompagnement de la diaspora et de la sécurisation des transactions immobilières.",
+                  "foundingLocation": { "@type": "City", "name": "Dakar, Sénégal" },
                   "sameAs": [
-                    "https://facebook.com",
-                    "https://instagram.com",
-                    "https://linkedin.com"
+                    "https://facebook.com/douselimmo",
+                    "https://instagram.com/douselimmo",
+                    "https://linkedin.com/company/douselimmo"
                   ]
                 },
                 {
                   "@type": "RealEstateAgent",
                   "@id": "https://www.dousel.com/#localbusiness",
+                  "name": "Dousel Immo - Immobilier Sénégal",
                   "url": "https://www.dousel.com",
-                  "name": "Dousel",
                   "image": "https://www.dousel.com/monument.png",
-                  "areaServed": [
-                    { "@type": "City", "name": "Dakar" },
-                    { "@type": "City", "name": "Saly" },
-                    { "@type": "City", "name": "Mbour" },
-                    { "@type": "Place", "name": "Petite Côte" }
-                  ],
+                  "description": "Leader de l'immobilier vérifié au Sénégal. Achat d'appartements, villas, terrains et location à Dakar et sur la Petite Côte.",
+                  "priceRange": "FCFA",
                   "address": {
                     "@type": "PostalAddress",
                     "addressCountry": "SN",
                     "addressLocality": "Dakar"
                   },
-                  "priceRange": "$$"
+                  "areaServed": [
+                    { "@type": "City", "name": "Dakar" },
+                    { "@type": "City", "name": "Saly" },
+                    { "@type": "City", "name": "Diamniadio" },
+                    { "@type": "Place", "name": "Petite Côte" },
+                    { "@type": "Country", "name": "Sénégal" }
+                  ]
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": "https://www.dousel.com/#website",
+                  "url": "https://www.dousel.com",
+                  "name": "Dousel Immo",
+                  "publisher": { "@id": "https://www.dousel.com/#organization" },
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://www.dousel.com/recherche?q={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                  }
                 }
               ]
             }),
