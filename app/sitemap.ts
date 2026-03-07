@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
 import { slugify } from '@/lib/slugs';
 import { getArticles } from '@/lib/actions/blog';
 
@@ -7,24 +7,23 @@ const BASE_URL = 'https://www.dousel.com';
 
 export const revalidate = 86400; // Update sitemap every 24h (réduit la charge Vercel)
 
+interface RpcRow {
+  city_slug: string;
+  district_slug: string;
+  property_type: string;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // 0. Récupérer les articles publiés
     const publishedArticles = await getArticles('published');
 
-    // 1. Récupérer les données LOCATION
-    const { data: rentals } = await supabase
-        .rpc('get_active_cities_and_types', { min_count: 1, target_transaction_type: 'location' });
+    // 1. Récupérer les données 4-tier (city/district/type) pour VENTE
+    const supabase = await createClient();
+    const { data: vente4tier } = await supabase
+        .rpc('get_active_cities_districts_types', { min_count: 1, target_category: 'vente' });
 
-    // 2. Récupérer les données VENTE
-    const { data: sales } = await supabase
-        .rpc('get_active_cities_and_types', { min_count: 1, target_transaction_type: 'vente' });
-
-    // 3. Récupérer les données IMMOBILIER (Global)
-    const { data: global } = await supabase
-        .rpc('get_active_cities_and_types', { min_count: 1 });
-
-    // 4. Récupérer tous les biens approuvés pour les inclure individuellement
+    // 2. Récupérer tous les biens approuvés pour les inclure individuellement
     const { data: properties } = await supabase
         .from('properties')
         .select('id, updated_at')
@@ -33,38 +32,55 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const routes: MetadataRoute.Sitemap = [];
 
-    // Helper pour ajouter des routes de catégories
-    const addCategoryRoutes = (items: any[], mode: 'location' | 'vente' | 'immobilier') => {
+    // Helper pour ajouter les routes 4-tier (city/district/type)
+    const add4TierRoutes = (items: RpcRow[] | null) => {
         const processedCities = new Set<string>();
+        const processedDistricts = new Set<string>();
 
-        // Root de la section
+        // Root immobilier
         routes.push({
-            url: `${BASE_URL}/${mode}`,
+            url: `${BASE_URL}/immobilier`,
             lastModified: new Date(),
             changeFrequency: 'daily',
             priority: 1.0,
         });
 
-        (items || []).forEach((page: { city: string; type: string }) => {
-            const citySlug = slugify(page.city);
-            const typeSlug = slugify(page.type);
+        // Traiter chaque combinaison city/district/type
+        (items || [])
+            .filter((row) => row.district_slug !== 'all') // Filtrer les 'all' districts
+            .forEach((row) => {
+                const citySlug = slugify(row.city_slug);
+                const districtSlug = slugify(row.district_slug);
+                const typeSlug = slugify(row.property_type);
 
-            // Page Ville/Type (Feuille)
-            routes.push({
-                url: `${BASE_URL}/${mode}/${citySlug}/${typeSlug}`,
-                lastModified: new Date(),
-                changeFrequency: 'daily',
-                priority: 0.8,
+                // Tier 4: /immobilier/[city]/[district]/[type]
+                routes.push({
+                    url: `${BASE_URL}/immobilier/${citySlug}/${districtSlug}/${typeSlug}`,
+                    lastModified: new Date(),
+                    changeFrequency: 'daily',
+                    priority: 0.8,
+                });
+
+                // Mémoriser les villes et quartiers uniques
+                processedCities.add(citySlug);
+                processedDistricts.add(`${citySlug}|${districtSlug}`);
             });
 
-            // Collecter les villes uniques
-            processedCities.add(citySlug);
+        // Tier 3: /immobilier/[city]/[district] (déduplicaté par clé unique)
+        processedDistricts.forEach((key) => {
+            const [citySlug, districtSlug] = key.split('|');
+            routes.push({
+                url: `${BASE_URL}/immobilier/${citySlug}/${districtSlug}`,
+                lastModified: new Date(),
+                changeFrequency: 'daily',
+                priority: 0.85,
+            });
         });
 
-        // Pages Ville (Parents)
-        processedCities.forEach(citySlug => {
+        // Tier 2: /immobilier/[city] (déduplicaté par set)
+        processedCities.forEach((citySlug) => {
             routes.push({
-                url: `${BASE_URL}/${mode}/${citySlug}`,
+                url: `${BASE_URL}/immobilier/${citySlug}`,
                 lastModified: new Date(),
                 changeFrequency: 'daily',
                 priority: 0.9,
@@ -72,9 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         });
     }
 
-    addCategoryRoutes(rentals, 'location');
-    addCategoryRoutes(sales, 'vente');
-    addCategoryRoutes(global, 'immobilier');
+    add4TierRoutes(vente4tier as RpcRow[] | null);
 
     // Mappage des biens individuels
     const propertyRoutes = (properties || []).map((prop) => ({

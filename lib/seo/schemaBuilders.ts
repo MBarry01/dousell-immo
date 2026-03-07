@@ -68,7 +68,7 @@ export function buildAggregateOfferSchema(
 ): Record<string, unknown> {
   const validPrices = properties
     .map((p) => p.prix)
-    .filter((prix) => typeof prix === 'number' && prix > 0);
+    .filter((prix): prix is number => typeof prix === 'number' && prix > 0);
 
   if (validPrices.length === 0) {
     // No valid price data, return minimal schema
@@ -82,8 +82,8 @@ export function buildAggregateOfferSchema(
     };
   }
 
-  const minPrice = Math.min(...validPrices);
-  const maxPrice = Math.max(...validPrices);
+  const minPrice = Math.min(...(validPrices as number[]));
+  const maxPrice = Math.max(...(validPrices as number[]));
   const avgPrice = Math.round(validPrices.reduce((a, b) => a + b, 0) / validPrices.length);
 
   return {
