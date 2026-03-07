@@ -1967,7 +1967,7 @@ export const Constants = {
 ---
 ## 2. UI COMPONENTS (Existing)
 Utilise ces composants pour construire l'interface.
-# 🗺️ MAP DES COMPOSANTS (224)
+# 🗺️ MAP DES COMPOSANTS (243)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -1978,6 +1978,22 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<admin-sidebar-client />** (Path: `components\admin\admin-sidebar-client.tsx`)
 - **<admin-sidebar />** (Path: `components\admin\admin-sidebar.tsx`)
 - **<admin-topbar />** (Path: `components\admin\admin-topbar.tsx`)
+- **<ArticleEditor />** (Path: `components\admin\blog\ArticleEditor.tsx`)
+- **<BlockCanvas />** (Path: `components\admin\blog\BlockCanvas.tsx`)
+- **<CalloutBlock />** (Path: `components\admin\blog\blocks\CalloutBlock.tsx`)
+- **<CtaBlock />** (Path: `components\admin\blog\blocks\CtaBlock.tsx`)
+- **<GalleryBlock />** (Path: `components\admin\blog\blocks\GalleryBlock.tsx`)
+- **<HeadingBlock />** (Path: `components\admin\blog\blocks\HeadingBlock.tsx`)
+- **<ImageBlock />** (Path: `components\admin\blog\blocks\ImageBlock.tsx`)
+- **<index />** (Path: `components\admin\blog\blocks\index.tsx`)
+- **<ListBlock />** (Path: `components\admin\blog\blocks\ListBlock.tsx`)
+- **<ParagraphBlock />** (Path: `components\admin\blog\blocks\ParagraphBlock.tsx`)
+- **<QuoteBlock />** (Path: `components\admin\blog\blocks\QuoteBlock.tsx`)
+- **<TableBlock />** (Path: `components\admin\blog\blocks\TableBlock.tsx`)
+- **<VideoBlock />** (Path: `components\admin\blog\blocks\VideoBlock.tsx`)
+- **<GenerateArticleModal />** (Path: `components\admin\blog\GenerateArticleModal.tsx`)
+- **<SeoPanel />** (Path: `components\admin\blog\SeoPanel.tsx`)
+- **<TemplateSelector />** (Path: `components\admin\blog\TemplateSelector.tsx`)
 - **<dashboard-chart />** (Path: `components\admin\dashboard-chart.tsx`)
 - **<dashboard-view />** (Path: `components\admin\dashboard-view.tsx`)
 - **<performance-chart />** (Path: `components\admin\performance-chart.tsx`)
@@ -1991,6 +2007,9 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<update-consent-on-load />** (Path: `components\analytics\update-consent-on-load.tsx`)
 - **<phone-missing-dialog />** (Path: `components\auth\phone-missing-dialog.tsx`)
 - **<verification-success-toast />** (Path: `components\auth\verification-success-toast.tsx`)
+- **<ArticleRenderer />** (Path: `components\blog\ArticleRenderer.tsx`)
+- **<ArticleTracker />** (Path: `components\blog\ArticleTracker.tsx`)
+- **<CtaBlockRenderer />** (Path: `components\blog\CtaBlockRenderer.tsx`)
 - **<ContractPreview />** (Path: `components\contracts\ContractPreview.tsx`)
 - **<GenerateContractButton />** (Path: `components\contracts\GenerateContractButton.tsx`)
 - **<GenerateContractModal />** (Path: `components\contracts\GenerateContractModal.tsx`)

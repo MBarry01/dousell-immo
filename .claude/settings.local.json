@@ -97,7 +97,15 @@
       "Bash(tail:*)",
       "mcp__plugin_playwright_playwright__browser_install",
       "Bash(npx playwright:*)",
-      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx next build:*)"
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx next build:*)",
+      "mcp__plugin_playwright_playwright__browser_run_code",
+      "Bash(del c:/Users/Barry/Downloads/Doussel_immo/fix-prompt.js)",
+      "Bash(npx jest lib/blog/__tests__/editorial-score.test.ts --no-coverage)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''jest'',{}\\), indent=2\\)\\)\")",
+      "Bash(npx vitest run lib/blog/__tests__/editorial-score.test.ts)",
+      "Bash(npx vitest run)",
+      "Bash(\"c:\\\\Users\\\\Barry\\\\Downloads\\\\Doussel_immo\\\\.env.local\":*)",
+      "Bash(sqlite3 /dev/null \".schema leads 2>/dev/null\")"
     ]
   }
 }

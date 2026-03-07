@@ -1,0 +1,5 @@
+Testing https://us.posthog.com
+https://us.posthog.com Error: The operation was aborted due to timeout
+Testing https://eu.posthog.com
+https://eu.posthog.com Status: 403
+https://eu.posthog.com Data: {"type":"authentication_error","code":"authentication_failed","detail":"Personal API key found in request Authorization header is invalid.","attr":nul

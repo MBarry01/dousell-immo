@@ -46,7 +46,7 @@ export function ProBlogList({ articles }: ProBlogListProps) {
 
     return (
         <main className="bg-black min-h-screen">
-            <div className="container mx-auto px-6 pt-32 pb-20">
+            <div className="container mx-auto px-6 pt-40 lg:pt-32 pb-20">
                 {/* Hero Section */}
                 <motion.section
                     initial="hidden"

@@ -7,7 +7,7 @@ let _serverClient: PostHog | null = null;
 export function getPostHogServer(): PostHog {
   if (!_serverClient) {
     const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-    const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://eu.posthog.com';
+    const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://us.posthog.com';
     if (!apiKey) throw new Error('NEXT_PUBLIC_POSTHOG_KEY is not set');
     _serverClient = new PostHog(apiKey, { host, flushAt: 1, flushInterval: 0 });
   }
@@ -29,7 +29,7 @@ export async function fetchArticlePostHogMetrics(
 ): Promise<ArticlePostHogMetrics> {
   const apiKey = process.env.POSTHOG_PERSONAL_API_KEY;
   const projectId = process.env.POSTHOG_PROJECT_ID;
-  const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://eu.posthog.com';
+  const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://us.posthog.com';
 
   if (!apiKey || !projectId) {
     // Not configured yet → return zeros (graceful degradation)

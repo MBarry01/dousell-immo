@@ -100,6 +100,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         '/contact',
         '/planifier-visite',
         '/blog',
+        '/barometre-prix-immobilier-senegal',
         '/pro/blog/immobilier-senegal-diaspora',
     ].map((route) => ({
         url: `${BASE_URL}${route}`,

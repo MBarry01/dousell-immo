@@ -1,0 +1,566 @@
+{
+  "name": "B2B Lead Generation — Immobilier Sénégal (GRATUIT)",
+  "nodes": [
+    {
+      "id": "trigger-cron",
+      "name": "🕐 Cron Trigger (Lundi 07h WAT)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "parameters": {
+        "cronExpression": "0 6 * * 1"
+      }
+    },
+    {
+      "id": "trigger-manual",
+      "name": "▶️ Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [100, 180],
+      "parameters": {}
+    },
+    {
+      "id": "set-queries",
+      "name": "📋 Requêtes de recherche",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [280, 240],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "q1",
+              "name": "queries",
+              "value": [
+                "agence immobilière Dakar Sénégal",
+                "promoteur immobilier Dakar",
+                "gestionnaire locatif Dakar",
+                "agence immobilière Thiès",
+                "agence immobilière Saint-Louis Sénégal",
+                "agence immobilière Ziguinchor",
+                "real estate agency Dakar"
+              ],
+              "type": "array"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "loop-queries",
+      "name": "🔄 Loop Requêtes",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [460, 240],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "google-maps-search",
+      "name": "📍 Google Maps — Text Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [640, 240],
+      "parameters": {
+        "method": "GET",
+        "url": "https://maps.googleapis.com/maps/api/place/textsearch/json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "query", "value": "={{ $json.queries[0] }}" },
+            { "name": "language", "value": "fr" },
+            { "name": "region", "value": "SN" },
+            { "name": "key", "value": "={{ $env.GOOGLE_MAPS_API_KEY }}" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "loop-places",
+      "name": "🔄 Loop Places",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [820, 240],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "google-maps-details",
+      "name": "📋 Google Maps — Détails lieu",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1000, 240],
+      "parameters": {
+        "method": "GET",
+        "url": "https://maps.googleapis.com/maps/api/place/details/json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "place_id", "value": "={{ $json.place_id }}" },
+            { "name": "fields", "value": "name,formatted_address,formatted_phone_number,website,rating,user_ratings_total,international_phone_number" },
+            { "name": "language", "value": "fr" },
+            { "name": "key", "value": "={{ $env.GOOGLE_MAPS_API_KEY }}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "normalize-lead",
+      "name": "🔧 Normaliser Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1180, 240],
+      "parameters": {
+        "jsCode": "const place = $input.item.json.result || {};\nconst placeId = $('loop-places').item.json.place_id;\n\n// Extraire le domaine du site web pour retrouver l'email\nlet domain = null;\nif (place.website) {\n  try {\n    domain = place.website.replace(/https?:\\/\\//, '').split('/')[0].replace(/^www\\./, '');\n  } catch(e) {}\n}\n\nreturn [{\n  json: {\n    company_name: place.name || 'Unknown',\n    source: 'google_maps',\n    source_id: placeId,\n    google_place_id: placeId,\n    phone: place.international_phone_number || place.formatted_phone_number || null,\n    website: place.website || null,\n    domain: domain,\n    address: place.formatted_address || null,\n    city: 'Dakar',\n    listings_count: place.user_ratings_total || 0,\n    score_details: {\n      has_website: !!place.website,\n      has_phone: !!(place.formatted_phone_number || place.international_phone_number),\n      rating: place.rating || 0,\n      reviews_count: place.user_ratings_total || 0\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "check-duplicate",
+      "name": "🔍 Vérif Doublon (Supabase)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1360, 240],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/b2b_prospects",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "google_place_id", "value": "=eq.{{ $json.google_place_id }}" },
+            { "name": "select", "value": "id,status" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "filter-new-only",
+      "name": "✅ Nouveau uniquement",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [1540, 240],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "scrape-email-from-website",
+      "name": "🌐 Scraper Email depuis Site Web",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1720, 240],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('normalize-lead').item.json.website || 'https://example.com' }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 8000,
+          "ignoreResponseCode": true
+        }
+      }
+    },
+    {
+      "id": "extract-email-from-html",
+      "name": "📬 Extraire Email du HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1900, 240],
+      "parameters": {
+        "jsCode": "const lead = $('normalize-lead').item.json;\nconst html = $input.item.json || '';\nconst htmlStr = typeof html === 'string' ? html : JSON.stringify(html);\n\n// Chercher emails dans le HTML (mailto: links et emails en clair)\nconst emailRegex = /[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}/g;\nconst found = htmlStr.match(emailRegex) || [];\n\n// Filtrer les faux emails (noreply, wordpress, plugin emails, etc.)\nconst blacklist = ['noreply', 'wordpress', 'example.com', 'woocommerce', 'plugin', 'schema.org', 'sentry', 'w3.org'];\nconst filtered = found.filter(email => {\n  const lower = email.toLowerCase();\n  return !blacklist.some(b => lower.includes(b));\n});\n\n// Prioriser contact@, info@, agence@, admin@ puis le premier trouvé\nconst priority = ['contact@', 'info@', 'agence@', 'administration@', 'admin@', 'direction@', 'directeur@', 'commercial@'];\nlet bestEmail = null;\n\nfor (const prefix of priority) {\n  const match = filtered.find(e => e.toLowerCase().startsWith(prefix));\n  if (match) { bestEmail = match; break; }\n}\n\nif (!bestEmail && filtered.length > 0) {\n  bestEmail = filtered[0];\n}\n\nreturn [{\n  json: {\n    ...lead,\n    email: bestEmail || null,\n    email_verified: false,\n    email_source: bestEmail ? 'website_scrape' : null\n  }\n}];"
+      }
+    },
+    {
+      "id": "calculate-score",
+      "name": "🎯 Calculer Score Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2080, 240],
+      "parameters": {
+        "jsCode": "const lead = $input.item.json;\nconst details = lead.score_details || {};\nlet score = 0;\n\n// Email trouvé sur le site (+25 pts)\nif (lead.email) score += 25;\n\n// Site web (+20 pts)\nif (lead.website) score += 20;\n\n// Téléphone (+20 pts)\nif (lead.phone) score += 20;\n\n// Activité Google Maps (nb reviews = indicateur d'activité)\nconst reviews = details.reviews_count || 0;\nif (reviews >= 50) score += 20;\nelse if (reviews >= 20) score += 15;\nelse if (reviews >= 5) score += 10;\nelse if (reviews >= 1) score += 5;\n\n// Note Google (bonus quali)\nconst rating = details.rating || 0;\nif (rating >= 4.5) score += 15;\nelse if (rating >= 4.0) score += 10;\nelse if (rating >= 3.5) score += 5;\n\nreturn [{\n  json: {\n    ...lead,\n    score: Math.min(score, 100),\n    score_details: {\n      ...details,\n      score_breakdown: {\n        email: lead.email ? 25 : 0,\n        website: lead.website ? 20 : 0,\n        phone: lead.phone ? 20 : 0,\n        activity: reviews >= 50 ? 20 : (reviews >= 20 ? 15 : (reviews >= 5 ? 10 : (reviews >= 1 ? 5 : 0))),\n        rating: rating >= 4.5 ? 15 : (rating >= 4.0 ? 10 : (rating >= 3.5 ? 5 : 0))\n      }\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "filter-qualified",
+      "name": "⭐ Score ≥ 25 ?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [2260, 240],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 25,
+              "operator": { "type": "number", "operation": "gte" }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "upsert-prospect",
+      "name": "💾 Sauvegarder Prospect (Supabase)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2440, 240],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/b2b_prospects",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "resolution=merge-duplicates,return=representation" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  company_name: $json.company_name,\n  source: $json.source,\n  source_id: $json.source_id,\n  google_place_id: $json.google_place_id,\n  email: $json.email || null,\n  email_verified: false,\n  email_source: $json.email_source || null,\n  phone: $json.phone || null,\n  website: $json.website || null,\n  address: $json.address || null,\n  city: $json.city || 'Dakar',\n  score: $json.score,\n  score_details: $json.score_details,\n  listings_count: $json.listings_count || 0,\n  status: 'qualified'\n}) }}"
+      }
+    },
+    {
+      "id": "check-has-email",
+      "name": "📬 A un Email ?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [2620, 240],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json[0].email }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "send-j0-email",
+      "name": "📨 Email J0 — Premier contact (Resend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2800, 240],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  from: 'Barry Diallo <barry@outreach.dousel.com>',\n  to: [$json[0].email],\n  subject: 'Gérez votre portefeuille locatif depuis Dakar — Dousel Immo',\n  reply_to: 'barry@dousel.com',\n  tags: [\n    { name: 'campaign', value: 'b2b-j0' },\n    { name: 'prospect_id', value: $json[0].id }\n  ],\n  html: '<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"></head><body style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#333\"><p>Bonjour,</p><p>Je m\\'appelle Barry Diallo, fondateur de <strong>Dousel Immo</strong> — une plateforme SaaS pensée pour les agences immobilières et gestionnaires locatifs au Sénégal.</p><p>En parcourant les annonces en ligne, j\\'ai remarqué l\\'activité de <strong>' + $json[0].company_name + '</strong> sur le marché dakarois. Vous gérez manifestement un portefeuille actif.</p><p><strong>Un défi que beaucoup d\\'agences nous confient :</strong> la gestion des loyers, des baux et des quittances passe encore par WhatsApp, Excel ou du papier — ce qui coûte des heures chaque mois et génère des litiges.</p><p><strong>Dousel Immo règle exactement ça :</strong></p><ul><li>✅ Avis d\\'échéance automatiques (WhatsApp + Email)</li><li>✅ Baux numériques + signatures électroniques</li><li>✅ Quittances PDF en un clic</li><li>✅ Tableau de bord pour tout votre portefeuille</li></ul><p>Est-ce que 20 minutes cette semaine vous conviendrait pour une démo rapide ?</p><p style=\"margin-top:30px\">Cordialement,<br><strong>Barry Diallo</strong><br>Fondateur, Dousel Immo<br>+221 XX XXX XX XX<br><a href=\"https://dousel.com\" style=\"color:#F4C430\">dousel.com</a></p><hr style=\"border:none;border-top:1px solid #eee;margin:30px 0\"><p style=\"font-size:11px;color:#999\">Vous recevez cet email car ' + $json[0].company_name + ' est active sur le marché immobilier sénégalais. <a href=\"https://dousel.com/unsubscribe?id=' + $json[0].id + '\" style=\"color:#999\">Se désabonner</a></p></body></html>'\n}) }}"
+      }
+    },
+    {
+      "id": "mark-j0-sent",
+      "name": "💾 Marquer J0 Envoyé",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2980, 240],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/b2b_prospects?id=eq.{{ $('upsert-prospect').item.json[0].id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ status: 'emailed_j0', j0_sent_at: new Date().toISOString(), last_emailed_at: new Date().toISOString() }) }}"
+      }
+    },
+    {
+      "id": "wait-3-days",
+      "name": "⏳ Attendre 3 jours",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [3160, 240],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 3,
+        "unit": "days"
+      }
+    },
+    {
+      "id": "check-status-j3",
+      "name": "👁️ Vérifier statut avant J+3",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [3340, 240],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/b2b_prospects?id=eq.{{ $('upsert-prospect').item.json[0].id }}&select=email_opened,status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "filter-send-j3",
+      "name": "🔀 Envoyer J+3 ?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [3520, 240],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            { "id": "c1", "leftValue": "={{ $json[0].email_opened }}", "rightValue": true, "operator": { "type": "boolean", "operation": "notEquals" } },
+            { "id": "c2", "leftValue": "={{ $json[0].status }}", "rightValue": "unsubscribed", "operator": { "type": "string", "operation": "notEquals" } },
+            { "id": "c3", "leftValue": "={{ $json[0].status }}", "rightValue": "replied", "operator": { "type": "string", "operation": "notEquals" } },
+            { "id": "c4", "leftValue": "={{ $json[0].status }}", "rightValue": "meeting_booked", "operator": { "type": "string", "operation": "notEquals" } }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "send-j3-email",
+      "name": "📨 Email J+3 — Relance (Resend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [3700, 240],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  from: 'Barry Diallo <barry@outreach.dousel.com>',\n  to: [$('upsert-prospect').item.json[0].email],\n  subject: 'Re: Gestion locative — avez-vous eu le temps de jeter un œil ?',\n  reply_to: 'barry@dousel.com',\n  tags: [{ name: 'campaign', value: 'b2b-j3' }, { name: 'prospect_id', value: $('upsert-prospect').item.json[0].id }],\n  html: '<!DOCTYPE html><html lang=\"fr\"><body style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#333\"><p>Bonjour,</p><p>Je fais suite à mon message de début de semaine concernant la gestion locative de <strong>' + $('upsert-prospect').item.json[0].company_name + '</strong>.</p><p>Je sais que votre quotidien est chargé — visites, négociations, suivi des locataires. C\\'est précisément pourquoi Dousel Immo existe : <strong>récupérer 5 à 10h par mois</strong> sur les tâches administratives répétitives.</p><p>👉 <strong>Une question directe :</strong> combien de biens gérez-vous actuellement en location ?</p><p>Selon votre réponse, je vous montre en 15 minutes comment automatiser vos relances de loyers et générer vos quittances en un clic.</p><p>À très bientôt,<br><strong>Barry Diallo</strong><br>Dousel Immo — <a href=\"https://dousel.com\" style=\"color:#F4C430\">dousel.com</a></p><hr style=\"border:none;border-top:1px solid #eee;margin:30px 0\"><p style=\"font-size:11px;color:#999\"><a href=\"https://dousel.com/unsubscribe?id=' + $('upsert-prospect').item.json[0].id + '\" style=\"color:#999\">Se désabonner</a></p></body></html>'\n}) }}"
+      }
+    },
+    {
+      "id": "mark-j3-sent",
+      "name": "💾 Marquer J3 Envoyé",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [3880, 240],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/b2b_prospects?id=eq.{{ $('upsert-prospect').item.json[0].id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ status: 'emailed_j3', j3_sent_at: new Date().toISOString(), last_emailed_at: new Date().toISOString() }) }}"
+      }
+    },
+    {
+      "id": "wait-4-days",
+      "name": "⏳ Attendre 4 jours",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [4060, 240],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 4,
+        "unit": "days"
+      }
+    },
+    {
+      "id": "check-status-j7",
+      "name": "💬 Vérifier statut avant J+7",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [4240, 240],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/b2b_prospects?id=eq.{{ $('upsert-prospect').item.json[0].id }}&select=status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "filter-send-j7",
+      "name": "🔀 Envoyer J+7 ?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [4420, 240],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            { "id": "c1", "leftValue": "={{ $json[0].status }}", "rightValue": "replied", "operator": { "type": "string", "operation": "notEquals" } },
+            { "id": "c2", "leftValue": "={{ $json[0].status }}", "rightValue": "meeting_booked", "operator": { "type": "string", "operation": "notEquals" } },
+            { "id": "c3", "leftValue": "={{ $json[0].status }}", "rightValue": "unsubscribed", "operator": { "type": "string", "operation": "notEquals" } },
+            { "id": "c4", "leftValue": "={{ $json[0].status }}", "rightValue": "converted", "operator": { "type": "string", "operation": "notEquals" } }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "send-j7-email",
+      "name": "📨 Email J+7 — Breakup (Resend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [4600, 240],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  from: 'Barry Diallo <barry@outreach.dousel.com>',\n  to: [$('upsert-prospect').item.json[0].email],\n  subject: 'Dernière tentative — puis-je fermer votre dossier ?',\n  reply_to: 'barry@dousel.com',\n  tags: [{ name: 'campaign', value: 'b2b-j7' }, { name: 'prospect_id', value: $('upsert-prospect').item.json[0].id }],\n  html: '<!DOCTYPE html><html lang=\"fr\"><body style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#333\"><p>Bonjour,</p><p>Je ne voudrais pas continuer à vous écrire si le sujet n\\'est pas pertinent pour vous en ce moment.</p><p>Puis-je fermer votre dossier, ou y a-t-il un meilleur moment pour en parler ?</p><p>Si la gestion locative numérique vous intéresse dans 3 ou 6 mois, dites-le moi — je reviendrai au bon moment sans vous relancer entre-temps.</p><p><strong>Barry Diallo</strong><br>Dousel Immo</p><hr style=\"border:none;border-top:1px solid #eee;margin:30px 0\"><p style=\"font-size:11px;color:#999\"><a href=\"https://dousel.com/unsubscribe?id=' + $('upsert-prospect').item.json[0].id + '\" style=\"color:#999\">Se désabonner définitivement</a></p></body></html>'\n}) }}"
+      }
+    },
+    {
+      "id": "mark-j7-sent",
+      "name": "💾 Marquer J7 Envoyé",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [4780, 240],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/b2b_prospects?id=eq.{{ $('upsert-prospect').item.json[0].id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ status: 'emailed_j7', j7_sent_at: new Date().toISOString(), last_emailed_at: new Date().toISOString() }) }}"
+      }
+    },
+    {
+      "id": "save-disqualified",
+      "name": "❌ Sauvegarder Disqualifié",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2260, 420],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/b2b_prospects",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "resolution=merge-duplicates" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  company_name: $json.company_name,\n  source: $json.source,\n  source_id: $json.source_id,\n  google_place_id: $json.google_place_id,\n  phone: $json.phone || null,\n  website: $json.website || null,\n  city: $json.city || 'Dakar',\n  score: $json.score,\n  score_details: $json.score_details,\n  status: 'disqualified'\n}) }}"
+      }
+    }
+  ],
+  "connections": {
+    "🕐 Cron Trigger (Lundi 07h WAT)": { "main": [[{ "node": "📋 Requêtes de recherche", "type": "main", "index": 0 }]] },
+    "▶️ Manual Trigger": { "main": [[{ "node": "📋 Requêtes de recherche", "type": "main", "index": 0 }]] },
+    "📋 Requêtes de recherche": { "main": [[{ "node": "🔄 Loop Requêtes", "type": "main", "index": 0 }]] },
+    "🔄 Loop Requêtes": { "main": [[{ "node": "📍 Google Maps — Text Search", "type": "main", "index": 0 }]] },
+    "📍 Google Maps — Text Search": { "main": [[{ "node": "🔄 Loop Places", "type": "main", "index": 0 }]] },
+    "🔄 Loop Places": { "main": [[{ "node": "📋 Google Maps — Détails lieu", "type": "main", "index": 0 }]] },
+    "📋 Google Maps — Détails lieu": { "main": [[{ "node": "🔧 Normaliser Lead", "type": "main", "index": 0 }]] },
+    "🔧 Normaliser Lead": { "main": [[{ "node": "🔍 Vérif Doublon (Supabase)", "type": "main", "index": 0 }]] },
+    "🔍 Vérif Doublon (Supabase)": { "main": [[{ "node": "✅ Nouveau uniquement", "type": "main", "index": 0 }]] },
+    "✅ Nouveau uniquement": { "main": [[{ "node": "🌐 Scraper Email depuis Site Web", "type": "main", "index": 0 }]] },
+    "🌐 Scraper Email depuis Site Web": { "main": [[{ "node": "📬 Extraire Email du HTML", "type": "main", "index": 0 }]] },
+    "📬 Extraire Email du HTML": { "main": [[{ "node": "🎯 Calculer Score Lead", "type": "main", "index": 0 }]] },
+    "🎯 Calculer Score Lead": {
+      "main": [
+        [{ "node": "⭐ Score ≥ 25 ?", "type": "main", "index": 0 }],
+        [{ "node": "❌ Sauvegarder Disqualifié", "type": "main", "index": 0 }]
+      ]
+    },
+    "⭐ Score ≥ 25 ?": { "main": [[{ "node": "💾 Sauvegarder Prospect (Supabase)", "type": "main", "index": 0 }]] },
+    "💾 Sauvegarder Prospect (Supabase)": { "main": [[{ "node": "📬 A un Email ?", "type": "main", "index": 0 }]] },
+    "📬 A un Email ?": { "main": [[{ "node": "📨 Email J0 — Premier contact (Resend)", "type": "main", "index": 0 }]] },
+    "📨 Email J0 — Premier contact (Resend)": { "main": [[{ "node": "💾 Marquer J0 Envoyé", "type": "main", "index": 0 }]] },
+    "💾 Marquer J0 Envoyé": { "main": [[{ "node": "⏳ Attendre 3 jours", "type": "main", "index": 0 }]] },
+    "⏳ Attendre 3 jours": { "main": [[{ "node": "👁️ Vérifier statut avant J+3", "type": "main", "index": 0 }]] },
+    "👁️ Vérifier statut avant J+3": { "main": [[{ "node": "🔀 Envoyer J+3 ?", "type": "main", "index": 0 }]] },
+    "🔀 Envoyer J+3 ?": { "main": [[{ "node": "📨 Email J+3 — Relance (Resend)", "type": "main", "index": 0 }]] },
+    "📨 Email J+3 — Relance (Resend)": { "main": [[{ "node": "💾 Marquer J3 Envoyé", "type": "main", "index": 0 }]] },
+    "💾 Marquer J3 Envoyé": { "main": [[{ "node": "⏳ Attendre 4 jours", "type": "main", "index": 0 }]] },
+    "⏳ Attendre 4 jours": { "main": [[{ "node": "💬 Vérifier statut avant J+7", "type": "main", "index": 0 }]] },
+    "💬 Vérifier statut avant J+7": { "main": [[{ "node": "🔀 Envoyer J+7 ?", "type": "main", "index": 0 }]] },
+    "🔀 Envoyer J+7 ?": { "main": [[{ "node": "📨 Email J+7 — Breakup (Resend)", "type": "main", "index": 0 }]] },
+    "📨 Email J+7 — Breakup (Resend)": { "main": [[{ "node": "💾 Marquer J7 Envoyé", "type": "main", "index": 0 }]] }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": ["b2b", "lead-generation", "immobilier", "senegal", "gratuit"],
+  "versionId": "1.0.0",
+  "meta": {
+    "instanceId": "dousel-immo",
+    "description": "Version 100% gratuite — Google Maps + scraping email site web + Resend. Sans Apollo ni Hunter."
+  }
+}
