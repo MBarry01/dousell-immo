@@ -24,6 +24,24 @@ export function unslugify(text: string): string {
 }
 
 /**
+ * Capitalise une chaîne de caractères
+ * Ex: "appartement" -> "Appartement"
+ */
+export function capitalize(text: string): string {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/**
+ * Échappe les caractères spéciaux PostgreSQL LIKE (%, _, \) dans une chaîne
+ * Prévient les contournements de filtre via des slugs malveillants
+ * Ex: "%" -> "\\%" (empêche le wildcard de correspondre à tout)
+ */
+export function safeLikeEscape(str: string): string {
+    return str.replace(/[%_\\]/g, '\\$&');
+}
+
+/**
  * Nettoie les noms de villes pour l'affichage
  * Supprime "Region", "Région de", "Ville de" etc.
  * Ex: "Thies Region" -> "Thiès" | "Région de Dakar" -> "Dakar"

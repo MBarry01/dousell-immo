@@ -15,6 +15,7 @@ import { getSimilarListings } from '@/services/gatewayService';
 import { getActiveCities, getCityNameFromSlug } from '@/services/propertyService';
 import ProgrammaticPageTemplate from '@/components/seo/ProgrammaticPageTemplate';
 import { Breadcrumb } from '@/components/seo/Breadcrumb';
+import { capitalize } from '@/lib/slugs';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -23,9 +24,6 @@ interface PageProps {
   params: Promise<{ city: string; district: string }>;
   searchParams: Promise<{ page?: string }>;
 }
-
-const capitalize = (text: string) =>
-  text.charAt(0).toUpperCase() + text.slice(1);
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { city, district } = await params;

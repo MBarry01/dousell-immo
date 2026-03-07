@@ -17,6 +17,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import type { District } from '@/types/districts';
+import { safeLikeEscape } from '@/lib/slugs';
 
 /**
  * Fetch all districts for a given city
@@ -188,8 +189,9 @@ export async function getPropertiesByDistrict(
     // Filter by type if provided
     // Note: type is stored in details.type (JSONB nested field)
     // Use ilike for case-insensitive matching — slug 'appartement' must match 'Appartement' in DB
+    // Escape LIKE metacharacters to prevent filter bypass via crafted slugs
     if (type) {
-      query = query.ilike('details->>type', type);
+      query = query.ilike('details->>type', safeLikeEscape(type));
     }
 
     // Add pagination

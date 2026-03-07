@@ -11,15 +11,12 @@
 
 import { getCachedDistrictBySlug } from '@/services/districtService.cached';
 import { getCityNameFromSlug } from '@/services/propertyService';
-import { unslugify } from '@/lib/slugs';
+import { unslugify, capitalize } from '@/lib/slugs';
 
 interface LayoutProps {
   children: React.ReactNode;
   params: Promise<{ city: string; district: string; type: string }>;
 }
-
-const capitalize = (text: string) =>
-  text.charAt(0).toUpperCase() + text.slice(1);
 
 export default async function DistrictTypeLayout({ children, params }: LayoutProps) {
   const { city, district, type } = await params;

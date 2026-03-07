@@ -9,11 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { unslugify } from '@/lib/slugs';
-
-// capitalize is not exported from lib/slugs — define inline for tests
-const capitalize = (text: string) =>
-  text.charAt(0).toUpperCase() + text.slice(1);
+import { unslugify, capitalize } from '@/lib/slugs';
 
 describe('4-Tier Immobilier Routes', () => {
   describe('route slug validation', () => {
