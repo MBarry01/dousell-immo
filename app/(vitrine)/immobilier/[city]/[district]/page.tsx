@@ -16,6 +16,7 @@ import { getActiveCities, getCityNameFromSlug } from '@/services/propertyService
 import ProgrammaticPageTemplate from '@/components/seo/ProgrammaticPageTemplate';
 import { Breadcrumb } from '@/components/seo/Breadcrumb';
 import { capitalize } from '@/lib/slugs';
+import { generateCityDistrictParams } from '@/lib/seo/generateStaticParams';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -51,8 +52,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export async function generateStaticParams() {
-  // Task 5 will populate this from RPC results
-  return [];
+  return await generateCityDistrictParams();
 }
 
 export default async function ImmobilierDistrictPage({ params, searchParams }: PageProps) {
