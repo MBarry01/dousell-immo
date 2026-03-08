@@ -55,9 +55,9 @@ export function CldImageSafe(props: CldImageProps) {
         if (src.startsWith('http') || src.startsWith('//')) {
             const isFacebookUrl = src.includes('fbcdn.net') || src.includes('facebook.com');
             if (isFacebookUrl) {
-                // Proxy via Cloudinary pour éviter CORS/expiration issues
-                const proxiedUrl = `https://res.cloudinary.com/${cloudName}/image/fetch/f_auto,q_auto/${encodeURIComponent(src)}`;
-                return { isLocal: false, finalSrc: proxiedUrl, isLogo: isLogoAsset, isDesign: false };
+                // Facebook bloque les proxies serveur — on sert directement depuis le CDN Facebook
+                // unoptimized=true sera appliqué automatiquement (src http + non-Cloudinary)
+                return { isLocal: false, finalSrc: src, isLogo: isLogoAsset, isDesign: false };
             }
             return { isLocal: false, finalSrc: src, isLogo: isLogoAsset, isDesign: false };
         }
