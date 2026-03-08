@@ -144,6 +144,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
+    "agentation": "^2.3.0",
     "baseline-browser-mapping": "^2.10.0",
     "dotenv": "^17.3.1",
     "eslint": "^9",

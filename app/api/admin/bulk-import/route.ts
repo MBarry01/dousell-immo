@@ -9,20 +9,26 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/actions/auth'
-import { requireAdmin } from '@/lib/permissions'
+import { requireAdmin, isAdmin } from '@/lib/admin-auth'
 import { createClient } from '@/utils/supabase/server'
 import { validateBulkImport } from '@/lib/schemas/bulkImportSchema'
 
 export async function POST(request: NextRequest) {
   try {
     // 1. Verify admin access
-    const user = await getCurrentUser()
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized - not authenticated' }, { status: 401 })
     }
 
-    await requireAdmin()
+    const adminCheck = await isAdmin()
+    if (!adminCheck) {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    }
 
     // 2. Parse request body
     let payload
@@ -45,7 +51,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Prepare properties for insertion
-    const supabase = await createClient()
     const properties = validation.data!.properties.map((prop) => ({
       title: prop.title,
       description: prop.description,

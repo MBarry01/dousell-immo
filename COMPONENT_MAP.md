@@ -1,4 +1,4 @@
-# 🗺️ MAP DES COMPOSANTS (243)
+# 🗺️ MAP DES COMPOSANTS (246)
 
 Utilise ces composants existants avant d'en créer de nouveaux :
 
@@ -160,6 +160,8 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<home-seo-content />** (Path: `components\sections\home-seo-content.tsx`)
 - **<new-properties />** (Path: `components\sections\new-properties.tsx`)
 - **<property-section />** (Path: `components\sections\property-section.tsx`)
+- **<Breadcrumb />** (Path: `components\seo\Breadcrumb.tsx`)
+- **<DistrictGuideSection />** (Path: `components\seo\DistrictGuideSection.tsx`)
 - **<json-ld />** (Path: `components\seo\json-ld.tsx`)
 - **<JsonLd />** (Path: `components\seo\JsonLd.tsx`)
 - **<ProgrammaticPageTemplate />** (Path: `components\seo\ProgrammaticPageTemplate.tsx`)
@@ -201,6 +203,7 @@ Utilise ces composants existants avant d'en créer de nouveaux :
 - **<input />** (Path: `components\ui\input.tsx`)
 - **<label />** (Path: `components\ui\label.tsx`)
 - **<loader-blueprint />** (Path: `components\ui\loader-blueprint.tsx`)
+- **<markdown />** (Path: `components\ui\markdown.tsx`)
 - **<motion-wrapper />** (Path: `components\ui\motion-wrapper.tsx`)
 - **<optimized-image />** (Path: `components\ui\optimized-image.tsx`)
 - **<otp-input />** (Path: `components\ui\otp-input.tsx`)

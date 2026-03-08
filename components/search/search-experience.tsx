@@ -18,7 +18,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import type { Property } from "@/types/property";
 import { hasActiveFilters } from "@/lib/search-filters";
 import { useSearchFilters } from "@/hooks/use-search-filters";
-import { getUnifiedListings } from "@/services/gatewayService";
+
 import { type PropertyFilters, getSearchSuggestions } from "@/services/propertyService";
 import {
   Pagination,
@@ -68,9 +68,10 @@ export const SearchExperience = ({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentPage, setCurrentPage] = useState(filters.page || 1);
+  const [isTyping, setIsTyping] = useState(false);
 
   // Debounce de la recherche textuelle (500ms)
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
   // Fetch suggestions
   useEffect(() => {
@@ -92,85 +93,47 @@ export const SearchExperience = ({
     }
   }, [searchParams, user]);
 
-  // Effet pour appliquer la recherche debouncée
   useEffect(() => {
     // Synchroniser searchQuery avec filters.q lors d'un changement d'URL (ex: retour arrière)
-    if (filters.q !== undefined && filters.q !== searchQuery) {
+    if (!isTyping && filters.q !== undefined && filters.q !== searchQuery) {
       console.log("[SearchExperience] Sync searchQuery from filters.q:", filters.q);
       setSearchQuery(filters.q);
     }
-  }, [filters.q]);
+  }, [filters.q, isTyping]);
 
   useEffect(() => {
-    let ignoreResult = false;
+    // Only synchronize results if they change from the server
+    setResults(initialResults);
+    setTotal(initialTotal);
+    setIsSearching(false);
+  }, [initialResults, initialTotal]);
 
+  useEffect(() => {
     if (debouncedSearchQuery !== (filters.q ?? "")) {
-      const searchFilters = async () => {
-        console.log("[SearchExperience] Triggering search for:", debouncedSearchQuery);
-        setIsSearching(true);
-        const nextFilters = { ...filters, q: debouncedSearchQuery || undefined, page: 1 };
-
-        setFilters(nextFilters);
-
-        try {
-          const { listings, total: nextTotal } = await getUnifiedListings(nextFilters);
-
-          if (!ignoreResult) {
-            setResults(listings);
-            setTotal(nextTotal);
-            setCurrentPage(1);
-          }
-        } catch (error) {
-          console.error("[SearchExperience] Search error:", error);
-        } finally {
-          if (!ignoreResult) {
-            setIsSearching(false);
-          }
-        }
-      };
-      searchFilters();
+      console.log("[SearchExperience] Triggering search for:", debouncedSearchQuery);
+      setIsSearching(true);
+      const nextFilters = { ...filters, q: debouncedSearchQuery || undefined, page: 1 };
+      setFilters(nextFilters);
     }
-
-    return () => {
-      ignoreResult = true;
-    };
   }, [debouncedSearchQuery, filters, setFilters]);
 
   const applyFilters = useCallback(async (nextFilters: PropertyFilters) => {
     setIsSearching(true);
     const filtersWithPage = { ...nextFilters, page: 1 };
     setFilters(filtersWithPage);
-    try {
-      const { listings, total: nextTotal } = await getUnifiedListings(filtersWithPage);
-      setResults(listings);
-      setTotal(nextTotal);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error("[SearchExperience] Filter application error:", error);
-    } finally {
-      setIsSearching(false);
-    }
+    setCurrentPage(1);
   }, [setFilters]);
 
   // Nouvelle fonction pour changer de page
-  const handlePageChange = useCallback(async (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     setIsSearching(true);
     setCurrentPage(page);
     const nextFilters = { ...filters, page };
     setFilters(nextFilters);
-    try {
-      const { listings, total: nextTotal } = await getUnifiedListings(nextFilters);
-      setResults(listings);
-      setTotal(nextTotal);
-    } catch (error) {
-      console.error("[SearchExperience] Page change error:", error);
-    } finally {
-      setIsSearching(false);
-      // Scroll to top
-      const resultsElement = document.getElementById("search-results-top");
-      if (resultsElement) {
-        resultsElement.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+    // Scroll to top
+    const resultsElement = document.getElementById("search-results-top");
+    if (resultsElement) {
+      resultsElement.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [filters, setFilters]);
 
@@ -195,12 +158,16 @@ export const SearchExperience = ({
                 type="search"
                 enterKeyHint="search"
                 value={searchQuery}
+                onKeyDown={() => setIsTyping(true)}
                 onChange={(event) => {
                   setSearchQuery(event.target.value);
                   setShowSuggestions(true);
                 }}
                 onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                onBlur={() => {
+                  setIsTyping(false);
+                  setTimeout(() => setShowSuggestions(false), 200);
+                }}
                 placeholder="Ville ou code postal"
                 className="border-none bg-transparent p-0 text-white placeholder:text-white/50 focus-visible:ring-0"
               />
