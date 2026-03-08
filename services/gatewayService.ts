@@ -2,8 +2,8 @@ import { supabase } from "@/lib/supabase";
 import type { Property } from "@/types/property";
 import { getProperties, getPropertiesCount, getSimilarProperties, type PropertyFilters } from "./propertyService";
 
-// TTL de fraîcheur — doit être >= au CLEANUP_TTL_DAYS du webhook apify-sync (7j)
-const FRESHNESS_TTL_DAYS = 7;
+// TTL de fraîcheur — augmenté à 14j car scraper en pause (anciennement 7j)
+const FRESHNESS_TTL_DAYS = 14;
 
 // Type pour les résultats bruts de la table external_listings
 type ExternalListingRow = {

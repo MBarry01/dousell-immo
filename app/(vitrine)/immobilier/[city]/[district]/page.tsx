@@ -17,6 +17,7 @@ import ProgrammaticPageTemplate from '@/components/seo/ProgrammaticPageTemplate'
 import { Breadcrumb } from '@/components/seo/Breadcrumb';
 import { capitalize } from '@/lib/slugs';
 import { generateCityDistrictParams } from '@/lib/seo/generateStaticParams';
+import { generateMetadata as generatePageMetadata } from '@/lib/seo/metadata';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -42,13 +43,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = `Trouvez les meilleures annonces immobilières à ${districtData.name_fr}. ${
     districtData.description || 'Appartements, villas, terrains en vente et location.'
   }`;
+  const keywords = [
+    'immobilier',
+    'senegal',
+    cityName.toLowerCase(),
+    districtData.name_fr.toLowerCase(),
+    'annonces',
+    'proprietes',
+    'vente',
+    'location',
+  ];
 
-  return {
+  return generatePageMetadata({
     title,
     description,
-    alternates: { canonical: `/immobilier/${city}/${district}` },
-    robots: { index: true, follow: true },
-  };
+    path: `/immobilier/${city}/${district}`,
+    type: 'website',
+    keywords,
+  });
 }
 
 export async function generateStaticParams() {

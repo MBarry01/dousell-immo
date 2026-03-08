@@ -17,6 +17,7 @@ import ProgrammaticPageTemplate from '@/components/seo/ProgrammaticPageTemplate'
 import { Breadcrumb } from '@/components/seo/Breadcrumb';
 import { unslugify, capitalize } from '@/lib/slugs';
 import { generateCityDistrictTypeParams } from '@/lib/seo/generateStaticParams';
+import { generateMetadata as generatePageMetadata } from '@/lib/seo/metadata';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -41,13 +42,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const typeLabel = capitalize(unslugify(type));
   const title = `${typeLabel} à ${districtData.name_fr}, ${cityName} | Doussel Immo`;
   const description = `Annonces de ${unslugify(type)} à ${districtData.name_fr}. Trouvez le bien idéal parmi nos ${unslugify(type)} disponibles.`;
+  const keywords = [
+    'immobilier',
+    'senegal',
+    cityName.toLowerCase(),
+    districtData.name_fr.toLowerCase(),
+    unslugify(type).toLowerCase(),
+    'annonces',
+    'proprietes',
+  ];
 
-  return {
+  return generatePageMetadata({
     title,
     description,
-    alternates: { canonical: `/immobilier/${city}/${district}/${type}` },
-    robots: { index: true, follow: true },
-  };
+    path: `/immobilier/${city}/${district}/${type}`,
+    type: 'article',
+    keywords,
+  });
 }
 
 export async function generateStaticParams() {

@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { getUnifiedListings, getSimilarListings } from "@/services/gatewayService";
 import { getActiveCities, getCityNameFromSlug } from "@/services/propertyService";
 import { slugify, unslugify } from "@/lib/slugs";
+import { generateMetadata as generatePageMetadata } from "@/lib/seo/metadata";
 import ProgrammaticPageTemplate from "@/components/seo/ProgrammaticPageTemplate";
 import Link from "next/link";
 
@@ -27,10 +28,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const resolvedCity = await getCityNameFromSlug(city);
     const displayCity = resolvedCity || capitalize(unslugify(city));
 
-    return {
+    const keywords = [
+        'immobilier',
+        'senegal',
+        displayCity.toLowerCase(),
+        'vente',
+        'location',
+        'proprietes',
+        'annonces',
+    ];
+
+    return generatePageMetadata({
         title: `Immobilier à ${displayCity} : Ventes et Locations au Sénégal`,
         description: `Trouvez votre bien immobilier à ${displayCity}. Villas, appartements et terrains vérifiés pour la diaspora et les résidents. Expertise Dousel Immo.`,
-    };
+        path: `/immobilier/${city}`,
+        type: 'website',
+        keywords,
+    });
 }
 
 // 2. Contenu profond pour Dakar (SEO Mastery)
