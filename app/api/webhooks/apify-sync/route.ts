@@ -58,7 +58,7 @@ const APIFY_TOKENS: Record<string, string | undefined> = {
   CoinAfrique: process.env.APIFY_API_TOKEN,
   'Expat-Dakar': process.env.APIFY_API_TOKEN_EXPAT || process.env.APIFY_API_TOKEN,
   Seloger: process.env.APIFY_API_TOKEN,
-  'Facebook Marketplace': process.env.APIFY_API_TOKEN,
+  'Facebook Marketplace': process.env.APIFY_API_TOKEN_FACEBOOK || process.env.APIFY_API_TOKEN,
 };
 
 /**
