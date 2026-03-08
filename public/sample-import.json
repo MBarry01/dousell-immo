@@ -1,0 +1,75 @@
+{
+  "properties": [
+    {
+      "title": "Magnifique Appartement Plateau",
+      "description": "Appartement moderne situé au cœur du plateau avec vue panoramique sur l'océan. 3 chambres, 2 salles de bain, cuisine équipée.",
+      "price": "50000000",
+      "category": "vente",
+      "type": "Appartement",
+      "city": "dakar",
+      "district": "plateau",
+      "surface": "120",
+      "rooms": "3",
+      "bedrooms": "3",
+      "bathrooms": "2",
+      "agent_name": "Jean Dupont",
+      "agent_phone": "+221771234567",
+      "agent_email": "jean@immobilier.sn"
+    },
+    {
+      "title": "Villa Almadies Standing",
+      "description": "Superbe villa à Almadies avec piscine, garage et jardin. 4 chambres, standing élevé.",
+      "price": "150000000",
+      "category": "vente",
+      "type": "Villa",
+      "city": "dakar",
+      "district": "almadies",
+      "surface": "250",
+      "rooms": "4",
+      "bedrooms": "4",
+      "bathrooms": "3",
+      "agent_name": "Marie Sène",
+      "agent_phone": "+221777654321"
+    },
+    {
+      "title": "Studio étudiant Médina",
+      "description": "Petit studio meublé idéal pour étudiant. Proche de l'Université Cheikh Anta Diop.",
+      "price": "8000000",
+      "category": "location",
+      "type": "Studio",
+      "city": "dakar",
+      "district": "medina",
+      "surface": "25",
+      "rooms": "1",
+      "agent_name": "Fatou BA",
+      "agent_phone": "+221784567890"
+    },
+    {
+      "title": "Terrain viabilisé Diamniadio",
+      "description": "Beau terrain viabilisé au pôle urbain de Diamniadio. Excellent potentiel d'investissement.",
+      "price": "75000000",
+      "category": "vente",
+      "type": "Terrain",
+      "city": "dakar",
+      "district": "diamniadio",
+      "surface": "500",
+      "agent_name": "Moussa Diallo",
+      "agent_phone": "+221775432123"
+    },
+    {
+      "title": "Duplex moderne Sacré-Cœur",
+      "description": "Duplex avec espace partagé et jardins privés. Quartier résidentiel calme. 5 chambres.",
+      "price": "120000000",
+      "category": "vente",
+      "type": "Duplex",
+      "city": "dakar",
+      "district": "sacre-coeur",
+      "surface": "180",
+      "rooms": "5",
+      "bedrooms": "4",
+      "bathrooms": "3",
+      "agent_name": "Aïssatou Fall",
+      "agent_phone": "+221701234567"
+    }
+  ]
+}
