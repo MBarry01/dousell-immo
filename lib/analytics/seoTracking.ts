@@ -16,7 +16,7 @@ import { PostHog } from 'posthog-node'
 const posthog = new PostHog(
   process.env.NEXT_PUBLIC_POSTHOG_KEY || '',
   {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.posthog.com',
+    host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.posthog.com',
     disabled: !process.env.NEXT_PUBLIC_POSTHOG_KEY,
   }
 )
@@ -38,7 +38,8 @@ export async function trackPageView(params: {
   userId?: string
   url: string
 }): Promise<void> {
-  if (!posthog.isEnabled()) return
+  // Skip if PostHog is not configured
+  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return
 
   try {
     await posthog.capture({
@@ -70,7 +71,8 @@ export async function trackPropertyClick(
   source: string,
   userId?: string
 ): Promise<void> {
-  if (!posthog.isEnabled()) return
+  // Skip if PostHog is not configured
+  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return
 
   try {
     await posthog.capture({
@@ -94,7 +96,8 @@ export async function trackPropertyClick(
  * Should be called before application shutdown to ensure all events are delivered.
  */
 export async function flushAnalytics(): Promise<void> {
-  if (!posthog.isEnabled()) return
+  // Skip if PostHog is not configured
+  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return
 
   try {
     await posthog.flush()
