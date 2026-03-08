@@ -27,31 +27,22 @@ export const BulkPropertyImportSchema = z.object({
     .regex(/^\d+$/, 'Price must be a number')
     .transform((v) => parseInt(v) * 100), // Convert to centimes
 
-  category: z.enum(['vente', 'location'], {
-    errorMap: () => ({ message: "Category must be 'vente' or 'location'" }),
-  }),
+  category: z.enum(['vente', 'location']),
 
-  type: z.enum(
-    [
-      'Appartement',
-      'Villa',
-      'Maison',
-      'Studio',
-      'Terrain',
-      'Immeuble',
-      'Bureau',
-      'Magasin',
-      'Hangar',
-      'Local commercial',
-      'Chambre',
-      'Duplex',
-    ],
-    {
-      errorMap: () => ({
-        message: 'Invalid property type',
-      }),
-    }
-  ),
+  type: z.enum([
+    'Appartement',
+    'Villa',
+    'Maison',
+    'Studio',
+    'Terrain',
+    'Immeuble',
+    'Bureau',
+    'Magasin',
+    'Hangar',
+    'Local commercial',
+    'Chambre',
+    'Duplex',
+  ]),
 
   city: z.string().min(2, 'City must be at least 2 characters').max(50),
 
@@ -133,7 +124,7 @@ export function validateBulkImport(payload: unknown) {
       return {
         success: false,
         data: null,
-        errors: error.errors.map((e) => ({
+        errors: error.issues.map((e) => ({
           field: e.path.join('.'),
           message: e.message,
         })),
