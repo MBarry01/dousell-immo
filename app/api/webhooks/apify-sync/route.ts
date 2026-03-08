@@ -38,6 +38,13 @@ const SOURCE_CONFIG: Record<string, {
     locationField: 'adresse',
     imageField: ['image_principale', 'image'],
   },
+  'Facebook Marketplace': {
+    urlField: ['listingUrl', 'url'],
+    titleField: ['marketplace_listing_title', 'title'],
+    priceField: ['listing_price.formatted_amount', 'price'],
+    locationField: ['location.reverse_geocode.city', 'location.reverse_geocode.state', 'location'],
+    imageField: ['primary_listing_photo_url', 'image'],
+  },
 };
 
 // TTL en jours - Annonces non vues après ce délai seront supprimées
@@ -51,15 +58,25 @@ const APIFY_TOKENS: Record<string, string | undefined> = {
   CoinAfrique: process.env.APIFY_API_TOKEN,
   'Expat-Dakar': process.env.APIFY_API_TOKEN_EXPAT || process.env.APIFY_API_TOKEN,
   Seloger: process.env.APIFY_API_TOKEN,
+  'Facebook Marketplace': process.env.APIFY_API_TOKEN,
 };
 
 /**
  * Extrait la première valeur non-nulle parmi plusieurs champs possibles
+ * Supporte la notation pointée (ex: "listing_price.formatted_amount")
  */
-function extractField(obj: Record<string, unknown>, fields: string | string[]): string | null {
+function extractField(obj: any, fields: string | string[]): string | null {
   const fieldList = Array.isArray(fields) ? fields : [fields];
   for (const field of fieldList) {
-    const value = obj[field];
+    let value = obj;
+    const parts = field.split('.');
+    for (const part of parts) {
+      if (value === null || value === undefined) {
+        value = null;
+        break;
+      }
+      value = value[part];
+    }
     if (value && typeof value === 'string' && value.trim() !== '') {
       return value.trim();
     }
@@ -109,6 +126,42 @@ function classifyAd(title: string, location: string) {
   return { category, type, city };
 }
 
+/**
+ * Vérifie si un lien (annonce ou image) est cassé (404 ou 410).
+ * Timeout court pour ne pas ralentir le webhook.
+ */
+async function validateUrl(url: string, timeoutMs: number = 3000): Promise<boolean> {
+  if (!url || !url.startsWith('http')) return false;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    // Requete HEAD d'abord pour economiser la bande passante
+    const response = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; DousselImmoBot/1.0; +https://doussel-immo.com)',
+        'Accept': '*/*'
+      }
+    });
+    clearTimeout(timeoutId);
+
+    // Si le HEAD échoue avec 404 ou 410, on considère que ça n'existe plus
+    if (response.status === 404 || response.status === 410) {
+      return false;
+    }
+    return true;
+  } catch (error: unknown) {
+    // Si c'est un timeout ou un problème réseau (ECONNRESET, etc), 
+    // on ne rejette pas l'annonce pour éviter les faux positifs en cas de surcharge.
+    return true;
+  }
+}
+
+// Alloue jusqu'à 5 minutes pour ce webhook sur Vercel (si plan Pro)
+export const maxDuration = 300;
+
 export async function POST(req: Request) {
   try {
     // 1. Vérification du secret — obligatoire, non optionnel
@@ -124,9 +177,11 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    // 2. Extraction des paramètres (support format Apify + custom)
+    // 2. Extraction des paramètres (support format Apify + custom URL params)
+    const { searchParams } = new URL(req.url);
     const datasetId = body.resource?.defaultDatasetId || body.datasetId;
-    const source = body.source || body.source_site || 'CoinAfrique';
+    const sourceParam = searchParams.get('source');
+    const source = sourceParam || body.source || body.source_site || 'CoinAfrique';
 
     // Token spécifique à la source ou token par défaut
     const apifyToken = APIFY_TOKENS[source] || process.env.APIFY_API_TOKEN;
@@ -168,16 +223,29 @@ export async function POST(req: Request) {
     console.log(`[${source}] ${ads.length} annonces brutes reçues`);
 
     // 4. Traitement avec mapping flexible
-    const processedAds = [];
-    let skipped = 0;
+    const rawProcessedAds = [];
+    let skippedFormat = 0;
 
     for (const ad of ads) {
+      // Filtrage spécifique pour Facebook Marketplace (ignorer les annonces vendues/inactives)
+      if (source === 'Facebook Marketplace') {
+        const isInactive =
+          ad.is_live === false ||
+          ad.is_sold === true ||
+          ad.is_pending === true ||
+          ad.is_hidden === true;
+        if (isInactive) {
+          skippedFormat++;
+          continue;
+        }
+      }
+
       const sourceUrl = extractField(ad, config.urlField);
       const title = extractField(ad, config.titleField);
 
       // Validation : URL et titre obligatoires
       if (!sourceUrl || !title) {
-        skipped++;
+        skippedFormat++;
         continue;
       }
 
@@ -187,7 +255,7 @@ export async function POST(req: Request) {
       // Utiliser source_site des données si présent, sinon celui du payload
       const adSourceSite = (ad.source_site as string) || source;
 
-      processedAds.push({
+      rawProcessedAds.push({
         source_url: sourceUrl,
         title,
         price: extractField(ad, config.priceField),
@@ -203,7 +271,37 @@ export async function POST(req: Request) {
       });
     }
 
-    console.log(`[${source}] ${processedAds.length} annonces valides (${skipped} ignorées)`);
+    console.log(`[${source}] ${rawProcessedAds.length} annonces valides au format (${skippedFormat} ignorées)`);
+
+    // 4.1 Validation de la disponibilité des liens (404/410)
+    const processedAds: typeof rawProcessedAds = [];
+    let skippedBrokenLinks = 0;
+    const CONCURRENCY_LIMIT = 20;
+
+    console.log(`[${source}] Vérification de la disponibilité des liens (Annonce et Image)...`);
+
+    for (let i = 0; i < rawProcessedAds.length; i += CONCURRENCY_LIMIT) {
+      const batch = rawProcessedAds.slice(i, i + CONCURRENCY_LIMIT);
+
+      await Promise.all(batch.map(async (ad) => {
+        // Vérifier le lien de l'annonce
+        const isSourceValid = await validateUrl(ad.source_url);
+        let isImageValid = true;
+
+        // Si l'annonce existe, on vérifie aussi l'image
+        if (isSourceValid && ad.image_url) {
+          isImageValid = await validateUrl(ad.image_url, 4000); // 4 secondes max pour les images
+        }
+
+        if (!isSourceValid || !isImageValid) {
+          skippedBrokenLinks++;
+        } else {
+          processedAds.push(ad);
+        }
+      }));
+    }
+
+    console.log(`[${source}] ${processedAds.length} annonces conservées après validation des liens (${skippedBrokenLinks} liens cassés ignorés)`);
 
     // 4.5 Géocodage dynamique via Nominatim — optimisé : skip les annonces déjà géocodées
     // Les mêmes URLs reviennent à chaque sync (toutes les 2 jours) → réutiliser les coords existantes
@@ -304,7 +402,9 @@ export async function POST(req: Request) {
         received: ads.length,
         valid: processedAds.length,
         unique: uniqueAds.length,
-        skipped,
+        skipped: skippedFormat + skippedBrokenLinks,
+        skippedFormat,
+        skippedBrokenLinks,
         geocoded: geocodedCount,
         geocodeReused: reusedCount,
         cleanupTTL: `${CLEANUP_TTL_DAYS} jours`,
