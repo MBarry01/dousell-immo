@@ -216,8 +216,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Config error' }, { status: 500 });
     }
     const authHeader = req.headers.get('x-webhook-secret') || req.headers.get('authorization');
+    console.log('[apify-sync] DEBUG: authHeader =', authHeader ? `${authHeader.slice(0, 10)}...` : 'undefined');
+    console.log('[apify-sync] DEBUG: WEBHOOK_SECRET =', WEBHOOK_SECRET ? `${WEBHOOK_SECRET.slice(0, 10)}...` : 'undefined');
     if (authHeader !== WEBHOOK_SECRET && authHeader !== `Bearer ${WEBHOOK_SECRET}`) {
       console.error('[apify-sync] Webhook secret invalide');
+      console.error('[apify-sync] authHeader:', authHeader);
+      console.error('[apify-sync] WEBHOOK_SECRET:', WEBHOOK_SECRET);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
