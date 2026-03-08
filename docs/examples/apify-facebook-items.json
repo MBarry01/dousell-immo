@@ -1,0 +1,38 @@
+[
+  {
+    "listingUrl": "https://www.facebook.com/marketplace/item/123456789/",
+    "marketplace_listing_title": "Bel appartement 2 chambres à Dakar Fann",
+    "listing_price": {
+      "formatted_amount": "5000000"
+    },
+    "location": {
+      "reverse_geocode": {
+        "city": "Dakar",
+        "state": "Dakar"
+      }
+    },
+    "primary_listing_photo_url": "https://example.com/photo1.jpg",
+    "is_live": true,
+    "is_sold": false,
+    "is_pending": false,
+    "is_hidden": false
+  },
+  {
+    "listingUrl": "https://www.facebook.com/marketplace/item/987654321/",
+    "marketplace_listing_title": "Villa à louer Saly Portudal",
+    "listing_price": {
+      "formatted_amount": "2500000"
+    },
+    "location": {
+      "reverse_geocode": {
+        "city": "Saly",
+        "state": "Mbour"
+      }
+    },
+    "primary_listing_photo_url": "https://example.com/photo2.jpg",
+    "is_live": true,
+    "is_sold": false,
+    "is_pending": false,
+    "is_hidden": false
+  }
+]
