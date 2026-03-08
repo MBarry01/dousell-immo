@@ -178,7 +178,6 @@ test.describe('4-Tier SEO Routes', () => {
 
     // Look for AggregateOffer schema
     const scripts = await page.locator('script[type="application/ld+json"]').all()
-    let foundSchema = false
 
     for (const script of scripts) {
       const content = await script.textContent()
@@ -186,11 +185,10 @@ test.describe('4-Tier SEO Routes', () => {
         try {
           const schema = JSON.parse(content)
           if (schema['@type'] === 'AggregateOffer') {
-            foundSchema = true
             expect(schema.priceCurrency).toBe('XOF')
             expect(schema.offerCount).toBeGreaterThanOrEqual(0)
           }
-        } catch (e) {
+        } catch (_e) {
           // Not JSON-LD, skip
         }
       }
