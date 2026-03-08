@@ -31,7 +31,7 @@
    - Log in to Apify account for Facebook Marketplace scraper
    - Navigate: Task > Integrations > Webhooks
    - Create new webhook:
-     - URL: `https://doussel-immo.com/api/webhooks/apify-sync?source=Facebook+Marketplace`
+     - URL: `https://www.dousel.com/api/webhooks/apify-sync?source=Facebook+Marketplace`
      - Secret: Copy value from Vercel `APIFY_WEBHOOK_SECRET`
      - Events: "Task succeeded"
    - Test run to verify payload processing

@@ -487,7 +487,7 @@ Create `.claude/checklists/facebook-marketplace-prod.md`:
 
 3. Verify webhook in Apify:
    - Facebook task > Integrations > Webhooks
-   - URL: `https://doussel-immo.com/api/webhooks/apify-sync?source=Facebook+Marketplace`
+   - URL: `https://www.dousel.com/api/webhooks/apify-sync?source=Facebook+Marketplace`
    - Secret: matches `APIFY_WEBHOOK_SECRET`
    - Test run to verify payload processing
 
