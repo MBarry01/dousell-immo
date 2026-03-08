@@ -50,8 +50,15 @@ export function CldImageSafe(props: CldImageProps) {
             return { isLocal: true, finalSrc: src, isLogo: isLogoAsset, isDesign: true };
         }
 
-        // Cas B : URL externe complète (Supabase, Unsplash)
+        // Cas B : URL externe complète (Supabase, Unsplash, Facebook)
+        // Pour Facebook CDN, utiliser Cloudinary comme proxy
         if (src.startsWith('http') || src.startsWith('//')) {
+            const isFacebookUrl = src.includes('fbcdn.net') || src.includes('facebook.com');
+            if (isFacebookUrl) {
+                // Proxy via Cloudinary pour éviter CORS/expiration issues
+                const proxiedUrl = `https://res.cloudinary.com/${cloudName}/image/fetch/f_auto,q_auto/${encodeURIComponent(src)}`;
+                return { isLocal: false, finalSrc: proxiedUrl, isLogo: isLogoAsset, isDesign: false };
+            }
             return { isLocal: false, finalSrc: src, isLogo: isLogoAsset, isDesign: false };
         }
 
