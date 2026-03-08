@@ -85,6 +85,52 @@ function extractField(obj: any, fields: string | string[]): string | null {
 }
 
 /**
+ * Filtre les annonces non-immobilières
+ * Garder SEULEMENT les biens immobiliers (maison, appartement, terrain, villa, studio, etc.)
+ * Rejeter: meubles, carreaux, quincaillerie, électronique, etc.
+ */
+function isRealEstateAd(title: string): boolean {
+  const titleLower = title.toLowerCase();
+
+  // Keywords immobiliers positifs (on GARDE si au moins un est présent)
+  const realEstateKeywords = [
+    'maison', 'villa', 'appartement', 'appart', 'studio', 'terrain',
+    'parcelle', 'lot', 'immeuble', 'duplex', 'chambre', 'chambre',
+    'location', 'louer', 'à louer', 'vendre', 'vente', 'bail',
+    'propriété', 'bien immobilier', 'immobilier', 'résidence',
+    'maison de ville', 'complexe résidentiel', 'penthouse'
+  ];
+
+  // Keywords à rejeter (articles ménagers, furniture, autres catégories)
+  const nonRealEstateKeywords = [
+    'meuble', 'table', 'chaise', 'sofa', 'salon', 'lit', 'armoire',
+    'carrelage', 'carreaux', 'peinture', 'ciment', 'tôle', 'bois',
+    'quincaillerie', 'outil', 'électronique', 'téléphone', 'ordinateur',
+    'véhicule', 'voiture', 'moto', 'bateau', 'électroménager',
+    'climatisation', 'frigo', 'cuisinière', 'vêtement', 'habit',
+    'chaussure', 'sac', 'bijoux', 'jeux', 'jouet', 'livre',
+    'service', 'formation', 'consulting', 'travaux', 'réparation'
+  ];
+
+  // Si le titre contient un keyword non-immobilier → rejeter
+  for (const keyword of nonRealEstateKeywords) {
+    if (titleLower.includes(keyword)) {
+      return false;
+    }
+  }
+
+  // Si le titre contient un keyword immobilier → accepter
+  for (const keyword of realEstateKeywords) {
+    if (titleLower.includes(keyword)) {
+      return true;
+    }
+  }
+
+  // Par défaut, rejeter les annonces ambiguës (pas de keyword clair)
+  return false;
+}
+
+/**
  * Classification automatique basée sur le titre et la localisation
  */
 function classifyAd(title: string, location: string) {
@@ -245,6 +291,12 @@ export async function POST(req: Request) {
 
       // Validation : URL et titre obligatoires
       if (!sourceUrl || !title) {
+        skippedFormat++;
+        continue;
+      }
+
+      // Filtrer les annonces non-immobilières (furniture, quincaillerie, etc.)
+      if (!isRealEstateAd(title)) {
         skippedFormat++;
         continue;
       }
