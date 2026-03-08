@@ -3,6 +3,7 @@ import { getUnifiedListings, getSimilarListings } from "@/services/gatewayServic
 import { getActiveCities, getCityNameFromSlug } from "@/services/propertyService";
 import { slugify, unslugify } from "@/lib/slugs";
 import { generateMetadata as generatePageMetadata } from "@/lib/seo/metadata";
+import { trackPageView } from "@/lib/analytics/seoTracking";
 import ProgrammaticPageTemplate from "@/components/seo/ProgrammaticPageTemplate";
 import Link from "next/link";
 
@@ -102,6 +103,12 @@ export default async function ImmobilierCityPage({ params, searchParams }: PageP
     const { city } = await params;
     const resolvedCity = await getCityNameFromSlug(city);
     const displayCity = resolvedCity || capitalize(unslugify(city));
+
+    // Track page view for analytics
+    await trackPageView({
+        city,
+        url: `/immobilier/${city}`,
+    });
 
     const res = await searchParams;
     const currentPage = Number(res.page) || 1;

@@ -13,6 +13,7 @@ import {
 } from '@/services/districtService.cached';
 import { getSimilarListings } from '@/services/gatewayService';
 import { getActiveCities, getCityNameFromSlug } from '@/services/propertyService';
+import { trackPageView } from '@/lib/analytics/seoTracking';
 import ProgrammaticPageTemplate from '@/components/seo/ProgrammaticPageTemplate';
 import { Breadcrumb } from '@/components/seo/Breadcrumb';
 import { capitalize } from '@/lib/slugs';
@@ -70,6 +71,13 @@ export async function generateStaticParams() {
 export default async function ImmobilierDistrictPage({ params, searchParams }: PageProps) {
   const { city, district } = await params;
   const { page = '1' } = await searchParams;
+
+  // Track page view for analytics
+  await trackPageView({
+    city,
+    district,
+    url: `/immobilier/${city}/${district}`,
+  });
 
   const districtData = await getCachedDistrictBySlug(district, city);
   if (!districtData) notFound();
