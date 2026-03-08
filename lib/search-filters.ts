@@ -40,6 +40,7 @@ export const parseFiltersFromSearchParams = (
     hasBackupGenerator: booleanOrUndefined(params.get("hasBackupGenerator")),
     hasWaterTank: booleanOrUndefined(params.get("hasWaterTank")),
     limit: numberOrUndefined(params.get("limit")),
+    page: numberOrUndefined(params.get("page")),
   };
 };
 
@@ -64,6 +65,7 @@ export const serializeFilters = (
       ["hasBackupGenerator", filters.hasBackupGenerator ? "true" : undefined],
       ["hasWaterTank", filters.hasWaterTank ? "true" : undefined],
       ["limit", filters.limit],
+      ["page", filters.page],
     ];
 
   entries.forEach(([key, value]) => {
@@ -80,18 +82,18 @@ export const serializeFilters = (
 export const hasActiveFilters = (filters: PropertyFilters) => {
   return Boolean(
     filters.q ||
-      filters.category ||
-      filters.city ||
-      filters.location ||
-      filters.minPrice ||
-      filters.maxPrice ||
-      filters.status ||
-      filters.type ||
-      filters.types ||
-      filters.rooms ||
-      filters.bedrooms ||
-      filters.hasBackupGenerator ||
-      filters.hasWaterTank
+    filters.category ||
+    filters.city ||
+    filters.location ||
+    filters.minPrice ||
+    filters.maxPrice ||
+    filters.status ||
+    filters.type ||
+    filters.types ||
+    filters.rooms ||
+    filters.bedrooms ||
+    filters.hasBackupGenerator ||
+    filters.hasWaterTank
   );
 };
 
