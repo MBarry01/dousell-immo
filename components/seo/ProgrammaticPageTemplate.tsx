@@ -8,7 +8,7 @@ import { PropertyCard } from "@/components/property/property-card";
 import { Button } from "@/components/ui/button";
 import { GripHorizontal, ArrowRight } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
-import { slugify, cleanCityName } from "@/lib/slugs";
+import { slugify, cleanCityName, capitalize } from "@/lib/slugs";
 import { getCityImage } from "@/lib/cityImages";
 
 import { SimilarListingsSection } from "@/components/seo/SimilarListingsSection";
@@ -70,10 +70,32 @@ export default function ProgrammaticPageTemplate({
     const availableTypes = Array.from(new Set(properties.map(p => p.details?.type).filter(Boolean)));
 
     if (properties.length === 0) {
+        const validCategories = ["appartement", "villa", "studio", "terrain", "commerce", "immeuble"];
+        const isCategory = validCategories.includes(displayCity.toLowerCase());
+
+        // French grammar helpers
+        const categoryName = displayCity.toLowerCase();
+        const startsWithVowel = /^[aeiouyAEIOUY]/.test(categoryName);
+        const articleDe = startsWithVowel ? "d'" : "de ";
+
+        // Special case for country vs city
+        const cityOrCountry = capitalize(city);
+        const locationPrefix = cityOrCountry.toLowerCase() === "senegal" || cityOrCountry.toLowerCase() === "sénégal"
+            ? "au Sénégal"
+            : `à ${cityOrCountry}`;
+
+        // For standard property search (not category catch-all)
+        const typePrefix = type
+            ? (/^[aeiouyAEIOUY]/.test(displayType || "") ? "d'" : "de ") + displayType
+            : "de bien";
+
         return (
             <div className="container mx-auto px-4 py-20 text-center">
                 <h1 className="text-3xl font-bold mb-4">
-                    Pas encore de {type ? displayType : "bien"} en {isRental ? "location" : "vente"} à {displayCity}
+                    {isCategory
+                        ? `Pas encore ${articleDe}${categoryName} en ${isRental ? "location" : "vente"} ${locationPrefix}`
+                        : `Pas encore ${typePrefix} en ${isRental ? "location" : "vente"} à ${displayCity}`
+                    }
                 </h1>
                 <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
                     Nous n&apos;avons pas d&apos;annonce correspondant à ces critères pour le moment.

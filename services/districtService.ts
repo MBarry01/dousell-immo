@@ -63,9 +63,9 @@ export async function getDistrictsByCity(citySlug: string): Promise<District[]> 
       landmarks: row.landmarks || [],
       price_range: row.price_range_min && row.price_range_max
         ? {
-            min: row.price_range_min,
-            max: row.price_range_max,
-          }
+          min: row.price_range_min,
+          max: row.price_range_max,
+        }
         : undefined,
     }));
   } catch (error) {
@@ -106,8 +106,8 @@ export async function getDistrictBySlug(
         // Not found — this is expected for invalid slugs
         return null;
       }
-      console.error('[getDistrictBySlug] Query error:', { districtSlug, citySlug, error });
-      throw error;
+      console.error('[getDistrictBySlug] Query error (caught and returning null):', { districtSlug, citySlug, error });
+      return null;
     }
 
     if (!data) {
@@ -129,14 +129,14 @@ export async function getDistrictBySlug(
       landmarks: data.landmarks || [],
       price_range: data.price_range_min && data.price_range_max
         ? {
-            min: data.price_range_min,
-            max: data.price_range_max,
-          }
+          min: data.price_range_min,
+          max: data.price_range_max,
+        }
         : undefined,
     };
   } catch (error) {
-    console.error('[getDistrictBySlug] Unexpected error:', { districtSlug, citySlug, error });
-    throw error;
+    console.error('[getDistrictBySlug] Unexpected error (caught and handled gracefully):', { districtSlug, citySlug, error });
+    return null;
   }
 }
 
@@ -200,14 +200,15 @@ export async function getPropertiesByDistrict(
     const { data, count, error } = await query;
 
     if (error) {
-      console.error('[getPropertiesByDistrict] Query error:', {
+      console.error('[getPropertiesByDistrict] Query error (handling gracefully):', {
         districtSlug,
         citySlug,
         category,
         type,
-        error,
+        errorMessage: error.message,
+        errorCode: error.code,
       });
-      throw error;
+      return { properties: [], total: 0 };
     }
 
     return {
@@ -215,13 +216,13 @@ export async function getPropertiesByDistrict(
       total: count || 0,
     };
   } catch (error) {
-    console.error('[getPropertiesByDistrict] Unexpected error:', {
+    console.error('[getPropertiesByDistrict] Unexpected error (handling gracefully):', {
       districtSlug,
       citySlug,
       category,
       type,
-      error,
+      error: error instanceof Error ? error.message : String(error),
     });
-    throw error;
+    return { properties: [], total: 0 };
   }
 }

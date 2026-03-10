@@ -15,7 +15,7 @@ import { getSimilarListings } from '@/services/gatewayService';
 import { getActiveCities, getCityNameFromSlug } from '@/services/propertyService';
 import { trackPageView } from '@/lib/analytics/seoTracking';
 import ProgrammaticPageTemplate from '@/components/seo/ProgrammaticPageTemplate';
-import { Breadcrumb } from '@/components/seo/Breadcrumb';
+
 import { unslugify, capitalize } from '@/lib/slugs';
 import { generateCityDistrictTypeParams } from '@/lib/seo/generateStaticParams';
 import { generateMetadata as generatePageMetadata } from '@/lib/seo/metadata';
@@ -101,15 +101,7 @@ export default async function ImmobilierDistrictTypePage({ params, searchParams 
 
   return (
     <>
-      <Breadcrumb
-        items={[
-          { label: 'Accueil', href: '/' },
-          { label: 'Immobilier', href: '/recherche' },
-          { label: cityName, href: `/immobilier/${city}` },
-          { label: districtData.name_fr, href: `/immobilier/${city}/${district}` },
-          { label: displayType },
-        ]}
-      />
+
       <ProgrammaticPageTemplate
         mode="immobilier"
         city={city}
