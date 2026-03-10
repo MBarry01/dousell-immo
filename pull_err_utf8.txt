@@ -1,0 +1,239 @@
+﻿supabase : 
+Initialising login 
+role...
+Au caractère Ligne:1 : 
+1
++ supabase db pull > 
+pull_err.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (Initialising    
+ login role...:Stri    
+ng) [], RemoteExce    
+ption
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+Connecting to remote 
+database...
+The remote database's 
+migration history does 
+not match local files 
+in supabase\migrations 
+directory.
+
+Make sure your local 
+git repo is 
+up-to-date. If the 
+error persists, try 
+repairing the 
+migration history 
+table:
+supabase migration 
+repair --status 
+applied 20251228000000
+supabase migration 
+repair --status 
+applied 20251228120001
+supabase migration 
+repair --status 
+applied 20251228140000
+supabase migration 
+repair --status 
+applied 20251230000000
+supabase migration 
+repair --status 
+applied 20251230161500
+supabase migration 
+repair --status 
+applied 20251231215100
+supabase migration 
+repair --status 
+applied 20251231221000
+supabase migration 
+repair --status 
+applied 20251231221500
+supabase migration 
+repair --status 
+applied 20251231224500
+supabase migration 
+repair --status 
+applied 20260103004600
+supabase migration 
+repair --status 
+applied 20260103152800
+supabase migration 
+repair --status 
+applied 20260103160300
+supabase migration 
+repair --status 
+applied 20260103183000
+supabase migration 
+repair --status 
+applied 20260103203000
+supabase migration 
+repair --status 
+applied 20260103233000
+supabase migration 
+repair --status 
+applied 20260109000000
+supabase migration 
+repair --status 
+applied 20260117000000
+supabase migration 
+repair --status 
+applied 20260120000000
+supabase migration 
+repair --status 
+applied 20260120000001
+supabase migration 
+repair --status 
+applied 20260121000000
+supabase migration 
+repair --status 
+applied 20260121000001
+supabase migration 
+repair --status 
+applied 20260122000000
+supabase migration 
+repair --status 
+applied 20260122000001
+supabase migration 
+repair --status 
+applied 20260124000000
+supabase migration 
+repair --status 
+applied 20260124000001
+supabase migration 
+repair --status 
+applied 20260124135500
+supabase migration 
+repair --status 
+applied 20260125012800
+supabase migration 
+repair --status 
+applied 20260128120000
+supabase migration 
+repair --status 
+applied 20260130160425
+supabase migration 
+repair --status 
+applied 20260130161211
+supabase migration 
+repair --status 
+applied 20260130203000
+supabase migration 
+repair --status 
+applied 20260131100000
+supabase migration 
+repair --status 
+applied 20260131160000
+supabase migration 
+repair --status 
+applied 20260201100000
+supabase migration 
+repair --status 
+applied 20260201100001
+supabase migration 
+repair --status 
+applied 20260201120000
+supabase migration 
+repair --status 
+applied 20260201140000
+supabase migration 
+repair --status 
+applied 20260202120000
+supabase migration 
+repair --status 
+applied 20260202130000
+supabase migration 
+repair --status 
+applied 20260202140000
+supabase migration 
+repair --status 
+applied 20260202141000
+supabase migration 
+repair --status 
+applied 20260203100000
+supabase migration 
+repair --status 
+applied 20260203110000
+supabase migration 
+repair --status 
+applied 20260204050000
+supabase migration 
+repair --status 
+applied 20260204060000
+supabase migration 
+repair --status 
+applied 20260207203700
+supabase migration 
+repair --status 
+applied 20260208100000
+supabase migration 
+repair --status 
+applied 20260211000000
+supabase migration 
+repair --status 
+applied 20260211000001
+supabase migration 
+repair --status 
+applied 20260211000002
+supabase migration 
+repair --status 
+applied 20260214100000
+supabase migration 
+repair --status 
+applied 20260214100001
+supabase migration 
+repair --status 
+applied 20260214110000
+supabase migration 
+repair --status 
+applied 20260214120000
+supabase migration 
+repair --status 
+applied 20260214130000
+supabase migration 
+repair --status 
+applied 20260214220000
+supabase migration 
+repair --status 
+applied 20260214230000
+supabase migration 
+repair --status 
+applied 20260215100000
+supabase migration 
+repair --status 
+applied 20260216234000
+supabase migration 
+repair --status 
+applied 20260217000100
+supabase migration 
+repair --status 
+applied 20260217100000
+supabase migration 
+repair --status 
+applied 20260220000000
+supabase migration 
+repair --status 
+applied 20260303000001
+supabase migration 
+repair --status 
+applied 20260304000001
+supabase migration 
+repair --status 
+applied 20260305000001
+supabase migration 
+repair --status 
+applied 20260307000000
+supabase migration 
+repair --status 
+applied 20260307000001
+supabase migration 
+repair --status 
+applied 20260308000000
+

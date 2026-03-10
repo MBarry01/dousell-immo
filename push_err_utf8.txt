@@ -1,0 +1,99 @@
+﻿Initialising login role...
+Connecting to remote database...
+Skipping migration test.html... (file name must match pattern "<timestamp>_name.sql")
+Do you want to push these migrations to the remote database?
+ â€¢ 20251227000000_add_rental_transaction_fields.sql
+ â€¢ 20251228000000_create_lease_decisions.sql
+ â€¢ 20251228120000_add_transactions_index.sql
+ â€¢ 20251228140000_add_end_date_to_leases.sql
+ â€¢ 20251230000000_create_lease_contracts_bucket.sql
+ â€¢ 20251230161500_storage_update_policy.sql
+ â€¢ 20251231215100_create_messaging.sql
+ â€¢ 20251231221000_update_leases_rls.sql
+ â€¢ 20251231221500_update_leases_rls.sql
+ â€¢ 20251231224500_gestion_locative_activation.sql
+ â€¢ 20260103004600_create_expenses_table.sql
+ â€¢ 20260103152800_create_inventory_reports.sql
+ â€¢ 20260103160300_create_branding_bucket.sql
+ â€¢ 20260103183000_create_inventory_bucket.sql
+ â€¢ 20260103203000_add_rental_fields_to_documents.sql
+ â€¢ 20260103233000_add_missing_user_documents_columns.sql
+ â€¢ 20260109000000_add_email_user_id_to_visit_requests.sql
+ â€¢ 20260117000000_create_external_listings.sql
+ â€¢ 20260120000000_add_coords_to_external_listings.sql
+ â€¢ 20260120000001_add_external_listings_indexes.sql
+ â€¢ 20260121000000_clean_null_images.sql
+ â€¢ 20260121000001_enable_rls_external_listings.sql
+ â€¢ 20260122000000_add_custom_data_to_leases.sql
+ â€¢ 20260122000001_add_expenses_table.sql
+ â€¢ 20260124000000_add_team_id_to_properties.sql
+ â€¢ 20260124000001_create_seo_rpc.sql
+ â€¢ 20260124135500_certify_existing_properties.sql
+ â€¢ 20260125012800_auto_unpublish_rented_properties.sql
+ â€¢ 20260128120000_fix_teams_rls.sql
+ â€¢ 20260130160425_unification_v4_5_atomic.sql
+ â€¢ 20260130161211_create_imports_staging_table.sql
+ â€¢ 20260130203000_force_rented_offline.sql
+ â€¢ 20260131100000_add_team_read_policies.sql
+ â€¢ 20260131160000_migrate_to_team_centric_rls.sql
+ â€¢ 20260201100000_add_pro_status_to_profiles.sql
+ â€¢ 20260201100001_add_tenant_access_control.sql
+ â€¢ 20260201120000_add_favorites_and_tenant_logs.sql
+ â€¢ 20260201140000_add_member_lifecycle_columns.sql
+ â€¢ 20260202120000_migrate_subscription_schema.sql
+ â€¢ 20260202130000_update_get_user_team_rpc.sql
+ â€¢ 20260202140000_create_access_control_schema.sql
+ â€¢ 20260202141000_update_get_active_temporary_permissions.sql
+ â€¢ 20260203100000_add_stripe_fields.sql
+ â€¢ 20260203110000_add_payment_method_to_transactions.sql
+ â€¢ 20260204050000_optimize_dashboard_indexes.sql
+ â€¢ 20260204060000_fix_maintenance_schema.sql
+ â€¢ 20260207203700_create_messages_table.sql
+ â€¢ 20260208100000_backfill_transaction_team_ids.sql
+ â€¢ 20260211000000_connect_production_readiness.sql
+ â€¢ 20260211000001_fix_subscription_and_setup_saas.sql
+ â€¢ 20260211000002_fix_subscription_tier_check.sql
+ â€¢ 20260214100000_add_team_id_to_messages_and_session_hash.sql
+ â€¢ 20260214100001_create_shared_documents_table.sql
+ â€¢ 20260214110000_update_maintenance_status_constraint.sql
+ â€¢ 20260214120000_add_tenant_coordination_columns.sql
+ â€¢ 20260214130000_add_rejection_reason_and_fix_constraint.sql
+ â€¢ 20260214220000_add_maintenance_type_to_user_documents.sql
+ â€¢ 20260214230000_fix_user_documents_insert_rls.sql
+ â€¢ 20260215100000_add_owner_viewed_at_to_maintenance.sql
+ â€¢ 20260216234000_add_anon_rls_policies.sql
+ â€¢ 20260217000100_add_message_to_notification_type.sql
+ â€¢ 20260217100000_subscription_audit_fixes.sql
+ â€¢ 20260220000000_secure_properties_bucket.sql
+ â€¢ 20260303000001_create_articles.sql
+ â€¢ 20260304000001_add_article_id_to_leads.sql
+ â€¢ 20260305000001_create_b2b_prospects.sql
+ â€¢ 20260307000000_add_districts_table.sql
+ â€¢ 20260307000001_create_seo_4tier_rpc.sql
+ â€¢ 20260308000000_create_facebook_listings.sql
+ â€¢ 20260308000001_add_email_verification_columns.sql
+ â€¢ 20260308000002_fixes_profiles_trigger_integrity.sql
+ â€¢ 20260308000003_intervention_workflow_v2.sql
+
+ [Y/n] y
+Applying migration 20251227000000_add_rental_transaction_fields.sql...
+NOTICE (42701): column "period_start" of relation "rental_transactions" already exists, skipping
+NOTICE (42701): column "period_end" of relation "rental_transactions" already exists, skipping
+NOTICE (42701): column "tenant_id" of relation "rental_transactions" already exists, skipping
+NOTICE (42P07): relation "idx_rental_transactions_tenant_id" already exists, skipping
+NOTICE (42P07): relation "idx_rental_transactions_period_dates" already exists, skipping
+ERROR: duplicate key value violates unique constraint "schema_migrations_pkey" (SQLSTATE 23505)
+Key (version)=(20251227000000) already exists.                                                 
+At statement: 8                                                                                
+-- 7. Migration du tenant_id basÃ© sur le lease_id                                              
+-- RÃ©cupÃ©rer le tenant_id depuis la table leases (si la colonne existe)                        
+-- Note: Cette partie dÃ©pend de votre schÃ©ma leases actuel                                     
+-- Si leases a un champ tenant_id, dÃ©commentez cette ligne:                                    
+-- UPDATE rental_transactions rt                                                               
+-- SET tenant_id = l.tenant_id                                                                 
+-- FROM leases l                                                                               
+-- WHERE rt.lease_id = l.id AND rt.tenant_id IS NULL;                                          
+                                                                                               
+-- Alternative: Si vous stockez tenant_name dans leases et voulez le lier Ã  profiles           
+-- Cette partie peut nÃ©cessiter un ajustement selon votre schÃ©ma exact                         
+Try rerunning the command with --debug to troubleshoot the error.

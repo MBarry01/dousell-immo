@@ -1,0 +1,10 @@
+Initialising login role...
+Connecting to remote database...
+Skipping migration test.html... (file name must match pattern "<timestamp>_name.sql")
+Found local migration files to be inserted before the last migration on remote database.
+
+Rerun the command with --include-all flag to apply these migrations:
+supabase\migrations\20251227000000_add_rental_transaction_fields.sql
+supabase\migrations\20251228000000_create_lease_decisions.sql       
+supabase\migrations\20251228120000_add_transactions_index.sql       
+

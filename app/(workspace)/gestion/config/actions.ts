@@ -205,7 +205,10 @@ export async function sendTestEmail(profileData: any) {
 
         const response = await fetch(`${N8N_WEBHOOK_URL}/generate-lease-pdf`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'any'
+            },
             body: JSON.stringify(payload),
         });
 

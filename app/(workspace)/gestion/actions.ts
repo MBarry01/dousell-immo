@@ -313,7 +313,10 @@ async function triggerN8N(webhookPath: string, payload: Record<string, unknown>)
     try {
         const response = await fetchWithRetry(`${N8N_URL}/${webhookPath}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'any'
+            },
             body: JSON.stringify({
                 ...payload,
                 timestamp: new Date().toISOString(),
