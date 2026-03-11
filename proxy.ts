@@ -13,16 +13,23 @@ export async function proxy(request: NextRequest) {
 
   // RÈGLE SOUS-DOMAINE : app.dousel.com -> /gestion
   const isAppSubdomain = host.startsWith("app.") || hostname.startsWith("app.");
+  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/auth') || pathname.startsWith('/reset-password');
 
-  if (isAppSubdomain && !pathname.startsWith('/gestion') && !pathname.startsWith('/api')) {
+  // Routes qui existent de manière autonome et ne doivent pas être préfixées par /gestion
+  const isSharedRoute = pathname.startsWith('/compte') || pathname.startsWith('/admin') || pathname.startsWith('/pro');
+
+  if (isAppSubdomain && !pathname.startsWith('/gestion') && !pathname.startsWith('/api') && !isAuthRoute && !isSharedRoute) {
     const url = request.nextUrl.clone();
     url.pathname = `/gestion${pathname}`;
+
+    console.log(`[PROXY] Rewriting ${host}${pathname} -> /gestion${pathname}`);
 
     // On doit quand même exécuter la logique de session/auth
     const sessionResponse = await updateSession(request);
 
     // Si l'auth demande une redirection (ex: vers /login), on l'honore
     if (sessionResponse.headers.get("location")) {
+      console.log(`[PROXY] updateSession redirected to: ${sessionResponse.headers.get("location")}`);
       return sessionResponse;
     }
 
@@ -40,6 +47,8 @@ export async function proxy(request: NextRequest) {
     response.headers.set("x-debug-target", url.pathname);
     response.headers.set("x-middleware-active", "true");
     return response;
+  } else if (isAppSubdomain) {
+    console.log(`[PROXY] Skipping rewrite for ${host}${pathname} (already /gestion, /api, or auth route)`);
   }
 
   // Traitement classique pour dousel.com

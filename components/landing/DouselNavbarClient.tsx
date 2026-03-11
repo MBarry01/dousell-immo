@@ -1,10 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
-import AceNavbar, { NavbarConfig } from "@/components/ui/ace-navbar";
-
-// Routes where the navbar should be hidden
+import AceNavbar, { NavbarConfig } from "@/components/ui/ace-navbar";// Routes where the navbar should be hidden
 const HIDDEN_ROUTES = ["/pro/start"];
+
+// URL strategy: use local app loopback for dev, env variable, or fallback to prod
+const appUrl = process.env.NODE_ENV === "development"
+    ? "/gestion"
+    : (process.env.NEXT_PUBLIC_APP_URL || "https://app.dousel.com");
 
 const dousellConfig: NavbarConfig = {
     logo: {
@@ -80,7 +83,7 @@ const dousellConfig: NavbarConfig = {
 // Configuration pour utilisateur connecté
 const loggedInCta = {
     text: "Mon Espace",
-    href: "https://app.dousel.com",
+    href: appUrl,
 };
 
 // Configuration pour visiteur (mode propriétaire)
@@ -163,12 +166,12 @@ export default function DouselNavbarClient({
                 case "demo":
                 case "features":
                     return isLoggedIn
-                        ? { text: "Mon Espace", href: "https://app.dousel.com" }
+                        ? { text: "Mon Espace", href: appUrl }
                         : { text: "Commencer gratuitement", href: "/pro/start" };
                 case "hero":
                 default:
                     if (isLoggedIn) {
-                        return { text: "Mon Espace", href: "https://app.dousel.com" };
+                        return { text: "Mon Espace", href: appUrl };
                     }
                     // Propager le redirect pour le bouton login du hero
                     const paramsStr = searchParams?.toString();
