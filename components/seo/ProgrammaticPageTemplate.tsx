@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Fragment } from "react";
-import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import Link from "next/link";
 import { Property } from "@/types/property";
 import { PropertyCard } from "@/components/property/property-card";
@@ -283,7 +283,7 @@ export default function ProgrammaticPageTemplate({
                                         className="group relative h-72 w-full sm:w-80 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 block"
                                     >
                                         {/* 1. L'Image de fond */}
-                                        <Image
+                                        <CldImageSafe
                                             src={imageUrl}
                                             alt={`Immobilier à ${cleanCityName(cityName)}`}
                                             fill

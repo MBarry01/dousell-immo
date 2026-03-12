@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
+import { CldImageSafe } from "@/components/ui/CldImageSafe";
 import { ArrowRight } from "lucide-react";
 import { slugify, unslugify } from "@/lib/slugs";
 import { getCityImage } from "@/lib/cityImages";
@@ -77,7 +77,7 @@ export default async function SaleRootPage() {
                                     className="group relative h-72 w-full sm:w-80 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 block"
                                 >
                                     {/* 1. L'Image de fond */}
-                                    <Image
+                                    <CldImageSafe
                                         src={imageUrl}
                                         alt={`Vente à ${city.name}`}
                                         fill

@@ -1,30 +1,38 @@
 import { slugify } from "./slugs";
 
-// Map of city slugs to image paths
-// Ensure these images exist in public/images/cities/
+// Map of city slugs to image paths on Cloudinary
 const CITY_IMAGES: Record<string, string> = {
-    "dakar": "/images/cities/dakar.jpg",
-    "region-de-dakar": "/images/cities/dakar.jpg",
-    "dakar-region": "/images/cities/dakar.jpg",
-    "ville-de-dakar": "/images/cities/dakar.jpg",
+    "dakar": "Dousel/static/cities/dakar",
+    "region-de-dakar": "Dousel/static/cities/dakar",
+    "dakar-region": "Dousel/static/cities/dakar",
+    "ville-de-dakar": "Dousel/static/cities/dakar",
 
-    "saly": "/images/cities/saly.jpg",
-    "saly-portudal": "/images/cities/saly.jpg",
-    "petite-cote": "/images/cities/saly.jpg",
+    "saly": "Dousel/static/cities/saly",
+    "saly-portudal": "Dousel/static/cities/saly",
+    "petite-cote": "Dousel/static/cities/saly",
 
-    "mbour": "/images/cities/mbour.jpg",
+    "mbour": "Dousel/static/cities/mbour",
 
-    "thies": "/images/cities/thies.jpg",
-    "region-de-thies": "/images/cities/thies.jpg",
-    "thies-region": "/images/cities/thies.jpg",
-    "ville-de-thies": "/images/cities/thies.jpg",
+    "thies": "Dousel/static/cities/thies",
+    "region-de-thies": "Dousel/static/cities/thies",
+    "thies-region": "Dousel/static/cities/thies",
+    "ville-de-thies": "Dousel/static/cities/thies",
 
-    "saint-louis": "/images/cities/saint-louis.jpg",
-    "somone": "/images/cities/saly.jpg", // Fallback for nearby coast
-    "ngaparou": "/images/cities/saly.jpg",
+    "saint-louis": "Dousel/static/cities/saint-louis",
+    "diamniadio": "Dousel/static/cities/diamniadio",
+    "rufisque": "Dousel/static/cities/rufisque",
+
+    "touba": "Dousel/static/cities/touba",
+    "ziguinchor": "Dousel/static/cities/ziguinchor",
+    "kaolack": "Dousel/static/cities/kaolack",
+    "diourbel": "Dousel/static/cities/diourbel",
+    "tambacounda": "Dousel/static/cities/tambacounda",
+
+    "somone": "Dousel/static/cities/saly", // Fallback for nearby coast
+    "ngaparou": "Dousel/static/cities/saly",
 };
 
-const DEFAULT_IMAGE = "/images/cities/default.jpg";
+const DEFAULT_IMAGE = "Dousel/static/cities/default_senegal";
 
 export function getCityImage(cityName: string): string {
     if (!cityName) return DEFAULT_IMAGE;
