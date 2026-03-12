@@ -10,6 +10,7 @@ interface ExpiredBannerProps {
   proStatus: string | null;
   propertiesCount?: number;
   leasesCount?: number;
+  trialEndsAt?: string | null;
 }
 
 /**
@@ -24,6 +25,7 @@ export function ExpiredBanner({
   proStatus,
   propertiesCount = 0,
   leasesCount = 0,
+  trialEndsAt,
 }: ExpiredBannerProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -55,9 +57,12 @@ export function ExpiredBanner({
             </div>
             <div>
               <p className="text-white font-medium">
-                {proStatus === "canceled" ? "Votre abonnement a été résilié" :
-                 proStatus === "unpaid" || proStatus === "incomplete" ? "Paiement en attente" :
-                 "Votre essai a expiré"}
+                {proStatus === "canceled" && trialEndsAt
+                  ? "Votre période d'essai est arrivée à terme"
+                  : proStatus === "canceled"
+                    ? "Votre abonnement a été résilié" :
+                    proStatus === "unpaid" || proStatus === "incomplete" ? "Paiement en attente" :
+                      "Votre période d'essai a expiré"}
               </p>
               <p className="text-white/60 text-sm">
                 Accès en lecture seule. Réactivez pour modifier vos données.

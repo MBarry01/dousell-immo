@@ -266,10 +266,9 @@ export default async function DashboardContent({
     );
 
     // ========================================
-    // FILTRAGE (identique à avant)
-    // ========================================
     const currentTier = team?.subscription_tier || "starter";
     const proStatus = context?.subscription_status || "none";
+    const trialEndsAt = context?.subscription_trial_ends_at || team?.subscription_trial_ends_at || null;
     const expensesList = expenses || [];
 
     const filteredLeases = isViewingTerminated
@@ -328,6 +327,7 @@ export default async function DashboardContent({
                         proStatus={proStatus}
                         propertiesCount={allLeases.length}
                         leasesCount={filteredLeases.length}
+                        trialEndsAt={trialEndsAt}
                     />
                 ) : (
                     <QuotaBanner
