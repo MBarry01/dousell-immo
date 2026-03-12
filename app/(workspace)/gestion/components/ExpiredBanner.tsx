@@ -56,7 +56,7 @@ export function ExpiredBanner({
               <Warning size={20} className="text-amber-500" />
             </div>
             <div>
-              <p className="text-white font-medium">
+              <p className="text-foreground font-medium">
                 {proStatus === "canceled" && trialEndsAt
                   ? "Votre période d'essai est arrivée à terme"
                   : proStatus === "canceled"
@@ -64,8 +64,10 @@ export function ExpiredBanner({
                     proStatus === "unpaid" || proStatus === "incomplete" ? "Paiement en attente" :
                       "Votre période d'essai a expiré"}
               </p>
-              <p className="text-white/60 text-sm">
-                Accès en lecture seule. Réactivez pour modifier vos données.
+              <p className="text-muted-foreground text-sm">
+                {(proStatus === "canceled" && trialEndsAt)
+                  ? "Passez à un abonnement payant pour continuer à gérer vos biens."
+                  : "Accès en lecture seule. Réactivez pour modifier vos données."}
               </p>
             </div>
           </div>
@@ -74,12 +76,12 @@ export function ExpiredBanner({
               onClick={() => router.push("/gestion/abonnement")}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              Réactiver
+              {(proStatus === "canceled" && trialEndsAt) ? "Passer Pro" : "Réactiver"}
               <ArrowRight size={16} className="ml-1" />
             </Button>
             <button
               onClick={() => setDismissed(true)}
-              className="p-2 text-white/40 hover:text-white/60 transition-colors"
+              className="p-2 text-muted-foreground/60 hover:text-muted-foreground transition-colors"
               aria-label="Fermer"
             >
               <X size={18} />

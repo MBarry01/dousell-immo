@@ -95,10 +95,10 @@ export function OrphanLeasesAlert({ count, leases }: OrphanLeasesAlertProps) {
                     <div className="flex items-start gap-3">
                         <AlertTriangle className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" />
                         <div>
-                            <p className="font-medium text-orange-300">
+                            <p className="font-medium text-orange-700 dark:text-orange-300">
                                 {count} bail{count > 1 ? "s" : ""} sans bien associé
                             </p>
-                            <p className="text-sm text-orange-400/80">
+                            <p className="text-sm text-orange-600/80 dark:text-orange-400/80">
                                 Ces locataires ont été importés sans liaison automatique à un bien existant.
                             </p>
                         </div>

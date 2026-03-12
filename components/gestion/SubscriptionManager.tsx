@@ -17,7 +17,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getAllPlans, formatPrice, getAnnualSavings, TRIAL_DURATION_DAYS, type BillingCycle } from "@/lib/subscription/plans-config";
-import { reactivateSubscription } from "@/app/(workspace)/gestion/abonnement/actions";
 
 export function SubscriptionManager() {
     const router = useRouter();
@@ -29,81 +28,75 @@ export function SubscriptionManager() {
     const [stats, setStats] = useState({ properties: 0, leases: 0 });
     const [hasStripeCustomer, setHasStripeCustomer] = useState(false);
     const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
-    const [canReactivateTrial, setCanReactivateTrial] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
-          try {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
+            try {
+                const supabase = createClient();
+                const { data: { user } } = await supabase.auth.getUser();
 
-            if (!user) return;
+                if (!user) return;
 
-            const { data: teamMemberships } = await supabase
-                .from("team_members")
-                .select("team_id, team:teams(*)")
-                .eq("user_id", user.id)
-                .eq("status", "active");
+                const { data: teamMemberships } = await supabase
+                    .from("team_members")
+                    .select("team_id, team:teams(*)")
+                    .eq("user_id", user.id)
+                    .eq("status", "active");
 
-            const teamMembership = teamMemberships && teamMemberships.length > 0 ? teamMemberships[0] : null;
-            const team = teamMembership?.team as {
-                subscription_status?: string;
-                subscription_tier?: string;
-                subscription_trial_ends_at?: string;
-                stripe_customer_id?: string;
-                trial_reactivation_count?: number;
-            } | null;
-            const tId = teamMembership?.team_id;
+                const teamMembership = teamMemberships && teamMemberships.length > 0 ? teamMemberships[0] : null;
+                const team = teamMembership?.team as {
+                    subscription_status?: string;
+                    subscription_tier?: string;
+                    subscription_trial_ends_at?: string;
+                    stripe_customer_id?: string;
+                    trial_reactivation_count?: number;
+                } | null;
+                const tId = teamMembership?.team_id;
 
-            if (team) {
-                let effectiveStatus = team.subscription_status || null;
-                let effectiveTier = team.subscription_tier || 'starter';
+                if (team) {
+                    let effectiveStatus = team.subscription_status || null;
+                    let effectiveTier = team.subscription_tier || 'starter';
 
-                // Normaliser : si trialing mais date expirée, traiter comme expiré
-                if (effectiveStatus === 'trialing' && team.subscription_trial_ends_at) {
-                    const trialEnd = new Date(team.subscription_trial_ends_at);
-                    if (trialEnd < new Date()) {
-                        effectiveStatus = 'past_due';
-                        effectiveTier = 'starter';
+                    // Normaliser : si trialing mais date expirée, traiter comme expiré
+                    if (effectiveStatus === 'trialing' && team.subscription_trial_ends_at) {
+                        const trialEnd = new Date(team.subscription_trial_ends_at);
+                        if (trialEnd < new Date()) {
+                            effectiveStatus = 'past_due';
+                            effectiveTier = 'starter';
+                        }
+                    }
+
+                    setProStatus(effectiveStatus);
+                    setSubscriptionTier(effectiveTier);
+                    setHasStripeCustomer(!!team.stripe_customer_id);
+
+                    if (team.subscription_trial_ends_at) {
+                        setTrialEndsAt(new Date(team.subscription_trial_ends_at));
                     }
                 }
 
-                setProStatus(effectiveStatus);
-                setSubscriptionTier(effectiveTier);
-                setHasStripeCustomer(!!team.stripe_customer_id);
+                if (tId) {
+                    const { count: propertiesCount } = await supabase
+                        .from("properties")
+                        .select("*", { count: "exact", head: true })
+                        .eq("team_id", tId);
 
-                // Peut réactiver l'essai si expiré et pas encore utilisé la réactivation
-                const MAX_REACTIVATIONS = 1;
-                const isExpiredStatus = effectiveStatus === 'past_due' || effectiveStatus === 'canceled';
-                const reactivationsUsed = team.trial_reactivation_count ?? 0;
-                setCanReactivateTrial(isExpiredStatus && reactivationsUsed < MAX_REACTIVATIONS);
-                if (team.subscription_trial_ends_at) {
-                    setTrialEndsAt(new Date(team.subscription_trial_ends_at));
+                    const { count: leasesCount } = await supabase
+                        .from("leases")
+                        .select("*", { count: "exact", head: true })
+                        .eq("team_id", tId)
+                        .eq("status", "active");
+
+                    setStats({
+                        properties: propertiesCount || 0,
+                        leases: leasesCount || 0,
+                    });
                 }
+            } catch (err) {
+                console.error("[SubscriptionManager] Failed to load data:", err);
+            } finally {
+                setIsLoading(false);
             }
-
-            if (tId) {
-                const { count: propertiesCount } = await supabase
-                    .from("properties")
-                    .select("*", { count: "exact", head: true })
-                    .eq("team_id", tId);
-
-                const { count: leasesCount } = await supabase
-                    .from("leases")
-                    .select("*", { count: "exact", head: true })
-                    .eq("team_id", tId)
-                    .eq("status", "active");
-
-                setStats({
-                    properties: propertiesCount || 0,
-                    leases: leasesCount || 0,
-                });
-            }
-          } catch (err) {
-            console.error("[SubscriptionManager] Failed to load data:", err);
-          } finally {
-            setIsLoading(false);
-          }
         };
 
         loadData();
@@ -154,23 +147,6 @@ export function SubscriptionManager() {
         }
     };
 
-    const handleReactivateTrial = async () => {
-        setIsSubmitting(true);
-        try {
-            const result = await reactivateSubscription();
-            if (result?.data?.success) {
-                toast.success("Essai gratuit réactivé ! Vous avez 14 jours supplémentaires.");
-                window.location.reload();
-                return;
-            } else {
-                toast.error(result?.error || "Erreur lors de la réactivation.");
-            }
-        } catch (err: any) {
-            toast.error(err.message || "Une erreur est survenue.");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
 
     if (isLoading) {
         return (
@@ -246,7 +222,8 @@ export function SubscriptionManager() {
                                 {isExpired && <span className="ml-2 text-xs font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">Expiré</span>}
                             </p>
                             <p className="text-xs text-gray-500 mt-0.5">
-                                {isExpired && "Votre abonnement a expiré. Réactivez pour retrouver l'accès."}
+                                {isExpired && trialEndsAt && "Votre période d'essai est terminée. Abonnez-vous pour retrouver l'accès."}
+                                {isExpired && !trialEndsAt && "Votre abonnement a expiré. Réactivez pour retrouver l'accès."}
                                 {isTrial && trialEndsAt && `${daysLeft} jour${daysLeft > 1 ? 's' : ''} restant${daysLeft > 1 ? 's' : ''} — expire le ${trialEndsAt.toLocaleDateString('fr-FR')}`}
                                 {isTrial && !trialEndsAt && "Essai gratuit en cours"}
                                 {isActive && "Votre abonnement est actif et à jour."}
@@ -277,25 +254,6 @@ export function SubscriptionManager() {
                     </div>
                 )}
 
-                {/* Reactivation CTA */}
-                {isExpired && canReactivateTrial && (
-                    <div className="mt-6 pt-6 border-t border-red-500/10">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div>
-                                <p className="text-sm font-medium text-slate-900 dark:text-white">Réactiver l&apos;essai gratuit</p>
-                                <p className="text-xs text-gray-500">Profitez de 14 jours supplémentaires avec toutes les fonctionnalités Pro.</p>
-                            </div>
-                            <Button
-                                onClick={handleReactivateTrial}
-                                disabled={isSubmitting}
-                                className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shrink-0"
-                            >
-                                <Clock size={16} className="mr-2" />
-                                {isSubmitting ? "Réactivation..." : "Réactiver (14 jours)"}
-                            </Button>
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* Billing Cycle Toggle */}
