@@ -4,10 +4,8 @@ import { useSearchParams, usePathname } from "next/navigation";
 import AceNavbar, { NavbarConfig } from "@/components/ui/ace-navbar";// Routes where the navbar should be hidden
 const HIDDEN_ROUTES = ["/pro/start"];
 
-// URL strategy: use local app loopback for dev, env variable, or fallback to prod
-const appUrl = process.env.NODE_ENV === "development"
-    ? "/gestion"
-    : (process.env.NEXT_PUBLIC_APP_URL || "https://app.dousel.com");
+// L'espace connecté est toujours sur /gestion
+const appUrl = "/gestion";
 
 const dousellConfig: NavbarConfig = {
     logo: {
