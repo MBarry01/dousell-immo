@@ -103,6 +103,8 @@ const nextConfig = {
             { protocol: "https", hostname: "pictures-senegal.jijistatic.com" },
             { protocol: "https", hostname: "res.cloudinary.com" },
             { protocol: "https", hostname: "*.cloudinary.com" },
+            { protocol: "https", hostname: "**.fbcdn.net" },
+            { protocol: "https", hostname: "*.facebook.com" },
         ],
         // Réduction du nombre de breakpoints pour limiter les fichiers générés
         deviceSizes: [640, 750, 828, 1080, 1200, 1920],

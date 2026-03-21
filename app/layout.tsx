@@ -27,9 +27,6 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.dousel.com"),
-  alternates: {
-    canonical: "./",
-  },
   title: {
     default: "Dousel | L'immobilier de confiance au Sénégal",
     template: "%s | Dousel",

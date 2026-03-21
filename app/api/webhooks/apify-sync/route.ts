@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { smartGeocode } from '@/lib/geocoding';
+import { uploadToCloudinary } from '@/lib/cloudinary-utils';
 
 // Initialisation de Supabase
 const supabase = createClient(
@@ -346,7 +347,27 @@ export async function POST(req: Request) {
 
         // Si l'annonce existe, on vérifie aussi l'image
         if (isSourceValid && ad.image_url) {
-          isImageValid = await validateUrl(ad.image_url, 4000); // 4 secondes max pour les images
+          isImageValid = await validateUrl(ad.image_url as string, 4000); // 4 secondes max pour les images
+
+          // UPLOAD CLOUDINARY POUR FACEBOOK
+          const imageUrlStr = ad.image_url as string;
+          if (isImageValid && (imageUrlStr.includes('fbcdn.net') || imageUrlStr.includes('facebook.com'))) {
+            try {
+              const imgRes = await fetch(imageUrlStr);
+              if (imgRes.ok) {
+                const buffer = await imgRes.arrayBuffer();
+                const base64 = Buffer.from(buffer).toString('base64');
+                const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
+                const dataUri = `data:${contentType};base64,${base64}`;
+                const uploadRes = await uploadToCloudinary(dataUri, 'external-listings', ['apify']);
+                if ('url' in uploadRes && uploadRes.url) {
+                  ad.image_url = uploadRes.url; // Remplace l'URL Facebook par Cloudinary
+                }
+              }
+            } catch (err) {
+              console.warn(`[${source}] Cloudinary upload failed for ${imageUrlStr}:`, err);
+            }
+          }
         }
 
         if (!isSourceValid || !isImageValid) {
@@ -362,16 +383,16 @@ export async function POST(req: Request) {
     // 4.5 Géocodage — coordonnées pré-définies pour villes connues + Nominatim en fallback
     // Évite les timeouts sur de gros volumes (500+ annonces)
     const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
-      'dakar':        { lat: 14.7167, lng: -17.4677 },
-      'saly':         { lat: 14.4600, lng: -16.9700 },
-      'thiès':        { lat: 14.7910, lng: -16.9256 },
-      'thies':        { lat: 14.7910, lng: -16.9256 },
-      'saint-louis':  { lat: 16.0179, lng: -16.4896 },
-      'saint louis':  { lat: 16.0179, lng: -16.4896 },
-      'ziguinchor':   { lat: 12.5681, lng: -16.2733 },
-      'mbour':        { lat: 14.3850, lng: -16.9750 },
-      'touba':        { lat: 14.8667, lng: -15.8833 },
-      'kaolack':      { lat: 14.1460, lng: -16.0726 },
+      'dakar': { lat: 14.7167, lng: -17.4677 },
+      'saly': { lat: 14.4600, lng: -16.9700 },
+      'thiès': { lat: 14.7910, lng: -16.9256 },
+      'thies': { lat: 14.7910, lng: -16.9256 },
+      'saint-louis': { lat: 16.0179, lng: -16.4896 },
+      'saint louis': { lat: 16.0179, lng: -16.4896 },
+      'ziguinchor': { lat: 12.5681, lng: -16.2733 },
+      'mbour': { lat: 14.3850, lng: -16.9750 },
+      'touba': { lat: 14.8667, lng: -15.8833 },
+      'kaolack': { lat: 14.1460, lng: -16.0726 },
     };
 
     function getCityCoords(city?: string, location?: string): { lat: number; lng: number } | null {
