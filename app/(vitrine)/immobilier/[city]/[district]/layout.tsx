@@ -16,7 +16,7 @@ import { buildBreadcrumbSchema } from '@/lib/seo/schemaBuilders';
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: Promise<{ city: string; district: string }>;
+  params: Promise<any>;
 }
 
 export default async function DistrictLayout({ children, params }: LayoutProps) {
